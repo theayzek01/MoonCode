@@ -9,6 +9,7 @@ import { getLanguageFromPath, highlightCode } from "../../modes/interactive/them
 import type { ToolDefinition, ToolRenderResultOptions } from "../extensions/types.js";
 import { withFileMutationQueue } from "./file-mutation-queue.js";
 import { resolveToCwd } from "./path-utils.js";
+import { assertNoPersonaLeak } from "./persona-guard.js";
 import { invalidArgText, normalizeDisplayText, replaceTabs, shortenPath, str } from "./render-utils.js";
 import { wrapToolDefinition } from "./tool-definition-wrapper.js";
 
@@ -218,6 +219,7 @@ export function createWriteToolDefinition(
 							signal?.addEventListener("abort", onAbort, { once: true });
 							(async () => {
 								try {
+									assertNoPersonaLeak(content);
 									// Create parent directories if needed.
 									await ops.mkdir(dir);
 									if (aborted) return;

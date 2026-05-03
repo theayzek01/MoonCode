@@ -20,6 +20,7 @@ import {
 } from "./edit-diff.js";
 import { withFileMutationQueue } from "./file-mutation-queue.js";
 import { resolveToCwd } from "./path-utils.js";
+import { assertNoPersonaLeak } from "./persona-guard.js";
 import { invalidArgText, shortenPath, str } from "./render-utils.js";
 import { wrapToolDefinition } from "./tool-definition-wrapper.js";
 
@@ -382,6 +383,7 @@ export function createEditToolDefinition(
 								}
 
 								const finalContent = bom + restoreLineEndings(newContent, originalEnding);
+								assertNoPersonaLeak(finalContent);
 								await ops.writeFile(absolutePath, finalContent);
 
 								// Check if aborted after writing.
