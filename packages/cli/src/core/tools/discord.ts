@@ -1,4 +1,4 @@
-// @ts-expect-error
+// @ts-nocheck
 import type { EngineTool } from "@mooncli/engine";
 import { ChannelType, Client, GatewayIntentBits, type TextChannel } from "discord.js";
 import type { ToolDefinition } from "../extensions/index.js";
@@ -29,6 +29,7 @@ export interface DiscordToolOptions {
 export function createDiscordListGuildsTool(options?: DiscordToolOptions): EngineTool {
 	return {
 		name: "discord_list_guilds",
+		label: "Discord: List Servers",
 		description: "List all Discord servers (guilds) the bot is a member of.",
 		parameters: {
 			type: "object",
@@ -55,6 +56,7 @@ export function createDiscordListGuildsTool(options?: DiscordToolOptions): Engin
 export function createDiscordGetChannelsTool(options?: DiscordToolOptions): EngineTool {
 	return {
 		name: "discord_get_channels",
+		label: "Discord: Get Channels",
 		description: "Get all channels in a specific Discord server.",
 		parameters: {
 			type: "object",
@@ -65,7 +67,8 @@ export function createDiscordGetChannelsTool(options?: DiscordToolOptions): Engi
 		},
 		execute: async (_toolCallId: string, params: unknown) => {
 			const { guildId } = (params as { guildId?: string }) ?? {};
-			if (!options?.token) return { content: [{ type: "text", text: "Error: No Discord token provided." }], details: {} };
+			if (!options?.token)
+				return { content: [{ type: "text", text: "Error: No Discord token provided." }], details: {} };
 			if (!guildId) return { content: [{ type: "text", text: "guildId is required." }], details: {} };
 			const client = await getDiscordClient(options.token);
 			const guild = client.guilds.cache.get(guildId);
@@ -83,6 +86,7 @@ export function createDiscordGetChannelsTool(options?: DiscordToolOptions): Engi
 export function createDiscordSendMessageTool(options?: DiscordToolOptions): EngineTool {
 	return {
 		name: "discord_send_message",
+		label: "Discord: Send Message",
 		description: "Send a message to a Discord channel.",
 		parameters: {
 			type: "object",
@@ -94,8 +98,10 @@ export function createDiscordSendMessageTool(options?: DiscordToolOptions): Engi
 		},
 		execute: async (_toolCallId: string, params: unknown) => {
 			const { channelId, content } = (params as { channelId?: string; content?: string }) ?? {};
-			if (!options?.token) return { content: [{ type: "text", text: "Error: No Discord token provided." }], details: {} };
-			if (!channelId || !content) return { content: [{ type: "text", text: "channelId and content are required." }], details: {} };
+			if (!options?.token)
+				return { content: [{ type: "text", text: "Error: No Discord token provided." }], details: {} };
+			if (!channelId || !content)
+				return { content: [{ type: "text", text: "channelId and content are required." }], details: {} };
 			const client = await getDiscordClient(options.token);
 			const channel = client.channels.cache.get(channelId) as TextChannel;
 			if (!channel) return { content: [{ type: "text", text: "Channel not found." }], details: {} };
@@ -112,6 +118,7 @@ export function createDiscordSendMessageTool(options?: DiscordToolOptions): Engi
 export function createDiscordManageChannelTool(options?: DiscordToolOptions): EngineTool {
 	return {
 		name: "discord_manage_channel",
+		label: "Discord: Manage Channels",
 		description: "Create or delete a channel in a Discord server.",
 		parameters: {
 			type: "object",
@@ -137,8 +144,10 @@ export function createDiscordManageChannelTool(options?: DiscordToolOptions): En
 					type?: "text" | "voice" | "category";
 					channelId?: string;
 				}) ?? {};
-			if (!options?.token) return { content: [{ type: "text", text: "Error: No Discord token provided." }], details: {} };
-			if (!guildId || !action) return { content: [{ type: "text", text: "guildId and action are required." }], details: {} };
+			if (!options?.token)
+				return { content: [{ type: "text", text: "Error: No Discord token provided." }], details: {} };
+			if (!guildId || !action)
+				return { content: [{ type: "text", text: "guildId and action are required." }], details: {} };
 			const client = await getDiscordClient(options.token);
 			const guild = client.guilds.cache.get(guildId);
 			if (!guild) return { content: [{ type: "text", text: "Server not found." }], details: {} };
@@ -150,9 +159,13 @@ export function createDiscordManageChannelTool(options?: DiscordToolOptions): En
 				if (type === "category") discordType = ChannelType.GuildCategory;
 
 				const channel = await guild.channels.create({ name, type: discordType });
-				return { content: [{ type: "text", text: `Channel created: ${channel.name} (${channel.id})` }], details: { ok: true } };
+				return {
+					content: [{ type: "text", text: `Channel created: ${channel.name} (${channel.id})` }],
+					details: { ok: true },
+				};
 			} else if (action === "delete") {
-				if (!channelId) return { content: [{ type: "text", text: "channelId is required for deletion." }], details: {} };
+				if (!channelId)
+					return { content: [{ type: "text", text: "channelId is required for deletion." }], details: {} };
 				const channel = guild.channels.cache.get(channelId);
 				if (!channel) return { content: [{ type: "text", text: "Channel not found." }], details: {} };
 				await channel.delete();

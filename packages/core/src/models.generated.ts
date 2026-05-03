@@ -16813,7 +16813,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"glm-5v-turbo": {
 			id: "glm-5v-turbo",
-			name: "glm-5v-turbo",
+			name: "GLM-5V-Turbo",
 			api: "openai-completions",
 			provider: "zai",
 			baseUrl: "https://api.z.ai/api/coding/paas/v4",

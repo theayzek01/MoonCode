@@ -1,0 +1,25 @@
+{
+	"extends": "./tsconfig.base.json",
+	"compilerOptions": {
+		"noEmit": true,
+		"paths": {
+			"*": ["./*"],
+			"@mooncli/core": ["./packages/core/src/index.ts"],
+			"@mooncli/core/oauth": ["./packages/core/src/oauth.ts"],
+			"@mooncli/core/*": ["./packages/core/src/*.ts", "./packages/core/src/providers/*.ts"],
+			"@mooncli/core/dist/*": ["./packages/core/src/*"],
+			"@mooncli/engine": ["./packages/engine/src/index.ts"],
+			"@mooncli/engine/*": ["./packages/engine/src/*"],
+			"@mooncli/cli": ["./packages/cli/src/index.ts"],
+			"@mooncli/cli/hooks": ["./packages/cli/src/core/hooks/index.ts"],
+			"@mooncli/cli/*": ["./packages/cli/src/*"],
+			"typebox": ["./node_modules/typebox"],
+			"@mooncli/tui": ["./packages/tui/src/index.ts"],
+			"@mooncli/tui/*": ["./packages/tui/src/*"],
+			"@mooncli/web-ui": ["./packages/web-ui/src/index.ts"],
+			"@mooncli/web-ui/*": ["./packages/web-ui/src/*"]
+		}
+	},
+	"include": ["packages/*/src/**/*"],
+	"exclude": ["packages/web-ui/**/*", "**/dist/**", "**/*.test.ts", "**/test/**", "packages/cli/examples/**/*"]
+}
