@@ -5000,10 +5000,21 @@ export class InteractiveMode {
 
 	private async handleDiscordCommand(args: string): Promise<void> {
 		if (args) {
-			this.settingsManager.setDiscordToken(args);
-			this.showStatus("Discord tokeni kaydedildi. Baglaniyor...");
-			// Reload session to refresh tools with the new token
-			await this.handleReloadCommand();
+			this.showStatus("Token kontrol ediliyor...");
+			try {
+				const { Client, GatewayIntentBits } = await import("discord.js");
+				const testClient = new Client({ intents: [GatewayIntentBits.Guilds] });
+				await testClient.login(args);
+				const botName = testClient.user?.tag || "Bot";
+				testClient.destroy();
+
+				this.settingsManager.setDiscordToken(args);
+				this.showStatus(`Discord tokeni kaydedildi. (${botName} olarak baglanildi)`);
+				this.showStatus("Oturum yenileniyor...");
+				await this.handleReloadCommand();
+			} catch (err: any) {
+				this.showStatus(`Hata: Gecersiz token veya baglanti sorunu (${err.message})`);
+			}
 			return;
 		}
 
