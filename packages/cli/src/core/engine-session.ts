@@ -69,7 +69,9 @@ import {
 	wrapRegisteredTools,
 } from "./extensions/index.js";
 import { emitSessionShutdownEvent } from "./extensions/runner.js";
+import { getMemoryPreface, persistMemorySignal, shouldPersistMemorySignal } from "./memory-policy.js";
 import type { BashExecutionMessage, CustomMessage } from "./messages.js";
+import { pickFallbackModel } from "./model-orchestrator.js";
 import type { ModelRegistry } from "./model-registry.js";
 import { expandPromptTemplate, type PromptTemplate } from "./prompt-templates.js";
 import type { ResourceExtensionPaths, ResourceLoader } from "./resource-loader.js";
@@ -80,6 +82,7 @@ import type { SettingsManager } from "./settings-manager.js";
 import type { SlashCommandInfo } from "./slash-commands.js";
 import { createSyntheticSourceInfo, type SourceInfo } from "./source-info.js";
 import { type BuildSystemPromptOptions, buildSystemPrompt, type RoboticsFunction } from "./system-prompt.js";
+import { optimizePromptText } from "./token-optimizer.js";
 import { type BashOperations, createLocalBashOperations } from "./tools/bash.js";
 import { createAllToolDefinitions } from "./tools/index.js";
 import {
@@ -1062,6 +1065,11 @@ export class EngineSession {
 	 * @throws Error if no model selected or no API key available (when not streaming)
 	 */
 	async prompt(text: string, options?: PromptOptions): Promise<void> {
+		const optimized = optimizePromptText(text);
+		if (optimized.wasOptimized) {
+			text = optimized.optimizedText;
+		}
+		if (shouldPersistMemorySignal(text)) persistMemorySignal(text);
 		const expandPromptTemplates = options?.expandPromptTemplates ?? true;
 		const preflightResult = options?.preflightResult;
 		let messages: EngineMessage[] | undefined;
@@ -1186,12 +1194,17 @@ export class EngineSession {
 					});
 				}
 			}
+			const memoryPreface = getMemoryPreface(5);
 			// Apply extension-modified system prompt, or reset to base
 			if (result?.systemPrompt) {
-				this.engine.state.systemPrompt = result.systemPrompt;
+				this.engine.state.systemPrompt = memoryPreface
+					? `${memoryPreface}\n${result.systemPrompt}`
+					: result.systemPrompt;
 			} else {
 				// Ensure we're using the base prompt (in case previous turn had modifications)
-				this.engine.state.systemPrompt = this._baseSystemPrompt;
+				this.engine.state.systemPrompt = memoryPreface
+					? `${memoryPreface}\n${this._baseSystemPrompt}`
+					: this._baseSystemPrompt;
 			}
 		} catch (error) {
 			preflightResult?.(false);
@@ -1203,7 +1216,17 @@ export class EngineSession {
 		}
 
 		preflightResult?.(true);
-		await this.engine.prompt(messages);
+		try {
+			await this.engine.prompt(messages);
+		} catch (error) {
+			const fallback = await pickFallbackModel(this.model, this._modelRegistry);
+			if (fallback) {
+				this.engine.state.model = fallback;
+				await this.engine.prompt(messages);
+			} else {
+				throw error;
+			}
+		}
 		await this.waitForRetry();
 	}
 

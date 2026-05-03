@@ -9,9 +9,24 @@
 /* biome-ignore lint/correctness/noInvalidPositionAtImportRule: fuck you */
 @import "tailwindcss";
 
+:root {
+	--color-background: #f5f7fb;
+	--color-foreground: #1f2937;
+	--color-muted: #eef2f8;
+	--color-muted-foreground: #64748b;
+	--color-border: #d8e1ee;
+	--color-card: #ffffff;
+	--color-primary: #6d8fd6;
+	--color-primary-foreground: #f8fbff;
+	--color-accent: #dfe9fb;
+	--color-accent-foreground: #2c456f;
+}
+
 body {
 	font-size: 16px;
 	-webkit-font-smoothing: antialiased;
+	background: radial-gradient(circle at top, #f9fbff 0%, #f3f6fc 50%, #eef3fb 100%);
+	color: var(--color-foreground);
 }
 
 * {
@@ -34,7 +49,7 @@ body {
 }
 
 *::-webkit-scrollbar-thumb:hover {
-	background-color: rgba(0, 0, 0, 0);
+	background-color: #c7d5ea;
 }
 
 /* Fix cursor for dialog close buttons */
@@ -61,8 +76,8 @@ body {
 .user-message-container {
 	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 	position: relative;
-	background: linear-gradient(135deg, rgba(217, 79, 0, 0.12), rgba(255, 107, 0, 0.12), rgba(212, 165, 0, 0.12));
-	border: 1px solid rgba(255, 107, 0, 0.25);
+	background: linear-gradient(135deg, rgba(139, 170, 230, 0.16), rgba(186, 206, 243, 0.18), rgba(217, 227, 246, 0.24));
+	border: 1px solid rgba(132, 162, 221, 0.3);
 	backdrop-filter: blur(10px);
 	max-width: 100%;
 }

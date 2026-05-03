@@ -654,7 +654,7 @@ function _detectTerminalBackground(): "dark" | "light" {
 }
 
 function getDefaultTheme(): string {
-	return "moon";
+	return "soft";
 }
 
 // ============================================================================
