@@ -134,7 +134,7 @@ Interactive HTML applications that can visualize data from other artifacts.
 ### Styling
 - Use Tailwind utility classes for clean, functional designs
 - Ensure responsive layout (iframe may be resized)
-- Avoid purple gradients, AI aesthetic clichés, and emojis
+- Avoid purple gradients, Core aesthetic clichés, and emojis
 
 ### Helper Functions (Automatically Available)
 

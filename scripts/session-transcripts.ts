@@ -1,10 +1,10 @@
 #!/usr/bin/env npx tsx
 /**
  * Extracts session transcripts for a given cwd, splits into context-sized files,
- * optionally spawns subagents to analyze patterns.
+ * optionally spawns subengines to analyze patterns.
  *
  * Usage: npx tsx scripts/session-transcripts.ts [--analyze] [--output <dir>] [cwd]
- *   --analyze      Spawn moodcli subagents to analyze each transcript file
+ *   --analyze      Spawn moodcli subengines to analyze each transcript file
  *   --output <dir> Output directory for transcript files (defaults to ./session-transcripts)
  *   cwd            Working directory to extract sessions for (defaults to current)
  */
@@ -14,7 +14,7 @@ import { spawn } from "child_process";
 import { createInterface } from "node:readline";
 import { homedir } from "os";
 import { join, resolve } from "path";
-import { parseSessionEntries, type SessionMessageEntry } from "../packages/coding-agent/src/core/session-manager.js";
+import { parseSessionEntries, type SessionMessageEntry } from "../packages/cli/src/core/session-manager.js";
 import chalk from "chalk";
 
 const MAX_CHARS_PER_FILE = 100_000; // ~20k tokens, leaving room for prompt + analysis + output
@@ -75,7 +75,7 @@ interface JsonEvent {
 	};
 }
 
-function runSubagent(prompt: string, cwd: string): Promise<{ success: boolean }> {
+function runSubengine(prompt: string, cwd: string): Promise<{ success: boolean }> {
 	return new Promise((resolve) => {
 		const child = spawn("moodcli", ["--mode", "json", "--tools", "read,write", "-p", prompt], {
 			cwd,
@@ -162,7 +162,7 @@ async function main() {
 	const cwd = resolve(cwdArg || process.cwd());
 
 	mkdirSync(outputDir, { recursive: true });
-	const sessionsBase = join(homedir(), ".moodcli/agent/sessions");
+	const sessionsBase = join(homedir(), ".moodcli/engine/sessions");
 	const sessionDirName = cwdToSessionDir(cwd);
 	const sessionDir = join(sessionsBase, sessionDirName);
 
@@ -243,23 +243,23 @@ async function main() {
 	console.log(`\nCreated ${outputFiles.length} transcript file(s) in ${outputDir}`);
 
 	if (!analyzeFlag) {
-		console.log("\nRun with --analyze to spawn moodcli subagents for pattern analysis.");
+		console.log("\nRun with --analyze to spawn moodcli subengines for pattern analysis.");
 		return;
 	}
 
 	// Find AGENTS.md files to compare against
-	const globalAgentsMd = join(homedir(), ".moodcli/agent/AGENTS.md");
-	const localAgentsMd = join(cwd, "AGENTS.md");
-	const agentsMdFiles = [globalAgentsMd, localAgentsMd].filter(existsSync);
-	const agentsMdSection =
-		agentsMdFiles.length > 0
-			? `STEP 1: Read the existing AGENTS.md file(s) to see what's already encoded:\n${agentsMdFiles.join("\n")}\n\nSTEP 2: `
+	const globalEnginesMd = join(homedir(), ".moodcli/engine/AGENTS.md");
+	const localEnginesMd = join(cwd, "AGENTS.md");
+	const enginesMdFiles = [globalEnginesMd, localEnginesMd].filter(existsSync);
+	const enginesMdSection =
+		enginesMdFiles.length > 0
+			? `STEP 1: Read the existing AGENTS.md file(s) to see what's already encoded:\n${enginesMdFiles.join("\n")}\n\nSTEP 2: `
 			: "";
 
-	// Spawn subagents to analyze each file
+	// Spawn subengines to analyze each file
 	const analysisPrompt = `You are analyzing session transcripts to identify recurring user instructions that could be automated.
 
-${agentsMdSection}READING THE TRANSCRIPT:
+${enginesMdSection}READING THE TRANSCRIPT:
 The transcript file is large. Read it in chunks of 1000 lines using offset/limit parameters:
 1. First: read with limit=1000 (lines 1-1000)
 2. Then: read with offset=1001, limit=1000 (lines 1001-2000)
@@ -279,7 +279,7 @@ Write a file with exactly this structure. Use --- as separator between patterns.
 
 PATTERN: <short descriptive name>
 STATUS: NEW | EXISTING
-TYPE: agents-md | skill | prompt-template
+TYPE: engines-md | skill | prompt-template
 FREQUENCY: <number of times observed>
 EVIDENCE:
 - "<exact quote 1>"
@@ -297,7 +297,7 @@ Rules:
 - If no patterns found, write "NO PATTERNS FOUND"
 - Do not include any other text outside this format`;
 
-	console.log("\nSpawning subagents for analysis...");
+	console.log("\nSpawning subengines for analysis...");
 	for (const file of outputFiles) {
 		const summaryFile = file.replace(".txt", ".summary.txt");
 		const filePath = join(outputDir, file);
@@ -311,12 +311,12 @@ Rules:
 		const lineCount = fileContent.split("\n").length;
 		const fullPrompt = `${analysisPrompt}\n\nThe file ${filePath} has ${lineCount} lines. Read it in full using chunked reads, then write your analysis to ${summaryPath}`;
 
-		const result = await runSubagent(fullPrompt, outputDir);
+		const result = await runSubengine(fullPrompt, outputDir);
 
 		if (result.success && existsSync(summaryPath)) {
 			console.log(chalk.green(`  -> ${summaryFile}`));
 		} else if (result.success) {
-			console.error(chalk.yellow(`  Agent finished but did not write ${summaryFile}`));
+			console.error(chalk.yellow(`  Engine finished but did not write ${summaryFile}`));
 		} else {
 			console.error(chalk.red(`  Failed to analyze ${file}`));
 		}
@@ -344,7 +344,7 @@ Rules:
 	const aggregationPrompt = `You are aggregating pattern analysis results from multiple summary files.
 
 STEP 1: Read the existing AGENTS.md file(s) to understand what patterns are already encoded:
-${agentsMdFiles.length > 0 ? agentsMdFiles.join("\n") : "(no AGENTS.md files found)"}
+${enginesMdFiles.length > 0 ? enginesMdFiles.join("\n") : "(no AGENTS.md files found)"}
 
 STEP 2: Read ALL of the following summary files:
 ${summaryPaths}
@@ -391,13 +391,13 @@ Already covered by: <quote relevant section from AGENTS.md>
 
 Write the final summary to ${finalSummaryPath}`;
 
-	const aggregateResult = await runSubagent(aggregationPrompt, outputDir);
+	const aggregateResult = await runSubengine(aggregationPrompt, outputDir);
 
 	if (aggregateResult.success && existsSync(finalSummaryPath)) {
 		console.log(chalk.green(`\n=== Final Summary Created ===`));
 		console.log(chalk.green(`  ${finalSummaryPath}`));
 	} else if (aggregateResult.success) {
-		console.error(chalk.yellow(`Agent finished but did not write final summary`));
+		console.error(chalk.yellow(`Engine finished but did not write final summary`));
 	} else {
 		console.error(chalk.red(`Failed to create final summary`));
 	}

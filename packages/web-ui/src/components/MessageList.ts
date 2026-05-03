@@ -1,13 +1,13 @@
-import type { AgentMessage, AgentTool } from "@moodcli/agent";
-import type { AssistantMessage as AssistantMessageType, ToolResultMessage as ToolResultMessageType } from "@moodcli/ai";
+import type { EngineMessage, EngineTool } from "@moodcli/engine";
+import type { AssistantMessage as AssistantMessageType, ToolResultMessage as ToolResultMessageType } from "@moodcli/core";
 import { html, LitElement, type TemplateResult } from "lit";
 import { property } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
 import { renderMessage } from "./message-renderer-registry.js";
 
 export class MessageList extends LitElement {
-	@property({ type: Array }) messages: AgentMessage[] = [];
-	@property({ type: Array }) tools: AgentTool[] = [];
+	@property({ type: Array }) messages: EngineMessage[] = [];
+	@property({ type: Array }) tools: EngineTool[] = [];
 	@property({ type: Object }) pendingToolCalls?: ReadonlySet<string>;
 	@property({ type: Boolean }) isStreaming: boolean = false;
 	@property({ attribute: false }) onCostClick?: () => void;

@@ -5,7 +5,7 @@ import type {
 	ToolCall,
 	ToolResultMessage as ToolResultMessageType,
 	UserMessage as UserMessageType,
-} from "@moodcli/ai";
+} from "@moodcli/core";
 import { html, LitElement, type TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { renderTool } from "../tools/index.js";
@@ -13,7 +13,7 @@ import type { Attachment } from "../utils/attachment-utils.js";
 import { formatUsage } from "../utils/format.js";
 import { i18n } from "../utils/i18n.js";
 import "./ThinkingBlock.js";
-import type { AgentTool } from "@moodcli/agent";
+import type { EngineTool } from "@moodcli/engine";
 
 export type UserMessageWithAttachments = {
 	role: "user-with-attachments";
@@ -32,8 +32,8 @@ export interface ArtifactMessage {
 	timestamp: string;
 }
 
-declare module "@moodcli/agent" {
-	interface CustomAgentMessages {
+declare module "@moodcli/engine" {
+	interface CustomEngineMessages {
 		"user-with-attachments": UserMessageWithAttachments;
 		artifact: ArtifactMessage;
 	}
@@ -84,7 +84,7 @@ export class UserMessage extends LitElement {
 @customElement("assistant-message")
 export class AssistantMessage extends LitElement {
 	@property({ type: Object }) message!: AssistantMessageType;
-	@property({ type: Array }) tools?: AgentTool<any>[];
+	@property({ type: Array }) tools?: EngineTool<any>[];
 	@property({ type: Object }) pendingToolCalls?: ReadonlySet<string>;
 	@property({ type: Boolean }) hideToolCalls = false;
 	@property({ type: Object }) toolResultsById?: Map<string, ToolResultMessageType>;
@@ -226,7 +226,7 @@ export class ToolMessageDebugView extends LitElement {
 @customElement("tool-message")
 export class ToolMessage extends LitElement {
 	@property({ type: Object }) toolCall!: ToolCall;
-	@property({ type: Object }) tool?: AgentTool<any>;
+	@property({ type: Object }) tool?: EngineTool<any>;
 	@property({ type: Object }) result?: ToolResultMessageType;
 	@property({ type: Boolean }) pending: boolean = false;
 	@property({ type: Boolean }) aborted: boolean = false;
@@ -296,11 +296,11 @@ export class AbortedMessage extends LitElement {
 // Default Message Transformer
 // ============================================================================
 
-import type { AgentMessage } from "@moodcli/agent";
-import type { Message } from "@moodcli/ai";
+import type { EngineMessage } from "@moodcli/engine";
+import type { Message } from "@moodcli/core";
 
 /**
- * Convert attachments to content blocks for LLM.
+ * Convert attachments to content blocks for Provider.
  * - Images become ImageContent blocks
  * - Documents with extractedText become TextContent blocks with filename header
  */
@@ -326,14 +326,14 @@ export function convertAttachments(attachments: Attachment[]): (TextContent | Im
 /**
  * Check if a message is a UserMessageWithAttachments.
  */
-export function isUserMessageWithAttachments(msg: AgentMessage): msg is UserMessageWithAttachments {
+export function isUserMessageWithAttachments(msg: EngineMessage): msg is UserMessageWithAttachments {
 	return (msg as UserMessageWithAttachments).role === "user-with-attachments";
 }
 
 /**
  * Check if a message is an ArtifactMessage.
  */
-export function isArtifactMessage(msg: AgentMessage): msg is ArtifactMessage {
+export function isArtifactMessage(msg: EngineMessage): msg is ArtifactMessage {
 	return (msg as ArtifactMessage).role === "artifact";
 }
 
@@ -343,9 +343,9 @@ export function isArtifactMessage(msg: AgentMessage): msg is ArtifactMessage {
  * Handles:
  * - UserMessageWithAttachments: converts to user message with content blocks
  * - ArtifactMessage: filtered out (UI-only, for session reconstruction)
- * - Standard LLM messages (user, assistant, toolResult): passed through
+ * - Standard Provider messages (user, assistant, toolResult): passed through
  */
-export function defaultConvertToLlm(messages: AgentMessage[]): Message[] {
+export function defaultConvertToLlm(messages: EngineMessage[]): Message[] {
 	return messages
 		.filter((m) => {
 			// Filter out artifact messages - they're for session reconstruction only
@@ -371,7 +371,7 @@ export function defaultConvertToLlm(messages: AgentMessage[]): Message[] {
 				} as Message;
 			}
 
-			// Pass through standard LLM roles
+			// Pass through standard Provider roles
 			if (m.role === "user" || m.role === "assistant" || m.role === "toolResult") {
 				return m as Message;
 			}

@@ -1,0 +1,16 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		"noEmit": true,
+		"paths": {
+			"@moodcli/cli": ["./src/index.ts"],
+			"@moodcli/cli/hooks": ["./src/core/hooks/index.ts"],
+			"@moodcli/tui": ["../tui/src/index.ts"],
+			"@moodcli/core": ["../ai/src/index.ts"],
+			"typebox": ["../../node_modules/typebox"]
+		},
+		"skipLibCheck": true
+	},
+	"include": ["examples/**/*.ts"],
+	"exclude": ["node_modules", "dist"]
+}

@@ -1,6 +1,6 @@
 import { i18n } from "@mariozechner/mini-lit";
 import { Select } from "@mariozechner/mini-lit/dist/Select.js";
-import { getProviders } from "@moodcli/ai";
+import { getProviders } from "@moodcli/core";
 import { html, type TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import "../components/CustomProviderCard.js";
@@ -79,7 +79,7 @@ export class ProvidersModelsTab extends SettingsTab {
 				<div>
 					<h3 class="text-sm font-semibold text-foreground mb-2">Cloud Providers</h3>
 					<p class="text-sm text-muted-foreground mb-4">
-						Cloud LLM providers with predefined models. API keys are stored locally in your browser.
+						Cloud Provider providers with predefined models. API keys are stored locally in your browser.
 					</p>
 				</div>
 				<div class="flex flex-col gap-6">
@@ -107,10 +107,10 @@ export class ProvidersModelsTab extends SettingsTab {
 						options: [
 							{ value: "ollama", label: "Ollama" },
 							{ value: "llama.cpp", label: "llama.cpp" },
-							{ value: "vllm", label: "vLLM" },
+							{ value: "vllm", label: "vProvider" },
 							{ value: "lmstudio", label: "LM Studio" },
-							{ value: "openai-completions", label: i18n("OpenAI Completions Compatible") },
-							{ value: "openai-responses", label: i18n("OpenAI Responses Compatible") },
+							{ value: "openai-completions", label: i18n("OpenCore Completions Compatible") },
+							{ value: "openai-responses", label: i18n("OpenCore Responses Compatible") },
 							{ value: "anthropic-messages", label: i18n("Anthropic Messages Compatible") },
 						],
 						onChange: (value: string) => this.addCustomProvider(value as CustomProviderType),

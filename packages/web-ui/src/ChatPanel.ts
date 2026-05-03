@@ -1,9 +1,9 @@
 import { Badge } from "@mariozechner/mini-lit/dist/Badge.js";
 import { html, LitElement } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import "./components/AgentInterface.js";
-import type { Agent, AgentTool } from "@moodcli/agent";
-import type { AgentInterface } from "./components/AgentInterface.js";
+import "./components/EngineInterface.js";
+import type { Engine, EngineTool } from "@moodcli/engine";
+import type { EngineInterface } from "./components/EngineInterface.js";
 import { ArtifactsRuntimeProvider } from "./components/sandbox/ArtifactsRuntimeProvider.js";
 import { AttachmentsRuntimeProvider } from "./components/sandbox/AttachmentsRuntimeProvider.js";
 import type { SandboxRuntimeProvider } from "./components/sandbox/SandboxRuntimeProvider.js";
@@ -16,8 +16,8 @@ const BREAKPOINT = 800; // px - switch between overlay and side-by-side
 
 @customElement("moodcli-chat-panel")
 export class ChatPanel extends LitElement {
-	@state() public agent?: Agent;
-	@state() public agentInterface?: AgentInterface;
+	@state() public engine?: Engine;
+	@state() public engineInterface?: EngineInterface;
 	@state() public artifactsPanel?: ArtifactsPanel;
 	@state() private hasArtifacts = false;
 	@state() private artifactCount = 0;
@@ -53,8 +53,8 @@ export class ChatPanel extends LitElement {
 		window.removeEventListener("resize", this.resizeHandler);
 	}
 
-	async setAgent(
-		agent: Agent,
+	async setEngine(
+		engine: Engine,
 		config?: {
 			onApiKeyRequired?: (provider: string) => Promise<boolean>;
 			onBeforeSend?: () => void | Promise<void>;
@@ -62,30 +62,30 @@ export class ChatPanel extends LitElement {
 			onModelSelect?: () => void;
 			sandboxUrlProvider?: () => string;
 			toolsFactory?: (
-				agent: Agent,
-				agentInterface: AgentInterface,
+				engine: Engine,
+				engineInterface: EngineInterface,
 				artifactsPanel: ArtifactsPanel,
 				runtimeProvidersFactory: () => SandboxRuntimeProvider[],
-			) => AgentTool<any>[];
+			) => EngineTool<any>[];
 		},
 	) {
-		this.agent = agent;
+		this.engine = engine;
 
-		// Create AgentInterface
-		this.agentInterface = document.createElement("agent-interface") as AgentInterface;
-		this.agentInterface.session = agent;
-		this.agentInterface.enableAttachments = true;
-		this.agentInterface.enableModelSelector = true;
-		this.agentInterface.enableThinkingSelector = true;
-		this.agentInterface.showThemeToggle = false;
-		this.agentInterface.onApiKeyRequired = config?.onApiKeyRequired;
-		this.agentInterface.onModelSelect = config?.onModelSelect;
-		this.agentInterface.onBeforeSend = config?.onBeforeSend;
-		this.agentInterface.onCostClick = config?.onCostClick;
+		// Create EngineInterface
+		this.engineInterface = document.createElement("engine-interface") as EngineInterface;
+		this.engineInterface.session = engine;
+		this.engineInterface.enableAttachments = true;
+		this.engineInterface.enableModelSelector = true;
+		this.engineInterface.enableThinkingSelector = true;
+		this.engineInterface.showThemeToggle = false;
+		this.engineInterface.onApiKeyRequired = config?.onApiKeyRequired;
+		this.engineInterface.onModelSelect = config?.onModelSelect;
+		this.engineInterface.onBeforeSend = config?.onBeforeSend;
+		this.engineInterface.onCostClick = config?.onCostClick;
 
 		// Set up artifacts panel
 		this.artifactsPanel = new ArtifactsPanel();
-		this.artifactsPanel.agent = agent; // Pass agent for HTML artifact runtime providers
+		this.artifactsPanel.engine = engine; // Pass engine for HTML artifact runtime providers
 		if (config?.sandboxUrlProvider) {
 			this.artifactsPanel.sandboxUrlProvider = config.sandboxUrlProvider;
 		}
@@ -95,7 +95,7 @@ export class ChatPanel extends LitElement {
 		// Runtime providers factory for REPL tools (read-write access)
 		const runtimeProvidersFactory = () => {
 			const attachments: Attachment[] = [];
-			for (const message of this.agent!.state.messages) {
+			for (const message of this.engine!.state.messages) {
 				if (message.role === "user-with-attachments") {
 					message.attachments?.forEach((a) => {
 						attachments.push(a);
@@ -110,7 +110,7 @@ export class ChatPanel extends LitElement {
 			}
 
 			// Add artifacts provider with read-write access (for REPL)
-			providers.push(new ArtifactsRuntimeProvider(this.artifactsPanel!, this.agent!, true));
+			providers.push(new ArtifactsRuntimeProvider(this.artifactsPanel!, this.engine!, true));
 
 			return providers;
 		};
@@ -136,18 +136,18 @@ export class ChatPanel extends LitElement {
 			this.requestUpdate();
 		};
 
-		// Set tools on the agent
+		// Set tools on the engine
 		// Pass runtimeProvidersFactory so consumers can configure their own REPL tools
 		const additionalTools =
-			config?.toolsFactory?.(agent, this.agentInterface, this.artifactsPanel, runtimeProvidersFactory) || [];
+			config?.toolsFactory?.(engine, this.engineInterface, this.artifactsPanel, runtimeProvidersFactory) || [];
 		const tools = [this.artifactsPanel.tool, ...additionalTools];
-		this.agent.state.tools = tools;
+		this.engine.state.tools = tools;
 
 		// Reconstruct artifacts from existing messages
 		// Temporarily disable the onArtifactsChange callback to prevent auto-opening on load
 		const originalCallback = this.artifactsPanel.onArtifactsChange;
 		this.artifactsPanel.onArtifactsChange = undefined;
-		await this.artifactsPanel.reconstructFromMessages(this.agent.state.messages);
+		await this.artifactsPanel.reconstructFromMessages(this.engine.state.messages);
 		this.artifactsPanel.onArtifactsChange = originalCallback;
 
 		this.hasArtifacts = this.artifactsPanel.artifacts.size > 0;
@@ -157,9 +157,9 @@ export class ChatPanel extends LitElement {
 	}
 
 	render() {
-		if (!this.agent || !this.agentInterface) {
+		if (!this.engine || !this.engineInterface) {
 			return html`<div class="flex items-center justify-center h-full">
-				<div class="text-muted-foreground">No agent set</div>
+				<div class="text-muted-foreground">No engine set</div>
 			</div>`;
 		}
 
@@ -174,7 +174,7 @@ export class ChatPanel extends LitElement {
 		return html`
 			<div class="relative w-full h-full overflow-hidden flex">
 				<div class="h-full" style="${!isMobile && this.showArtifactsPanel && this.hasArtifacts ? "width: 50%;" : "width: 100%;"}">
-						${this.agentInterface}
+						${this.engineInterface}
 					</div>
 
 					<!-- Floating pill when artifacts exist and panel is collapsed -->

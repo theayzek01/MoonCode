@@ -21,14 +21,14 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 This example demonstrates:
 
 - **ChatPanel** - The main chat interface component
-- **System Prompt** - Custom configuration for the AI assistant
+- **System Prompt** - Custom configuration for the Core assistant
 - **Tools** - JavaScript REPL and artifacts tool
 
 ## Configuration
 
 ### API Keys
 
-The example uses **Direct Mode** by default, which means it calls AI provider APIs directly from the browser.
+The example uses **Direct Mode** by default, which means it calls Core provider APIs directly from the browser.
 
 To use the chat:
 
@@ -36,10 +36,10 @@ To use the chat:
 2. Click "Manage API Keys"
 3. Add your API key for your preferred provider:
    - **Anthropic**: Get a key from [console.anthropic.com](https://console.anthropic.com/)
-   - **OpenAI**: Get a key from [platform.openai.com](https://platform.openai.com/)
+   - **OpenCore**: Get a key from [platform.openai.com](https://platform.openai.com/)
    - **Google**: Get a key from [makersuite.google.com](https://makersuite.google.com/)
 
-API keys are stored in your browser's localStorage and never sent to any server except the AI provider's API.
+API keys are stored in your browser's localStorage and never sent to any server except the Core provider's API.
 
 ## Project Structure
 
@@ -57,5 +57,5 @@ example/
 ## Learn More
 
 - [Moodcli Web UI Documentation](../README.md)
-- [Moodcli AI Documentation](../../ai/README.md)
+- [Moodcli Core Documentation](../../ai/README.md)
 - [Mini Lit Documentation](https://github.com/badlogic/mini-lit)

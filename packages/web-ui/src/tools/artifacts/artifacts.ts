@@ -1,8 +1,8 @@
 import { icon } from "@mariozechner/mini-lit";
 import "@mariozechner/mini-lit/dist/MarkdownBlock.js";
 import { Button } from "@mariozechner/mini-lit/dist/Button.js";
-import type { Agent, AgentMessage, AgentTool } from "@moodcli/agent";
-import { StringEnum, type ToolCall } from "@moodcli/ai";
+import type { Engine, EngineMessage, EngineTool } from "@moodcli/engine";
+import { StringEnum, type ToolCall } from "@moodcli/core";
 import { html, LitElement, type TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { createRef, type Ref, ref } from "lit/directives/ref.js";
@@ -38,7 +38,7 @@ export interface Artifact {
 	updatedAt: Date;
 }
 
-// JSON-schema friendly parameters object (LLM-facing)
+// JSON-schema friendly parameters object (Provider-facing)
 const artifactsParamsSchema = Type.Object({
 	command: StringEnum(["create", "update", "rewrite", "get", "delete", "logs"], {
 		description: "The operation to perform",
@@ -59,8 +59,8 @@ export class ArtifactsPanel extends LitElement {
 	private artifactElements = new Map<string, ArtifactElement>();
 	private contentRef: Ref<HTMLDivElement> = createRef();
 
-	// Agent reference (needed to get attachments for HTML artifacts)
-	@property({ attribute: false }) agent?: Agent;
+	// Engine reference (needed to get attachments for HTML artifacts)
+	@property({ attribute: false }) engine?: Engine;
 	// Sandbox URL provider for browser extensions (optional)
 	@property({ attribute: false }) sandboxUrlProvider?: () => string;
 	// Callbacks
@@ -81,10 +81,10 @@ export class ArtifactsPanel extends LitElement {
 	private getHtmlArtifactRuntimeProviders(): SandboxRuntimeProvider[] {
 		const providers: SandboxRuntimeProvider[] = [];
 
-		// Get attachments from agent messages
-		if (this.agent) {
+		// Get attachments from engine messages
+		if (this.engine) {
 			const attachments: Attachment[] = [];
-			for (const message of this.agent.state.messages) {
+			for (const message of this.engine.state.messages) {
 				if (message.role === "user-with-attachments" && message.attachments) {
 					attachments.push(...message.attachments);
 				}
@@ -95,7 +95,7 @@ export class ArtifactsPanel extends LitElement {
 		}
 
 		// Add read-only artifacts provider
-		providers.push(new ArtifactsRuntimeProvider(this, this.agent, false));
+		providers.push(new ArtifactsRuntimeProvider(this, this.engine, false));
 
 		return providers;
 	}
@@ -263,13 +263,13 @@ export class ArtifactsPanel extends LitElement {
 	public openArtifact(filename: string) {
 		if (this._artifacts.has(filename)) {
 			this.showArtifact(filename);
-			// Ask host to open panel (AgentInterface demo listens to onOpen)
+			// Ask host to open panel (EngineInterface demo listens to onOpen)
 			this.onOpen?.();
 		}
 	}
 
-	// Build the AgentTool (no details payload; return only output strings)
-	public get tool(): AgentTool<typeof artifactsParamsSchema, undefined> {
+	// Build the EngineTool (no details payload; return only output strings)
+	public get tool(): EngineTool<typeof artifactsParamsSchema, undefined> {
 		return {
 			label: "Artifacts",
 			name: "artifacts",
@@ -292,7 +292,7 @@ export class ArtifactsPanel extends LitElement {
 
 	// Re-apply artifacts by scanning a message list (optional utility)
 	public async reconstructFromMessages(
-		messages: Array<AgentMessage | { role: "aborted" } | { role: "artifact" }>,
+		messages: Array<EngineMessage | { role: "aborted" } | { role: "artifact" }>,
 	): Promise<void> {
 		const toolCalls = new Map<string, ToolCall>();
 		const artifactToolName = "artifacts";

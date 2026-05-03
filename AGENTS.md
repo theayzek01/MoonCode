@@ -27,8 +27,8 @@
 - Run tests from the package root, not the repo root.
 - If you create or modify a test file, you MUST run that test file and iterate until it passes.
 - When writing tests, run them, identify issues in either the test or implementation, and iterate until fixed.
-- For `packages/coding-agent/test/suite/`, use `test/suite/harness.ts` plus the faux provider. Do not use real provider APIs, real API keys, or paid tokens.
-- Put issue-specific regressions under `packages/coding-agent/test/suite/regressions/` and name them `<issue-number>-<short-slug>.test.ts`.
+- For `packages/cli/test/suite/`, use `test/suite/harness.ts` plus the faux provider. Do not use real provider APIs, real API keys, or paid tokens.
+- Put issue-specific regressions under `packages/cli/test/suite/regressions/` and name them `<issue-number>-<short-slug>.test.ts`.
 - NEVER commit unless user asks
 
 ## Contribution Gate
@@ -44,7 +44,7 @@
 When creating issues:
 
 - Add `pkg:*` labels to indicate which package(s) the issue affects
-  - Available labels: `pkg:agent`, `pkg:ai`, `pkg:coding-agent`, `pkg:tui`, `pkg:web-ui`
+  - Available labels: `pkg:engine`, `pkg:ai`, `pkg:cli`, `pkg:tui`, `pkg:web-ui`
 - If an issue spans multiple packages, add all relevant labels
 
 When posting issue/PR comments:
@@ -119,7 +119,7 @@ Use these sections under `## [Unreleased]`:
 - **Internal changes (from issues)**: `Fixed foo bar ([#123](https://github.com/badlogic/moodcli-mono/issues/123))`
 - **External contributions**: `Added feature X ([#456](https://github.com/badlogic/moodcli-mono/pull/456) by [@username](https://github.com/username))`
 
-## Adding a New LLM Provider (packages/ai)
+## Adding a New Provider Provider (packages/ai)
 
 Adding a new provider requires changes across multiple files:
 
@@ -159,7 +159,7 @@ Create provider file exporting:
 - For `cross-provider-handoff.test.ts`, add at least one provider/model pair. If the provider exposes multiple model families (for example GPT and Claude), add at least one pair per family.
 - For non-standard auth, create utility (e.g., `bedrock-utils.ts`) with credential detection.
 
-### 6. Coding Agent (`packages/coding-agent/`)
+### 6. Coding Engine (`packages/cli/`)
 
 - `src/core/model-resolver.ts`: Add default model ID to `defaultModelPerProvider`
 - `src/core/provider-display-names.ts`: Add API-key login display name so `/login` and related UI show the provider for built-in API-key auth.
@@ -193,15 +193,15 @@ Create provider file exporting:
 
 The script handles: version bump, CHANGELOG finalization, commit, tag, publish, and adding new `[Unreleased]` sections.
 
-## **CRITICAL** Git Rules for Parallel Agents **CRITICAL**
+## **CRITICAL** Git Rules for Parallel Engines **CRITICAL**
 
-Multiple agents may work on different files in the same worktree simultaneously. You MUST follow these rules:
+Multiple engines may work on different files in the same worktree simultaneously. You MUST follow these rules:
 
 ### Committing
 
 - **ONLY commit files YOU changed in THIS session**
 - ALWAYS include `fixes #<number>` or `closes #<number>` in the commit message when there is a related issue or PR
-- NEVER use `git add -A` or `git add .` - these sweep up changes from other agents
+- NEVER use `git add -A` or `git add .` - these sweep up changes from other engines
 - ALWAYS use `git add <specific-file-paths>` listing only files you modified
 - Before committing, run `git status` and verify you are only staging YOUR files
 - Track which files you created/modified/deleted during the session
@@ -209,13 +209,13 @@ Multiple agents may work on different files in the same worktree simultaneously.
 
 ### Forbidden Git Operations
 
-These commands can destroy other agents' work:
+These commands can destroy other engines' work:
 
 - `git reset --hard` - destroys uncommitted changes
 - `git checkout .` - destroys uncommitted changes
 - `git clean -fd` - deletes untracked files
-- `git stash` - stashes ALL changes including other agents' work
-- `git add -A` / `git add .` - stages other agents' uncommitted work
+- `git stash` - stashes ALL changes including other engines' work
+- `git add -A` / `git add .` - stages other engines' uncommitted work
 - `git commit --no-verify` - bypasses required checks and is never allowed
 
 ### Safe Workflow

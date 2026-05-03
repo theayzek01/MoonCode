@@ -2,7 +2,7 @@ import { Store } from "../store.js";
 import type { StoreConfig } from "../types.js";
 
 /**
- * Store for LLM provider API keys (Anthropic, OpenAI, etc.).
+ * Store for Provider provider API keys (Anthropic, OpenCore, etc.).
  */
 export class ProviderKeysStore extends Store {
 	getConfig(): StoreConfig {

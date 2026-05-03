@@ -1,4 +1,4 @@
-import type { Model } from "@moodcli/ai";
+import type { Model } from "@moodcli/core";
 import { Store } from "../store.js";
 import type { StoreConfig } from "../types.js";
 
@@ -23,7 +23,7 @@ export interface CustomProvider {
 }
 
 /**
- * Store for custom LLM providers (auto-discovery servers + manual providers).
+ * Store for custom Provider providers (auto-discovery servers + manual providers).
  */
 export class CustomProvidersStore extends Store {
 	getConfig(): StoreConfig {

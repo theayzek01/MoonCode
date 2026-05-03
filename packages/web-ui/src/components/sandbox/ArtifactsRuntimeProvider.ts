@@ -1,4 +1,4 @@
-import type { AgentMessage } from "@moodcli/agent";
+import type { EngineMessage } from "@moodcli/engine";
 import {
 	ARTIFACTS_RUNTIME_PROVIDER_DESCRIPTION_RO,
 	ARTIFACTS_RUNTIME_PROVIDER_DESCRIPTION_RW,
@@ -13,8 +13,8 @@ interface ArtifactsPanelLike {
 	};
 }
 
-interface AgentLike {
-	state: { messages: AgentMessage[] };
+interface EngineLike {
+	state: { messages: EngineMessage[] };
 }
 
 /**
@@ -27,7 +27,7 @@ interface AgentLike {
 export class ArtifactsRuntimeProvider implements SandboxRuntimeProvider {
 	constructor(
 		private artifactsPanel: ArtifactsPanelLike,
-		private agent?: AgentLike,
+		private engine?: EngineLike,
 		private readWrite: boolean = true,
 	) {}
 
@@ -172,7 +172,7 @@ export class ArtifactsRuntimeProvider implements SandboxRuntimeProvider {
 							filename,
 							content,
 						});
-						this.agent?.state.messages.push({
+						this.engine?.state.messages.push({
 							role: "artifact",
 							action,
 							filename,
@@ -193,7 +193,7 @@ export class ArtifactsRuntimeProvider implements SandboxRuntimeProvider {
 							command: "delete",
 							filename,
 						});
-						this.agent?.state.messages.push({
+						this.engine?.state.messages.push({
 							role: "artifact",
 							action: "delete",
 							filename,

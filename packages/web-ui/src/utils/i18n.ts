@@ -16,7 +16,7 @@ declare module "@mariozechner/mini-lit" {
 		"Thinking...": string;
 		"Type your message...": string;
 		"API Keys Configuration": string;
-		"Configure API keys for LLM providers. Keys are stored locally in your browser.": string;
+		"Configure API keys for Provider providers. Keys are stored locally in your browser.": string;
 		Configured: string;
 		"Not configured": string;
 		"✓ Valid": string;
@@ -48,7 +48,7 @@ declare module "@mariozechner/mini-lit" {
 		"Click the download button above to view it on your computer.": string;
 		"No content available": string;
 		"Failed to display text content": string;
-		"API keys are required to use AI models. Get your keys from the provider's website.": string;
+		"API keys are required to use Core models. Get your keys from the provider's website.": string;
 		console: string;
 		"Copy output": string;
 		"Copied!": string;
@@ -142,7 +142,7 @@ declare module "@mariozechner/mini-lit" {
 		Clear: string;
 		"API Key Required": string;
 		"Enter your API key for {provider}": string;
-		"Allows browser-based apps to bypass CORS restrictions when calling LLM providers. Required for Z-AI and Anthropic with OAuth token.": string;
+		"Allows browser-based apps to bypass CORS restrictions when calling Provider providers. Required for Z-Core and Anthropic with OAuth token.": string;
 		Off: string;
 		Minimal: string;
 		Low: string;
@@ -173,7 +173,7 @@ declare module "@mariozechner/mini-lit" {
 		// Providers & Models
 		"Providers & Models": string;
 		"Cloud Providers": string;
-		"Cloud LLM providers with predefined models. API keys are stored locally in your browser.": string;
+		"Cloud Provider providers with predefined models. API keys are stored locally in your browser.": string;
 		"Custom Providers": string;
 		"User-configured servers with auto-discovered or manually defined models.": string;
 		"Add Provider": string;
@@ -199,8 +199,8 @@ declare module "@mariozechner/mini-lit" {
 		"For manual provider types, add models after saving the provider.": string;
 		"Please fill in all required fields": string;
 		"Failed to save provider": string;
-		"OpenAI Completions Compatible": string;
-		"OpenAI Responses Compatible": string;
+		"OpenCore Completions Compatible": string;
+		"OpenCore Responses Compatible": string;
 		"Anthropic Messages Compatible": string;
 		"Checking...": string;
 		Disconnected: string;
@@ -224,8 +224,8 @@ export const translations = {
 		"Thinking...": "Analiz ediyor...",
 		"Type your message...": "Mesajinizi yazin...",
 		"API Keys Configuration": "API Keys Configuration",
-		"Configure API keys for LLM providers. Keys are stored locally in your browser.":
-			"Configure API keys for LLM providers. Keys are stored locally in your browser.",
+		"Configure API keys for Provider providers. Keys are stored locally in your browser.":
+			"Configure API keys for Provider providers. Keys are stored locally in your browser.",
 		Configured: "Configured",
 		"Not configured": "Not configured",
 		"✓ Valid": "✓ Valid",
@@ -258,8 +258,8 @@ export const translations = {
 			"Click the download button above to view it on your computer.",
 		"No content available": "No content available",
 		"Failed to display text content": "Failed to display text content",
-		"API keys are required to use AI models. Get your keys from the provider's website.":
-			"API keys are required to use AI models. Get your keys from the provider's website.",
+		"API keys are required to use Core models. Get your keys from the provider's website.":
+			"API keys are required to use Core models. Get your keys from the provider's website.",
 		console: "console",
 		"Copy output": "Copy output",
 		"Copied!": "Copied!",
@@ -353,8 +353,8 @@ export const translations = {
 		Clear: "Clear",
 		"API Key Required": "API Key Required",
 		"Enter your API key for {provider}": "Enter your API key for {provider}",
-		"Allows browser-based apps to bypass CORS restrictions when calling LLM providers. Required for Z-AI and Anthropic with OAuth token.":
-			"Allows browser-based apps to bypass CORS restrictions when calling LLM providers. Required for Z-AI and Anthropic with OAuth token.",
+		"Allows browser-based apps to bypass CORS restrictions when calling Provider providers. Required for Z-Core and Anthropic with OAuth token.":
+			"Allows browser-based apps to bypass CORS restrictions when calling Provider providers. Required for Z-Core and Anthropic with OAuth token.",
 		Off: "Off",
 		Minimal: "Minimal",
 		Low: "Low",
@@ -391,8 +391,8 @@ export const translations = {
 		// Providers & Models
 		"Providers & Models": "Providers & Models",
 		"Cloud Providers": "Cloud Providers",
-		"Cloud LLM providers with predefined models. API keys are stored locally in your browser.":
-			"Cloud LLM providers with predefined models. API keys are stored locally in your browser.",
+		"Cloud Provider providers with predefined models. API keys are stored locally in your browser.":
+			"Cloud Provider providers with predefined models. API keys are stored locally in your browser.",
 		"Custom Providers": "Custom Providers",
 		"User-configured servers with auto-discovered or manually defined models.":
 			"User-configured servers with auto-discovered or manually defined models.",
@@ -421,8 +421,8 @@ export const translations = {
 			"For manual provider types, add models after saving the provider.",
 		"Please fill in all required fields": "Please fill in all required fields",
 		"Failed to save provider": "Failed to save provider",
-		"OpenAI Completions Compatible": "OpenAI Completions Compatible",
-		"OpenAI Responses Compatible": "OpenAI Responses Compatible",
+		"OpenCore Completions Compatible": "OpenCore Completions Compatible",
+		"OpenCore Responses Compatible": "OpenCore Responses Compatible",
 		"Anthropic Messages Compatible": "Anthropic Messages Compatible",
 		"Checking...": "Checking...",
 		Disconnected: "Disconnected",
@@ -443,8 +443,8 @@ export const translations = {
 		"Thinking...": "Denkt nach...",
 		"Type your message...": "Geben Sie Ihre Nachricht ein...",
 		"API Keys Configuration": "API-Schlüssel-Konfiguration",
-		"Configure API keys for LLM providers. Keys are stored locally in your browser.":
-			"Konfigurieren Sie API-Schlüssel für LLM-Anbieter. Schlüssel werden lokal in Ihrem Browser gespeichert.",
+		"Configure API keys for Provider providers. Keys are stored locally in your browser.":
+			"Konfigurieren Sie API-Schlüssel für Provider-Anbieter. Schlüssel werden lokal in Ihrem Browser gespeichert.",
 		Configured: "Konfiguriert",
 		"Not configured": "Nicht konfiguriert",
 		"✓ Valid": "✓ Gültig",
@@ -477,7 +477,7 @@ export const translations = {
 			"Klicken Sie oben auf die Download-Schaltfläche, um die Datei auf Ihrem Computer anzuzeigen.",
 		"No content available": "Kein Inhalt verfügbar",
 		"Failed to display text content": "Textinhalt konnte nicht angezeigt werden",
-		"API keys are required to use AI models. Get your keys from the provider's website.":
+		"API keys are required to use Core models. Get your keys from the provider's website.":
 			"API-Schlüssel sind erforderlich, um KI-Modelle zu verwenden. Holen Sie sich Ihre Schlüssel von der Website des Anbieters.",
 		console: "Konsole",
 		"Copy output": "Ausgabe kopieren",
@@ -572,8 +572,8 @@ export const translations = {
 		Clear: "Löschen",
 		"API Key Required": "API-Schlüssel erforderlich",
 		"Enter your API key for {provider}": "Geben Sie Ihren API-Schlüssel für {provider} ein",
-		"Allows browser-based apps to bypass CORS restrictions when calling LLM providers. Required for Z-AI and Anthropic with OAuth token.":
-			"Ermöglicht browserbasierten Anwendungen, CORS-Einschränkungen beim Aufruf von LLM-Anbietern zu umgehen. Erforderlich für Z-AI und Anthropic mit OAuth-Token.",
+		"Allows browser-based apps to bypass CORS restrictions when calling Provider providers. Required for Z-Core and Anthropic with OAuth token.":
+			"Ermöglicht browserbasierten Anwendungen, CORS-Einschränkungen beim Aufruf von Provider-Anbietern zu umgehen. Erforderlich für Z-Core und Anthropic mit OAuth-Token.",
 		Off: "Aus",
 		Minimal: "Minimal",
 		Low: "Niedrig",
@@ -610,8 +610,8 @@ export const translations = {
 		// Providers & Models
 		"Providers & Models": "Anbieter & Modelle",
 		"Cloud Providers": "Cloud-Anbieter",
-		"Cloud LLM providers with predefined models. API keys are stored locally in your browser.":
-			"Cloud-LLM-Anbieter mit vordefinierten Modellen. API-Schlüssel werden lokal in Ihrem Browser gespeichert.",
+		"Cloud Provider providers with predefined models. API keys are stored locally in your browser.":
+			"Cloud-Provider-Anbieter mit vordefinierten Modellen. API-Schlüssel werden lokal in Ihrem Browser gespeichert.",
 		"Custom Providers": "Benutzerdefinierte Anbieter",
 		"User-configured servers with auto-discovered or manually defined models.":
 			"Benutzerkonfigurierte Server mit automatisch erkannten oder manuell definierten Modellen.",
@@ -640,8 +640,8 @@ export const translations = {
 			"Für manuelle Anbietertypen fügen Sie Modelle nach dem Speichern des Anbieters hinzu.",
 		"Please fill in all required fields": "Bitte füllen Sie alle erforderlichen Felder aus",
 		"Failed to save provider": "Fehler beim Speichern des Anbieters",
-		"OpenAI Completions Compatible": "OpenAI Completions Kompatibel",
-		"OpenAI Responses Compatible": "OpenAI Responses Kompatibel",
+		"OpenCore Completions Compatible": "OpenCore Completions Kompatibel",
+		"OpenCore Responses Compatible": "OpenCore Responses Kompatibel",
 		"Anthropic Messages Compatible": "Anthropic Messages Kompatibel",
 		"Checking...": "Überprüfe...",
 		Disconnected: "Getrennt",

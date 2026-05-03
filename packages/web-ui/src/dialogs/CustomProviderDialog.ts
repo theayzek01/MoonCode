@@ -4,7 +4,7 @@ import { DialogBase } from "@mariozechner/mini-lit/dist/DialogBase.js";
 import { Input } from "@mariozechner/mini-lit/dist/Input.js";
 import { Label } from "@mariozechner/mini-lit/dist/Label.js";
 import { Select } from "@mariozechner/mini-lit/dist/Select.js";
-import type { Model } from "@moodcli/ai";
+import type { Model } from "@moodcli/core";
 import { html, type TemplateResult } from "lit";
 import { state } from "lit/decorators.js";
 import { getAppStorage } from "../storage/app-storage.js";
@@ -144,10 +144,10 @@ export class CustomProviderDialog extends DialogBase {
 		const providerTypes = [
 			{ value: "ollama", label: "Ollama (auto-discovery)" },
 			{ value: "llama.cpp", label: "llama.cpp (auto-discovery)" },
-			{ value: "vllm", label: "vLLM (auto-discovery)" },
+			{ value: "vllm", label: "vProvider (auto-discovery)" },
 			{ value: "lmstudio", label: "LM Studio (auto-discovery)" },
-			{ value: "openai-completions", label: "OpenAI Completions Compatible" },
-			{ value: "openai-responses", label: "OpenAI Responses Compatible" },
+			{ value: "openai-completions", label: "OpenCore Completions Compatible" },
+			{ value: "openai-responses", label: "OpenCore Responses Compatible" },
 			{ value: "anthropic-messages", label: "Anthropic Messages Compatible" },
 		];
 

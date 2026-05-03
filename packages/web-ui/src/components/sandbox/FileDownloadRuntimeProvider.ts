@@ -10,7 +10,7 @@ export interface DownloadableFile {
  * File Download Runtime Provider
  *
  * Provides returnDownloadableFile() for creating user downloads.
- * Files returned this way are NOT accessible to the LLM later (one-time download).
+ * Files returned this way are NOT accessible to the Provider later (one-time download).
  * Works both online (sends to extension) and offline (triggers browser download directly).
  * Collects files for retrieval by caller.
  */

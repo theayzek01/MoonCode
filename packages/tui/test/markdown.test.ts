@@ -120,7 +120,7 @@ describe("Markdown component", () => {
 			assert.ok(plainLines.some((line) => line.includes("2. Second ordered")));
 		});
 
-		it("should maintain numbering when code blocks are not indented (LLM output)", () => {
+		it("should maintain numbering when code blocks are not indented (Provider output)", () => {
 			// When code blocks aren't indented, marked parses each item as a separate list.
 			// We use token.start to preserve the original numbering.
 			const markdown = new Markdown(
@@ -817,7 +817,7 @@ bar`,
 				0,
 				defaultMarkdownTheme,
 				{
-					color: (text) => chalk.magenta(text), // This should NOT be applied to blockquotes
+					color: (text) => chalk.menginea(text), // This should NOT be applied to blockquotes
 				},
 			);
 
@@ -838,9 +838,9 @@ bar`,
 			assert.ok(fooLine?.includes("\x1b[3m"), `Foo line should have italic: ${fooLine}`);
 			assert.ok(barLine?.includes("\x1b[3m"), `bar line should have italic: ${barLine}`);
 
-			// Blockquotes should NOT have the default message color (magenta)
-			assert.ok(!fooLine?.includes("\x1b[35m"), `Foo line should NOT have magenta color: ${fooLine}`);
-			assert.ok(!barLine?.includes("\x1b[35m"), `bar line should NOT have magenta color: ${barLine}`);
+			// Blockquotes should NOT have the default message color (menginea)
+			assert.ok(!fooLine?.includes("\x1b[35m"), `Foo line should NOT have menginea color: ${fooLine}`);
+			assert.ok(!barLine?.includes("\x1b[35m"), `bar line should NOT have menginea color: ${barLine}`);
 		});
 
 		it("should apply consistent styling to explicit multiline blockquote", () => {

@@ -1,5 +1,5 @@
-import type { AgentMessage, ThinkingLevel } from "@moodcli/agent";
-import type { Model } from "@moodcli/ai";
+import type { EngineMessage, ThinkingLevel } from "@moodcli/engine";
+import type { Model } from "@moodcli/core";
 
 /**
  * Transaction interface for atomic operations across stores.
@@ -158,7 +158,7 @@ export interface SessionData {
 	thinkingLevel: ThinkingLevel;
 
 	/** Full conversation history (with attachments inline) */
-	messages: AgentMessage[];
+	messages: EngineMessage[];
 
 	/** ISO 8601 UTC timestamp of creation */
 	createdAt: string;

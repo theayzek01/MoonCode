@@ -1,5 +1,5 @@
-import type { AgentTool } from "@moodcli/agent";
-import type { ToolResultMessage } from "@moodcli/ai";
+import type { EngineTool } from "@moodcli/engine";
+import type { ToolResultMessage } from "@moodcli/core";
 import { html } from "lit";
 import { createRef, ref } from "lit/directives/ref.js";
 import { FileText } from "lucide";
@@ -33,7 +33,7 @@ export interface ExtractDocumentResult {
 // TOOL
 // ============================================================================
 
-export function createExtractDocumentTool(): AgentTool<typeof extractDocumentSchema, ExtractDocumentResult> & {
+export function createExtractDocumentTool(): EngineTool<typeof extractDocumentSchema, ExtractDocumentResult> & {
 	corsProxyUrl?: string;
 } {
 	const tool = {

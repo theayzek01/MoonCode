@@ -1,10 +1,10 @@
 // Main chat interface
 
-export type { Agent, AgentMessage, AgentState, ThinkingLevel } from "@moodcli/agent";
-export type { Model } from "@moodcli/ai";
+export type { Engine, EngineMessage, EngineState, ThinkingLevel } from "@moodcli/engine";
+export type { Model } from "@moodcli/core";
 export { ChatPanel } from "./ChatPanel.js";
 // Components
-export { AgentInterface } from "./components/AgentInterface.js";
+export { EngineInterface } from "./components/EngineInterface.js";
 export { AttachmentTile } from "./components/AttachmentTile.js";
 export { ConsoleBlock } from "./components/ConsoleBlock.js";
 export { CustomProviderCard } from "./components/CustomProviderCard.js";

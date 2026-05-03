@@ -1,4 +1,4 @@
-import type { AgentState } from "@moodcli/agent";
+import type { EngineState } from "@moodcli/engine";
 import { Store } from "../store.js";
 import type { SessionData, SessionMetadata, StoreConfig } from "../types.js";
 
@@ -85,7 +85,7 @@ export class SessionsStore extends Store {
 	// Alias methods for backward compatibility
 	async saveSession(
 		id: string,
-		state: AgentState,
+		state: EngineState,
 		metadata: SessionMetadata | undefined,
 		title?: string,
 	): Promise<void> {

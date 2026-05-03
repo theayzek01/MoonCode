@@ -29,7 +29,7 @@ export interface SandboxRuntimeProvider {
 
 	/**
 	 * Optional documentation describing what globals/functions this provider injects.
-	 * This will be appended to tool descriptions dynamically so the LLM knows what's available.
+	 * This will be appended to tool descriptions dynamically so the Provider knows what's available.
 	 */
 	getDescription(): string;
 

@@ -1,10 +1,10 @@
-import type { Api, Context, Model, SimpleStreamOptions } from "@moodcli/ai";
-import { streamSimple } from "@moodcli/ai";
+import type { Api, Context, Model, SimpleStreamOptions } from "@moodcli/core";
+import { streamSimple } from "@moodcli/core";
 
 /**
  * Centralized proxy decision logic.
  *
- * Determines whether to use a CORS proxy for LLM API requests based on:
+ * Determines whether to use a CORS proxy for Provider API requests based on:
  * - Provider name
  * - API key pattern (for providers where it matters)
  */
@@ -19,7 +19,7 @@ import { streamSimple } from "@moodcli/ai";
 export function shouldUseProxyForProvider(provider: string, apiKey: string): boolean {
 	switch (provider.toLowerCase()) {
 		case "zai":
-			// Z-AI always requires proxy
+			// Z-Core always requires proxy
 			return true;
 
 		case "anthropic":
@@ -122,7 +122,7 @@ export function isCorsError(error: unknown): boolean {
  * Reads proxy settings from storage on each call.
  *
  * @param getProxyUrl - Async function to get current proxy URL (or undefined if disabled)
- * @returns A streamFn compatible with Agent's streamFn option
+ * @returns A streamFn compatible with Engine's streamFn option
  */
 export function createStreamFn(getProxyUrl: () => Promise<string | undefined>) {
 	return async (model: Model<any>, context: Context, options?: SimpleStreamOptions) => {

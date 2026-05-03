@@ -1,6 +1,6 @@
 import { i18n } from "@mariozechner/mini-lit";
-import type { AgentTool } from "@moodcli/agent";
-import type { ToolResultMessage } from "@moodcli/ai";
+import type { EngineTool } from "@moodcli/engine";
+import type { ToolResultMessage } from "@moodcli/core";
 import { html } from "lit";
 import { createRef, ref } from "lit/directives/ref.js";
 import { Code } from "lucide";
@@ -125,7 +125,7 @@ interface JavaScriptReplResult {
 	}>;
 }
 
-export function createJavaScriptReplTool(): AgentTool<typeof javascriptReplSchema, JavaScriptReplToolResult> & {
+export function createJavaScriptReplTool(): EngineTool<typeof javascriptReplSchema, JavaScriptReplToolResult> & {
 	runtimeProvidersFactory?: () => SandboxRuntimeProvider[];
 	sandboxUrlProvider?: () => string;
 } {

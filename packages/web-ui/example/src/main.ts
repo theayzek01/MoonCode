@@ -1,8 +1,8 @@
 import "@mariozechner/mini-lit/dist/ThemeToggle.js";
-import { Agent, type AgentMessage } from "@moodcli/agent";
-import { getModel } from "@moodcli/ai";
+import { Engine, type EngineMessage } from "@moodcli/engine";
+import { getModel } from "@moodcli/core";
 import {
-	type AgentState,
+	type EngineState,
 	ApiKeyPromptDialog,
 	AppStorage,
 	ChatPanel,
@@ -65,11 +65,11 @@ setAppStorage(storage);
 let currentSessionId: string | undefined;
 let currentTitle = "";
 let isEditingTitle = false;
-let agent: Agent;
+let engine: Engine;
 let chatPanel: ChatPanel;
-let agentUnsubscribe: (() => void) | undefined;
+let engineUnsubscribe: (() => void) | undefined;
 
-const generateTitle = (messages: AgentMessage[]): string => {
+const generateTitle = (messages: EngineMessage[]): string => {
 	const firstUserMsg = messages.find((m) => m.role === "user" || m.role === "user-with-attachments");
 	if (!firstUserMsg || (firstUserMsg.role !== "user" && firstUserMsg.role !== "user-with-attachments")) return "";
 
@@ -93,16 +93,16 @@ const generateTitle = (messages: AgentMessage[]): string => {
 	return text.length <= 50 ? text : `${text.substring(0, 47)}...`;
 };
 
-const shouldSaveSession = (messages: AgentMessage[]): boolean => {
+const shouldSaveSession = (messages: EngineMessage[]): boolean => {
 	const hasUserMsg = messages.some((m: any) => m.role === "user" || m.role === "user-with-attachments");
 	const hasAssistantMsg = messages.some((m: any) => m.role === "assistant");
 	return hasUserMsg && hasAssistantMsg;
 };
 
 const saveSession = async () => {
-	if (!storage.sessions || !currentSessionId || !agent || !currentTitle) return;
+	if (!storage.sessions || !currentSessionId || !engine || !currentTitle) return;
 
-	const state = agent.state;
+	const state = engine.state;
 	if (!shouldSaveSession(state.messages)) return;
 
 	try {
@@ -155,14 +155,14 @@ const updateUrl = (sessionId: string) => {
 	window.history.replaceState({}, "", url);
 };
 
-const createAgent = async (initialState?: Partial<AgentState>) => {
-	if (agentUnsubscribe) {
-		agentUnsubscribe();
+const createEngine = async (initialState?: Partial<EngineState>) => {
+	if (engineUnsubscribe) {
+		engineUnsubscribe();
 	}
 
-	agent = new Agent({
+	engine = new Engine({
 		initialState: initialState || {
-			systemPrompt: `You are a helpful AI assistant with access to various tools.
+			systemPrompt: `You are a helpful Core assistant with access to various tools.
 
 Available tools:
 - JavaScript REPL: Execute JavaScript code in a sandboxed browser environment (can do calculations, get time, process data, create visualizations, etc.)
@@ -174,11 +174,11 @@ Feel free to use these tools when needed to provide accurate and helpful respons
 			messages: [],
 			tools: [],
 		},
-		// Custom transformer: convert custom messages to LLM-compatible format
+		// Custom transformer: convert custom messages to Provider-compatible format
 		convertToLlm: customConvertToLlm,
 	});
 
-	agentUnsubscribe = agent.subscribe((event: any) => {
+	engineUnsubscribe = engine.subscribe((event: any) => {
 		if (event.type === "state-update") {
 			const messages = event.state.messages;
 
@@ -202,11 +202,11 @@ Feel free to use these tools when needed to provide accurate and helpful respons
 		}
 	});
 
-	await chatPanel.setAgent(agent, {
+	await chatPanel.setEngine(engine, {
 		onApiKeyRequired: async (provider: string) => {
 			return await ApiKeyPromptDialog.prompt(provider);
 		},
-		toolsFactory: (_agent, _agentInterface, _artifactsPanel, runtimeProvidersFactory) => {
+		toolsFactory: (_engine, _engineInterface, _artifactsPanel, runtimeProvidersFactory) => {
 			// Create javascript_repl tool with access to attachments + artifacts
 			const replTool = createJavaScriptReplTool();
 			replTool.runtimeProvidersFactory = runtimeProvidersFactory;
@@ -228,7 +228,7 @@ const loadSession = async (sessionId: string): Promise<boolean> => {
 	const metadata = await storage.sessions.getMetadata(sessionId);
 	currentTitle = metadata?.title || "";
 
-	await createAgent({
+	await createEngine({
 		model: sessionData.model,
 		thinkingLevel: sessionData.thinkingLevel,
 		messages: sessionData.messages,
@@ -344,11 +344,11 @@ const renderApp = () => {
 						size: "sm",
 						children: icon(Bell, "sm"),
 						onClick: () => {
-							// Demo: Inject custom message (will appear on next agent run)
-							if (agent) {
-								agent.steer(
+							// Demo: Inject custom message (will appear on next engine run)
+							if (engine) {
+								engine.steer(
 									createSystemNotification(
-										"This is a custom message! It appears in the UI but is never sent to the LLM.",
+										"This is a custom message! It appears in the UI but is never sent to the Provider.",
 									),
 								);
 							}
@@ -412,7 +412,7 @@ async function initApp() {
 			return;
 		}
 	} else {
-		await createAgent();
+		await createEngine();
 	}
 
 	renderApp();

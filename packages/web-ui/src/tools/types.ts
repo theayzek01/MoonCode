@@ -1,4 +1,4 @@
-import type { ToolResultMessage } from "@moodcli/ai";
+import type { ToolResultMessage } from "@moodcli/core";
 import type { TemplateResult } from "lit";
 
 export interface ToolRenderResult {

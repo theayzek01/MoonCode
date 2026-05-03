@@ -3,7 +3,7 @@ param(
     $RemainingArgs
 )
 
-$cliPath = "$PSScriptRoot\packages\coding-agent\dist\cli.js"
+$cliPath = "$PSScriptRoot\packages\cli\dist\cli.js"
 
 if ($RemainingArgs) {
     & node $cliPath $RemainingArgs

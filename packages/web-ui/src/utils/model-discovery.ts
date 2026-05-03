@@ -1,5 +1,5 @@
 import { LMStudioClient } from "@lmstudio/sdk";
-import type { Model } from "@moodcli/ai";
+import type { Model } from "@moodcli/core";
 import { Ollama } from "ollama/browser";
 
 /**
@@ -77,7 +77,7 @@ export async function discoverOllamaModels(baseUrl: string, _apiKey?: string): P
 }
 
 /**
- * Discover models from a llama.cpp server via OpenAI-compatible /v1/models endpoint.
+ * Discover models from a llama.cpp server via OpenCore-compatible /v1/models endpoint.
  * @param baseUrl - Base URL of the llama.cpp server (e.g., "http://localhost:8080")
  * @param apiKey - Optional API key
  * @returns Array of discovered models
@@ -139,12 +139,12 @@ export async function discoverLlamaCppModels(baseUrl: string, apiKey?: string): 
 }
 
 /**
- * Discover models from a vLLM server via OpenAI-compatible /v1/models endpoint.
- * @param baseUrl - Base URL of the vLLM server (e.g., "http://localhost:8000")
+ * Discover models from a vProvider server via OpenCore-compatible /v1/models endpoint.
+ * @param baseUrl - Base URL of the vProvider server (e.g., "http://localhost:8000")
  * @param apiKey - Optional API key
  * @returns Array of discovered models
  */
-export async function discoverVLLMModels(baseUrl: string, apiKey?: string): Promise<Model<any>[]> {
+export async function discoverVProviderModels(baseUrl: string, apiKey?: string): Promise<Model<any>[]> {
 	try {
 		const headers: HeadersInit = {
 			"Content-Type": "application/json",
@@ -166,11 +166,11 @@ export async function discoverVLLMModels(baseUrl: string, apiKey?: string): Prom
 		const data = await response.json();
 
 		if (!data.data || !Array.isArray(data.data)) {
-			throw new Error("Invalid response format from vLLM server");
+			throw new Error("Invalid response format from vProvider server");
 		}
 
 		return data.data.map((model: any) => {
-			// vLLM provides max_model_len which is the context window
+			// vProvider provides max_model_len which is the context window
 			const contextWindow = model.max_model_len || 8192;
 			const maxTokens = Math.min(contextWindow, 4096); // Cap max tokens
 
@@ -195,8 +195,8 @@ export async function discoverVLLMModels(baseUrl: string, apiKey?: string): Prom
 			return vllmModel;
 		});
 	} catch (err) {
-		console.error("Failed to discover vLLM models:", err);
-		throw new Error(`vLLM discovery failed: ${err instanceof Error ? err.message : String(err)}`);
+		console.error("Failed to discover vProvider models:", err);
+		throw new Error(`vProvider discovery failed: ${err instanceof Error ? err.message : String(err)}`);
 	}
 }
 
@@ -218,7 +218,7 @@ export async function discoverLMStudioModels(baseUrl: string, _apiKey?: string):
 		// List all downloaded models
 		const models = await client.system.listDownloadedModels();
 
-		// Filter to only LLM models and map to our Model format
+		// Filter to only Provider models and map to our Model format
 		return models
 			.filter((model) => model.type === "llm")
 			.map((model) => {
@@ -270,7 +270,7 @@ export async function discoverModels(
 		case "llama.cpp":
 			return discoverLlamaCppModels(baseUrl, apiKey);
 		case "vllm":
-			return discoverVLLMModels(baseUrl, apiKey);
+			return discoverVProviderModels(baseUrl, apiKey);
 		case "lmstudio":
 			return discoverLMStudioModels(baseUrl, apiKey);
 	}

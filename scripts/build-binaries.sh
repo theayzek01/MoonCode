@@ -11,7 +11,7 @@
 #   --platform <name>   Build only for specified platform (darwin-arm64, darwin-x64, linux-x64, linux-arm64, windows-x64)
 #
 # Output:
-#   packages/coding-agent/binaries/
+#   packages/cli/binaries/
 #     moodcli-darwin-arm64.tar.gz
 #     moodcli-darwin-x64.tar.gz
 #     moodcli-linux-x64.tar.gz
@@ -87,7 +87,7 @@ echo "==> Building all packages..."
 npm run build
 
 echo "==> Building binaries..."
-cd packages/coding-agent
+cd packages/cli
 
 # Clean previous builds
 rm -rf binaries
@@ -166,7 +166,7 @@ done
 
 echo ""
 echo "==> Build complete!"
-echo "Archives available in packages/coding-agent/binaries/"
+echo "Archives available in packages/cli/binaries/"
 ls -lh *.tar.gz *.zip 2>/dev/null || true
 echo ""
 echo "Extracted directories for testing:"

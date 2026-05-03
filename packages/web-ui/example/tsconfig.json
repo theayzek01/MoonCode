@@ -6,8 +6,8 @@
 		"moduleResolution": "bundler",
 		"paths": {
 			"*": ["./*"],
-			"@moodcli/agent-core": ["../../agent/dist/index.d.ts"],
-			"@moodcli/ai": ["../../ai/dist/index.d.ts"],
+			"@moodcli/engine-core": ["../../engine/dist/index.d.ts"],
+			"@moodcli/core": ["../../ai/dist/index.d.ts"],
 			"@moodcli/tui": ["../../tui/dist/index.d.ts"],
 			"@moodcli/web-ui": ["../dist/index.d.ts"]
 		},

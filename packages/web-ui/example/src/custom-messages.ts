@@ -1,6 +1,6 @@
 import { Alert } from "@mariozechner/mini-lit/dist/Alert.js";
-import type { Message } from "@moodcli/ai";
-import type { AgentMessage, MessageRenderer } from "@moodcli/web-ui";
+import type { Message } from "@moodcli/core";
+import type { EngineMessage, MessageRenderer } from "@moodcli/web-ui";
 import { defaultConvertToLlm, registerMessageRenderer } from "@moodcli/web-ui";
 import { html } from "lit";
 
@@ -16,10 +16,10 @@ export interface SystemNotificationMessage {
 	timestamp: string;
 }
 
-// Extend CustomAgentMessages interface via declaration merging
-// This must target moodcli-agent-core where CustomAgentMessages is defined
-declare module "@moodcli/agent" {
-	interface CustomAgentMessages {
+// Extend CustomEngineMessages interface via declaration merging
+// This must target moodcli-engine-core where CustomEngineMessages is defined
+declare module "@moodcli/engine" {
+	interface CustomEngineMessages {
 		"system-notification": SystemNotificationMessage;
 	}
 }
@@ -79,9 +79,9 @@ export function createSystemNotification(
  * Custom message transformer that extends defaultConvertToLlm.
  * Handles system-notification messages by converting them to user messages.
  */
-export function customConvertToLlm(messages: AgentMessage[]): Message[] {
+export function customConvertToLlm(messages: EngineMessage[]): Message[] {
 	// First, handle our custom system-notification type
-	const processed = messages.map((m): AgentMessage => {
+	const processed = messages.map((m): EngineMessage => {
 		if (m.role === "system-notification") {
 			const notification = m as SystemNotificationMessage;
 			// Convert to user message with <system> tags

@@ -1,17 +1,17 @@
-import type { AgentMessage, AgentTool } from "@moodcli/agent";
-import type { ToolResultMessage } from "@moodcli/ai";
+import type { EngineMessage, EngineTool } from "@moodcli/engine";
+import type { ToolResultMessage } from "@moodcli/core";
 import { html, LitElement } from "lit";
 import { property, state } from "lit/decorators.js";
 
 export class StreamingMessageContainer extends LitElement {
-	@property({ type: Array }) tools: AgentTool[] = [];
+	@property({ type: Array }) tools: EngineTool[] = [];
 	@property({ type: Boolean }) isStreaming = false;
 	@property({ type: Object }) pendingToolCalls?: ReadonlySet<string>;
 	@property({ type: Object }) toolResultsById?: Map<string, ToolResultMessage>;
 	@property({ attribute: false }) onCostClick?: () => void;
 
-	@state() private _message: AgentMessage | null = null;
-	private _pendingMessage: AgentMessage | null = null;
+	@state() private _message: EngineMessage | null = null;
+	private _pendingMessage: EngineMessage | null = null;
 	private _updateScheduled = false;
 	private _immediateUpdate = false;
 
@@ -25,7 +25,7 @@ export class StreamingMessageContainer extends LitElement {
 	}
 
 	// Public method to update the message with batching for performance
-	public setMessage(message: AgentMessage | null, immediate = false) {
+	public setMessage(message: EngineMessage | null, immediate = false) {
 		// Store the latest message
 		this._pendingMessage = message;
 

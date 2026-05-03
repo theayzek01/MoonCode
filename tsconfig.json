@@ -4,24 +4,22 @@
 		"noEmit": true,
 		"paths": {
 			"*": ["./*"],
-			"@moodcli/ai": ["./packages/ai/src/index.ts"],
-			"@moodcli/ai/oauth": ["./packages/ai/src/oauth.ts"],
-			"@moodcli/ai/*": ["./packages/ai/src/*.ts", "./packages/ai/src/providers/*.ts"],
-			"@moodcli/ai/dist/*": ["./packages/ai/src/*"],
-			"@moodcli/agent": ["./packages/agent/src/index.ts"],
-			"@moodcli/agent/*": ["./packages/agent/src/*"],
-			"@moodcli/coding-agent": ["./packages/coding-agent/src/index.ts"],
-			"@moodcli/coding-agent/hooks": ["./packages/coding-agent/src/core/hooks/index.ts"],
-			"@moodcli/coding-agent/*": ["./packages/coding-agent/src/*"],
+			"@moodcli/core": ["./packages/core/src/index.ts"],
+			"@moodcli/core/oauth": ["./packages/core/src/oauth.ts"],
+			"@moodcli/core/*": ["./packages/core/src/*.ts", "./packages/core/src/providers/*.ts"],
+			"@moodcli/core/dist/*": ["./packages/core/src/*"],
+			"@moodcli/engine": ["./packages/engine/src/index.ts"],
+			"@moodcli/engine/*": ["./packages/engine/src/*"],
+			"@moodcli/cli": ["./packages/cli/src/index.ts"],
+			"@moodcli/cli/hooks": ["./packages/cli/src/core/hooks/index.ts"],
+			"@moodcli/cli/*": ["./packages/cli/src/*"],
 			"typebox": ["./node_modules/typebox"],
 			"@moodcli/tui": ["./packages/tui/src/index.ts"],
 			"@moodcli/tui/*": ["./packages/tui/src/*"],
 			"@moodcli/web-ui": ["./packages/web-ui/src/index.ts"],
-			"@moodcli/web-ui/*": ["./packages/web-ui/src/*"],
-			"@moodcli/agent-old": ["./packages/agent-old/src/index.ts"],
-			"@moodcli/agent-old/*": ["./packages/agent-old/src/*"]
+			"@moodcli/web-ui/*": ["./packages/web-ui/src/*"]
 		}
 	},
-	"include": ["packages/*/src/**/*", "packages/*/test/**/*", "packages/coding-agent/examples/**/*"],
+	"include": ["packages/*/src/**/*", "packages/*/test/**/*", "packages/cli/examples/**/*"],
 	"exclude": ["packages/web-ui/**/*", "**/dist/**"]
 }
