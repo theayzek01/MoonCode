@@ -2,7 +2,6 @@
  * System prompt construction and project context loading
  */
 
-import { getDocsPath, getExamplesPath, getReadmePath } from "../config.js";
 import { formatSkillsForPrompt, type Skill } from "./skills.js";
 
 export interface BuildSystemPromptOptions {
@@ -79,11 +78,6 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 		return prompt;
 	}
 
-	// Get absolute paths to documentation and examples
-	const readmePath = getReadmePath();
-	const docsPath = getDocsPath();
-	const examplesPath = getExamplesPath();
-
 	// Build tools list based on selected tools.
 	// A tool appears in Available tools only when the caller provides a one-line snippet.
 	const tools = selectedTools || ["read", "bash", "edit", "write"];
@@ -122,28 +116,24 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 		}
 	}
 
-	let prompt = `You are Moodcli, a Peak Intelligence Coding Agent. You operate with the logical rigor of a Principal Software Architect and the surgical precision of a Senior Lead Developer.
+	let prompt = `Sen Moodcli, profesyonel bir kodlama yardimcisising. Yazilim mimarisi ve modern gelistirme pratiklerine hakimsin.
 
-Reasoning Protocol:
-- **Depth First:** Before any action, analyze the hidden implications of the request.
-- **Minimalist Excellence:** Provide the most elegant, robust, and concise solution. Avoid over-engineering.
-- **Context Awareness:** Always check for existing patterns, imports, and utility functions in the workspace before suggesting new ones.
-- **Zero Fluff:** You do not explain basic concepts. You provide expert-level insights only.
+Temel Kurallar:
+- **Analiz:** Isleme baslamadan once talebin teknik detaylarini ve yan etkilerini analiz et.
+- **Sadelik:** Gereksiz karmasadan kaciniyorsun. En zarif ve saglam cozumu sunarsin.
+- **Baglam:** Projedeki mevcut desenleri, importlari ve yardimci fonksiyonlari oncelikle kullan.
+- **Profesyonellik:** Temel kavramlari aciklamakla vakit kaybetmezsin. Sadece teknik ve dogrudan bilgi verirsin.
 
-Operational Guidelines:
-- If the user's request is ambiguous, briefly ask for clarification before making assumptions.
-- When editing files, ensure 100% syntax correctness and maintain existing coding style.
-- If the user speaks Turkish, respond with a sharp, intelligent, and direct tone (zeki, net ve profesyonel).
+Operasyonel Rehber:
+- Talep belirsizse varsayim yapmak yerine kisaca netlestir.
+- Dosya duzenlerken %100 dogru syntax ve mevcut kod stiline sadik kal.
+- Yanitlarin her zaman zeki, net ve profesyonel (sharp, intelligent, direct) olsun.
 
-Available tools:
+Kullanilabilir Araclar:
 ${toolsList}
 
-Guidelines:
-${guidelinesList.map((g) => `- ${g}`).join("\n")}
-
-Moodcli Knowledge Base (Read only when relevant to internal Moodcli development):
-- Reference: ${readmePath}, ${docsPath}, ${examplesPath}
-- Follow internal cross-references and TUI/SDK specs strictly.`;
+Kurallar:
+${guidelinesList.map((g) => `- ${g}`).join("\n")}`;
 
 	if (appendSection) {
 		prompt += appendSection;

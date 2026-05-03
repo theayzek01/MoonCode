@@ -563,34 +563,45 @@ export class InteractiveMode {
 
 		// Add header with keybindings from config (unless silenced)
 		if (this.options.verbose || !this.settingsManager.getQuietStartup()) {
-			const logo = theme.bold(theme.fg("accent", APP_NAME)) + theme.fg("dim", ` v${this.version}`);
+			const banner = theme.fg(
+				"accent",
+				`
+     .  *  .  *  .  *  .
+  *    _..._     *  .  *
+ .   .:::::.   .   *  . 
+  * :::::::: :  .  MOODCLI
+ .  :::::::::  *    Zeki Kodlama Yardimcisi
+  *  ':::::::'  .  v${this.version}
+ .     ':::'   *   .  *  .
+`,
+			);
 
 			// Build startup instructions using keybinding hint helpers
 			const hint = (keybinding: AppKeybinding, description: string) => keyHint(keybinding, description);
 
 			const expandedInstructions = [
-				hint("app.interrupt", "durdurmak icin"),
-				hint("app.clear", "temizlemek icin"),
+				hint("app.interrupt", "islemi durdurmak icin"),
+				hint("app.clear", "ekrani temizlemek icin"),
 				rawKeyHint(`${keyText("app.clear")} iki kez`, "cikmak icin"),
 				hint("app.exit", "cikmak icin (bosken)"),
-				hint("app.suspend", "askiya almak icin"),
-				keyHint("tui.editor.deleteToLineEnd", "satir sonuna kadar silmek icin"),
-				hint("app.thinking.cycle", "dusunme seviyesini degistirmek icin"),
+				hint("app.suspend", "arka plana atmak icin"),
+				keyHint("tui.editor.deleteToLineEnd", "satir sonunu silmek icin"),
+				hint("app.thinking.cycle", "dusunme modunu degistirmek icin"),
 				rawKeyHint(
 					`${keyText("app.model.cycleForward")}/${keyText("app.model.cycleBackward")}`,
-					"modelleri dondurmek icin",
+					"modelleri degistirmek icin",
 				),
 				hint("app.model.select", "model secmek icin"),
 				hint("app.tools.expand", "araclari genisletmek icin"),
-				hint("app.thinking.toggle", "dusunmeyi genisletmek icin"),
-				hint("app.editor.external", "harici editor icin"),
-				rawKeyHint("/", "komutlar icin"),
-				rawKeyHint("!", "bash calistirmak icin"),
-				rawKeyHint("!!", "bash calistirmak icin (baglamsiz)"),
-				hint("app.message.followUp", "takip mesaji kuyruklamak icin"),
-				hint("app.message.dequeue", "tum kuyruklanan mesajlari duzenlemek icin"),
-				hint("app.clipboard.pasteImage", "resim yapistirmak icin"),
-				rawKeyHint("dosyalari birakin", "eklemek icin"),
+				hint("app.thinking.toggle", "dusunme detaylarini gormek icin"),
+				hint("app.editor.external", "harici editorde acmak icin"),
+				rawKeyHint("/", "komut listesi icin"),
+				rawKeyHint("!", "bash komutu calistirmak icin"),
+				rawKeyHint("!!", "baglamsiz bash calistirmak icin"),
+				hint("app.message.followUp", "mesaji siraya eklemek icin"),
+				hint("app.message.dequeue", "siradaki mesajlari duzenlemek icin"),
+				hint("app.clipboard.pasteImage", "pano'dan resim eklemek icin"),
+				rawKeyHint("dosyalari surukleyin", "projeye eklemek icin"),
 			].join("\n");
 			const compactInstructions = [
 				hint("app.interrupt", "durdur"),
@@ -601,15 +612,15 @@ export class InteractiveMode {
 			].join(theme.fg("muted", " · "));
 			const compactOnboarding = theme.fg(
 				"dim",
-				`Tam yardim ve yuklenen kaynaklari gormek icin ${keyText("app.tools.expand")} tusuna basin.`,
+				`Tum yardim icerigi ve kaynaklar icin ${keyText("app.tools.expand")} tusuna basin.`,
 			);
 			const onboarding = theme.fg(
 				"dim",
-				`Moodcli kendi ozelliklerini aciklayabilir ve dokumanlarina bakabilir. Nasil kullanildigini Moodcli'ye sorabilirsiniz.`,
+				`Moodcli zeki bir yardimcidir. Nasil kullanildigini kendisine sorabilirsiniz.`,
 			);
 			this.builtInHeader = new ExpandableText(
-				() => `${logo}\n${compactInstructions}\n${compactOnboarding}\n\n${onboarding}`,
-				() => `${logo}\n${expandedInstructions}\n\n${onboarding}`,
+				() => `${banner}\n${compactInstructions}\n${compactOnboarding}\n\n${onboarding}`,
+				() => `${banner}\n${expandedInstructions}\n\n${onboarding}`,
 				this.getStartupExpansionState(),
 				1,
 				0,

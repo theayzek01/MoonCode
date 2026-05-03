@@ -2223,7 +2223,10 @@ export class DefaultPackageManager implements PackageManager {
 		);
 		addResources(
 			"skills",
-			[...collectAutoSkillEntries(userDirs.skills, "moodcli"), ...collectAutoSkillEntries(userAgentsSkillsDir, "agents")],
+			[
+				...collectAutoSkillEntries(userDirs.skills, "moodcli"),
+				...collectAutoSkillEntries(userAgentsSkillsDir, "agents"),
+			],
 			userMetadata,
 			userOverrides.skills,
 			globalBaseDir,

@@ -352,21 +352,27 @@ describe("InteractiveMode.showLoadedResources", () => {
 			},
 			{
 				path: "/tmp/project/.moodcli/npm/node_modules/moodcli-markdown-preview/extensions/index.ts",
-				sourceInfo: createSourceInfo("/tmp/project/.moodcli/npm/node_modules/moodcli-markdown-preview/extensions/index.ts", {
-					source: "npm:moodcli-markdown-preview",
-					scope: "project",
-					origin: "package",
-					baseDir: "/tmp/project/.moodcli/npm/node_modules/moodcli-markdown-preview",
-				}),
+				sourceInfo: createSourceInfo(
+					"/tmp/project/.moodcli/npm/node_modules/moodcli-markdown-preview/extensions/index.ts",
+					{
+						source: "npm:moodcli-markdown-preview",
+						scope: "project",
+						origin: "package",
+						baseDir: "/tmp/project/.moodcli/npm/node_modules/moodcli-markdown-preview",
+					},
+				),
 			},
 			{
 				path: "/tmp/project/.moodcli/npm/node_modules/@scope/moodcli-scoped/extensions/index.ts",
-				sourceInfo: createSourceInfo("/tmp/project/.moodcli/npm/node_modules/@scope/moodcli-scoped/extensions/index.ts", {
-					source: "npm:@scope/moodcli-scoped",
-					scope: "project",
-					origin: "package",
-					baseDir: "/tmp/project/.moodcli/npm/node_modules/@scope/moodcli-scoped",
-				}),
+				sourceInfo: createSourceInfo(
+					"/tmp/project/.moodcli/npm/node_modules/@scope/moodcli-scoped/extensions/index.ts",
+					{
+						source: "npm:@scope/moodcli-scoped",
+						scope: "project",
+						origin: "package",
+						baseDir: "/tmp/project/.moodcli/npm/node_modules/@scope/moodcli-scoped",
+					},
+				),
 			},
 			{
 				path: "/tmp/project/.moodcli/git/github.com/HazAT/moodcli-interactive-subagents/extensions/index.ts",
@@ -732,12 +738,15 @@ describe("InteractiveMode.showLoadedResources", () => {
 		const extensions: ExtensionFixture[] = [
 			{
 				path: "/tmp/project/.moodcli/npm/node_modules/moodcli-markdown-preview/extensions/index.ts",
-				sourceInfo: createSourceInfo("/tmp/project/.moodcli/npm/node_modules/moodcli-markdown-preview/extensions/index.ts", {
-					source: "npm:moodcli-markdown-preview",
-					scope: "project",
-					origin: "package",
-					baseDir: "/tmp/project/.moodcli/npm/node_modules/moodcli-markdown-preview",
-				}),
+				sourceInfo: createSourceInfo(
+					"/tmp/project/.moodcli/npm/node_modules/moodcli-markdown-preview/extensions/index.ts",
+					{
+						source: "npm:moodcli-markdown-preview",
+						scope: "project",
+						origin: "package",
+						baseDir: "/tmp/project/.moodcli/npm/node_modules/moodcli-markdown-preview",
+					},
+				),
 			},
 		];
 
@@ -791,7 +800,10 @@ describe("InteractiveMode.showLoadedResources", () => {
 		const fakeThis = createShowLoadedResourcesThis({
 			quietStartup: false,
 			cwd,
-			contextFiles: [{ path: path.join(home, ".moodcli", "agent", "AGENTS.md") }, { path: path.join(cwd, "AGENTS.md") }],
+			contextFiles: [
+				{ path: path.join(home, ".moodcli", "agent", "AGENTS.md") },
+				{ path: path.join(cwd, "AGENTS.md") },
+			],
 		});
 
 		(InteractiveMode as any).prototype.showLoadedResources.call(fakeThis, {
@@ -811,7 +823,10 @@ describe("InteractiveMode.showLoadedResources", () => {
 			quietStartup: false,
 			toolOutputExpanded: true,
 			cwd,
-			contextFiles: [{ path: path.join(home, ".moodcli", "agent", "AGENTS.md") }, { path: path.join(cwd, "AGENTS.md") }],
+			contextFiles: [
+				{ path: path.join(home, ".moodcli", "agent", "AGENTS.md") },
+				{ path: path.join(cwd, "AGENTS.md") },
+			],
 		});
 
 		(InteractiveMode as any).prototype.showLoadedResources.call(fakeThis, {

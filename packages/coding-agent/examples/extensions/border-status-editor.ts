@@ -105,7 +105,9 @@ export default function (moodcli: ExtensionAPI) {
 		let branch: string | undefined;
 
 		const refreshBranch = async () => {
-			const result = await moodcli.exec("git", ["branch", "--show-current"], { cwd: ctx.cwd }).catch(() => undefined);
+			const result = await moodcli
+				.exec("git", ["branch", "--show-current"], { cwd: ctx.cwd })
+				.catch(() => undefined);
 			const stdout = result?.stdout.trim();
 			branch = stdout && stdout.length > 0 ? stdout : undefined;
 			activeTui?.requestRender();
