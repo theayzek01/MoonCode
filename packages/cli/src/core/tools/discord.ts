@@ -34,15 +34,18 @@ export function createDiscordListGuildsTool(options?: DiscordToolOptions): Engin
 			type: "object",
 			properties: {},
 		},
-		execute: async () => {
+		execute: async (_toolCallId: string, _params: unknown) => {
 			if (!options?.token)
 				return {
 					content: [{ type: "text", text: "Error: No Discord token provided. Use /discord command to set it." }],
+					details: { ok: false },
 				};
 			const client = await getDiscordClient(options.token);
-			const guilds = client.guilds.cache.map((g) => ({ id: g.id, name: g.name }));
+			const fetchedGuilds = await client.guilds.fetch();
+			const guilds = fetchedGuilds.map((g) => ({ id: g.id, name: g.name || "(unknown)" }));
 			return {
 				content: [{ type: "text", text: JSON.stringify(guilds, null, 2) }],
+				details: { ok: true, count: guilds.length },
 			};
 		},
 	};
@@ -60,14 +63,17 @@ export function createDiscordGetChannelsTool(options?: DiscordToolOptions): Engi
 			},
 			required: ["guildId"],
 		},
-		execute: async ({ guildId }: { guildId: string }) => {
-			if (!options?.token) return { content: [{ type: "text", text: "Error: No Discord token provided." }] };
+		execute: async (_toolCallId: string, params: unknown) => {
+			const { guildId } = (params as { guildId?: string }) ?? {};
+			if (!options?.token) return { content: [{ type: "text", text: "Error: No Discord token provided." }], details: {} };
+			if (!guildId) return { content: [{ type: "text", text: "guildId is required." }], details: {} };
 			const client = await getDiscordClient(options.token);
 			const guild = client.guilds.cache.get(guildId);
-			if (!guild) return { content: [{ type: "text", text: "Server not found." }] };
+			if (!guild) return { content: [{ type: "text", text: "Server not found." }], details: {} };
 			const channels = guild.channels.cache.map((c) => ({ id: c.id, name: c.name, type: ChannelType[c.type] }));
 			return {
 				content: [{ type: "text", text: JSON.stringify(channels, null, 2) }],
+				details: { ok: true, count: channels.length },
 			};
 		},
 	};
@@ -86,14 +92,17 @@ export function createDiscordSendMessageTool(options?: DiscordToolOptions): Engi
 			},
 			required: ["channelId", "content"],
 		},
-		execute: async ({ channelId, content }: { channelId: string; content: string }) => {
-			if (!options?.token) return { content: [{ type: "text", text: "Error: No Discord token provided." }] };
+		execute: async (_toolCallId: string, params: unknown) => {
+			const { channelId, content } = (params as { channelId?: string; content?: string }) ?? {};
+			if (!options?.token) return { content: [{ type: "text", text: "Error: No Discord token provided." }], details: {} };
+			if (!channelId || !content) return { content: [{ type: "text", text: "channelId and content are required." }], details: {} };
 			const client = await getDiscordClient(options.token);
 			const channel = client.channels.cache.get(channelId) as TextChannel;
-			if (!channel) return { content: [{ type: "text", text: "Channel not found." }] };
+			if (!channel) return { content: [{ type: "text", text: "Channel not found." }], details: {} };
 			const message = await channel.send(content);
 			return {
 				content: [{ type: "text", text: `Message sent. ID: ${message.id}` }],
+				details: { ok: true, messageId: message.id },
 			};
 		},
 	};
@@ -119,46 +128,43 @@ export function createDiscordManageChannelTool(options?: DiscordToolOptions): En
 			},
 			required: ["guildId", "action"],
 		},
-		execute: async ({
-			guildId,
-			action,
-			name,
-			type,
-			channelId,
-		}: {
-			guildId: string;
-			action: "create" | "delete";
-			name?: string;
-			type?: "text" | "voice" | "category";
-			channelId?: string;
-		}) => {
-			if (!options?.token) return { content: [{ type: "text", text: "Error: No Discord token provided." }] };
+		execute: async (_toolCallId: string, params: unknown) => {
+			const { guildId, action, name, type, channelId } =
+				(params as {
+					guildId?: string;
+					action?: "create" | "delete";
+					name?: string;
+					type?: "text" | "voice" | "category";
+					channelId?: string;
+				}) ?? {};
+			if (!options?.token) return { content: [{ type: "text", text: "Error: No Discord token provided." }], details: {} };
+			if (!guildId || !action) return { content: [{ type: "text", text: "guildId and action are required." }], details: {} };
 			const client = await getDiscordClient(options.token);
 			const guild = client.guilds.cache.get(guildId);
-			if (!guild) return { content: [{ type: "text", text: "Server not found." }] };
+			if (!guild) return { content: [{ type: "text", text: "Server not found." }], details: {} };
 
 			if (action === "create") {
-				if (!name) return { content: [{ type: "text", text: "Name is required for creation." }] };
+				if (!name) return { content: [{ type: "text", text: "Name is required for creation." }], details: {} };
 				let discordType = ChannelType.GuildText;
 				if (type === "voice") discordType = ChannelType.GuildVoice;
 				if (type === "category") discordType = ChannelType.GuildCategory;
 
 				const channel = await guild.channels.create({ name, type: discordType });
-				return { content: [{ type: "text", text: `Channel created: ${channel.name} (${channel.id})` }] };
+				return { content: [{ type: "text", text: `Channel created: ${channel.name} (${channel.id})` }], details: { ok: true } };
 			} else if (action === "delete") {
-				if (!channelId) return { content: [{ type: "text", text: "channelId is required for deletion." }] };
+				if (!channelId) return { content: [{ type: "text", text: "channelId is required for deletion." }], details: {} };
 				const channel = guild.channels.cache.get(channelId);
-				if (!channel) return { content: [{ type: "text", text: "Channel not found." }] };
+				if (!channel) return { content: [{ type: "text", text: "Channel not found." }], details: {} };
 				await channel.delete();
-				return { content: [{ type: "text", text: `Channel deleted.` }] };
+				return { content: [{ type: "text", text: `Channel deleted.` }], details: { ok: true } };
 			}
-			return { content: [{ type: "text", text: "Invalid action." }] };
+			return { content: [{ type: "text", text: "Invalid action." }], details: {} };
 		},
 	};
 }
 
 export function createDiscordToolDefinitions(_options?: DiscordToolOptions): ToolDefinition[] {
-	const dummyExecute = async () => ({ content: [] });
+	const dummyExecute = async () => ({ content: [], details: {} });
 	return [
 		{
 			name: "discord_list_guilds",
