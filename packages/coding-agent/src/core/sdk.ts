@@ -33,7 +33,7 @@ import {
 export interface CreateAgentSessionOptions {
 	/** Working directory for project-local discovery. Default: process.cwd() */
 	cwd?: string;
-	/** Global config directory. Default: ~/.pi/agent */
+	/** Global config directory. Default: ~/.moodcli/agent */
 	agentDir?: string;
 
 	/** Auth storage for credentials. Default: AuthStorage.create(agentDir/auth.json) */
@@ -59,7 +59,7 @@ export interface CreateAgentSessionOptions {
 	/**
 	 * Optional allowlist of tool names.
 	 *
-	 * When omitted, pi enables the default built-in tools (read, bash, edit, write)
+	 * When omitted, moodcli enables the default built-in tools (read, bash, edit, write)
 	 * and leaves extension/custom tools enabled unless `noTools` changes that default.
 	 * When provided, only the listed tool names are enabled.
 	 */
@@ -148,7 +148,7 @@ function getAttributionHeaders(
 		model.baseUrl.includes("gateway.ai.cloudflare.com")
 	) {
 		return {
-			"User-Agent": "pi-coding-agent",
+			"User-Agent": "moodcli-coding-agent",
 		};
 	}
 

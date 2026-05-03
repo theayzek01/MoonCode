@@ -1,7 +1,7 @@
 /**
  * Rainbow Editor - highlights "ultrathink" with animated shine effect
  *
- * Usage: pi --extension ./examples/extensions/rainbow-editor.ts
+ * Usage: moodcli --extension ./examples/extensions/rainbow-editor.ts
  */
 
 import { CustomEditor, type ExtensionAPI } from "moodcli";
@@ -81,8 +81,8 @@ class RainbowEditor extends CustomEditor {
 	}
 }
 
-export default function (pi: ExtensionAPI) {
-	pi.on("session_start", (_event, ctx) => {
+export default function (moodcli: ExtensionAPI) {
+	moodcli.on("session_start", (_event, ctx) => {
 		ctx.ui.setEditorComponent((tui, theme, kb) => new RainbowEditor(tui, theme, kb));
 	});
 }

@@ -930,7 +930,7 @@ export function buildRequest(
 		request,
 		...(isAntigravity ? { requestType: "agent" } : {}),
 		userAgent: isAntigravity ? "antigravity" : "hodeuscli-coding-agent",
-		requestId: `${isAntigravity ? "agent" : "pi"}-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+		requestId: `${isAntigravity ? "agent" : "moodcli"}-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
 	};
 }
 
@@ -939,7 +939,7 @@ type ClampedThinkingLevel = Exclude<ThinkingLevel, "xhigh">;
 function getDisabledThinkingConfig(modelId: string): ThinkingConfig {
 	// Google docs: Gemini 3.1 Pro cannot disable thinking, and Gemini 3 Flash / Flash-Lite
 	// do not support full thinking-off either. For Gemini 3 models, use the lowest supported
-	// thinkingLevel without includeThoughts so hidden thinking remains invisible to pi.
+	// thinkingLevel without includeThoughts so hidden thinking remains invisible to moodcli.
 	if (isGemini3ProModel(modelId)) {
 		return { thinkingLevel: "LOW" as any };
 	}

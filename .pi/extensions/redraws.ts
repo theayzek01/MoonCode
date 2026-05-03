@@ -4,11 +4,11 @@
  * Exposes /tui to show TUI redraw stats.
  */
 
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
-import { Text } from "@mariozechner/pi-tui";
+import type { ExtensionAPI } from "@moodcli/coding-agent";
+import { Text } from "@moodcli/tui";
 
-export default function (pi: ExtensionAPI) {
-	pi.registerCommand("tui", {
+export default function (moodcli: ExtensionAPI) {
+	moodcli.registerCommand("tui", {
 		description: "Show TUI stats",
 		handler: async (_args, ctx) => {
 			if (!ctx.hasUI) return;

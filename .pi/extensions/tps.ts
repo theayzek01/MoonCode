@@ -1,5 +1,5 @@
-import type { AssistantMessage } from "@mariozechner/pi-ai";
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { AssistantMessage } from "@moodcli/ai";
+import type { ExtensionAPI } from "@moodcli/coding-agent";
 
 function isAssistantMessage(message: unknown): message is AssistantMessage {
 	if (!message || typeof message !== "object") return false;
@@ -7,14 +7,14 @@ function isAssistantMessage(message: unknown): message is AssistantMessage {
 	return role === "assistant";
 }
 
-export default function (pi: ExtensionAPI) {
+export default function (moodcli: ExtensionAPI) {
 	let agentStartMs: number | null = null;
 
-	pi.on("agent_start", () => {
+	moodcli.on("agent_start", () => {
 		agentStartMs = Date.now();
 	});
 
-	pi.on("agent_end", (event, ctx) => {
+	moodcli.on("agent_end", (event, ctx) => {
 		if (!ctx.hasUI) return;
 		if (agentStartMs === null) return;
 

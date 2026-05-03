@@ -324,21 +324,21 @@ describe("InteractiveMode.showLoadedResources", () => {
 	function createExtensionFixtures(): ExtensionFixture[] {
 		return [
 			{
-				path: "/tmp/project/.pi/extensions/answer.ts",
-				sourceInfo: createSourceInfo("/tmp/project/.pi/extensions/answer.ts", {
+				path: "/tmp/project/.moodcli/extensions/answer.ts",
+				sourceInfo: createSourceInfo("/tmp/project/.moodcli/extensions/answer.ts", {
 					source: "local",
 					scope: "project",
 					origin: "top-level",
-					baseDir: "/tmp/project/.pi/extensions",
+					baseDir: "/tmp/project/.moodcli/extensions",
 				}),
 			},
 			{
-				path: "/tmp/project/.pi/extensions/local-index/index.ts",
-				sourceInfo: createSourceInfo("/tmp/project/.pi/extensions/local-index/index.ts", {
+				path: "/tmp/project/.moodcli/extensions/local-index/index.ts",
+				sourceInfo: createSourceInfo("/tmp/project/.moodcli/extensions/local-index/index.ts", {
 					source: "local",
 					scope: "project",
 					origin: "top-level",
-					baseDir: "/tmp/project/.pi/extensions",
+					baseDir: "/tmp/project/.moodcli/extensions",
 				}),
 			},
 			{
@@ -351,44 +351,44 @@ describe("InteractiveMode.showLoadedResources", () => {
 				}),
 			},
 			{
-				path: "/tmp/project/.pi/npm/node_modules/pi-markdown-preview/extensions/index.ts",
-				sourceInfo: createSourceInfo("/tmp/project/.pi/npm/node_modules/pi-markdown-preview/extensions/index.ts", {
-					source: "npm:pi-markdown-preview",
+				path: "/tmp/project/.moodcli/npm/node_modules/moodcli-markdown-preview/extensions/index.ts",
+				sourceInfo: createSourceInfo("/tmp/project/.moodcli/npm/node_modules/moodcli-markdown-preview/extensions/index.ts", {
+					source: "npm:moodcli-markdown-preview",
 					scope: "project",
 					origin: "package",
-					baseDir: "/tmp/project/.pi/npm/node_modules/pi-markdown-preview",
+					baseDir: "/tmp/project/.moodcli/npm/node_modules/moodcli-markdown-preview",
 				}),
 			},
 			{
-				path: "/tmp/project/.pi/npm/node_modules/@scope/pi-scoped/extensions/index.ts",
-				sourceInfo: createSourceInfo("/tmp/project/.pi/npm/node_modules/@scope/pi-scoped/extensions/index.ts", {
-					source: "npm:@scope/pi-scoped",
+				path: "/tmp/project/.moodcli/npm/node_modules/@scope/moodcli-scoped/extensions/index.ts",
+				sourceInfo: createSourceInfo("/tmp/project/.moodcli/npm/node_modules/@scope/moodcli-scoped/extensions/index.ts", {
+					source: "npm:@scope/moodcli-scoped",
 					scope: "project",
 					origin: "package",
-					baseDir: "/tmp/project/.pi/npm/node_modules/@scope/pi-scoped",
+					baseDir: "/tmp/project/.moodcli/npm/node_modules/@scope/moodcli-scoped",
 				}),
 			},
 			{
-				path: "/tmp/project/.pi/git/github.com/HazAT/pi-interactive-subagents/extensions/index.ts",
+				path: "/tmp/project/.moodcli/git/github.com/HazAT/moodcli-interactive-subagents/extensions/index.ts",
 				sourceInfo: createSourceInfo(
-					"/tmp/project/.pi/git/github.com/HazAT/pi-interactive-subagents/extensions/index.ts",
+					"/tmp/project/.moodcli/git/github.com/HazAT/moodcli-interactive-subagents/extensions/index.ts",
 					{
-						source: "git:github.com/HazAT/pi-interactive-subagents",
+						source: "git:github.com/HazAT/moodcli-interactive-subagents",
 						scope: "project",
 						origin: "package",
-						baseDir: "/tmp/project/.pi/git/github.com/HazAT/pi-interactive-subagents",
+						baseDir: "/tmp/project/.moodcli/git/github.com/HazAT/moodcli-interactive-subagents",
 					},
 				),
 			},
 			{
-				path: "/tmp/project/.pi/git/github.com/HazAT/pi-interactive-subagents/extensions/subagents/index.ts",
+				path: "/tmp/project/.moodcli/git/github.com/HazAT/moodcli-interactive-subagents/extensions/subagents/index.ts",
 				sourceInfo: createSourceInfo(
-					"/tmp/project/.pi/git/github.com/HazAT/pi-interactive-subagents/extensions/subagents/index.ts",
+					"/tmp/project/.moodcli/git/github.com/HazAT/moodcli-interactive-subagents/extensions/subagents/index.ts",
 					{
-						source: "git:github.com/HazAT/pi-interactive-subagents",
+						source: "git:github.com/HazAT/moodcli-interactive-subagents",
 						scope: "project",
 						origin: "package",
-						baseDir: "/tmp/project/.pi/git/github.com/HazAT/pi-interactive-subagents",
+						baseDir: "/tmp/project/.moodcli/git/github.com/HazAT/moodcli-interactive-subagents",
 					},
 				),
 			},
@@ -484,7 +484,7 @@ describe("InteractiveMode.showLoadedResources", () => {
 
 		expect(normalizeRenderedOutput(fakeThis.chatContainer)).toMatchInlineSnapshot(`
 "[Extensions]
-  @scope/pi-scoped, answer.ts, cli-extension.ts, HazAT/pi-interactive-subagents, HazAT/pi-interactive-subagents:subagents, local-index, pi-markdown-preview, user-index"`);
+  @scope/moodcli-scoped, answer.ts, cli-extension.ts, HazAT/moodcli-interactive-subagents, HazAT/moodcli-interactive-subagents:subagents, local-index, moodcli-markdown-preview, user-index"`);
 	});
 
 	test("adds more parent folders until local extension labels are unique", () => {
@@ -731,12 +731,12 @@ describe("InteractiveMode.showLoadedResources", () => {
 	test("package extensions still strip index.ts correctly (regression guard)", () => {
 		const extensions: ExtensionFixture[] = [
 			{
-				path: "/tmp/project/.pi/npm/node_modules/pi-markdown-preview/extensions/index.ts",
-				sourceInfo: createSourceInfo("/tmp/project/.pi/npm/node_modules/pi-markdown-preview/extensions/index.ts", {
-					source: "npm:pi-markdown-preview",
+				path: "/tmp/project/.moodcli/npm/node_modules/moodcli-markdown-preview/extensions/index.ts",
+				sourceInfo: createSourceInfo("/tmp/project/.moodcli/npm/node_modules/moodcli-markdown-preview/extensions/index.ts", {
+					source: "npm:moodcli-markdown-preview",
 					scope: "project",
 					origin: "package",
-					baseDir: "/tmp/project/.pi/npm/node_modules/pi-markdown-preview",
+					baseDir: "/tmp/project/.moodcli/npm/node_modules/moodcli-markdown-preview",
 				}),
 			},
 		];
@@ -753,7 +753,7 @@ describe("InteractiveMode.showLoadedResources", () => {
 
 		expect(normalizeRenderedOutput(fakeThis.chatContainer)).toMatchInlineSnapshot(`
 "[Extensions]
-  pi-markdown-preview"`);
+  moodcli-markdown-preview"`);
 	});
 	test("captures mixed extension layouts in expanded output", () => {
 		const fakeThis = createShowLoadedResourcesThis({
@@ -770,14 +770,14 @@ describe("InteractiveMode.showLoadedResources", () => {
 		expect(normalizeRenderedOutput(fakeThis.chatContainer)).toMatchInlineSnapshot(`
 "[Extensions]
   project
-    /tmp/project/.pi/extensions/answer.ts
-    /tmp/project/.pi/extensions/local-index
-    git:github.com/HazAT/pi-interactive-subagents
+    /tmp/project/.moodcli/extensions/answer.ts
+    /tmp/project/.moodcli/extensions/local-index
+    git:github.com/HazAT/moodcli-interactive-subagents
       extensions
       extensions/subagents
-    npm:@scope/pi-scoped
+    npm:@scope/moodcli-scoped
       extensions
-    npm:pi-markdown-preview
+    npm:moodcli-markdown-preview
       extensions
   user
     /tmp/agent/extensions/user-index
@@ -787,11 +787,11 @@ describe("InteractiveMode.showLoadedResources", () => {
 
 	test("shows context paths relative to cwd while preserving full external paths", () => {
 		const home = homedir();
-		const cwd = path.join(home, "Development", "pi-mono");
+		const cwd = path.join(home, "Development", "moodcli-mono");
 		const fakeThis = createShowLoadedResourcesThis({
 			quietStartup: false,
 			cwd,
-			contextFiles: [{ path: path.join(home, ".pi", "agent", "AGENTS.md") }, { path: path.join(cwd, "AGENTS.md") }],
+			contextFiles: [{ path: path.join(home, ".moodcli", "agent", "AGENTS.md") }, { path: path.join(cwd, "AGENTS.md") }],
 		});
 
 		(InteractiveMode as any).prototype.showLoadedResources.call(fakeThis, {
@@ -800,18 +800,18 @@ describe("InteractiveMode.showLoadedResources", () => {
 
 		const output = renderAll(fakeThis.chatContainer).replace(/\\/g, "/");
 		expect(output).toContain("[Context]");
-		expect(output).toContain("~/.pi/agent/AGENTS.md, AGENTS.md");
+		expect(output).toContain("~/.moodcli/agent/AGENTS.md, AGENTS.md");
 		expect(output).not.toContain(`${cwd.replace(/\\/g, "/")}/AGENTS.md`);
 	});
 
 	test("shows full context paths when expanded", () => {
 		const home = homedir();
-		const cwd = path.join(home, "Development", "pi-mono");
+		const cwd = path.join(home, "Development", "moodcli-mono");
 		const fakeThis = createShowLoadedResourcesThis({
 			quietStartup: false,
 			toolOutputExpanded: true,
 			cwd,
-			contextFiles: [{ path: path.join(home, ".pi", "agent", "AGENTS.md") }, { path: path.join(cwd, "AGENTS.md") }],
+			contextFiles: [{ path: path.join(home, ".moodcli", "agent", "AGENTS.md") }, { path: path.join(cwd, "AGENTS.md") }],
 		});
 
 		(InteractiveMode as any).prototype.showLoadedResources.call(fakeThis, {
@@ -820,9 +820,9 @@ describe("InteractiveMode.showLoadedResources", () => {
 
 		const output = renderAll(fakeThis.chatContainer).replace(/\\/g, "/");
 		expect(output).toContain("[Context]");
-		expect(output).toContain("~/.pi/agent/AGENTS.md");
-		expect(output).toContain("~/Development/pi-mono/AGENTS.md");
-		expect(output).not.toContain("~/.pi/agent/AGENTS.md, AGENTS.md");
+		expect(output).toContain("~/.moodcli/agent/AGENTS.md");
+		expect(output).toContain("~/Development/moodcli-mono/AGENTS.md");
+		expect(output).not.toContain("~/.moodcli/agent/AGENTS.md, AGENTS.md");
 	});
 
 	test("does not show verbose listing on quiet startup during reload", () => {

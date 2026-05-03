@@ -17,7 +17,7 @@ describe("package commands", () => {
 	let originalExecPath: string;
 
 	beforeEach(() => {
-		tempDir = join(tmpdir(), `pi-package-commands-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+		tempDir = join(tmpdir(), `moodcli-package-commands-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 		agentDir = join(tempDir, "agent");
 		projectDir = join(tempDir, "project");
 		packageDir = join(tempDir, "local-package");
@@ -88,7 +88,7 @@ describe("package commands", () => {
 
 			const stdout = logSpy.mock.calls.map(([message]) => String(message)).join("\n");
 			expect(stdout).toContain("Usage:");
-			expect(stdout).toContain("pi install <source> [-l]");
+			expect(stdout).toContain("moodcli install <source> [-l]");
 			expect(errorSpy).not.toHaveBeenCalled();
 			expect(process.exitCode).toBeUndefined();
 		} finally {
@@ -105,7 +105,7 @@ describe("package commands", () => {
 
 			const stderr = errorSpy.mock.calls.map(([message]) => String(message)).join("\n");
 			expect(stderr).toContain('Unknown option --unknown for "install".');
-			expect(stderr).toContain('Use "pi --help" or "pi install <source> [-l]".');
+			expect(stderr).toContain('Use "moodcli --help" or "moodcli install <source> [-l]".');
 			expect(process.exitCode).toBe(1);
 		} finally {
 			errorSpy.mockRestore();
@@ -120,7 +120,7 @@ describe("package commands", () => {
 
 			const stderr = errorSpy.mock.calls.map(([message]) => String(message)).join("\n");
 			expect(stderr).toContain("Missing install source.");
-			expect(stderr).toContain("Usage: pi install <source> [-l]");
+			expect(stderr).toContain("Usage: moodcli install <source> [-l]");
 			expect(stderr).not.toContain("at ");
 			expect(process.exitCode).toBe(1);
 		} finally {
@@ -131,11 +131,11 @@ describe("package commands", () => {
 	it("uses global npmCommand for self updates", async () => {
 		const globalPrefix = join(tempDir, "global-prefix");
 		const projectPrefix = join(tempDir, "project-prefix");
-		const selfPackageDir = join(globalPrefix, "lib", "node_modules", "@mariozechner", "pi-coding-agent");
+		const selfPackageDir = join(globalPrefix, "lib", "node_modules", "@mariozechner", "moodcli-coding-agent");
 		const fakeNpmPath = join(tempDir, "fake-npm.cjs");
 		const recordPath = join(tempDir, "self-update.json");
 		mkdirSync(selfPackageDir, { recursive: true });
-		mkdirSync(join(projectDir, ".pi"), { recursive: true });
+		mkdirSync(join(projectDir, ".moodcli"), { recursive: true });
 		writeFileSync(
 			fakeNpmPath,
 			`const fs=require("node:fs"),path=require("node:path"),args=process.argv.slice(2),prefix=args[args.indexOf("--prefix")+1];
@@ -148,7 +148,7 @@ else fs.writeFileSync(${JSON.stringify(recordPath)},JSON.stringify(args));
 			JSON.stringify({ npmCommand: [originalExecPath, fakeNpmPath, "--prefix", globalPrefix] }, null, 2),
 		);
 		writeFileSync(
-			join(projectDir, ".pi", "settings.json"),
+			join(projectDir, ".moodcli", "settings.json"),
 			JSON.stringify({ npmCommand: [originalExecPath, fakeNpmPath, "--prefix", projectPrefix] }, null, 2),
 		);
 		process.env.PI_PACKAGE_DIR = selfPackageDir;
@@ -176,22 +176,22 @@ else fs.writeFileSync(${JSON.stringify(recordPath)},JSON.stringify(args));
 
 	it("suggests the configured source when update input omits the npm prefix", async () => {
 		const settingsPath = join(agentDir, "settings.json");
-		writeFileSync(settingsPath, JSON.stringify({ packages: ["npm:pi-formatter"] }, null, 2));
+		writeFileSync(settingsPath, JSON.stringify({ packages: ["npm:moodcli-formatter"] }, null, 2));
 
 		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 		const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
 		try {
-			await expect(main(["update", "pi-formatter"])).resolves.toBeUndefined();
+			await expect(main(["update", "moodcli-formatter"])).resolves.toBeUndefined();
 
 			const stderr = errorSpy.mock.calls.map(([message]) => String(message)).join("\n");
 			const stdout = logSpy.mock.calls.map(([message]) => String(message)).join("\n");
-			expect(stderr).toContain("Did you mean npm:pi-formatter?");
-			expect(stdout).not.toContain("Updated pi-formatter");
+			expect(stderr).toContain("Did you mean npm:moodcli-formatter?");
+			expect(stdout).not.toContain("Updated moodcli-formatter");
 			expect(process.exitCode).toBe(1);
 
 			const settings = JSON.parse(readFileSync(settingsPath, "utf-8")) as { packages?: string[] };
-			expect(settings.packages).toContain("npm:pi-formatter");
+			expect(settings.packages).toContain("npm:moodcli-formatter");
 		} finally {
 			errorSpy.mockRestore();
 			logSpy.mockRestore();

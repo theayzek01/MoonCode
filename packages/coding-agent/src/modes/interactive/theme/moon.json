@@ -1,5 +1,5 @@
 {
-	"$schema": "https://raw.githubusercontent.com/badlogic/pi-mono/main/packages/coding-agent/src/modes/interactive/theme/theme-schema.json",
+	"$schema": "https://raw.githubusercontent.com/badlogic/moodcli-mono/main/packages/coding-agent/src/modes/interactive/theme/theme-schema.json",
 	"name": "moon",
 	"vars": {
 		"moonBg": "#0f1016",

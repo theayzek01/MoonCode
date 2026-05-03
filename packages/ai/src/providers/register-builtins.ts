@@ -74,7 +74,6 @@ interface OpenAIResponsesProviderModule {
 	streamSimpleOpenAIResponses: StreamFunction<"openai-responses", SimpleStreamOptions>;
 }
 
-
 interface BedrockProviderModule {
 	streamBedrock: (
 		model: Model<"bedrock-converse-stream">,

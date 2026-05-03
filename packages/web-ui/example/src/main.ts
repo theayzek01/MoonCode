@@ -47,7 +47,7 @@ const configs = [
 
 // Create backend
 const backend = new IndexedDBStorageBackend({
-	dbName: "pi-web-ui-example",
+	dbName: "moodcli-web-ui-example",
 	version: 2, // Incremented for custom-providers store
 	stores: configs,
 });
@@ -335,7 +335,7 @@ const renderApp = () => {
 								>
 									${currentTitle}
 								</button>`
-							: html`<span class="text-base font-semibold text-foreground">Pi Web UI Example</span>`
+							: html`<span class="text-base font-semibold text-foreground">Moodcli Web UI Example</span>`
 					}
 				</div>
 				<div class="flex items-center gap-1 px-2">

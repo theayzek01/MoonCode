@@ -349,7 +349,7 @@ describe("ToolExecutionComponent parity", () => {
 			absent: undefined,
 		},
 		{
-			title: "Pi documentation",
+			title: "Moodcli documentation",
 			path: getReadmePath(),
 			content: "Hidden docs content",
 			compact: "read docs README.md",

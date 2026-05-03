@@ -10,10 +10,10 @@
  * via `tool_call` input mutation without replacing the tool.
  *
  * Config files (merged, project takes precedence):
- * - ~/.pi/agent/extensions/sandbox.json (global)
- * - <cwd>/.pi/sandbox.json (project-local)
+ * - ~/.moodcli/agent/extensions/sandbox.json (global)
+ * - <cwd>/.moodcli/sandbox.json (project-local)
  *
- * Example .pi/sandbox.json:
+ * Example .moodcli/sandbox.json:
  * ```json
  * {
  *   "enabled": true,
@@ -30,13 +30,13 @@
  * ```
  *
  * Usage:
- * - `pi -e ./sandbox` - sandbox enabled with default/config settings
- * - `pi -e ./sandbox --no-sandbox` - disable sandboxing
+ * - `moodcli -e ./sandbox` - sandbox enabled with default/config settings
+ * - `moodcli -e ./sandbox --no-sandbox` - disable sandboxing
  * - `/sandbox` - show current sandbox configuration
  *
  * Setup:
- * 1. Copy sandbox/ directory to ~/.pi/agent/extensions/
- * 2. Run `npm install` in ~/.pi/agent/extensions/sandbox/
+ * 1. Copy sandbox/ directory to ~/.moodcli/agent/extensions/
+ * 2. Run `npm install` in ~/.moodcli/agent/extensions/sandbox/
  *
  * Linux also requires: bubblewrap, socat, ripgrep
  */
@@ -77,7 +77,7 @@ const DEFAULT_CONFIG: SandboxConfig = {
 };
 
 function loadConfig(cwd: string): SandboxConfig {
-	const projectConfigPath = join(cwd, ".pi", "sandbox.json");
+	const projectConfigPath = join(cwd, ".moodcli", "sandbox.json");
 	const globalConfigPath = join(getAgentDir(), "extensions", "sandbox.json");
 
 	let globalConfig: Partial<SandboxConfig> = {};
@@ -198,8 +198,8 @@ function createSandboxedBashOps(): BashOperations {
 	};
 }
 
-export default function (pi: ExtensionAPI) {
-	pi.registerFlag("no-sandbox", {
+export default function (moodcli: ExtensionAPI) {
+	moodcli.registerFlag("no-sandbox", {
 		description: "Disable OS-level sandboxing for bash commands",
 		type: "boolean",
 		default: false,
@@ -211,7 +211,7 @@ export default function (pi: ExtensionAPI) {
 	let sandboxEnabled = false;
 	let sandboxInitialized = false;
 
-	pi.registerTool({
+	moodcli.registerTool({
 		...localBash,
 		label: "bash (sandboxed)",
 		async execute(id, params, signal, onUpdate, _ctx) {
@@ -226,13 +226,13 @@ export default function (pi: ExtensionAPI) {
 		},
 	});
 
-	pi.on("user_bash", () => {
+	moodcli.on("user_bash", () => {
 		if (!sandboxEnabled || !sandboxInitialized) return;
 		return { operations: createSandboxedBashOps() };
 	});
 
-	pi.on("session_start", async (_event, ctx) => {
-		const noSandbox = pi.getFlag("no-sandbox") as boolean;
+	moodcli.on("session_start", async (_event, ctx) => {
+		const noSandbox = moodcli.getFlag("no-sandbox") as boolean;
 
 		if (noSandbox) {
 			sandboxEnabled = false;
@@ -284,7 +284,7 @@ export default function (pi: ExtensionAPI) {
 		}
 	});
 
-	pi.on("session_shutdown", async () => {
+	moodcli.on("session_shutdown", async () => {
 		if (sandboxInitialized) {
 			try {
 				await SandboxManager.reset();
@@ -294,7 +294,7 @@ export default function (pi: ExtensionAPI) {
 		}
 	});
 
-	pi.registerCommand("sandbox", {
+	moodcli.registerCommand("sandbox", {
 		description: "Show sandbox configuration",
 		handler: async (_args, ctx) => {
 			if (!sandboxEnabled) {

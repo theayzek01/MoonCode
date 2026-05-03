@@ -14,7 +14,7 @@ afterEach(() => {
 });
 
 function createTempDir(): string {
-	tempDir = mkdtempSync(join(tmpdir(), "pi-paths-"));
+	tempDir = mkdtempSync(join(tmpdir(), "moodcli-paths-"));
 	return tempDir;
 }
 

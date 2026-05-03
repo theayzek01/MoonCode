@@ -1,6 +1,6 @@
 # Custom Providers
 
-Extensions can register custom model providers via `pi.registerProvider()`. This enables:
+Extensions can register custom model providers via `moodcli.registerProvider()`. This enables:
 
 - **Proxies** - Route requests through corporate proxies or API gateways
 - **Custom endpoints** - Use self-hosted or private model deployments
@@ -30,16 +30,16 @@ See these complete provider examples:
 ## Quick Reference
 
 ```typescript
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@moodcli/coding-agent";
 
-export default function (pi: ExtensionAPI) {
+export default function (moodcli: ExtensionAPI) {
   // Override baseUrl for existing provider
-  pi.registerProvider("anthropic", {
+  moodcli.registerProvider("anthropic", {
     baseUrl: "https://proxy.example.com"
   });
 
   // Register new provider with models
-  pi.registerProvider("my-provider", {
+  moodcli.registerProvider("my-provider", {
     name: "My Provider",
     baseUrl: "https://api.example.com",
     apiKey: "MY_API_KEY",
@@ -59,7 +59,7 @@ export default function (pi: ExtensionAPI) {
 }
 ```
 
-The extension factory can also be `async`. For dynamic model discovery, fetch and register models in the factory instead of `session_start`. pi waits for the factory before startup continues, so the provider is available during interactive startup and to `pi --list-models`.
+The extension factory can also be `async`. For dynamic model discovery, fetch and register models in the factory instead of `session_start`. moodcli waits for the factory before startup continues, so the provider is available during interactive startup and to `moodcli --list-models`.
 
 ## Override Existing Provider
 
@@ -67,19 +67,19 @@ The simplest use case: redirect an existing provider through a proxy.
 
 ```typescript
 // All Anthropic requests now go through your proxy
-pi.registerProvider("anthropic", {
+moodcli.registerProvider("anthropic", {
   baseUrl: "https://proxy.example.com"
 });
 
 // Add custom headers to OpenAI requests
-pi.registerProvider("openai", {
+moodcli.registerProvider("openai", {
   headers: {
     "X-Custom-Header": "value"
   }
 });
 
 // Both baseUrl and headers
-pi.registerProvider("google", {
+moodcli.registerProvider("google", {
   baseUrl: "https://ai-gateway.corp.com/google",
   headers: {
     "X-Corp-Auth": "CORP_AUTH_TOKEN"  // env var or literal
@@ -96,9 +96,9 @@ To add a completely new provider, specify `models` along with the required confi
 If the model list comes from a remote endpoint, use an async extension factory:
 
 ```typescript
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@moodcli/coding-agent";
 
-export default async function (pi: ExtensionAPI) {
+export default async function (moodcli: ExtensionAPI) {
   const response = await fetch("http://localhost:1234/v1/models");
   const payload = (await response.json()) as {
     data: Array<{
@@ -109,7 +109,7 @@ export default async function (pi: ExtensionAPI) {
     }>;
   };
 
-  pi.registerProvider("local-openai", {
+  moodcli.registerProvider("local-openai", {
     baseUrl: "http://localhost:1234/v1",
     apiKey: "LOCAL_OPENAI_API_KEY",
     api: "openai-completions",
@@ -129,7 +129,7 @@ export default async function (pi: ExtensionAPI) {
 This registers the fetched models before startup finishes.
 
 ```typescript
-pi.registerProvider("my-llm", {
+moodcli.registerProvider("my-llm", {
   baseUrl: "https://api.my-llm.com/v1",
   apiKey: "MY_LLM_API_KEY",  // env var name or literal value
   api: "openai-completions",  // which streaming API to use
@@ -156,11 +156,11 @@ When `models` is provided, it **replaces** all existing models for that provider
 
 ## Unregister Provider
 
-Use `pi.unregisterProvider(name)` to remove a provider that was previously registered via `pi.registerProvider(name, ...)`:
+Use `moodcli.unregisterProvider(name)` to remove a provider that was previously registered via `moodcli.registerProvider(name, ...)`:
 
 ```typescript
 // Register
-pi.registerProvider("my-llm", {
+moodcli.registerProvider("my-llm", {
   baseUrl: "https://api.my-llm.com/v1",
   apiKey: "MY_LLM_API_KEY",
   api: "openai-completions",
@@ -178,7 +178,7 @@ pi.registerProvider("my-llm", {
 });
 
 // Later, remove it
-pi.unregisterProvider("my-llm");
+moodcli.unregisterProvider("my-llm");
 ```
 
 Unregistering removes that provider's dynamic models, API key fallback, OAuth provider registration, and custom stream handler registrations. Any built-in models or provider behavior that were overridden are restored.
@@ -208,7 +208,7 @@ models: [{
   id: "custom-model",
   // ...
   reasoning: true,
-  thinkingLevelMap: {              // map pi levels to provider values; null hides unsupported levels
+  thinkingLevelMap: {              // map moodcli levels to provider values; null hides unsupported levels
     minimal: null,
     low: null,
     medium: null,
@@ -238,7 +238,7 @@ Use `cacheControlFormat: "anthropic"` for OpenAI-compatible providers that expos
 If your provider expects `Authorization: Bearer <key>` but doesn't use a standard API, set `authHeader: true`:
 
 ```typescript
-pi.registerProvider("custom-api", {
+moodcli.registerProvider("custom-api", {
   baseUrl: "https://api.example.com",
   apiKey: "MY_API_KEY",
   authHeader: true,  // adds Authorization: Bearer header
@@ -252,9 +252,9 @@ pi.registerProvider("custom-api", {
 Add OAuth/SSO authentication that integrates with `/login`:
 
 ```typescript
-import type { OAuthCredentials, OAuthLoginCallbacks } from "@mariozechner/pi-ai";
+import type { OAuthCredentials, OAuthLoginCallbacks } from "@moodcli/ai";
 
-pi.registerProvider("corporate-ai", {
+moodcli.registerProvider("corporate-ai", {
   baseUrl: "https://ai.corp.com/v1",
   api: "openai-responses",
   models: [...],
@@ -330,7 +330,7 @@ interface OAuthLoginCallbacks {
 
 ### OAuthCredentials
 
-Credentials are persisted in `~/.pi/agent/auth.json`:
+Credentials are persisted in `~/.moodcli/agent/auth.json`:
 
 ```typescript
 interface OAuthCredentials {
@@ -345,12 +345,12 @@ interface OAuthCredentials {
 For providers with non-standard APIs, implement `streamSimple`. Study the existing provider implementations before writing your own:
 
 **Reference implementations:**
-- [anthropic.ts](https://github.com/badlogic/pi-mono/blob/main/packages/ai/src/providers/anthropic.ts) - Anthropic Messages API
-- [mistral.ts](https://github.com/badlogic/pi-mono/blob/main/packages/ai/src/providers/mistral.ts) - Mistral Conversations API
-- [openai-completions.ts](https://github.com/badlogic/pi-mono/blob/main/packages/ai/src/providers/openai-completions.ts) - OpenAI Chat Completions
-- [openai-responses.ts](https://github.com/badlogic/pi-mono/blob/main/packages/ai/src/providers/openai-responses.ts) - OpenAI Responses API
-- [google.ts](https://github.com/badlogic/pi-mono/blob/main/packages/ai/src/providers/google.ts) - Google Generative AI
-- [amazon-bedrock.ts](https://github.com/badlogic/pi-mono/blob/main/packages/ai/src/providers/amazon-bedrock.ts) - AWS Bedrock
+- [anthropic.ts](https://github.com/badlogic/moodcli-mono/blob/main/packages/ai/src/providers/anthropic.ts) - Anthropic Messages API
+- [mistral.ts](https://github.com/badlogic/moodcli-mono/blob/main/packages/ai/src/providers/mistral.ts) - Mistral Conversations API
+- [openai-completions.ts](https://github.com/badlogic/moodcli-mono/blob/main/packages/ai/src/providers/openai-completions.ts) - OpenAI Chat Completions
+- [openai-responses.ts](https://github.com/badlogic/moodcli-mono/blob/main/packages/ai/src/providers/openai-responses.ts) - OpenAI Responses API
+- [google.ts](https://github.com/badlogic/moodcli-mono/blob/main/packages/ai/src/providers/google.ts) - Google Generative AI
+- [amazon-bedrock.ts](https://github.com/badlogic/moodcli-mono/blob/main/packages/ai/src/providers/amazon-bedrock.ts) - AWS Bedrock
 
 ### Stream Pattern
 
@@ -365,7 +365,7 @@ import {
   type SimpleStreamOptions,
   calculateCost,
   createAssistantMessageEventStream,
-} from "@mariozechner/pi-ai";
+} from "@moodcli/ai";
 
 function streamMyProvider(
   model: Model<any>,
@@ -511,7 +511,7 @@ calculateCost(model, output.usage);
 Register your stream function:
 
 ```typescript
-pi.registerProvider("my-provider", {
+moodcli.registerProvider("my-provider", {
   baseUrl: "https://api.example.com",
   apiKey: "MY_API_KEY",
   api: "my-custom-api",
@@ -522,7 +522,7 @@ pi.registerProvider("my-provider", {
 
 ## Testing Your Implementation
 
-Test your provider against the same test suites used by built-in providers. Copy and adapt these test files from [packages/ai/test/](https://github.com/badlogic/pi-mono/tree/main/packages/ai/test):
+Test your provider against the same test suites used by built-in providers. Copy and adapt these test files from [packages/ai/test/](https://github.com/badlogic/moodcli-mono/tree/main/packages/ai/test):
 
 | Test | Purpose |
 |------|---------|
@@ -602,7 +602,7 @@ interface ProviderModelConfig {
   /** Whether the model supports extended thinking. */
   reasoning: boolean;
 
-  /** Maps pi thinking levels to provider/model-specific values; null marks a level unsupported. */
+  /** Maps moodcli thinking levels to provider/model-specific values; null marks a level unsupported. */
   thinkingLevelMap?: Partial<Record<"off" | "minimal" | "low" | "medium" | "high" | "xhigh", string | null>>;
 
   /** Supported input types. */

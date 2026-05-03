@@ -12,10 +12,10 @@ import type { AssistantMessage } from "@moodcli/ai";
 import { truncateToWidth, visibleWidth } from "@moodcli/tui";
 import type { ExtensionAPI } from "moodcli";
 
-export default function (pi: ExtensionAPI) {
+export default function (moodcli: ExtensionAPI) {
 	let enabled = false;
 
-	pi.registerCommand("footer", {
+	moodcli.registerCommand("footer", {
 		description: "Toggle custom footer",
 		handler: async (_args, ctx) => {
 			enabled = !enabled;

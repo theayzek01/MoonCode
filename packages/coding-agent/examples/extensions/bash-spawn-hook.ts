@@ -4,13 +4,13 @@
  * Adjusts command, cwd, and env before execution.
  *
  * Usage:
- *   pi -e ./bash-spawn-hook.ts
+ *   moodcli -e ./bash-spawn-hook.ts
  */
 
 import type { ExtensionAPI } from "moodcli";
 import { createBashTool } from "moodcli";
 
-export default function (pi: ExtensionAPI) {
+export default function (moodcli: ExtensionAPI) {
 	const cwd = process.cwd();
 
 	const bashTool = createBashTool(cwd, {
@@ -21,7 +21,7 @@ export default function (pi: ExtensionAPI) {
 		}),
 	});
 
-	pi.registerTool({
+	moodcli.registerTool({
 		...bashTool,
 		execute: async (id, params, signal, onUpdate, _ctx) => {
 			return bashTool.execute(id, params, signal, onUpdate);

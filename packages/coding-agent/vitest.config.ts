@@ -18,9 +18,9 @@ export default defineConfig({
 	},
 	resolve: {
 		alias: [
-			{ find: /^@mariozechner\/pi-ai$/, replacement: aiSrcIndex },
-			{ find: /^@mariozechner\/pi-ai\/oauth$/, replacement: aiSrcOAuth },
-			{ find: /^@mariozechner\/pi-agent-core$/, replacement: agentSrcIndex },
+			{ find: /^@mariozechner\/moodcli-ai$/, replacement: aiSrcIndex },
+			{ find: /^@mariozechner\/moodcli-ai\/oauth$/, replacement: aiSrcOAuth },
+			{ find: /^@mariozechner\/moodcli-agent-core$/, replacement: agentSrcIndex },
 		],
 	},
 });

@@ -144,7 +144,7 @@ describe("AgentSession prompt characterization", () => {
 	});
 
 	it("expands skill commands before sending the prompt", async () => {
-		const tempDir = join(tmpdir(), `pi-skill-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+		const tempDir = join(tmpdir(), `moodcli-skill-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 		mkdirSync(tempDir, { recursive: true });
 		tempDirs.push(tempDir);
 		const skillPath = join(tempDir, "test-skill.md");
@@ -227,8 +227,8 @@ describe("AgentSession prompt characterization", () => {
 		const commandRuns: string[] = [];
 		const harness = await createHarness({
 			extensionFactories: [
-				(pi) => {
-					pi.registerCommand("testcmd", {
+				(moodcli) => {
+					moodcli.registerCommand("testcmd", {
 						description: "Test command",
 						handler: async (args) => {
 							commandRuns.push(args);

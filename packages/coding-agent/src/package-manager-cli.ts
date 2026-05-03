@@ -49,7 +49,7 @@ function getPackageCommandUsage(command: PackageCommand): string {
 		case "remove":
 			return `${APP_NAME} remove <source> [-l]`;
 		case "update":
-			return `${APP_NAME} update [source|self|pi] [--self] [--extensions] [--extension <source>] [--force]`;
+			return `${APP_NAME} update [source|self|moodcli] [--self] [--extensions] [--extension <source>] [--force]`;
 		case "list":
 			return `${APP_NAME} list`;
 	}
@@ -64,7 +64,7 @@ function printPackageCommandHelp(command: PackageCommand): void {
 Install a package and add it to settings.
 
 Options:
-  -l, --local    Install project-locally (.pi/settings.json)
+  -l, --local    Install project-locally (.moodcli/settings.json)
 
 Examples:
   ${APP_NAME} install npm:@foo/bar
@@ -84,7 +84,7 @@ Remove a package and its source from settings.
 Alias: ${APP_NAME} uninstall <source> [-l]
 
 Options:
-  -l, --local    Remove from project settings (.pi/settings.json)
+  -l, --local    Remove from project settings (.moodcli/settings.json)
 
 Examples:
   ${APP_NAME} remove npm:@foo/bar
@@ -96,18 +96,18 @@ Examples:
 			console.log(`${chalk.bold("Usage:")}
   ${getPackageCommandUsage("update")}
 
-Update pi and installed packages.
+Update moodcli and installed packages.
 
 Options:
-  --self                  Update pi only
+  --self                  Update moodcli only
   --extensions            Update installed packages only
   --extension <source>    Update one package only
-  --force                 Reinstall pi even if the current version is latest
+  --force                 Reinstall moodcli even if the current version is latest
 
 Short forms:
-  ${APP_NAME} update                Update pi and all extensions
+  ${APP_NAME} update                Update moodcli and all extensions
   ${APP_NAME} update <source>       Update one package
-  ${APP_NAME} update pi             Update pi only (self works as alias to pi)
+  ${APP_NAME} update moodcli             Update moodcli only (self works as alias to moodcli)
 `);
 			return;
 
@@ -230,7 +230,7 @@ function parsePackageCommand(args: string[]): PackageCommandOptions | undefined 
 			}
 			updateTarget = { type: "extensions", source: extensionFlagSource };
 		} else if (source) {
-			const sourceIsSelf = source === "self" || source === "pi";
+			const sourceIsSelf = source === "self" || source === "moodcli";
 			if (sourceIsSelf) {
 				updateTarget = extensionsFlag ? { type: "all" } : { type: "self" };
 			} else {
@@ -280,7 +280,7 @@ function printSelfUpdateUnavailable(npmCommand?: string[]): void {
 	const entrypoint = process.argv[1];
 	if (entrypoint) {
 		console.error("");
-		console.error(`Location of pi executable: ${entrypoint}`);
+		console.error(`Location of moodcli executable: ${entrypoint}`);
 	}
 }
 

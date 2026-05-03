@@ -1,11 +1,11 @@
 # Settings
 
-Pi uses JSON settings files with project settings overriding global settings.
+Moodcli uses JSON settings files with project settings overriding global settings.
 
 | Location | Scope |
 |----------|-------|
-| `~/.pi/agent/settings.json` | Global (all projects) |
-| `.pi/settings.json` | Project (current directory) |
+| `~/.moodcli/agent/settings.json` | Global (all projects) |
+| `.moodcli/settings.json` | Project (current directory) |
 
 Edit directly or use `/settings` for common options.
 
@@ -50,9 +50,9 @@ Edit directly or use `/settings` for common options.
 
 ### Telemetry and update checks
 
-`enableInstallTelemetry` only controls the anonymous install/update ping to `https://pi.dev/api/report-install`. Opting out of telemetry does not disable update checks; Pi can still fetch `https://pi.dev/api/latest-version` to look for the latest version.
+`enableInstallTelemetry` only controls the anonymous install/update ping to `https://moodcli.dev/api/report-install`. Opting out of telemetry does not disable update checks; Moodcli can still fetch `https://moodcli.dev/api/latest-version` to look for the latest version.
 
-Set `PI_SKIP_VERSION_CHECK=1` to disable the Pi version update check. Use `--offline` or `PI_OFFLINE=1` to disable all startup network operations described here, including update checks, package update checks, and install/update telemetry.
+Set `PI_SKIP_VERSION_CHECK=1` to disable the Moodcli version update check. Use `--offline` or `PI_OFFLINE=1` to disable all startup network operations described here, including update checks, package update checks, and install/update telemetry.
 
 ### Warnings
 
@@ -164,7 +164,7 @@ Normally the package manager's global modules location is queried using `root -g
 | `sessionDir` | string | - | Directory where session files are stored. Accepts absolute or relative paths, plus `~`. |
 
 ```json
-{ "sessionDir": ".pi/sessions" }
+{ "sessionDir": ".moodcli/sessions" }
 ```
 
 When multiple sources specify a session directory, precedence is `--session-dir`, `PI_CODING_AGENT_SESSION_DIR`, then `sessionDir` in settings.json.
@@ -191,7 +191,7 @@ When multiple sources specify a session directory, precedence is `--session-dir`
 
 These settings define where to load extensions, skills, prompts, and themes from.
 
-Paths in `~/.pi/agent/settings.json` resolve relative to `~/.pi/agent`. Paths in `.pi/settings.json` resolve relative to `.pi`. Absolute paths and `~` are supported.
+Paths in `~/.moodcli/agent/settings.json` resolve relative to `~/.moodcli/agent`. Paths in `.moodcli/settings.json` resolve relative to `.moodcli`. Absolute paths and `~` are supported.
 
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
@@ -210,7 +210,7 @@ String form loads all resources from a package:
 
 ```json
 {
-  "packages": ["pi-skills", "@org/my-extension"]
+  "packages": ["moodcli-skills", "@org/my-extension"]
 }
 ```
 
@@ -220,7 +220,7 @@ Object form filters which resources to load:
 {
   "packages": [
     {
-      "source": "pi-skills",
+      "source": "moodcli-skills",
       "skills": ["brave-search", "transcribe"],
       "extensions": []
     }
@@ -251,22 +251,22 @@ See [packages.md](packages.md) for package management details.
   "warnings": {
     "anthropicExtraUsage": true
   },
-  "packages": ["pi-skills"]
+  "packages": ["moodcli-skills"]
 }
 ```
 
 ## Project Overrides
 
-Project settings (`.pi/settings.json`) override global settings. Nested objects are merged:
+Project settings (`.moodcli/settings.json`) override global settings. Nested objects are merged:
 
 ```json
-// ~/.pi/agent/settings.json (global)
+// ~/.moodcli/agent/settings.json (global)
 {
   "theme": "dark",
   "compaction": { "enabled": true, "reserveTokens": 16384 }
 }
 
-// .pi/settings.json (project)
+// .moodcli/settings.json (project)
 {
   "compaction": { "reserveTokens": 8192 }
 }
