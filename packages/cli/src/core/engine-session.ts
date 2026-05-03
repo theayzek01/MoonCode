@@ -2496,7 +2496,13 @@ export class EngineSession {
 		const activeToolNames = this.getActiveToolNames();
 		const discordToken = this.settingsManager.getDiscordToken();
 		const nextActiveToolNames = discordToken
-			? [...activeToolNames, "discord_list_guilds", "discord_get_channels", "discord_send_message", "discord_manage_channel"]
+			? [
+					...activeToolNames,
+					"discord_list_guilds",
+					"discord_get_channels",
+					"discord_send_message",
+					"discord_manage_channel",
+				]
 			: activeToolNames;
 		this._buildRuntime({
 			activeToolNames: nextActiveToolNames,
