@@ -6,9 +6,9 @@
 
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
+import { Type } from "typebox";
 import type { ToolDefinition } from "../extensions/types.js";
 import { ImageCapture } from "../robotics/image-capture.js";
-import { TaskPlanner } from "../robotics/task-planner.js";
 import { VisionPipeline } from "../robotics/vision-pipeline.js";
 
 // ============================================================================
@@ -24,25 +24,11 @@ export function createRoboticsDetectToolDefinition(options?: {
 		name: "robotics_detect",
 		description:
 			"Bir görüntüdeki nesneleri tespit eder ve [y, x] koordinatlarını (0-1000 normalize) döndürür. Robotik manipülasyon görevleri için nesne konumlarını bulmada kullanılır.",
-		parameters: {
-			type: "object",
-			properties: {
-				image_path: {
-					type: "string",
-					description: "Analiz edilecek görüntünün dosya yolu veya URL'si",
-				},
-				queries: {
-					type: "array",
-					items: { type: "string" },
-					description: "Aranacak nesne isimleri. Boş bırakılırsa tüm nesneleri tespit eder.",
-				},
-				max_objects: {
-					type: "number",
-					description: "Maksimum tespit edilecek nesne sayısı. Varsayılan: 10",
-				},
-			},
-			required: ["image_path"],
-		},
+		parameters: Type.Object({
+			image_path: Type.String({ description: "Analiz edilecek görüntünün dosya yolu veya URL'si" }),
+			queries: Type.Optional(Type.Array(Type.String(), { description: "Aranacak nesne isimleri. Boş bırakılırsa tüm nesneleri tespit eder." })),
+			max_objects: Type.Optional(Type.Number({ description: "Maksimum tespit edilecek nesne sayısı. Varsayılan: 10" })),
+		}),
 		execute: async (args: { image_path: string; queries?: string[]; max_objects?: number }) => {
 			const capture = new ImageCapture();
 			const pipeline = new VisionPipeline({
@@ -89,20 +75,10 @@ export function createRoboticsBboxToolDefinition(options?: {
 		name: "robotics_bbox",
 		description:
 			"Görüntüdeki nesneler için sınırlayıcı kutular (bounding box) döndürür. [ymin, xmin, ymax, xmax] formatında 0-1000 normalize koordinatlar.",
-		parameters: {
-			type: "object",
-			properties: {
-				image_path: {
-					type: "string",
-					description: "Görüntü dosya yolu veya URL",
-				},
-				max_objects: {
-					type: "number",
-					description: "Maksimum nesne sayısı. Varsayılan: 25",
-				},
-			},
-			required: ["image_path"],
-		},
+		parameters: Type.Object({
+			image_path: Type.String({ description: "Görüntü dosya yolu veya URL" }),
+			max_objects: Type.Optional(Type.Number({ description: "Maksimum nesne sayısı. Varsayılan: 25" })),
+		}),
 		execute: async (args: { image_path: string; max_objects?: number }) => {
 			const capture = new ImageCapture();
 			const pipeline = new VisionPipeline({
@@ -152,28 +128,12 @@ export function createRoboticsTrajectoryToolDefinition(options?: {
 		name: "robotics_trajectory",
 		description:
 			"Robot hareketi için yörünge noktaları planlar. Başlangıç nesnesinden hedef konuma kadar ardışık [y, x] koordinatları döndürür.",
-		parameters: {
-			type: "object",
-			properties: {
-				image_path: {
-					type: "string",
-					description: "Görüntü dosya yolu",
-				},
-				start_object: {
-					type: "string",
-					description: "Başlangıç nesnesi (ör: 'kırmızı kalem')",
-				},
-				instruction: {
-					type: "string",
-					description: "Hareket talimatı (ör: 'düzenleyicinin üstüne taşı')",
-				},
-				num_points: {
-					type: "number",
-					description: "Yörünge nokta sayısı. Varsayılan: 15",
-				},
-			},
-			required: ["image_path", "start_object", "instruction"],
-		},
+		parameters: Type.Object({
+			image_path: Type.String({ description: "Görüntü dosya yolu" }),
+			start_object: Type.String({ description: "Başlangıç nesnesi (ör: 'kırmızı kalem')" }),
+			instruction: Type.String({ description: "Hareket talimatı (ör: 'düzenleyicinin üstüne taşı')" }),
+			num_points: Type.Optional(Type.Number({ description: "Yörünge nokta sayısı. Varsayılan: 15" })),
+		}),
 		execute: async (args: { image_path: string; start_object: string; instruction: string; num_points?: number }) => {
 			const capture = new ImageCapture();
 			const pipeline = new VisionPipeline({
@@ -216,20 +176,10 @@ export function createRoboticsAnalyzeToolDefinition(options?: {
 		name: "robotics_analyze",
 		description:
 			"Görüntüdeki sahneyi detaylı analiz eder: nesneler, uzamsal ilişkiler, bağlam. Görev planlamadan önce sahneyi anlamak için kullanılır.",
-		parameters: {
-			type: "object",
-			properties: {
-				image_path: {
-					type: "string",
-					description: "Görüntü dosya yolu",
-				},
-				question: {
-					type: "string",
-					description: "Sahne hakkında serbest soru (opsiyonel)",
-				},
-			},
-			required: ["image_path"],
-		},
+		parameters: Type.Object({
+			image_path: Type.String({ description: "Görüntü dosya yolu" }),
+			question: Type.Optional(Type.String({ description: "Sahne hakkında serbest soru (opsiyonel)" })),
+		}),
 		execute: async (args: { image_path: string; question?: string }) => {
 			const capture = new ImageCapture();
 			const pipeline = new VisionPipeline({
@@ -277,24 +227,11 @@ export function createRoboticsPlanToolDefinition(options?: {
 		name: "robotics_plan",
 		description:
 			"Doğal dil görev talimatını robot API fonksiyon çağrılarına dönüştürür. Önce robot fonksiyonlarını tanımlamanız gerekir.",
-		parameters: {
-			type: "object",
-			properties: {
-				instruction: {
-					type: "string",
-					description: "Robot görevi (ör: 'mavi bloğu turuncu kaseye koy')",
-				},
-				image_path: {
-					type: "string",
-					description: "Sahne görüntüsü (opsiyonel ama önerilir)",
-				},
-				functions_path: {
-					type: "string",
-					description: "Robot fonksiyon tanım JSON dosyası yolu (opsiyonel, settings'den alınır)",
-				},
-			},
-			required: ["instruction"],
-		},
+		parameters: Type.Object({
+			instruction: Type.String({ description: "Robot görevi (ör: 'mavi bloğu turuncu kaseye koy')" }),
+			image_path: Type.Optional(Type.String({ description: "Sahne görüntüsü (opsiyonel ama önerilir)" })),
+			functions_path: Type.Optional(Type.String({ description: "Robot fonksiyon tanım JSON dosyası yolu (opsiyonel, settings'den alınır)" })),
+		}),
 		execute: async (args: { instruction: string; image_path?: string; functions_path?: string }) => {
 			const { OllamaVision } = await import("../robotics/ollama-vision.js");
 			const { TaskPlanner } = await import("../robotics/task-planner.js");

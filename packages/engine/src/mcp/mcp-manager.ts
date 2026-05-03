@@ -87,7 +87,7 @@ export class McpManager {
 		for (const client of this.clients.values()) {
 			try {
 				await client.close();
-			} catch (error) {
+			} catch (_error) {
 				// Ignore
 			}
 		}

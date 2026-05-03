@@ -571,7 +571,7 @@ export class InteractiveMode {
     ${theme.bold("🌙 M O O N C L I")}
     ${theme.fg("dim", "✧ ────────────── ✧")}
    ${theme.fg("accent", "  .   *   .    *  ")}  ${theme.fg("muted", "Zihin Sarayinda Bir Rehber")}
-  ${theme.fg("accent", " *  .  🌙   .  * ")}  ${theme.fg("dim", "v" + this.version)} ${theme.fg("success", "[MCP Ready]")}
+  ${theme.fg("accent", " *  .  🌙   .  * ")}  ${theme.fg("dim", `v${this.version}`)} ${theme.fg("success", "[MCP Ready]")}
    ${theme.fg("accent", "  .   *   .    *  ")}
     ${theme.fg("dim", "✧ ────────────── ✧")}  ${theme.fg("muted", "Dusun, Kodla, Mukemmellestir.")}
 `,
