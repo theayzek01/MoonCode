@@ -238,8 +238,8 @@ export class InteractiveMode {
 	private workingMessage: string | undefined = undefined;
 	private workingVisible = true;
 	private workingIndicatorOptions: LoaderIndicatorOptions | undefined = undefined;
-	private readonly defaultWorkingMessage = "Calisiyor...";
-	private readonly defaultHiddenThinkingLabel = "Dusunuyor...";
+	private readonly defaultWorkingMessage = "Islem Gerceklestiriliyor...";
+	private readonly defaultHiddenThinkingLabel = "Zihin Sarayinda Analiz Ediliyor...";
 	private hiddenThinkingLabel = this.defaultHiddenThinkingLabel;
 
 	private lastSigintTime = 0;
@@ -566,13 +566,13 @@ export class InteractiveMode {
 			const banner = theme.fg(
 				"accent",
 				`
-     .  *  .  *  .  *  .
-  *    _..._     *  .  *
- .   .:::::.   .   *  . 
-  * :::::::: :  .  MOODCLI
- .  :::::::::  *    Zeki Kodlama Yardimcisi
-  *  ':::::::'  .  v${this.version}
- .     ':::'   *   .  *  .
+   ${theme.bold("MOODCLI")}
+   ${theme.fg("dim", "_________")}
+  ${theme.fg("accent", "/   ____  \\")}  ${theme.fg("muted", "Zeki Kodlama Yardimcisi")}
+ ${theme.fg("accent", "|  /    \\  |")}  ${theme.fg("dim", "v" + this.version)}
+ ${theme.fg("accent", "| |      | |")}
+ ${theme.fg("accent", "|  \\____/  |")}  ${theme.fg("muted", "Dusun, Kodla, Mukemmellestir.")}
+  ${theme.fg("accent", "\\________/")}
 `,
 			);
 
