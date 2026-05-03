@@ -3,10 +3,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-	getOpenCoreCodexWebSocketDebugStats,
-	resetOpenCoreCodexWebSocketDebugStats,
-	streamOpenCoreCodexResponses,
-	streamSimpleOpenCoreCodexResponses,
+	getOpenAICodexWebSocketDebugStats,
+	resetOpenAICodexWebSocketDebugStats,
+	streamOpenAICodexResponses,
+	streamSimpleOpenAICodexResponses,
 } from "../src/providers/openai-codex-responses.js";
 import type { Context, Model } from "../src/types.js";
 
@@ -22,7 +22,7 @@ afterEach(() => {
 	} else {
 		process.env.PI_CODING_AGENT_DIR = originalEngineDir;
 	}
-	resetOpenCoreCodexWebSocketDebugStats();
+	resetOpenAICodexWebSocketDebugStats();
 	vi.restoreAllMocks();
 });
 
@@ -83,7 +83,7 @@ function buildSSEPayload({
 
 describe("openai-codex streaming", () => {
 	it("streams SSE responses into AssistantMessageEventStream", async () => {
-		const tempDir = mkdtempSync(join(tmpdir(), "moodcli-codex-stream-"));
+		const tempDir = mkdtempSync(join(tmpdir(), "Mooncli-codex-stream-"));
 		process.env.PI_CODING_AGENT_DIR = tempDir;
 
 		const payload = Buffer.from(
@@ -143,8 +143,8 @@ describe("openai-codex streaming", () => {
 				const headers = init?.headers instanceof Headers ? init.headers : undefined;
 				expect(headers?.get("Authorization")).toBe(`Bearer ${token}`);
 				expect(headers?.get("chatgpt-account-id")).toBe("acc_test");
-				expect(headers?.get("OpenCore-Beta")).toBe("responses=experimental");
-				expect(headers?.get("originator")).toBe("moodcli");
+				expect(headers?.get("OpenAI-Beta")).toBe("responses=experimental");
+				expect(headers?.get("originator")).toBe("Mooncli");
 				expect(headers?.get("accept")).toBe("text/event-stream");
 				expect(headers?.has("x-api-key")).toBe(false);
 				return new Response(stream, {
@@ -175,7 +175,7 @@ describe("openai-codex streaming", () => {
 			messages: [{ role: "user", content: "Say hello", timestamp: Date.now() }],
 		};
 
-		const streamResult = streamOpenCoreCodexResponses(model, context, { apiKey: token });
+		const streamResult = streamOpenAICodexResponses(model, context, { apiKey: token });
 		let sawTextDelta = false;
 		let sawDone = false;
 
@@ -194,7 +194,7 @@ describe("openai-codex streaming", () => {
 	});
 
 	it("completes after response.completed even when the SSE body stays open", async () => {
-		const tempDir = mkdtempSync(join(tmpdir(), "moodcli-codex-stream-"));
+		const tempDir = mkdtempSync(join(tmpdir(), "Mooncli-codex-stream-"));
 		process.env.PI_CODING_AGENT_DIR = tempDir;
 		const token = mockToken();
 		const encoder = new TextEncoder();
@@ -242,7 +242,7 @@ describe("openai-codex streaming", () => {
 		};
 
 		const result = await Promise.race([
-			streamOpenCoreCodexResponses(model, context, { apiKey: token, transport: "sse" }).result(),
+			streamOpenAICodexResponses(model, context, { apiKey: token, transport: "sse" }).result(),
 			new Promise<never>((_, reject) => {
 				setTimeout(() => reject(new Error("Timed out waiting for completed SSE stream")), 1000);
 			}),
@@ -253,7 +253,7 @@ describe("openai-codex streaming", () => {
 	});
 
 	it("maps response.incomplete to stopReason length even when the SSE body stays open", async () => {
-		const tempDir = mkdtempSync(join(tmpdir(), "moodcli-codex-stream-"));
+		const tempDir = mkdtempSync(join(tmpdir(), "Mooncli-codex-stream-"));
 		process.env.PI_CODING_AGENT_DIR = tempDir;
 		const token = mockToken();
 		const encoder = new TextEncoder();
@@ -301,7 +301,7 @@ describe("openai-codex streaming", () => {
 		};
 
 		const result = await Promise.race([
-			streamOpenCoreCodexResponses(model, context, { apiKey: token, transport: "sse" }).result(),
+			streamOpenAICodexResponses(model, context, { apiKey: token, transport: "sse" }).result(),
 			new Promise<never>((_, reject) => {
 				setTimeout(() => reject(new Error("Timed out waiting for incomplete SSE stream")), 1000);
 			}),
@@ -312,7 +312,7 @@ describe("openai-codex streaming", () => {
 	});
 
 	it("sets session_id/x-client-request-id headers and prompt_cache_key when sessionId is provided", async () => {
-		const tempDir = mkdtempSync(join(tmpdir(), "moodcli-codex-stream-"));
+		const tempDir = mkdtempSync(join(tmpdir(), "Mooncli-codex-stream-"));
 		process.env.PI_CODING_AGENT_DIR = tempDir;
 
 		const payload = Buffer.from(
@@ -407,12 +407,12 @@ describe("openai-codex streaming", () => {
 			messages: [{ role: "user", content: "Say hello", timestamp: Date.now() }],
 		};
 
-		const streamResult = streamOpenCoreCodexResponses(model, context, { apiKey: token, sessionId });
+		const streamResult = streamOpenAICodexResponses(model, context, { apiKey: token, sessionId });
 		await streamResult.result();
 	});
 
 	it("preserves gpt-5.5 xhigh reasoning effort from simple options", async () => {
-		const tempDir = mkdtempSync(join(tmpdir(), "moodcli-codex-stream-"));
+		const tempDir = mkdtempSync(join(tmpdir(), "Mooncli-codex-stream-"));
 		process.env.PI_CODING_AGENT_DIR = tempDir;
 		const token = mockToken();
 		const sse = buildSSEPayload({ status: "completed" });
@@ -462,13 +462,13 @@ describe("openai-codex streaming", () => {
 			messages: [{ role: "user", content: "Say hello", timestamp: Date.now() }],
 		};
 
-		await streamSimpleOpenCoreCodexResponses(model, context, { apiKey: token, reasoning: "xhigh" }).result();
+		await streamSimpleOpenAICodexResponses(model, context, { apiKey: token, reasoning: "xhigh" }).result();
 
 		expect(requestedReasoning).toEqual({ effort: "xhigh", summary: "auto" });
 	});
 
 	it.each(["gpt-5.3-codex", "gpt-5.4", "gpt-5.5"])("clamps %s minimal reasoning effort to low", async (modelId) => {
-		const tempDir = mkdtempSync(join(tmpdir(), "moodcli-codex-stream-"));
+		const tempDir = mkdtempSync(join(tmpdir(), "Mooncli-codex-stream-"));
 		process.env.PI_CODING_AGENT_DIR = tempDir;
 
 		const payload = Buffer.from(
@@ -556,7 +556,7 @@ describe("openai-codex streaming", () => {
 			messages: [{ role: "user", content: "Say hello", timestamp: Date.now() }],
 		};
 
-		const streamResult = streamOpenCoreCodexResponses(model, context, {
+		const streamResult = streamOpenAICodexResponses(model, context, {
 			apiKey: token,
 			reasoningEffort: "minimal",
 		});
@@ -571,7 +571,7 @@ describe("openai-codex streaming", () => {
 	] as const)(
 		"uses the client-sent %s service tier for %s when Codex echoes default",
 		async (modelId, serviceTier, multiplier) => {
-			const tempDir = mkdtempSync(join(tmpdir(), "moodcli-codex-stream-"));
+			const tempDir = mkdtempSync(join(tmpdir(), "Mooncli-codex-stream-"));
 			process.env.PI_CODING_AGENT_DIR = tempDir;
 			const token = mockToken();
 			const sse = `${[
@@ -649,7 +649,7 @@ describe("openai-codex streaming", () => {
 				messages: [{ role: "user", content: "Say hello", timestamp: Date.now() }],
 			};
 
-			const result = await streamOpenCoreCodexResponses(model, context, { apiKey: token, serviceTier }).result();
+			const result = await streamOpenAICodexResponses(model, context, { apiKey: token, serviceTier }).result();
 
 			expect(result.usage.cost.input).toBe(1 * multiplier);
 			expect(result.usage.cost.output).toBe(2 * multiplier);
@@ -658,7 +658,7 @@ describe("openai-codex streaming", () => {
 	);
 
 	it("does not set session_id/x-client-request-id headers when sessionId is not provided", async () => {
-		const tempDir = mkdtempSync(join(tmpdir(), "moodcli-codex-stream-"));
+		const tempDir = mkdtempSync(join(tmpdir(), "Mooncli-codex-stream-"));
 		process.env.PI_CODING_AGENT_DIR = tempDir;
 
 		const payload = Buffer.from(
@@ -749,7 +749,7 @@ describe("openai-codex streaming", () => {
 		};
 
 		// No sessionId provided
-		const streamResult = streamOpenCoreCodexResponses(model, context, { apiKey: token });
+		const streamResult = streamOpenAICodexResponses(model, context, { apiKey: token });
 		await streamResult.result();
 	});
 	it("forwards auto transport from streamSimple options and uses cached websocket context", async () => {
@@ -845,7 +845,7 @@ describe("openai-codex streaming", () => {
 			messages: [{ role: "user", content: "Say hello", timestamp: 1 }],
 		};
 
-		await streamSimpleOpenCoreCodexResponses(model, context, {
+		await streamSimpleOpenAICodexResponses(model, context, {
 			apiKey: token,
 			sessionId: "session-auto",
 			transport: "auto",
@@ -853,7 +853,7 @@ describe("openai-codex streaming", () => {
 
 		expect(sentBodies).toHaveLength(1);
 		expect(global.fetch).not.toHaveBeenCalled();
-		expect(getOpenCoreCodexWebSocketDebugStats("session-auto")).toMatchObject({
+		expect(getOpenAICodexWebSocketDebugStats("session-auto")).toMatchObject({
 			cachedContextRequests: 1,
 			fullContextRequests: 1,
 		});
@@ -968,7 +968,7 @@ describe("openai-codex streaming", () => {
 			messages: [{ role: "user", content: "Say hello", timestamp: 1 }],
 		};
 
-		const first = await streamOpenCoreCodexResponses(model, firstContext, {
+		const first = await streamOpenAICodexResponses(model, firstContext, {
 			apiKey: token,
 			sessionId: "session-1",
 			transport: "websocket-cached",
@@ -978,7 +978,7 @@ describe("openai-codex streaming", () => {
 			systemPrompt: "You are a helpful assistant.",
 			messages: [...firstContext.messages, first, { role: "user", content: "Now finish", timestamp: 2 }],
 		};
-		await streamOpenCoreCodexResponses(model, secondContext, {
+		await streamOpenAICodexResponses(model, secondContext, {
 			apiKey: token,
 			sessionId: "session-1",
 			transport: "websocket-cached",
@@ -993,7 +993,7 @@ describe("openai-codex streaming", () => {
 		expect(secondBody.store).toBe(false);
 		expect(secondBody.previous_response_id).toBe("resp_1");
 		expect(secondBody.input).toEqual([{ role: "user", content: [{ type: "input_text", text: "Now finish" }] }]);
-		expect(getOpenCoreCodexWebSocketDebugStats("session-1")).toMatchObject({
+		expect(getOpenAICodexWebSocketDebugStats("session-1")).toMatchObject({
 			requests: 2,
 			connectionsCreated: 1,
 			connectionsReused: 1,

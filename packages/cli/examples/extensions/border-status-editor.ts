@@ -1,6 +1,6 @@
-import type { Component, EditorTheme, TUI } from "@moodcli/tui";
-import { truncateToWidth, visibleWidth } from "@moodcli/tui";
-import { CustomEditor, type ExtensionAPI, type ExtensionContext, type KeybindingsManager } from "moodcli";
+import { CustomEditor, type ExtensionAPI, type ExtensionContext, type KeybindingsManager } from "Mooncli";
+import type { Component, EditorTheme, TUI } from "@mooncli/tui";
+import { truncateToWidth, visibleWidth } from "@mooncli/tui";
 
 function fitBorder(
 	left: string,
@@ -63,7 +63,7 @@ class EmptyFooter implements Component {
 	invalidate(): void {}
 }
 
-export default function (moodcli: ExtensionAPI) {
+export default function (Mooncli: ExtensionAPI) {
 	let isWorking = false;
 	let spinnerIndex = 0;
 	let spinnerTimer: ReturnType<typeof setInterval> | undefined;
@@ -77,7 +77,7 @@ export default function (moodcli: ExtensionAPI) {
 		}
 	};
 
-	moodcli.on("engine_start", () => {
+	Mooncli.on("engine_start", () => {
 		isWorking = true;
 		stopSpinner();
 		spinnerTimer = setInterval(() => {
@@ -87,27 +87,27 @@ export default function (moodcli: ExtensionAPI) {
 		activeTui?.requestRender();
 	});
 
-	moodcli.on("engine_end", () => {
+	Mooncli.on("engine_end", () => {
 		isWorking = false;
 		stopSpinner();
 		activeTui?.requestRender();
 	});
 
-	moodcli.on("session_shutdown", () => {
+	Mooncli.on("session_shutdown", () => {
 		stopSpinner();
 		activeTui = undefined;
 	});
 
-	moodcli.on("session_start", (_event, ctx) => {
+	Mooncli.on("session_start", (_event, ctx) => {
 		ctx.ui.setWorkingVisible(false);
 		ctx.ui.setFooter(() => new EmptyFooter());
 
 		let branch: string | undefined;
 
 		const refreshBranch = async () => {
-			const result = await moodcli
-				.exec("git", ["branch", "--show-current"], { cwd: ctx.cwd })
-				.catch(() => undefined);
+			const result = await Mooncli.exec("git", ["branch", "--show-current"], { cwd: ctx.cwd }).catch(
+				() => undefined,
+			);
 			const stdout = result?.stdout.trim();
 			branch = stdout && stdout.length > 0 ? stdout : undefined;
 			activeTui?.requestRender();
@@ -126,7 +126,7 @@ export default function (moodcli: ExtensionAPI) {
 
 				const thm = ctx.ui.theme;
 				const model = ctx.model ? `${ctx.model.provider}/${ctx.model.id}` : "no model";
-				const thinking = moodcli.getThinkingLevel();
+				const thinking = Mooncli.getThinkingLevel();
 				const topLeft = isWorking ? thm.fg("accent", ` ${spinnerFrames[spinnerIndex]} `) : "";
 				const topRight = "";
 				const bottomLeft = thm.fg("muted", ` ${model} · ${formatThinking(thinking)} `);

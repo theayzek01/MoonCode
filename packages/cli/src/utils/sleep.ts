@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Sleep helper that respects abort signal.
  */

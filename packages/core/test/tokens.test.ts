@@ -5,7 +5,7 @@ import type { Api, Context, Model, StreamOptions } from "../src/types.js";
 
 type StreamOptionsWithExtras = StreamOptions & Record<string, unknown>;
 
-import { hasAzureOpenCoreCredentials, resolveAzureDeploymentName } from "./azure-utils.js";
+import { hasAzureOpenAICredentials, resolveAzureDeploymentName } from "./azure-utils.js";
 import { hasBedrockCredentials } from "./bedrock-utils.js";
 import { hasCloudflareAiGatewayCredentials, hasCloudflareWorkersCoreCredentials } from "./cloudflare-utils.js";
 import { resolveApiKey } from "./oauth.js";
@@ -49,7 +49,7 @@ async function testTokensOnAbort<TApi extends Api>(llm: Model<TApi>, options: St
 
 	expect(msg.stopReason).toBe("aborted");
 
-	// OpenCore providers, OpenCore Codex, zai, and Amazon Bedrock only send usage in the final chunk,
+	// OpenAI providers, OpenAI Codex, zai, and Amazon Bedrock only send usage in the final chunk,
 	// so when aborted they have no token stats. Anthropic and Google send usage information early in the stream.
 	// MiniMax and Kimi report input tokens but not output tokens differently on aborted requests.
 	if (
@@ -93,7 +93,7 @@ describe("Token Statistics on Abort", () => {
 		});
 	});
 
-	describe.skipIf(!process.env.OPENCore_API_KEY)("OpenCore Completions Provider", () => {
+	describe.skipIf(!process.env.OpenAI_API_KEY)("OpenAI Completions Provider", () => {
 		const { compat: _compat, ...baseModel } = getModel("openai", "gpt-4o-mini")!;
 		void _compat;
 		const llm: Model<"openai-completions"> = {
@@ -106,7 +106,7 @@ describe("Token Statistics on Abort", () => {
 		});
 	});
 
-	describe.skipIf(!process.env.OPENCore_API_KEY)("OpenCore Responses Provider", () => {
+	describe.skipIf(!process.env.OpenAI_API_KEY)("OpenAI Responses Provider", () => {
 		const llm = getModel("openai", "gpt-5.4-mini");
 
 		it("should include token stats when aborted mid-stream", { retry: 3, timeout: 30000 }, async () => {
@@ -114,7 +114,7 @@ describe("Token Statistics on Abort", () => {
 		});
 	});
 
-	describe.skipIf(!hasAzureOpenCoreCredentials())("Azure OpenCore Responses Provider", () => {
+	describe.skipIf(!hasAzureOpenAICredentials())("Azure OpenAI Responses Provider", () => {
 		const llm = getModel("azure-openai-responses", "gpt-4o-mini");
 		const azureDeploymentName = resolveAzureDeploymentName(llm.id);
 		const azureOptions = azureDeploymentName ? { azureDeploymentName } : {};
@@ -264,7 +264,7 @@ describe("Token Statistics on Abort", () => {
 	});
 
 	// =========================================================================
-	// OAuth-based providers (credentials from ~/.moodcli/engine/oauth.json)
+	// OAuth-based providers (credentials from ~/.Mooncli/engine/oauth.json)
 	// =========================================================================
 
 	describe("Anthropic OAuth Provider", () => {
@@ -299,7 +299,7 @@ describe("Token Statistics on Abort", () => {
 		);
 	});
 
-	describe("OpenCore Codex Provider", () => {
+	describe("OpenAI Codex Provider", () => {
 		it.skipIf(!openaiCodexToken)(
 			"gpt-5.2-codex - should include token stats when aborted mid-stream",
 			{ retry: 3, timeout: 30000 },

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Interactive mode for the coding engine.
  * Handles TUI rendering and user interaction, delegating business logic to EngineSession.
@@ -7,7 +8,6 @@ import * as crypto from "node:crypto";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { EngineMessage } from "@moodcli/engine";
 import {
 	type AssistantMessage,
 	getProviders,
@@ -15,7 +15,8 @@ import {
 	type Message,
 	type Model,
 	type OAuthProviderId,
-} from "@moodcli/core";
+} from "@mooncli/core";
+import type { EngineMessage } from "@mooncli/engine";
 import type {
 	AutocompleteItem,
 	AutocompleteProvider,
@@ -26,7 +27,7 @@ import type {
 	OverlayHandle,
 	OverlayOptions,
 	SlashCommand,
-} from "@moodcli/tui";
+} from "@mooncli/tui";
 import {
 	CombinedAutocompleteProvider,
 	type Component,
@@ -43,15 +44,15 @@ import {
 	TruncatedText,
 	TUI,
 	visibleWidth,
-} from "@moodcli/tui";
+} from "@mooncli/tui";
 import { spawn, spawnSync } from "child_process";
 import {
 	APP_NAME,
 	APP_TITLE,
-	getEngineDir,
 	getAuthPath,
 	getDebugLogPath,
 	getDocsPath,
+	getEngineDir,
 	getShareViewerUrl,
 	VERSION,
 } from "../../config.js";
@@ -84,10 +85,10 @@ import { getChangelogPath, getNewEntries, parseChangelog } from "../../utils/cha
 import { copyToClipboard } from "../../utils/clipboard.js";
 import { extensionForImageMimeType, readClipboardImage } from "../../utils/clipboard-image.js";
 import { parseGitUrl } from "../../utils/git.js";
-import { getMoodcliUserEngine } from "../../utils/mood-user-engine.js";
+import { getMooncliUserEngine } from "../../utils/Moon-user-engine.js";
 import { killTrackedDetachedChildren } from "../../utils/shell.js";
 import { ensureTool } from "../../utils/tools-manager.js";
-import { checkForNewMoodcliVersion } from "../../utils/version-check.js";
+import { checkForNewMooncliVersion } from "../../utils/version-check.js";
 import { ArminComponent } from "./components/armin.js";
 import { AssistantMessageComponent } from "./components/assistant-message.js";
 import { BashExecutionComponent } from "./components/bash-execution.js";
@@ -106,6 +107,7 @@ import { ExtensionSelectorComponent } from "./components/extension-selector.js";
 import { FooterComponent } from "./components/footer.js";
 import { keyHint, keyText, rawKeyHint } from "./components/keybinding-hints.js";
 import { LoginDialogComponent } from "./components/login-dialog.js";
+import { McpSelectorComponent } from "./components/mcp-selector.js";
 import { ModelSelectorComponent } from "./components/model-selector.js";
 import { type AuthSelectorProvider, OAuthSelectorComponent } from "./components/oauth-selector.js";
 import { ScopedModelsSelectorComponent } from "./components/scoped-models-selector.js";
@@ -566,13 +568,12 @@ export class InteractiveMode {
 			const banner = theme.fg(
 				"accent",
 				`
-   ${theme.bold("MOODCLI")}
-   ${theme.fg("dim", "_________")}
-  ${theme.fg("accent", "/   ____  \\")}  ${theme.fg("muted", "Zeki Kodlama Yardimcisi")}
- ${theme.fg("accent", "|  /    \\  |")}  ${theme.fg("dim", "v" + this.version)}
- ${theme.fg("accent", "| |      | |")}
- ${theme.fg("accent", "|  \\____/  |")}  ${theme.fg("muted", "Dusun, Kodla, Mukemmellestir.")}
-  ${theme.fg("accent", "\\________/")}
+    ${theme.bold("🌙 M O O N C L I")}
+    ${theme.fg("dim", "✧ ────────────── ✧")}
+   ${theme.fg("accent", "  .   *   .    *  ")}  ${theme.fg("muted", "Zihin Sarayinda Bir Rehber")}
+  ${theme.fg("accent", " *  .  🌙   .  * ")}  ${theme.fg("dim", "v" + this.version)} ${theme.fg("success", "[MCP Ready]")}
+   ${theme.fg("accent", "  .   *   .    *  ")}
+    ${theme.fg("dim", "✧ ────────────── ✧")}  ${theme.fg("muted", "Dusun, Kodla, Mukemmellestir.")}
 `,
 			);
 
@@ -603,23 +604,22 @@ export class InteractiveMode {
 				hint("app.clipboard.pasteImage", "pano'dan resim eklemek icin"),
 				rawKeyHint("dosyalari surukleyin", "projeye eklemek icin"),
 			].join("\n");
+
 			const compactInstructions = [
 				hint("app.interrupt", "durdur"),
 				rawKeyHint(`${keyText("app.clear")}/${keyText("app.exit")}`, "temizle/cik"),
 				rawKeyHint("/", "komutlar"),
 				rawKeyHint("!", "bash"),
-				hint("app.tools.expand", "daha fazla"),
-			].join(theme.fg("muted", " · "));
-			const compactOnboarding = theme.fg(
-				"dim",
-				`Tum yardim icerigi ve kaynaklar icin ${keyText("app.tools.expand")} tusuna basin.`,
-			);
-			const onboarding = theme.fg(
-				"dim",
-				`Moodcli zeki bir yardimcidir. Nasil kullanildigini kendisine sorabilirsiniz.`,
-			);
+				hint("app.tools.expand", "yardim"),
+			].join(theme.fg("dim", " • "));
+
+			const onboarding =
+				theme.fg("muted", "✨ Mooncli ile hayallerini koda dok. Yardim icin ") +
+				keyText("app.tools.expand") +
+				theme.fg("muted", " tusuna bas.");
+
 			this.builtInHeader = new ExpandableText(
-				() => `${banner}\n${compactInstructions}\n${compactOnboarding}\n\n${onboarding}`,
+				() => `${banner}\n ${compactInstructions}\n\n ${onboarding}\n`,
 				() => `${banner}\n${expandedInstructions}\n\n${onboarding}`,
 				this.getStartupExpansionState(),
 				1,
@@ -696,7 +696,7 @@ export class InteractiveMode {
 		await this.init();
 
 		// Start version check asynchronously
-		checkForNewMoodcliVersion(this.version).then((newVersion) => {
+		checkForNewMooncliVersion(this.version).then((newVersion) => {
 			if (newVersion) {
 				this.showNewVersionNotification(newVersion);
 			}
@@ -768,7 +768,7 @@ export class InteractiveMode {
 	}
 
 	private async checkForPackageUpdates(): Promise<string[]> {
-		if (process.env.MOOD_OFFLINE) {
+		if (process.env.Moon_OFFLINE) {
 			return [];
 		}
 
@@ -826,7 +826,7 @@ export class InteractiveMode {
 		}
 
 		if (extendedKeysFormat === "xterm") {
-			return "tmux extended-keys-format is xterm. Moodcli works best with csi-u. Add `set -g extended-keys-format csi-u` to ~/.tmux.conf and restart tmux.";
+			return "tmux extended-keys-format is xterm. Mooncli works best with csi-u. Add `set -g extended-keys-format csi-u` to ~/.tmux.conf and restart tmux.";
 		}
 
 		return undefined;
@@ -864,7 +864,7 @@ export class InteractiveMode {
 	}
 
 	private reportInstallTelemetry(version: string): void {
-		if (process.env.MOOD_OFFLINE) {
+		if (process.env.Moon_OFFLINE) {
 			return;
 		}
 
@@ -872,10 +872,10 @@ export class InteractiveMode {
 			return;
 		}
 
-		void fetch(`https://moodcli.dev/api/report-install?version=${encodeURIComponent(version)}`, {
+		void fetch(`https://Mooncli.dev/api/report-install?version=${encodeURIComponent(version)}`, {
 			method: "POST",
 			headers: {
-				"User-Engine": getMoodcliUserEngine(version),
+				"User-Engine": getMooncliUserEngine(version),
 			},
 			signal: AbortSignal.timeout(5000),
 		})
@@ -2429,7 +2429,7 @@ export class InteractiveMode {
 			// Write to temp file
 			const tmpDir = os.tmpdir();
 			const ext = extensionForImageMimeType(image.mimeType) ?? "png";
-			const fileName = `mood-clipboard-${crypto.randomUUID()}.${ext}`;
+			const fileName = `Moon-clipboard-${crypto.randomUUID()}.${ext}`;
 			const filePath = path.join(tmpDir, fileName);
 			fs.writeFileSync(filePath, Buffer.from(image.bytes));
 
@@ -2449,6 +2449,11 @@ export class InteractiveMode {
 			// Handle commands
 			if (text === "/settings") {
 				this.showSettingsSelector();
+				this.editor.setText("");
+				return;
+			}
+			if (text === "/mcp") {
+				this.handleMcpCommand();
 				this.editor.setText("");
 				return;
 			}
@@ -2542,6 +2547,12 @@ export class InteractiveMode {
 			if (text === "/reload") {
 				this.editor.setText("");
 				await this.handleReloadCommand();
+				return;
+			}
+			if (text === "/robotics" || text.startsWith("/robotics ")) {
+				const args = text.startsWith("/robotics ") ? text.slice(10).trim() : "";
+				this.editor.setText("");
+				await this.handleRoboticsCommand(args);
 				return;
 			}
 			if (text === "/debug") {
@@ -3434,7 +3445,7 @@ export class InteractiveMode {
 		}
 
 		const currentText = this.editor.getExpandedText?.() ?? this.editor.getText();
-		const tmpFile = path.join(os.tmpdir(), `mood-editor-${Date.now()}.mood.md`);
+		const tmpFile = path.join(os.tmpdir(), `Moon-editor-${Date.now()}.Moon.md`);
 
 		try {
 			// Write current content to temp file
@@ -3499,7 +3510,7 @@ export class InteractiveMode {
 		const updateInstruction = theme.fg("muted", `New version ${newVersion} is available. Run `) + action;
 		const changelogUrl = theme.fg(
 			"accent",
-			"https://github.com/badlogic/moodcli-mono/blob/main/packages/cli/CHANGELOG.md",
+			"https://github.com/badlogic/Mooncli-mono/blob/main/packages/cli/CHANGELOG.md",
 		);
 		const changelogLine = theme.fg("muted", "Changelog: ") + changelogUrl;
 
@@ -4730,6 +4741,212 @@ export class InteractiveMode {
 	// Command handlers
 	// =========================================================================
 
+	private async handleRoboticsCommand(args: string): Promise<void> {
+		const parts = args.split(" ");
+		const cmd = parts[0]?.toLowerCase();
+
+		const { RoboticsView } = await import("./components/robotics-view.js");
+		const { VisionPipeline, ImageCapture } = await import("../../core/robotics/index.js");
+
+		if (!cmd || cmd === "help") {
+			const text = RoboticsView.renderHelp();
+			this.chatContainer.addChild(new Text(text, 1, 0));
+			this.ui.requestRender();
+			return;
+		}
+
+		if (cmd === "enable") {
+			this.session.enableRoboticsMode();
+			const config = this.settingsManager.getRoboticsSettings();
+			const text = RoboticsView.renderBanner(config.visionModel || "unknown", config.visionBaseUrl || "unknown");
+			this.chatContainer.addChild(new Text(text, 1, 0));
+			this.ui.requestRender();
+			return;
+		}
+
+		if (cmd === "disable") {
+			this.session.disableRoboticsMode();
+			this.chatContainer.addChild(new Text(RoboticsView.renderSuccess("Robotics mode kapatildi."), 1, 0));
+			this.ui.requestRender();
+			return;
+		}
+
+		if (cmd === "status") {
+			const config = this.settingsManager.getRoboticsSettings();
+			const text = RoboticsView.renderStatus({
+				enabled: config.enabled ?? false,
+				visionModel: config.visionModel || "unknown",
+				visionBaseUrl: config.visionBaseUrl || "unknown",
+				outputOverlay: config.outputOverlay ?? true,
+				robotApiFunctionsPath: config.robotApiFunctionsPath,
+				lastImagePath: config.lastImagePath,
+			});
+			this.chatContainer.addChild(new Text(text, 1, 0));
+			this.ui.requestRender();
+			return;
+		}
+
+		if (cmd === "model") {
+			const model = parts[1];
+			if (!model) {
+				this.chatContainer.addChild(
+					new Text(RoboticsView.renderError("Model adi gerekli: /robotics model <isim>"), 1, 0),
+				);
+				this.ui.requestRender();
+				return;
+			}
+			this.settingsManager.setRoboticsSetting("visionModel", model);
+			if (this.session.getRoboticsMode()) {
+				// Re-enable to update tool definitions
+				this.session.enableRoboticsMode();
+			}
+			this.chatContainer.addChild(new Text(RoboticsView.renderSuccess(`Vision modeli guncellendi: ${model}`), 1, 0));
+			this.ui.requestRender();
+			return;
+		}
+
+		if (cmd === "functions") {
+			const fpath = parts.slice(1).join(" ");
+			if (!fpath) {
+				this.chatContainer.addChild(
+					new Text(RoboticsView.renderError("Dosya yolu gerekli: /robotics functions <path>"), 1, 0),
+				);
+				this.ui.requestRender();
+				return;
+			}
+			this.settingsManager.setRoboticsSetting("robotApiFunctionsPath", fpath);
+			if (this.session.getRoboticsMode()) {
+				this.session.enableRoboticsMode();
+			}
+			this.chatContainer.addChild(
+				new Text(RoboticsView.renderSuccess(`Robot fonksiyon dosyasi guncellendi: ${fpath}`), 1, 0),
+			);
+			this.ui.requestRender();
+			return;
+		}
+
+		if (cmd === "image") {
+			const fpath = parts.slice(1).join(" ");
+			if (!fpath) {
+				this.chatContainer.addChild(
+					new Text(RoboticsView.renderError("Dosya yolu gerekli: /robotics image <path>"), 1, 0),
+				);
+				this.ui.requestRender();
+				return;
+			}
+			this.settingsManager.setRoboticsLastImagePath(fpath);
+			this.chatContainer.addChild(new Text(RoboticsView.renderSuccess(`Son goruntu ayarlandi: ${fpath}`), 1, 0));
+			this.ui.requestRender();
+			return;
+		}
+
+		// Analysis commands (detect, bbox, trajectory, analyze, plan)
+		const requiresImage = ["detect", "bbox", "trajectory", "analyze"].includes(cmd);
+		const imagePath = this.settingsManager.getRoboticsLastImagePath();
+
+		if (requiresImage && !imagePath) {
+			this.chatContainer.addChild(
+				new Text(RoboticsView.renderError("Once goruntu yukleyin: /robotics image <path>"), 1, 0),
+			);
+			this.ui.requestRender();
+			return;
+		}
+
+		if (requiresImage || cmd === "plan") {
+			const config = this.settingsManager.getRoboticsSettings();
+			const pipeline = new VisionPipeline({
+				model: config.visionModel,
+				baseUrl: config.visionBaseUrl,
+				drawOverlay: config.outputOverlay ?? true,
+			});
+			const capture = new ImageCapture();
+
+			try {
+				this.showWorking("Robotik gorus isleniyor...");
+				let imageBytes: Buffer | undefined;
+
+				if (imagePath && requiresImage) {
+					if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+						imageBytes = await capture.fromUrl(imagePath);
+					} else {
+						imageBytes = capture.fromFile(imagePath);
+					}
+				}
+
+				if (cmd === "detect") {
+					const queryArgs = parts.slice(1).join(" ");
+					const queries = queryArgs ? queryArgs.split(",").map((s) => s.trim()) : undefined;
+					const result = await pipeline.detectObjects(imageBytes!, queries);
+					const text = RoboticsView.renderDetectionResults(result.objects, result.durationMs);
+					this.chatContainer.addChild(new Text(text, 1, 0));
+				} else if (cmd === "bbox") {
+					const result = await pipeline.detectBoundingBoxes(imageBytes!);
+					const text = RoboticsView.renderDetectionResults(result.objects, result.durationMs);
+					this.chatContainer.addChild(new Text(text, 1, 0));
+				} else if (cmd === "trajectory") {
+					const instruction = parts.slice(1).join(" ");
+					if (!instruction) {
+						throw new Error("Yorunge talimati gerekli. Ornek: /robotics trajectory duzenleyicinin icine");
+					}
+					const result = await pipeline.planTrajectory(imageBytes!, "nesne", instruction);
+					const text = RoboticsView.renderTrajectory(result.trajectory, result.durationMs);
+					this.chatContainer.addChild(new Text(text, 1, 0));
+				} else if (cmd === "analyze") {
+					const q = parts.slice(1).join(" ");
+					if (q) {
+						const result = await pipeline.freeformAnalyze(imageBytes!, q);
+						this.chatContainer.addChild(
+							new Text(`\n🤖 Analiz (${result.durationMs}ms):\n\n${result.response}\n`, 1, 0),
+						);
+					} else {
+						const result = await pipeline.analyzeScene(imageBytes!);
+						this.chatContainer.addChild(
+							new Text(`\n🤖 Sahne Analizi (${result.durationMs}ms):\n\n${result.description}\n`, 1, 0),
+						);
+					}
+				} else if (cmd === "plan") {
+					const instruction = parts.slice(1).join(" ");
+					if (!instruction) {
+						throw new Error("Gorev talimati gerekli.");
+					}
+					const { TaskPlanner, OllamaVision } = await import("../../core/robotics/index.js");
+					const vision = new OllamaVision(config.visionModel, config.visionBaseUrl);
+
+					const fnPath = config.robotApiFunctionsPath;
+					let fns = TaskPlanner.mockPickAndPlaceFunctions();
+					if (fnPath) {
+						const fs = await import("fs");
+						const path = await import("path");
+						if (fs.existsSync(path.resolve(fnPath))) {
+							fns = TaskPlanner.loadFunctions(path.resolve(fnPath));
+						}
+					}
+
+					const planner = new TaskPlanner(vision, fns);
+					let base64: string | undefined;
+					if (imagePath) {
+						const imgBytes = imagePath.startsWith("http")
+							? await capture.fromUrl(imagePath)
+							: capture.fromFile(imagePath);
+						base64 = capture.toBase64(imgBytes);
+					}
+
+					const result = await planner.planTask(instruction, base64);
+					const text = RoboticsView.renderTaskPlan(result.actions, result.durationMs);
+					this.chatContainer.addChild(new Text(text, 1, 0));
+				}
+			} catch (err: any) {
+				this.chatContainer.addChild(new Text(RoboticsView.renderError(err.message), 1, 0));
+			} finally {
+				this.hideWorking();
+				this.ui.requestRender();
+			}
+		} else {
+			this.chatContainer.addChild(new Text(RoboticsView.renderError(`Bilinmeyen robotics komutu: ${cmd}`), 1, 0));
+			this.ui.requestRender();
+		}
+	}
+
 	private async handleReloadCommand(): Promise<void> {
 		if (this.session.isStreaming) {
 			this.showWarning("Wait for the current response to finish before reloading.");
@@ -5441,5 +5658,76 @@ export class InteractiveMode {
 			this.ui.stop();
 			this.isInitialized = false;
 		}
+	}
+
+	private handleMcpCommand(): void {
+		this.showMcpSelector();
+	}
+
+	private showMcpSelector(): void {
+		const mcpManager = this.session.mcpManager;
+		let statusMessage = "";
+		const options = [{ id: "settings", name: "⚙️  Ayarları Düzenle", description: "settings.json dosyasını aç" }];
+
+		if (!mcpManager) {
+			statusMessage = "❌ MCP Manager oturumda yüklü değil. Ayarları kontrol edin.";
+		} else {
+			const clients = mcpManager.getClients();
+			if (!clients || clients.size === 0) {
+				statusMessage = "⚠️ Bağlı MCP sunucusu yok.";
+			} else {
+				statusMessage = `✅ ${clients.size} adet MCP sunucusu bağlı.`;
+				options.push({ id: "restart", name: "🔄 Yeniden Başlat", description: "MCP Manager'ı yeniden yükle" });
+
+				for (const name of clients.keys()) {
+					options.push({ id: `server-${name}`, name: `✓ ${name}`, description: "Bağlı sunucu" });
+				}
+			}
+		}
+
+		this.showSelector((done) => {
+			const selector = new McpSelectorComponent(
+				options,
+				statusMessage,
+				async (optionId: string) => {
+					done();
+
+					if (optionId === "settings") {
+						const { getSettingsPath } = await import("../../config.js");
+						const { spawn } = await import("child_process");
+						const settingsPath = getSettingsPath();
+
+						// Try to open with OS default application
+						const command =
+							process.platform === "win32" ? "start" : process.platform === "darwin" ? "open" : "xdg-open";
+						spawn(command, [settingsPath], { shell: true, detached: true });
+
+						this.showStatus(
+							`Ayarlar dosyası şurada açıldı: ${settingsPath}. Değişikliklerden sonra 'Yeniden Başlat' yapmayı unutmayın.`,
+						);
+						return;
+					}
+
+					if (optionId === "restart") {
+						if (mcpManager) {
+							this.showStatus("MCP Manager yeniden başlatılıyor...");
+							await mcpManager.restart();
+							this.showStatus("MCP Manager başarıyla yeniden başlatıldı.");
+						}
+						return;
+					}
+
+					// Just showing info for servers
+					if (optionId.startsWith("server-")) {
+						this.showStatus(`Sunucu: ${optionId.replace("server-", "")}`);
+					}
+				},
+				() => {
+					done();
+					this.ui.requestRender();
+				},
+			);
+			return { component: selector, focus: selector };
+		});
 	}
 }

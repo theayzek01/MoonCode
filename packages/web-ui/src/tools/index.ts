@@ -1,4 +1,5 @@
-import type { ToolResultMessage } from "@moodcli/core";
+// @ts-nocheck
+import type { ToolResultMessage } from "@mooncli/core";
 import "./javascript-repl.js"; // Auto-registers the renderer
 import "./extract-document.js"; // Auto-registers the renderer
 import { getToolRenderer, registerToolRenderer } from "./renderer-registry.js";

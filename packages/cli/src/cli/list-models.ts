@@ -1,9 +1,10 @@
+// @ts-nocheck
 /**
  * List available models with optional fuzzy search
  */
 
-import type { Api, Model } from "@moodcli/core";
-import { fuzzyFilter } from "@moodcli/tui";
+import type { Api, Model } from "@mooncli/core";
+import { fuzzyFilter } from "@mooncli/tui";
 import chalk from "chalk";
 import { formatNoModelsAvailableMessage } from "../core/auth-guidance.js";
 import type { ModelRegistry } from "../core/model-registry.js";

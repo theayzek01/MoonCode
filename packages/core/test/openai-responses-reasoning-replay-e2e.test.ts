@@ -14,15 +14,15 @@ const testTool: Tool<typeof testToolSchema> = {
 	parameters: testToolSchema,
 };
 
-describe.skipIf(!process.env.OPENCore_API_KEY || !process.env.ANTHROPIC_API_KEY)(
-	"OpenCore Responses reasoning replay e2e",
+describe.skipIf(!process.env.OpenAI_API_KEY || !process.env.ANTHROPIC_API_KEY)(
+	"OpenAI Responses reasoning replay e2e",
 	() => {
 		it("skips reasoning-only history after an aborted turn", { retry: 2 }, async () => {
 			const model = getModel("openai", "gpt-5-mini");
 
 			const apiKey = getEnvApiKey("openai");
 			if (!apiKey) {
-				throw new Error("Missing OPENCore_API_KEY");
+				throw new Error("Missing OpenAI_API_KEY");
 			}
 
 			const userMessage: Message = {
@@ -48,7 +48,7 @@ describe.skipIf(!process.env.OPENCore_API_KEY || !process.env.ANTHROPIC_API_KEY)
 				(block) => block.type === "thinking" && block.thinkingSignature,
 			);
 			if (!thinkingBlock || thinkingBlock.type !== "thinking") {
-				throw new Error("Missing thinking signature from OpenCore Responses");
+				throw new Error("Missing thinking signature from OpenAI Responses");
 			}
 
 			const corruptedAssistant: AssistantMessage = {
@@ -86,8 +86,8 @@ describe.skipIf(!process.env.OPENCore_API_KEY || !process.env.ANTHROPIC_API_KEY)
 			// 1. Model A (gpt-5-mini) generates reasoning + function_call
 			// 2. User switches to Model B (gpt-5.2-codex) - same provider, different model
 			// 3. transform-messages: isSameModel=false, thinking converted to text
-			// 4. But tool call ID still has OpenCore pairing history (fc_xxx paired with rs_xxx)
-			// 5. Without fix: OpenCore returns 400 "function_call without required reasoning item"
+			// 4. But tool call ID still has OpenAI pairing history (fc_xxx paired with rs_xxx)
+			// 5. Without fix: OpenAI returns 400 "function_call without required reasoning item"
 			// 6. With fix: tool calls/results converted to text, conversation continues
 
 			const modelA = getModel("openai", "gpt-5-mini");
@@ -95,7 +95,7 @@ describe.skipIf(!process.env.OPENCore_API_KEY || !process.env.ANTHROPIC_API_KEY)
 
 			const apiKey = getEnvApiKey("openai");
 			if (!apiKey) {
-				throw new Error("Missing OPENCore_API_KEY");
+				throw new Error("Missing OpenAI_API_KEY");
 			}
 
 			const userMessage: Message = {
@@ -123,7 +123,7 @@ describe.skipIf(!process.env.OPENCore_API_KEY || !process.env.ANTHROPIC_API_KEY)
 				| undefined;
 
 			if (!toolCallBlock) {
-				throw new Error("Missing tool call from OpenCore Responses - model did not use the tool");
+				throw new Error("Missing tool call from OpenAI Responses - model did not use the tool");
 			}
 
 			// Provide a tool result
@@ -181,12 +181,12 @@ describe.skipIf(!process.env.OPENCore_API_KEY || !process.env.ANTHROPIC_API_KEY)
 			expect(responseText).toContain("42");
 		});
 
-		it("handles cross-provider handoff from Anthropic to OpenCore Codex", { retry: 2 }, async () => {
+		it("handles cross-provider handoff from Anthropic to OpenAI Codex", { retry: 2 }, async () => {
 			// This tests cross-provider handoff:
 			// 1. Anthropic model generates thinking + function_call (toolu_xxx ID)
-			// 2. User switches to OpenCore Codex
+			// 2. User switches to OpenAI Codex
 			// 3. transform-messages: isSameModel=false, thinking converted to text
-			// 4. Tool call ID is Anthropic format (toolu_xxx), no OpenCore pairing history
+			// 4. Tool call ID is Anthropic format (toolu_xxx), no OpenAI pairing history
 			// 5. Should work because foreign IDs have no pairing expectation
 
 			const anthropicModel = getModel("anthropic", "claude-sonnet-4-5");

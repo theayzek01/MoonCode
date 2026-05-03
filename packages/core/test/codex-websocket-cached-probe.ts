@@ -1,8 +1,8 @@
 #!/usr/bin/env tsx
 /**
- * Live probe for OpenCore Codex Responses websocket-cached mode.
+ * Live probe for OpenAI Codex Responses websocket-cached mode.
  *
- * Runs a simple tool loop directly against the moodcli-ai provider source so it does not
+ * Runs a simple tool loop directly against the Mooncli-ai provider source so it does not
  * depend on built dist packages or cli SDK wiring.
  */
 
@@ -12,10 +12,10 @@ import { Type } from "typebox";
 import { AuthStorage } from "../../cli/src/core/auth-storage.js";
 import { getModel } from "../src/models.js";
 import {
-	closeOpenCoreCodexWebSocketSessions,
-	getOpenCoreCodexWebSocketDebugStats,
-	resetOpenCoreCodexWebSocketDebugStats,
-	streamOpenCoreCodexResponses,
+	closeOpenAICodexWebSocketSessions,
+	getOpenAICodexWebSocketDebugStats,
+	resetOpenAICodexWebSocketDebugStats,
+	streamOpenAICodexResponses,
 } from "../src/providers/openai-codex-responses.js";
 import type { AssistantMessage, Context, Message, Model, Tool, ToolResultMessage, Transport } from "../src/types.js";
 
@@ -37,7 +37,7 @@ function parseArgs(argv: string[]): Args {
 	let transport: Transport = "websocket-cached";
 	let maxTokens = DEFAULT_MAX_TOKENS;
 	let reasoning: ThinkingLevel = "low";
-	let sessionId = `moodcli-ai-codex-ws-cached-probe-${Date.now()}`;
+	let sessionId = `Mooncli-ai-codex-ws-cached-probe-${Date.now()}`;
 
 	for (let i = 0; i < argv.length; i++) {
 		const arg = argv[i];
@@ -99,7 +99,7 @@ Options:
 function buildPrompt(turn: number): string {
 	const marker = `TURN-${String(turn).padStart(2, "0")}-MARKER-${(turn * 17 + 13) % 97}`;
 	const lines = [
-		"This is an automated OpenCore Codex Responses websocket cache probe.",
+		"This is an automated OpenAI Codex Responses websocket cache probe.",
 		`Task for turn ${turn}: call deterministic_probe exactly once before your final answer.`,
 		`Use tool arguments: turn=${turn}, marker=${marker}`,
 		`After the tool result arrives, reply exactly: TURN ${turn} OK ${marker}`,
@@ -107,7 +107,7 @@ function buildPrompt(turn: number): string {
 	];
 	for (let i = 1; i <= 180; i++) {
 		lines.push(
-			`Turn ${turn} synthetic record ${String(i).padStart(3, "0")}: alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu nu xi omicron moodcli rho sigma tau upsilon phi chi psi omega.`,
+			`Turn ${turn} synthetic record ${String(i).padStart(3, "0")}: alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu nu xi omicron Mooncli rho sigma tau upsilon phi chi psi omega.`,
 		);
 	}
 	return lines.join("\n");
@@ -162,7 +162,7 @@ async function main(): Promise<void> {
 	const authStorage = AuthStorage.create();
 	const apiKey = (await authStorage.getApiKey("openai-codex")) ?? (await authStorage.getApiKey("openai"));
 	if (!apiKey) {
-		throw new Error("No OpenCore Codex API key found in cli auth storage.");
+		throw new Error("No OpenAI Codex API key found in cli auth storage.");
 	}
 	const context: Context = {
 		systemPrompt:
@@ -171,7 +171,7 @@ async function main(): Promise<void> {
 		tools: [deterministicProbeTool()],
 	};
 	const elapsed: number[] = [];
-	resetOpenCoreCodexWebSocketDebugStats(args.sessionId);
+	resetOpenAICodexWebSocketDebugStats(args.sessionId);
 
 	console.log(`provider openai-codex, model gpt-5.5`);
 	console.log(`sessionId ${args.sessionId}`);
@@ -183,7 +183,7 @@ async function main(): Promise<void> {
 
 	for (let turn = 1; turn <= args.turns; turn++) {
 		context.messages.push({ role: "user", content: buildPrompt(turn), timestamp: Date.now() });
-		const beforeStats = getOpenCoreCodexWebSocketDebugStats(args.sessionId);
+		const beforeStats = getOpenAICodexWebSocketDebugStats(args.sessionId);
 		const started = Date.now();
 		let requests = 0;
 		let assistantCount = 0;
@@ -196,7 +196,7 @@ async function main(): Promise<void> {
 
 		while (true) {
 			requests++;
-			const message = await streamOpenCoreCodexResponses(modelWithMaxTokens, context, {
+			const message = await streamOpenAICodexResponses(modelWithMaxTokens, context, {
 				apiKey,
 				sessionId: args.sessionId,
 				transport: args.transport,
@@ -239,7 +239,7 @@ async function main(): Promise<void> {
 
 		const elapsedMs = Date.now() - started;
 		elapsed.push(elapsedMs);
-		const afterStats = getOpenCoreCodexWebSocketDebugStats(args.sessionId);
+		const afterStats = getOpenAICodexWebSocketDebugStats(args.sessionId);
 		const statLine = afterStats
 			? `ws requests ${afterStats.requests - (beforeStats?.requests ?? 0)} | new/reused ${afterStats.connectionsCreated - (beforeStats?.connectionsCreated ?? 0)}/${afterStats.connectionsReused - (beforeStats?.connectionsReused ?? 0)} | cached ${afterStats.cachedContextRequests - (beforeStats?.cachedContextRequests ?? 0)} | store ${afterStats.storeTrueRequests - (beforeStats?.storeTrueRequests ?? 0)} | full/delta ${afterStats.fullContextRequests - (beforeStats?.fullContextRequests ?? 0)}/${afterStats.deltaRequests - (beforeStats?.deltaRequests ?? 0)}`
 			: "ws none";
@@ -258,7 +258,7 @@ async function main(): Promise<void> {
 		);
 	}
 
-	const stats = getOpenCoreCodexWebSocketDebugStats(args.sessionId);
+	const stats = getOpenAICodexWebSocketDebugStats(args.sessionId);
 	console.log("");
 	console.log(
 		[
@@ -282,7 +282,7 @@ async function main(): Promise<void> {
 			`lastPreviousResponseId ${stats?.lastPreviousResponseId ?? "n/a"}`,
 		].join(" | "),
 	);
-	closeOpenCoreCodexWebSocketSessions(args.sessionId);
+	closeOpenAICodexWebSocketSessions(args.sessionId);
 }
 
 main().catch((error: unknown) => {

@@ -10,7 +10,7 @@ const mockState = vi.hoisted(() => ({
 }));
 
 vi.mock("openai", () => {
-	class FakeOpenCore {
+	class FakeOpenAI {
 		chat = {
 			completions: {
 				create: () => {
@@ -35,7 +35,7 @@ vi.mock("openai", () => {
 			},
 		};
 	}
-	return { default: FakeOpenCore };
+	return { default: FakeOpenAI };
 });
 
 function openRouterAuto(): Model<"openai-completions"> {

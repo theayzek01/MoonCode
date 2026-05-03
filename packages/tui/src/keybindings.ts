@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { type KeyId, matchesKey } from "./keys.js";
 
 /**

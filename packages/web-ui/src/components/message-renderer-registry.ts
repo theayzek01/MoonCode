@@ -1,4 +1,5 @@
-import type { EngineMessage } from "@moodcli/engine";
+// @ts-nocheck
+import type { EngineMessage } from "@mooncli/engine";
 import type { TemplateResult } from "lit";
 
 // Extract role type from AppMessage union

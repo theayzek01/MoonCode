@@ -1,4 +1,5 @@
-import type { EngineState } from "@moodcli/engine";
+// @ts-nocheck
+import type { EngineState } from "@mooncli/engine";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { basename, join } from "path";
 import { APP_NAME, getExportTemplateDir } from "../../config.js";

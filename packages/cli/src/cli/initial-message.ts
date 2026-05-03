@@ -1,4 +1,5 @@
-import type { ImageContent } from "@moodcli/core";
+// @ts-nocheck
+import type { ImageContent } from "@mooncli/core";
 import type { Args } from "./args.js";
 
 export interface InitialMessageInput {

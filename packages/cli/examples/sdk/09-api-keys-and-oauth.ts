@@ -4,10 +4,10 @@
  * Configure API key resolution via AuthStorage and ModelRegistry.
  */
 
-import { AuthStorage, createEngineSession, ModelRegistry, SessionManager } from "moodcli";
+import { AuthStorage, createEngineSession, ModelRegistry, SessionManager } from "Mooncli";
 
-// Default: AuthStorage uses ~/.moodcli/engine/auth.json
-// ModelRegistry loads built-in + custom models from ~/.moodcli/engine/models.json
+// Default: AuthStorage uses ~/.Mooncli/engine/auth.json
+// ModelRegistry loads built-in + custom models from ~/.Mooncli/engine/models.json
 const authStorage = AuthStorage.create();
 const modelRegistry = ModelRegistry.create(authStorage);
 

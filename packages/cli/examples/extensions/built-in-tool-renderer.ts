@@ -22,19 +22,19 @@
  *   toggled the tool output open (via ctrl+e or clicking)
  *
  * Usage:
- *   moodcli -e ./built-in-tool-renderer.ts
+ *   Mooncli -e ./built-in-tool-renderer.ts
  */
 
-import { Text } from "@moodcli/tui";
-import type { BashToolDetails, EditToolDetails, ExtensionAPI, ReadToolDetails } from "moodcli";
-import { createBashTool, createEditTool, createReadTool, createWriteTool } from "moodcli";
+import type { BashToolDetails, EditToolDetails, ExtensionAPI, ReadToolDetails } from "Mooncli";
+import { createBashTool, createEditTool, createReadTool, createWriteTool } from "Mooncli";
+import { Text } from "@mooncli/tui";
 
-export default function (moodcli: ExtensionAPI) {
+export default function (Mooncli: ExtensionAPI) {
 	const cwd = process.cwd();
 
 	// --- Read tool: show path and line count ---
 	const originalRead = createReadTool(cwd);
-	moodcli.registerTool({
+	Mooncli.registerTool({
 		name: "read",
 		label: "read",
 		description: originalRead.description,
@@ -93,7 +93,7 @@ export default function (moodcli: ExtensionAPI) {
 
 	// --- Bash tool: show command and exit code ---
 	const originalBash = createBashTool(cwd);
-	moodcli.registerTool({
+	Mooncli.registerTool({
 		name: "bash",
 		label: "bash",
 		description: originalBash.description,
@@ -152,7 +152,7 @@ export default function (moodcli: ExtensionAPI) {
 
 	// --- Edit tool: show path and diff stats ---
 	const originalEdit = createEditTool(cwd);
-	moodcli.registerTool({
+	Mooncli.registerTool({
 		name: "edit",
 		label: "edit",
 		description: originalEdit.description,
@@ -217,7 +217,7 @@ export default function (moodcli: ExtensionAPI) {
 
 	// --- Write tool: show path and size ---
 	const originalWrite = createWriteTool(cwd);
-	moodcli.registerTool({
+	Mooncli.registerTool({
 		name: "write",
 		label: "write",
 		description: originalWrite.description,

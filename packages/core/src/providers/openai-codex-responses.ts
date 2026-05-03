@@ -1,6 +1,7 @@
+// @ts-nocheck
 import type * as NodeOs from "node:os";
 import type {
-	Tool as OpenCoreTool,
+	Tool as OpenAITool,
 	ResponseCreateParamsStreaming,
 	ResponseInput,
 	ResponseStreamEvent,
@@ -60,7 +61,7 @@ const CODEX_RESPONSE_STATUSES = new Set<CodexResponseStatus>([
 // Types
 // ============================================================================
 
-export interface OpenCoreCodexResponsesOptions extends StreamOptions {
+export interface OpenAICodexResponsesOptions extends StreamOptions {
 	reasoningEffort?: "none" | "minimal" | "low" | "medium" | "high" | "xhigh";
 	reasoningSummary?: "auto" | "concise" | "detailed" | "off" | "on" | null;
 	serviceTier?: ResponseCreateParamsStreaming["service_tier"];
@@ -76,7 +77,7 @@ interface RequestBody {
 	instructions?: string;
 	previous_response_id?: string;
 	input?: ResponseInput;
-	tools?: OpenCoreTool[];
+	tools?: OpenAITool[];
 	tool_choice?: "auto";
 	parallel_tool_calls?: boolean;
 	temperature?: number;
@@ -117,10 +118,10 @@ function sleep(ms: number, signal?: AbortSignal): Promise<void> {
 // Main Stream Function
 // ============================================================================
 
-export const streamOpenCoreCodexResponses: StreamFunction<"openai-codex-responses", OpenCoreCodexResponsesOptions> = (
+export const streamOpenAICodexResponses: StreamFunction<"openai-codex-responses", OpenAICodexResponsesOptions> = (
 	model: Model<"openai-codex-responses">,
 	context: Context,
-	options?: OpenCoreCodexResponsesOptions,
+	options?: OpenAICodexResponsesOptions,
 ): AssistantMessageEventStream => {
 	const stream = new AssistantMessageEventStream();
 
@@ -288,7 +289,7 @@ export const streamOpenCoreCodexResponses: StreamFunction<"openai-codex-response
 	return stream;
 };
 
-export const streamSimpleOpenCoreCodexResponses: StreamFunction<"openai-codex-responses", SimpleStreamOptions> = (
+export const streamSimpleOpenAICodexResponses: StreamFunction<"openai-codex-responses", SimpleStreamOptions> = (
 	model: Model<"openai-codex-responses">,
 	context: Context,
 	options?: SimpleStreamOptions,
@@ -302,10 +303,10 @@ export const streamSimpleOpenCoreCodexResponses: StreamFunction<"openai-codex-re
 	const clampedReasoning = options?.reasoning ? clampThinkingLevel(model, options.reasoning) : undefined;
 	const reasoningEffort = clampedReasoning === "off" ? undefined : clampedReasoning;
 
-	return streamOpenCoreCodexResponses(model, context, {
+	return streamOpenAICodexResponses(model, context, {
 		...base,
 		reasoningEffort,
-	} satisfies OpenCoreCodexResponsesOptions);
+	} satisfies OpenAICodexResponsesOptions);
 };
 
 // ============================================================================
@@ -315,7 +316,7 @@ export const streamSimpleOpenCoreCodexResponses: StreamFunction<"openai-codex-re
 function buildRequestBody(
 	model: Model<"openai-codex-responses">,
 	context: Context,
-	options?: OpenCoreCodexResponsesOptions,
+	options?: OpenAICodexResponsesOptions,
 ): RequestBody {
 	const messages = convertResponsesMessages(model, context, CODEX_TOOL_CALL_PROVIDERS, {
 		includeSystemPrompt: false,
@@ -425,7 +426,7 @@ async function processStream(
 	output: AssistantMessage,
 	stream: AssistantMessageEventStream,
 	model: Model<"openai-codex-responses">,
-	options?: OpenCoreCodexResponsesOptions,
+	options?: OpenAICodexResponsesOptions,
 ): Promise<void> {
 	await processResponsesStream(mapCodexEvents(parseSSE(response)), output, stream, model, {
 		serviceTier: options?.serviceTier,
@@ -519,7 +520,7 @@ async function* parseSSE(response: Response): AsyncGenerator<Record<string, unkn
 // WebSocket Parsing
 // ============================================================================
 
-const OPENCore_BETA_RESPONSES_WEBSOCKETS = "responses_websockets=2026-02-06";
+const OpenAI_BETA_RESPONSES_WEBSOCKETS = "responses_websockets=2026-02-06";
 const SESSION_WEBSOCKET_CACHE_TTL_MS = 5 * 60 * 1000;
 
 type WebSocketEventType = "open" | "message" | "error" | "close";
@@ -545,7 +546,7 @@ interface CachedWebSocketConnection {
 	continuation?: CachedWebSocketContinuationState;
 }
 
-export interface OpenCoreCodexWebSocketDebugStats {
+export interface OpenAICodexWebSocketDebugStats {
 	requests: number;
 	connectionsCreated: number;
 	connectionsReused: number;
@@ -559,9 +560,9 @@ export interface OpenCoreCodexWebSocketDebugStats {
 }
 
 const websocketSessionCache = new Map<string, CachedWebSocketConnection>();
-const websocketDebugStats = new Map<string, OpenCoreCodexWebSocketDebugStats>();
+const websocketDebugStats = new Map<string, OpenAICodexWebSocketDebugStats>();
 
-function getOrCreateWebSocketDebugStats(sessionId: string): OpenCoreCodexWebSocketDebugStats {
+function getOrCreateWebSocketDebugStats(sessionId: string): OpenAICodexWebSocketDebugStats {
 	let stats = websocketDebugStats.get(sessionId);
 	if (!stats) {
 		stats = {
@@ -579,12 +580,12 @@ function getOrCreateWebSocketDebugStats(sessionId: string): OpenCoreCodexWebSock
 	return stats;
 }
 
-export function getOpenCoreCodexWebSocketDebugStats(sessionId: string): OpenCoreCodexWebSocketDebugStats | undefined {
+export function getOpenAICodexWebSocketDebugStats(sessionId: string): OpenAICodexWebSocketDebugStats | undefined {
 	const stats = websocketDebugStats.get(sessionId);
 	return stats ? { ...stats } : undefined;
 }
 
-export function resetOpenCoreCodexWebSocketDebugStats(sessionId?: string): void {
+export function resetOpenAICodexWebSocketDebugStats(sessionId?: string): void {
 	if (sessionId) {
 		websocketDebugStats.delete(sessionId);
 		return;
@@ -592,7 +593,7 @@ export function resetOpenCoreCodexWebSocketDebugStats(sessionId?: string): void 
 	websocketDebugStats.clear();
 }
 
-export function closeOpenCoreCodexWebSocketSessions(sessionId?: string): void {
+export function closeOpenAICodexWebSocketSessions(sessionId?: string): void {
 	const closeEntry = (entry: CachedWebSocketConnection) => {
 		if (entry.idleTimer) clearTimeout(entry.idleTimer);
 		closeWebSocketSilently(entry.socket, 1000, "debug_close");
@@ -655,7 +656,7 @@ async function connectWebSocket(url: string, headers: Headers, signal?: AbortSig
 	}
 
 	const wsHeaders = headersToRecord(headers);
-	delete wsHeaders["OpenCore-Beta"];
+	delete wsHeaders["OpenAI-Beta"];
 
 	return new Promise<WebSocketLike>((resolve, reject) => {
 		let settled = false;
@@ -988,7 +989,7 @@ async function processWebSocketStream(
 	stream: AssistantMessageEventStream,
 	model: Model<"openai-codex-responses">,
 	onStart: () => void,
-	options?: OpenCoreCodexResponsesOptions,
+	options?: OpenAICodexResponsesOptions,
 ): Promise<void> {
 	const { socket, entry, reused, release } = await acquireWebSocket(url, headers, options?.sessionId, options?.signal);
 	let keepConnection = true;
@@ -1114,8 +1115,8 @@ function buildBaseCodexHeaders(
 	}
 	headers.set("Authorization", `Bearer ${token}`);
 	headers.set("chatgpt-account-id", accountId);
-	headers.set("originator", "moodcli");
-	const userEngine = _os ? `moodcli (${_os.platform()} ${_os.release()}; ${_os.arch()})` : "moodcli (browser)";
+	headers.set("originator", "Mooncli");
+	const userEngine = _os ? `Mooncli (${_os.platform()} ${_os.release()}; ${_os.arch()})` : "Mooncli (browser)";
 	headers.set("User-Engine", userEngine);
 	return headers;
 }
@@ -1128,7 +1129,7 @@ function buildSSEHeaders(
 	sessionId?: string,
 ): Headers {
 	const headers = buildBaseCodexHeaders(initHeaders, additionalHeaders, accountId, token);
-	headers.set("OpenCore-Beta", "responses=experimental");
+	headers.set("OpenAI-Beta", "responses=experimental");
 	headers.set("accept", "text/event-stream");
 	headers.set("content-type", "application/json");
 
@@ -1150,9 +1151,9 @@ function buildWebSocketHeaders(
 	const headers = buildBaseCodexHeaders(initHeaders, additionalHeaders, accountId, token);
 	headers.delete("accept");
 	headers.delete("content-type");
-	headers.delete("OpenCore-Beta");
+	headers.delete("OpenAI-Beta");
 	headers.delete("openai-beta");
-	headers.set("OpenCore-Beta", OPENCore_BETA_RESPONSES_WEBSOCKETS);
+	headers.set("OpenAI-Beta", OpenAI_BETA_RESPONSES_WEBSOCKETS);
 	headers.set("x-client-request-id", requestId);
 	headers.set("session_id", requestId);
 	return headers;

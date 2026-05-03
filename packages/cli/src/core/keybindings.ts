@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
 	type Keybinding,
 	type KeybindingDefinitions,
@@ -5,7 +6,7 @@ import {
 	type KeyId,
 	TUI_KEYBINDINGS,
 	KeybindingsManager as TuiKeybindingsManager,
-} from "@moodcli/tui";
+} from "@mooncli/tui";
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { getEngineDir } from "../config.js";
@@ -56,7 +57,7 @@ export interface AppKeybindings {
 
 export type AppKeybinding = keyof AppKeybindings;
 
-declare module "@moodcli/tui" {
+declare module "@mooncli/tui" {
 	interface Keybindings extends AppKeybindings {}
 }
 

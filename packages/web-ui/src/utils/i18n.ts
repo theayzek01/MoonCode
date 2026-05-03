@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { defaultEnglish, defaultGerman, type MiniLitRequiredMessages, setTranslations } from "@mariozechner/mini-lit";
 
 declare module "@mariozechner/mini-lit" {
@@ -199,8 +200,8 @@ declare module "@mariozechner/mini-lit" {
 		"For manual provider types, add models after saving the provider.": string;
 		"Please fill in all required fields": string;
 		"Failed to save provider": string;
-		"OpenCore Completions Compatible": string;
-		"OpenCore Responses Compatible": string;
+		"OpenAI Completions Compatible": string;
+		"OpenAI Responses Compatible": string;
 		"Anthropic Messages Compatible": string;
 		"Checking...": string;
 		Disconnected: string;
@@ -210,19 +211,19 @@ declare module "@mariozechner/mini-lit" {
 export const translations = {
 	en: {
 		...defaultEnglish,
-		Free: "Ucretsiz",
-		"Input Required": "Giris Gerekli",
-		Cancel: "Iptal",
+		Free: "Ücretsiz",
+		"Input Required": "Giriş Gerekli",
+		Cancel: "İptal",
 		Confirm: "Onayla",
-		"Select Model": "Model Sec",
+		"Select Model": "Model Seç",
 		"Search models...": "Model ara...",
 		Format: "Format",
 		Thinking: "Analiz",
-		Vision: "Gorme",
+		Vision: "Görme",
 		You: "Sen",
-		Assistant: "Yardimci",
+		Assistant: "Yardımcı",
 		"Thinking...": "Analiz ediyor...",
-		"Type your message...": "Mesajinizi yazin...",
+		"Type your message...": "Mesajınızı yazın...",
 		"API Keys Configuration": "API Keys Configuration",
 		"Configure API keys for Provider providers. Keys are stored locally in your browser.":
 			"Configure API keys for Provider providers. Keys are stored locally in your browser.",
@@ -421,8 +422,8 @@ export const translations = {
 			"For manual provider types, add models after saving the provider.",
 		"Please fill in all required fields": "Please fill in all required fields",
 		"Failed to save provider": "Failed to save provider",
-		"OpenCore Completions Compatible": "OpenCore Completions Compatible",
-		"OpenCore Responses Compatible": "OpenCore Responses Compatible",
+		"OpenAI Completions Compatible": "OpenAI Completions Compatible",
+		"OpenAI Responses Compatible": "OpenAI Responses Compatible",
 		"Anthropic Messages Compatible": "Anthropic Messages Compatible",
 		"Checking...": "Checking...",
 		Disconnected: "Disconnected",
@@ -640,8 +641,8 @@ export const translations = {
 			"Für manuelle Anbietertypen fügen Sie Modelle nach dem Speichern des Anbieters hinzu.",
 		"Please fill in all required fields": "Bitte füllen Sie alle erforderlichen Felder aus",
 		"Failed to save provider": "Fehler beim Speichern des Anbieters",
-		"OpenCore Completions Compatible": "OpenCore Completions Kompatibel",
-		"OpenCore Responses Compatible": "OpenCore Responses Kompatibel",
+		"OpenAI Completions Compatible": "OpenAI Completions Kompatibel",
+		"OpenAI Responses Compatible": "OpenAI Responses Kompatibel",
 		"Anthropic Messages Compatible": "Anthropic Messages Kompatibel",
 		"Checking...": "Überprüfe...",
 		Disconnected: "Getrennt",

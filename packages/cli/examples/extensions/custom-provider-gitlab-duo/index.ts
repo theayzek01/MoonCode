@@ -2,13 +2,14 @@
  * GitLab Duo Provider Extension
  *
  * Provides access to GitLab Duo Core models (Claude and GPT) through GitLab's Core Gateway.
- * Delegates to moodcli-ai's built-in Anthropic and OpenCore streaming implementations.
+ * Delegates to Mooncli-ai's built-in Anthropic and OpenAI streaming implementations.
  *
  * Usage:
- *   moodcli -e ./packages/cli/examples/extensions/custom-provider-gitlab-duo
+ *   Mooncli -e ./packages/cli/examples/extensions/custom-provider-gitlab-duo
  *   # Then /login gitlab-duo, or set GITLAB_TOKEN=glpat-...
  */
 
+import type { ExtensionAPI } from "Mooncli";
 import {
 	type Api,
 	type AssistantMessageEventStream,
@@ -19,9 +20,8 @@ import {
 	type OAuthLoginCallbacks,
 	type SimpleStreamOptions,
 	streamSimpleAnthropic,
-	streamSimpleOpenCoreResponses,
-} from "@moodcli/core";
-import type { ExtensionAPI } from "moodcli";
+	streamSimpleOpenAIResponses,
+} from "@mooncli/core";
 
 // =============================================================================
 // Constants
@@ -30,7 +30,7 @@ import type { ExtensionAPI } from "moodcli";
 const GITLAB_COM_URL = "https://gitlab.com";
 const Core_GATEWAY_URL = "https://cloud.gitlab.com";
 const ANTHROPIC_PROXY_URL = `${Core_GATEWAY_URL}/ai/v1/proxy/anthropic/`;
-const OPENCore_PROXY_URL = `${Core_GATEWAY_URL}/ai/v1/proxy/openai/v1`;
+const OpenAI_PROXY_URL = `${Core_GATEWAY_URL}/ai/v1/proxy/openai/v1`;
 
 const BUNDLED_CLIENT_ID = "da4edff2e6ebd2bc3208611e2768bc1c1dd7be791dc5ff26ca34ca9ee44f7d4b";
 const OAUTH_SCOPES = ["api"];
@@ -90,12 +90,12 @@ export const MODELS: GitLabModel[] = [
 		contextWindow: 200000,
 		maxTokens: 8192,
 	},
-	// OpenCore (all use Responses API)
+	// OpenAI (all use Responses API)
 	{
 		id: "gpt-5.1-2025-11-13",
 		name: "GPT-5.1",
 		backend: "openai",
-		baseUrl: OPENCore_PROXY_URL,
+		baseUrl: OpenAI_PROXY_URL,
 		reasoning: true,
 		input: ["text", "image"],
 		cost: { input: 2.5, output: 10, cacheRead: 0, cacheWrite: 0 },
@@ -106,7 +106,7 @@ export const MODELS: GitLabModel[] = [
 		id: "gpt-5-mini-2025-08-07",
 		name: "GPT-5 Mini",
 		backend: "openai",
-		baseUrl: OPENCore_PROXY_URL,
+		baseUrl: OpenAI_PROXY_URL,
 		reasoning: true,
 		input: ["text", "image"],
 		cost: { input: 0.15, output: 0.6, cacheRead: 0, cacheWrite: 0 },
@@ -117,7 +117,7 @@ export const MODELS: GitLabModel[] = [
 		id: "gpt-5-codex",
 		name: "GPT-5 Codex",
 		backend: "openai",
-		baseUrl: OPENCore_PROXY_URL,
+		baseUrl: OpenAI_PROXY_URL,
 		reasoning: true,
 		input: ["text", "image"],
 		cost: { input: 2.5, output: 10, cacheRead: 0, cacheWrite: 0 },
@@ -286,7 +286,7 @@ export function streamGitLabDuo(
 			const innerStream =
 				cfg.backend === "anthropic"
 					? streamSimpleAnthropic(modelWithBaseUrl as Model<"anthropic-messages">, context, streamOptions)
-					: streamSimpleOpenCoreResponses(modelWithBaseUrl as Model<"openai-responses">, context, streamOptions);
+					: streamSimpleOpenAIResponses(modelWithBaseUrl as Model<"openai-responses">, context, streamOptions);
 
 			for await (const event of innerStream) stream.push(event);
 			stream.end();
@@ -324,8 +324,8 @@ export function streamGitLabDuo(
 // Extension Entry Point
 // =============================================================================
 
-export default function (moodcli: ExtensionAPI) {
-	moodcli.registerProvider("gitlab-duo", {
+export default function (Mooncli: ExtensionAPI) {
+	Mooncli.registerProvider("gitlab-duo", {
 		baseUrl: Core_GATEWAY_URL,
 		apiKey: "GITLAB_TOKEN",
 		api: "gitlab-duo-api",

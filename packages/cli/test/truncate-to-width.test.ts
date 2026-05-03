@@ -1,4 +1,4 @@
-import { truncateToWidth, visibleWidth } from "@moodcli/tui";
+import { truncateToWidth, visibleWidth } from "@mooncli/tui";
 import { describe, expect, it } from "vitest";
 
 /**

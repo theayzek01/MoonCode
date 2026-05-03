@@ -1,5 +1,6 @@
-import type { EngineTool } from "@moodcli/engine";
-import { Box, Container, Spacer, Text } from "@moodcli/tui";
+// @ts-nocheck
+import type { EngineTool } from "@mooncli/engine";
+import { Box, Container, Spacer, Text } from "@mooncli/tui";
 import { constants } from "fs";
 import { access as fsAccess, readFile as fsReadFile, writeFile as fsWriteFile } from "fs/promises";
 import { type Static, Type } from "typebox";

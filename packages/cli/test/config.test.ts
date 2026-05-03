@@ -42,11 +42,11 @@ afterEach(() => {
 	}
 });
 
-function createNpmPrefixInstall(template = "moodcli-prefix-"): { prefix: string; packageDir: string } {
+function createNpmPrefixInstall(template = "Mooncli-prefix-"): { prefix: string; packageDir: string } {
 	const prefix = mkdtempSync(join(tmpdir(), template));
 	const root = join(prefix, "lib", "node_modules");
 	const scopeDir = join(root, "@mariozechner");
-	const packageDir = join(scopeDir, "moodcli-cli");
+	const packageDir = join(scopeDir, "Mooncli-cli");
 	mkdirSync(packageDir, { recursive: true });
 	tempDir = prefix;
 	process.env.PI_PACKAGE_DIR = packageDir;
@@ -55,12 +55,12 @@ function createNpmPrefixInstall(template = "moodcli-prefix-"): { prefix: string;
 }
 
 function createBunGlobalInstall(): { packageDir: string } {
-	const temp = mkdtempSync(join(tmpdir(), "moodcli-bun-"));
+	const temp = mkdtempSync(join(tmpdir(), "Mooncli-bun-"));
 	const prefix = join(temp, ".bun");
 	const bunBin = join(prefix, "bin");
 	const root = join(prefix, "install", "global", "node_modules");
 	const scopeDir = join(root, "@mariozechner");
-	const packageDir = join(scopeDir, "moodcli-cli");
+	const packageDir = join(scopeDir, "Mooncli-cli");
 	mkdirSync(packageDir, { recursive: true });
 	mkdirSync(bunBin, { recursive: true });
 	writeFileSync(join(bunBin, process.platform === "win32" ? "bun.cmd" : "bun"), createFakeBunScript(bunBin));
@@ -83,83 +83,83 @@ function createFakeBunScript(bunBin: string): string {
 describe("detectInstallMethod", () => {
 	test("detects pnpm from Windows .pnpm install paths", () => {
 		setExecPath(
-			"C:\\Users\\Admin\\Documents\\pnpm-repository\\global\\5\\.pnpm\\@mariozechner+moodcli-cli@0.67.68\\node_modules\\@mariozechner\\moodcli-cli\\dist\\cli.js",
+			"C:\\Users\\Admin\\Documents\\pnpm-repository\\global\\5\\.pnpm\\@mariozechner+Mooncli-cli@0.67.68\\node_modules\\@mariozechner\\Mooncli-cli\\dist\\cli.js",
 		);
 
 		expect(detectInstallMethod()).toBe("pnpm");
-		expect(getUpdateInstruction("moodcli")).toBe("Run: pnpm install -g moodcli");
+		expect(getUpdateInstruction("Mooncli")).toBe("Run: pnpm install -g Mooncli");
 	});
 
 	test("does not self-update unknown wrapper installs", () => {
 		setExecPath("/usr/local/bin/node");
 
 		expect(detectInstallMethod()).toBe("unknown");
-		expect(getSelfUpdateCommand("moodcli")).toBeUndefined();
-		expect(getUpdateInstruction("moodcli")).toBe(
-			"Update moodcli using the package manager, wrapper, or source checkout that provides this installation.",
+		expect(getSelfUpdateCommand("Mooncli")).toBeUndefined();
+		expect(getUpdateInstruction("Mooncli")).toBe(
+			"Update Mooncli using the package manager, wrapper, or source checkout that provides this installation.",
 		);
 	});
 
 	test("self-updates npm installs from custom prefixes", () => {
 		const { prefix } = createNpmPrefixInstall();
 
-		const command = getSelfUpdateCommand("moodcli");
+		const command = getSelfUpdateCommand("Mooncli");
 
 		expect(detectInstallMethod()).toBe("npm");
 		expect(command).toEqual({
 			command: "npm",
-			args: ["--prefix", prefix, "install", "-g", "moodcli"],
-			display: `npm --prefix ${prefix} install -g moodcli`,
+			args: ["--prefix", prefix, "install", "-g", "Mooncli"],
+			display: `npm --prefix ${prefix} install -g Mooncli`,
 		});
 	});
 
 	test("self-update respects configured npmCommand", () => {
 		const { prefix } = createNpmPrefixInstall();
 
-		const command = getSelfUpdateCommand("moodcli", ["npm", "--prefix", prefix]);
+		const command = getSelfUpdateCommand("Mooncli", ["npm", "--prefix", prefix]);
 
 		expect(command).toEqual({
 			command: "npm",
-			args: ["--prefix", prefix, "install", "-g", "moodcli"],
-			display: `npm --prefix ${prefix} install -g moodcli`,
+			args: ["--prefix", prefix, "install", "-g", "Mooncli"],
+			display: `npm --prefix ${prefix} install -g Mooncli`,
 		});
 	});
 
 	test("self-update treats empty npmCommand as unset", () => {
 		const { prefix } = createNpmPrefixInstall();
 
-		const command = getSelfUpdateCommand("moodcli", []);
+		const command = getSelfUpdateCommand("Mooncli", []);
 
-		expect(command?.args).toEqual(["--prefix", prefix, "install", "-g", "moodcli"]);
+		expect(command?.args).toEqual(["--prefix", prefix, "install", "-g", "Mooncli"]);
 	});
 
 	test("quotes npm self-update display paths", () => {
-		const { prefix } = createNpmPrefixInstall("moodcli prefix ");
+		const { prefix } = createNpmPrefixInstall("Mooncli prefix ");
 
-		const command = getSelfUpdateCommand("moodcli");
+		const command = getSelfUpdateCommand("Mooncli");
 
-		expect(command?.display).toBe(`npm --prefix "${prefix}" install -g moodcli`);
+		expect(command?.display).toBe(`npm --prefix "${prefix}" install -g Mooncli`);
 	});
 
 	test("does not infer Windows npm custom prefixes from package paths", () => {
-		const packageDir = "C:\\Users\\Admin\\npm prefix\\node_modules\\@mariozechner\\moodcli-cli";
+		const packageDir = "C:\\Users\\Admin\\npm prefix\\node_modules\\@mariozechner\\Mooncli-cli";
 		process.env.PI_PACKAGE_DIR = packageDir;
 		setExecPath(`${packageDir}\\dist\\cli.js`);
 
 		expect(detectInstallMethod()).toBe("npm");
-		expect(getUpdateInstruction("moodcli")).toBe("Run: npm install -g moodcli");
+		expect(getUpdateInstruction("Mooncli")).toBe("Run: npm install -g Mooncli");
 	});
 
 	test("self-updates bun global installs from bun pm bin", () => {
 		createBunGlobalInstall();
 
-		const command = getSelfUpdateCommand("moodcli");
+		const command = getSelfUpdateCommand("Mooncli");
 
 		expect(detectInstallMethod()).toBe("bun");
 		expect(command).toEqual({
 			command: "bun",
-			args: ["install", "-g", "moodcli"],
-			display: "bun install -g moodcli",
+			args: ["install", "-g", "Mooncli"],
+			display: "bun install -g Mooncli",
 		});
 	});
 
@@ -167,7 +167,7 @@ describe("detectInstallMethod", () => {
 		const { packageDir } = createNpmPrefixInstall();
 		chmodSync(packageDir, 0o500);
 
-		expect(getSelfUpdateCommand("moodcli")).toBeUndefined();
-		expect(getSelfUpdateUnavailableInstruction("moodcli")).toContain("the install path is not writable");
+		expect(getSelfUpdateCommand("Mooncli")).toBeUndefined();
+		expect(getSelfUpdateUnavailableInstruction("Mooncli")).toContain("the install path is not writable");
 	});
 });

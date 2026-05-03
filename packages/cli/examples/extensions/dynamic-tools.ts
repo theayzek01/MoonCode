@@ -7,7 +7,7 @@
  * - Registers additional tools at runtime via /add-echo-tool <name>
  */
 
-import type { ExtensionAPI } from "moodcli";
+import type { ExtensionAPI } from "Mooncli";
 import { Type } from "typebox";
 
 const ECHO_PARAMS = Type.Object({
@@ -21,7 +21,7 @@ function normalizeToolName(input: string): string | undefined {
 	return trimmed;
 }
 
-export default function dynamicToolsExtension(moodcli: ExtensionAPI) {
+export default function dynamicToolsExtension(Mooncli: ExtensionAPI) {
 	const registeredToolNames = new Set<string>();
 
 	const registerEchoTool = (name: string, label: string, prefix: string): boolean => {
@@ -30,7 +30,7 @@ export default function dynamicToolsExtension(moodcli: ExtensionAPI) {
 		}
 
 		registeredToolNames.add(name);
-		moodcli.registerTool({
+		Mooncli.registerTool({
 			name,
 			label,
 			description: `Echo a message with prefix: ${prefix}`,
@@ -48,12 +48,12 @@ export default function dynamicToolsExtension(moodcli: ExtensionAPI) {
 		return true;
 	};
 
-	moodcli.on("session_start", (_event, ctx) => {
+	Mooncli.on("session_start", (_event, ctx) => {
 		registerEchoTool("echo_session", "Echo Session", "[session] ");
 		ctx.ui.notify("Registered dynamic tool: echo_session", "info");
 	});
 
-	moodcli.registerCommand("add-echo-tool", {
+	Mooncli.registerCommand("add-echo-tool", {
 		description: "Register a new echo tool dynamically: /add-echo-tool <tool_name>",
 		handler: async (args, ctx) => {
 			const toolName = normalizeToolName(args);

@@ -1,6 +1,6 @@
 import { Buffer } from "node:buffer";
-import type { EngineTool } from "@moodcli/engine";
-import { fauxAssistantMessage, fauxToolCall } from "@moodcli/core";
+import { fauxAssistantMessage, fauxToolCall } from "@mooncli/core";
+import type { EngineTool } from "@mooncli/engine";
 import { Type } from "typebox";
 import { afterEach, describe, expect, it } from "vitest";
 import type { BashOperations } from "../../src/core/tools/bash.js";

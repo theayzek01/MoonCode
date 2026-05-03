@@ -7,7 +7,7 @@ import { SettingsManager } from "../src/core/settings-manager.js";
  * Tests for the fix to a bug where external file changes to arrays were overwritten.
  *
  * The bug scenario was:
- * 1. Moodcli starts with settings.json containing packages: ["npm:some-pkg"]
+ * 1. Mooncli starts with settings.json containing packages: ["npm:some-pkg"]
  * 2. User externally edits file to packages: []
  * 3. User changes an unrelated setting (e.g., theme) via UI
  * 4. save() would overwrite packages back to ["npm:some-pkg"] from stale in-memory state
@@ -25,7 +25,7 @@ describe("SettingsManager - External Edit Preservation", () => {
 			rmSync(testDir, { recursive: true });
 		}
 		mkdirSync(engineDir, { recursive: true });
-		mkdirSync(join(projectDir, ".moodcli"), { recursive: true });
+		mkdirSync(join(projectDir, ".Mooncli"), { recursive: true });
 	});
 
 	afterEach(() => {
@@ -42,15 +42,15 @@ describe("SettingsManager - External Edit Preservation", () => {
 			settingsPath,
 			JSON.stringify({
 				theme: "dark",
-				packages: ["npm:moodcli-mcp-adapter"],
+				packages: ["npm:Mooncli-mcp-adapter"],
 			}),
 		);
 
-		// Moodcli starts up, loads settings into memory
+		// Mooncli starts up, loads settings into memory
 		const manager = SettingsManager.create(projectDir, engineDir);
 
-		// At this point, globalSettings.packages = ["npm:moodcli-mcp-adapter"]
-		expect(manager.getPackages()).toEqual(["npm:moodcli-mcp-adapter"]);
+		// At this point, globalSettings.packages = ["npm:Mooncli-mcp-adapter"]
+		expect(manager.getPackages()).toEqual(["npm:Mooncli-mcp-adapter"]);
 
 		// User externally edits settings.json to remove the package
 		const currentSettings = JSON.parse(readFileSync(settingsPath, "utf-8"));
@@ -100,7 +100,7 @@ describe("SettingsManager - External Edit Preservation", () => {
 	});
 
 	it("should preserve external project settings changes when updating unrelated project field", async () => {
-		const projectSettingsPath = join(projectDir, ".moodcli", "settings.json");
+		const projectSettingsPath = join(projectDir, ".Mooncli", "settings.json");
 		writeFileSync(
 			projectSettingsPath,
 			JSON.stringify({
@@ -124,7 +124,7 @@ describe("SettingsManager - External Edit Preservation", () => {
 	});
 
 	it("should let in-memory project changes override external changes for the same project field", async () => {
-		const projectSettingsPath = join(projectDir, ".moodcli", "settings.json");
+		const projectSettingsPath = join(projectDir, ".Mooncli", "settings.json");
 		writeFileSync(
 			projectSettingsPath,
 			JSON.stringify({

@@ -1,5 +1,5 @@
 {
-  "name": "moodcli-extension-with-deps",
+  "name": "mooncli-extension-with-deps",
   "private": true,
   "version": "0.72.1",
   "type": "module",
@@ -8,7 +8,7 @@
     "build": "echo 'nothing to build'",
     "check": "echo 'nothing to check'"
   },
-  "moodcli": {
+  "mooncli": {
     "extensions": [
       "./index.ts"
     ]

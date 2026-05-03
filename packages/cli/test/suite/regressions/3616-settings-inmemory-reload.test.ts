@@ -10,7 +10,7 @@ describe("regression #3616: in-memory settings survive reload", () => {
 	let engineDir: string;
 
 	beforeEach(() => {
-		tempDir = join(tmpdir(), `moodcli-settings-inmemory-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+		tempDir = join(tmpdir(), `Mooncli-settings-inmemory-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 		engineDir = join(tempDir, "engine");
 		mkdirSync(engineDir, { recursive: true });
 	});

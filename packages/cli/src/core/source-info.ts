@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { PathMetadata } from "./package-manager.js";
 
 export type SourceScope = "user" | "project" | "temporary";

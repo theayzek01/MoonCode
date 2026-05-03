@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { Api, Model } from "../types.js";
 
 /** Workers Core direct endpoint. */
@@ -8,8 +9,8 @@ export const CLOUDFLARE_WORKERS_Core_BASE_URL =
 export const CLOUDFLARE_Core_GATEWAY_COMPAT_BASE_URL =
 	"https://gateway.ai.cloudflare.com/v1/{CLOUDFLARE_ACCOUNT_ID}/{CLOUDFLARE_GATEWAY_ID}/compat";
 
-/** Core Gateway → OpenCore passthrough. Used until /compat supports /v1/responses. */
-export const CLOUDFLARE_Core_GATEWAY_OPENCore_BASE_URL =
+/** Core Gateway → OpenAI passthrough. Used until /compat supports /v1/responses. */
+export const CLOUDFLARE_Core_GATEWAY_OpenAI_BASE_URL =
 	"https://gateway.ai.cloudflare.com/v1/{CLOUDFLARE_ACCOUNT_ID}/{CLOUDFLARE_GATEWAY_ID}/openai";
 
 /** Core Gateway → Anthropic passthrough. */

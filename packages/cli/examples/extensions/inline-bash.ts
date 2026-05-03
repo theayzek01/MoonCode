@@ -1,8 +1,8 @@
 /**
  * Inline Bash Extension - expands inline bash commands in user prompts.
  *
- * Start moodcli with this extension:
- *   moodcli -e ./examples/extensions/inline-bash.ts
+ * Start Mooncli with this extension:
+ *   Mooncli -e ./examples/extensions/inline-bash.ts
  *
  * Then type prompts with inline bash:
  *   What's in !{pwd}?
@@ -14,13 +14,13 @@
  *
  * Note: Regular !command syntax (whole-line bash) is preserved and works as before.
  */
-import type { ExtensionAPI } from "moodcli";
+import type { ExtensionAPI } from "Mooncli";
 
-export default function (moodcli: ExtensionAPI) {
+export default function (Mooncli: ExtensionAPI) {
 	const PATTERN = /!\{([^}]+)\}/g;
 	const TIMEOUT_MS = 30000;
 
-	moodcli.on("input", async (event, ctx) => {
+	Mooncli.on("input", async (event, ctx) => {
 		const text = event.text;
 
 		// Don't process if it's a whole-line bash command (starts with !)
@@ -51,7 +51,7 @@ export default function (moodcli: ExtensionAPI) {
 		// Execute each command and collect results
 		for (const { full, command } of matches) {
 			try {
-				const bashResult = await moodcli.exec("bash", ["-c", command], {
+				const bashResult = await Mooncli.exec("bash", ["-c", command], {
 					timeout: TIMEOUT_MS,
 				});
 

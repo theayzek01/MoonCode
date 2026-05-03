@@ -5,12 +5,12 @@
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { EngineMessage, EngineTool } from "@moodcli/engine";
-import { Engine } from "@moodcli/engine";
-import type { FauxModelDefinition, FauxProviderRegistration, FauxResponseStep, Model } from "@moodcli/core";
-import { registerFauxProvider } from "@moodcli/core";
-import { EngineSession, type EngineSessionEvent } from "../../src/core/engine-session.js";
+import type { FauxModelDefinition, FauxProviderRegistration, FauxResponseStep, Model } from "@mooncli/core";
+import { registerFauxProvider } from "@mooncli/core";
+import type { EngineMessage, EngineTool } from "@mooncli/engine";
+import { Engine } from "@mooncli/engine";
 import { AuthStorage } from "../../src/core/auth-storage.js";
+import { EngineSession, type EngineSessionEvent } from "../../src/core/engine-session.js";
 import type { ExtensionRunner } from "../../src/core/extensions/index.js";
 import { convertToLlm } from "../../src/core/messages.js";
 import { ModelRegistry } from "../../src/core/model-registry.js";
@@ -84,7 +84,7 @@ export interface Harness {
 }
 
 function createTempDir(): string {
-	const tempDir = join(tmpdir(), `moodcli-suite-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+	const tempDir = join(tmpdir(), `Mooncli-suite-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 	mkdirSync(tempDir, { recursive: true });
 	return tempDir;
 }

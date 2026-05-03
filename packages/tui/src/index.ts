@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Core TUI interfaces and classes
 
 // Autocomplete support

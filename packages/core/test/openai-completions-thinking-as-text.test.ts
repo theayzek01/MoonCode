@@ -2,13 +2,13 @@ import { once } from "node:events";
 import http from "node:http";
 import type { AddressInfo } from "node:net";
 import { afterEach, describe, expect, it } from "vitest";
-import { convertMessages, streamOpenCoreCompletions } from "../src/providers/openai-completions.js";
+import { convertMessages, streamOpenAICompletions } from "../src/providers/openai-completions.js";
 import type {
 	AssistantMessage,
 	AssistantMessageEvent,
 	Context,
 	Model,
-	OpenCoreCompletionsCompat,
+	OpenAICompletionsCompat,
 	Usage,
 } from "../src/types.js";
 
@@ -39,8 +39,8 @@ const compat = {
 	cacheControlFormat: undefined,
 	sendSessionAffinityHeaders: false,
 	supportsLongCacheRetention: true,
-} satisfies Required<Omit<OpenCoreCompletionsCompat, "cacheControlFormat">> & {
-	cacheControlFormat?: OpenCoreCompletionsCompat["cacheControlFormat"];
+} satisfies Required<Omit<OpenAICompletionsCompat, "cacheControlFormat">> & {
+	cacheControlFormat?: OpenAICompletionsCompat["cacheControlFormat"];
 };
 
 function buildModel(baseUrl = "http://127.0.0.1:1"): Model<"openai-completions"> {
@@ -99,7 +99,7 @@ interface ChatCompletionsRequestBody {
 
 describe("openai-completions thinking-as-text replay", () => {
 	afterEach(() => {
-		delete process.env.OPENCore_API_KEY;
+		delete process.env.OpenAI_API_KEY;
 	});
 
 	it("serializes same-model thinking-plus-text replay as assistant text parts", () => {
@@ -184,7 +184,7 @@ describe("openai-completions thinking-as-text replay", () => {
 		try {
 			const { port } = server.address() as AddressInfo;
 			const events = await collectEvents(
-				streamOpenCoreCompletions(
+				streamOpenAICompletions(
 					buildModel(`http://127.0.0.1:${port}`),
 					buildContext(
 						buildAssistant([

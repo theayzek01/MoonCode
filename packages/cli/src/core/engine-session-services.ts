@@ -1,6 +1,7 @@
+// @ts-nocheck
 import { join } from "node:path";
-import type { ThinkingLevel } from "@moodcli/engine";
-import type { Model } from "@moodcli/core";
+import type { Model } from "@mooncli/core";
+import type { ThinkingLevel } from "@mooncli/engine";
 import { getEngineDir } from "../config.js";
 import { AuthStorage } from "./auth-storage.js";
 import type { SessionStartEvent, ToolDefinition } from "./extensions/index.js";

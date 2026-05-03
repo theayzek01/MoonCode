@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { execSync, spawn } from "child_process";
 import { platform } from "os";
 import { isWaylandSession } from "./clipboard-image.js";

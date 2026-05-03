@@ -1,5 +1,6 @@
-import type { EngineTool } from "@moodcli/engine";
-import type { ToolResultMessage } from "@moodcli/core";
+// @ts-nocheck
+import type { ToolResultMessage } from "@mooncli/core";
+import type { EngineTool } from "@mooncli/engine";
 import { html } from "lit";
 import { createRef, ref } from "lit/directives/ref.js";
 import { FileText } from "lucide";

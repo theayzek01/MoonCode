@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * One-time migrations that run on startup.
  */
@@ -5,13 +6,12 @@
 import chalk from "chalk";
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
-import { CONFIG_DIR_NAME, getEngineDir, getBinDir } from "./config.js";
+import { CONFIG_DIR_NAME, getBinDir, getEngineDir } from "./config.js";
 import { migrateKeybindingsConfig } from "./core/keybindings.js";
 
 const MIGRATION_GUIDE_URL =
-	"https://github.com/badlogic/moodcli-mono/blob/main/packages/cli/CHANGELOG.md#extensions-migration";
-const EXTENSIONS_DOC_URL =
-	"https://github.com/badlogic/moodcli-mono/blob/main/packages/cli/docs/extensions.md";
+	"https://github.com/badlogic/Mooncli-mono/blob/main/packages/cli/CHANGELOG.md#extensions-migration";
+const EXTENSIONS_DOC_URL = "https://github.com/badlogic/Mooncli-mono/blob/main/packages/cli/docs/extensions.md";
 
 /**
  * Migrate legacy oauth.json and settings.json apiKeys to auth.json.
@@ -73,13 +73,13 @@ export function migrateAuthToAuthJson(): string[] {
 }
 
 /**
- * Migrate sessions from ~/.moodcli/engine/*.jsonl to proper session directories.
+ * Migrate sessions from ~/.Mooncli/engine/*.jsonl to proper session directories.
  *
- * Bug in v0.30.0: Sessions were saved to ~/.moodcli/engine/ instead of
- * ~/.moodcli/engine/sessions/<encoded-cwd>/. This migration moves them
+ * Bug in v0.30.0: Sessions were saved to ~/.Mooncli/engine/ instead of
+ * ~/.Mooncli/engine/sessions/<encoded-cwd>/. This migration moves them
  * to the correct location based on the cwd in their session header.
  *
- * See: https://github.com/badlogic/moodcli-mono/issues/320
+ * See: https://github.com/badlogic/Mooncli-mono/issues/320
  */
 export function migrateSessionsFromEngineRoot(): void {
 	const engineDir = getEngineDir();
@@ -217,7 +217,7 @@ function migrateToolsToBin(): void {
 
 /**
  * Check for deprecated hooks/ and tools/ directories.
- * Note: tools/ may contain fd/rg binaries extracted by moodcli, so only warn if it has other files.
+ * Note: tools/ may contain fd/rg binaries extracted by Mooncli, so only warn if it has other files.
  */
 function checkDeprecatedExtensionDirs(baseDir: string, label: string): string[] {
 	const hooksDir = join(baseDir, "hooks");

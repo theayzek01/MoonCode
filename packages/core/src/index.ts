@@ -6,23 +6,23 @@ export * from "./env-api-keys.js";
 export * from "./models.js";
 export type { BedrockOptions, BedrockThinkingDisplay } from "./providers/amazon-bedrock.js";
 export type { AnthropicEffort, AnthropicOptions, AnthropicThinkingDisplay } from "./providers/anthropic.js";
-export type { AzureOpenCoreResponsesOptions } from "./providers/azure-openai-responses.js";
+export type { AzureOpenAIResponsesOptions } from "./providers/azure-openai-responses.js";
 export * from "./providers/faux.js";
 export type { GoogleOptions } from "./providers/google.js";
 export type { GoogleThinkingLevel } from "./providers/google-shared.js";
 export type { GoogleVertexOptions } from "./providers/google-vertex.js";
 export type { MistralOptions } from "./providers/mistral.js";
 export type {
-	OpenCoreCodexResponsesOptions,
-	OpenCoreCodexWebSocketDebugStats,
+	OpenAICodexResponsesOptions,
+	OpenAICodexWebSocketDebugStats,
 } from "./providers/openai-codex-responses.js";
 export {
-	closeOpenCoreCodexWebSocketSessions,
-	getOpenCoreCodexWebSocketDebugStats,
-	resetOpenCoreCodexWebSocketDebugStats,
+	closeOpenAICodexWebSocketSessions,
+	getOpenAICodexWebSocketDebugStats,
+	resetOpenAICodexWebSocketDebugStats,
 } from "./providers/openai-codex-responses.js";
-export type { OpenCoreCompletionsOptions } from "./providers/openai-completions.js";
-export type { OpenCoreResponsesOptions } from "./providers/openai-responses.js";
+export type { OpenAICompletionsOptions } from "./providers/openai-completions.js";
+export type { OpenAIResponsesOptions } from "./providers/openai-responses.js";
 export * from "./providers/register-builtins.js";
 export * from "./stream.js";
 export * from "./types.js";

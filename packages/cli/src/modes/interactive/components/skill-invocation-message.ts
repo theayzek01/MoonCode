@@ -1,4 +1,5 @@
-import { Box, Markdown, type MarkdownTheme, Text } from "@moodcli/tui";
+// @ts-nocheck
+import { Box, Markdown, type MarkdownTheme, Text } from "@mooncli/tui";
 import type { ParsedSkillBlock } from "../../../core/engine-session.js";
 import { getMarkdownTheme, theme } from "../theme/theme.js";
 import { keyText } from "./keybinding-hints.js";

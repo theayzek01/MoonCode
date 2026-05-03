@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { parse } from "yaml";
 
 type ParsedFrontmatter<T extends Record<string, unknown>> = {

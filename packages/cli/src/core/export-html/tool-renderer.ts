@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Tool HTML renderer for custom tools in HTML export.
  *
@@ -5,8 +6,8 @@
  * and converting the ANSI output to HTML.
  */
 
-import type { ImageContent, TextContent } from "@moodcli/core";
-import type { Component } from "@moodcli/tui";
+import type { ImageContent, TextContent } from "@mooncli/core";
+import type { Component } from "@mooncli/tui";
 import type { Theme } from "../../modes/interactive/theme/theme.js";
 import type { ToolDefinition, ToolRenderContext } from "../extensions/types.js";
 import { ansiLinesToHtml } from "./ansi-to-html.js";

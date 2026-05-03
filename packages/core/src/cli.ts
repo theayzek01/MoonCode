@@ -64,7 +64,7 @@ async function main(): Promise<void> {
 
 	if (!command || command === "help" || command === "--help" || command === "-h") {
 		const providerList = PROVIDERS.map((p) => `  ${p.id.padEnd(20)} ${p.name}`).join("\n");
-		console.log(`Usage: npx @moodcli/core <command> [provider]
+		console.log(`Usage: npx @mooncli/core <command> [provider]
 
 Commands:
   login [provider]  Login to an OAuth provider
@@ -74,9 +74,9 @@ Providers:
 ${providerList}
 
 Examples:
-  npx @moodcli/core login              # interactive provider selection
-  npx @moodcli/core login anthropic    # login to specific provider
-  npx @moodcli/core list               # list providers
+  npx @mooncli/core login              # interactive provider selection
+  npx @mooncli/core login anthropic    # login to specific provider
+  npx @mooncli/core list               # list providers
 `);
 		return;
 	}
@@ -113,7 +113,7 @@ Examples:
 
 		if (!PROVIDERS.some((p) => p.id === provider)) {
 			console.error(`Unknown provider: ${provider}`);
-			console.error(`Use 'npx @moodcli/core list' to see available providers`);
+			console.error(`Use 'npx @mooncli/core list' to see available providers`);
 			process.exit(1);
 		}
 
@@ -123,7 +123,7 @@ Examples:
 	}
 
 	console.error(`Unknown command: ${command}`);
-	console.error(`Use 'npx @moodcli/core --help' for usage`);
+	console.error(`Use 'npx @mooncli/core --help' for usage`);
 	process.exit(1);
 }
 

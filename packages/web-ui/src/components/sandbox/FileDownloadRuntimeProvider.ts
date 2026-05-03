@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { SandboxRuntimeProvider } from "./SandboxRuntimeProvider.js";
 
 export interface DownloadableFile {

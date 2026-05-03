@@ -5,18 +5,18 @@
  * change engine behavior based on extension state.
  *
  * Usage:
- * 1. Copy this file to ~/.moodcli/engine/extensions/ or your project's .moodcli/extensions/
+ * 1. Copy this file to ~/.Mooncli/engine/extensions/ or your project's .Mooncli/extensions/
  * 2. Use /pirate to toggle pirate mode
  * 3. When enabled, the engine will respond like a pirate
  */
 
-import type { ExtensionAPI } from "moodcli";
+import type { ExtensionAPI } from "Mooncli";
 
-export default function pirateExtension(moodcli: ExtensionAPI) {
+export default function pirateExtension(Mooncli: ExtensionAPI) {
 	let pirateMode = false;
 
 	// Register /pirate command to toggle pirate mode
-	moodcli.registerCommand("pirate", {
+	Mooncli.registerCommand("pirate", {
 		description: "Toggle pirate mode (engine speaks like a pirate)",
 		handler: async (_args, ctx) => {
 			pirateMode = !pirateMode;
@@ -25,7 +25,7 @@ export default function pirateExtension(moodcli: ExtensionAPI) {
 	});
 
 	// Append to system prompt when pirate mode is enabled
-	moodcli.on("before_engine_start", async (event) => {
+	Mooncli.on("before_engine_start", async (event) => {
 		if (pirateMode) {
 			return {
 				systemPrompt:

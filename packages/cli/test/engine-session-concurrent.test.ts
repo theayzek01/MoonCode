@@ -5,7 +5,6 @@
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { Engine } from "@moodcli/engine";
 import {
 	type AssistantMessage,
 	type AssistantMessageEvent,
@@ -13,11 +12,12 @@ import {
 	getModel,
 	type ImageContent,
 	type TextContent,
-} from "@moodcli/core";
+} from "@mooncli/core";
+import { Engine } from "@mooncli/engine";
 import { Type } from "typebox";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { EngineSession } from "../src/core/engine-session.js";
 import { AuthStorage } from "../src/core/auth-storage.js";
+import { EngineSession } from "../src/core/engine-session.js";
 import { ModelRegistry } from "../src/core/model-registry.js";
 import { SessionManager } from "../src/core/session-manager.js";
 import { SettingsManager } from "../src/core/settings-manager.js";
@@ -63,7 +63,7 @@ describe("EngineSession concurrent prompt guard", () => {
 	let tempDir: string;
 
 	beforeEach(() => {
-		tempDir = join(tmpdir(), `moodcli-concurrent-test-${Date.now()}`);
+		tempDir = join(tmpdir(), `Mooncli-concurrent-test-${Date.now()}`);
 		mkdirSync(tempDir, { recursive: true });
 	});
 
@@ -240,11 +240,11 @@ describe("EngineSession concurrent prompt guard", () => {
 		authStorage.setRuntimeApiKey("anthropic", "test-key");
 
 		const extensionsResult = await createTestExtensionsResult([
-			(moodcli) => {
-				(globalThis as typeof globalThis & { testExtensionApi?: unknown }).testExtensionApi = moodcli;
+			(Mooncli) => {
+				(globalThis as typeof globalThis & { testExtensionApi?: unknown }).testExtensionApi = Mooncli;
 			},
-			(moodcli) => {
-				moodcli.on("input", async (event) => {
+			(Mooncli) => {
+				Mooncli.on("input", async (event) => {
 					lastInputSource = event.source;
 				});
 			},
@@ -268,16 +268,16 @@ describe("EngineSession concurrent prompt guard", () => {
 		await new Promise((resolve) => setTimeout(resolve, 10));
 		expect(session.isStreaming).toBe(true);
 
-		const moodcli = (
+		const Mooncli = (
 			globalThis as typeof globalThis & {
 				testExtensionApi?: {
 					sendUserMessage: (content: string, options?: { deliverAs?: "steer" | "followUp" }) => void;
 				};
 			}
 		).testExtensionApi;
-		expect(moodcli).toBeDefined();
+		expect(Mooncli).toBeDefined();
 
-		moodcli!.sendUserMessage("Steer from extension", { deliverAs: "steer" });
+		Mooncli!.sendUserMessage("Steer from extension", { deliverAs: "steer" });
 		await new Promise((resolve) => setTimeout(resolve, 25));
 
 		expect(session.pendingMessageCount).toBe(1);

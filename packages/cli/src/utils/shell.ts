@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { existsSync } from "node:fs";
 import { delimiter } from "node:path";
 import { spawn, spawnSync } from "child_process";

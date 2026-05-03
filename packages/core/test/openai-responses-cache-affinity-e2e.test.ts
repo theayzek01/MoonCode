@@ -3,8 +3,8 @@ import { getModel } from "../src/models.js";
 import { complete } from "../src/stream.js";
 import type { Context } from "../src/types.js";
 
-describe.skipIf(!process.env.OPENCore_API_KEY)("openai responses cache affinity e2e", () => {
-	it("handles direct OpenCore Responses requests with aligned cache-affinity identifiers", { retry: 2 }, async () => {
+describe.skipIf(!process.env.OpenAI_API_KEY)("openai responses cache affinity e2e", () => {
+	it("handles direct OpenAI Responses requests with aligned cache-affinity identifiers", { retry: 2 }, async () => {
 		const model = getModel("openai", "gpt-5.4");
 		const sessionId = "0195d6e4-4cf9-7f44-a2d8-f8f7f49ee9d3";
 		const context: Context = {
@@ -19,7 +19,7 @@ describe.skipIf(!process.env.OPENCore_API_KEY)("openai responses cache affinity 
 		};
 
 		const response = await complete(model, context, {
-			apiKey: process.env.OPENCore_API_KEY!,
+			apiKey: process.env.OpenAI_API_KEY!,
 			sessionId,
 		});
 

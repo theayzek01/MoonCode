@@ -1,13 +1,13 @@
 import "@mariozechner/mini-lit/dist/ThemeToggle.js";
-import { Engine, type EngineMessage } from "@moodcli/engine";
-import { getModel } from "@moodcli/core";
+import { getModel } from "@mooncli/core";
+import { Engine, type EngineMessage } from "@mooncli/engine";
 import {
-	type EngineState,
 	ApiKeyPromptDialog,
 	AppStorage,
 	ChatPanel,
 	CustomProvidersStore,
 	createJavaScriptReplTool,
+	type EngineState,
 	IndexedDBStorageBackend,
 	// PersistentStorageDialog, // TODO: Fix - currently broken
 	ProviderKeysStore,
@@ -18,7 +18,7 @@ import {
 	SettingsDialog,
 	SettingsStore,
 	setAppStorage,
-} from "@moodcli/web-ui";
+} from "@mooncli/web-ui";
 import { html, render } from "lit";
 import { Bell, History, Plus, Settings } from "lucide";
 import "./app.css";
@@ -47,7 +47,7 @@ const configs = [
 
 // Create backend
 const backend = new IndexedDBStorageBackend({
-	dbName: "moodcli-web-ui-example",
+	dbName: "Mooncli-web-ui-example",
 	version: 2, // Incremented for custom-providers store
 	stores: configs,
 });
@@ -335,7 +335,7 @@ const renderApp = () => {
 								>
 									${currentTitle}
 								</button>`
-							: html`<span class="text-base font-semibold text-foreground">Moodcli Web UI Example</span>`
+							: html`<span class="text-base font-semibold text-foreground">Mooncli Web UI Example</span>`
 					}
 				</div>
 				<div class="flex items-center gap-1 px-2">

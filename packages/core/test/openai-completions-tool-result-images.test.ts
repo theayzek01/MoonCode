@@ -5,7 +5,7 @@ import type {
 	AssistantMessage,
 	Context,
 	Model,
-	OpenCoreCompletionsCompat,
+	OpenAICompletionsCompat,
 	ToolResultMessage,
 	Usage,
 } from "../src/types.js";
@@ -19,7 +19,7 @@ const emptyUsage: Usage = {
 	cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
 };
 
-const compat: Required<OpenCoreCompletionsCompat> = {
+const compat: Required<OpenAICompletionsCompat> = {
 	supportsStore: true,
 	supportsDeveloperRole: true,
 	supportsReasoningEffort: true,

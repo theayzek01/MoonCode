@@ -13,11 +13,11 @@ describe("createEngineSession skills option", () => {
 	let skillsDir: string;
 
 	beforeEach(() => {
-		tempDir = join(tmpdir(), `moodcli-sdk-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+		tempDir = join(tmpdir(), `Mooncli-sdk-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 		skillsDir = join(tempDir, "skills", "test-skill");
 		mkdirSync(skillsDir, { recursive: true });
 
-		// Create a test skill in the moodcli skills directory
+		// Create a test skill in the Mooncli skills directory
 		writeFileSync(
 			join(skillsDir, "SKILL.md"),
 			`---

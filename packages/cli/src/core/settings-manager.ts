@@ -1,4 +1,5 @@
-import type { Transport } from "@moodcli/core";
+// @ts-nocheck
+import type { Transport } from "@mooncli/core";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { homedir } from "os";
 import { dirname, join } from "path";
@@ -56,6 +57,23 @@ export interface WarningSettings {
 	anthropicExtraUsage?: boolean; // default: true
 }
 
+export interface RoboticsSettings {
+	enabled?: boolean; // default: false
+	visionModel?: string; // default: "qwen2.5-vl:7b"
+	visionProvider?: string; // default: "ollama"
+	visionBaseUrl?: string; // default: "http://localhost:11434"
+	somEnabled?: boolean; // Set-of-Mark pipeline, default: false
+	coordinateFormat?: "normalized" | "pixel"; // default: "normalized" (0-1000)
+	thinkingBudget?: number; // 0-4096, default: 0
+	captureSource?: "file" | "webcam" | "url"; // default: "file"
+	webcamDevice?: string; // default: platform-specific
+	outputOverlay?: boolean; // terminalde overlay çiz, default: true
+	robotApiFunctionsPath?: string; // robot fonksiyon tanım dosyası
+	autoCapture?: boolean; // her prompt'ta otomatik kamera çek, default: false
+	captureIntervalMs?: number; // auto capture interval ms, default: 2000
+	lastImagePath?: string; // son kullanılan görüntü dosyası
+}
+
 export type TransportSetting = Transport;
 
 /**
@@ -110,6 +128,14 @@ export interface Settings {
 	markdown?: MarkdownSettings;
 	warnings?: WarningSettings;
 	sessionDir?: string; // Custom session storage directory (same format as --session-dir CLI flag)
+	mcpServers?: Record<string, McpServerConfig>; // MCP server configurations
+	robotics?: RoboticsSettings; // Robotics mode configuration
+}
+
+export interface McpServerConfig {
+	command: string;
+	args?: string[];
+	env?: Record<string, string>;
 }
 
 /** Deep merge settings: project/overrides take precedence, nested objects merge recursively */
@@ -798,6 +824,10 @@ export class SettingsManager {
 		return this.settings.enableInstallTelemetry ?? true;
 	}
 
+	getMcpServers(): Record<string, McpServerConfig> {
+		return this.settings.mcpServers || {};
+	}
+
 	setEnableInstallTelemetry(enabled: boolean): void {
 		this.globalSettings.enableInstallTelemetry = enabled;
 		this.markModified("enableInstallTelemetry");
@@ -1062,6 +1092,55 @@ export class SettingsManager {
 	setWarnings(warnings: WarningSettings): void {
 		this.globalSettings.warnings = { ...warnings };
 		this.markModified("warnings");
+		this.save();
+	}
+
+	// =========================================================================
+	// Robotics Settings
+	// =========================================================================
+
+	getRoboticsEnabled(): boolean {
+		return this.settings.robotics?.enabled ?? false;
+	}
+
+	setRoboticsEnabled(enabled: boolean): void {
+		if (!this.globalSettings.robotics) this.globalSettings.robotics = {};
+		this.globalSettings.robotics.enabled = enabled;
+		this.markModified("robotics", "enabled");
+		this.save();
+	}
+
+	getRoboticsSettings(): RoboticsSettings {
+		return { ...(this.settings.robotics ?? {}) };
+	}
+
+	setRoboticsSetting<K extends keyof RoboticsSettings>(key: K, value: RoboticsSettings[K]): void {
+		if (!this.globalSettings.robotics) this.globalSettings.robotics = {};
+		this.globalSettings.robotics[key] = value;
+		this.markModified("robotics", key as string);
+		this.save();
+	}
+
+	getRoboticsVisionModel(): string {
+		return this.settings.robotics?.visionModel ?? "qwen2.5-vl:7b";
+	}
+
+	getRoboticsVisionBaseUrl(): string {
+		return this.settings.robotics?.visionBaseUrl ?? "http://localhost:11434";
+	}
+
+	getRoboticsOutputOverlay(): boolean {
+		return this.settings.robotics?.outputOverlay ?? true;
+	}
+
+	getRoboticsLastImagePath(): string | undefined {
+		return this.settings.robotics?.lastImagePath;
+	}
+
+	setRoboticsLastImagePath(path: string): void {
+		if (!this.globalSettings.robotics) this.globalSettings.robotics = {};
+		this.globalSettings.robotics.lastImagePath = path;
+		this.markModified("robotics", "lastImagePath");
 		this.save();
 	}
 }

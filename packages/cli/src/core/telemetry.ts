@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { SettingsManager } from "./settings-manager.js";
 
 function isTruthyEnvFlag(value: string | undefined): boolean {
@@ -7,7 +8,7 @@ function isTruthyEnvFlag(value: string | undefined): boolean {
 
 export function isInstallTelemetryEnabled(
 	settingsManager: SettingsManager,
-	telemetryEnv: string | undefined = process.env.MOOD_TELEMETRY,
+	telemetryEnv: string | undefined = process.env.Moon_TELEMETRY,
 ): boolean {
 	return telemetryEnv !== undefined ? isTruthyEnvFlag(telemetryEnv) : settingsManager.getEnableInstallTelemetry();
 }

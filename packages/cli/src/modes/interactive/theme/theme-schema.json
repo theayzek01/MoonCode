@@ -1,7 +1,7 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
-	"title": "Moodcli Coding Engine Theme",
-	"description": "Theme schema for Moodcli coding engine",
+	"title": "Mooncli Coding Engine Theme",
+	"description": "Theme schema for Mooncli coding engine",
 	"type": "object",
 	"required": ["name", "colors"],
 	"properties": {
@@ -286,7 +286,7 @@
 				},
 				"thinkingXhigh": {
 					"$ref": "#/$defs/colorValue",
-					"description": "Thinking level border: xhigh (OpenCore codex-max only)"
+					"description": "Thinking level border: xhigh (OpenAI codex-max only)"
 				},
 				"bashMode": {
 					"$ref": "#/$defs/colorValue",

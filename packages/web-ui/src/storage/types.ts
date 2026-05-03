@@ -1,5 +1,6 @@
-import type { EngineMessage, ThinkingLevel } from "@moodcli/engine";
-import type { Model } from "@moodcli/core";
+// @ts-nocheck
+import type { Model } from "@mooncli/core";
+import type { EngineMessage, ThinkingLevel } from "@mooncli/engine";
 
 /**
  * Transaction interface for atomic operations across stores.

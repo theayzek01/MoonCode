@@ -25,8 +25,8 @@ export {
 export { geminiCliOAuthProvider, loginGeminiCli, refreshGoogleCloudToken } from "./google-gemini-cli.js";
 // Ollama
 export { loginOllama, ollamaOAuthProvider } from "./ollama.js";
-// OpenCore Codex (ChatGPT OAuth)
-export { loginOpenCoreCodex, openaiCodexOAuthProvider, refreshOpenCoreCodexToken } from "./openai-codex.js";
+// OpenAI Codex (ChatGPT OAuth)
+export { loginOpenAICodex, openaiCodexOAuthProvider, refreshOpenAICodexToken } from "./openai-codex.js";
 
 export * from "./types.js";
 

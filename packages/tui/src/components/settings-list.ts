@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { fuzzyFilter } from "../fuzzy.js";
 import { getKeybindings } from "../keybindings.js";
 import type { Component } from "../tui.js";

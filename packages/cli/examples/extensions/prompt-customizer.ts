@@ -8,11 +8,11 @@
  * are currently active, respecting whatever the user has configured.
  *
  * Usage:
- * 1. Copy this file to ~/.moodcli/engine/extensions/ or your project's .moodcli/extensions/
+ * 1. Copy this file to ~/.Mooncli/engine/extensions/ or your project's .Mooncli/extensions/
  * 2. Use the extension — it automatically adapts to your active tools and skills
  */
 
-import type { BuildSystemPromptOptions, ExtensionAPI } from "moodcli";
+import type { BuildSystemPromptOptions, ExtensionAPI } from "Mooncli";
 
 /**
  * Adds tool-specific guidance that adapts to the active tool set.
@@ -83,8 +83,8 @@ If you have additional requirements, configure them via --append-system-prompt o
 	return extensionSpecific;
 }
 
-export default function promptCustomizer(moodcli: ExtensionAPI) {
-	moodcli.on("before_engine_start", async (event) => {
+export default function promptCustomizer(Mooncli: ExtensionAPI) {
+	Mooncli.on("before_engine_start", async (event) => {
 		const { systemPrompt, systemPromptOptions } = event;
 
 		const customPrompt = addToolGuidance(systemPromptOptions, systemPrompt);

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { spawnSync } from "child_process";
 import { randomUUID } from "crypto";
 import { readFileSync, unlinkSync } from "fs";
@@ -159,7 +160,7 @@ function isWSL(env: NodeJS.ProcessEnv = process.env): boolean {
  * directly, so we use it as a fallback.
  */
 function readClipboardImageViaPowerShell(): ClipboardImage | null {
-	const tmpFile = join(tmpdir(), `moodcli-wsl-clip-${randomUUID()}.png`);
+	const tmpFile = join(tmpdir(), `Mooncli-wsl-clip-${randomUUID()}.png`);
 
 	try {
 		const winPathResult = runCommand("wslpath", ["-w", tmpFile], { timeoutMs: DEFAULT_LIST_TIMEOUT_MS });

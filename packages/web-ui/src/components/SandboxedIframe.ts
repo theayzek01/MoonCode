@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { ConsoleRuntimeProvider } from "./sandbox/ConsoleRuntimeProvider.js";

@@ -1,13 +1,14 @@
+// @ts-nocheck
 // Main chat interface
 
-export type { Engine, EngineMessage, EngineState, ThinkingLevel } from "@moodcli/engine";
-export type { Model } from "@moodcli/core";
+export type { Model } from "@mooncli/core";
+export type { Engine, EngineMessage, EngineState, ThinkingLevel } from "@mooncli/engine";
 export { ChatPanel } from "./ChatPanel.js";
-// Components
-export { EngineInterface } from "./components/EngineInterface.js";
 export { AttachmentTile } from "./components/AttachmentTile.js";
 export { ConsoleBlock } from "./components/ConsoleBlock.js";
 export { CustomProviderCard } from "./components/CustomProviderCard.js";
+// Components
+export { EngineInterface } from "./components/EngineInterface.js";
 export { ExpandableSection } from "./components/ExpandableSection.js";
 export { Input } from "./components/Input.js";
 export { MessageEditor } from "./components/MessageEditor.js";

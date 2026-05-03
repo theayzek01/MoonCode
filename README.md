@@ -1,52 +1,84 @@
 <p align="center">
-  <a href="https://github.com/theayzek01/hodeuscli">
-    <img alt="moodcli logosu" src="Moodcli.png" width="160">
+  <a href="https://mooncli.dev">
+    <img alt="Mooncli" src="Mooncli.png" width="200">
   </a>
 </p>
+
+<h1 align="center">🌙 M O O N C L I</h1>
+
 <p align="center">
-  <a href="https://discord.com/invite/3cU7Bz4UPx"><img alt="Discord" src="https://img.shields.io/badge/discord-toplulugu-5865F2?style=flat-square&logo=discord&logoColor=white" /></a>
+  <strong>Terminalinizdeki Zihin Sarayı.</strong><br>
+  Modern, hızlı ve tamamen özelleştirilebilir bir AI kodlama asistanı.
 </p>
+
 <p align="center">
-  <a href="https://moodcli.dev">moodcli.dev</a>
+  <a href="https://discord.com/invite/3cU7Bz4UPx"><img alt="Discord" src="https://img.shields.io/badge/discord-community-5865F2?style=flat-square&logo=discord&logoColor=white" /></a>
+  <a href="https://mooncli.dev"><img alt="Website" src="https://img.shields.io/badge/website-mooncli.dev-blue?style=flat-square" /></a>
+  <a href="https://www.npmjs.com/package/mooncli"><img alt="NPM Version" src="https://img.shields.io/npm/v/mooncli?style=flat-square&color=cb3837" /></a>
 </p>
 
 ---
 
-Moodcli, minimal bir terminal kodlama aracidir. Moodcli'yi kendi is akislariniza gore uyarlayin, Moodcli'nin ic yapisini degistirmek zorunda kalmayin. TypeScript [Uzantilar](#extensions), [Yetenekler](#skills), [Istem Sablonlari](#prompt-templates) ve [Temalar](#themes) ile ozellestirin. Kendi paketlerinizi olusturup npm veya git uzerinden paylasin.
+**Mooncli**, geliştiriciler için tasarlanmış minimal ama güçlü bir terminal asistanıdır. Kod yazma sürecinizi hızlandırmak için tasarlanmış olan Mooncli, **Model Context Protocol (MCP)** desteği ile harici servislerle (GitHub, Docker, Spotify vb.) kusursuz bir şekilde entegre olur.
 
-Moodcli guclu varsayilanlarla gelir ancak alt araclar (sub-engines) veya plan modu gibi siskin ozellikleri icermez. Bunun yerine, ihtiyaciniz olan ozellikleri Moodcli'ye yaptirabilir veya topluluk paketlerini yukleyebilirsiniz.
+### ✨ Neden Mooncli?
 
-## Hizli Baslangic
+*   **MCP Entegrasyonu:** Dünyanın ilk MCP destekli CLI araçlarından biri. Gmail'den GitHub'a kadar tüm uygulamalarınızı AI'a bağlayın.
+*   **Premium TUI:** Ay temalı, göz yormayan, modern ve estetik bir terminal arayüzü.
+*   **Gelişmiş Modeller:** Claude 3.5 Sonnet, Opus 4.6 ve daha fazlası; Antigravity motoru ile emrinizde.
+*   **Tamamen Özelleştirilebilir:** Kendi [Uzantılarınızı](docs/extensions.md), [Yeteneklerinizi](docs/skills.md) ve [Temalarınızı](docs/themes.md) oluşturun.
+*   **Hızlı & Hafif:** Node.js ve TypeScript ile optimize edilmiş çekirdek; sıfır şişkinlik, maksimum verim.
+
+### 🚀 Hızlı Başlangıç
 
 ```bash
-npm install -g @moodcli/cli
+npm install -g mooncli
 ```
 
-API anahtari ile kimlik dogrula:
+Ardından asistanınızı başlatın:
+
+```bash
+mooncli
+```
+
+### 🛠️ Yapılandırma
+
+API anahtarlarınızı çevre değişkeni olarak ayarlayabilir veya interaktif modda `/login` komutunu kullanabilirsiniz:
 
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
-mood
+mooncli
 ```
 
-Veya mevcut aboneligini kullan:
+### 🔌 MCP Sunucularını Bağlama
 
-```bash
-mood
-/login  # Ardindan saglayiciyi secin
+`.mooncli/settings.json` dosyanıza favori MCP sunucularınızı ekleyin:
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "..." }
+    }
+  }
+}
 ```
 
-## Ozellikler
+### 🤝 Katkıda Bulunma
 
-- **Moon Temasi**: Varsayilan olarak yumusak ve koyu estetik.
-- **Sonnet 4.6 & Opus 4.6**: Antigravity ve Codex saglayicilari uzerinden en yeni modeller entegre edildi.
-- **Turkce Yerellestirme**: Turk kullanicilar icin tamamen Turkceye cevrilmis TUI.
-- **Hizli & Minimal**: Gereksiz siskinlik yok, sadece ihtiyaciniz olan araclar var.
-
-## Gelistirme
+Geliştirme ortamını kurmak için:
 
 ```bash
 npm install
 npm run build
-node dist/cli.js
+node packages/cli/dist/cli.js
 ```
+
+---
+
+<p align="center">
+  Düşün, Kodla, Mükemmelleştir. <br>
+  Made with 🌙 by Mooncli Team.
+</p>

@@ -10,15 +10,15 @@
  * which can be cheaper/faster than the main conversation model.
  *
  * Usage:
- *   moodcli --extension examples/extensions/custom-compaction.ts
+ *   Mooncli --extension examples/extensions/custom-compaction.ts
  */
 
-import { complete } from "@moodcli/core";
-import type { ExtensionAPI } from "moodcli";
-import { convertToLlm, serializeConversation } from "moodcli";
+import type { ExtensionAPI } from "Mooncli";
+import { convertToLlm, serializeConversation } from "Mooncli";
+import { complete } from "@mooncli/core";
 
-export default function (moodcli: ExtensionAPI) {
-	moodcli.on("session_before_compact", async (event, ctx) => {
+export default function (Mooncli: ExtensionAPI) {
+	Mooncli.on("session_before_compact", async (event, ctx) => {
 		ctx.ui.notify("Custom compaction extension triggered", "info");
 
 		const { preparation, branchEntries: _, signal } = event;

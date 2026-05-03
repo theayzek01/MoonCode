@@ -18,7 +18,7 @@ import { getModel } from "../src/models.js";
 import { complete } from "../src/stream.js";
 import type { AssistantMessage, Context, Model, Usage } from "../src/types.js";
 import { isContextOverflow } from "../src/utils/overflow.js";
-import { hasAzureOpenCoreCredentials } from "./azure-utils.js";
+import { hasAzureOpenAICredentials } from "./azure-utils.js";
 import { hasBedrockCredentials } from "./bedrock-utils.js";
 import { resolveApiKey } from "./oauth.js";
 
@@ -120,11 +120,11 @@ describe("Context overflow error handling", () => {
 
 	// =============================================================================
 	// GitHub Copilot (OAuth)
-	// Tests both OpenCore and Anthropic models via Copilot
+	// Tests both OpenAI and Anthropic models via Copilot
 	// =============================================================================
 
 	describe("GitHub Copilot (OAuth)", () => {
-		// OpenCore model via Copilot
+		// OpenAI model via Copilot
 		it.skipIf(!githubCopilotToken)(
 			"gpt-4o - should detect overflow via isContextOverflow",
 			async () => {
@@ -156,15 +156,15 @@ describe("Context overflow error handling", () => {
 	});
 
 	// =============================================================================
-	// OpenCore
+	// OpenAI
 	// Expected pattern: "exceeds the context window"
 	// =============================================================================
 
-	describe.skipIf(!process.env.OPENCore_API_KEY)("OpenCore Completions", () => {
+	describe.skipIf(!process.env.OpenAI_API_KEY)("OpenAI Completions", () => {
 		it("gpt-4o-mini - should detect overflow via isContextOverflow", async () => {
 			const model = { ...getModel("openai", "gpt-4o-mini") };
 			model.api = "openai-completions" as any;
-			const result = await testContextOverflow(model, process.env.OPENCore_API_KEY!);
+			const result = await testContextOverflow(model, process.env.OpenAI_API_KEY!);
 			logResult(result);
 
 			expect(result.stopReason).toBe("error");
@@ -173,10 +173,10 @@ describe("Context overflow error handling", () => {
 		}, 120000);
 	});
 
-	describe.skipIf(!process.env.OPENCore_API_KEY)("OpenCore Responses", () => {
+	describe.skipIf(!process.env.OpenAI_API_KEY)("OpenAI Responses", () => {
 		it("gpt-4o - should detect overflow via isContextOverflow", async () => {
 			const model = getModel("openai", "gpt-4o");
-			const result = await testContextOverflow(model, process.env.OPENCore_API_KEY!);
+			const result = await testContextOverflow(model, process.env.OpenAI_API_KEY!);
 			logResult(result);
 
 			expect(result.stopReason).toBe("error");
@@ -185,10 +185,10 @@ describe("Context overflow error handling", () => {
 		}, 120000);
 	});
 
-	describe.skipIf(!hasAzureOpenCoreCredentials())("Azure OpenCore Responses", () => {
+	describe.skipIf(!hasAzureOpenAICredentials())("Azure OpenAI Responses", () => {
 		it("gpt-4o-mini - should detect overflow via isContextOverflow", async () => {
 			const model = getModel("azure-openai-responses", "gpt-4o-mini");
-			const result = await testContextOverflow(model, process.env.AZURE_OPENCore_API_KEY!);
+			const result = await testContextOverflow(model, process.env.AZURE_OpenAI_API_KEY!);
 			logResult(result);
 
 			expect(result.stopReason).toBe("error");
@@ -222,11 +222,11 @@ describe("Context overflow error handling", () => {
 	// =============================================================================
 
 	// =============================================================================
-	// OpenCore Codex (OAuth)
+	// OpenAI Codex (OAuth)
 	// Uses ChatGPT Plus/Pro subscription via OAuth
 	// =============================================================================
 
-	describe("OpenCore Codex (OAuth)", () => {
+	describe("OpenAI Codex (OAuth)", () => {
 		it.skipIf(!openaiCodexToken)(
 			"gpt-5.2-codex - should detect overflow via isContextOverflow",
 			async () => {
@@ -311,7 +311,7 @@ describe("Context overflow error handling", () => {
 
 	// =============================================================================
 	// Hugging Face
-	// Uses OpenCore-compatible Inference Router
+	// Uses OpenAI-compatible Inference Router
 	// =============================================================================
 
 	describe.skipIf(!process.env.HF_TOKEN)("Hugging Face", () => {

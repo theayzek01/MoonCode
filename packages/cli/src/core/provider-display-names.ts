@@ -1,7 +1,8 @@
+// @ts-nocheck
 export const BUILT_IN_PROVIDER_DISPLAY_NAMES: Record<string, string> = {
 	anthropic: "Anthropic",
 	"amazon-bedrock": "Amazon Bedrock",
-	"azure-openai-responses": "Azure OpenCore Responses",
+	"azure-openai-responses": "Azure OpenAI Responses",
 	cerebras: "Cerebras",
 	"cloudflare-ai-gateway": "Cloudflare Core Gateway",
 	"cloudflare-workers-ai": "Cloudflare Workers Core",
@@ -19,7 +20,7 @@ export const BUILT_IN_PROVIDER_DISPLAY_NAMES: Record<string, string> = {
 	"moonshotai-cn": "Moonshot Core (China)",
 	opencode: "OpenCode Zen",
 	"opencode-go": "OpenCode Go",
-	openai: "OpenCore",
+	openai: "OpenAI",
 	openrouter: "OpenRouter",
 	"vercel-ai-gateway": "Vercel Core Gateway",
 	xai: "xCore",

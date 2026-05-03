@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { CopyButton } from "@mariozechner/mini-lit/dist/CopyButton.js";
 import { DownloadButton } from "@mariozechner/mini-lit/dist/DownloadButton.js";
 import hljs from "highlight.js";

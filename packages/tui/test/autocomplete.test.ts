@@ -120,7 +120,7 @@ describe("CombinedAutocompleteProvider", () => {
 		let outsideDir = "";
 
 		beforeEach(() => {
-			rootDir = mkdtempSync(join(tmpdir(), "moodcli-autocomplete-root-"));
+			rootDir = mkdtempSync(join(tmpdir(), "Mooncli-autocomplete-root-"));
 			baseDir = join(rootDir, "cwd");
 			outsideDir = join(rootDir, "outside");
 			mkdirSync(baseDir, { recursive: true });
@@ -282,9 +282,9 @@ describe("CombinedAutocompleteProvider", () => {
 
 		test("includes hidden paths but excludes .git", async () => {
 			setupFolder(baseDir, {
-				dirs: [".moodcli", ".github", ".git"],
+				dirs: [".Mooncli", ".github", ".git"],
 				files: {
-					".moodcli/config.json": "{}",
+					".Mooncli/config.json": "{}",
 					".github/workflows/ci.yml": "name: ci",
 					".git/config": "[core]",
 				},
@@ -295,7 +295,7 @@ describe("CombinedAutocompleteProvider", () => {
 			const result = await getSuggestions(provider, [line], 0, line.length);
 
 			const values = result?.items.map((item) => item.value) ?? [];
-			assert.ok(values.includes("@.moodcli/"));
+			assert.ok(values.includes("@.Mooncli/"));
 			assert.ok(values.includes("@.github/"));
 			assert.ok(!values.some((value) => value === "@.git" || value.startsWith("@.git/")));
 		});
@@ -382,9 +382,7 @@ describe("CombinedAutocompleteProvider", () => {
 				(result?.items ?? []).map((item) => `${item.label} :: ${item.description ?? ""}`).sort();
 
 			assert.deepStrictEqual(normalize(queryInPathResult), normalize(normalResult));
-			assert.ok(
-				normalize(normalResult).includes("plan-mode/ :: packages/cli/examples/extensions/plan-mode"),
-			);
+			assert.ok(normalize(normalResult).includes("plan-mode/ :: packages/cli/examples/extensions/plan-mode"));
 			assert.ok(normalize(normalResult).includes("plan.md :: packages/web-ui/docs/plan.md"));
 		});
 
@@ -431,7 +429,7 @@ describe("CombinedAutocompleteProvider", () => {
 		let baseDir = "";
 
 		beforeEach(() => {
-			baseDir = mkdtempSync(join(tmpdir(), "moodcli-autocomplete-"));
+			baseDir = mkdtempSync(join(tmpdir(), "Mooncli-autocomplete-"));
 		});
 
 		afterEach(() => {
@@ -477,7 +475,7 @@ describe("CombinedAutocompleteProvider", () => {
 		let baseDir = "";
 
 		beforeEach(() => {
-			baseDir = mkdtempSync(join(tmpdir(), "moodcli-autocomplete-"));
+			baseDir = mkdtempSync(join(tmpdir(), "Mooncli-autocomplete-"));
 		});
 
 		afterEach(() => {

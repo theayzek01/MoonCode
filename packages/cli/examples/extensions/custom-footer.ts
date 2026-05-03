@@ -8,14 +8,14 @@
  * Token stats come from ctx.sessionManager/ctx.model (already accessible).
  */
 
-import type { AssistantMessage } from "@moodcli/core";
-import { truncateToWidth, visibleWidth } from "@moodcli/tui";
-import type { ExtensionAPI } from "moodcli";
+import type { ExtensionAPI } from "Mooncli";
+import type { AssistantMessage } from "@mooncli/core";
+import { truncateToWidth, visibleWidth } from "@mooncli/tui";
 
-export default function (moodcli: ExtensionAPI) {
+export default function (Mooncli: ExtensionAPI) {
 	let enabled = false;
 
-	moodcli.registerCommand("footer", {
+	Mooncli.registerCommand("footer", {
 		description: "Toggle custom footer",
 		handler: async (_args, ctx) => {
 			enabled = !enabled;

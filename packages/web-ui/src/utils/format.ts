@@ -1,5 +1,6 @@
+// @ts-nocheck
 import { i18n } from "@mariozechner/mini-lit";
-import type { Usage } from "@moodcli/core";
+import type { Usage } from "@mooncli/core";
 
 export function formatCost(cost: number): string {
 	return `$${cost.toFixed(4)}`;

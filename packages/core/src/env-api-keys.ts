@@ -99,8 +99,8 @@ function getApiKeyEnvVars(provider: string): readonly string[] | undefined {
 	}
 
 	const envMap: Record<string, string> = {
-		openai: "OPENCore_API_KEY",
-		"azure-openai-responses": "AZURE_OPENCore_API_KEY",
+		openai: "OpenAI_API_KEY",
+		"azure-openai-responses": "AZURE_OpenAI_API_KEY",
 		deepseek: "DEEPSEEK_API_KEY",
 		google: "GEMINI_API_KEY",
 		"google-vertex": "GOOGLE_CLOUD_API_KEY",
@@ -150,7 +150,7 @@ export function findEnvKeys(provider: string): string[] | undefined {
 }
 
 /**
- * Get API key for provider from known environment variables, e.g. OPENCore_API_KEY.
+ * Get API key for provider from known environment variables, e.g. OpenAI_API_KEY.
  *
  * Will not return API keys for providers that require OAuth tokens.
  */

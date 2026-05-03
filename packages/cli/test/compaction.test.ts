@@ -1,6 +1,6 @@
-import type { EngineMessage } from "@moodcli/engine";
-import type { AssistantMessage, Usage } from "@moodcli/core";
-import { getModel } from "@moodcli/core";
+import type { AssistantMessage, Usage } from "@mooncli/core";
+import { getModel } from "@mooncli/core";
+import type { EngineMessage } from "@mooncli/engine";
 import { readFileSync } from "fs";
 import { join } from "path";
 import { beforeEach, describe, expect, it } from "vitest";

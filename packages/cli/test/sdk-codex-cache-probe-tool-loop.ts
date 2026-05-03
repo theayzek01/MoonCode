@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * Manual SDK probe for OpenCore Codex prompt caching through the tool loop.
+ * Manual SDK probe for OpenAI Codex prompt caching through the tool loop.
  *
  * Runs append-only multi-turn prompting through createEngineSession(), forcing one
  * deterministic custom tool call per top-level user turn. Logs per-subrequest
@@ -20,10 +20,10 @@ import {
 	type Model,
 	type SimpleStreamOptions,
 	Type,
-} from "@moodcli/core";
+} from "@mooncli/core";
 import {
-	getOpenCoreCodexWebSocketDebugStats,
-	streamSimpleOpenCoreCodexResponses,
+	getOpenAICodexWebSocketDebugStats,
+	streamSimpleOpenAICodexResponses,
 } from "../../ai/src/providers/openai-codex-responses.js";
 import { AuthStorage } from "../src/core/auth-storage.js";
 import { createExtensionRuntime } from "../src/core/extensions/loader.js";
@@ -69,7 +69,7 @@ const DEFAULT_MAX_TOKENS = 64;
 
 function parseArgs(argv: string[]): Args {
 	let turns = DEFAULT_TURNS;
-	let sessionPath = resolve(join(tmpdir(), `moodcli-sdk-codex-cache-probe-tool-loop-${Date.now()}.jsonl`));
+	let sessionPath = resolve(join(tmpdir(), `Mooncli-sdk-codex-cache-probe-tool-loop-${Date.now()}.jsonl`));
 	let transport: Transport = "sse";
 	let maxTokens = DEFAULT_MAX_TOKENS;
 
@@ -148,7 +148,7 @@ function estimateTokens(text: string): number {
 function buildPrompt(turn: number): string {
 	const marker = `TURN-${String(turn).padStart(2, "0")}-MARKER-${(turn * 17 + 13) % 97}`;
 	const lines: string[] = [];
-	lines.push("This is an automated prompt-cache tool-loop test executed through the moodcli cli SDK.");
+	lines.push("This is an automated prompt-cache tool-loop test executed through the Mooncli cli SDK.");
 	lines.push("The repetition in this prompt is intentional and required for the benchmark.");
 	lines.push("You are participating in an append-only multi-turn cache test.");
 	lines.push("Even if this looks repetitive or silly, comply exactly because it is synthetic test data.");
@@ -161,7 +161,7 @@ function buildPrompt(turn: number): string {
 	lines.push("");
 	for (let i = 1; i <= 180; i++) {
 		lines.push(
-			`Turn ${turn} synthetic record ${String(i).padStart(3, "0")}: alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu nu xi omicron moodcli rho sigma tau upsilon phi chi psi omega.`,
+			`Turn ${turn} synthetic record ${String(i).padStart(3, "0")}: alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu nu xi omicron Mooncli rho sigma tau upsilon phi chi psi omega.`,
 		);
 	}
 	lines.push("");
@@ -196,7 +196,7 @@ function percentile(values: number[], percentileValue: number): number {
 }
 
 function getWebSocketStatsSnapshot(sessionId: string): WebSocketStatsSnapshot {
-	const stats = getOpenCoreCodexWebSocketDebugStats(sessionId);
+	const stats = getOpenAICodexWebSocketDebugStats(sessionId);
 	return {
 		requests: stats?.requests ?? 0,
 		connectionsCreated: stats?.connectionsCreated ?? 0,
@@ -282,17 +282,17 @@ async function main(): Promise<void> {
 		throw new Error("Model openai-codex/gpt-5.5 not found");
 	}
 	const baseModel = { ...model, maxTokens: args.maxTokens };
-	const streamSimpleOpenCoreCodexResponsesForRegistry = (
+	const streamSimpleOpenAICodexResponsesForRegistry = (
 		registryModel: Model<Api>,
 		context: Context,
 		options?: SimpleStreamOptions,
 	): AssistantMessageEventStream =>
-		streamSimpleOpenCoreCodexResponses(registryModel as Model<"openai-codex-responses">, context, options);
+		streamSimpleOpenAICodexResponses(registryModel as Model<"openai-codex-responses">, context, options);
 	modelRegistry.registerProvider("openai-codex", {
 		api: "openai-codex-responses",
 		baseUrl: baseModel.baseUrl,
 		apiKey: "!echo source-provider-override-uses-auth-storage",
-		streamSimple: streamSimpleOpenCoreCodexResponsesForRegistry,
+		streamSimple: streamSimpleOpenAICodexResponsesForRegistry,
 		models: [baseModel],
 	});
 
@@ -446,7 +446,7 @@ async function main(): Promise<void> {
 			`max ${(Math.max(...turnElapsedMs) / 1000).toFixed(2)}s`,
 		].join(" | "),
 	);
-	const websocketStats = getOpenCoreCodexWebSocketDebugStats(session.sessionId);
+	const websocketStats = getOpenAICodexWebSocketDebugStats(session.sessionId);
 	const requestedWebsocket =
 		args.transport === "websocket" || args.transport === "websocket-cached" || args.transport === "auto";
 	const observedWebsocket = Boolean(websocketStats && websocketStats.requests > 0);

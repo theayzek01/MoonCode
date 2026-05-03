@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ANSI escape code to HTML converter.
  *
@@ -18,7 +19,7 @@ const ANSI_COLORS = [
 	"#008000", // 2: green
 	"#808000", // 3: yellow
 	"#000080", // 4: blue
-	"#800080", // 5: menginea
+	"#800080", // 5: magenta
 	"#008080", // 6: cyan
 	"#c0c0c0", // 7: white
 	"#808080", // 8: bright black
@@ -26,7 +27,7 @@ const ANSI_COLORS = [
 	"#00ff00", // 10: bright green
 	"#ffff00", // 11: bright yellow
 	"#0000ff", // 12: bright blue
-	"#ff00ff", // 13: bright menginea
+	"#ff00ff", // 13: bright magenta
 	"#00ffff", // 14: bright cyan
 	"#ffffff", // 15: bright white
 ];

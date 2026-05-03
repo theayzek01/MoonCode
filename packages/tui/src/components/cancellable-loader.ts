@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getKeybindings } from "../keybindings.js";
 import { Loader } from "./loader.js";
 

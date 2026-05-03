@@ -1,15 +1,15 @@
 {
-	"name": "moodcli",
+	"name": "mooncli",
 	"version": "0.72.1",
 	"description": "Modern Terminal Assistant",
 	"type": "module",
-	"moodConfig": {
-		"name": "mood",
-		"configDir": ".moodcli"
+	"moonConfig": {
+		"name": "Moon",
+		"configDir": ".mooncli"
 	},
 	"bin": {
-		"mood": "dist/cli.js",
-		"moodcli": "dist/cli.js"
+		"Moon": "dist/cli.js",
+		"mooncli": "dist/cli.js"
 	},
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
@@ -31,9 +31,9 @@
 	],
 	"scripts": {
 		"clean": "shx rm -rf dist",
-		"dev": "tsgo -p tsconfig.build.json --watch --preserveWatchOutput",
-		"build": "tsgo -p tsconfig.build.json && shx chmod +x dist/cli.js && npm run copy-assets",
-		"build:binary": "npm --prefix ../tui run build && npm --prefix ../core run build && npm --prefix ../engine run build && npm run build && bun build --compile ./dist/bun/cli.js --outfile dist/mood && npm run copy-binary-assets",
+		"dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+		"build": "tsc -p tsconfig.build.json && shx chmod +x dist/cli.js && npm run copy-assets",
+		"build:binary": "npm --prefix ../tui run build && npm --prefix ../core run build && npm --prefix ../engine run build && npm run build && bun build --compile ./dist/bun/cli.js --outfile dist/Moon && npm run copy-binary-assets",
 		"copy-assets": "shx mkdir -p dist/modes/interactive/theme && shx cp src/modes/interactive/theme/*.json dist/modes/interactive/theme/ && shx mkdir -p dist/modes/interactive/assets && shx cp src/modes/interactive/assets/*.png dist/modes/interactive/assets/ && shx mkdir -p dist/core/export-html/vendor && shx cp src/core/export-html/template.html src/core/export-html/template.css src/core/export-html/template.js dist/core/export-html/ && shx cp src/core/export-html/vendor/*.js dist/core/export-html/vendor/",
 		"copy-binary-assets": "shx cp package.json dist/ && shx cp README.md dist/ && shx cp CHANGELOG.md dist/ && shx mkdir -p dist/theme && shx cp src/modes/interactive/theme/*.json dist/theme/ && shx mkdir -p dist/assets && shx cp src/modes/interactive/assets/*.png dist/assets/ && shx mkdir -p dist/export-html/vendor && shx cp src/core/export-html/template.html dist/export-html/ && shx cp src/core/export-html/vendor/*.js dist/export-html/vendor/ && shx cp -r docs dist/ && shx cp -r examples dist/ && shx cp ../../node_modules/@silvia-odwyer/photon-node/photon_rs_bg.wasm dist/",
 		"test": "vitest --run",
@@ -41,9 +41,9 @@
 	},
 	"dependencies": {
 		"@mariozechner/jiti": "^2.6.2",
-		"@moodcli/engine": "^0.72.1",
-		"@moodcli/core": "^0.72.1",
-		"@moodcli/tui": "^0.72.1",
+		"@mooncli/engine": "^0.72.1",
+		"@mooncli/core": "^0.72.1",
+		"@mooncli/tui": "^0.72.1",
 		"@silvia-odwyer/photon-node": "^0.3.4",
 		"chalk": "^5.5.0",
 		"cli-highlight": "^2.1.11",
@@ -91,7 +91,7 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/theayzek01/hodeuscli",
+		"url": "https://github.com/theayzek01/mooncli",
 		"directory": "packages/cli"
 	},
 	"engines": {

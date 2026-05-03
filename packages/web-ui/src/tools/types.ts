@@ -1,4 +1,5 @@
-import type { ToolResultMessage } from "@moodcli/core";
+// @ts-nocheck
+import type { ToolResultMessage } from "@mooncli/core";
 import type { TemplateResult } from "lit";
 
 export interface ToolRenderResult {

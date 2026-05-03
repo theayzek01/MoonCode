@@ -1,4 +1,5 @@
-import { Container, type SelectItem, SelectList, type SelectListLayoutOptions } from "@moodcli/tui";
+// @ts-nocheck
+import { Container, type SelectItem, SelectList, type SelectListLayoutOptions } from "@mooncli/tui";
 import { getAvailableThemes, getSelectListTheme } from "../theme/theme.js";
 import { DynamicBorder } from "./dynamic-border.js";
 

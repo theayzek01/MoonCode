@@ -2785,7 +2785,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"zai-glm-4.7": {
 			id: "zai-glm-4.7",
-			name: "Z.Core GLM-4.7",
+			name: "Z.AI GLM-4.7",
 			api: "openai-completions",
 			provider: "cerebras",
 			baseUrl: "https://api.cerebras.ai/v1",
@@ -5421,8 +5421,8 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 	},
 	"huggingface": {
-		"MiniMaxCore/MiniMax-M2.1": {
-			id: "MiniMaxCore/MiniMax-M2.1",
+		"MiniMaxAI/MiniMax-M2.1": {
+			id: "MiniMaxAI/MiniMax-M2.1",
 			name: "MiniMax-M2.1",
 			api: "openai-completions",
 			provider: "huggingface",
@@ -5439,8 +5439,8 @@ export const MODELS = {
 			contextWindow: 204800,
 			maxTokens: 131072,
 		} satisfies Model<"openai-completions">,
-		"MiniMaxCore/MiniMax-M2.5": {
-			id: "MiniMaxCore/MiniMax-M2.5",
+		"MiniMaxAI/MiniMax-M2.5": {
+			id: "MiniMaxAI/MiniMax-M2.5",
 			name: "MiniMax-M2.5",
 			api: "openai-completions",
 			provider: "huggingface",
@@ -5457,8 +5457,8 @@ export const MODELS = {
 			contextWindow: 204800,
 			maxTokens: 131072,
 		} satisfies Model<"openai-completions">,
-		"MiniMaxCore/MiniMax-M2.7": {
-			id: "MiniMaxCore/MiniMax-M2.7",
+		"MiniMaxAI/MiniMax-M2.7": {
+			id: "MiniMaxAI/MiniMax-M2.7",
 			name: "MiniMax-M2.7",
 			api: "openai-completions",
 			provider: "huggingface",
@@ -8517,7 +8517,7 @@ export const MODELS = {
 	"openrouter": {
 		"ai21/jamba-large-1.7": {
 			id: "ai21/jamba-large-1.7",
-			name: "Core21: Jamba Large 1.7",
+			name: "AI21: Jamba Large 1.7",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -8551,7 +8551,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"allenai/olmo-3.1-32b-instruct": {
 			id: "allenai/olmo-3.1-32b-instruct",
-			name: "AllenCore: Olmo 3.1 32B Instruct",
+			name: "AllenAI: Olmo 3.1 32B Instruct",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -8894,7 +8894,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"arcee-ai/trinity-large-preview": {
 			id: "arcee-ai/trinity-large-preview",
-			name: "Arcee Core: Trinity Large Preview",
+			name: "Arcee AI: Trinity Large Preview",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -8911,7 +8911,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"arcee-ai/trinity-large-thinking": {
 			id: "arcee-ai/trinity-large-thinking",
-			name: "Arcee Core: Trinity Large Thinking",
+			name: "Arcee AI: Trinity Large Thinking",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -8928,7 +8928,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"arcee-ai/trinity-mini": {
 			id: "arcee-ai/trinity-mini",
-			name: "Arcee Core: Trinity Mini",
+			name: "Arcee AI: Trinity Mini",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -8945,7 +8945,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"arcee-ai/virtuoso-large": {
 			id: "arcee-ai/virtuoso-large",
-			name: "Arcee Core: Virtuoso Large",
+			name: "Arcee AI: Virtuoso Large",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -9289,7 +9289,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"essentialai/rnj-1-instruct": {
 			id: "essentialai/rnj-1-instruct",
-			name: "EssentialCore: Rnj 1 Instruct",
+			name: "EssentialAI: Rnj 1 Instruct",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -9646,7 +9646,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"inclusionai/ling-2.6-1t:free": {
 			id: "inclusionai/ling-2.6-1t:free",
-			name: "inclusionCore: Ling-2.6-1T (free)",
+			name: "inclusionAI: Ling-2.6-1T (free)",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -9663,7 +9663,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"inclusionai/ling-2.6-flash": {
 			id: "inclusionai/ling-2.6-flash",
-			name: "inclusionCore: Ling-2.6-flash",
+			name: "inclusionAI: Ling-2.6-flash",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10258,7 +10258,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"moonshotai/kimi-k2": {
 			id: "moonshotai/kimi-k2",
-			name: "MoonshotCore: Kimi K2 0711",
+			name: "MoonshotAI: Kimi K2 0711",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10275,7 +10275,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"moonshotai/kimi-k2-0905": {
 			id: "moonshotai/kimi-k2-0905",
-			name: "MoonshotCore: Kimi K2 0905",
+			name: "MoonshotAI: Kimi K2 0905",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10292,7 +10292,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"moonshotai/kimi-k2-thinking": {
 			id: "moonshotai/kimi-k2-thinking",
-			name: "MoonshotCore: Kimi K2 Thinking",
+			name: "MoonshotAI: Kimi K2 Thinking",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10309,7 +10309,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"moonshotai/kimi-k2.5": {
 			id: "moonshotai/kimi-k2.5",
-			name: "MoonshotCore: Kimi K2.5",
+			name: "MoonshotAI: Kimi K2.5",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10326,7 +10326,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"moonshotai/kimi-k2.6": {
 			id: "moonshotai/kimi-k2.6",
-			name: "MoonshotCore: Kimi K2.6",
+			name: "MoonshotAI: Kimi K2.6",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10530,7 +10530,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-3.5-turbo": {
 			id: "openai/gpt-3.5-turbo",
-			name: "OpenCore: GPT-3.5 Turbo",
+			name: "OpenAI: GPT-3.5 Turbo",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10547,7 +10547,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-3.5-turbo-0613": {
 			id: "openai/gpt-3.5-turbo-0613",
-			name: "OpenCore: GPT-3.5 Turbo (older v0613)",
+			name: "OpenAI: GPT-3.5 Turbo (older v0613)",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10564,7 +10564,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-3.5-turbo-16k": {
 			id: "openai/gpt-3.5-turbo-16k",
-			name: "OpenCore: GPT-3.5 Turbo 16k",
+			name: "OpenAI: GPT-3.5 Turbo 16k",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10581,7 +10581,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-4": {
 			id: "openai/gpt-4",
-			name: "OpenCore: GPT-4",
+			name: "OpenAI: GPT-4",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10598,7 +10598,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-4-0314": {
 			id: "openai/gpt-4-0314",
-			name: "OpenCore: GPT-4 (older v0314)",
+			name: "OpenAI: GPT-4 (older v0314)",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10615,7 +10615,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-4-1106-preview": {
 			id: "openai/gpt-4-1106-preview",
-			name: "OpenCore: GPT-4 Turbo (older v1106)",
+			name: "OpenAI: GPT-4 Turbo (older v1106)",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10632,7 +10632,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-4-turbo": {
 			id: "openai/gpt-4-turbo",
-			name: "OpenCore: GPT-4 Turbo",
+			name: "OpenAI: GPT-4 Turbo",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10649,7 +10649,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-4-turbo-preview": {
 			id: "openai/gpt-4-turbo-preview",
-			name: "OpenCore: GPT-4 Turbo Preview",
+			name: "OpenAI: GPT-4 Turbo Preview",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10666,7 +10666,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-4.1": {
 			id: "openai/gpt-4.1",
-			name: "OpenCore: GPT-4.1",
+			name: "OpenAI: GPT-4.1",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10683,7 +10683,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-4.1-mini": {
 			id: "openai/gpt-4.1-mini",
-			name: "OpenCore: GPT-4.1 Mini",
+			name: "OpenAI: GPT-4.1 Mini",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10700,7 +10700,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-4.1-nano": {
 			id: "openai/gpt-4.1-nano",
-			name: "OpenCore: GPT-4.1 Nano",
+			name: "OpenAI: GPT-4.1 Nano",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10717,7 +10717,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-4o": {
 			id: "openai/gpt-4o",
-			name: "OpenCore: GPT-4o",
+			name: "OpenAI: GPT-4o",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10734,7 +10734,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-4o-2024-05-13": {
 			id: "openai/gpt-4o-2024-05-13",
-			name: "OpenCore: GPT-4o (2024-05-13)",
+			name: "OpenAI: GPT-4o (2024-05-13)",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10751,7 +10751,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-4o-2024-08-06": {
 			id: "openai/gpt-4o-2024-08-06",
-			name: "OpenCore: GPT-4o (2024-08-06)",
+			name: "OpenAI: GPT-4o (2024-08-06)",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10768,7 +10768,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-4o-2024-11-20": {
 			id: "openai/gpt-4o-2024-11-20",
-			name: "OpenCore: GPT-4o (2024-11-20)",
+			name: "OpenAI: GPT-4o (2024-11-20)",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10785,7 +10785,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-4o-audio-preview": {
 			id: "openai/gpt-4o-audio-preview",
-			name: "OpenCore: GPT-4o Audio",
+			name: "OpenAI: GPT-4o Audio",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10802,7 +10802,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-4o-mini": {
 			id: "openai/gpt-4o-mini",
-			name: "OpenCore: GPT-4o-mini",
+			name: "OpenAI: GPT-4o-mini",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10819,7 +10819,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-4o-mini-2024-07-18": {
 			id: "openai/gpt-4o-mini-2024-07-18",
-			name: "OpenCore: GPT-4o-mini (2024-07-18)",
+			name: "OpenAI: GPT-4o-mini (2024-07-18)",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10836,7 +10836,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-5": {
 			id: "openai/gpt-5",
-			name: "OpenCore: GPT-5",
+			name: "OpenAI: GPT-5",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10853,7 +10853,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-5-codex": {
 			id: "openai/gpt-5-codex",
-			name: "OpenCore: GPT-5 Codex",
+			name: "OpenAI: GPT-5 Codex",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10870,7 +10870,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-5-mini": {
 			id: "openai/gpt-5-mini",
-			name: "OpenCore: GPT-5 Mini",
+			name: "OpenAI: GPT-5 Mini",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10887,7 +10887,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-5-nano": {
 			id: "openai/gpt-5-nano",
-			name: "OpenCore: GPT-5 Nano",
+			name: "OpenAI: GPT-5 Nano",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10904,7 +10904,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-5-pro": {
 			id: "openai/gpt-5-pro",
-			name: "OpenCore: GPT-5 Pro",
+			name: "OpenAI: GPT-5 Pro",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10921,7 +10921,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-5.1": {
 			id: "openai/gpt-5.1",
-			name: "OpenCore: GPT-5.1",
+			name: "OpenAI: GPT-5.1",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10938,7 +10938,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-5.1-chat": {
 			id: "openai/gpt-5.1-chat",
-			name: "OpenCore: GPT-5.1 Chat",
+			name: "OpenAI: GPT-5.1 Chat",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10955,7 +10955,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-5.1-codex": {
 			id: "openai/gpt-5.1-codex",
-			name: "OpenCore: GPT-5.1-Codex",
+			name: "OpenAI: GPT-5.1-Codex",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10972,7 +10972,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-5.1-codex-max": {
 			id: "openai/gpt-5.1-codex-max",
-			name: "OpenCore: GPT-5.1-Codex-Max",
+			name: "OpenAI: GPT-5.1-Codex-Max",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -10989,7 +10989,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-5.1-codex-mini": {
 			id: "openai/gpt-5.1-codex-mini",
-			name: "OpenCore: GPT-5.1-Codex-Mini",
+			name: "OpenAI: GPT-5.1-Codex-Mini",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11006,7 +11006,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-5.2": {
 			id: "openai/gpt-5.2",
-			name: "OpenCore: GPT-5.2",
+			name: "OpenAI: GPT-5.2",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11024,7 +11024,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-5.2-chat": {
 			id: "openai/gpt-5.2-chat",
-			name: "OpenCore: GPT-5.2 Chat",
+			name: "OpenAI: GPT-5.2 Chat",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11042,7 +11042,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-5.2-codex": {
 			id: "openai/gpt-5.2-codex",
-			name: "OpenCore: GPT-5.2-Codex",
+			name: "OpenAI: GPT-5.2-Codex",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11060,7 +11060,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-5.2-pro": {
 			id: "openai/gpt-5.2-pro",
-			name: "OpenCore: GPT-5.2 Pro",
+			name: "OpenAI: GPT-5.2 Pro",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11078,7 +11078,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-5.3-chat": {
 			id: "openai/gpt-5.3-chat",
-			name: "OpenCore: GPT-5.3 Chat",
+			name: "OpenAI: GPT-5.3 Chat",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11096,7 +11096,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-5.3-codex": {
 			id: "openai/gpt-5.3-codex",
-			name: "OpenCore: GPT-5.3-Codex",
+			name: "OpenAI: GPT-5.3-Codex",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11114,7 +11114,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-5.4": {
 			id: "openai/gpt-5.4",
-			name: "OpenCore: GPT-5.4",
+			name: "OpenAI: GPT-5.4",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11132,7 +11132,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-5.4-mini": {
 			id: "openai/gpt-5.4-mini",
-			name: "OpenCore: GPT-5.4 Mini",
+			name: "OpenAI: GPT-5.4 Mini",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11150,7 +11150,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-5.4-nano": {
 			id: "openai/gpt-5.4-nano",
-			name: "OpenCore: GPT-5.4 Nano",
+			name: "OpenAI: GPT-5.4 Nano",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11168,7 +11168,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-5.4-pro": {
 			id: "openai/gpt-5.4-pro",
-			name: "OpenCore: GPT-5.4 Pro",
+			name: "OpenAI: GPT-5.4 Pro",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11186,7 +11186,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-5.5": {
 			id: "openai/gpt-5.5",
-			name: "OpenCore: GPT-5.5",
+			name: "OpenAI: GPT-5.5",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11204,7 +11204,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-5.5-pro": {
 			id: "openai/gpt-5.5-pro",
-			name: "OpenCore: GPT-5.5 Pro",
+			name: "OpenAI: GPT-5.5 Pro",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11222,7 +11222,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-audio": {
 			id: "openai/gpt-audio",
-			name: "OpenCore: GPT Audio",
+			name: "OpenAI: GPT Audio",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11239,7 +11239,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-audio-mini": {
 			id: "openai/gpt-audio-mini",
-			name: "OpenCore: GPT Audio Mini",
+			name: "OpenAI: GPT Audio Mini",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11256,7 +11256,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-oss-120b": {
 			id: "openai/gpt-oss-120b",
-			name: "OpenCore: gpt-oss-120b",
+			name: "OpenAI: gpt-oss-120b",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11273,7 +11273,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-oss-120b:free": {
 			id: "openai/gpt-oss-120b:free",
-			name: "OpenCore: gpt-oss-120b (free)",
+			name: "OpenAI: gpt-oss-120b (free)",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11290,7 +11290,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-oss-20b": {
 			id: "openai/gpt-oss-20b",
-			name: "OpenCore: gpt-oss-20b",
+			name: "OpenAI: gpt-oss-20b",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11307,7 +11307,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-oss-20b:free": {
 			id: "openai/gpt-oss-20b:free",
-			name: "OpenCore: gpt-oss-20b (free)",
+			name: "OpenAI: gpt-oss-20b (free)",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11324,7 +11324,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-oss-safeguard-20b": {
 			id: "openai/gpt-oss-safeguard-20b",
-			name: "OpenCore: gpt-oss-safeguard-20b",
+			name: "OpenAI: gpt-oss-safeguard-20b",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11341,7 +11341,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/o1": {
 			id: "openai/o1",
-			name: "OpenCore: o1",
+			name: "OpenAI: o1",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11358,7 +11358,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/o3": {
 			id: "openai/o3",
-			name: "OpenCore: o3",
+			name: "OpenAI: o3",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11375,7 +11375,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/o3-deep-research": {
 			id: "openai/o3-deep-research",
-			name: "OpenCore: o3 Deep Research",
+			name: "OpenAI: o3 Deep Research",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11392,7 +11392,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/o3-mini": {
 			id: "openai/o3-mini",
-			name: "OpenCore: o3 Mini",
+			name: "OpenAI: o3 Mini",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11409,7 +11409,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/o3-mini-high": {
 			id: "openai/o3-mini-high",
-			name: "OpenCore: o3 Mini High",
+			name: "OpenAI: o3 Mini High",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11426,7 +11426,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/o3-pro": {
 			id: "openai/o3-pro",
-			name: "OpenCore: o3 Pro",
+			name: "OpenAI: o3 Pro",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11443,7 +11443,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/o4-mini": {
 			id: "openai/o4-mini",
-			name: "OpenCore: o4 Mini",
+			name: "OpenAI: o4 Mini",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11460,7 +11460,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/o4-mini-deep-research": {
 			id: "openai/o4-mini-deep-research",
-			name: "OpenCore: o4 Mini Deep Research",
+			name: "OpenAI: o4 Mini Deep Research",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -11477,7 +11477,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"openai/o4-mini-high": {
 			id: "openai/o4-mini-high",
-			name: "OpenCore: o4 Mini High",
+			name: "OpenAI: o4 Mini High",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -12565,7 +12565,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"x-ai/grok-3": {
 			id: "x-ai/grok-3",
-			name: "xCore: Grok 3",
+			name: "xAI: Grok 3",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -12582,7 +12582,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"x-ai/grok-3-beta": {
 			id: "x-ai/grok-3-beta",
-			name: "xCore: Grok 3 Beta",
+			name: "xAI: Grok 3 Beta",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -12599,7 +12599,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"x-ai/grok-3-mini": {
 			id: "x-ai/grok-3-mini",
-			name: "xCore: Grok 3 Mini",
+			name: "xAI: Grok 3 Mini",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -12616,7 +12616,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"x-ai/grok-3-mini-beta": {
 			id: "x-ai/grok-3-mini-beta",
-			name: "xCore: Grok 3 Mini Beta",
+			name: "xAI: Grok 3 Mini Beta",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -12633,7 +12633,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"x-ai/grok-4": {
 			id: "x-ai/grok-4",
-			name: "xCore: Grok 4",
+			name: "xAI: Grok 4",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -12650,7 +12650,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"x-ai/grok-4-fast": {
 			id: "x-ai/grok-4-fast",
-			name: "xCore: Grok 4 Fast",
+			name: "xAI: Grok 4 Fast",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -12667,7 +12667,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"x-ai/grok-4.1-fast": {
 			id: "x-ai/grok-4.1-fast",
-			name: "xCore: Grok 4.1 Fast",
+			name: "xAI: Grok 4.1 Fast",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -12684,7 +12684,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"x-ai/grok-4.20": {
 			id: "x-ai/grok-4.20",
-			name: "xCore: Grok 4.20",
+			name: "xAI: Grok 4.20",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -12701,7 +12701,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"x-ai/grok-4.3": {
 			id: "x-ai/grok-4.3",
-			name: "xCore: Grok 4.3",
+			name: "xAI: Grok 4.3",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -12718,7 +12718,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"x-ai/grok-code-fast-1": {
 			id: "x-ai/grok-code-fast-1",
-			name: "xCore: Grok Code Fast 1",
+			name: "xAI: Grok Code Fast 1",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -13126,7 +13126,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"~moonshotai/kimi-latest": {
 			id: "~moonshotai/kimi-latest",
-			name: "MoonshotCore Kimi Latest",
+			name: "MoonshotAI Kimi Latest",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -13143,7 +13143,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"~openai/gpt-latest": {
 			id: "~openai/gpt-latest",
-			name: "OpenCore GPT Latest",
+			name: "OpenAI GPT Latest",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -13160,7 +13160,7 @@ export const MODELS = {
 		} satisfies Model<"openai-completions">,
 		"~openai/gpt-mini-latest": {
 			id: "~openai/gpt-mini-latest",
-			name: "OpenCore GPT Mini Latest",
+			name: "OpenAI GPT Mini Latest",
 			api: "openai-completions",
 			provider: "openrouter",
 			baseUrl: "https://openrouter.ai/api/v1",
@@ -15537,9 +15537,9 @@ export const MODELS = {
 			contextWindow: 2000000,
 			maxTokens: 30000,
 		} satisfies Model<"anthropic-messages">,
-		"xai/grok-4.20-multi-engine": {
-			id: "xai/grok-4.20-multi-engine",
-			name: "Grok 4.20 Multi-Engine",
+		"xai/grok-4.20-multi-agent": {
+			id: "xai/grok-4.20-multi-agent",
+			name: "Grok 4.20 Multi-Agent",
 			api: "anthropic-messages",
 			provider: "vercel-ai-gateway",
 			baseUrl: "https://ai-gateway.vercel.sh",
@@ -15554,9 +15554,9 @@ export const MODELS = {
 			contextWindow: 2000000,
 			maxTokens: 2000000,
 		} satisfies Model<"anthropic-messages">,
-		"xai/grok-4.20-multi-engine-beta": {
-			id: "xai/grok-4.20-multi-engine-beta",
-			name: "Grok 4.20 Multi Engine Beta",
+		"xai/grok-4.20-multi-agent-beta": {
+			id: "xai/grok-4.20-multi-agent-beta",
+			name: "Grok 4.20 Multi Agent Beta",
 			api: "anthropic-messages",
 			provider: "vercel-ai-gateway",
 			baseUrl: "https://ai-gateway.vercel.sh",

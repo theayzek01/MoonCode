@@ -1,5 +1,5 @@
-import type { EngineTool, ThinkingLevel } from "@moodcli/engine";
-import { fauxAssistantMessage, fauxToolCall, type Model } from "@moodcli/core";
+import { fauxAssistantMessage, fauxToolCall, type Model } from "@mooncli/core";
+import type { EngineTool, ThinkingLevel } from "@mooncli/engine";
 import { Type } from "typebox";
 import { afterEach, describe, expect, it } from "vitest";
 import type { ExtensionAPI } from "../../src/index.js";
@@ -22,8 +22,8 @@ describe("EngineSession model and extension characterization", () => {
 				{ id: "faux-2", name: "Two", reasoning: true },
 			],
 			extensionFactories: [
-				(moodcli) => {
-					moodcli.on("model_select", async (event) => {
+				(Mooncli) => {
+					Mooncli.on("model_select", async (event) => {
 						modelEvents.push(`${event.previousModel?.id ?? "none"}->${event.model.id}:${event.source}`);
 					});
 				},
@@ -106,8 +106,8 @@ describe("EngineSession model and extension characterization", () => {
 		const harness = await createHarness({
 			tools: [echoTool],
 			extensionFactories: [
-				(moodcli) => {
-					moodcli.on("tool_call", async () => ({ block: true, reason: "Blocked by test" }));
+				(Mooncli) => {
+					Mooncli.on("tool_call", async () => ({ block: true, reason: "Blocked by test" }));
 				},
 			],
 		});
@@ -149,8 +149,8 @@ describe("EngineSession model and extension characterization", () => {
 		const harness = await createHarness({
 			tools: [echoTool],
 			extensionFactories: [
-				(moodcli) => {
-					moodcli.on("tool_result", async () => ({
+				(Mooncli) => {
+					Mooncli.on("tool_result", async () => ({
 						content: [{ type: "text", text: "patched result" }],
 						details: { patched: true },
 					}));
@@ -184,8 +184,8 @@ describe("EngineSession model and extension characterization", () => {
 	it("allows extension context handlers to modify messages before the Provider call", async () => {
 		const harness = await createHarness({
 			extensionFactories: [
-				(moodcli) => {
-					moodcli.on("context", async (event) => ({
+				(Mooncli) => {
+					Mooncli.on("context", async (event) => ({
 						messages: event.messages.map((message) =>
 							message.role === "user"
 								? { ...message, content: [{ type: "text", text: "rewritten" }], timestamp: message.timestamp }
@@ -225,9 +225,9 @@ describe("EngineSession model and extension characterization", () => {
 		let extensionApi: ExtensionAPI | undefined;
 		const transformedHarness = await createHarness({
 			extensionFactories: [
-				(moodcli) => {
-					extensionApi = moodcli;
-					moodcli.on("input", async (event) => {
+				(Mooncli) => {
+					extensionApi = Mooncli;
+					Mooncli.on("input", async (event) => {
 						if (event.text === "ping") {
 							return { action: "handled" };
 						}
@@ -263,8 +263,8 @@ describe("EngineSession model and extension characterization", () => {
 	it("allows before_engine_start handlers to inject custom messages and modify the system prompt", async () => {
 		const harness = await createHarness({
 			extensionFactories: [
-				(moodcli) => {
-					moodcli.on("before_engine_start", async (event) => ({
+				(Mooncli) => {
+					Mooncli.on("before_engine_start", async (event) => ({
 						message: {
 							customType: "before-start",
 							content: "injected",
@@ -305,11 +305,11 @@ describe("EngineSession model and extension characterization", () => {
 		const lifecycleEvents: string[] = [];
 		const harness = await createHarness({
 			extensionFactories: [
-				(moodcli) => {
-					moodcli.on("session_start", async (event) => {
+				(Mooncli) => {
+					Mooncli.on("session_start", async (event) => {
 						lifecycleEvents.push(`start:${event.reason}`);
 					});
-					moodcli.on("session_shutdown", async (event) => {
+					Mooncli.on("session_shutdown", async (event) => {
 						lifecycleEvents.push(`shutdown:${event.reason}`);
 					});
 				},

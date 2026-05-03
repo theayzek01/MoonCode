@@ -3,8 +3,8 @@
  * Uses Kitty keyboard protocol for smooth movement (press/release detection)
  */
 
-import { isKeyRelease, Key, matchesKey, visibleWidth } from "@moodcli/tui";
-import type { ExtensionAPI } from "moodcli";
+import type { ExtensionAPI } from "Mooncli";
+import { isKeyRelease, Key, matchesKey, visibleWidth } from "@mooncli/tui";
 
 const GAME_WIDTH = 60;
 const GAME_HEIGHT = 24;
@@ -392,7 +392,7 @@ class SpaceInvadersComponent {
 		const red = (s: string) => `\x1b[31m${s}\x1b[0m`;
 		const yellow = (s: string) => `\x1b[33m${s}\x1b[0m`;
 		const cyan = (s: string) => `\x1b[36m${s}\x1b[0m`;
-		const menginea = (s: string) => `\x1b[35m${s}\x1b[0m`;
+		const magenta = (s: string) => `\x1b[35m${s}\x1b[0m`;
 		const white = (s: string) => `\x1b[97m${s}\x1b[0m`;
 		const bold = (s: string) => `\x1b[1m${s}\x1b[22m`;
 
@@ -434,7 +434,7 @@ class SpaceInvadersComponent {
 							x === alien.x ? "◆" : "╱╲"[x < alien.x ? 0 : 1],
 							x === alien.x ? "☆" : "◄►"[x < alien.x ? 0 : 1],
 						];
-						const colors = [green, cyan, menginea];
+						const colors = [green, cyan, magenta];
 						char = colors[alien.type](sprites[alien.type]);
 						colored = true;
 						break;
@@ -524,8 +524,8 @@ class SpaceInvadersComponent {
 
 const INVADERS_SAVE_TYPE = "space-invaders-save";
 
-export default function (moodcli: ExtensionAPI) {
-	moodcli.registerCommand("invaders", {
+export default function (Mooncli: ExtensionAPI) {
+	Mooncli.registerCommand("invaders", {
 		description: "Play Space Invaders!",
 
 		handler: async (_args, ctx) => {
@@ -550,7 +550,7 @@ export default function (moodcli: ExtensionAPI) {
 					tui,
 					() => done(undefined),
 					(state) => {
-						moodcli.appendEntry(INVADERS_SAVE_TYPE, state);
+						Mooncli.appendEntry(INVADERS_SAVE_TYPE, state);
 					},
 					savedState,
 				);

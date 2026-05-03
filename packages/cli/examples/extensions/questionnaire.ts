@@ -5,8 +5,8 @@
  * Multiple questions: tab bar navigation between questions
  */
 
-import { Editor, type EditorTheme, Key, matchesKey, Text, truncateToWidth } from "@moodcli/tui";
-import type { ExtensionAPI } from "moodcli";
+import type { ExtensionAPI } from "Mooncli";
+import { Editor, type EditorTheme, Key, matchesKey, Text, truncateToWidth } from "@mooncli/tui";
 import { Type } from "typebox";
 
 // Types
@@ -73,8 +73,8 @@ function errorResult(
 	};
 }
 
-export default function questionnaire(moodcli: ExtensionAPI) {
-	moodcli.registerTool({
+export default function questionnaire(Mooncli: ExtensionAPI) {
+	Mooncli.registerTool({
 		name: "questionnaire",
 		label: "Questionnaire",
 		description:

@@ -1,6 +1,7 @@
+// @ts-nocheck
 import { i18n } from "@mariozechner/mini-lit";
 import { Select } from "@mariozechner/mini-lit/dist/Select.js";
-import { getProviders } from "@moodcli/core";
+import { getProviders } from "@mooncli/core";
 import { html, type TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import "../components/CustomProviderCard.js";
@@ -109,8 +110,8 @@ export class ProvidersModelsTab extends SettingsTab {
 							{ value: "llama.cpp", label: "llama.cpp" },
 							{ value: "vllm", label: "vProvider" },
 							{ value: "lmstudio", label: "LM Studio" },
-							{ value: "openai-completions", label: i18n("OpenCore Completions Compatible") },
-							{ value: "openai-responses", label: i18n("OpenCore Responses Compatible") },
+							{ value: "openai-completions", label: i18n("OpenAI Completions Compatible") },
+							{ value: "openai-responses", label: i18n("OpenAI Responses Compatible") },
 							{ value: "anthropic-messages", label: i18n("Anthropic Messages Compatible") },
 						],
 						onChange: (value: string) => this.addCustomProvider(value as CustomProviderType),

@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, realpathSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { getModel } from "@moodcli/core";
+import { getModel } from "@mooncli/core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createEngineSession } from "../src/core/sdk.js";
 import { SessionManager } from "../src/core/session-manager.js";
@@ -12,7 +12,7 @@ describe("createEngineSession session manager defaults", () => {
 	let engineDir: string;
 
 	beforeEach(() => {
-		tempDir = join(tmpdir(), `moodcli-sdk-session-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+		tempDir = join(tmpdir(), `Mooncli-sdk-session-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 		cwd = join(tempDir, "project");
 		engineDir = join(tempDir, "engine");
 		mkdirSync(cwd, { recursive: true });

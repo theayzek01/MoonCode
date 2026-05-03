@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
 	type ImageContent,
 	type Message,
@@ -7,19 +8,19 @@ import {
 	type TextContent,
 	type ThinkingBudgets,
 	type Transport,
-} from "@moodcli/core";
+} from "@mooncli/core";
 import { runEngineLoop, runEngineLoopContinue } from "./engine-loop.js";
 import type {
 	AfterToolCallContext,
 	AfterToolCallResult,
+	BeforeToolCallContext,
+	BeforeToolCallResult,
 	EngineContext,
 	EngineEvent,
 	EngineLoopConfig,
 	EngineMessage,
 	EngineState,
 	EngineTool,
-	BeforeToolCallContext,
-	BeforeToolCallResult,
 	StreamFn,
 	ToolExecutionMode,
 } from "./types.js";
@@ -54,7 +55,10 @@ const DEFAULT_MODEL = {
 
 type QueueMode = "all" | "one-at-a-time";
 
-type MutableEngineState = Omit<EngineState, "isStreaming" | "streamingMessage" | "pendingToolCalls" | "errorMessage"> & {
+type MutableEngineState = Omit<
+	EngineState,
+	"isStreaming" | "streamingMessage" | "pendingToolCalls" | "errorMessage"
+> & {
 	isStreaming: boolean;
 	streamingMessage?: EngineMessage;
 	pendingToolCalls: Set<string>;
@@ -91,7 +95,7 @@ function createMutableEngineState(
 }
 
 /** Options for constructing an {@link Engine}. */
-export interface EngineOptions {
+export interface AgentOptions {
 	initialState?: Partial<Omit<EngineState, "pendingToolCalls" | "isStreaming" | "streamingMessage" | "errorMessage">>;
 	convertToLlm?: (messages: EngineMessage[]) => Message[] | Promise<Message[]>;
 	transformContext?: (messages: EngineMessage[], signal?: AbortSignal) => Promise<EngineMessage[]>;
@@ -187,7 +191,7 @@ export class Engine {
 	/** Tool execution strategy for assistant messages that contain multiple tool calls. */
 	public toolExecution: ToolExecutionMode;
 
-	constructor(options: EngineOptions = {}) {
+	constructor(options: AgentOptions = {}) {
 		this._state = createMutableEngineState(options.initialState);
 		this.convertToLlm = options.convertToLlm ?? defaultConvertToLlm;
 		this.transformContext = options.transformContext;

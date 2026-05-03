@@ -1,3 +1,7 @@
+/**
+ * CLI entry point for the refactored coding engine.
+ * Uses main.ts with EngineSession and new mode modules.
+ */
 import { spawnSync } from "child_process";
 import { accessSync, constants, existsSync, readFileSync, realpathSync } from "fs";
 import { homedir } from "os";
@@ -75,9 +79,6 @@ function getInferredNpmInstall(packageName: string): { root: string; prefix: str
 	if (!root || path.basename(root) !== "node_modules") return undefined;
 	const parent = path.dirname(root);
 	if (path.basename(parent) === "lib") return { root, prefix: path.dirname(parent) };
-	// Windows global npm prefixes use `<prefix>\\node_modules`, which is
-	// indistinguishable from local project installs by path shape alone. Do not
-	// infer unsupported Windows custom prefixes without `npm root -g` evidence.
 	return undefined;
 }
 
@@ -222,7 +223,7 @@ export function getSelfUpdateCommand(packageName: string, npmCommand?: string[])
 export function getSelfUpdateUnavailableInstruction(packageName: string, npmCommand?: string[]): string {
 	const method = detectInstallMethod();
 	if (method === "bun-binary") {
-		return `Download from: https://moodcli.dev/releases/latest`;
+		return `Download from: https://mooncli.dev/releases/latest`;
 	}
 	const command = getSelfUpdateCommandForMethod(method, packageName, npmCommand);
 	if (command) {
@@ -249,13 +250,9 @@ export function getUpdateInstruction(packageName: string): string {
 
 /**
  * Get the base directory for resolving package assets (themes, package.json, README.md, CHANGELOG.md).
- * - For Bun binary: returns the directory containing the executable
- * - For Node.js (dist/): returns __dirname (the dist/ directory)
- * - For tsx (src/): returns parent directory (the package root)
  */
 export function getPackageDir(): string {
-	// Allow override via environment variable (useful for Nix/Guix where store paths tokenize poorly)
-	const envDir = process.env.MOOD_PACKAGE_DIR;
+	const envDir = process.env.MOON_PACKAGE_DIR;
 	if (envDir) {
 		if (envDir === "~") return homedir();
 		if (envDir.startsWith("~/")) return homedir() + envDir.slice(1);
@@ -263,10 +260,8 @@ export function getPackageDir(): string {
 	}
 
 	if (isBunBinary) {
-		// Bun binary: process.execPath points to the compiled executable
 		return dirname(process.execPath);
 	}
-	// Node.js: walk up from __dirname until we find package.json
 	let dir = __dirname;
 	while (dir !== dirname(dir)) {
 		if (existsSync(join(dir, "package.json"))) {
@@ -274,31 +269,23 @@ export function getPackageDir(): string {
 		}
 		dir = dirname(dir);
 	}
-	// Fallback (shouldn't happen)
 	return __dirname;
 }
 
 /**
- * Get path to built-in themes directory (shipped with package)
- * - For Bun binary: theme/ next to executable
- * - For Node.js (dist/): dist/modes/interactive/theme/
- * - For tsx (src/): src/modes/interactive/theme/
+ * Get path to built-in themes directory
  */
 export function getThemesDir(): string {
 	if (isBunBinary) {
 		return join(getPackageDir(), "theme");
 	}
-	// Theme is in modes/interactive/theme/ relative to src/ or dist/
 	const packageDir = getPackageDir();
 	const srcOrDist = existsSync(join(packageDir, "src")) ? "src" : "dist";
 	return join(packageDir, srcOrDist, "modes", "interactive", "theme");
 }
 
 /**
- * Get path to HTML export template directory (shipped with package)
- * - For Bun binary: export-html/ next to executable
- * - For Node.js (dist/): dist/core/export-html/
- * - For tsx (src/): src/core/export-html/
+ * Get path to HTML export template directory
  */
 export function getExportTemplateDir(): string {
 	if (isBunBinary) {
@@ -336,9 +323,6 @@ export function getChangelogPath(): string {
 
 /**
  * Get path to built-in interactive assets directory.
- * - For Bun binary: assets/ next to executable
- * - For Node.js (dist/): dist/modes/interactive/assets/
- * - For tsx (src/): src/modes/interactive/assets/
  */
 export function getInteractiveAssetsDir(): string {
 	if (isBunBinary) {
@@ -355,13 +339,13 @@ export function getBundledInteractiveAssetPath(name: string): string {
 }
 
 // =============================================================================
-// App Config (from package.json piConfig)
+// App Config (from package.json moonConfig)
 // =============================================================================
 
 interface PackageJson {
 	name?: string;
 	version?: string;
-	moodConfig?: {
+	moonConfig?: {
 		name?: string;
 		configDir?: string;
 	};
@@ -369,14 +353,13 @@ interface PackageJson {
 
 const pkg = JSON.parse(readFileSync(getPackageJsonPath(), "utf-8")) as PackageJson;
 
-const moodConfigName: string | undefined = pkg.moodConfig?.name;
-export const PACKAGE_NAME: string = pkg.name || "moodcli";
-export const APP_NAME: string = moodConfigName || "mood";
-export const APP_TITLE: string = "Moodcli";
-export const CONFIG_DIR_NAME: string = pkg.moodConfig?.configDir || ".moodcli";
+const moonConfigName: string | undefined = pkg.moonConfig?.name;
+export const PACKAGE_NAME: string = pkg.name || "mooncli";
+export const APP_NAME: string = moonConfigName || "moon";
+export const APP_TITLE: string = "Mooncli";
+export const CONFIG_DIR_NAME: string = pkg.moonConfig?.configDir || ".mooncli";
 export const VERSION: string = pkg.version || "0.0.0";
 
-// e.g., MOOD_CODING_AGENT_DIR or TAU_CODING_AGENT_DIR
 export const ENV_AGENT_DIR = `${APP_NAME.toUpperCase()}_CODING_AGENT_DIR`;
 export const ENV_SESSION_DIR = `${APP_NAME.toUpperCase()}_CODING_AGENT_SESSION_DIR`;
 
@@ -386,19 +369,19 @@ export function expandTildePath(path: string): string {
 	return path;
 }
 
-const DEFAULT_SHARE_VIEWER_URL = "https://moodcli.dev/session/";
+const DEFAULT_SHARE_VIEWER_URL = "https://mooncli.dev/session/";
 
 /** Get the share viewer URL for a gist ID */
 export function getShareViewerUrl(gistId: string): string {
-	const baseUrl = process.env.MOOD_SHARE_VIEWER_URL || DEFAULT_SHARE_VIEWER_URL;
+	const baseUrl = process.env.MOON_SHARE_VIEWER_URL || DEFAULT_SHARE_VIEWER_URL;
 	return `${baseUrl}#${gistId}`;
 }
 
 // =============================================================================
-// User Config Paths (~/.moodcli/engine/*)
+// User Config Paths (~/.mooncli/engine/*)
 // =============================================================================
 
-/** Get the engine config directory (e.g., ~/.moodcli/engine/) */
+/** Get the engine config directory (e.g., ~/.mooncli/engine/) */
 export function getEngineDir(): string {
 	const envDir = process.env[ENV_AGENT_DIR];
 	if (envDir) {

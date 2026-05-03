@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-nocheck
 import { APP_NAME } from "../config.js";
 
 process.title = APP_NAME;

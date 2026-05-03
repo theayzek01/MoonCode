@@ -5,7 +5,7 @@ const googleGenAiMock = vi.hoisted(() => ({
 }));
 
 vi.mock("@google/genai", () => {
-	class GoogleGenCore {
+	class GoogleGenAI {
 		models = {
 			generateContentStream: async function* () {
 				yield {
@@ -31,7 +31,7 @@ vi.mock("@google/genai", () => {
 	}
 
 	return {
-		GoogleGenCore,
+		GoogleGenAI,
 		ResourceScope: {
 			COLLECTION: "COLLECTION",
 		},

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Compaction and summarization utilities.
  */

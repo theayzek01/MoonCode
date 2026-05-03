@@ -14,10 +14,7 @@
  * built-in `grep` tool in src/core/tools/grep.ts for a more complete implementation.
  */
 
-import { mkdtemp, writeFile } from "node:fs/promises";
-import { Text } from "@moodcli/tui";
-import { execSync } from "child_process";
-import type { ExtensionAPI } from "moodcli";
+import type { ExtensionAPI } from "Mooncli";
 import {
 	DEFAULT_MAX_BYTES,
 	DEFAULT_MAX_LINES,
@@ -25,7 +22,10 @@ import {
 	type TruncationResult,
 	truncateHead,
 	withFileMutationQueue,
-} from "moodcli";
+} from "Mooncli";
+import { mkdtemp, writeFile } from "node:fs/promises";
+import { Text } from "@mooncli/tui";
+import { execSync } from "child_process";
 import { tmpdir } from "os";
 import { join } from "path";
 import { Type } from "typebox";
@@ -45,8 +45,8 @@ interface RgDetails {
 	fullOutputPath?: string;
 }
 
-export default function (moodcli: ExtensionAPI) {
-	moodcli.registerTool({
+export default function (Mooncli: ExtensionAPI) {
+	Mooncli.registerTool({
 		name: "rg",
 		label: "ripgrep",
 		// Document the truncation limits in the tool description so the Provider knows
@@ -109,7 +109,7 @@ export default function (moodcli: ExtensionAPI) {
 
 			if (truncation.truncated) {
 				// Save full output to a temp file so Provider can access it if needed
-				const tempDir = await mkdtemp(join(tmpdir(), "moodcli-rg-"));
+				const tempDir = await mkdtemp(join(tmpdir(), "Mooncli-rg-"));
 				const tempFile = join(tempDir, "output.txt");
 				await withFileMutationQueue(tempFile, async () => {
 					await writeFile(tempFile, output, "utf8");

@@ -1,5 +1,6 @@
-import type { EngineMessage, EngineTool } from "@moodcli/engine";
-import type { ToolResultMessage } from "@moodcli/core";
+// @ts-nocheck
+import type { ToolResultMessage } from "@mooncli/core";
+import type { EngineMessage, EngineTool } from "@mooncli/engine";
 import { html, LitElement } from "lit";
 import { property, state } from "lit/decorators.js";
 

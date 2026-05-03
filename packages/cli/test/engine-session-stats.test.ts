@@ -1,8 +1,8 @@
-import { Engine } from "@moodcli/engine";
-import { type AssistantMessage, getModel, type Usage } from "@moodcli/core";
+import { type AssistantMessage, getModel, type Usage } from "@mooncli/core";
+import { Engine } from "@mooncli/engine";
 import { describe, expect, it } from "vitest";
-import { EngineSession } from "../src/core/engine-session.js";
 import { AuthStorage } from "../src/core/auth-storage.js";
+import { EngineSession } from "../src/core/engine-session.js";
 import { ModelRegistry } from "../src/core/model-registry.js";
 import { SessionManager } from "../src/core/session-manager.js";
 import { SettingsManager } from "../src/core/settings-manager.js";

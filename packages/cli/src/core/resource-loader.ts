@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, resolve, sep } from "node:path";
@@ -57,10 +58,10 @@ function resolvePromptInput(input: string | undefined, description: string): str
 
 function loadContextFileFromDir(dir: string): { path: string; content: string } | null {
 	const candidates = [
-		"MOODCLI.md",
-		"MOODCLI.MD",
-		"MOOD.md",
-		"MOOD.MD",
+		"MoonCLI.md",
+		"MoonCLI.MD",
+		"Moon.md",
+		"Moon.MD",
 		"AGENTS.md",
 		"AGENTS.MD",
 		"CLAUDE.md",

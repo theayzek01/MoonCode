@@ -1,13 +1,13 @@
 /**
  * Tool Call ID Normalization Tests
  *
- * Tests that tool call IDs from OpenCore Responses API (github-copilot, openai-codex, opencode)
+ * Tests that tool call IDs from OpenAI Responses API (github-copilot, openai-codex, opencode)
  * are properly normalized when sent to other providers.
  *
- * OpenCore Responses API generates IDs in format: {call_id}|{id}
+ * OpenAI Responses API generates IDs in format: {call_id}|{id}
  * where {id} can be 400+ chars with special characters (+, /, =).
  *
- * Regression test for: https://github.com/badlogic/moodcli-mono/issues/1022
+ * Regression test for: https://github.com/badlogic/Mooncli-mono/issues/1022
  */
 
 import { Type } from "typebox";
@@ -72,7 +72,7 @@ describe("Tool Call ID Normalization - Live Handoff", () => {
 			expect(toolCall).toBeDefined();
 			expect(toolCall!.type).toBe("toolCall");
 
-			// Verify it's a pipe-separated ID (OpenCore Responses format)
+			// Verify it's a pipe-separated ID (OpenAI Responses format)
 			if (toolCall?.type === "toolCall") {
 				expect(toolCall.id).toContain("|");
 				console.log(`Tool call ID from github-copilot: ${toolCall.id.slice(0, 80)}...`);

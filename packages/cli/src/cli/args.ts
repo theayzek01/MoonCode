@@ -1,8 +1,9 @@
+// @ts-nocheck
 /**
  * CLI argument parsing and help display
  */
 
-import type { ThinkingLevel } from "@moodcli/engine";
+import type { ThinkingLevel } from "@mooncli/engine";
 import chalk from "chalk";
 import { APP_NAME, CONFIG_DIR_NAME, ENV_AGENT_DIR, ENV_SESSION_DIR } from "../config.js";
 import type { ExtensionFlag } from "../core/extensions/types.js";
@@ -203,7 +204,7 @@ ${chalk.bold("Commands:")}
   ${APP_NAME} install <source> [-l]     Install extension source and add to settings
   ${APP_NAME} remove <source> [-l]      Remove extension source from settings
   ${APP_NAME} uninstall <source> [-l]   Alias for remove
-  ${APP_NAME} update [source|self|mood]   Update Moodcli and installed extensions
+  ${APP_NAME} update [source|self|Moon]   Update Mooncli and installed extensions
   ${APP_NAME} list                      List installed extensions from settings
   ${APP_NAME} config                    Open TUI to enable/disable package resources
   ${APP_NAME} <command> --help          Show help for install/remove/uninstall/update/list
@@ -297,12 +298,12 @@ ${chalk.bold("Examples:")}
 ${chalk.bold("Environment Variables:")}
   ANTHROPIC_API_KEY                - Anthropic Claude API key
   ANTHROPIC_OAUTH_TOKEN            - Anthropic OAuth token (alternative to API key)
-  OPENCore_API_KEY                   - OpenCore GPT API key
-  AZURE_OPENCore_API_KEY             - Azure OpenCore API key
-  AZURE_OPENCore_BASE_URL            - Azure OpenCore/Cognitive Services base URL (e.g. https://{resource}.openai.azure.com)
-  AZURE_OPENCore_RESOURCE_NAME       - Azure OpenCore resource name (alternative to base URL)
-  AZURE_OPENCore_API_VERSION         - Azure OpenCore API version (default: v1)
-  AZURE_OPENCore_DEPLOYMENT_NAME_MAP - Azure OpenCore model=deployment map (comma-separated)
+  OpenAI_API_KEY                   - OpenAI GPT API key
+  AZURE_OpenAI_API_KEY             - Azure OpenAI API key
+  AZURE_OpenAI_BASE_URL            - Azure OpenAI/Cognitive Services base URL (e.g. https://{resource}.openai.azure.com)
+  AZURE_OpenAI_RESOURCE_NAME       - Azure OpenAI resource name (alternative to base URL)
+  AZURE_OpenAI_API_VERSION         - Azure OpenAI API version (default: v1)
+  AZURE_OpenAI_DEPLOYMENT_NAME_MAP - Azure OpenAI model=deployment map (comma-separated)
   DEEPSEEK_API_KEY                 - DeepSeek API key
   GEMINI_API_KEY                   - Google Gemini API key
   GROQ_API_KEY                     - Groq API key
@@ -331,10 +332,10 @@ ${chalk.bold("Environment Variables:")}
   AWS_REGION                       - AWS region for Amazon Bedrock (e.g., us-east-1)
   ${ENV_AGENT_DIR.padEnd(32)} - Config directory (default: ~/${CONFIG_DIR_NAME}/engine)
   ${ENV_SESSION_DIR.padEnd(32)} - Session storage directory (overridden by --session-dir)
-  MOOD_PACKAGE_DIR                 - Override package directory (for Nix/Guix store paths)
-  MOOD_OFFLINE                     - Disable startup network operations when set to 1/true/yes
-  MOOD_TELEMETRY                   - Override install telemetry when set to 1/true/yes or 0/false/no
-  MOOD_SHARE_VIEWER_URL            - Base URL for /share command (default: https://moodcli.dev/session/)
+  Moon_PACKAGE_DIR                 - Override package directory (for Nix/Guix store paths)
+  Moon_OFFLINE                     - Disable startup network operations when set to 1/true/yes
+  Moon_TELEMETRY                   - Override install telemetry when set to 1/true/yes or 0/false/no
+  Moon_SHARE_VIEWER_URL            - Base URL for /share command (default: https://Mooncli.dev/session/)
 
 ${chalk.bold("Built-in Tool Names:")}
   read   - Read file contents

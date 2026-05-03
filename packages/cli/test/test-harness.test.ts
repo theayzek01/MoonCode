@@ -3,8 +3,8 @@
  * Validates that the faux provider and session factory work correctly.
  */
 
-import type { EngineTool } from "@moodcli/engine";
-import type { AssistantMessage } from "@moodcli/core";
+import type { AssistantMessage } from "@mooncli/core";
+import type { EngineTool } from "@mooncli/engine";
 import { Type } from "typebox";
 import { afterEach, describe, expect, it } from "vitest";
 import { createHarness, createHarnessWithExtensions, type Harness } from "./test-harness.js";
@@ -264,8 +264,8 @@ describe("test harness", () => {
 			extensionFactories: [
 				{
 					path: "<alpha>",
-					factory: (moodcli) => {
-						moodcli.registerCommand("shared-cmd", {
+					factory: (Mooncli) => {
+						Mooncli.registerCommand("shared-cmd", {
 							description: "Alpha command",
 							handler: async (args) => {
 								calls.push(`alpha:${args}`);
@@ -275,8 +275,8 @@ describe("test harness", () => {
 				},
 				{
 					path: "<beta>",
-					factory: (moodcli) => {
-						moodcli.registerCommand("shared-cmd", {
+					factory: (Mooncli) => {
+						Mooncli.registerCommand("shared-cmd", {
 							description: "Beta command",
 							handler: async (args) => {
 								calls.push(`beta:${args}`);

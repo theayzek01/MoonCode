@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { Text, type TUI } from "@moodcli/tui";
+import { Text, type TUI } from "@mooncli/tui";
 import stripAnsi from "strip-ansi";
 import { Type } from "typebox";
 import { beforeAll, describe, expect, test } from "vitest";
@@ -349,7 +349,7 @@ describe("ToolExecutionComponent parity", () => {
 			absent: undefined,
 		},
 		{
-			title: "Moodcli documentation",
+			title: "Mooncli documentation",
 			path: getReadmePath(),
 			content: "Hidden docs content",
 			compact: "read docs README.md",

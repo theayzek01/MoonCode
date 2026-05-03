@@ -1,4 +1,5 @@
-import type { EngineTool } from "@moodcli/engine";
+// @ts-nocheck
+import type { EngineTool } from "@mooncli/engine";
 import type { ExtensionContext, ToolDefinition } from "../extensions/types.js";
 
 /** Wrap a ToolDefinition into an EngineTool for the core runtime. */

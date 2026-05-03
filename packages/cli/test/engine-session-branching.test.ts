@@ -10,17 +10,17 @@
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { getModel } from "@moodcli/core";
+import { getModel } from "@mooncli/core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { AuthStorage } from "../src/core/auth-storage.js";
 import type { EngineSession } from "../src/core/engine-session.js";
 import {
-	type EngineSessionRuntime,
 	type CreateEngineSessionRuntimeFactory,
 	createEngineSessionFromServices,
 	createEngineSessionRuntime,
 	createEngineSessionServices,
+	type EngineSessionRuntime,
 } from "../src/core/engine-session-runtime.js";
-import { AuthStorage } from "../src/core/auth-storage.js";
 import { SessionManager } from "../src/core/session-manager.js";
 import { API_KEY } from "./utilities.js";
 
@@ -31,7 +31,7 @@ describe.skipIf(!API_KEY)("EngineSession forking", () => {
 	let sessionManager: SessionManager;
 
 	beforeEach(() => {
-		tempDir = join(tmpdir(), `moodcli-branching-test-${Date.now()}`);
+		tempDir = join(tmpdir(), `Mooncli-branching-test-${Date.now()}`);
 		mkdirSync(tempDir, { recursive: true });
 	});
 

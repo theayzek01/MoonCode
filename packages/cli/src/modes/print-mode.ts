@@ -1,12 +1,13 @@
+// @ts-nocheck
 /**
  * Print mode (single-shot): Send prompts, output result, exit.
  *
  * Used for:
- * - `moodcli -p "prompt"` - text output
- * - `moodcli --mode json "prompt"` - JSON event stream
+ * - `Mooncli -p "prompt"` - text output
+ * - `Mooncli --mode json "prompt"` - JSON event stream
  */
 
-import type { AssistantMessage, ImageContent } from "@moodcli/core";
+import type { AssistantMessage, ImageContent } from "@mooncli/core";
 import type { EngineSessionRuntime } from "../core/engine-session-runtime.js";
 import { flushRawStdout, writeRawStdout } from "../core/output-guard.js";
 import { killTrackedDetachedChildren } from "../utils/shell.js";

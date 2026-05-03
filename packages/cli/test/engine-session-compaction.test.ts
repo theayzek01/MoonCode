@@ -10,11 +10,11 @@
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { Engine } from "@moodcli/engine";
-import { getModel } from "@moodcli/core";
+import { getModel } from "@mooncli/core";
+import { Engine } from "@mooncli/engine";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { EngineSession, type EngineSessionEvent } from "../src/core/engine-session.js";
 import { AuthStorage } from "../src/core/auth-storage.js";
+import { EngineSession, type EngineSessionEvent } from "../src/core/engine-session.js";
 import { ModelRegistry } from "../src/core/model-registry.js";
 import { SessionManager } from "../src/core/session-manager.js";
 import { SettingsManager } from "../src/core/settings-manager.js";
@@ -29,7 +29,7 @@ describe.skipIf(!API_KEY)("EngineSession compaction e2e", () => {
 
 	beforeEach(() => {
 		// Create temp directory for session files
-		tempDir = join(tmpdir(), `moodcli-compaction-test-${Date.now()}`);
+		tempDir = join(tmpdir(), `Mooncli-compaction-test-${Date.now()}`);
 		mkdirSync(tempDir, { recursive: true });
 
 		// Track events

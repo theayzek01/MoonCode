@@ -1,6 +1,6 @@
-# Moodcli Web UI - Example
+# Mooncli Web UI - Example
 
-This is a minimal example showing how to use `@moodcli/web-ui` in a web application.
+This is a minimal example showing how to use `@mooncli/web-ui` in a web application.
 
 ## Setup
 
@@ -56,6 +56,6 @@ example/
 
 ## Learn More
 
-- [Moodcli Web UI Documentation](../README.md)
-- [Moodcli Core Documentation](../../ai/README.md)
+- [Mooncli Web UI Documentation](../README.md)
+- [Mooncli Core Documentation](../../ai/README.md)
 - [Mini Lit Documentation](https://github.com/badlogic/mini-lit)

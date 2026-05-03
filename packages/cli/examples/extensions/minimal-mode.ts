@@ -11,13 +11,12 @@
  * - Minimal: Shows only tool call, no output (this extension's collapsed mode)
  *
  * Usage:
- *   moodcli -e ./minimal-mode.ts
+ *   Mooncli -e ./minimal-mode.ts
  *
  * Then use ctrl+o to toggle between minimal (collapsed) and full (expanded) views.
  */
 
-import { Text } from "@moodcli/tui";
-import type { ExtensionAPI } from "moodcli";
+import type { ExtensionAPI } from "Mooncli";
 import {
 	createBashTool,
 	createEditTool,
@@ -26,7 +25,8 @@ import {
 	createLsTool,
 	createReadTool,
 	createWriteTool,
-} from "moodcli";
+} from "Mooncli";
+import { Text } from "@mooncli/tui";
 import { homedir } from "os";
 
 /**
@@ -64,11 +64,11 @@ function getBuiltInTools(cwd: string) {
 	return tools;
 }
 
-export default function (moodcli: ExtensionAPI) {
+export default function (Mooncli: ExtensionAPI) {
 	// =========================================================================
 	// Read Tool
 	// =========================================================================
-	moodcli.registerTool({
+	Mooncli.registerTool({
 		name: "read",
 		label: "read",
 		description:
@@ -115,7 +115,7 @@ export default function (moodcli: ExtensionAPI) {
 	// =========================================================================
 	// Bash Tool
 	// =========================================================================
-	moodcli.registerTool({
+	Mooncli.registerTool({
 		name: "bash",
 		label: "bash",
 		description:
@@ -164,7 +164,7 @@ export default function (moodcli: ExtensionAPI) {
 	// =========================================================================
 	// Write Tool
 	// =========================================================================
-	moodcli.registerTool({
+	Mooncli.registerTool({
 		name: "write",
 		label: "write",
 		description:
@@ -206,7 +206,7 @@ export default function (moodcli: ExtensionAPI) {
 	// =========================================================================
 	// Edit Tool
 	// =========================================================================
-	moodcli.registerTool({
+	Mooncli.registerTool({
 		name: "edit",
 		label: "edit",
 		description:
@@ -251,7 +251,7 @@ export default function (moodcli: ExtensionAPI) {
 	// =========================================================================
 	// Find Tool
 	// =========================================================================
-	moodcli.registerTool({
+	Mooncli.registerTool({
 		name: "find",
 		label: "find",
 		description:
@@ -309,7 +309,7 @@ export default function (moodcli: ExtensionAPI) {
 	// =========================================================================
 	// Grep Tool
 	// =========================================================================
-	moodcli.registerTool({
+	Mooncli.registerTool({
 		name: "grep",
 		label: "grep",
 		description:
@@ -371,7 +371,7 @@ export default function (moodcli: ExtensionAPI) {
 	// =========================================================================
 	// Ls Tool
 	// =========================================================================
-	moodcli.registerTool({
+	Mooncli.registerTool({
 		name: "ls",
 		label: "ls",
 		description:

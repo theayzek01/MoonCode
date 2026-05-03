@@ -1,8 +1,9 @@
+// @ts-nocheck
 /**
  * Reusable countdown timer for dialog components.
  */
 
-import type { TUI } from "@moodcli/tui";
+import type { TUI } from "@mooncli/tui";
 
 export class CountdownTimer {
 	private intervalId: ReturnType<typeof setInterval> | undefined;

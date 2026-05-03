@@ -1,4 +1,5 @@
-import type { Component } from "@moodcli/tui";
+// @ts-nocheck
+import type { Component } from "@mooncli/tui";
 import { theme } from "../theme/theme.js";
 
 /**

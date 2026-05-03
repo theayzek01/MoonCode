@@ -3,10 +3,10 @@
 	"compilerOptions": {
 		"noEmit": true,
 		"paths": {
-			"@moodcli/cli": ["./src/index.ts"],
-			"@moodcli/cli/hooks": ["./src/core/hooks/index.ts"],
-			"@moodcli/tui": ["../tui/src/index.ts"],
-			"@moodcli/core": ["../ai/src/index.ts"],
+			"@mooncli/cli": ["./src/index.ts"],
+			"@mooncli/cli/hooks": ["./src/core/hooks/index.ts"],
+			"@mooncli/tui": ["../tui/src/index.ts"],
+			"@mooncli/core": ["../ai/src/index.ts"],
 			"typebox": ["../../node_modules/typebox"]
 		},
 		"skipLibCheck": true

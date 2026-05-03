@@ -7,7 +7,7 @@ import {
 	createAssistantMessageEventStream,
 	type Model,
 	type SimpleStreamOptions,
-} from "@moodcli/core";
+} from "@mooncli/core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { AuthStorage } from "../src/core/auth-storage.js";
 import { ModelRegistry } from "../src/core/model-registry.js";
@@ -22,7 +22,7 @@ describe("createEngineSession OpenRouter attribution headers", () => {
 	let originalTelemetryEnv: string | undefined;
 
 	beforeEach(() => {
-		tempDir = join(tmpdir(), `moodcli-sdk-openrouter-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+		tempDir = join(tmpdir(), `Mooncli-sdk-openrouter-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 		cwd = join(tempDir, "project");
 		engineDir = join(tempDir, "engine");
 		mkdirSync(cwd, { recursive: true });
@@ -140,8 +140,8 @@ describe("createEngineSession OpenRouter attribution headers", () => {
 	it("adds default attribution headers for OpenRouter models", async () => {
 		const headers = await captureHeaders(createModel("openrouter", "https://openrouter.ai/api/v1"));
 
-		expect(headers?.["HTTP-Referer"]).toBe("https://moodcli.dev");
-		expect(headers?.["X-OpenRouter-Title"]).toBe("moodcli");
+		expect(headers?.["HTTP-Referer"]).toBe("https://Mooncli.dev");
+		expect(headers?.["X-OpenRouter-Title"]).toBe("Mooncli");
 		expect(headers?.["X-OpenRouter-Categories"]).toBe("cli-engine");
 	});
 
@@ -158,8 +158,8 @@ describe("createEngineSession OpenRouter attribution headers", () => {
 	it("adds attribution headers for custom providers routed through OpenRouter", async () => {
 		const headers = await captureHeaders(createModel("custom-openrouter", "https://openrouter.ai/api/v1"));
 
-		expect(headers?.["HTTP-Referer"]).toBe("https://moodcli.dev");
-		expect(headers?.["X-OpenRouter-Title"]).toBe("moodcli");
+		expect(headers?.["HTTP-Referer"]).toBe("https://Mooncli.dev");
+		expect(headers?.["X-OpenRouter-Title"]).toBe("Mooncli");
 		expect(headers?.["X-OpenRouter-Categories"]).toBe("cli-engine");
 	});
 

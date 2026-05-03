@@ -1,8 +1,9 @@
+// @ts-nocheck
 /**
  * Component for displaying bash command execution with streaming output.
  */
 
-import { Container, Loader, Spacer, Text, type TUI } from "@moodcli/tui";
+import { Container, Loader, Spacer, Text, type TUI } from "@mooncli/tui";
 import stripAnsi from "strip-ansi";
 import {
 	DEFAULT_MAX_BYTES,

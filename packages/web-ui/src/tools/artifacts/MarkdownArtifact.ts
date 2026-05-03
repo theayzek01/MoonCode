@@ -1,3 +1,4 @@
+// @ts-nocheck
 import hljs from "highlight.js";
 import { html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";

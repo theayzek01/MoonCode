@@ -6,7 +6,7 @@ import type { Api, Context, Model, StreamOptions, Tool } from "../src/types.js";
 
 type StreamOptionsWithExtras = StreamOptions & Record<string, unknown>;
 
-import { hasAzureOpenCoreCredentials, resolveAzureDeploymentName } from "./azure-utils.js";
+import { hasAzureOpenAICredentials, resolveAzureDeploymentName } from "./azure-utils.js";
 import { hasBedrockCredentials } from "./bedrock-utils.js";
 import { hasCloudflareAiGatewayCredentials, hasCloudflareWorkersCoreCredentials } from "./cloudflare-utils.js";
 import { resolveApiKey } from "./oauth.js";
@@ -104,7 +104,7 @@ describe("Tool Call Without Result Tests", () => {
 		});
 	});
 
-	describe.skipIf(!process.env.OPENCore_API_KEY)("OpenCore Completions Provider", () => {
+	describe.skipIf(!process.env.OpenAI_API_KEY)("OpenAI Completions Provider", () => {
 		const { compat: _compat, ...baseModel } = getModel("openai", "gpt-4o-mini")!;
 		void _compat;
 		const model: Model<"openai-completions"> = {
@@ -117,7 +117,7 @@ describe("Tool Call Without Result Tests", () => {
 		});
 	});
 
-	describe.skipIf(!process.env.OPENCore_API_KEY)("OpenCore Responses Provider", () => {
+	describe.skipIf(!process.env.OpenAI_API_KEY)("OpenAI Responses Provider", () => {
 		const model = getModel("openai", "gpt-5-mini");
 
 		it("should filter out tool calls without corresponding tool results", { retry: 3, timeout: 30000 }, async () => {
@@ -125,7 +125,7 @@ describe("Tool Call Without Result Tests", () => {
 		});
 	});
 
-	describe.skipIf(!hasAzureOpenCoreCredentials())("Azure OpenCore Responses Provider", () => {
+	describe.skipIf(!hasAzureOpenAICredentials())("Azure OpenAI Responses Provider", () => {
 		const model = getModel("azure-openai-responses", "gpt-4o-mini");
 		const azureDeploymentName = resolveAzureDeploymentName(model.id);
 		const azureOptions = azureDeploymentName ? { azureDeploymentName } : {};
@@ -272,7 +272,7 @@ describe("Tool Call Without Result Tests", () => {
 	});
 
 	// =========================================================================
-	// OAuth-based providers (credentials from ~/.moodcli/engine/oauth.json)
+	// OAuth-based providers (credentials from ~/.Mooncli/engine/oauth.json)
 	// =========================================================================
 
 	describe("Anthropic OAuth Provider", () => {
@@ -307,7 +307,7 @@ describe("Tool Call Without Result Tests", () => {
 		);
 	});
 
-	describe("OpenCore Codex Provider", () => {
+	describe("OpenAI Codex Provider", () => {
 		it.skipIf(!openaiCodexToken)(
 			"gpt-5.2-codex - should filter out tool calls without corresponding tool results",
 			{ retry: 3, timeout: 30000 },

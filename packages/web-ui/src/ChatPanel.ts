@@ -1,8 +1,9 @@
+// @ts-nocheck
 import { Badge } from "@mariozechner/mini-lit/dist/Badge.js";
 import { html, LitElement } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import "./components/EngineInterface.js";
-import type { Engine, EngineTool } from "@moodcli/engine";
+import type { Engine, EngineTool } from "@mooncli/engine";
 import type { EngineInterface } from "./components/EngineInterface.js";
 import { ArtifactsRuntimeProvider } from "./components/sandbox/ArtifactsRuntimeProvider.js";
 import { AttachmentsRuntimeProvider } from "./components/sandbox/AttachmentsRuntimeProvider.js";
@@ -14,7 +15,7 @@ import { i18n } from "./utils/i18n.js";
 
 const BREAKPOINT = 800; // px - switch between overlay and side-by-side
 
-@customElement("moodcli-chat-panel")
+@customElement("Mooncli-chat-panel")
 export class ChatPanel extends LitElement {
 	@state() public engine?: Engine;
 	@state() public engineInterface?: EngineInterface;

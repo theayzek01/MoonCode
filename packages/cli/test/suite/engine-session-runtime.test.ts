@@ -1,15 +1,15 @@
 import { existsSync, mkdirSync, realpathSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { fauxAssistantMessage, registerFauxProvider } from "@moodcli/core";
+import { fauxAssistantMessage, registerFauxProvider } from "@mooncli/core";
 import { afterEach, describe, expect, it } from "vitest";
+import { AuthStorage } from "../../src/core/auth-storage.js";
 import {
 	type CreateEngineSessionRuntimeFactory,
 	createEngineSessionFromServices,
 	createEngineSessionRuntime,
 	createEngineSessionServices,
 } from "../../src/core/engine-session-runtime.js";
-import { AuthStorage } from "../../src/core/auth-storage.js";
 import { SessionManager } from "../../src/core/session-manager.js";
 import type {
 	ExtensionAPI,
@@ -40,7 +40,7 @@ describe("EngineSessionRuntime characterization", () => {
 		options?: { cwd?: string; bootstrapModel?: boolean; bootstrapThinkingLevel?: boolean },
 	) {
 		const tempDir =
-			options?.cwd ?? join(tmpdir(), `moodcli-runtime-suite-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+			options?.cwd ?? join(tmpdir(), `Mooncli-runtime-suite-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 		mkdirSync(tempDir, { recursive: true });
 
 		const faux = registerFauxProvider({
@@ -61,8 +61,8 @@ describe("EngineSessionRuntime characterization", () => {
 			thinkingLevel: options?.bootstrapThinkingLevel === false ? undefined : undefined,
 			resourceLoaderOptions: {
 				extensionFactories: [
-					(moodcli: ExtensionAPI) => {
-						moodcli.registerProvider(faux.getModel().provider, {
+					(Mooncli: ExtensionAPI) => {
+						Mooncli.registerProvider(faux.getModel().provider, {
 							baseUrl: faux.getModel().baseUrl,
 							apiKey: "faux-key",
 							api: faux.api,
@@ -77,7 +77,7 @@ describe("EngineSessionRuntime characterization", () => {
 								maxTokens: registeredModel.maxTokens,
 							})),
 						});
-						extensionFactory(moodcli);
+						extensionFactory(Mooncli);
 					},
 				],
 				noSkills: true,
@@ -121,8 +121,8 @@ describe("EngineSessionRuntime characterization", () => {
 	}
 
 	it("persists message_end assistant replacements to the session manager", async () => {
-		const { runtime } = await createRuntimeForTest((moodcli: ExtensionAPI) => {
-			moodcli.on("message_end", (event) => {
+		const { runtime } = await createRuntimeForTest((Mooncli: ExtensionAPI) => {
+			Mooncli.on("message_end", (event) => {
 				if (event.message.role !== "assistant") return;
 
 				return {
@@ -163,14 +163,14 @@ describe("EngineSessionRuntime characterization", () => {
 
 	it("emits session_before_switch and session_start for new and resume flows", async () => {
 		const events: RecordedSessionEvent[] = [];
-		const { runtime } = await createRuntimeForTest((moodcli: ExtensionAPI) => {
-			moodcli.on("session_before_switch", (event) => {
+		const { runtime } = await createRuntimeForTest((Mooncli: ExtensionAPI) => {
+			Mooncli.on("session_before_switch", (event) => {
 				events.push(event);
 			});
-			moodcli.on("session_shutdown", (event) => {
+			Mooncli.on("session_shutdown", (event) => {
 				events.push(event);
 			});
-			moodcli.on("session_start", (event) => {
+			Mooncli.on("session_start", (event) => {
 				events.push(event);
 			});
 		});
@@ -209,14 +209,14 @@ describe("EngineSessionRuntime characterization", () => {
 	it("honors session_before_switch cancellation for new and resume", async () => {
 		const events: RecordedSessionEvent[] = [];
 		let cancelReason: "new" | "resume" | undefined;
-		const { runtime } = await createRuntimeForTest((moodcli: ExtensionAPI) => {
-			moodcli.on("session_before_switch", (event) => {
+		const { runtime } = await createRuntimeForTest((Mooncli: ExtensionAPI) => {
+			Mooncli.on("session_before_switch", (event) => {
 				events.push(event);
 				if (event.reason === cancelReason) {
 					return { cancel: true };
 				}
 			});
-			moodcli.on("session_start", (event) => {
+			Mooncli.on("session_start", (event) => {
 				events.push(event);
 			});
 		});
@@ -230,7 +230,7 @@ describe("EngineSessionRuntime characterization", () => {
 		expect(runtime.session.sessionFile).toBe(originalSessionFile);
 
 		events.length = 0;
-		const otherDir = join(tmpdir(), `moodcli-runtime-other-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+		const otherDir = join(tmpdir(), `Mooncli-runtime-other-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 		mkdirSync(otherDir, { recursive: true });
 		const otherSession = SessionManager.create(otherDir);
 		otherSession.appendMessage({ role: "user", content: [{ type: "text", text: "other" }], timestamp: Date.now() });
@@ -244,18 +244,18 @@ describe("EngineSessionRuntime characterization", () => {
 	it("emits session_before_fork and session_start and honors cancellation", async () => {
 		const events: RecordedSessionEvent[] = [];
 		let cancelNextFork = false;
-		const { runtime } = await createRuntimeForTest((moodcli: ExtensionAPI) => {
-			moodcli.on("session_before_fork", (event) => {
+		const { runtime } = await createRuntimeForTest((Mooncli: ExtensionAPI) => {
+			Mooncli.on("session_before_fork", (event) => {
 				events.push(event);
 				if (cancelNextFork) {
 					cancelNextFork = false;
 					return { cancel: true };
 				}
 			});
-			moodcli.on("session_shutdown", (event) => {
+			Mooncli.on("session_shutdown", (event) => {
 				events.push(event);
 			});
-			moodcli.on("session_start", (event) => {
+			Mooncli.on("session_start", (event) => {
 				events.push(event);
 			});
 		});
@@ -331,7 +331,7 @@ describe("EngineSessionRuntime characterization", () => {
 	it("duplicates the current active branch in-memory when forking at the current position", async () => {
 		const tempDir = join(
 			tmpdir(),
-			`moodcli-runtime-suite-in-memory-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+			`Mooncli-runtime-suite-in-memory-${Date.now()}-${Math.random().toString(36).slice(2)}`,
 		);
 		mkdirSync(tempDir, { recursive: true });
 
@@ -352,8 +352,8 @@ describe("EngineSessionRuntime characterization", () => {
 			model: faux.getModel(),
 			resourceLoaderOptions: {
 				extensionFactories: [
-					(moodcli: ExtensionAPI) => {
-						moodcli.registerProvider(faux.getModel().provider, {
+					(Mooncli: ExtensionAPI) => {
+						Mooncli.registerProvider(faux.getModel().provider, {
 							baseUrl: faux.getModel().baseUrl,
 							apiKey: "faux-key",
 							api: faux.api,
@@ -449,8 +449,8 @@ describe("EngineSessionRuntime characterization", () => {
 	});
 
 	it("updates the runtime session cwd on cross-cwd session replacement", async () => {
-		const firstDir = join(tmpdir(), `moodcli-runtime-cwd-a-${Date.now()}-${Math.random().toString(36).slice(2)}`);
-		const secondDir = join(tmpdir(), `moodcli-runtime-cwd-b-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+		const firstDir = join(tmpdir(), `Mooncli-runtime-cwd-a-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+		const secondDir = join(tmpdir(), `Mooncli-runtime-cwd-b-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 		mkdirSync(firstDir, { recursive: true });
 		mkdirSync(secondDir, { recursive: true });
 		const { runtime, faux, tempDir } = await createRuntimeForTest(() => {}, { cwd: firstDir });
@@ -461,8 +461,8 @@ describe("EngineSessionRuntime characterization", () => {
 			authStorage: otherAuthStorage,
 			resourceLoaderOptions: {
 				extensionFactories: [
-					(moodcli: ExtensionAPI) => {
-						moodcli.registerProvider(faux.getModel().provider, {
+					(Mooncli: ExtensionAPI) => {
+						Mooncli.registerProvider(faux.getModel().provider, {
 							baseUrl: faux.getModel().baseUrl,
 							apiKey: "faux-key",
 							api: faux.api,
@@ -534,8 +534,8 @@ describe("EngineSessionRuntime characterization", () => {
 			authStorage: otherAuthStorage,
 			resourceLoaderOptions: {
 				extensionFactories: [
-					(moodcli: ExtensionAPI) => {
-						moodcli.registerProvider(faux.getModel().provider, {
+					(Mooncli: ExtensionAPI) => {
+						Mooncli.registerProvider(faux.getModel().provider, {
 							baseUrl: faux.getModel().baseUrl,
 							apiKey: "faux-key",
 							api: faux.api,

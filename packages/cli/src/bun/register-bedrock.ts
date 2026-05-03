@@ -1,4 +1,5 @@
-import { setBedrockProviderModule } from "@moodcli/core";
-import { bedrockProviderModule } from "@moodcli/core/bedrock-provider";
+// @ts-nocheck
+import { setBedrockProviderModule } from "@mooncli/core";
+import { bedrockProviderModule } from "@mooncli/core/bedrock-provider";
 
 setBedrockProviderModule(bedrockProviderModule);

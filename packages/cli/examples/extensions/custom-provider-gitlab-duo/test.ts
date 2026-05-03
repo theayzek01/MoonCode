@@ -8,7 +8,7 @@
  *   npx tsx test.ts claude-sonnet-4-5-20250929 --thinking
  */
 
-import { type Api, type Context, type Model, registerApiProvider, streamSimple } from "@moodcli/core";
+import { type Api, type Context, type Model, registerApiProvider, streamSimple } from "@mooncli/core";
 import { readFileSync } from "fs";
 import { getEngineDir } from "packages/cli/src/config.js";
 import { join } from "path";

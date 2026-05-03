@@ -1,7 +1,7 @@
 import { Alert } from "@mariozechner/mini-lit/dist/Alert.js";
-import type { Message } from "@moodcli/core";
-import type { EngineMessage, MessageRenderer } from "@moodcli/web-ui";
-import { defaultConvertToLlm, registerMessageRenderer } from "@moodcli/web-ui";
+import type { Message } from "@mooncli/core";
+import type { EngineMessage, MessageRenderer } from "@mooncli/web-ui";
+import { defaultConvertToLlm, registerMessageRenderer } from "@mooncli/web-ui";
 import { html } from "lit";
 
 // ============================================================================
@@ -17,8 +17,8 @@ export interface SystemNotificationMessage {
 }
 
 // Extend CustomEngineMessages interface via declaration merging
-// This must target moodcli-engine-core where CustomEngineMessages is defined
-declare module "@moodcli/engine" {
+// This must target Mooncli-engine-core where CustomEngineMessages is defined
+declare module "@mooncli/engine" {
 	interface CustomEngineMessages {
 		"system-notification": SystemNotificationMessage;
 	}

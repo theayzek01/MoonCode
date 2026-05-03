@@ -2,10 +2,10 @@
  * Minimal SDK Usage
  *
  * Uses all defaults: discovers skills, extensions, tools, context files
- * from cwd and ~/.moodcli/engine. Model chosen from settings or first available.
+ * from cwd and ~/.Mooncli/engine. Model chosen from settings or first available.
  */
 
-import { createEngineSession } from "moodcli";
+import { createEngineSession } from "Mooncli";
 
 const { session } = await createEngineSession();
 

@@ -5,7 +5,7 @@ import type { Api, AssistantMessage, Context, Model, StreamOptions, UserMessage 
 
 type StreamOptionsWithExtras = StreamOptions & Record<string, unknown>;
 
-import { hasAzureOpenCoreCredentials, resolveAzureDeploymentName } from "./azure-utils.js";
+import { hasAzureOpenAICredentials, resolveAzureDeploymentName } from "./azure-utils.js";
 import { hasBedrockCredentials } from "./bedrock-utils.js";
 import { hasCloudflareAiGatewayCredentials, hasCloudflareWorkersCoreCredentials } from "./cloudflare-utils.js";
 import { resolveApiKey } from "./oauth.js";
@@ -165,7 +165,7 @@ describe("Core Providers Empty Message Tests", () => {
 		});
 	});
 
-	describe.skipIf(!process.env.OPENCore_API_KEY)("OpenCore Completions Provider Empty Messages", () => {
+	describe.skipIf(!process.env.OpenAI_API_KEY)("OpenAI Completions Provider Empty Messages", () => {
 		const llm = getModel("openai", "gpt-4o-mini");
 
 		it("should handle empty content array", { retry: 3, timeout: 30000 }, async () => {
@@ -185,7 +185,7 @@ describe("Core Providers Empty Message Tests", () => {
 		});
 	});
 
-	describe.skipIf(!process.env.OPENCore_API_KEY)("OpenCore Responses Provider Empty Messages", () => {
+	describe.skipIf(!process.env.OpenAI_API_KEY)("OpenAI Responses Provider Empty Messages", () => {
 		const llm = getModel("openai", "gpt-5-mini");
 
 		it("should handle empty content array", { retry: 3, timeout: 30000 }, async () => {
@@ -205,7 +205,7 @@ describe("Core Providers Empty Message Tests", () => {
 		});
 	});
 
-	describe.skipIf(!hasAzureOpenCoreCredentials())("Azure OpenCore Responses Provider Empty Messages", () => {
+	describe.skipIf(!hasAzureOpenAICredentials())("Azure OpenAI Responses Provider Empty Messages", () => {
 		const llm = getModel("azure-openai-responses", "gpt-4o-mini");
 		const azureDeploymentName = resolveAzureDeploymentName(llm.id);
 		const azureOptions = azureDeploymentName ? { azureDeploymentName } : {};
@@ -577,7 +577,7 @@ describe("Core Providers Empty Message Tests", () => {
 	});
 
 	// =========================================================================
-	// OAuth-based providers (credentials from ~/.moodcli/engine/oauth.json)
+	// OAuth-based providers (credentials from ~/.Mooncli/engine/oauth.json)
 	// =========================================================================
 
 	describe("Anthropic OAuth Provider Empty Messages", () => {
@@ -682,7 +682,7 @@ describe("Core Providers Empty Message Tests", () => {
 		);
 	});
 
-	describe("OpenCore Codex Provider Empty Messages", () => {
+	describe("OpenAI Codex Provider Empty Messages", () => {
 		it.skipIf(!openaiCodexToken)(
 			"gpt-5.2-codex - should handle empty content array",
 			{ retry: 3, timeout: 30000 },

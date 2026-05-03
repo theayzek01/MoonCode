@@ -10,10 +10,10 @@
  * via `tool_call` input mutation without replacing the tool.
  *
  * Config files (merged, project takes precedence):
- * - ~/.moodcli/engine/extensions/sandbox.json (global)
- * - <cwd>/.moodcli/sandbox.json (project-local)
+ * - ~/.Mooncli/engine/extensions/sandbox.json (global)
+ * - <cwd>/.Mooncli/sandbox.json (project-local)
  *
- * Example .moodcli/sandbox.json:
+ * Example .Mooncli/sandbox.json:
  * ```json
  * {
  *   "enabled": true,
@@ -30,23 +30,23 @@
  * ```
  *
  * Usage:
- * - `moodcli -e ./sandbox` - sandbox enabled with default/config settings
- * - `moodcli -e ./sandbox --no-sandbox` - disable sandboxing
+ * - `Mooncli -e ./sandbox` - sandbox enabled with default/config settings
+ * - `Mooncli -e ./sandbox --no-sandbox` - disable sandboxing
  * - `/sandbox` - show current sandbox configuration
  *
  * Setup:
- * 1. Copy sandbox/ directory to ~/.moodcli/engine/extensions/
- * 2. Run `npm install` in ~/.moodcli/engine/extensions/sandbox/
+ * 1. Copy sandbox/ directory to ~/.Mooncli/engine/extensions/
+ * 2. Run `npm install` in ~/.Mooncli/engine/extensions/sandbox/
  *
  * Linux also requires: bubblewrap, socat, ripgrep
  */
 
+import type { ExtensionAPI } from "Mooncli";
+import { type BashOperations, createBashTool, getEngineDir } from "Mooncli";
 import { spawn } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { SandboxManager, type SandboxRuntimeConfig } from "@anthropic-ai/sandbox-runtime";
-import type { ExtensionAPI } from "moodcli";
-import { type BashOperations, createBashTool, getEngineDir } from "moodcli";
 
 interface SandboxConfig extends SandboxRuntimeConfig {
 	enabled?: boolean;
@@ -77,7 +77,7 @@ const DEFAULT_CONFIG: SandboxConfig = {
 };
 
 function loadConfig(cwd: string): SandboxConfig {
-	const projectConfigPath = join(cwd, ".moodcli", "sandbox.json");
+	const projectConfigPath = join(cwd, ".Mooncli", "sandbox.json");
 	const globalConfigPath = join(getEngineDir(), "extensions", "sandbox.json");
 
 	let globalConfig: Partial<SandboxConfig> = {};
@@ -198,8 +198,8 @@ function createSandboxedBashOps(): BashOperations {
 	};
 }
 
-export default function (moodcli: ExtensionAPI) {
-	moodcli.registerFlag("no-sandbox", {
+export default function (Mooncli: ExtensionAPI) {
+	Mooncli.registerFlag("no-sandbox", {
 		description: "Disable OS-level sandboxing for bash commands",
 		type: "boolean",
 		default: false,
@@ -211,7 +211,7 @@ export default function (moodcli: ExtensionAPI) {
 	let sandboxEnabled = false;
 	let sandboxInitialized = false;
 
-	moodcli.registerTool({
+	Mooncli.registerTool({
 		...localBash,
 		label: "bash (sandboxed)",
 		async execute(id, params, signal, onUpdate, _ctx) {
@@ -226,13 +226,13 @@ export default function (moodcli: ExtensionAPI) {
 		},
 	});
 
-	moodcli.on("user_bash", () => {
+	Mooncli.on("user_bash", () => {
 		if (!sandboxEnabled || !sandboxInitialized) return;
 		return { operations: createSandboxedBashOps() };
 	});
 
-	moodcli.on("session_start", async (_event, ctx) => {
-		const noSandbox = moodcli.getFlag("no-sandbox") as boolean;
+	Mooncli.on("session_start", async (_event, ctx) => {
+		const noSandbox = Mooncli.getFlag("no-sandbox") as boolean;
 
 		if (noSandbox) {
 			sandboxEnabled = false;
@@ -284,7 +284,7 @@ export default function (moodcli: ExtensionAPI) {
 		}
 	});
 
-	moodcli.on("session_shutdown", async () => {
+	Mooncli.on("session_shutdown", async () => {
 		if (sandboxInitialized) {
 			try {
 				await SandboxManager.reset();
@@ -294,7 +294,7 @@ export default function (moodcli: ExtensionAPI) {
 		}
 	});
 
-	moodcli.registerCommand("sandbox", {
+	Mooncli.registerCommand("sandbox", {
 		description: "Show sandbox configuration",
 		handler: async (_args, ctx) => {
 			if (!sandboxEnabled) {

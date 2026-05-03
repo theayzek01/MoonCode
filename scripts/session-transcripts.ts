@@ -4,7 +4,7 @@
  * optionally spawns subengines to analyze patterns.
  *
  * Usage: npx tsx scripts/session-transcripts.ts [--analyze] [--output <dir>] [cwd]
- *   --analyze      Spawn moodcli subengines to analyze each transcript file
+ *   --analyze      Spawn Mooncli subengines to analyze each transcript file
  *   --output <dir> Output directory for transcript files (defaults to ./session-transcripts)
  *   cwd            Working directory to extract sessions for (defaults to current)
  */
@@ -77,7 +77,7 @@ interface JsonEvent {
 
 function runSubengine(prompt: string, cwd: string): Promise<{ success: boolean }> {
 	return new Promise((resolve) => {
-		const child = spawn("moodcli", ["--mode", "json", "--tools", "read,write", "-p", prompt], {
+		const child = spawn("Mooncli", ["--mode", "json", "--tools", "read,write", "-p", prompt], {
 			cwd,
 			stdio: ["ignore", "pipe", "pipe"],
 		});
@@ -134,7 +134,7 @@ function runSubengine(prompt: string, cwd: string): Promise<{ success: boolean }
 		});
 
 		child.on("error", (err) => {
-			console.error(chalk.red(`  Failed to spawn moodcli: ${err.message}`));
+			console.error(chalk.red(`  Failed to spawn Mooncli: ${err.message}`));
 			resolve({ success: false });
 		});
 	});
@@ -162,7 +162,7 @@ async function main() {
 	const cwd = resolve(cwdArg || process.cwd());
 
 	mkdirSync(outputDir, { recursive: true });
-	const sessionsBase = join(homedir(), ".moodcli/engine/sessions");
+	const sessionsBase = join(homedir(), ".Mooncli/engine/sessions");
 	const sessionDirName = cwdToSessionDir(cwd);
 	const sessionDir = join(sessionsBase, sessionDirName);
 
@@ -243,12 +243,12 @@ async function main() {
 	console.log(`\nCreated ${outputFiles.length} transcript file(s) in ${outputDir}`);
 
 	if (!analyzeFlag) {
-		console.log("\nRun with --analyze to spawn moodcli subengines for pattern analysis.");
+		console.log("\nRun with --analyze to spawn Mooncli subengines for pattern analysis.");
 		return;
 	}
 
 	// Find AGENTS.md files to compare against
-	const globalEnginesMd = join(homedir(), ".moodcli/engine/AGENTS.md");
+	const globalEnginesMd = join(homedir(), ".Mooncli/engine/AGENTS.md");
 	const localEnginesMd = join(cwd, "AGENTS.md");
 	const enginesMdFiles = [globalEnginesMd, localEnginesMd].filter(existsSync);
 	const enginesMdSection =

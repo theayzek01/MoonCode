@@ -5,11 +5,11 @@
  * including input (with cache) and output (with thinking). This is the
  * base for calculating context size for the next request.
  *
- * - OpenCore Completions: Uses native total_tokens field
- * - OpenCore Responses: Uses native total_tokens field
+ * - OpenAI Completions: Uses native total_tokens field
+ * - OpenAI Responses: Uses native total_tokens field
  * - Google: Uses native totalTokenCount field
  * - Anthropic: Computed as input + output + cacheRead + cacheWrite
- * - Other OpenCore-compatible providers: Uses native total_tokens field
+ * - Other OpenAI-compatible providers: Uses native total_tokens field
  */
 
 import { describe, expect, it } from "vitest";
@@ -19,7 +19,7 @@ import type { Api, Context, Model, StreamOptions, Usage } from "../src/types.js"
 
 type StreamOptionsWithExtras = StreamOptions & Record<string, unknown>;
 
-import { hasAzureOpenCoreCredentials, resolveAzureDeploymentName } from "./azure-utils.js";
+import { hasAzureOpenAICredentials, resolveAzureDeploymentName } from "./azure-utils.js";
 import { hasBedrockCredentials } from "./bedrock-utils.js";
 import { hasCloudflareAiGatewayCredentials, hasCloudflareWorkersCoreCredentials } from "./cloudflare-utils.js";
 import { resolveApiKey } from "./oauth.js";
@@ -150,10 +150,10 @@ describe("totalTokens field", () => {
 	});
 
 	// =========================================================================
-	// OpenCore
+	// OpenAI
 	// =========================================================================
 
-	describe.skipIf(!process.env.OPENCore_API_KEY)("OpenCore Completions", () => {
+	describe.skipIf(!process.env.OpenAI_API_KEY)("OpenAI Completions", () => {
 		it(
 			"gpt-4o-mini - should return totalTokens equal to sum of components",
 			{ retry: 3, timeout: 60000 },
@@ -165,7 +165,7 @@ describe("totalTokens field", () => {
 					api: "openai-completions",
 				};
 
-				console.log(`\nOpenCore Completions / ${llm.id}:`);
+				console.log(`\nOpenAI Completions / ${llm.id}:`);
 				const { first, second } = await testTotalTokensWithCache(llm);
 
 				logUsage("First request", first);
@@ -177,11 +177,11 @@ describe("totalTokens field", () => {
 		);
 	});
 
-	describe.skipIf(!process.env.OPENCore_API_KEY)("OpenCore Responses", () => {
+	describe.skipIf(!process.env.OpenAI_API_KEY)("OpenAI Responses", () => {
 		it("gpt-4o - should return totalTokens equal to sum of components", { retry: 3, timeout: 60000 }, async () => {
 			const llm = getModel("openai", "gpt-4o");
 
-			console.log(`\nOpenCore Responses / ${llm.id}:`);
+			console.log(`\nOpenAI Responses / ${llm.id}:`);
 			const { first, second } = await testTotalTokensWithCache(llm);
 
 			logUsage("First request", first);
@@ -192,7 +192,7 @@ describe("totalTokens field", () => {
 		});
 	});
 
-	describe.skipIf(!hasAzureOpenCoreCredentials())("Azure OpenCore Responses", () => {
+	describe.skipIf(!hasAzureOpenAICredentials())("Azure OpenAI Responses", () => {
 		it(
 			"gpt-4o-mini - should return totalTokens equal to sum of components",
 			{ retry: 3, timeout: 60000 },
@@ -201,7 +201,7 @@ describe("totalTokens field", () => {
 				const azureDeploymentName = resolveAzureDeploymentName(llm.id);
 				const azureOptions = azureDeploymentName ? { azureDeploymentName } : {};
 
-				console.log(`\nAzure OpenCore Responses / ${llm.id}:`);
+				console.log(`\nAzure OpenAI Responses / ${llm.id}:`);
 				const { first, second } = await testTotalTokensWithCache(llm, azureOptions);
 
 				logUsage("First request", first);
@@ -744,17 +744,17 @@ describe("totalTokens field", () => {
 	});
 
 	// =========================================================================
-	// OpenCore Codex (OAuth)
+	// OpenAI Codex (OAuth)
 	// =========================================================================
 
-	describe("OpenCore Codex (OAuth)", () => {
+	describe("OpenAI Codex (OAuth)", () => {
 		it.skipIf(!openaiCodexToken)(
 			"gpt-5.2-codex - should return totalTokens equal to sum of components",
 			{ retry: 3, timeout: 60000 },
 			async () => {
 				const llm = getModel("openai-codex", "gpt-5.2-codex");
 
-				console.log(`\nOpenCore Codex / ${llm.id}:`);
+				console.log(`\nOpenAI Codex / ${llm.id}:`);
 				const { first, second } = await testTotalTokensWithCache(llm, { apiKey: openaiCodexToken });
 
 				logUsage("First request", first);

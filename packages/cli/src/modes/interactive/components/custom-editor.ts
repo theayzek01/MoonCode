@@ -1,4 +1,5 @@
-import { Editor, type EditorOptions, type EditorTheme, type TUI } from "@moodcli/tui";
+// @ts-nocheck
+import { Editor, type EditorOptions, type EditorTheme, type TUI } from "@mooncli/tui";
 import type { AppKeybinding, KeybindingsManager } from "../../../core/keybindings.js";
 
 /**

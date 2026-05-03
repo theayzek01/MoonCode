@@ -1,5 +1,5 @@
 /**
- * OpenCore Codex (ChatGPT OAuth) flow
+ * OpenAI Codex (ChatGPT OAuth) flow
  *
  * NOTE: This module uses Node.js crypto and http for the OAuth callback.
  * It is only intended for CLI use, not browser environments.
@@ -43,7 +43,7 @@ type JwtPayload = {
 
 function createState(): string {
 	if (!_randomBytes) {
-		throw new Error("OpenCore Codex OAuth is only available in Node.js environments");
+		throw new Error("OpenAI Codex OAuth is only available in Node.js environments");
 	}
 	return _randomBytes(16).toString("hex");
 }
@@ -174,7 +174,7 @@ async function refreshAccessToken(refreshToken: string): Promise<TokenResult> {
 }
 
 async function createAuthorizationFlow(
-	originator: string = "moodcli",
+	originator: string = "Mooncli",
 ): Promise<{ verifier: string; state: string; url: string }> {
 	const { verifier, challenge } = await generatePKCE();
 	const state = createState();
@@ -202,7 +202,7 @@ type OAuthServerInfo = {
 
 function startLocalOAuthServer(state: string): Promise<OAuthServerInfo> {
 	if (!_http) {
-		throw new Error("OpenCore Codex OAuth is only available in Node.js environments");
+		throw new Error("OpenAI Codex OAuth is only available in Node.js environments");
 	}
 
 	let settleWait: ((value: { code: string } | null) => void) | undefined;
@@ -239,7 +239,7 @@ function startLocalOAuthServer(state: string): Promise<OAuthServerInfo> {
 			}
 			res.statusCode = 200;
 			res.setHeader("Content-Type", "text/html; charset=utf-8");
-			res.end(oauthSuccessHtml("OpenCore authentication completed. You can close this window."));
+			res.end(oauthSuccessHtml("OpenAI authentication completed. You can close this window."));
 			settleWait?.({ code });
 		} catch {
 			res.statusCode = 500;
@@ -289,7 +289,7 @@ function getAccountId(accessToken: string): string | null {
 }
 
 /**
- * Login with OpenCore Codex OAuth
+ * Login with OpenAI Codex OAuth
  *
  * @param options.onAuth - Called with URL and instructions when auth starts
  * @param options.onPrompt - Called to prompt user for manual code paste (fallback if no onManualCodeInput)
@@ -297,9 +297,9 @@ function getAccountId(accessToken: string): string | null {
  * @param options.onManualCodeInput - Optional promise that resolves with user-pasted code.
  *                                    Races with browser callback - whichever completes first wins.
  *                                    Useful for showing paste input immediately alongside browser flow.
- * @param options.originator - OAuth originator parameter (defaults to "moodcli")
+ * @param options.originator - OAuth originator parameter (defaults to "Mooncli")
  */
-export async function loginOpenCoreCodex(options: {
+export async function loginOpenAICodex(options: {
 	onAuth: (info: { url: string; instructions?: string }) => void;
 	onPrompt: (prompt: OAuthPrompt) => Promise<string>;
 	onProgress?: (message: string) => void;
@@ -407,12 +407,12 @@ export async function loginOpenCoreCodex(options: {
 }
 
 /**
- * Refresh OpenCore Codex OAuth token
+ * Refresh OpenAI Codex OAuth token
  */
-export async function refreshOpenCoreCodexToken(refreshToken: string): Promise<OAuthCredentials> {
+export async function refreshOpenAICodexToken(refreshToken: string): Promise<OAuthCredentials> {
 	const result = await refreshAccessToken(refreshToken);
 	if (result.type !== "success") {
-		throw new Error("Failed to refresh OpenCore Codex token");
+		throw new Error("Failed to refresh OpenAI Codex token");
 	}
 
 	const accountId = getAccountId(result.access);
@@ -434,7 +434,7 @@ export const openaiCodexOAuthProvider: OAuthProviderInterface = {
 	usesCallbackServer: true,
 
 	async login(callbacks: OAuthLoginCallbacks): Promise<OAuthCredentials> {
-		return loginOpenCoreCodex({
+		return loginOpenAICodex({
 			onAuth: callbacks.onAuth,
 			onPrompt: callbacks.onPrompt,
 			onProgress: callbacks.onProgress,
@@ -443,7 +443,7 @@ export const openaiCodexOAuthProvider: OAuthProviderInterface = {
 	},
 
 	async refreshToken(credentials: OAuthCredentials): Promise<OAuthCredentials> {
-		return refreshOpenCoreCodexToken(credentials.refresh);
+		return refreshOpenAICodexToken(credentials.refresh);
 	},
 
 	getApiKey(credentials: OAuthCredentials): string {

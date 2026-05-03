@@ -1,13 +1,13 @@
 // Requires GitHub CLI (`gh`) and a GitHub repository checkout.
 // Preloads the latest open issues once per session, then filters them locally for fast `#...` completion.
 
+import type { ExtensionAPI } from "Mooncli";
 import {
 	type AutocompleteItem,
 	type AutocompleteProvider,
 	type AutocompleteSuggestions,
 	fuzzyFilter,
-} from "@moodcli/tui";
-import type { ExtensionAPI } from "moodcli";
+} from "@mooncli/tui";
 
 type GitHubIssue = {
 	number: number;
@@ -39,8 +39,8 @@ function parseGitHubRepo(remoteUrl: string): string | undefined {
 	return undefined;
 }
 
-async function resolveGitHubRepo(moodcli: ExtensionAPI, cwd: string): Promise<RepoResolution> {
-	const result = await moodcli.exec("git", ["remote", "-v"], { cwd, timeout: 5_000 });
+async function resolveGitHubRepo(Mooncli: ExtensionAPI, cwd: string): Promise<RepoResolution> {
+	const result = await Mooncli.exec("git", ["remote", "-v"], { cwd, timeout: 5_000 });
 	if (result.code !== 0) {
 		return { ok: false, error: "github-issue-autocomplete: cwd is not a git repository" };
 	}
@@ -127,9 +127,9 @@ function createIssueAutocompleteProvider(
 	};
 }
 
-export default function (moodcli: ExtensionAPI): void {
-	moodcli.on("session_start", async (_event, ctx) => {
-		const resolvedRepo = await resolveGitHubRepo(moodcli, ctx.cwd);
+export default function (Mooncli: ExtensionAPI): void {
+	Mooncli.on("session_start", async (_event, ctx) => {
+		const resolvedRepo = await resolveGitHubRepo(Mooncli, ctx.cwd);
 		if (!resolvedRepo.ok) {
 			ctx.ui.notify(resolvedRepo.error, "error");
 			return;
@@ -141,7 +141,7 @@ export default function (moodcli: ExtensionAPI): void {
 
 		const getIssues = async (): Promise<GitHubIssue[] | undefined> => {
 			issuesPromise ||= (async () => {
-				const result = await moodcli.exec(
+				const result = await Mooncli.exec(
 					"gh",
 					[
 						"issue",

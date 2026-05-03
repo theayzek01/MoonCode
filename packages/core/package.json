@@ -1,5 +1,5 @@
 {
-	"name": "@moodcli/core",
+	"name": "@mooncli/core",
 	"version": "0.72.1",
 	"description": "Unified Core Engine for Modern Apps",
 	"type": "module",
@@ -52,7 +52,7 @@
 		}
 	},
 	"bin": {
-		"moodcli-core": "./dist/cli.js"
+		"mooncli-core": "./dist/cli.js"
 	},
 	"files": [
 		"dist",
@@ -61,9 +61,9 @@
 	"scripts": {
 		"clean": "shx rm -rf dist",
 		"generate-models": "npx tsx scripts/generate-models.ts",
-		"build": "npm run generate-models && tsgo -p tsconfig.build.json",
-		"dev": "tsgo -p tsconfig.build.json --watch --preserveWatchOutput",
-		"dev:tsc": "tsgo -p tsconfig.build.json --watch --preserveWatchOutput",
+		"build": "npm run generate-models && tsc -p tsconfig.build.json",
+		"dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+		"dev:tsc": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
 		"test": "vitest --run",
 		"prepublishOnly": "npm run clean && npm run build"
 	},
@@ -74,9 +74,9 @@
 		"@mistralai/mistralai": "^2.2.0",
 		"typebox": "^1.1.24",
 		"chalk": "^5.6.2",
-		"openai": "6.26.0",
+		"openai": "^4.82.0",
 		"partial-json": "^0.1.7",
-		"proxy-engine": "^6.5.0",
+		"proxy-agent": "^6.5.0",
 		"undici": "^7.19.1",
 		"zod-to-json-schema": "^3.24.6"
 	},

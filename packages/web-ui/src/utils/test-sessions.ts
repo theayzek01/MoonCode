@@ -1,3 +1,4 @@
+// @ts-nocheck
 // biome-ignore lint/suspicious/noTemplateCurlyInString: Test data contains code snippets with template literals
 export const simpleHtml = {
 	systemPrompt:

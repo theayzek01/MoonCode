@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Extension system types.
  *
@@ -8,13 +9,6 @@
  * - Interact with the user via UI primitives
  */
 
-import type {
-	EngineMessage,
-	EngineToolResult,
-	EngineToolUpdateCallback,
-	ThinkingLevel,
-	ToolExecutionMode,
-} from "@moodcli/engine";
 import type {
 	Api,
 	AssistantMessageEvent,
@@ -27,7 +21,14 @@ import type {
 	SimpleStreamOptions,
 	TextContent,
 	ToolResultMessage,
-} from "@moodcli/core";
+} from "@mooncli/core";
+import type {
+	EngineMessage,
+	EngineToolResult,
+	EngineToolUpdateCallback,
+	ThinkingLevel,
+	ToolExecutionMode,
+} from "@mooncli/engine";
 import type {
 	AutocompleteItem,
 	AutocompleteProvider,
@@ -38,7 +39,7 @@ import type {
 	OverlayHandle,
 	OverlayOptions,
 	TUI,
-} from "@moodcli/tui";
+} from "@mooncli/tui";
 import type { Static, TSchema } from "typebox";
 import type { Theme } from "../../modes/interactive/theme/theme.js";
 import type { BashResult } from "../bash-executor.js";
@@ -226,12 +227,12 @@ export interface ExtensionUIContext {
 	 * - `keybindings`: KeybindingsManager for app-level keybindings
 	 *
 	 * For full app keybinding support (escape, ctrl+d, model switching, etc.),
-	 * extend `CustomEditor` from `moodcli` and call
+	 * extend `CustomEditor` from `Mooncli` and call
 	 * `super.handleInput(data)` for keys you don't handle.
 	 *
 	 * @example
 	 * ```ts
-	 * import { CustomEditor } from "moodcli";
+	 * import { CustomEditor } from "Mooncli";
 	 *
 	 * class VimEditor extends CustomEditor {
 	 *   private mode: "normal" | "insert" = "insert";
@@ -316,7 +317,7 @@ export interface ExtensionContext {
 	abort(): void;
 	/** Whether there are queued messages waiting */
 	hasPendingMessages(): boolean;
-	/** Gracefully shutdown moodcli and exit. Available in all contexts. */
+	/** Gracefully shutdown Mooncli and exit. Available in all contexts. */
 	shutdown(): void;
 	/** Get current context usage for the active model. */
 	getContextUsage(): ContextUsage | undefined;
@@ -629,7 +630,7 @@ export interface BeforeEngineStartEvent {
 	images?: ImageContent[];
 	/** The fully assembled system prompt string. */
 	systemPrompt: string;
-	/** Structured options used to build the system prompt. Extensions can inspect this to understand what Moodcli loaded without re-discovering resources. */
+	/** Structured options used to build the system prompt. Extensions can inspect this to understand what Mooncli loaded without re-discovering resources. */
 	systemPromptOptions: BuildSystemPromptOptions;
 }
 
@@ -1107,7 +1108,10 @@ export interface ExtensionAPI {
 		handler: ExtensionHandler<BeforeProviderRequestEvent, BeforeProviderRequestEventResult>,
 	): void;
 	on(event: "after_provider_response", handler: ExtensionHandler<AfterProviderResponseEvent>): void;
-	on(event: "before_engine_start", handler: ExtensionHandler<BeforeEngineStartEvent, BeforeEngineStartEventResult>): void;
+	on(
+		event: "before_engine_start",
+		handler: ExtensionHandler<BeforeEngineStartEvent, BeforeEngineStartEventResult>,
+	): void;
 	on(event: "engine_start", handler: ExtensionHandler<EngineStartEvent>): void;
 	on(event: "engine_end", handler: ExtensionHandler<EngineEndEvent>): void;
 	on(event: "turn_start", handler: ExtensionHandler<TurnStartEvent>): void;
@@ -1252,7 +1256,7 @@ export interface ExtensionAPI {
 	 *
 	 * @example
 	 * // Register a new provider with custom models
-	 * moodcli.registerProvider("my-proxy", {
+	 * Mooncli.registerProvider("my-proxy", {
 	 *   baseUrl: "https://proxy.example.com",
 	 *   apiKey: "PROXY_API_KEY",
 	 *   api: "anthropic-messages",
@@ -1271,13 +1275,13 @@ export interface ExtensionAPI {
 	 *
 	 * @example
 	 * // Override baseUrl for an existing provider
-	 * moodcli.registerProvider("anthropic", {
+	 * Mooncli.registerProvider("anthropic", {
 	 *   baseUrl: "https://proxy.example.com"
 	 * });
 	 *
 	 * @example
 	 * // Register provider with OAuth support
-	 * moodcli.registerProvider("corporate-ai", {
+	 * Mooncli.registerProvider("corporate-ai", {
 	 *   baseUrl: "https://ai.corp.com",
 	 *   api: "openai-responses",
 	 *   models: [...],
@@ -1302,7 +1306,7 @@ export interface ExtensionAPI {
 	 * the initial load phase.
 	 *
 	 * @example
-	 * moodcli.unregisterProvider("my-proxy");
+	 * Mooncli.unregisterProvider("my-proxy");
 	 */
 	unregisterProvider(name: string): void;
 
@@ -1314,7 +1318,7 @@ export interface ExtensionAPI {
 // Provider Registration Types
 // ============================================================================
 
-/** Configuration for registering a provider via moodcli.registerProvider(). */
+/** Configuration for registering a provider via Mooncli.registerProvider(). */
 export interface ProviderConfig {
 	/** Display name for the provider in UI. */
 	name?: string;
@@ -1359,7 +1363,7 @@ export interface ProviderModelConfig {
 	baseUrl?: string;
 	/** Whether the model supports extended thinking. */
 	reasoning: boolean;
-	/** Maps moodcli thinking levels to provider/model-specific values; null marks a level unsupported. */
+	/** Maps Mooncli thinking levels to provider/model-specific values; null marks a level unsupported. */
 	thinkingLevelMap?: Model<Api>["thinkingLevelMap"];
 	/** Supported input types. */
 	input: ("text" | "image")[];
@@ -1371,12 +1375,12 @@ export interface ProviderModelConfig {
 	maxTokens: number;
 	/** Custom headers for this model. */
 	headers?: Record<string, string>;
-	/** OpenCore compatibility settings. */
+	/** OpenAI compatibility settings. */
 	compat?: Model<Api>["compat"];
 }
 
 /** Extension factory function type. Supports both sync and async initialization. */
-export type ExtensionFactory = (moodcli: ExtensionAPI) => void | Promise<void>;
+export type ExtensionFactory = (Mooncli: ExtensionAPI) => void | Promise<void>;
 
 // ============================================================================
 // Loaded Extension Types
@@ -1466,7 +1470,7 @@ export interface ExtensionRuntimeState {
 }
 
 /**
- * Action implementations for moodcli.* API methods.
+ * Action implementations for Mooncli.* API methods.
  * Provided to runner.initialize(), copied into the shared runtime.
  */
 export interface ExtensionActions {

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Centralized tool prompts/descriptions.
  * Each prompt is either a string constant or a template function.

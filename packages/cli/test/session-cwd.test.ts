@@ -2,7 +2,10 @@ import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { type CreateEngineSessionRuntimeFactory, createEngineSessionRuntime } from "../src/core/engine-session-runtime.js";
+import {
+	type CreateEngineSessionRuntimeFactory,
+	createEngineSessionRuntime,
+} from "../src/core/engine-session-runtime.js";
 import { getMissingSessionCwdIssue, MissingSessionCwdError } from "../src/core/session-cwd.js";
 import { SessionManager } from "../src/core/session-manager.js";
 
@@ -35,9 +38,9 @@ describe("session cwd handling", () => {
 	});
 
 	it("detects missing session cwd from persisted sessions", () => {
-		const fallbackCwd = createTempDir("moodcli-session-cwd-fallback");
+		const fallbackCwd = createTempDir("Mooncli-session-cwd-fallback");
 		const missingCwd = join(fallbackCwd, "does-not-exist");
-		const sessionDir = createTempDir("moodcli-session-cwd-session-dir");
+		const sessionDir = createTempDir("Mooncli-session-cwd-session-dir");
 		const sessionFile = join(sessionDir, "session.jsonl");
 		cleanupPaths.push(fallbackCwd, sessionDir);
 		writeSessionFile(sessionFile, missingCwd);
@@ -52,9 +55,9 @@ describe("session cwd handling", () => {
 	});
 
 	it("supports overriding the effective cwd when opening a session", () => {
-		const fallbackCwd = createTempDir("moodcli-session-cwd-override");
+		const fallbackCwd = createTempDir("Mooncli-session-cwd-override");
 		const missingCwd = join(fallbackCwd, "does-not-exist");
-		const sessionDir = createTempDir("moodcli-session-cwd-override-session-dir");
+		const sessionDir = createTempDir("Mooncli-session-cwd-override-session-dir");
 		const sessionFile = join(sessionDir, "session.jsonl");
 		cleanupPaths.push(fallbackCwd, sessionDir);
 		writeSessionFile(sessionFile, missingCwd);
@@ -65,9 +68,9 @@ describe("session cwd handling", () => {
 	});
 
 	it("throws a controlled error before runtime creation when the stored cwd is missing", async () => {
-		const fallbackCwd = createTempDir("moodcli-session-cwd-runtime");
+		const fallbackCwd = createTempDir("Mooncli-session-cwd-runtime");
 		const missingCwd = join(fallbackCwd, "does-not-exist");
-		const sessionDir = createTempDir("moodcli-session-cwd-runtime-session-dir");
+		const sessionDir = createTempDir("Mooncli-session-cwd-runtime-session-dir");
 		const sessionFile = join(sessionDir, "session.jsonl");
 		cleanupPaths.push(fallbackCwd, sessionDir);
 		writeSessionFile(sessionFile, missingCwd);

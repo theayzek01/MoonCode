@@ -1,5 +1,5 @@
 /**
- * Utility functions for Azure OpenCore tests
+ * Utility functions for Azure OpenAI tests
  */
 
 function parseDeploymentNameMap(value: string | undefined): Map<string, string> {
@@ -15,14 +15,14 @@ function parseDeploymentNameMap(value: string | undefined): Map<string, string> 
 	return map;
 }
 
-export function hasAzureOpenCoreCredentials(): boolean {
-	const hasKey = !!process.env.AZURE_OPENCore_API_KEY;
-	const hasBaseUrl = !!(process.env.AZURE_OPENCore_BASE_URL || process.env.AZURE_OPENCore_RESOURCE_NAME);
+export function hasAzureOpenAICredentials(): boolean {
+	const hasKey = !!process.env.AZURE_OpenAI_API_KEY;
+	const hasBaseUrl = !!(process.env.AZURE_OpenAI_BASE_URL || process.env.AZURE_OpenAI_RESOURCE_NAME);
 	return hasKey && hasBaseUrl;
 }
 
 export function resolveAzureDeploymentName(modelId: string): string | undefined {
-	const mapValue = process.env.AZURE_OPENCore_DEPLOYMENT_NAME_MAP;
+	const mapValue = process.env.AZURE_OpenAI_DEPLOYMENT_NAME_MAP;
 	if (!mapValue) return undefined;
 	return parseDeploymentNameMap(mapValue).get(modelId);
 }

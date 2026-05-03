@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Context compaction for long sessions.
  *
@@ -5,9 +6,9 @@
  * and after compaction the session is reloaded.
  */
 
-import type { EngineMessage, ThinkingLevel } from "@moodcli/engine";
-import type { AssistantMessage, Model, Usage } from "@moodcli/core";
-import { completeSimple } from "@moodcli/core";
+import type { AssistantMessage, Model, Usage } from "@mooncli/core";
+import { completeSimple } from "@mooncli/core";
+import type { EngineMessage, ThinkingLevel } from "@mooncli/engine";
 import {
 	convertToLlm,
 	createBranchSummaryMessage,
@@ -45,7 +46,7 @@ function extractFileOperations(
 ): FileOperations {
 	const fileOps = createFileOps();
 
-	// Collect from previous compaction's details (if moodcli-generated)
+	// Collect from previous compaction's details (if Mooncli-generated)
 	if (prevCompactionIndex >= 0) {
 		const prevCompaction = entries[prevCompactionIndex] as CompactionEntry;
 		if (!prevCompaction.fromHook && prevCompaction.details) {

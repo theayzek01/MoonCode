@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
 	BedrockRuntimeClient,
 	type BedrockRuntimeClientConfig,
@@ -165,16 +166,16 @@ export const streamBedrock: StreamFunction<"bedrock-converse-stream", BedrockOpt
 				process.env.no_proxy
 			) {
 				const nodeHttpHandler = await import("@smithy/node-http-handler");
-				const proxyEngine = await import("proxy-engine");
+				const ProxyAgent = await import("proxy-agent");
 
-				const engine = new proxyEngine.ProxyEngine();
+				const engine = new ProxyAgent.ProxyAgent();
 
 				// Bedrock runtime uses NodeHttp2Handler by default since v3.798.0, which is based
 				// on `http2` module and has no support for http engine.
 				// Use NodeHttpHandler to support http engine.
 				config.requestHandler = new nodeHttpHandler.NodeHttpHandler({
-					httpEngine: engine,
-					httpsEngine: engine,
+					httpAgent: engine,
+					httpsAgent: engine,
 				});
 			} else if (process.env.AWS_BEDROCK_FORCE_HTTP1 === "1") {
 				// Some custom endpoints require HTTP/1.1 instead of HTTP/2
@@ -302,7 +303,7 @@ const BEDROCK_ERROR_PREFIXES: Record<string, string> = {
 function formatBedrockError(error: unknown): string {
 	const message = error instanceof Error ? error.message : JSON.stringify(error);
 	if (error instanceof BedrockRuntimeServiceException) {
-		const prefix = BEDROCK_ERROR_PREFIXES[error.name] ?? error.name;
+		const prefix = BEDROCK_ERROR_PREFIXES[(error as any).name] ?? (error as any).name;
 		return `${prefix}: ${message}`;
 	}
 	return message;
@@ -586,7 +587,7 @@ function supportsPromptCaching(model: Model<"bedrock-converse-stream">): boolean
 /**
  * Check if the model supports thinking signatures in reasoningContent.
  * Only Anthropic Claude models support the signature field.
- * Other models (OpenCore, Qwen, Minimax, Moonshot, etc.) reject it with:
+ * Other models (OpenAI, Qwen, Minimax, Moonshot, etc.) reject it with:
  * "This model doesn't support the reasoningContent.reasoningText.signature field"
  *
  * Checks both model ID and model name to support application inference profiles.

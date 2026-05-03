@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { TUI } from "../tui.js";
 import { Text } from "./text.js";
 

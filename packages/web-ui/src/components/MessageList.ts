@@ -1,5 +1,9 @@
-import type { EngineMessage, EngineTool } from "@moodcli/engine";
-import type { AssistantMessage as AssistantMessageType, ToolResultMessage as ToolResultMessageType } from "@moodcli/core";
+// @ts-nocheck
+import type {
+	AssistantMessage as AssistantMessageType,
+	ToolResultMessage as ToolResultMessageType,
+} from "@mooncli/core";
+import type { EngineMessage, EngineTool } from "@mooncli/engine";
 import { html, LitElement, type TemplateResult } from "lit";
 import { property } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";

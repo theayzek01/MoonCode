@@ -12,10 +12,10 @@
  * - Progress tracking widget during execution
  */
 
-import type { EngineMessage } from "@moodcli/engine";
-import type { AssistantMessage, TextContent } from "@moodcli/core";
-import { Key } from "@moodcli/tui";
-import type { ExtensionAPI, ExtensionContext } from "moodcli";
+import type { ExtensionAPI, ExtensionContext } from "Mooncli";
+import type { AssistantMessage, TextContent } from "@mooncli/core";
+import type { EngineMessage } from "@mooncli/engine";
+import { Key } from "@mooncli/tui";
 import { extractTodoItems, isSafeCommand, markCompletedSteps, type TodoItem } from "./utils.js";
 
 // Tools
@@ -35,12 +35,12 @@ function getTextContent(message: AssistantMessage): string {
 		.join("\n");
 }
 
-export default function planModeExtension(moodcli: ExtensionAPI): void {
+export default function planModeExtension(Mooncli: ExtensionAPI): void {
 	let planModeEnabled = false;
 	let executionMode = false;
 	let todoItems: TodoItem[] = [];
 
-	moodcli.registerFlag("plan", {
+	Mooncli.registerFlag("plan", {
 		description: "Start in plan mode (read-only exploration)",
 		type: "boolean",
 		default: false,
@@ -79,29 +79,29 @@ export default function planModeExtension(moodcli: ExtensionAPI): void {
 		todoItems = [];
 
 		if (planModeEnabled) {
-			moodcli.setActiveTools(PLAN_MODE_TOOLS);
+			Mooncli.setActiveTools(PLAN_MODE_TOOLS);
 			ctx.ui.notify(`Plan mode enabled. Tools: ${PLAN_MODE_TOOLS.join(", ")}`);
 		} else {
-			moodcli.setActiveTools(NORMAL_MODE_TOOLS);
+			Mooncli.setActiveTools(NORMAL_MODE_TOOLS);
 			ctx.ui.notify("Plan mode disabled. Full access restored.");
 		}
 		updateStatus(ctx);
 	}
 
 	function persistState(): void {
-		moodcli.appendEntry("plan-mode", {
+		Mooncli.appendEntry("plan-mode", {
 			enabled: planModeEnabled,
 			todos: todoItems,
 			executing: executionMode,
 		});
 	}
 
-	moodcli.registerCommand("plan", {
+	Mooncli.registerCommand("plan", {
 		description: "Toggle plan mode (read-only exploration)",
 		handler: async (_args, ctx) => togglePlanMode(ctx),
 	});
 
-	moodcli.registerCommand("todos", {
+	Mooncli.registerCommand("todos", {
 		description: "Show current plan todo list",
 		handler: async (_args, ctx) => {
 			if (todoItems.length === 0) {
@@ -113,13 +113,13 @@ export default function planModeExtension(moodcli: ExtensionAPI): void {
 		},
 	});
 
-	moodcli.registerShortcut(Key.ctrlAlt("p"), {
+	Mooncli.registerShortcut(Key.ctrlAlt("p"), {
 		description: "Toggle plan mode",
 		handler: async (ctx) => togglePlanMode(ctx),
 	});
 
 	// Block destructive bash commands in plan mode
-	moodcli.on("tool_call", async (event) => {
+	Mooncli.on("tool_call", async (event) => {
 		if (!planModeEnabled || event.toolName !== "bash") return;
 
 		const command = event.input.command as string;
@@ -132,7 +132,7 @@ export default function planModeExtension(moodcli: ExtensionAPI): void {
 	});
 
 	// Filter out stale plan mode context when not in plan mode
-	moodcli.on("context", async (event) => {
+	Mooncli.on("context", async (event) => {
 		if (planModeEnabled) return;
 
 		return {
@@ -156,7 +156,7 @@ export default function planModeExtension(moodcli: ExtensionAPI): void {
 	});
 
 	// Inject plan/execution context before engine starts
-	moodcli.on("before_engine_start", async () => {
+	Mooncli.on("before_engine_start", async () => {
 		if (planModeEnabled) {
 			return {
 				message: {
@@ -205,7 +205,7 @@ After completing a step, include a [DONE:n] tag in your response.`,
 	});
 
 	// Track progress after each turn
-	moodcli.on("turn_end", async (event, ctx) => {
+	Mooncli.on("turn_end", async (event, ctx) => {
 		if (!executionMode || todoItems.length === 0) return;
 		if (!isAssistantMessage(event.message)) return;
 
@@ -217,18 +217,18 @@ After completing a step, include a [DONE:n] tag in your response.`,
 	});
 
 	// Handle plan completion and plan mode UI
-	moodcli.on("engine_end", async (event, ctx) => {
+	Mooncli.on("engine_end", async (event, ctx) => {
 		// Check if execution is complete
 		if (executionMode && todoItems.length > 0) {
 			if (todoItems.every((t) => t.completed)) {
 				const completedList = todoItems.map((t) => `~~${t.text}~~`).join("\n");
-				moodcli.sendMessage(
+				Mooncli.sendMessage(
 					{ customType: "plan-complete", content: `**Plan Complete!** ✓\n\n${completedList}`, display: true },
 					{ triggerTurn: false },
 				);
 				executionMode = false;
 				todoItems = [];
-				moodcli.setActiveTools(NORMAL_MODE_TOOLS);
+				Mooncli.setActiveTools(NORMAL_MODE_TOOLS);
 				updateStatus(ctx);
 				persistState(); // Save cleared state so resume doesn't restore old execution mode
 			}
@@ -249,7 +249,7 @@ After completing a step, include a [DONE:n] tag in your response.`,
 		// Show plan steps and prompt for next action
 		if (todoItems.length > 0) {
 			const todoListText = todoItems.map((t, i) => `${i + 1}. ☐ ${t.text}`).join("\n");
-			moodcli.sendMessage(
+			Mooncli.sendMessage(
 				{
 					customType: "plan-todo-list",
 					content: `**Plan Steps (${todoItems.length}):**\n\n${todoListText}`,
@@ -268,28 +268,28 @@ After completing a step, include a [DONE:n] tag in your response.`,
 		if (choice?.startsWith("Execute")) {
 			planModeEnabled = false;
 			executionMode = todoItems.length > 0;
-			moodcli.setActiveTools(NORMAL_MODE_TOOLS);
+			Mooncli.setActiveTools(NORMAL_MODE_TOOLS);
 			updateStatus(ctx);
 
 			const execMessage =
 				todoItems.length > 0
 					? `Execute the plan. Start with: ${todoItems[0].text}`
 					: "Execute the plan you just created.";
-			moodcli.sendMessage(
+			Mooncli.sendMessage(
 				{ customType: "plan-mode-execute", content: execMessage, display: true },
 				{ triggerTurn: true },
 			);
 		} else if (choice === "Refine the plan") {
 			const refinement = await ctx.ui.editor("Refine the plan:", "");
 			if (refinement?.trim()) {
-				moodcli.sendUserMessage(refinement.trim());
+				Mooncli.sendUserMessage(refinement.trim());
 			}
 		}
 	});
 
 	// Restore state on session start/resume
-	moodcli.on("session_start", async (_event, ctx) => {
-		if (moodcli.getFlag("plan") === true) {
+	Mooncli.on("session_start", async (_event, ctx) => {
+		if (Mooncli.getFlag("plan") === true) {
 			planModeEnabled = true;
 		}
 
@@ -333,7 +333,7 @@ After completing a step, include a [DONE:n] tag in your response.`,
 		}
 
 		if (planModeEnabled) {
-			moodcli.setActiveTools(PLAN_MODE_TOOLS);
+			Mooncli.setActiveTools(PLAN_MODE_TOOLS);
 		}
 		updateStatus(ctx);
 	});

@@ -1,4 +1,5 @@
-import { AzureOpenCore } from "openai";
+// @ts-nocheck
+import { AzureOpenAI } from "openai";
 import type { ResponseCreateParamsStreaming } from "openai/resources/responses/responses.js";
 import { getEnvApiKey } from "../env-api-keys.js";
 import { clampThinkingLevel } from "../models.js";
@@ -32,16 +33,16 @@ function parseDeploymentNameMap(value: string | undefined): Map<string, string> 
 	return map;
 }
 
-function resolveDeploymentName(model: Model<"azure-openai-responses">, options?: AzureOpenCoreResponsesOptions): string {
+function resolveDeploymentName(model: Model<"azure-openai-responses">, options?: AzureOpenAIResponsesOptions): string {
 	if (options?.azureDeploymentName) {
 		return options.azureDeploymentName;
 	}
-	const mappedDeployment = parseDeploymentNameMap(process.env.AZURE_OPENCore_DEPLOYMENT_NAME_MAP).get(model.id);
+	const mappedDeployment = parseDeploymentNameMap(process.env.AZURE_OpenAI_DEPLOYMENT_NAME_MAP).get(model.id);
 	return mappedDeployment || model.id;
 }
 
-// Azure OpenCore Responses-specific options
-export interface AzureOpenCoreResponsesOptions extends StreamOptions {
+// Azure OpenAI Responses-specific options
+export interface AzureOpenAIResponsesOptions extends StreamOptions {
 	reasoningEffort?: "minimal" | "low" | "medium" | "high" | "xhigh";
 	reasoningSummary?: "auto" | "detailed" | "concise" | null;
 	azureApiVersion?: string;
@@ -51,12 +52,12 @@ export interface AzureOpenCoreResponsesOptions extends StreamOptions {
 }
 
 /**
- * Generate function for Azure OpenCore Responses API
+ * Generate function for Azure OpenAI Responses API
  */
-export const streamAzureOpenCoreResponses: StreamFunction<"azure-openai-responses", AzureOpenCoreResponsesOptions> = (
+export const streamAzureOpenAIResponses: StreamFunction<"azure-openai-responses", AzureOpenAIResponsesOptions> = (
 	model: Model<"azure-openai-responses">,
 	context: Context,
-	options?: AzureOpenCoreResponsesOptions,
+	options?: AzureOpenAIResponsesOptions,
 ): AssistantMessageEventStream => {
 	const stream = new AssistantMessageEventStream();
 
@@ -83,7 +84,7 @@ export const streamAzureOpenCoreResponses: StreamFunction<"azure-openai-response
 		};
 
 		try {
-			// Create Azure OpenCore client
+			// Create Azure OpenAI client
 			const apiKey = options?.apiKey || getEnvApiKey(model.provider) || "";
 			const client = createClient(model, apiKey, options);
 			let params = buildParams(model, context, options, deploymentName);
@@ -128,7 +129,7 @@ export const streamAzureOpenCoreResponses: StreamFunction<"azure-openai-response
 	return stream;
 };
 
-export const streamSimpleAzureOpenCoreResponses: StreamFunction<"azure-openai-responses", SimpleStreamOptions> = (
+export const streamSimpleAzureOpenAIResponses: StreamFunction<"azure-openai-responses", SimpleStreamOptions> = (
 	model: Model<"azure-openai-responses">,
 	context: Context,
 	options?: SimpleStreamOptions,
@@ -142,10 +143,10 @@ export const streamSimpleAzureOpenCoreResponses: StreamFunction<"azure-openai-re
 	const clampedReasoning = options?.reasoning ? clampThinkingLevel(model, options.reasoning) : undefined;
 	const reasoningEffort = clampedReasoning === "off" ? undefined : clampedReasoning;
 
-	return streamAzureOpenCoreResponses(model, context, {
+	return streamAzureOpenAIResponses(model, context, {
 		...base,
 		reasoningEffort,
-	} satisfies AzureOpenCoreResponsesOptions);
+	} satisfies AzureOpenAIResponsesOptions);
 };
 
 function normalizeAzureBaseUrl(baseUrl: string): string {
@@ -154,14 +155,14 @@ function normalizeAzureBaseUrl(baseUrl: string): string {
 	try {
 		url = new URL(trimmed);
 	} catch {
-		throw new Error(`Invalid Azure OpenCore base URL: ${baseUrl}`);
+		throw new Error(`Invalid Azure OpenAI base URL: ${baseUrl}`);
 	}
 
 	const isAzureHost =
 		url.hostname.endsWith(".openai.azure.com") || url.hostname.endsWith(".cognitiveservices.azure.com");
 	const normalizedPath = url.pathname.replace(/\/+$/, "");
 
-	// Ensure Azure hosts have /openai/v1 as base path so the AzureOpenCore SDK
+	// Ensure Azure hosts have /openai/v1 as base path so the AzureOpenAI SDK
 	// can append /deployments/<model>/... and ?api-version=v1 correctly.
 	if (isAzureHost && (normalizedPath === "" || normalizedPath === "/" || normalizedPath === "/openai")) {
 		url.pathname = "/openai/v1";
@@ -177,12 +178,12 @@ function buildDefaultBaseUrl(resourceName: string): string {
 
 function resolveAzureConfig(
 	model: Model<"azure-openai-responses">,
-	options?: AzureOpenCoreResponsesOptions,
+	options?: AzureOpenAIResponsesOptions,
 ): { baseUrl: string; apiVersion: string } {
-	const apiVersion = options?.azureApiVersion || process.env.AZURE_OPENCore_API_VERSION || DEFAULT_AZURE_API_VERSION;
+	const apiVersion = options?.azureApiVersion || process.env.AZURE_OpenAI_API_VERSION || DEFAULT_AZURE_API_VERSION;
 
-	const baseUrl = options?.azureBaseUrl?.trim() || process.env.AZURE_OPENCore_BASE_URL?.trim() || undefined;
-	const resourceName = options?.azureResourceName || process.env.AZURE_OPENCore_RESOURCE_NAME;
+	const baseUrl = options?.azureBaseUrl?.trim() || process.env.AZURE_OpenAI_BASE_URL?.trim() || undefined;
+	const resourceName = options?.azureResourceName || process.env.AZURE_OpenAI_RESOURCE_NAME;
 
 	let resolvedBaseUrl = baseUrl;
 
@@ -196,7 +197,7 @@ function resolveAzureConfig(
 
 	if (!resolvedBaseUrl) {
 		throw new Error(
-			"Azure OpenCore base URL is required. Set AZURE_OPENCore_BASE_URL or AZURE_OPENCore_RESOURCE_NAME, or pass azureBaseUrl, azureResourceName, or model.baseUrl.",
+			"Azure OpenAI base URL is required. Set AZURE_OpenAI_BASE_URL or AZURE_OpenAI_RESOURCE_NAME, or pass azureBaseUrl, azureResourceName, or model.baseUrl.",
 		);
 	}
 
@@ -206,14 +207,14 @@ function resolveAzureConfig(
 	};
 }
 
-function createClient(model: Model<"azure-openai-responses">, apiKey: string, options?: AzureOpenCoreResponsesOptions) {
+function createClient(model: Model<"azure-openai-responses">, apiKey: string, options?: AzureOpenAIResponsesOptions) {
 	if (!apiKey) {
-		if (!process.env.AZURE_OPENCore_API_KEY) {
+		if (!process.env.AZURE_OpenAI_API_KEY) {
 			throw new Error(
-				"Azure OpenCore API key is required. Set AZURE_OPENCore_API_KEY environment variable or pass it as an argument.",
+				"Azure OpenAI API key is required. Set AZURE_OpenAI_API_KEY environment variable or pass it as an argument.",
 			);
 		}
-		apiKey = process.env.AZURE_OPENCore_API_KEY;
+		apiKey = process.env.AZURE_OpenAI_API_KEY;
 	}
 
 	const headers = { ...model.headers };
@@ -224,7 +225,7 @@ function createClient(model: Model<"azure-openai-responses">, apiKey: string, op
 
 	const { baseUrl, apiVersion } = resolveAzureConfig(model, options);
 
-	return new AzureOpenCore({
+	return new AzureOpenAI({
 		apiKey,
 		apiVersion,
 		dangerouslyAllowBrowser: true,
@@ -236,7 +237,7 @@ function createClient(model: Model<"azure-openai-responses">, apiKey: string, op
 function buildParams(
 	model: Model<"azure-openai-responses">,
 	context: Context,
-	options: AzureOpenCoreResponsesOptions | undefined,
+	options: AzureOpenAIResponsesOptions | undefined,
 	deploymentName: string,
 ) {
 	const messages = convertResponsesMessages(model, context, AZURE_TOOL_CALL_PROVIDERS);

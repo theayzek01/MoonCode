@@ -5,7 +5,7 @@
  * with full terminal access. The TUI suspends while they run.
  *
  * Usage:
- *   moodcli -e examples/extensions/interactive-shell.ts
+ *   Mooncli -e examples/extensions/interactive-shell.ts
  *
  *   !vim file.txt        # Auto-detected as interactive
  *   !i any-command       # Force interactive mode with !i prefix
@@ -20,8 +20,8 @@
  * If the engine runs an interactive command, it will fail (which is fine).
  */
 
+import type { ExtensionAPI } from "Mooncli";
 import { spawnSync } from "node:child_process";
-import type { ExtensionAPI } from "moodcli";
 
 // Default interactive commands - editors, pagers, git ops, TUIs
 const DEFAULT_INTERACTIVE_COMMANDS = [
@@ -128,8 +128,8 @@ function isInteractiveCommand(command: string): boolean {
 	return false;
 }
 
-export default function (moodcli: ExtensionAPI) {
-	moodcli.on("user_bash", async (event, ctx) => {
+export default function (Mooncli: ExtensionAPI) {
+	Mooncli.on("user_bash", async (event, ctx) => {
 		let command = event.command;
 		let forceInteractive = false;
 

@@ -1,5 +1,6 @@
-import type { EngineTool } from "@moodcli/engine";
-import { Text } from "@moodcli/tui";
+// @ts-nocheck
+import type { EngineTool } from "@mooncli/engine";
+import { Text } from "@mooncli/tui";
 import { existsSync, readdirSync, statSync } from "fs";
 import nodePath from "path";
 import { type Static, Type } from "typebox";

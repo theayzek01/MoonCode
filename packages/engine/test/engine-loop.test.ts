@@ -5,7 +5,7 @@ import {
 	type Message,
 	type Model,
 	type UserMessage,
-} from "@moodcli/core";
+} from "@mooncli/core";
 import { Type } from "typebox";
 import { describe, expect, it } from "vitest";
 import { engineLoop, engineLoopContinue } from "../src/engine-loop.js";

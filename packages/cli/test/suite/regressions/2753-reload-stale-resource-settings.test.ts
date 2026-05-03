@@ -1,15 +1,15 @@
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { registerFauxProvider } from "@moodcli/core";
+import { registerFauxProvider } from "@mooncli/core";
 import { afterEach, describe, expect, it } from "vitest";
+import { AuthStorage } from "../../../src/core/auth-storage.js";
 import {
 	type CreateEngineSessionRuntimeFactory,
 	createEngineSessionFromServices,
 	createEngineSessionRuntime,
 	createEngineSessionServices,
 } from "../../../src/core/engine-session-runtime.js";
-import { AuthStorage } from "../../../src/core/auth-storage.js";
 import { SessionManager } from "../../../src/core/session-manager.js";
 
 describe("issue #2753 reload stale resource settings", () => {
@@ -22,7 +22,7 @@ describe("issue #2753 reload stale resource settings", () => {
 	});
 
 	it("applies updated top-level prompt settings on reload after startup", async () => {
-		const tempDir = join(tmpdir(), `moodcli-2753-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+		const tempDir = join(tmpdir(), `Mooncli-2753-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 		const engineDir = join(tempDir, "engine");
 		const promptsDir = join(engineDir, "prompts");
 		mkdirSync(promptsDir, { recursive: true });
@@ -41,8 +41,8 @@ describe("issue #2753 reload stale resource settings", () => {
 				authStorage,
 				resourceLoaderOptions: {
 					extensionFactories: [
-						(moodcli) => {
-							moodcli.registerProvider(faux.getModel().provider, {
+						(Mooncli) => {
+							Mooncli.registerProvider(faux.getModel().provider, {
 								baseUrl: faux.getModel().baseUrl,
 								apiKey: "faux-key",
 								api: faux.api,
@@ -90,7 +90,10 @@ describe("issue #2753 reload stale resource settings", () => {
 
 		expect(runtime.session.promptTemplates.map((prompt) => prompt.name)).toContain("test");
 
-		writeFileSync(join(engineDir, "settings.json"), `${JSON.stringify({ prompts: ["-prompts/test.md"] }, null, 2)}\n`);
+		writeFileSync(
+			join(engineDir, "settings.json"),
+			`${JSON.stringify({ prompts: ["-prompts/test.md"] }, null, 2)}\n`,
+		);
 
 		await runtime.session.reload();
 

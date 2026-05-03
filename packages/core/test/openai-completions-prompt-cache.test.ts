@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getModel } from "../src/models.js";
-import { streamOpenCoreCompletions } from "../src/providers/openai-completions.js";
+import { streamOpenAICompletions } from "../src/providers/openai-completions.js";
 import type { Model } from "../src/types.js";
 
-interface FakeOpenCoreClientOptions {
+interface FakeOpenAIClientOptions {
 	apiKey: string;
 	baseURL: string;
 	dangerouslyAllowBrowser: boolean;
@@ -17,11 +17,11 @@ interface CapturedCompletionsPayload {
 
 const mockState = vi.hoisted(() => ({
 	lastParams: undefined as CapturedCompletionsPayload | undefined,
-	lastClientOptions: undefined as FakeOpenCoreClientOptions | undefined,
+	lastClientOptions: undefined as FakeOpenAIClientOptions | undefined,
 }));
 
 vi.mock("openai", () => {
-	class FakeOpenCore {
+	class FakeOpenAI {
 		chat = {
 			completions: {
 				create: (params: CapturedCompletionsPayload) => {
@@ -54,12 +54,12 @@ vi.mock("openai", () => {
 			},
 		};
 
-		constructor(options: FakeOpenCoreClientOptions) {
+		constructor(options: FakeOpenAIClientOptions) {
 			mockState.lastClientOptions = options;
 		}
 	}
 
-	return { default: FakeOpenCore };
+	return { default: FakeOpenAI };
 });
 
 describe("openai-completions prompt caching", () => {
@@ -96,7 +96,7 @@ describe("openai-completions prompt caching", () => {
 		},
 		model: Model<"openai-completions"> = createModel(),
 	) {
-		await streamOpenCoreCompletions(
+		await streamOpenAICompletions(
 			model,
 			{
 				systemPrompt: "sys",
@@ -111,14 +111,14 @@ describe("openai-completions prompt caching", () => {
 		};
 	}
 
-	it("sets prompt_cache_key for direct OpenCore requests when caching is enabled", async () => {
+	it("sets prompt_cache_key for direct OpenAI requests when caching is enabled", async () => {
 		const { payload } = await captureRequest({ sessionId: "session-123" });
 
 		expect(payload?.prompt_cache_key).toBe("session-123");
 		expect(payload?.prompt_cache_retention).toBeUndefined();
 	});
 
-	it("sets prompt_cache_retention to 24h for direct OpenCore requests when cacheRetention is long", async () => {
+	it("sets prompt_cache_retention to 24h for direct OpenAI requests when cacheRetention is long", async () => {
 		const { payload } = await captureRequest({ cacheRetention: "long", sessionId: "session-456" });
 
 		expect(payload?.prompt_cache_key).toBe("session-456");
@@ -132,7 +132,7 @@ describe("openai-completions prompt caching", () => {
 		expect(payload?.prompt_cache_retention).toBeUndefined();
 	});
 
-	it("omits prompt cache fields for non-OpenCore base URLs without compatible long retention", async () => {
+	it("omits prompt cache fields for non-OpenAI base URLs without compatible long retention", async () => {
 		const model = createModel({
 			baseUrl: "https://proxy.example.com/v1",
 			compat: { supportsLongCacheRetention: false },
@@ -143,7 +143,7 @@ describe("openai-completions prompt caching", () => {
 		expect(payload?.prompt_cache_retention).toBeUndefined();
 	});
 
-	it("uses PI_CACHE_RETENTION for direct OpenCore requests", async () => {
+	it("uses PI_CACHE_RETENTION for direct OpenAI requests", async () => {
 		process.env.PI_CACHE_RETENTION = "long";
 		const { payload } = await captureRequest({ sessionId: "session-env" });
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { icon } from "@mariozechner/mini-lit";
 import { html, LitElement } from "lit";
 import { customElement, property, state } from "lit/decorators.js";

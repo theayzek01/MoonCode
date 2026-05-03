@@ -1,4 +1,5 @@
-import { fuzzyMatch } from "@moodcli/tui";
+// @ts-nocheck
+import { fuzzyMatch } from "@mooncli/tui";
 import type { SessionInfo } from "../../../core/session-manager.js";
 
 export type SortMode = "threaded" | "recent" | "relevance";

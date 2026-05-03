@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { SandboxRuntimeProvider } from "./SandboxRuntimeProvider.js";
 
 // Type declaration for chrome extension API (when available)

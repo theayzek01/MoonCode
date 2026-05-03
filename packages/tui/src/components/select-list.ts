@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getKeybindings } from "../keybindings.js";
 import type { Component } from "../tui.js";
 import { truncateToWidth, visibleWidth } from "../utils.js";

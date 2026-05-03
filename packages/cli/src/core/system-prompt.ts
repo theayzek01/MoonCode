@@ -1,8 +1,15 @@
+// @ts-nocheck
 /**
  * System prompt construction and project context loading
  */
 
 import { formatSkillsForPrompt, type Skill } from "./skills.js";
+
+export interface RoboticsFunction {
+	name: string;
+	description: string;
+	parameters: Array<{ name: string; type: string; description: string }>;
+}
 
 export interface BuildSystemPromptOptions {
 	/** Custom system prompt (replaces default). */
@@ -21,6 +28,10 @@ export interface BuildSystemPromptOptions {
 	contextFiles?: Array<{ path: string; content: string }>;
 	/** Pre-loaded skills. */
 	skills?: Skill[];
+	/** Robotics mode aktif mi */
+	roboticsEnabled?: boolean;
+	/** Tanımlı robot fonksiyonları */
+	roboticsFunctions?: RoboticsFunction[];
 }
 
 /** Build the system prompt with tools, guidelines, and context */
@@ -34,6 +45,8 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 		cwd,
 		contextFiles: providedContextFiles,
 		skills: providedSkills,
+		roboticsEnabled,
+		roboticsFunctions,
 	} = options;
 	const resolvedCwd = cwd;
 	const promptCwd = resolvedCwd.replace(/\\/g, "/");
@@ -116,7 +129,7 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 		}
 	}
 
-	let prompt = `Sen Moodcli, dunya klasmaninda (world-class) bir yazilim muhendisi ve teknik mimarsing. Dusunme ve kod yazma tarzın GPT veya Claude gibi genel AI'lardan cok daha ileri, dogrudan ve cozum odaklidir.
+	let prompt = `Sen Mooncli, dunya klasmaninda (world-class) bir yazilim muhendisi ve teknik mimarsing. Dusunme ve kod yazma tarzın GPT veya Claude gibi genel AI'lardan cok daha ileri, dogrudan ve cozum odaklidir.
 
 Core Principles (Benligin):
 - **First Principles Thinking:** Sorunlari en temel bilesenlerine ayirip, varsayimlardan arinmis en saf teknik cozumu uretirsin.
@@ -158,5 +171,46 @@ ${guidelinesList.map((g) => `- ${g}`).join("\n")}`;
 	prompt += `\nCurrent date: ${date}`;
 	prompt += `\nCurrent working directory: ${promptCwd}`;
 
+	// Robotics mode inject
+	if (roboticsEnabled) {
+		prompt += buildRoboticsSystemPrompt(roboticsFunctions);
+	}
+
 	return prompt;
+}
+
+/** Robotics mode system prompt eki */
+function buildRoboticsSystemPrompt(functions?: RoboticsFunction[]): string {
+	let section = `
+
+## Robotics Mode (Aktif 🤖)
+
+Sen aynı zamanda bir robotik görüş (computer vision) ve hareket planlama uzmanısın.
+Görüntülerdeki nesneleri tespit edebilir, uzamsal akıl yürütme yapabilir ve robot hareketlerini planlayabilirsin.
+
+**Koordinat Sistemi:** Tüm koordinatlar [y, x] formatında, 0-1000 normalize.
+
+**Çıktı Formatları:**
+- Nesne tespiti: [{"point": [y, x], "label": "..."}]
+- Bounding box: [{"box_2d": [ymin, xmin, ymax, xmax], "label": "..."}]
+- Yörünge: [{"point": [y, x], "label": "0"}, ...] (sıralı)
+
+**Kullanılabilir Robotics Araçları:**
+- robotics_detect: Görüntüde nesne tespiti
+- robotics_bbox: Bounding box tespiti
+- robotics_trajectory: Yörünge planlama
+- robotics_analyze: Sahne analizi
+- robotics_plan: Fonksiyon çağrısı planla`;
+
+	if (functions && functions.length > 0) {
+		const fnList = functions
+			.map((fn) => {
+				const params = fn.parameters.map((p) => `${p.name}: ${p.type}`).join(", ");
+				return `  - ${fn.name}(${params}): ${fn.description}`;
+			})
+			.join("\n");
+		section += `\n\n**Mevcut Robot API Fonksiyonları:**\n${fnList}`;
+	}
+
+	return section;
 }

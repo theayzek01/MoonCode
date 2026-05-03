@@ -4,8 +4,8 @@
  * Shows how to select a specific model and thinking level.
  */
 
-import { getModel } from "@moodcli/core";
-import { AuthStorage, createEngineSession, ModelRegistry } from "moodcli";
+import { AuthStorage, createEngineSession, ModelRegistry } from "Mooncli";
+import { getModel } from "@mooncli/core";
 
 // Set up auth storage and model registry
 const authStorage = AuthStorage.create();

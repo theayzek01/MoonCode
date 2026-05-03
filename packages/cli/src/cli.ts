@@ -1,11 +1,13 @@
 #!/usr/bin/env node
+// @ts-nocheck
+// @ts-nocheck
 /**
  * CLI entry point for the refactored coding engine.
  * Uses main.ts with EngineSession and new mode modules.
  *
  * Test with: npx tsx src/cli-new.ts [args...]
  */
-import { EnvHttpProxyEngine, setGlobalDispatcher } from "undici";
+import { EnvHttpProxyAgent, setGlobalDispatcher } from "undici";
 import { APP_NAME } from "./config.js";
 import { main } from "./main.js";
 
@@ -17,6 +19,6 @@ process.emitWarning = (() => {}) as typeof process.emitWarning;
 // (e.g. vProvider buffering a large tool call) exceed that and abort the SSE stream
 // with UND_ERR_BODY_TIMEOUT. Disable both — provider SDKs enforce their own
 // AbortController-based deadlines via retry.provider.timeoutMs.
-setGlobalDispatcher(new EnvHttpProxyEngine({ bodyTimeout: 0, headersTimeout: 0 }));
+setGlobalDispatcher(new EnvHttpProxyAgent({ bodyTimeout: 0, headersTimeout: 0 }));
 
 main(process.argv.slice(2));

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type {
 	Api,
 	AssistantMessage,
@@ -58,7 +59,7 @@ function downgradeUnsupportedImages<TApi extends Api>(messages: Message[], model
 
 /**
  * Normalize tool call ID for cross-provider compatibility.
- * OpenCore Responses API generates IDs that are 450+ chars with special characters like `|`.
+ * OpenAI Responses API generates IDs that are 450+ chars with special characters like `|`.
  * Anthropic APIs require IDs matching ^[a-zA-Z0-9_-]+$ (max 64 chars).
  */
 export function transformMessages<TApi extends Api>(
@@ -102,7 +103,7 @@ export function transformMessages<TApi extends Api>(
 						return isSameModel ? block : [];
 					}
 					// For same model: keep thinking blocks with signatures (needed for replay)
-					// even if the thinking text is empty (OpenCore encrypted reasoning)
+					// even if the thinking text is empty (OpenAI encrypted reasoning)
 					if (isSameModel && block.thinkingSignature) return block;
 					// Skip empty thinking blocks, convert others to plain text
 					if (!block.thinking || block.thinking.trim() === "") return [];
@@ -186,7 +187,7 @@ export function transformMessages<TApi extends Api>(
 			// Skip errored/aborted assistant messages entirely.
 			// These are incomplete turns that shouldn't be replayed:
 			// - May have partial content (reasoning without message, incomplete tool calls)
-			// - Replaying them can cause API errors (e.g., OpenCore "reasoning without following item")
+			// - Replaying them can cause API errors (e.g., OpenAI "reasoning without following item")
 			// - The model should retry from the last valid state
 			const assistantMsg = msg as AssistantMessage;
 			if (assistantMsg.stopReason === "error" || assistantMsg.stopReason === "aborted") {

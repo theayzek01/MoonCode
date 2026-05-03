@@ -1,7 +1,7 @@
-import { complete, getModel } from "@moodcli/core";
-import { Container, Markdown, matchesKey, Text } from "@moodcli/tui";
-import type { ExtensionAPI, ExtensionCommandContext } from "moodcli";
-import { DynamicBorder, getMarkdownTheme } from "moodcli";
+import type { ExtensionAPI, ExtensionCommandContext } from "Mooncli";
+import { DynamicBorder, getMarkdownTheme } from "Mooncli";
+import { complete, getModel } from "@mooncli/core";
+import { Container, Markdown, matchesKey, Text } from "@mooncli/tui";
 
 type ContentBlock = {
 	type?: string;
@@ -142,8 +142,8 @@ const showSummaryUi = async (summary: string, ctx: ExtensionCommandContext) => {
 	});
 };
 
-export default function (moodcli: ExtensionAPI) {
-	moodcli.registerCommand("summarize", {
+export default function (Mooncli: ExtensionAPI) {
+	Mooncli.registerCommand("summarize", {
 		description: "Summarize the current conversation in a custom UI",
 		handler: async (_args, ctx) => {
 			const branch = ctx.sessionManager.getBranch();

@@ -1,4 +1,4 @@
-import { type AssistantMessage, type AssistantMessageEvent, EventStream, getModel } from "@moodcli/core";
+import { type AssistantMessage, type AssistantMessageEvent, EventStream, getModel } from "@mooncli/core";
 import { describe, expect, it } from "vitest";
 import { Engine } from "../src/index.js";
 
@@ -64,7 +64,7 @@ describe("Engine", () => {
 	});
 
 	it("should create an engine instance with custom initial state", () => {
-		const customModel = getModel("openai", "gpt-4o-mini");
+		const customModel = getModel("openai", "gpt-4o-mini")!;
 		const engine = new Engine({
 			initialState: {
 				systemPrompt: "You are a helpful assistant.",
@@ -219,7 +219,7 @@ describe("Engine", () => {
 		expect(engine.state.systemPrompt).toBe("Custom prompt");
 
 		// Test setModel
-		const newModel = getModel("google", "gemini-2.5-flash");
+		const newModel = getModel("google", "gemini-2.5-flash")!;
 		engine.state.model = newModel;
 		expect(engine.state.model).toBe(newModel);
 

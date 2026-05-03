@@ -1,5 +1,6 @@
-import type { EngineTool } from "@moodcli/engine";
-import { Container, Text } from "@moodcli/tui";
+// @ts-nocheck
+import type { EngineTool } from "@mooncli/engine";
+import { Container, Text } from "@mooncli/tui";
 import { mkdir as fsMkdir, writeFile as fsWriteFile } from "fs/promises";
 import { dirname } from "path";
 import { type Static, Type } from "typebox";

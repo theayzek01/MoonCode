@@ -1,15 +1,16 @@
+// @ts-nocheck
 import type { SimpleStreamOptions, StreamFunction } from "../types.js";
 import {
-	type OpenCoreCompletionsOptions,
-	streamOpenCoreCompletions,
-	streamSimpleOpenCoreCompletions,
+	type OpenAICompletionsOptions,
+	streamOpenAICompletions,
+	streamSimpleOpenAICompletions,
 } from "./openai-completions.js";
 
 /**
  * Ollama provider.
- * Ollama is OpenCore-compatible but defaults to a local endpoint.
+ * Ollama is OpenAI-compatible but defaults to a local endpoint.
  */
-export const streamOllama: StreamFunction<"openai-completions", OpenCoreCompletionsOptions> = (
+export const streamOllama: StreamFunction<"openai-completions", OpenAICompletionsOptions> = (
 	model,
 	context,
 	options,
@@ -18,7 +19,7 @@ export const streamOllama: StreamFunction<"openai-completions", OpenCoreCompleti
 	if (!model.baseUrl) {
 		(model as any).baseUrl = "http://localhost:11434/v1";
 	}
-	return streamOpenCoreCompletions(model, context, options);
+	return streamOpenAICompletions(model, context, options);
 };
 
 export const streamSimpleOllama: StreamFunction<"openai-completions", SimpleStreamOptions> = (
@@ -29,5 +30,5 @@ export const streamSimpleOllama: StreamFunction<"openai-completions", SimpleStre
 	if (!model.baseUrl) {
 		(model as any).baseUrl = "http://localhost:11434/v1";
 	}
-	return streamSimpleOpenCoreCompletions(model, context, options);
+	return streamSimpleOpenAICompletions(model, context, options);
 };

@@ -20,7 +20,7 @@ describe("getThemeExportColors", () => {
 	let previousEngineDir: string | undefined;
 
 	beforeEach(() => {
-		tempRoot = mkdtempSync(join(tmpdir(), "moodcli-theme-export-"));
+		tempRoot = mkdtempSync(join(tmpdir(), "Mooncli-theme-export-"));
 		previousEngineDir = process.env.PI_CODING_AGENT_DIR;
 		process.env.PI_CODING_AGENT_DIR = join(tempRoot, "engine");
 		mkdirSync(join(process.env.PI_CODING_AGENT_DIR, "themes"), { recursive: true });

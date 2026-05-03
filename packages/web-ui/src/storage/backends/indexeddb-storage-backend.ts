@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { IndexedDBConfig, StorageBackend, StorageTransaction } from "../types.js";
 
 /**

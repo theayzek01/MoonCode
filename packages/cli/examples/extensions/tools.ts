@@ -5,39 +5,39 @@
  * Tool selection persists across session reloads and respects branch navigation.
  *
  * Usage:
- * 1. Copy this file to ~/.moodcli/engine/extensions/ or your project's .moodcli/extensions/
+ * 1. Copy this file to ~/.Mooncli/engine/extensions/ or your project's .Mooncli/extensions/
  * 2. Use /tools to open the tool selector
  */
 
-import { Container, type SettingItem, SettingsList } from "@moodcli/tui";
-import type { ExtensionAPI, ExtensionContext, ToolInfo } from "moodcli";
-import { getSettingsListTheme } from "moodcli";
+import type { ExtensionAPI, ExtensionContext, ToolInfo } from "Mooncli";
+import { getSettingsListTheme } from "Mooncli";
+import { Container, type SettingItem, SettingsList } from "@mooncli/tui";
 
 // State persisted to session
 interface ToolsState {
 	enabledTools: string[];
 }
 
-export default function toolsExtension(moodcli: ExtensionAPI) {
+export default function toolsExtension(Mooncli: ExtensionAPI) {
 	// Track enabled tools
 	let enabledTools: Set<string> = new Set();
 	let allTools: ToolInfo[] = [];
 
 	// Persist current state
 	function persistState() {
-		moodcli.appendEntry<ToolsState>("tools-config", {
+		Mooncli.appendEntry<ToolsState>("tools-config", {
 			enabledTools: Array.from(enabledTools),
 		});
 	}
 
 	// Apply current tool selection
 	function applyTools() {
-		moodcli.setActiveTools(Array.from(enabledTools));
+		Mooncli.setActiveTools(Array.from(enabledTools));
 	}
 
 	// Find the last tools-config entry in the current branch
 	function restoreFromBranch(ctx: ExtensionContext) {
-		allTools = moodcli.getAllTools();
+		allTools = Mooncli.getAllTools();
 
 		// Get entries in current branch only
 		const branchEntries = ctx.sessionManager.getBranch();
@@ -59,16 +59,16 @@ export default function toolsExtension(moodcli: ExtensionAPI) {
 			applyTools();
 		} else {
 			// No saved state - sync with currently active tools
-			enabledTools = new Set(moodcli.getActiveTools());
+			enabledTools = new Set(Mooncli.getActiveTools());
 		}
 	}
 
 	// Register /tools command
-	moodcli.registerCommand("tools", {
+	Mooncli.registerCommand("tools", {
 		description: "Enable/disable tools",
 		handler: async (_args, ctx) => {
 			// Refresh tool list
-			allTools = moodcli.getAllTools();
+			allTools = Mooncli.getAllTools();
 
 			await ctx.ui.custom((tui, theme, _kb, done) => {
 				// Build settings items for each tool
@@ -130,12 +130,12 @@ export default function toolsExtension(moodcli: ExtensionAPI) {
 	});
 
 	// Restore state on session start
-	moodcli.on("session_start", async (_event, ctx) => {
+	Mooncli.on("session_start", async (_event, ctx) => {
 		restoreFromBranch(ctx);
 	});
 
 	// Restore state when navigating the session tree
-	moodcli.on("session_tree", async (_event, ctx) => {
+	Mooncli.on("session_tree", async (_event, ctx) => {
 		restoreFromBranch(ctx);
 	});
 }

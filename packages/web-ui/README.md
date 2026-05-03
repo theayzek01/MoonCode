@@ -1,3 +1,3 @@
-# @moodcli/web-ui
+# @mooncli/web-ui
 
-Modern web UI components for Moodcli.
+Modern web UI components for Mooncli.

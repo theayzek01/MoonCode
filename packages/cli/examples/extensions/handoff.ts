@@ -12,10 +12,10 @@
  * The generated prompt appears as a draft in the editor for review/editing.
  */
 
-import type { EngineMessage } from "@moodcli/engine";
-import { complete, type Message } from "@moodcli/core";
-import type { ExtensionAPI, SessionEntry } from "moodcli";
-import { BorderedLoader, convertToLlm, serializeConversation } from "moodcli";
+import type { ExtensionAPI, SessionEntry } from "Mooncli";
+import { BorderedLoader, convertToLlm, serializeConversation } from "Mooncli";
+import { complete, type Message } from "@mooncli/core";
+import type { EngineMessage } from "@mooncli/engine";
 
 const SYSTEM_PROMPT = `You are a context transfer assistant. Given a conversation history and the user's goal for a new thread, generate a focused prompt that:
 
@@ -77,8 +77,8 @@ function getHandoffMessages(branch: SessionEntry[]): EngineMessage[] {
 	return compactedBranch.map(entryToMessage).filter((message) => message !== undefined);
 }
 
-export default function (moodcli: ExtensionAPI) {
-	moodcli.registerCommand("handoff", {
+export default function (Mooncli: ExtensionAPI) {
+	Mooncli.registerCommand("handoff", {
 		description: "Transfer context to a new focused session",
 		handler: async (args, ctx) => {
 			if (!ctx.hasUI) {

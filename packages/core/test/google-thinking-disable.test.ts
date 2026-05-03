@@ -144,7 +144,7 @@ describe("Google Vertex thinking disable E2E", () => {
 	});
 });
 
-describe.skipIf(!process.env.OPENCore_API_KEY)("OpenCore thinking disable E2E", () => {
+describe.skipIf(!process.env.OpenAI_API_KEY)("OpenAI thinking disable E2E", () => {
 	it("disables thinking for Responses reasoning models", { retry: 2, timeout: 30000 }, async () => {
 		await expectThinkingDisabledE2E(getModel("openai", "gpt-5.4-mini"), {
 			requestOptions: { temperature: undefined },

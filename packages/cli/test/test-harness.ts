@@ -10,8 +10,6 @@
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { EngineTool } from "@moodcli/engine";
-import { Engine } from "@moodcli/engine";
 import type {
 	AssistantMessage,
 	AssistantMessageEvent,
@@ -24,10 +22,12 @@ import type {
 	ThinkingContent,
 	ToolCall,
 	Usage,
-} from "@moodcli/core";
-import { createAssistantMessageEventStream } from "@moodcli/core";
-import { EngineSession, type EngineSessionEvent } from "../src/core/engine-session.js";
+} from "@mooncli/core";
+import { createAssistantMessageEventStream } from "@mooncli/core";
+import type { EngineTool } from "@mooncli/engine";
+import { Engine } from "@mooncli/engine";
 import { AuthStorage } from "../src/core/auth-storage.js";
+import { EngineSession, type EngineSessionEvent } from "../src/core/engine-session.js";
 import { ModelRegistry } from "../src/core/model-registry.js";
 import { SessionManager } from "../src/core/session-manager.js";
 import type { Settings } from "../src/core/settings-manager.js";
@@ -356,7 +356,7 @@ export interface Harness {
 }
 
 function createTempDir(): string {
-	const tempDir = join(tmpdir(), `moodcli-harness-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+	const tempDir = join(tmpdir(), `Mooncli-harness-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 	mkdirSync(tempDir, { recursive: true });
 	return tempDir;
 }

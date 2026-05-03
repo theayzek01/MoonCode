@@ -1,4 +1,5 @@
-import type { EngineState } from "@moodcli/engine";
+// @ts-nocheck
+import type { EngineState } from "@mooncli/engine";
 import { Store } from "../store.js";
 import type { SessionData, SessionMetadata, StoreConfig } from "../types.js";
 

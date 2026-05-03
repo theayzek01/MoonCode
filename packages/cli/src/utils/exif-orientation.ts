@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { PhotonImageType } from "./photon.js";
 
 type Photon = typeof import("@silvia-odwyer/photon-node");

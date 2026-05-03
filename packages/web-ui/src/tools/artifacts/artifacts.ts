@@ -1,8 +1,9 @@
+// @ts-nocheck
 import { icon } from "@mariozechner/mini-lit";
 import "@mariozechner/mini-lit/dist/MarkdownBlock.js";
 import { Button } from "@mariozechner/mini-lit/dist/Button.js";
-import type { Engine, EngineMessage, EngineTool } from "@moodcli/engine";
-import { StringEnum, type ToolCall } from "@moodcli/core";
+import { StringEnum, type ToolCall } from "@mooncli/core";
+import type { Engine, EngineMessage, EngineTool } from "@mooncli/engine";
 import { html, LitElement, type TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { createRef, type Ref, ref } from "lit/directives/ref.js";

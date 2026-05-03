@@ -5,8 +5,8 @@
  * without paying for an extra follow-up Provider turn.
  */
 
-import { Text } from "@moodcli/tui";
-import { defineTool, type ExtensionAPI } from "moodcli";
+import { defineTool, type ExtensionAPI } from "Mooncli";
+import { Text } from "@mooncli/tui";
 import { Type } from "typebox";
 
 interface StructuredOutputDetails {
@@ -60,6 +60,6 @@ const structuredOutputTool = defineTool({
 	},
 });
 
-export default function (moodcli: ExtensionAPI) {
-	moodcli.registerTool(structuredOutputTool);
+export default function (Mooncli: ExtensionAPI) {
+	Mooncli.registerTool(structuredOutputTool);
 }

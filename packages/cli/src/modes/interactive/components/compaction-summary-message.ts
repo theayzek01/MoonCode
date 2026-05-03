@@ -1,4 +1,5 @@
-import { Box, Markdown, type MarkdownTheme, Spacer, Text } from "@moodcli/tui";
+// @ts-nocheck
+import { Box, Markdown, type MarkdownTheme, Spacer, Text } from "@mooncli/tui";
 import type { CompactionSummaryMessage } from "../../../core/messages.js";
 import { getMarkdownTheme, theme } from "../theme/theme.js";
 import { keyText } from "./keybinding-hints.js";

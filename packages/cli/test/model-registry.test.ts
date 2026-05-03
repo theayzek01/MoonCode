@@ -1,9 +1,9 @@
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { AnthropicMessagesCompat, Api, Context, Model, OpenCoreCompletionsCompat } from "@moodcli/core";
-import { getApiProvider } from "@moodcli/core";
-import { getOAuthProvider } from "@moodcli/core/oauth";
+import type { AnthropicMessagesCompat, Api, Context, Model, OpenAICompletionsCompat } from "@mooncli/core";
+import { getApiProvider } from "@mooncli/core";
+import { getOAuthProvider } from "@mooncli/core/oauth";
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { AuthStorage } from "../src/core/auth-storage.js";
 import { clearApiKeyCache, ModelRegistry, type ProviderConfigInput } from "../src/core/model-registry.js";
@@ -14,7 +14,7 @@ describe("ModelRegistry", () => {
 	let authStorage: AuthStorage;
 
 	beforeEach(() => {
-		tempDir = join(tmpdir(), `moodcli-test-model-registry-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+		tempDir = join(tmpdir(), `Mooncli-test-model-registry-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 		mkdirSync(tempDir, { recursive: true });
 		modelsJsonPath = join(tempDir, "models.json");
 		authStorage = AuthStorage.create(join(tempDir, "auth.json"));
@@ -73,7 +73,7 @@ describe("ModelRegistry", () => {
 
 	const openAiModel: Model<Api> = {
 		id: "test-openai-model",
-		name: "Test OpenCore Model",
+		name: "Test OpenAI Model",
 		api: "openai-completions",
 		provider: "openai",
 		baseUrl: "https://api.openai.com/v1",
@@ -335,7 +335,7 @@ describe("ModelRegistry", () => {
 			});
 
 			const registry = ModelRegistry.create(authStorage, modelsJsonPath);
-			const compat = registry.find("demo", "demo-model")?.compat as OpenCoreCompletionsCompat | undefined;
+			const compat = registry.find("demo", "demo-model")?.compat as OpenAICompletionsCompat | undefined;
 
 			expect(compat?.supportsUsageInStreaming).toBe(false);
 			expect(compat?.maxTokensField).toBe("max_tokens");
@@ -369,7 +369,7 @@ describe("ModelRegistry", () => {
 			});
 
 			const registry = ModelRegistry.create(authStorage, modelsJsonPath);
-			const compat = registry.find("demo", "demo-model")?.compat as OpenCoreCompletionsCompat | undefined;
+			const compat = registry.find("demo", "demo-model")?.compat as OpenAICompletionsCompat | undefined;
 
 			expect(compat?.supportsUsageInStreaming).toBe(true);
 			expect(compat?.maxTokensField).toBe("max_completion_tokens");
@@ -390,7 +390,7 @@ describe("ModelRegistry", () => {
 
 			expect(models.length).toBeGreaterThan(0);
 			for (const model of models) {
-				const compat = model.compat as OpenCoreCompletionsCompat | undefined;
+				const compat = model.compat as OpenAICompletionsCompat | undefined;
 				expect(compat?.supportsUsageInStreaming).toBe(false);
 				expect(compat?.supportsStrictMode).toBe(false);
 			}
@@ -425,7 +425,7 @@ describe("ModelRegistry", () => {
 
 			const registry = ModelRegistry.create(authStorage, modelsJsonPath);
 			const model = registry.find("demo", "demo-model");
-			const compat = model?.compat as OpenCoreCompletionsCompat | undefined;
+			const compat = model?.compat as OpenAICompletionsCompat | undefined;
 
 			expect(registry.getError()).toBeUndefined();
 			expect(model?.thinkingLevelMap).toEqual({ minimal: null, high: "max" });
@@ -638,7 +638,7 @@ describe("ModelRegistry", () => {
 			const models = getModelsForProvider(registry, "openrouter");
 
 			const sonnet = models.find((m) => m.id === "anthropic/claude-sonnet-4");
-			const compat = sonnet?.compat as OpenCoreCompletionsCompat | undefined;
+			const compat = sonnet?.compat as OpenAICompletionsCompat | undefined;
 			expect(compat?.openRouterRouting).toEqual({ only: ["amazon-bedrock"] });
 		});
 
@@ -660,7 +660,7 @@ describe("ModelRegistry", () => {
 			const sonnet = models.find((m) => m.id === "anthropic/claude-sonnet-4");
 
 			// Should have both the new routing AND preserve other compat settings
-			const compat = sonnet?.compat as OpenCoreCompletionsCompat | undefined;
+			const compat = sonnet?.compat as OpenAICompletionsCompat | undefined;
 			expect(compat?.openRouterRouting).toEqual({ order: ["anthropic", "together"] });
 		});
 
@@ -684,8 +684,8 @@ describe("ModelRegistry", () => {
 			const sonnet = models.find((m) => m.id === "anthropic/claude-sonnet-4");
 			const opus = models.find((m) => m.id === "anthropic/claude-opus-4");
 
-			const sonnetCompat = sonnet?.compat as OpenCoreCompletionsCompat | undefined;
-			const opusCompat = opus?.compat as OpenCoreCompletionsCompat | undefined;
+			const sonnetCompat = sonnet?.compat as OpenAICompletionsCompat | undefined;
+			const opusCompat = opus?.compat as OpenAICompletionsCompat | undefined;
 			expect(sonnetCompat?.openRouterRouting).toEqual({ only: ["amazon-bedrock"] });
 			expect(opusCompat?.openRouterRouting).toEqual({ only: ["anthropic"] });
 		});
@@ -845,7 +845,7 @@ describe("ModelRegistry", () => {
 		test("getProviderDisplayName resolves registered, OAuth, built-in, and fallback names", () => {
 			const registry = ModelRegistry.create(authStorage, modelsJsonPath);
 
-			expect(registry.getProviderDisplayName("openai")).toBe("OpenCore");
+			expect(registry.getProviderDisplayName("openai")).toBe("OpenAI");
 			expect(registry.getProviderDisplayName("github-copilot")).toBe("GitHub Copilot");
 			expect(registry.getProviderDisplayName("unknown-provider")).toBe("unknown-provider");
 

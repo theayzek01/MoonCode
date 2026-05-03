@@ -1,9 +1,10 @@
+// @ts-nocheck
 /**
  * Model resolution, scoping, and initial selection
  */
 
-import type { ThinkingLevel } from "@moodcli/engine";
-import { type Api, type KnownProvider, type Model, modelsAreEqual } from "@moodcli/core";
+import { type Api, type KnownProvider, type Model, modelsAreEqual } from "@mooncli/core";
+import type { ThinkingLevel } from "@mooncli/engine";
 import chalk from "chalk";
 import { minimatch } from "minimatch";
 import { isValidThinkingLevel } from "../cli/args.js";

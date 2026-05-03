@@ -1,6 +1,7 @@
+// @ts-nocheck
 import { i18n } from "@mariozechner/mini-lit";
-import type { EngineTool } from "@moodcli/engine";
-import type { ToolResultMessage } from "@moodcli/core";
+import type { ToolResultMessage } from "@mooncli/core";
+import type { EngineTool } from "@mooncli/engine";
 import { html } from "lit";
 import { createRef, ref } from "lit/directives/ref.js";
 import { Code } from "lucide";

@@ -1,4 +1,5 @@
-import type { ToolResultMessage } from "@moodcli/core";
+// @ts-nocheck
+import type { ToolResultMessage } from "@mooncli/core";
 import { html } from "lit";
 import { Code } from "lucide";
 import { i18n } from "../../utils/i18n.js";

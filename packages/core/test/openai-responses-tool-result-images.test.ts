@@ -6,7 +6,7 @@ import { Type } from "typebox";
 import { describe, expect, it } from "vitest";
 import type { Api, Context, Model, StreamOptions, Tool, ToolResultMessage } from "../src/index.js";
 import { complete, getModel } from "../src/index.js";
-import { hasAzureOpenCoreCredentials, resolveAzureDeploymentName } from "./azure-utils.js";
+import { hasAzureOpenAICredentials, resolveAzureDeploymentName } from "./azure-utils.js";
 import { resolveApiKey } from "./oauth.js";
 
 type StreamOptionsWithExtras = StreamOptions & Record<string, unknown>;
@@ -150,7 +150,7 @@ async function verifyToolResultImagesStayInFunctionCallOutput<TApi extends Api>(
 }
 
 describe("Responses API tool result images", () => {
-	describe.skipIf(!process.env.OPENCore_API_KEY)("OpenCore Responses Provider (gpt-5-mini)", () => {
+	describe.skipIf(!process.env.OpenAI_API_KEY)("OpenAI Responses Provider (gpt-5-mini)", () => {
 		const model = getModel("openai", "gpt-5-mini");
 
 		it("should send tool result images in function_call_output", { retry: 3, timeout: 30000 }, async () => {
@@ -158,7 +158,7 @@ describe("Responses API tool result images", () => {
 		});
 	});
 
-	describe.skipIf(!hasAzureOpenCoreCredentials())("Azure OpenCore Responses Provider (gpt-4o-mini)", () => {
+	describe.skipIf(!hasAzureOpenAICredentials())("Azure OpenAI Responses Provider (gpt-4o-mini)", () => {
 		const model = getModel("azure-openai-responses", "gpt-4o-mini");
 		const azureDeploymentName = resolveAzureDeploymentName(model.id);
 		const azureOptions = azureDeploymentName ? { azureDeploymentName } : {};
@@ -183,7 +183,7 @@ describe("Responses API tool result images", () => {
 		);
 	});
 
-	describe("OpenCore Codex Responses Provider (gpt-5.2-codex)", () => {
+	describe("OpenAI Codex Responses Provider (gpt-5.2-codex)", () => {
 		const model = getModel("openai-codex", "gpt-5.2-codex");
 
 		it.skipIf(!openaiCodexToken)(

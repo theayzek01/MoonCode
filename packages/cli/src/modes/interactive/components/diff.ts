@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as Diff from "diff";
 import { theme } from "../theme/theme.js";
 

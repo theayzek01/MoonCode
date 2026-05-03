@@ -6,7 +6,7 @@ import { fileURLToPath } from "url";
 import {
 	CLOUDFLARE_Core_GATEWAY_ANTHROPIC_BASE_URL,
 	CLOUDFLARE_Core_GATEWAY_COMPAT_BASE_URL,
-	CLOUDFLARE_Core_GATEWAY_OPENCore_BASE_URL,
+	CLOUDFLARE_Core_GATEWAY_OpenAI_BASE_URL,
 	CLOUDFLARE_WORKERS_Core_BASE_URL,
 } from "../src/providers/cloudflare.js";
 import {
@@ -14,7 +14,7 @@ import {
 	type AnthropicMessagesCompat,
 	KnownProvider,
 	Model,
-	type OpenCoreCompletionsCompat,
+	type OpenAICompletionsCompat,
 } from "../src/types.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -380,7 +380,7 @@ async function loadModelsDevData(): Promise<Model<any>[]> {
 			}
 		}
 
-		// Process OpenCore models
+		// Process OpenAI models
 		if (data.openai?.models) {
 			for (const [modelId, model] of Object.entries(data.openai.models)) {
 				const m = model as ModelsDevModel;
@@ -501,7 +501,7 @@ async function loadModelsDevData(): Promise<Model<any>[]> {
 				let id: string;
 				if (upstream === "openai") {
 					api = "openai-responses";
-					baseUrl = CLOUDFLARE_Core_GATEWAY_OPENCore_BASE_URL;
+					baseUrl = CLOUDFLARE_Core_GATEWAY_OpenAI_BASE_URL;
 					id = nativeId;
 				} else if (upstream === "anthropic") {
 					api = "anthropic-messages";
@@ -702,7 +702,7 @@ async function loadModelsDevData(): Promise<Model<any>[]> {
 				const npm = m.provider?.npm;
 				let api: Api;
 				let baseUrl: string;
-				let compat: OpenCoreCompletionsCompat | undefined;
+				let compat: OpenAICompletionsCompat | undefined;
 
 				if (npm === "@ai-sdk/openai") {
 					api = "openai-responses";
@@ -728,7 +728,7 @@ async function loadModelsDevData(): Promise<Model<any>[]> {
 				// OpenCode Go endpoint behaviour. models.dev reports these models
 				// as @ai-sdk/anthropic, but the OpenCode Go endpoints either don't
 				// accept Anthropic SDK auth (MiniMax M2.7) or are served through
-				// the OpenCore-compatible /v1/chat/completions path (Qwen 3.5/3.6).
+				// the OpenAI-compatible /v1/chat/completions path (Qwen 3.5/3.6).
 				// Switch them to openai-completions so requests use Bearer auth
 				// and the standard /v1/chat/completions endpoint.
 				if (variant.provider === "opencode-go") {
@@ -894,7 +894,7 @@ async function loadModelsDevData(): Promise<Model<any>[]> {
 			{ key: "moonshotai", provider: "moonshotai", baseUrl: "https://api.moonshot.ai/v1" },
 			{ key: "moonshotai-cn", provider: "moonshotai-cn", baseUrl: "https://api.moonshot.cn/v1" },
 		] as const;
-		const moonshotCompat: OpenCoreCompletionsCompat = {
+		const moonshotCompat: OpenAICompletionsCompat = {
 			supportsStore: false,
 			supportsDeveloperRole: false,
 			supportsReasoningEffort: false,
@@ -978,9 +978,9 @@ async function loadModelsDevData(): Promise<Model<any>[]> {
 
 async function generateModels() {
 	// Fetch models from both sources
-	// models.dev: Anthropic, Google, OpenCore, Groq, Cerebras
-	// OpenRouter: xCore and other providers (excluding Anthropic, Google, OpenCore)
-	// Core Gateway: OpenCore-compatible catalog with tool-capable models
+	// models.dev: Anthropic, Google, OpenAI, Groq, Cerebras
+	// OpenRouter: xCore and other providers (excluding Anthropic, Google, OpenAI)
+	// Core Gateway: OpenAI-compatible catalog with tool-capable models
 	const modelsDevModels = await loadModelsDevData();
 	const openRouterModels = await fetchOpenRouterModels();
 	const aiGatewayModels = await fetchAiGatewayModels();
@@ -1269,7 +1269,7 @@ async function generateModels() {
 		});
 	}
 
-	const deepseekCompat: OpenCoreCompletionsCompat = {
+	const deepseekCompat: OpenAICompletionsCompat = {
 		requiresReasoningContentOnAssistantMessages: true,
 		thinkingFormat: "deepseek",
 	};
@@ -1351,7 +1351,7 @@ async function generateModels() {
 		}
 	}
 
-	// OpenCore Codex (ChatGPT OAuth) models
+	// OpenAI Codex (ChatGPT OAuth) models
 	// NOTE: These are not fetched from models.dev; we keep a small, explicit list to avoid aliases.
 	// Context window is based on observed server limits (400s above ~272k), not marketing numbers.
 	const CODEX_BASE_URL = "https://chatgpt.com/backend-api";

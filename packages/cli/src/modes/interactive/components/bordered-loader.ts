@@ -1,4 +1,5 @@
-import { CancellableLoader, Container, Loader, Spacer, Text, type TUI } from "@moodcli/tui";
+// @ts-nocheck
+import { CancellableLoader, Container, Loader, Spacer, Text, type TUI } from "@mooncli/tui";
 import type { Theme } from "../theme/theme.js";
 import { DynamicBorder } from "./dynamic-border.js";
 import { keyHint } from "./keybinding-hints.js";

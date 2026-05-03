@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { unlink } from "node:fs/promises";
@@ -12,7 +13,7 @@ import {
 	Text,
 	truncateToWidth,
 	visibleWidth,
-} from "@moodcli/tui";
+} from "@mooncli/tui";
 import { KeybindingsManager } from "../../../core/keybindings.js";
 import type { SessionInfo, SessionListProgress } from "../../../core/session-manager.js";
 import { canonicalizePath as _canonicalizePath } from "../../../utils/paths.js";

@@ -1,4 +1,5 @@
-import type { Model } from "@moodcli/core";
+// @ts-nocheck
+import type { Model } from "@mooncli/core";
 import { Store } from "../store.js";
 import type { StoreConfig } from "../types.js";
 

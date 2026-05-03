@@ -1,7 +1,7 @@
 /**
  * Subengine Tool - Delegate tasks to specialized engines
  *
- * Spawns a separate `moodcli` process for each subengine invocation,
+ * Spawns a separate `Mooncli` process for each subengine invocation,
  * giving it an isolated context window.
  *
  * Supports three modes:
@@ -12,17 +12,17 @@
  * Uses JSON mode to capture structured output from subengines.
  */
 
+import { type ExtensionAPI, getMarkdownTheme, withFileMutationQueue } from "Mooncli";
 import { spawn } from "node:child_process";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { EngineToolResult } from "@moodcli/engine";
-import type { Message } from "@moodcli/core";
-import { StringEnum } from "@moodcli/core";
-import { Container, Markdown, Spacer, Text } from "@moodcli/tui";
-import { type ExtensionAPI, getMarkdownTheme, withFileMutationQueue } from "moodcli";
+import type { Message } from "@mooncli/core";
+import { StringEnum } from "@mooncli/core";
+import type { EngineToolResult } from "@mooncli/engine";
+import { Container, Markdown, Spacer, Text } from "@mooncli/tui";
 import { Type } from "typebox";
-import { type EngineConfig, type EngineScope, discoverEngines } from "./engines.js";
+import { discoverEngines, type EngineConfig, type EngineScope } from "./engines.js";
 
 const MAX_PARALLEL_TASKS = 8;
 const MAX_CONCURRENCY = 4;
@@ -208,7 +208,7 @@ async function mapWithConcurrencyLimit<TIn, TOut>(
 }
 
 async function writePromptToTempFile(engineName: string, prompt: string): Promise<{ dir: string; filePath: string }> {
-	const tmpDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "moodcli-subengine-"));
+	const tmpDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "Mooncli-subengine-"));
 	const safeName = engineName.replace(/[^\w.-]+/g, "_");
 	const filePath = path.join(tmpDir, `prompt-${safeName}.md`);
 	await withFileMutationQueue(filePath, async () => {
@@ -230,7 +230,7 @@ function getPiInvocation(args: string[]): { command: string; args: string[] } {
 		return { command: process.execPath, args };
 	}
 
-	return { command: "moodcli", args };
+	return { command: "Mooncli", args };
 }
 
 type OnUpdateCallback = (partial: EngineToolResult<SubengineDetails>) => void;
@@ -428,15 +428,15 @@ const SubengineParams = Type.Object({
 	cwd: Type.Optional(Type.String({ description: "Working directory for the engine process (single mode)" })),
 });
 
-export default function (moodcli: ExtensionAPI) {
-	moodcli.registerTool({
+export default function (Mooncli: ExtensionAPI) {
+	Mooncli.registerTool({
 		name: "subengine",
 		label: "Subengine",
 		description: [
 			"Delegate tasks to specialized subengines with isolated context.",
 			"Modes: single (engine + task), parallel (tasks array), chain (sequential with {previous} placeholder).",
-			'Default engine scope is "user" (from ~/.moodcli/engine/engines).',
-			'To enable project-local engines in .moodcli/engines, set engineScope: "both" (or "project").',
+			'Default engine scope is "user" (from ~/.Mooncli/engine/engines).',
+			'To enable project-local engines in .Mooncli/engines, set engineScope: "both" (or "project").',
 		].join(" "),
 		parameters: SubengineParams,
 

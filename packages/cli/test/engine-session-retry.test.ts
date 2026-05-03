@@ -1,12 +1,12 @@
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { Engine, type EngineEvent, type EngineTool } from "@moodcli/engine";
-import { type AssistantMessage, type AssistantMessageEvent, EventStream, getModel } from "@moodcli/core";
+import { type AssistantMessage, type AssistantMessageEvent, EventStream, getModel } from "@mooncli/core";
+import { Engine, type EngineEvent, type EngineTool } from "@mooncli/engine";
 import { Type } from "typebox";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { EngineSession } from "../src/core/engine-session.js";
 import { AuthStorage } from "../src/core/auth-storage.js";
+import { EngineSession } from "../src/core/engine-session.js";
 import { ModelRegistry } from "../src/core/model-registry.js";
 import { SessionManager } from "../src/core/session-manager.js";
 import { SettingsManager } from "../src/core/settings-manager.js";
@@ -55,7 +55,7 @@ describe("EngineSession retry", () => {
 	let tempDir: string;
 
 	beforeEach(() => {
-		tempDir = join(tmpdir(), `moodcli-retry-test-${Date.now()}`);
+		tempDir = join(tmpdir(), `Mooncli-retry-test-${Date.now()}`);
 		mkdirSync(tempDir, { recursive: true });
 	});
 

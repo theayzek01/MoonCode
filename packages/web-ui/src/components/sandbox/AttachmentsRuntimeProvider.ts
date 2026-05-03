@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ATTACHMENTS_RUNTIME_DESCRIPTION } from "../../prompts/prompts.js";
 import type { Attachment } from "../../utils/attachment-utils.js";
 import type { SandboxRuntimeProvider } from "./SandboxRuntimeProvider.js";

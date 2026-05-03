@@ -1,6 +1,6 @@
 # Examples
 
-Example code for moodcli-cli SDK and extensions.
+Example code for Mooncli-cli SDK and extensions.
 
 ## Directories
 

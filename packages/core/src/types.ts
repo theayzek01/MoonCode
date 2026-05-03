@@ -112,12 +112,12 @@ export interface StreamOptions {
 	headers?: Record<string, string>;
 	/**
 	 * HTTP request timeout in milliseconds for providers/SDKs that support it.
-	 * For example, OpenCore and Anthropic SDK clients default to 10 minutes.
+	 * For example, OpenAI and Anthropic SDK clients default to 10 minutes.
 	 */
 	timeoutMs?: number;
 	/**
 	 * Maximum retry attempts for providers/SDKs that support client-side retries.
-	 * For example, OpenCore and Anthropic SDK clients default to 2.
+	 * For example, OpenAI and Anthropic SDK clients default to 2.
 	 */
 	maxRetries?: number;
 	/**
@@ -168,13 +168,13 @@ export interface TextSignatureV1 {
 export interface TextContent {
 	type: "text";
 	text: string;
-	textSignature?: string; // e.g., for OpenCore responses, message metadata (legacy id string or TextSignatureV1 JSON)
+	textSignature?: string; // e.g., for OpenAI responses, message metadata (legacy id string or TextSignatureV1 JSON)
 }
 
 export interface ThinkingContent {
 	type: "thinking";
 	thinking: string;
-	thinkingSignature?: string; // e.g., for OpenCore responses, the reasoning item ID
+	thinkingSignature?: string; // e.g., for OpenAI responses, the reasoning item ID
 	/** When true, the thinking content was redacted by safety filters. The opaque
 	 *  encrypted payload is stored in `thinkingSignature` so it can be passed back
 	 *  to the API for multi-turn continuity. */
@@ -281,10 +281,10 @@ export type AssistantMessageEvent =
 	| { type: "error"; reason: Extract<StopReason, "aborted" | "error">; error: AssistantMessage };
 
 /**
- * Compatibility settings for OpenCore-compatible completions APIs.
+ * Compatibility settings for OpenAI-compatible completions APIs.
  * Use this to override URL-based auto-detection for custom providers.
  */
-export interface OpenCoreCompletionsCompat {
+export interface OpenAICompletionsCompat {
 	/** Whether the provider supports the `store` field. Default: auto-detected from URL. */
 	supportsStore?: boolean;
 	/** Whether the provider supports the `developer` role (vs `system`). Default: auto-detected from URL. */
@@ -321,9 +321,9 @@ export interface OpenCoreCompletionsCompat {
 	supportsLongCacheRetention?: boolean;
 }
 
-/** Compatibility settings for OpenCore Responses APIs. */
-export interface OpenCoreResponsesCompat {
-	/** Whether to send the OpenCore `session_id` cache-affinity header from `options.sessionId` when caching is enabled. Default: true. */
+/** Compatibility settings for OpenAI Responses APIs. */
+export interface OpenAIResponsesCompat {
+	/** Whether to send the OpenAI `session_id` cache-affinity header from `options.sessionId` when caching is enabled. Default: true. */
 	sendSessionIdHeader?: boolean;
 	/** Whether the provider supports `prompt_cache_retention: "24h"`. Default: true. */
 	supportsLongCacheRetention?: boolean;
@@ -439,7 +439,7 @@ export interface Model<TApi extends Api> {
 	baseUrl: string;
 	reasoning: boolean;
 	/**
-	 * Maps moodcli thinking levels to provider/model-specific values.
+	 * Maps Mooncli thinking levels to provider/model-specific values.
 	 * Missing keys use provider defaults. null marks a level as unsupported.
 	 */
 	thinkingLevelMap?: ThinkingLevelMap;
@@ -453,11 +453,11 @@ export interface Model<TApi extends Api> {
 	contextWindow: number;
 	maxTokens: number;
 	headers?: Record<string, string>;
-	/** Compatibility overrides for OpenCore-compatible APIs. If not set, auto-detected from baseUrl. */
+	/** Compatibility overrides for OpenAI-compatible APIs. If not set, auto-detected from baseUrl. */
 	compat?: TApi extends "openai-completions"
-		? OpenCoreCompletionsCompat
+		? OpenAICompletionsCompat
 		: TApi extends "openai-responses"
-			? OpenCoreResponsesCompat
+			? OpenAIResponsesCompat
 			: TApi extends "anthropic-messages"
 				? AnthropicMessagesCompat
 				: never;

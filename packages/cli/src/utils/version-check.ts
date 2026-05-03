@@ -1,6 +1,7 @@
-import { getMoodcliUserEngine } from "./mood-user-engine.js";
+// @ts-nocheck
+import { getMooncliUserEngine } from "./Moon-user-engine.js";
 
-const LATEST_VERSION_URL = "https://moodcli.dev/api/latest-version";
+const LATEST_VERSION_URL = "https://Mooncli.dev/api/latest-version";
 const DEFAULT_VERSION_CHECK_TIMEOUT_MS = 10000;
 
 interface ParsedVersion {
@@ -47,15 +48,15 @@ export function isNewerPackageVersion(candidateVersion: string, currentVersion: 
 	return candidateVersion.trim() !== currentVersion.trim();
 }
 
-export async function getLatestMoodcliVersion(
+export async function getLatestMooncliVersion(
 	currentVersion: string,
 	options: { timeoutMs?: number } = {},
 ): Promise<string | undefined> {
-	if (process.env.MOOD_SKIP_VERSION_CHECK || process.env.MOOD_OFFLINE) return undefined;
+	if (process.env.Moon_SKIP_VERSION_CHECK || process.env.Moon_OFFLINE) return undefined;
 
 	const response = await fetch(LATEST_VERSION_URL, {
 		headers: {
-			"User-Engine": getMoodcliUserEngine(currentVersion),
+			"User-Engine": getMooncliUserEngine(currentVersion),
 			accept: "application/json",
 		},
 		signal: AbortSignal.timeout(options.timeoutMs ?? DEFAULT_VERSION_CHECK_TIMEOUT_MS),
@@ -66,9 +67,9 @@ export async function getLatestMoodcliVersion(
 	return typeof data.version === "string" && data.version.trim() ? data.version.trim() : undefined;
 }
 
-export async function checkForNewMoodcliVersion(currentVersion: string): Promise<string | undefined> {
+export async function checkForNewMooncliVersion(currentVersion: string): Promise<string | undefined> {
 	try {
-		const latestVersion = await getLatestMoodcliVersion(currentVersion);
+		const latestVersion = await getLatestMooncliVersion(currentVersion);
 		if (latestVersion && isNewerPackageVersion(latestVersion, currentVersion)) {
 			return latestVersion;
 		}

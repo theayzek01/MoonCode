@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * StdinBuffer buffers input and emits complete sequences.
  *

@@ -2,8 +2,8 @@
  * Hello Tool - Minimal custom tool example
  */
 
-import { Type } from "@moodcli/core";
-import { defineTool, type ExtensionAPI } from "moodcli";
+import { defineTool, type ExtensionAPI } from "Mooncli";
+import { Type } from "@mooncli/core";
 
 const helloTool = defineTool({
 	name: "hello",
@@ -21,6 +21,6 @@ const helloTool = defineTool({
 	},
 });
 
-export default function (moodcli: ExtensionAPI) {
-	moodcli.registerTool(helloTool);
+export default function (Mooncli: ExtensionAPI) {
+	Mooncli.registerTool(helloTool);
 }

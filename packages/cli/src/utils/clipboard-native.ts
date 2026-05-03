@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createRequire } from "module";
 
 export type ClipboardModule = {

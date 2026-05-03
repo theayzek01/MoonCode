@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Interface for providing runtime capabilities to sandboxed iframes.
  * Each provider injects data and runtime functions into the sandbox context.

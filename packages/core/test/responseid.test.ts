@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { getModel } from "../src/models.js";
 import { complete } from "../src/stream.js";
 import type { Api, Context, Model, StreamOptions } from "../src/types.js";
-import { hasAzureOpenCoreCredentials, resolveAzureDeploymentName } from "./azure-utils.js";
+import { hasAzureOpenAICredentials, resolveAzureDeploymentName } from "./azure-utils.js";
 import { resolveApiKey } from "./oauth.js";
 
 type StreamOptionsWithExtras = StreamOptions & Record<string, unknown>;
@@ -49,7 +49,7 @@ describe("responseId E2E Tests", () => {
 		});
 	});
 
-	describe.skipIf(!process.env.OPENCore_API_KEY)("OpenCore Completions Provider", () => {
+	describe.skipIf(!process.env.OpenAI_API_KEY)("OpenAI Completions Provider", () => {
 		const { compat: _compat, ...baseModel } = getModel("openai", "gpt-4o-mini");
 		void _compat;
 		const llm: Model<"openai-completions"> = {
@@ -62,7 +62,7 @@ describe("responseId E2E Tests", () => {
 		});
 	});
 
-	describe.skipIf(!process.env.OPENCore_API_KEY)("OpenCore Responses Provider", () => {
+	describe.skipIf(!process.env.OpenAI_API_KEY)("OpenAI Responses Provider", () => {
 		const llm = getModel("openai", "gpt-5-mini");
 
 		it("should expose responseId", { retry: 3, timeout: 30000 }, async () => {
@@ -78,7 +78,7 @@ describe("responseId E2E Tests", () => {
 		});
 	});
 
-	describe.skipIf(!hasAzureOpenCoreCredentials())("Azure OpenCore Responses Provider", () => {
+	describe.skipIf(!hasAzureOpenAICredentials())("Azure OpenAI Responses Provider", () => {
 		const llm = getModel("azure-openai-responses", "gpt-4o-mini");
 		const azureDeploymentName = resolveAzureDeploymentName(llm.id);
 		const azureOptions = azureDeploymentName ? { azureDeploymentName } : {};
@@ -97,7 +97,7 @@ describe("responseId E2E Tests", () => {
 	});
 
 	describe("GitHub Copilot Provider", () => {
-		it.skipIf(!githubCopilotToken)("OpenCore path should expose responseId", { retry: 3, timeout: 30000 }, async () => {
+		it.skipIf(!githubCopilotToken)("OpenAI path should expose responseId", { retry: 3, timeout: 30000 }, async () => {
 			const llm = getModel("github-copilot", "gpt-5.3-codex");
 			await expectResponseId(llm, { apiKey: githubCopilotToken });
 		});
@@ -112,7 +112,7 @@ describe("responseId E2E Tests", () => {
 		);
 	});
 
-	describe("OpenCore Codex Provider", () => {
+	describe("OpenAI Codex Provider", () => {
 		it.skipIf(!openaiCodexToken)("should expose responseId", { retry: 3, timeout: 30000 }, async () => {
 			const llm = getModel("openai-codex", "gpt-5.2-codex");
 			await expectResponseId(llm, { apiKey: openaiCodexToken });

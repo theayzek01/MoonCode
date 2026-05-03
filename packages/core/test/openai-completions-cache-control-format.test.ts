@@ -1,7 +1,7 @@
 import { Type } from "typebox";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getModel } from "../src/models.js";
-import { streamOpenCoreCompletions } from "../src/providers/openai-completions.js";
+import { streamOpenAICompletions } from "../src/providers/openai-completions.js";
 import type { Model } from "../src/types.js";
 
 interface CacheControl {
@@ -33,7 +33,7 @@ const mockState = vi.hoisted(() => ({
 }));
 
 vi.mock("openai", () => {
-	class FakeOpenCore {
+	class FakeOpenAI {
 		chat = {
 			completions: {
 				create: (params: CapturedParams) => {
@@ -68,7 +68,7 @@ vi.mock("openai", () => {
 		};
 	}
 
-	return { default: FakeOpenCore };
+	return { default: FakeOpenAI };
 });
 
 async function capturePayload(
@@ -77,7 +77,7 @@ async function capturePayload(
 ): Promise<CapturedParams> {
 	const timestamp = Date.now();
 
-	await streamOpenCoreCompletions(
+	await streamOpenAICompletions(
 		model,
 		{
 			systemPrompt: "System prompt",

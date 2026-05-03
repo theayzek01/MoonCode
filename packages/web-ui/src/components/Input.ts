@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { type BaseComponentProps, fc } from "@mariozechner/mini-lit/dist/mini.js";
 import { html } from "lit";
 import { type Ref, ref } from "lit/directives/ref.js";

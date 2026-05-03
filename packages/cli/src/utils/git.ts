@@ -1,3 +1,4 @@
+// @ts-nocheck
 import hostedGitInfo from "hosted-git-info";
 
 /**

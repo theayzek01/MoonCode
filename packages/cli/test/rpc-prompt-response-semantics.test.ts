@@ -1,12 +1,12 @@
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { Engine } from "@moodcli/engine";
-import { type AssistantMessage, type AssistantMessageEvent, EventStream, getModel, type Model } from "@moodcli/core";
+import { type AssistantMessage, type AssistantMessageEvent, EventStream, getModel, type Model } from "@mooncli/core";
+import { Engine } from "@mooncli/engine";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { AuthStorage } from "../src/core/auth-storage.js";
 import { EngineSession } from "../src/core/engine-session.js";
 import type { EngineSessionRuntime } from "../src/core/engine-session-runtime.js";
-import { AuthStorage } from "../src/core/auth-storage.js";
 import { ModelRegistry } from "../src/core/model-registry.js";
 import { SessionManager } from "../src/core/session-manager.js";
 import { SettingsManager } from "../src/core/settings-manager.js";
@@ -91,7 +91,7 @@ function createRuntimeHost(options: { withAuth: boolean; responseDelayMs: number
 	runtimeHost: EngineSessionRuntime;
 	cleanup: () => Promise<void>;
 } {
-	const tempDir = join(tmpdir(), `moodcli-rpc-prompt-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+	const tempDir = join(tmpdir(), `Mooncli-rpc-prompt-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 	mkdirSync(tempDir, { recursive: true });
 
 	const model = options.model ?? getModel("anthropic", "claude-sonnet-4-5");

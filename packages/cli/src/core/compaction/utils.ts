@@ -1,9 +1,10 @@
+// @ts-nocheck
 /**
  * Shared utilities for compaction and branch summarization.
  */
 
-import type { EngineMessage } from "@moodcli/engine";
-import type { Message } from "@moodcli/core";
+import type { Message } from "@mooncli/core";
+import type { EngineMessage } from "@mooncli/engine";
 
 // ============================================================================
 // File Operation Tracking

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getModel } from "../src/models.js";
-import { streamAzureOpenCoreResponses } from "../src/providers/azure-openai-responses.js";
+import { streamAzureOpenAIResponses } from "../src/providers/azure-openai-responses.js";
 import type { Context } from "../src/types.js";
 
 interface CapturedAzureClientOptions {
@@ -16,7 +16,7 @@ const azureMock = vi.hoisted(() => ({
 }));
 
 vi.mock("openai", () => {
-	class AzureOpenCore {
+	class AzureOpenAI {
 		responses = {
 			create: () => {
 				throw new Error("mock create");
@@ -28,56 +28,56 @@ vi.mock("openai", () => {
 		}
 	}
 
-	return { AzureOpenCore };
+	return { AzureOpenAI };
 });
 
 const context: Context = {
 	messages: [{ role: "user", content: "hello", timestamp: Date.now() }],
 };
 
-const originalAzureOpenCoreBaseUrl = process.env.AZURE_OPENCore_BASE_URL;
-const originalAzureOpenCoreResourceName = process.env.AZURE_OPENCore_RESOURCE_NAME;
-const originalAzureOpenCoreApiVersion = process.env.AZURE_OPENCore_API_VERSION;
-const originalAzureOpenCoreApiKey = process.env.AZURE_OPENCore_API_KEY;
+const originalAzureOpenAIBaseUrl = process.env.AZURE_OpenAI_BASE_URL;
+const originalAzureOpenAIResourceName = process.env.AZURE_OpenAI_RESOURCE_NAME;
+const originalAzureOpenAIApiVersion = process.env.AZURE_OpenAI_API_VERSION;
+const originalAzureOpenAIApiKey = process.env.AZURE_OpenAI_API_KEY;
 
 beforeEach(() => {
 	azureMock.constructorCalls.length = 0;
-	delete process.env.AZURE_OPENCore_BASE_URL;
-	delete process.env.AZURE_OPENCore_RESOURCE_NAME;
-	delete process.env.AZURE_OPENCore_API_VERSION;
-	delete process.env.AZURE_OPENCore_API_KEY;
+	delete process.env.AZURE_OpenAI_BASE_URL;
+	delete process.env.AZURE_OpenAI_RESOURCE_NAME;
+	delete process.env.AZURE_OpenAI_API_VERSION;
+	delete process.env.AZURE_OpenAI_API_KEY;
 });
 
 afterEach(() => {
-	if (originalAzureOpenCoreBaseUrl === undefined) {
-		delete process.env.AZURE_OPENCore_BASE_URL;
+	if (originalAzureOpenAIBaseUrl === undefined) {
+		delete process.env.AZURE_OpenAI_BASE_URL;
 	} else {
-		process.env.AZURE_OPENCore_BASE_URL = originalAzureOpenCoreBaseUrl;
+		process.env.AZURE_OpenAI_BASE_URL = originalAzureOpenAIBaseUrl;
 	}
 
-	if (originalAzureOpenCoreResourceName === undefined) {
-		delete process.env.AZURE_OPENCore_RESOURCE_NAME;
+	if (originalAzureOpenAIResourceName === undefined) {
+		delete process.env.AZURE_OpenAI_RESOURCE_NAME;
 	} else {
-		process.env.AZURE_OPENCore_RESOURCE_NAME = originalAzureOpenCoreResourceName;
+		process.env.AZURE_OpenAI_RESOURCE_NAME = originalAzureOpenAIResourceName;
 	}
 
-	if (originalAzureOpenCoreApiVersion === undefined) {
-		delete process.env.AZURE_OPENCore_API_VERSION;
+	if (originalAzureOpenAIApiVersion === undefined) {
+		delete process.env.AZURE_OpenAI_API_VERSION;
 	} else {
-		process.env.AZURE_OPENCore_API_VERSION = originalAzureOpenCoreApiVersion;
+		process.env.AZURE_OpenAI_API_VERSION = originalAzureOpenAIApiVersion;
 	}
 
-	if (originalAzureOpenCoreApiKey === undefined) {
-		delete process.env.AZURE_OPENCore_API_KEY;
+	if (originalAzureOpenAIApiKey === undefined) {
+		delete process.env.AZURE_OpenAI_API_KEY;
 	} else {
-		process.env.AZURE_OPENCore_API_KEY = originalAzureOpenCoreApiKey;
+		process.env.AZURE_OpenAI_API_KEY = originalAzureOpenAIApiKey;
 	}
 });
 
 async function captureClientBaseUrl(baseUrl: string): Promise<string> {
-	process.env.AZURE_OPENCore_BASE_URL = baseUrl;
+	process.env.AZURE_OpenAI_BASE_URL = baseUrl;
 	const model = getModel("azure-openai-responses", "gpt-4o-mini");
-	await streamAzureOpenCoreResponses(model, context, { apiKey: "test-api-key" }).result();
+	await streamAzureOpenAIResponses(model, context, { apiKey: "test-api-key" }).result();
 	expect(azureMock.constructorCalls).toHaveLength(1);
 	return azureMock.constructorCalls[0].baseURL;
 }
@@ -88,7 +88,7 @@ describe("azure-openai-responses base URL normalization", () => {
 		expect(baseURL).toBe("https://marc-quicktests-resource.cognitiveservices.azure.com/openai/v1");
 	});
 
-	it("normalizes Azure OpenCore root endpoints to /openai/v1", async () => {
+	it("normalizes Azure OpenAI root endpoints to /openai/v1", async () => {
 		const baseURL = await captureClientBaseUrl("https://my-resource.openai.azure.com");
 		expect(baseURL).toBe("https://my-resource.openai.azure.com/openai/v1");
 	});
@@ -119,17 +119,17 @@ describe("azure-openai-responses base URL normalization", () => {
 	});
 
 	it("throws on invalid URLs", async () => {
-		process.env.AZURE_OPENCore_BASE_URL = "not-a-url";
+		process.env.AZURE_OpenAI_BASE_URL = "not-a-url";
 		const model = getModel("azure-openai-responses", "gpt-4o-mini");
-		const result = await streamAzureOpenCoreResponses(model, context, { apiKey: "test-api-key" }).result();
+		const result = await streamAzureOpenAIResponses(model, context, { apiKey: "test-api-key" }).result();
 		expect(result.stopReason).toBe("error");
-		expect(result.errorMessage).toContain("Invalid Azure OpenCore base URL");
+		expect(result.errorMessage).toContain("Invalid Azure OpenAI base URL");
 	});
 
-	it("builds correct default URL from AZURE_OPENCore_RESOURCE_NAME", async () => {
-		process.env.AZURE_OPENCore_RESOURCE_NAME = "my-resource";
+	it("builds correct default URL from AZURE_OpenAI_RESOURCE_NAME", async () => {
+		process.env.AZURE_OpenAI_RESOURCE_NAME = "my-resource";
 		const model = getModel("azure-openai-responses", "gpt-4o-mini");
-		await streamAzureOpenCoreResponses(model, context, { apiKey: "test-api-key" }).result();
+		await streamAzureOpenAIResponses(model, context, { apiKey: "test-api-key" }).result();
 		expect(azureMock.constructorCalls).toHaveLength(1);
 		expect(azureMock.constructorCalls[0].baseURL).toBe("https://my-resource.openai.azure.com/openai/v1");
 	});

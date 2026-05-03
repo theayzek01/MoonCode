@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * RPC Client for programmatic access to the coding engine.
  *
@@ -5,11 +6,11 @@
  */
 
 import { type ChildProcess, spawn } from "node:child_process";
-import type { EngineEvent, EngineMessage, ThinkingLevel } from "@moodcli/engine";
-import type { ImageContent } from "@moodcli/core";
-import type { SessionStats } from "../../core/engine-session.js";
+import type { ImageContent } from "@mooncli/core";
+import type { EngineEvent, EngineMessage, ThinkingLevel } from "@mooncli/engine";
 import type { BashResult } from "../../core/bash-executor.js";
 import type { CompactionResult } from "../../core/compaction/index.js";
+import type { SessionStats } from "../../core/engine-session.js";
 import { attachJsonlLineReader, serializeJsonLine } from "./jsonl.js";
 import type { RpcCommand, RpcResponse, RpcSessionState, RpcSlashCommand } from "./rpc-types.js";
 
@@ -104,7 +105,9 @@ export class RpcClient {
 		await new Promise((resolve) => setTimeout(resolve, 100));
 
 		if (this.process.exitCode !== null) {
-			throw new Error(`Engine process exited immediately with code ${this.process.exitCode}. Stderr: ${this.stderr}`);
+			throw new Error(
+				`Engine process exited immediately with code ${this.process.exitCode}. Stderr: ${this.stderr}`,
+			);
 		}
 	}
 

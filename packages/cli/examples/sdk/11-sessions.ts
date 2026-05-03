@@ -4,7 +4,7 @@
  * Control session persistence: in-memory, new file, continue, or open specific.
  */
 
-import { createEngineSession, SessionManager } from "moodcli";
+import { createEngineSession, SessionManager } from "Mooncli";
 
 // In-memory (no persistence)
 const { session: inMemory } = await createEngineSession({

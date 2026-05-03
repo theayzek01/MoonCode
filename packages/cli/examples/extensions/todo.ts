@@ -10,9 +10,9 @@
  * correct for that point in history.
  */
 
-import { StringEnum } from "@moodcli/core";
-import { matchesKey, Text, truncateToWidth } from "@moodcli/tui";
-import type { ExtensionAPI, ExtensionContext, Theme } from "moodcli";
+import type { ExtensionAPI, ExtensionContext, Theme } from "Mooncli";
+import { StringEnum } from "@mooncli/core";
+import { matchesKey, Text, truncateToWidth } from "@mooncli/tui";
 import { Type } from "typebox";
 
 interface Todo {
@@ -102,7 +102,7 @@ class TodoListComponent {
 	}
 }
 
-export default function (moodcli: ExtensionAPI) {
+export default function (Mooncli: ExtensionAPI) {
 	// In-memory state (reconstructed from session on load)
 	let todos: Todo[] = [];
 	let nextId = 1;
@@ -129,11 +129,11 @@ export default function (moodcli: ExtensionAPI) {
 	};
 
 	// Reconstruct state on session events
-	moodcli.on("session_start", async (_event, ctx) => reconstructState(ctx));
-	moodcli.on("session_tree", async (_event, ctx) => reconstructState(ctx));
+	Mooncli.on("session_start", async (_event, ctx) => reconstructState(ctx));
+	Mooncli.on("session_tree", async (_event, ctx) => reconstructState(ctx));
 
 	// Register the todo tool for the Provider
-	moodcli.registerTool({
+	Mooncli.registerTool({
 		name: "todo",
 		label: "Todo",
 		description: "Manage a todo list. Actions: list, add (text), toggle (id), clear",
@@ -281,7 +281,7 @@ export default function (moodcli: ExtensionAPI) {
 	});
 
 	// Register the /todos command for users
-	moodcli.registerCommand("todos", {
+	Mooncli.registerCommand("todos", {
 		description: "Show all todos on the current branch",
 		handler: async (_args, ctx) => {
 			if (!ctx.hasUI) {

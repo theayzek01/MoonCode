@@ -1,5 +1,5 @@
 {
-	"name": "moodcli-extension-sandbox",
+	"name": "mooncli-extension-sandbox",
 	"private": true,
 	"version": "1.2.1",
 	"type": "module",
@@ -8,7 +8,7 @@
 		"build": "echo 'nothing to build'",
 		"check": "echo 'nothing to check'"
 	},
-	"moodcli": {
+	"mooncli": {
 		"extensions": [
 			"./index.ts"
 		]

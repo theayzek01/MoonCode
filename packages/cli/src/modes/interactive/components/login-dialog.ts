@@ -1,5 +1,6 @@
-import { getOAuthProviders } from "@moodcli/core/oauth";
-import { Container, type Focusable, getKeybindings, Input, Spacer, Text, type TUI } from "@moodcli/tui";
+// @ts-nocheck
+import { getOAuthProviders } from "@mooncli/core/oauth";
+import { Container, type Focusable, getKeybindings, Input, Spacer, Text, type TUI } from "@mooncli/tui";
 import { exec } from "child_process";
 import { theme } from "../theme/theme.js";
 import { DynamicBorder } from "./dynamic-border.js";

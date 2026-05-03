@@ -1,19 +1,19 @@
 /**
  * Commands Extension
  *
- * Demonstrates the moodcli.getCommands() API by providing a /commands command
+ * Demonstrates the Mooncli.getCommands() API by providing a /commands command
  * that lists all available slash commands in the current session.
  *
  * Usage:
- * 1. Copy this file to ~/.moodcli/engine/extensions/ or your project's .moodcli/extensions/
+ * 1. Copy this file to ~/.Mooncli/engine/extensions/ or your project's .Mooncli/extensions/
  * 2. Use /commands to see available commands
  * 3. Use /commands extensions to filter by source
  */
 
-import type { ExtensionAPI, SlashCommandInfo } from "moodcli";
+import type { ExtensionAPI, SlashCommandInfo } from "Mooncli";
 
-export default function commandsExtension(moodcli: ExtensionAPI) {
-	moodcli.registerCommand("commands", {
+export default function commandsExtension(Mooncli: ExtensionAPI) {
+	Mooncli.registerCommand("commands", {
 		description: "List available slash commands",
 		getArgumentCompletions: (prefix) => {
 			const sources = ["extension", "prompt", "skill"];
@@ -21,7 +21,7 @@ export default function commandsExtension(moodcli: ExtensionAPI) {
 			return filtered.length > 0 ? filtered.map((s) => ({ value: s, label: s })) : null;
 		},
 		handler: async (args, ctx) => {
-			const commands = moodcli.getCommands();
+			const commands = Mooncli.getCommands();
 			const sourceFilter = args.trim() as "extension" | "prompt" | "skill" | "";
 
 			// Filter by source if specified

@@ -21,7 +21,7 @@ const mockState = vi.hoisted(() => ({
 }));
 
 vi.mock("openai", () => {
-	class FakeOpenCore {
+	class FakeOpenAI {
 		chat = {
 			completions: {
 				create: (params: unknown) => {
@@ -60,7 +60,7 @@ vi.mock("openai", () => {
 		};
 	}
 
-	return { default: FakeOpenCore };
+	return { default: FakeOpenAI };
 });
 
 describe("openai-completions tool_choice", () => {

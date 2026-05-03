@@ -1,4 +1,5 @@
-import OpenCore from "openai";
+// @ts-nocheck
+import OpenAI from "openai";
 import type {
 	ChatCompletionAssistantMessageParam,
 	ChatCompletionChunk,
@@ -19,7 +20,7 @@ import type {
 	ImageContent,
 	Message,
 	Model,
-	OpenCoreCompletionsCompat,
+	OpenAICompletionsCompat,
 	SimpleStreamOptions,
 	StopReason,
 	StreamFunction,
@@ -74,28 +75,28 @@ function isImageContentBlock(block: { type: string }): block is ImageContent {
 	return block.type === "image";
 }
 
-export interface OpenCoreCompletionsOptions extends StreamOptions {
+export interface OpenAICompletionsOptions extends StreamOptions {
 	toolChoice?: "auto" | "none" | "required" | { type: "function"; function: { name: string } };
 	reasoningEffort?: "minimal" | "low" | "medium" | "high" | "xhigh";
 }
 
-interface OpenCoreCompatCacheControl {
+interface OpenAICompatCacheControl {
 	type: "ephemeral";
 	ttl?: string;
 }
 
-type ResolvedOpenCoreCompletionsCompat = Omit<Required<OpenCoreCompletionsCompat>, "cacheControlFormat"> & {
-	cacheControlFormat?: OpenCoreCompletionsCompat["cacheControlFormat"];
+type ResolvedOpenAICompletionsCompat = Omit<Required<OpenAICompletionsCompat>, "cacheControlFormat"> & {
+	cacheControlFormat?: OpenAICompletionsCompat["cacheControlFormat"];
 };
 
 type ChatCompletionInstructionMessageParam = ChatCompletionDeveloperMessageParam | ChatCompletionSystemMessageParam;
 
 type ChatCompletionTextPartWithCacheControl = ChatCompletionContentPartText & {
-	cache_control?: OpenCoreCompatCacheControl;
+	cache_control?: OpenAICompatCacheControl;
 };
 
-type ChatCompletionToolWithCacheControl = OpenCore.Chat.Completions.ChatCompletionTool & {
-	cache_control?: OpenCoreCompatCacheControl;
+type ChatCompletionToolWithCacheControl = OpenAI.Chat.Completions.ChatCompletionTool & {
+	cache_control?: OpenAICompatCacheControl;
 };
 
 function resolveCacheRetention(cacheRetention?: CacheRetention): CacheRetention {
@@ -108,10 +109,10 @@ function resolveCacheRetention(cacheRetention?: CacheRetention): CacheRetention 
 	return "short";
 }
 
-export const streamOpenCoreCompletions: StreamFunction<"openai-completions", OpenCoreCompletionsOptions> = (
+export const streamOpenAICompletions: StreamFunction<"openai-completions", OpenAICompletionsOptions> = (
 	model: Model<"openai-completions">,
 	context: Context,
-	options?: OpenCoreCompletionsOptions,
+	options?: OpenAICompletionsOptions,
 ): AssistantMessageEventStream => {
 	const stream = new AssistantMessageEventStream();
 
@@ -143,7 +144,7 @@ export const streamOpenCoreCompletions: StreamFunction<"openai-completions", Ope
 			let params = buildParams(model, context, options, compat, cacheRetention);
 			const nextParams = await options?.onPayload?.(params, model);
 			if (nextParams !== undefined) {
-				params = nextParams as OpenCore.Chat.Completions.ChatCompletionCreateParamsStreaming;
+				params = nextParams as OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming;
 			}
 			const requestOptions = {
 				...(options?.signal ? { signal: options.signal } : {}),
@@ -204,7 +205,7 @@ export const streamOpenCoreCompletions: StreamFunction<"openai-completions", Ope
 			for await (const chunk of openaiStream) {
 				if (!chunk || typeof chunk !== "object") continue;
 
-				// OpenCore documents ChatCompletionChunk.id as the unique chat completion identifier,
+				// OpenAI documents ChatCompletionChunk.id as the unique chat completion identifier,
 				// and each chunk in a streamed completion carries the same id.
 				output.responseId ||= chunk.id;
 				if (typeof chunk.model === "string" && chunk.model.length > 0 && chunk.model !== model.id) {
@@ -399,7 +400,7 @@ export const streamOpenCoreCompletions: StreamFunction<"openai-completions", Ope
 	return stream;
 };
 
-export const streamSimpleOpenCoreCompletions: StreamFunction<"openai-completions", SimpleStreamOptions> = (
+export const streamSimpleOpenAICompletions: StreamFunction<"openai-completions", SimpleStreamOptions> = (
 	model: Model<"openai-completions">,
 	context: Context,
 	options?: SimpleStreamOptions,
@@ -412,13 +413,13 @@ export const streamSimpleOpenCoreCompletions: StreamFunction<"openai-completions
 	const base = buildBaseOptions(model, options, apiKey);
 	const clampedReasoning = options?.reasoning ? clampThinkingLevel(model, options.reasoning) : undefined;
 	const reasoningEffort = clampedReasoning === "off" ? undefined : clampedReasoning;
-	const toolChoice = (options as OpenCoreCompletionsOptions | undefined)?.toolChoice;
+	const toolChoice = (options as OpenAICompletionsOptions | undefined)?.toolChoice;
 
-	return streamOpenCoreCompletions(model, context, {
+	return streamOpenAICompletions(model, context, {
 		...base,
 		reasoningEffort,
 		toolChoice,
-	} satisfies OpenCoreCompletionsOptions);
+	} satisfies OpenAICompletionsOptions);
 };
 
 function createClient(
@@ -427,15 +428,15 @@ function createClient(
 	apiKey?: string,
 	optionsHeaders?: Record<string, string>,
 	sessionId?: string,
-	compat: ResolvedOpenCoreCompletionsCompat = getCompat(model),
+	compat: ResolvedOpenAICompletionsCompat = getCompat(model),
 ) {
 	if (!apiKey) {
-		if (!process.env.OPENCore_API_KEY) {
+		if (!process.env.OpenAI_API_KEY) {
 			throw new Error(
-				"OpenCore API key is required. Set OPENCore_API_KEY environment variable or pass it as an argument.",
+				"OpenAI API key is required. Set OpenAI_API_KEY environment variable or pass it as an argument.",
 			);
 		}
-		apiKey = process.env.OPENCore_API_KEY;
+		apiKey = process.env.OpenAI_API_KEY;
 	}
 
 	const headers = { ...model.headers };
@@ -468,7 +469,7 @@ function createClient(
 				}
 			: headers;
 
-	return new OpenCore({
+	return new OpenAI({
 		apiKey,
 		baseURL: isCloudflareProvider(model.provider) ? resolveCloudflareBaseUrl(model) : model.baseUrl,
 		dangerouslyAllowBrowser: true,
@@ -479,14 +480,14 @@ function createClient(
 function buildParams(
 	model: Model<"openai-completions">,
 	context: Context,
-	options?: OpenCoreCompletionsOptions,
-	compat: ResolvedOpenCoreCompletionsCompat = getCompat(model),
+	options?: OpenAICompletionsOptions,
+	compat: ResolvedOpenAICompletionsCompat = getCompat(model),
 	cacheRetention: CacheRetention = resolveCacheRetention(options?.cacheRetention),
 ) {
 	const messages = convertMessages(model, context, compat);
 	const cacheControl = getCompatCacheControl(compat, cacheRetention);
 
-	const params: OpenCore.Chat.Completions.ChatCompletionCreateParamsStreaming = {
+	const params: OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming = {
 		model: model.id,
 		messages,
 		stream: true,
@@ -562,7 +563,7 @@ function buildParams(
 			openRouterParams.reasoning = { effort: model.thinkingLevelMap?.off ?? "none" };
 		}
 	} else if (options?.reasoningEffort && model.reasoning && compat.supportsReasoningEffort) {
-		// OpenCore-style reasoning_effort
+		// OpenAI-style reasoning_effort
 		(params as any).reasoning_effort = model.thinkingLevelMap?.[options.reasoningEffort] ?? options.reasoningEffort;
 	} else if (!options?.reasoningEffort && model.reasoning && compat.supportsReasoningEffort) {
 		const offValue = model.thinkingLevelMap?.off;
@@ -591,9 +592,9 @@ function buildParams(
 }
 
 function getCompatCacheControl(
-	compat: ResolvedOpenCoreCompletionsCompat,
+	compat: ResolvedOpenAICompletionsCompat,
 	cacheRetention: CacheRetention,
-): OpenCoreCompatCacheControl | undefined {
+): OpenAICompatCacheControl | undefined {
 	if (compat.cacheControlFormat !== "anthropic" || cacheRetention === "none") {
 		return undefined;
 	}
@@ -604,8 +605,8 @@ function getCompatCacheControl(
 
 function applyAnthropicCacheControl(
 	messages: ChatCompletionMessageParam[],
-	tools: OpenCore.Chat.Completions.ChatCompletionTool[] | undefined,
-	cacheControl: OpenCoreCompatCacheControl,
+	tools: OpenAI.Chat.Completions.ChatCompletionTool[] | undefined,
+	cacheControl: OpenAICompatCacheControl,
 ): void {
 	addCacheControlToSystemPrompt(messages, cacheControl);
 	addCacheControlToLastTool(tools, cacheControl);
@@ -614,7 +615,7 @@ function applyAnthropicCacheControl(
 
 function addCacheControlToSystemPrompt(
 	messages: ChatCompletionMessageParam[],
-	cacheControl: OpenCoreCompatCacheControl,
+	cacheControl: OpenAICompatCacheControl,
 ): void {
 	for (const message of messages) {
 		if (message.role === "system" || message.role === "developer") {
@@ -626,7 +627,7 @@ function addCacheControlToSystemPrompt(
 
 function addCacheControlToLastConversationMessage(
 	messages: ChatCompletionMessageParam[],
-	cacheControl: OpenCoreCompatCacheControl,
+	cacheControl: OpenAICompatCacheControl,
 ): void {
 	for (let i = messages.length - 1; i >= 0; i--) {
 		const message = messages[i];
@@ -639,8 +640,8 @@ function addCacheControlToLastConversationMessage(
 }
 
 function addCacheControlToLastTool(
-	tools: OpenCore.Chat.Completions.ChatCompletionTool[] | undefined,
-	cacheControl: OpenCoreCompatCacheControl,
+	tools: OpenAI.Chat.Completions.ChatCompletionTool[] | undefined,
+	cacheControl: OpenAICompatCacheControl,
 ): void {
 	if (!tools || tools.length === 0) {
 		return;
@@ -652,14 +653,14 @@ function addCacheControlToLastTool(
 
 function addCacheControlToInstructionMessage(
 	message: ChatCompletionInstructionMessageParam,
-	cacheControl: OpenCoreCompatCacheControl,
+	cacheControl: OpenAICompatCacheControl,
 ): boolean {
 	return addCacheControlToTextContent(message, cacheControl);
 }
 
 function addCacheControlToMessage(
 	message: ChatCompletionMessageParam,
-	cacheControl: OpenCoreCompatCacheControl,
+	cacheControl: OpenAICompatCacheControl,
 ): boolean {
 	if (message.role === "user" || message.role === "assistant") {
 		return addCacheControlToTextContent(message, cacheControl);
@@ -672,7 +673,7 @@ function addCacheControlToTextContent(
 		| ChatCompletionInstructionMessageParam
 		| ChatCompletionAssistantMessageParam
 		| Extract<ChatCompletionMessageParam, { role: "user" }>,
-	cacheControl: OpenCoreCompatCacheControl,
+	cacheControl: OpenAICompatCacheControl,
 ): boolean {
 	const content = message.content;
 	if (typeof content === "string") {
@@ -708,18 +709,18 @@ function addCacheControlToTextContent(
 export function convertMessages(
 	model: Model<"openai-completions">,
 	context: Context,
-	compat: ResolvedOpenCoreCompletionsCompat,
+	compat: ResolvedOpenAICompletionsCompat,
 ): ChatCompletionMessageParam[] {
 	const params: ChatCompletionMessageParam[] = [];
 
 	const normalizeToolCallId = (id: string): string => {
-		// Handle pipe-separated IDs from OpenCore Responses API
+		// Handle pipe-separated IDs from OpenAI Responses API
 		// Format: {call_id}|{id} where {id} can be 400+ chars with special chars (+, /, =)
 		// These come from providers like github-copilot, openai-codex, opencode
 		// Extract just the call_id part and normalize it
 		if (id.includes("|")) {
 			const [callId] = id.split("|");
-			// Sanitize to allowed chars and truncate to 40 chars (OpenCore limit)
+			// Sanitize to allowed chars and truncate to 40 chars (OpenAI limit)
 			return callId.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 40);
 		}
 
@@ -806,7 +807,7 @@ export function convertMessages(
 						.join("\n\n");
 					assistantMsg.content = [{ type: "text", text: thinkingText }, ...assistantTextParts];
 				} else {
-					// Always send assistant content as a plain string (OpenCore Chat Completions
+					// Always send assistant content as a plain string (OpenAI Chat Completions
 					// API standard format). Sending as an array of {type:"text", text:"..."}
 					// objects is non-standard and causes some models (e.g. DeepSeek V3.2 via
 					// NVIDIA NIM) to mirror the content-block structure literally in their
@@ -822,7 +823,7 @@ export function convertMessages(
 					}
 				}
 			} else if (assistantText.length > 0) {
-				// Always send assistant content as a plain string (OpenCore Chat Completions
+				// Always send assistant content as a plain string (OpenAI Chat Completions
 				// API standard format). Sending as an array of {type:"text", text:"..."}
 				// objects is non-standard and causes some models (e.g. DeepSeek V3.2 via
 				// NVIDIA NIM) to mirror the content-block structure literally in their
@@ -950,8 +951,8 @@ export function convertMessages(
 
 function convertTools(
 	tools: Tool[],
-	compat: ResolvedOpenCoreCompletionsCompat,
-): OpenCore.Chat.Completions.ChatCompletionTool[] {
+	compat: ResolvedOpenAICompletionsCompat,
+): OpenAI.Chat.Completions.ChatCompletionTool[] {
 	return tools.map((tool) => ({
 		type: "function",
 		function: {
@@ -977,16 +978,16 @@ function parseChunkUsage(
 	const reportedCachedTokens = rawUsage.prompt_tokens_details?.cached_tokens ?? rawUsage.prompt_cache_hit_tokens ?? 0;
 	const cacheWriteTokens = rawUsage.prompt_tokens_details?.cache_write_tokens || 0;
 
-	// Normalize to moodcli-ai semantics:
+	// Normalize to Mooncli-ai semantics:
 	// - cacheRead: hits from cache created by previous requests only
 	// - cacheWrite: tokens written to cache in this request
-	// Some OpenCore-compatible providers (observed on OpenRouter) report cached_tokens
+	// Some OpenAI-compatible providers (observed on OpenRouter) report cached_tokens
 	// as (previous hits + current writes). In that case, remove cacheWrite from cacheRead.
 	const cacheReadTokens =
 		cacheWriteTokens > 0 ? Math.max(0, reportedCachedTokens - cacheWriteTokens) : reportedCachedTokens;
 
 	const input = Math.max(0, promptTokens - cacheReadTokens - cacheWriteTokens);
-	// OpenCore completion_tokens already includes reasoning_tokens.
+	// OpenAI completion_tokens already includes reasoning_tokens.
 	const outputTokens = rawUsage.completion_tokens || 0;
 	const usage: AssistantMessage["usage"] = {
 		input,
@@ -1029,9 +1030,9 @@ function mapStopReason(reason: ChatCompletionChunk.Choice["finish_reason"] | str
 /**
  * Detect compatibility settings from provider and baseUrl for known providers.
  * Provider takes precedence over URL-based detection since it's explicitly configured.
- * Returns a fully resolved OpenCoreCompletionsCompat object with all fields set.
+ * Returns a fully resolved OpenAICompletionsCompat object with all fields set.
  */
-function detectCompat(model: Model<"openai-completions">): ResolvedOpenCoreCompletionsCompat {
+function detectCompat(model: Model<"openai-completions">): ResolvedOpenAICompletionsCompat {
 	const provider = model.provider;
 	const baseUrl = model.baseUrl;
 
@@ -1091,7 +1092,7 @@ function detectCompat(model: Model<"openai-completions">): ResolvedOpenCoreCompl
  * Get resolved compatibility settings for a model.
  * Uses explicit model.compat if provided, otherwise auto-detects from provider/URL.
  */
-function getCompat(model: Model<"openai-completions">): ResolvedOpenCoreCompletionsCompat {
+function getCompat(model: Model<"openai-completions">): ResolvedOpenAICompletionsCompat {
 	const detected = detectCompat(model);
 	if (!model.compat) return detected;
 

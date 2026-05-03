@@ -5,11 +5,11 @@
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { Engine } from "@moodcli/engine";
-import { getModel } from "@moodcli/core";
+import { getModel } from "@mooncli/core";
+import { Engine } from "@mooncli/engine";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { EngineSession } from "../src/core/engine-session.js";
 import { AuthStorage } from "../src/core/auth-storage.js";
+import { EngineSession } from "../src/core/engine-session.js";
 import {
 	createExtensionRuntime,
 	type Extension,
@@ -32,7 +32,7 @@ describe.skipIf(!API_KEY)("Compaction extensions", () => {
 	let capturedEvents: SessionEvent[];
 
 	beforeEach(() => {
-		tempDir = join(tmpdir(), `moodcli-compaction-extensions-test-${Date.now()}`);
+		tempDir = join(tmpdir(), `Mooncli-compaction-extensions-test-${Date.now()}`);
 		mkdirSync(tempDir, { recursive: true });
 		capturedEvents = [];
 	});

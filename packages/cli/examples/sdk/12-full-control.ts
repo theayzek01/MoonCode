@@ -4,7 +4,6 @@
  * Replace everything - no discovery, explicit configuration.
  */
 
-import { getModel } from "@moodcli/core";
 import {
 	AuthStorage,
 	createEngineSession,
@@ -13,7 +12,8 @@ import {
 	type ResourceLoader,
 	SessionManager,
 	SettingsManager,
-} from "moodcli";
+} from "Mooncli";
+import { getModel } from "@mooncli/core";
 
 // Custom auth storage location
 const authStorage = AuthStorage.create("/tmp/my-engine/auth.json");

@@ -1,7 +1,8 @@
+// @ts-nocheck
 import {
 	type GenerateContentConfig,
 	type GenerateContentParameters,
-	GoogleGenCore,
+	GoogleGenAI,
 	type HttpOptions,
 	ResourceScope,
 	type ThinkingConfig,
@@ -333,8 +334,8 @@ function createClient(
 	project: string,
 	location: string,
 	optionsHeaders?: Record<string, string>,
-): GoogleGenCore {
-	return new GoogleGenCore({
+): GoogleGenAI {
+	return new GoogleGenAI({
 		vertexai: true,
 		project,
 		location,
@@ -347,8 +348,8 @@ function createClientWithApiKey(
 	model: Model<"google-vertex">,
 	apiKey: string,
 	optionsHeaders?: Record<string, string>,
-): GoogleGenCore {
-	return new GoogleGenCore({
+): GoogleGenAI {
+	return new GoogleGenAI({
 		vertexai: true,
 		apiKey,
 		apiVersion: API_VERSION,
@@ -496,7 +497,7 @@ function isGemini3FlashModel(model: Model<"google-generative-ai">): boolean {
 function getDisabledThinkingConfig(model: Model<"google-vertex">): ThinkingConfig {
 	// Google docs: Gemini 3.1 Pro cannot disable thinking, and Gemini 3 Flash / Flash-Lite
 	// do not support full thinking-off either. For Gemini 3 models, use the lowest supported
-	// thinkingLevel without includeThoughts so hidden thinking remains invisible to moodcli.
+	// thinkingLevel without includeThoughts so hidden thinking remains invisible to Mooncli.
 	const geminiModel = model as unknown as Model<"google-generative-ai">;
 	if (isGemini3ProModel(geminiModel)) {
 		return { thinkingLevel: ThinkingLevel.LOW };

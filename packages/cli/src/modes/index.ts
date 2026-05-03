@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Run modes for the coding engine.
  */

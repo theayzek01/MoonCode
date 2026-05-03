@@ -2,10 +2,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getModel } from "../src/models.js";
 import { streamSimple } from "../src/stream.js";
 
-// Empty tools arrays must NOT be serialized as `tools: []` — some OpenCore-compatible
+// Empty tools arrays must NOT be serialized as `tools: []` — some OpenAI-compatible
 // backends (e.g. DashScope / Aliyun Qwen via compatible-mode) reject the request with
 // `"[] is too short - 'tools'"` (HTTP 400) when `--no-tools` produces an empty array.
-// Regression for https://github.com/badlogic/moodcli-mono/issues/<issue-number>
+// Regression for https://github.com/badlogic/Mooncli-mono/issues/<issue-number>
 
 const mockState = vi.hoisted(() => ({
 	lastParams: undefined as unknown,
@@ -13,7 +13,7 @@ const mockState = vi.hoisted(() => ({
 }));
 
 vi.mock("openai", () => {
-	class FakeOpenCore {
+	class FakeOpenAI {
 		constructor(options: unknown) {
 			mockState.lastClientOptions = options;
 		}
@@ -51,7 +51,7 @@ vi.mock("openai", () => {
 		};
 	}
 
-	return { default: FakeOpenCore };
+	return { default: FakeOpenAI };
 });
 
 describe("openai-completions empty tools handling", () => {
@@ -93,7 +93,7 @@ describe("openai-completions empty tools handling", () => {
 		expect("tools" in (params as object)).toBe(false);
 	});
 
-	it("uses conservative OpenCore-compatible fields for Cloudflare Core Gateway /compat models", async () => {
+	it("uses conservative OpenAI-compatible fields for Cloudflare Core Gateway /compat models", async () => {
 		process.env.CLOUDFLARE_ACCOUNT_ID = "account-id";
 		process.env.CLOUDFLARE_GATEWAY_ID = "gateway-id";
 		const model = getModel("cloudflare-ai-gateway", "workers-ai/@cf/moonshotai/kimi-k2.6")!;

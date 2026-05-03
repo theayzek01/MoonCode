@@ -17,7 +17,7 @@ afterEach(() => {
 });
 
 function createTempDir(): string {
-	const dir = mkdtempSync(join(tmpdir(), "moodcli-stdout-clean-"));
+	const dir = mkdtempSync(join(tmpdir(), "Mooncli-stdout-clean-"));
 	tempDirs.push(dir);
 	return dir;
 }
@@ -26,7 +26,7 @@ async function runCli(args: string[]): Promise<{ stdout: string; stderr: string;
 	const tempRoot = createTempDir();
 	const engineDir = join(tempRoot, "engine");
 	const projectDir = join(tempRoot, "project");
-	const projectConfigDir = join(projectDir, ".moodcli");
+	const projectConfigDir = join(projectDir, ".Mooncli");
 	mkdirSync(engineDir, { recursive: true });
 	mkdirSync(projectConfigDir, { recursive: true });
 

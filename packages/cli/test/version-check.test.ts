@@ -1,25 +1,25 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-	checkForNewMoodcliVersion,
+	checkForNewMooncliVersion,
 	comparePackageVersions,
-	getLatestMoodcliVersion,
+	getLatestMooncliVersion,
 	isNewerPackageVersion,
 } from "../src/utils/version-check.js";
 
-const originalSkipVersionCheck = process.env.MOODCLI_SKIP_VERSION_CHECK;
-const originalOffline = process.env.MOODCLI_OFFLINE;
+const originalSkipVersionCheck = process.env.MoonCLI_SKIP_VERSION_CHECK;
+const originalOffline = process.env.MoonCLI_OFFLINE;
 
 afterEach(() => {
 	vi.unstubAllGlobals();
 	if (originalSkipVersionCheck === undefined) {
-		delete process.env.MOODCLI_SKIP_VERSION_CHECK;
+		delete process.env.MoonCLI_SKIP_VERSION_CHECK;
 	} else {
-		process.env.MOODCLI_SKIP_VERSION_CHECK = originalSkipVersionCheck;
+		process.env.MoonCLI_SKIP_VERSION_CHECK = originalSkipVersionCheck;
 	}
 	if (originalOffline === undefined) {
-		delete process.env.MOODCLI_OFFLINE;
+		delete process.env.MoonCLI_OFFLINE;
 	} else {
-		process.env.MOODCLI_OFFLINE = originalOffline;
+		process.env.MoonCLI_OFFLINE = originalOffline;
 	}
 });
 
@@ -36,20 +36,20 @@ describe("version checks", () => {
 		const fetchMock = vi.fn(async () => Response.json({ version: "1.2.3" }));
 		vi.stubGlobal("fetch", fetchMock);
 
-		await expect(checkForNewMoodcliVersion("1.2.3")).resolves.toBeUndefined();
-		await expect(checkForNewMoodcliVersion("1.2.2")).resolves.toBe("1.2.3");
+		await expect(checkForNewMooncliVersion("1.2.3")).resolves.toBeUndefined();
+		await expect(checkForNewMooncliVersion("1.2.2")).resolves.toBe("1.2.3");
 	});
 
-	it("uses the moodcli.dev version check api with a moodcli user engine", async () => {
+	it("uses the Mooncli.dev version check api with a Mooncli user engine", async () => {
 		const fetchMock = vi.fn(async () => Response.json({ version: "1.2.4" }));
 		vi.stubGlobal("fetch", fetchMock);
 
-		await expect(getLatestMoodcliVersion("1.2.3")).resolves.toBe("1.2.4");
+		await expect(getLatestMooncliVersion("1.2.3")).resolves.toBe("1.2.4");
 		expect(fetchMock).toHaveBeenCalledWith(
-			"https://moodcli.dev/api/latest-version",
+			"https://Mooncli.dev/api/latest-version",
 			expect.objectContaining({
 				headers: expect.objectContaining({
-					"User-Engine": expect.stringMatching(/^moodcli\/1\.2\.3 /),
+					"User-Engine": expect.stringMatching(/^Mooncli\/1\.2\.3 /),
 					accept: "application/json",
 				}),
 			}),
@@ -57,11 +57,11 @@ describe("version checks", () => {
 	});
 
 	it("skips api calls when version checks are disabled", async () => {
-		process.env.MOODCLI_SKIP_VERSION_CHECK = "1";
+		process.env.MoonCLI_SKIP_VERSION_CHECK = "1";
 		const fetchMock = vi.fn();
 		vi.stubGlobal("fetch", fetchMock);
 
-		await expect(getLatestMoodcliVersion("1.2.3")).resolves.toBeUndefined();
+		await expect(getLatestMooncliVersion("1.2.3")).resolves.toBeUndefined();
 		expect(fetchMock).not.toHaveBeenCalled();
 	});
 });

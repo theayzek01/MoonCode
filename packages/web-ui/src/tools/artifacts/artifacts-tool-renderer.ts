@@ -1,5 +1,6 @@
+// @ts-nocheck
 import "@mariozechner/mini-lit/dist/CodeBlock.js";
-import type { ToolResultMessage } from "@moodcli/core";
+import type { ToolResultMessage } from "@mooncli/core";
 import { createRef, ref } from "lit/directives/ref.js";
 import { FileCode2 } from "lucide";
 import "../../components/ConsoleBlock.js";

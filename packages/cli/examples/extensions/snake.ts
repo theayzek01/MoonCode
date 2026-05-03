@@ -2,8 +2,8 @@
  * Snake game extension - play snake with /snake command
  */
 
-import { matchesKey, visibleWidth } from "@moodcli/tui";
-import type { ExtensionAPI } from "moodcli";
+import type { ExtensionAPI } from "Mooncli";
+import { matchesKey, visibleWidth } from "@mooncli/tui";
 
 const GAME_WIDTH = 40;
 const GAME_HEIGHT = 15;
@@ -306,8 +306,8 @@ class SnakeComponent {
 
 const SNAKE_SAVE_TYPE = "snake-save";
 
-export default function (moodcli: ExtensionAPI) {
-	moodcli.registerCommand("snake", {
+export default function (Mooncli: ExtensionAPI) {
+	Mooncli.registerCommand("snake", {
 		description: "Play Snake!",
 
 		handler: async (_args, ctx) => {
@@ -333,7 +333,7 @@ export default function (moodcli: ExtensionAPI) {
 					() => done(undefined),
 					(state) => {
 						// Save or clear state
-						moodcli.appendEntry(SNAKE_SAVE_TYPE, state);
+						Mooncli.appendEntry(SNAKE_SAVE_TYPE, state);
 					},
 					savedState,
 				);

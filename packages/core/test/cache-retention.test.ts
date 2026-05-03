@@ -222,8 +222,8 @@ describe("Cache Retention (PI_CACHE_RETENTION)", () => {
 		});
 	});
 
-	describe("OpenCore Responses Provider", () => {
-		it.skipIf(!process.env.OPENCore_API_KEY)(
+	describe("OpenAI Responses Provider", () => {
+		it.skipIf(!process.env.OpenAI_API_KEY)(
 			"should not set prompt_cache_retention when PI_CACHE_RETENTION is not set",
 			async () => {
 				const model = getModel("openai", "gpt-4o-mini");
@@ -245,7 +245,7 @@ describe("Cache Retention (PI_CACHE_RETENTION)", () => {
 			},
 		);
 
-		it.skipIf(!process.env.OPENCore_API_KEY)(
+		it.skipIf(!process.env.OpenAI_API_KEY)(
 			"should set prompt_cache_retention to 24h when PI_CACHE_RETENTION=long",
 			async () => {
 				process.env.PI_CACHE_RETENTION = "long";
@@ -280,10 +280,10 @@ describe("Cache Retention (PI_CACHE_RETENTION)", () => {
 
 			let capturedPayload: any = null;
 
-			const { streamOpenCoreResponses } = await import("../src/providers/openai-responses.js");
+			const { streamOpenAIResponses } = await import("../src/providers/openai-responses.js");
 
 			try {
-				const s = streamOpenCoreResponses(proxyModel, context, {
+				const s = streamOpenAIResponses(proxyModel, context, {
 					apiKey: "fake-key",
 					onPayload: (payload) => {
 						capturedPayload = payload;
@@ -309,10 +309,10 @@ describe("Cache Retention (PI_CACHE_RETENTION)", () => {
 			};
 			let capturedPayload: any = null;
 
-			const { streamOpenCoreResponses } = await import("../src/providers/openai-responses.js");
+			const { streamOpenAIResponses } = await import("../src/providers/openai-responses.js");
 
 			try {
-				const s = streamOpenCoreResponses(model, context, {
+				const s = streamOpenAIResponses(model, context, {
 					apiKey: "fake-key",
 					cacheRetention: "long",
 					sessionId: "session-compat-false",
@@ -336,10 +336,10 @@ describe("Cache Retention (PI_CACHE_RETENTION)", () => {
 			const model = getModel("openai", "gpt-4o-mini");
 			let capturedPayload: any = null;
 
-			const { streamOpenCoreResponses } = await import("../src/providers/openai-responses.js");
+			const { streamOpenAIResponses } = await import("../src/providers/openai-responses.js");
 
 			try {
-				const s = streamOpenCoreResponses(model, context, {
+				const s = streamOpenAIResponses(model, context, {
 					apiKey: "fake-key",
 					cacheRetention: "none",
 					sessionId: "session-1",
@@ -364,10 +364,10 @@ describe("Cache Retention (PI_CACHE_RETENTION)", () => {
 			const model = getModel("openai", "gpt-4o-mini");
 			let capturedPayload: any = null;
 
-			const { streamOpenCoreResponses } = await import("../src/providers/openai-responses.js");
+			const { streamOpenAIResponses } = await import("../src/providers/openai-responses.js");
 
 			try {
-				const s = streamOpenCoreResponses(model, context, {
+				const s = streamOpenAIResponses(model, context, {
 					apiKey: "fake-key",
 					cacheRetention: "long",
 					sessionId: "session-2",
@@ -389,7 +389,7 @@ describe("Cache Retention (PI_CACHE_RETENTION)", () => {
 		});
 	});
 
-	describe("OpenCore Completions Provider", () => {
+	describe("OpenAI Completions Provider", () => {
 		function createCompletionsModel(compat?: Model<"openai-completions">["compat"]): Model<"openai-completions"> {
 			return {
 				id: "test-model",
@@ -408,10 +408,10 @@ describe("Cache Retention (PI_CACHE_RETENTION)", () => {
 
 		it("should set prompt_cache_retention for non-api.openai.com baseUrl by default", async () => {
 			let capturedPayload: any = null;
-			const { streamOpenCoreCompletions } = await import("../src/providers/openai-completions.js");
+			const { streamOpenAICompletions } = await import("../src/providers/openai-completions.js");
 
 			try {
-				const s = streamOpenCoreCompletions(createCompletionsModel(), context, {
+				const s = streamOpenAICompletions(createCompletionsModel(), context, {
 					apiKey: "fake-key",
 					cacheRetention: "long",
 					sessionId: "session-completions",
@@ -434,10 +434,10 @@ describe("Cache Retention (PI_CACHE_RETENTION)", () => {
 
 		it("should omit prompt_cache_retention when supportsLongCacheRetention is false", async () => {
 			let capturedPayload: any = null;
-			const { streamOpenCoreCompletions } = await import("../src/providers/openai-completions.js");
+			const { streamOpenAICompletions } = await import("../src/providers/openai-completions.js");
 
 			try {
-				const s = streamOpenCoreCompletions(createCompletionsModel({ supportsLongCacheRetention: false }), context, {
+				const s = streamOpenAICompletions(createCompletionsModel({ supportsLongCacheRetention: false }), context, {
 					apiKey: "fake-key",
 					cacheRetention: "long",
 					sessionId: "session-completions-false",

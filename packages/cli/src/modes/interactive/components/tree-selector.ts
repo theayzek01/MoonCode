@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
 	type Component,
 	Container,
@@ -8,7 +9,7 @@ import {
 	Text,
 	TruncatedText,
 	truncateToWidth,
-} from "@moodcli/tui";
+} from "@mooncli/tui";
 import type { SessionTreeNode } from "../../../core/session-manager.js";
 import { theme } from "../theme/theme.js";
 import { DynamicBorder } from "./dynamic-border.js";

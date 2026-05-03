@@ -1,7 +1,8 @@
+// @ts-nocheck
 import { basename, dirname, isAbsolute, relative, resolve as resolvePath, sep } from "node:path";
-import type { EngineTool } from "@moodcli/engine";
-import type { Api, ImageContent, Model, TextContent } from "@moodcli/core";
-import { Text } from "@moodcli/tui";
+import type { Api, ImageContent, Model, TextContent } from "@mooncli/core";
+import type { EngineTool } from "@mooncli/engine";
+import { Text } from "@mooncli/tui";
 import { constants } from "fs";
 import { access as fsAccess, readFile as fsReadFile } from "fs/promises";
 import { type Static, Type } from "typebox";

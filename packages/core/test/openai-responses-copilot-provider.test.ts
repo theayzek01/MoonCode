@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { getModel } from "../src/models.js";
-import { streamOpenCoreResponses } from "../src/providers/openai-responses.js";
+import { streamOpenAIResponses } from "../src/providers/openai-responses.js";
 import type { Model } from "../src/types.js";
 
 type CapturedHeaders = Headers | string[][] | Record<string, string | readonly string[]> | undefined;
@@ -21,8 +21,8 @@ function getHeader(headers: CapturedHeaders, name: string): string | null {
 	return null;
 }
 
-async function captureOpenCoreResponseHeaders(
-	options: Parameters<typeof streamOpenCoreResponses>[2],
+async function captureOpenAIResponseHeaders(
+	options: Parameters<typeof streamOpenAIResponses>[2],
 	model: Model<"openai-responses"> = getModel("openai", "gpt-5.4"),
 ): Promise<{ sessionId: string | null; clientRequestId: string | null }> {
 	const captured = { sessionId: null as string | null, clientRequestId: null as string | null };
@@ -35,7 +35,7 @@ async function captureOpenCoreResponseHeaders(
 		});
 	});
 
-	const stream = streamOpenCoreResponses(
+	const stream = streamOpenAIResponses(
 		model,
 		{
 			systemPrompt: "sys",
@@ -67,7 +67,7 @@ describe("openai-responses provider defaults", () => {
 			}),
 		);
 
-		const stream = streamOpenCoreResponses(
+		const stream = streamOpenAIResponses(
 			model,
 			{
 				systemPrompt: "sys",
@@ -91,19 +91,19 @@ describe("openai-responses provider defaults", () => {
 		});
 	});
 
-	it("sets cache-affinity headers for official OpenCore Responses requests with a sessionId", async () => {
-		const captured = await captureOpenCoreResponseHeaders({ sessionId: "session-123" });
+	it("sets cache-affinity headers for official OpenAI Responses requests with a sessionId", async () => {
+		const captured = await captureOpenAIResponseHeaders({ sessionId: "session-123" });
 
 		expect(captured).toEqual({ sessionId: "session-123", clientRequestId: "session-123" });
 	});
 
-	it("sets cache-affinity headers for proxy OpenCore Responses requests with a sessionId", async () => {
+	it("sets cache-affinity headers for proxy OpenAI Responses requests with a sessionId", async () => {
 		const proxyModel: Model<"openai-responses"> = {
 			...getModel("openai", "gpt-5.4"),
 			provider: "opencode",
 			baseUrl: "https://proxy.example.com/v1",
 		};
-		const captured = await captureOpenCoreResponseHeaders({ sessionId: "session-123" }, proxyModel);
+		const captured = await captureOpenAIResponseHeaders({ sessionId: "session-123" }, proxyModel);
 
 		expect(captured).toEqual({ sessionId: "session-123", clientRequestId: "session-123" });
 	});
@@ -115,13 +115,13 @@ describe("openai-responses provider defaults", () => {
 			baseUrl: "https://proxy.example.com/v1",
 			compat: { sendSessionIdHeader: false },
 		};
-		const captured = await captureOpenCoreResponseHeaders({ sessionId: "session-123" }, proxyModel);
+		const captured = await captureOpenAIResponseHeaders({ sessionId: "session-123" }, proxyModel);
 
 		expect(captured).toEqual({ sessionId: null, clientRequestId: "session-123" });
 	});
 
-	it("lets explicit headers override the default OpenCore cache-affinity headers", async () => {
-		const captured = await captureOpenCoreResponseHeaders({
+	it("lets explicit headers override the default OpenAI cache-affinity headers", async () => {
+		const captured = await captureOpenAIResponseHeaders({
 			sessionId: "session-123",
 			headers: {
 				session_id: "override-session",
@@ -132,8 +132,8 @@ describe("openai-responses provider defaults", () => {
 		expect(captured).toEqual({ sessionId: "override-session", clientRequestId: "override-request" });
 	});
 
-	it("omits OpenCore cache-affinity headers when cacheRetention is none", async () => {
-		const captured = await captureOpenCoreResponseHeaders({ cacheRetention: "none", sessionId: "session-123" });
+	it("omits OpenAI cache-affinity headers when cacheRetention is none", async () => {
+		const captured = await captureOpenAIResponseHeaders({ cacheRetention: "none", sessionId: "session-123" });
 
 		expect(captured).toEqual({ sessionId: null, clientRequestId: null });
 	});
@@ -167,7 +167,7 @@ describe("openai-responses provider defaults", () => {
 			}),
 		);
 
-		const stream = streamOpenCoreResponses(
+		const stream = streamOpenAIResponses(
 			model,
 			{
 				systemPrompt: "sys",

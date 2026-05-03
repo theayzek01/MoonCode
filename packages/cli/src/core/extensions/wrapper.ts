@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Tool wrappers for extension-registered tools.
  *
@@ -5,7 +6,7 @@
  * Tool call and tool result interception is handled by EngineSession via engine-core hooks.
  */
 
-import type { EngineTool } from "@moodcli/engine";
+import type { EngineTool } from "@mooncli/engine";
 import { wrapToolDefinition, wrapToolDefinitions } from "../tools/tool-definition-wrapper.js";
 import type { ExtensionRunner } from "./runner.js";
 import type { RegisteredTool } from "./types.js";

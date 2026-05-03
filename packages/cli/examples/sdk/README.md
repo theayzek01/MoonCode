@@ -1,6 +1,6 @@
 # SDK Examples
 
-Programmatic usage of moodcli-cli via `createEngineSession()` and `createEngineSessionRuntime()`.
+Programmatic usage of Mooncli-cli via `createEngineSession()` and `createEngineSessionRuntime()`.
 
 The runtime example shows how to build a recreate function that closes over process-global fixed inputs and recreates cwd-bound services and sessions as the active session cwd changes.
 
@@ -32,7 +32,7 @@ npx tsx examples/sdk/01-minimal.ts
 ## Quick Reference
 
 ```typescript
-import { getModel } from "@moodcli/core";
+import { getModel } from "@mooncli/core";
 import {
   AuthStorage,
   createEngineSession,
@@ -43,7 +43,7 @@ import {
   codingTools,
   readOnlyTools,
   readTool, bashTool, editTool, writeTool,
-} from "@moodcli/cli";
+} from "@mooncli/cli";
 
 // Auth and models setup
 const authStorage = AuthStorage.create();
@@ -114,7 +114,7 @@ await session.prompt("Hello");
 | `authStorage` | `AuthStorage.create()` | Credential storage |
 | `modelRegistry` | `ModelRegistry.create(authStorage)` | Model registry |
 | `cwd` | `process.cwd()` | Working directory |
-| `engineDir` | `~/.moodcli/engine` | Config directory |
+| `engineDir` | `~/.Mooncli/engine` | Config directory |
 | `model` | From settings/first available | Model to use |
 | `thinkingLevel` | From settings/"off" | off, low, medium, high |
 | `tools` | `codingTools` | Built-in tools |

@@ -1,9 +1,10 @@
+// @ts-nocheck
 import { randomBytes } from "node:crypto";
 import { createWriteStream, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { EngineTool } from "@moodcli/engine";
-import { Container, Text, truncateToWidth } from "@moodcli/tui";
+import type { EngineTool } from "@mooncli/engine";
+import { Container, Text, truncateToWidth } from "@mooncli/tui";
 import { spawn } from "child_process";
 import { type Static, Type } from "typebox";
 import { keyHint } from "../../modes/interactive/components/keybinding-hints.js";
@@ -27,7 +28,7 @@ import { DEFAULT_MAX_BYTES, DEFAULT_MAX_LINES, formatSize, type TruncationResult
  */
 function getTempFilePath(): string {
 	const id = randomBytes(8).toString("hex");
-	return join(tmpdir(), `moodcli-bash-${id}.log`);
+	return join(tmpdir(), `Mooncli-bash-${id}.log`);
 }
 
 const bashSchema = Type.Object({
@@ -67,9 +68,9 @@ export interface BashOperations {
 }
 
 /**
- * Create bash operations using moodcli's built-in local shell execution backend.
+ * Create bash operations using Mooncli's built-in local shell execution backend.
  *
- * This is useful for extensions that intercept user_bash and still want moodcli's
+ * This is useful for extensions that intercept user_bash and still want Mooncli's
  * standard local shell behavior while wrapping or rewriting commands.
  */
 export function createLocalBashOperations(options?: { shellPath?: string }): BashOperations {

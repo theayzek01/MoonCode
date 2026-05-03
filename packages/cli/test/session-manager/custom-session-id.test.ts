@@ -61,7 +61,7 @@ describe("SessionManager.newSession with custom id", () => {
 	});
 
 	it("generates a UUIDv7 id when forking from another session file", () => {
-		const tempDir = mkdtempSync(join(tmpdir(), "moodcli-session-manager-"));
+		const tempDir = mkdtempSync(join(tmpdir(), "Mooncli-session-manager-"));
 		const sourcePath = join(tempDir, "source.jsonl");
 		writeFileSync(
 			sourcePath,

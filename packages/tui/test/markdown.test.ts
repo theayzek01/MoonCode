@@ -817,7 +817,7 @@ bar`,
 				0,
 				defaultMarkdownTheme,
 				{
-					color: (text) => chalk.menginea(text), // This should NOT be applied to blockquotes
+					color: (text) => chalk.magenta(text), // This should NOT be applied to blockquotes
 				},
 			);
 
@@ -838,9 +838,9 @@ bar`,
 			assert.ok(fooLine?.includes("\x1b[3m"), `Foo line should have italic: ${fooLine}`);
 			assert.ok(barLine?.includes("\x1b[3m"), `bar line should have italic: ${barLine}`);
 
-			// Blockquotes should NOT have the default message color (menginea)
-			assert.ok(!fooLine?.includes("\x1b[35m"), `Foo line should NOT have menginea color: ${fooLine}`);
-			assert.ok(!barLine?.includes("\x1b[35m"), `bar line should NOT have menginea color: ${barLine}`);
+			// Blockquotes should NOT have the default message color (magenta)
+			assert.ok(!fooLine?.includes("\x1b[35m"), `Foo line should NOT have magenta color: ${fooLine}`);
+			assert.ok(!barLine?.includes("\x1b[35m"), `bar line should NOT have magenta color: ${barLine}`);
 		});
 
 		it("should apply consistent styling to explicit multiline blockquote", () => {

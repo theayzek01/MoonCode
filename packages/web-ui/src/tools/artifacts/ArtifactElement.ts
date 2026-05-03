@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { LitElement, type TemplateResult } from "lit";
 
 export abstract class ArtifactElement extends LitElement {

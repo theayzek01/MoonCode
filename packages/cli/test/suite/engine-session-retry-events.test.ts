@@ -1,5 +1,5 @@
-import type { EngineTool } from "@moodcli/engine";
-import { fauxAssistantMessage, fauxThinking, fauxToolCall } from "@moodcli/core";
+import { fauxAssistantMessage, fauxThinking, fauxToolCall } from "@mooncli/core";
+import type { EngineTool } from "@mooncli/engine";
 import { Type } from "typebox";
 import { afterEach, describe, expect, it } from "vitest";
 import { createHarness, type Harness } from "./harness.js";
@@ -98,8 +98,8 @@ describe("EngineSession retry and event characterization", () => {
 		const harness = await createHarness({
 			settings: { retry: { enabled: true, maxRetries: 3, baseDelayMs: 1 } },
 			extensionFactories: [
-				(moodcli) => {
-					moodcli.on("message_end", async (event) => {
+				(Mooncli) => {
+					Mooncli.on("message_end", async (event) => {
 						if (event.message.role === "assistant") {
 							await new Promise((resolve) => setTimeout(resolve, 40));
 						}
@@ -202,11 +202,11 @@ describe("EngineSession retry and event characterization", () => {
 		const order: string[] = [];
 		const harness = await createHarness({
 			extensionFactories: [
-				(moodcli) => {
-					moodcli.on("message_start", async (event) => {
+				(Mooncli) => {
+					Mooncli.on("message_start", async (event) => {
 						order.push(`extension:${event.type}:${event.message.role}`);
 					});
-					moodcli.on("message_end", async (event) => {
+					Mooncli.on("message_end", async (event) => {
 						order.push(`extension:${event.type}:${event.message.role}`);
 					});
 				},

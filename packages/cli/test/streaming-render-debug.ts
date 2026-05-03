@@ -4,8 +4,8 @@
  * Run with: npx tsx test/streaming-render-debug.ts
  */
 
-import type { AssistantMessage } from "@moodcli/core";
-import { ProcessTerminal, TUI } from "@moodcli/tui";
+import type { AssistantMessage } from "@mooncli/core";
+import { ProcessTerminal, TUI } from "@mooncli/tui";
 import { readFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";

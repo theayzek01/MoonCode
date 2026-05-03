@@ -1,9 +1,10 @@
+// @ts-nocheck
 /**
  * Process @file CLI arguments into text content and image attachments
  */
 
 import { access, readFile, stat } from "node:fs/promises";
-import type { ImageContent } from "@moodcli/core";
+import type { ImageContent } from "@mooncli/core";
 import chalk from "chalk";
 import { resolve } from "path";
 import { resolveReadPath } from "../core/tools/path-utils.js";

@@ -1,6 +1,6 @@
-import type { EngineTool } from "@moodcli/engine";
-import { fauxAssistantMessage, fauxToolCall } from "@moodcli/core";
-import type { ExtensionAPI } from "moodcli";
+import type { ExtensionAPI } from "Mooncli";
+import { fauxAssistantMessage, fauxToolCall } from "@mooncli/core";
+import type { EngineTool } from "@mooncli/engine";
 import { Type } from "typebox";
 import { afterEach, describe, expect, it } from "vitest";
 import { createHarness, getAssistantTexts, getUserTexts, type Harness } from "../harness.js";
@@ -37,9 +37,9 @@ describe("issue #2023 queued slash-command follow-up", () => {
 		const harness = await createHarness({
 			tools: [waitTool],
 			extensionFactories: [
-				(moodcli) => {
-					extensionApi = moodcli;
-					moodcli.registerCommand("testcmd", {
+				(Mooncli) => {
+					extensionApi = Mooncli;
+					Mooncli.registerCommand("testcmd", {
 						description: "Test command",
 						handler: async (args) => {
 							commandRuns.push(args);

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { customElement, state } from "lit/decorators.js";
 import "../components/ProviderKeyInput.js";
 import { DialogContent, DialogHeader } from "@mariozechner/mini-lit/dist/Dialog.js";

@@ -1,5 +1,5 @@
 {
-	"name": "@moodcli/engine",
+	"name": "@mooncli/engine",
 	"version": "0.72.1",
 	"description": "General-purpose state management engine",
 	"type": "module",
@@ -11,13 +11,14 @@
 	],
 	"scripts": {
 		"clean": "shx rm -rf dist",
-		"build": "tsgo -p tsconfig.build.json",
-		"dev": "tsgo -p tsconfig.build.json --watch --preserveWatchOutput",
+		"build": "tsc -p tsconfig.build.json",
+		"dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
 		"test": "vitest --run",
 		"prepublishOnly": "npm run clean && npm run build"
 	},
 	"dependencies": {
-		"@moodcli/core": "^0.72.1",
+		"@modelcontextprotocol/sdk": "^1.29.0",
+		"@mooncli/core": "^0.72.1",
 		"typebox": "^1.1.24"
 	},
 	"keywords": [

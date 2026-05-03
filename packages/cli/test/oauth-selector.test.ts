@@ -1,4 +1,4 @@
-import { setKeybindings } from "@moodcli/tui";
+import { setKeybindings } from "@mooncli/tui";
 import stripAnsi from "strip-ansi";
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { AuthStorage } from "../src/core/auth-storage.js";
@@ -8,7 +8,7 @@ import { OAuthSelectorComponent } from "../src/modes/interactive/components/oaut
 import { isApiKeyLoginProvider } from "../src/modes/interactive/interactive-mode.js";
 import { initTheme } from "../src/modes/interactive/theme/theme.js";
 
-const originalOpenAiApiKey = process.env.OPENCore_API_KEY;
+const originalOpenAiApiKey = process.env.OpenAI_API_KEY;
 
 describe("OAuthSelectorComponent", () => {
 	beforeAll(() => {
@@ -21,9 +21,9 @@ describe("OAuthSelectorComponent", () => {
 
 	afterEach(() => {
 		if (originalOpenAiApiKey === undefined) {
-			delete process.env.OPENCore_API_KEY;
+			delete process.env.OpenAI_API_KEY;
 		} else {
-			process.env.OPENCore_API_KEY = originalOpenAiApiKey;
+			process.env.OpenAI_API_KEY = originalOpenAiApiKey;
 		}
 	});
 
@@ -64,20 +64,20 @@ describe("OAuthSelectorComponent", () => {
 	});
 
 	it("shows environment API key auth as configured", () => {
-		process.env.OPENCore_API_KEY = "test-openai-key";
+		process.env.OpenAI_API_KEY = "test-openai-key";
 		const authStorage = AuthStorage.inMemory();
 		const selector = new OAuthSelectorComponent(
 			"login",
 			authStorage,
-			[{ id: "openai", name: "OpenCore", authType: "api_key" }],
+			[{ id: "openai", name: "OpenAI", authType: "api_key" }],
 			() => {},
 			() => {},
 		);
 
 		const output = stripAnsi(selector.render(120).join("\n"));
 
-		expect(output).toContain("OpenCore");
-		expect(output).toContain("✓ env: OPENCore_API_KEY");
+		expect(output).toContain("OpenAI");
+		expect(output).toContain("✓ env: OpenAI_API_KEY");
 		expect(output).not.toContain("unconfigured");
 	});
 

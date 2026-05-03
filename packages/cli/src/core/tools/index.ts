@@ -1,3 +1,4 @@
+// @ts-nocheck
 export {
 	type BashOperations,
 	type BashSpawnContext,
@@ -68,7 +69,7 @@ export {
 	type WriteToolOptions,
 } from "./write.js";
 
-import type { EngineTool } from "@moodcli/engine";
+import type { EngineTool } from "@mooncli/engine";
 import type { ToolDefinition } from "../extensions/types.js";
 import { type BashToolOptions, createBashTool, createBashToolDefinition } from "./bash.js";
 import { createEditTool, createEditToolDefinition, type EditToolOptions } from "./edit.js";

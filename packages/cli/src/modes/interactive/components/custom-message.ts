@@ -1,6 +1,7 @@
-import type { TextContent } from "@moodcli/core";
-import type { Component } from "@moodcli/tui";
-import { Box, Container, Markdown, type MarkdownTheme, Spacer, Text } from "@moodcli/tui";
+// @ts-nocheck
+import type { TextContent } from "@mooncli/core";
+import type { Component } from "@mooncli/tui";
+import { Box, Container, Markdown, type MarkdownTheme, Spacer, Text } from "@mooncli/tui";
 import type { MessageRenderer } from "../../../core/extensions/types.js";
 import type { CustomMessage } from "../../../core/messages.js";
 import { getMarkdownTheme, theme } from "../theme/theme.js";

@@ -5,15 +5,15 @@
  * Useful to ensure work is committed before switching context.
  */
 
-import type { ExtensionAPI, ExtensionContext } from "moodcli";
+import type { ExtensionAPI, ExtensionContext } from "Mooncli";
 
 async function checkDirtyRepo(
-	moodcli: ExtensionAPI,
+	Mooncli: ExtensionAPI,
 	ctx: ExtensionContext,
 	action: string,
 ): Promise<{ cancel: boolean } | undefined> {
 	// Check for uncommitted changes
-	const { stdout, code } = await moodcli.exec("git", ["status", "--porcelain"]);
+	const { stdout, code } = await Mooncli.exec("git", ["status", "--porcelain"]);
 
 	if (code !== 0) {
 		// Not a git repo, allow the action
@@ -44,13 +44,13 @@ async function checkDirtyRepo(
 	}
 }
 
-export default function (moodcli: ExtensionAPI) {
-	moodcli.on("session_before_switch", async (event, ctx) => {
+export default function (Mooncli: ExtensionAPI) {
+	Mooncli.on("session_before_switch", async (event, ctx) => {
 		const action = event.reason === "new" ? "new session" : "switch session";
-		return checkDirtyRepo(moodcli, ctx, action);
+		return checkDirtyRepo(Mooncli, ctx, action);
 	});
 
-	moodcli.on("session_before_fork", async (_event, ctx) => {
-		return checkDirtyRepo(moodcli, ctx, "fork");
+	Mooncli.on("session_before_fork", async (_event, ctx) => {
+		return checkDirtyRepo(Mooncli, ctx, "fork");
 	});
 }

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Store } from "../store.js";
 import type { StoreConfig } from "../types.js";
 

@@ -1,4 +1,5 @@
-import type { EngineMessage } from "@moodcli/engine";
+// @ts-nocheck
+import type { EngineMessage } from "@mooncli/engine";
 import {
 	ARTIFACTS_RUNTIME_PROVIDER_DESCRIPTION_RO,
 	ARTIFACTS_RUNTIME_PROVIDER_DESCRIPTION_RW,

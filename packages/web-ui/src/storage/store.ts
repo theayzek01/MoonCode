@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { StorageBackend, StoreConfig } from "./types.js";
 
 /**

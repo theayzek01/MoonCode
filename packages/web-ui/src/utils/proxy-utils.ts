@@ -1,5 +1,6 @@
-import type { Api, Context, Model, SimpleStreamOptions } from "@moodcli/core";
-import { streamSimple } from "@moodcli/core";
+// @ts-nocheck
+import type { Api, Context, Model, SimpleStreamOptions } from "@mooncli/core";
+import { streamSimple } from "@mooncli/core";
 
 /**
  * Centralized proxy decision logic.

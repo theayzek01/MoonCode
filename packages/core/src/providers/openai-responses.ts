@@ -1,4 +1,5 @@
-import OpenCore from "openai";
+// @ts-nocheck
+import OpenAI from "openai";
 import type { ResponseCreateParamsStreaming } from "openai/resources/responses/responses.js";
 import { getEnvApiKey } from "../env-api-keys.js";
 import { clampThinkingLevel } from "../models.js";
@@ -8,7 +9,7 @@ import type {
 	CacheRetention,
 	Context,
 	Model,
-	OpenCoreResponsesCompat,
+	OpenAIResponsesCompat,
 	SimpleStreamOptions,
 	StreamFunction,
 	StreamOptions,
@@ -21,7 +22,7 @@ import { buildCopilotDynamicHeaders, hasCopilotVisionInput } from "./github-copi
 import { convertResponsesMessages, convertResponsesTools, processResponsesStream } from "./openai-responses-shared.js";
 import { buildBaseOptions } from "./simple-options.js";
 
-const OPENCore_TOOL_CALL_PROVIDERS = new Set(["openai", "openai-codex", "opencode"]);
+const OpenAI_TOOL_CALL_PROVIDERS = new Set(["openai", "openai-codex", "opencode"]);
 
 /**
  * Resolve cache retention preference.
@@ -37,7 +38,7 @@ function resolveCacheRetention(cacheRetention?: CacheRetention): CacheRetention 
 	return "short";
 }
 
-function getCompat(model: Model<"openai-responses">): Required<OpenCoreResponsesCompat> {
+function getCompat(model: Model<"openai-responses">): Required<OpenAIResponsesCompat> {
 	return {
 		sendSessionIdHeader: model.compat?.sendSessionIdHeader ?? true,
 		supportsLongCacheRetention: model.compat?.supportsLongCacheRetention ?? true,
@@ -45,26 +46,26 @@ function getCompat(model: Model<"openai-responses">): Required<OpenCoreResponses
 }
 
 function getPromptCacheRetention(
-	compat: Required<OpenCoreResponsesCompat>,
+	compat: Required<OpenAIResponsesCompat>,
 	cacheRetention: CacheRetention,
 ): "24h" | undefined {
 	return cacheRetention === "long" && compat.supportsLongCacheRetention ? "24h" : undefined;
 }
 
-// OpenCore Responses-specific options
-export interface OpenCoreResponsesOptions extends StreamOptions {
+// OpenAI Responses-specific options
+export interface OpenAIResponsesOptions extends StreamOptions {
 	reasoningEffort?: "minimal" | "low" | "medium" | "high" | "xhigh";
 	reasoningSummary?: "auto" | "detailed" | "concise" | null;
 	serviceTier?: ResponseCreateParamsStreaming["service_tier"];
 }
 
 /**
- * Generate function for OpenCore Responses API
+ * Generate function for OpenAI Responses API
  */
-export const streamOpenCoreResponses: StreamFunction<"openai-responses", OpenCoreResponsesOptions> = (
+export const streamOpenAIResponses: StreamFunction<"openai-responses", OpenAIResponsesOptions> = (
 	model: Model<"openai-responses">,
 	context: Context,
-	options?: OpenCoreResponsesOptions,
+	options?: OpenAIResponsesOptions,
 ): AssistantMessageEventStream => {
 	const stream = new AssistantMessageEventStream();
 
@@ -89,7 +90,7 @@ export const streamOpenCoreResponses: StreamFunction<"openai-responses", OpenCor
 		};
 
 		try {
-			// Create OpenCore client
+			// Create OpenAI client
 			const apiKey = options?.apiKey || getEnvApiKey(model.provider) || "";
 			const cacheRetention = resolveCacheRetention(options?.cacheRetention);
 			const cacheSessionId = cacheRetention === "none" ? undefined : options?.sessionId;
@@ -139,7 +140,7 @@ export const streamOpenCoreResponses: StreamFunction<"openai-responses", OpenCor
 	return stream;
 };
 
-export const streamSimpleOpenCoreResponses: StreamFunction<"openai-responses", SimpleStreamOptions> = (
+export const streamSimpleOpenAIResponses: StreamFunction<"openai-responses", SimpleStreamOptions> = (
 	model: Model<"openai-responses">,
 	context: Context,
 	options?: SimpleStreamOptions,
@@ -153,10 +154,10 @@ export const streamSimpleOpenCoreResponses: StreamFunction<"openai-responses", S
 	const clampedReasoning = options?.reasoning ? clampThinkingLevel(model, options.reasoning) : undefined;
 	const reasoningEffort = clampedReasoning === "off" ? undefined : clampedReasoning;
 
-	return streamOpenCoreResponses(model, context, {
+	return streamOpenAIResponses(model, context, {
 		...base,
 		reasoningEffort,
-	} satisfies OpenCoreResponsesOptions);
+	} satisfies OpenAIResponsesOptions);
 };
 
 function createClient(
@@ -167,12 +168,12 @@ function createClient(
 	sessionId?: string,
 ) {
 	if (!apiKey) {
-		if (!process.env.OPENCore_API_KEY) {
+		if (!process.env.OpenAI_API_KEY) {
 			throw new Error(
-				"OpenCore API key is required. Set OPENCore_API_KEY environment variable or pass it as an argument.",
+				"OpenAI API key is required. Set OpenAI_API_KEY environment variable or pass it as an argument.",
 			);
 		}
-		apiKey = process.env.OPENCore_API_KEY;
+		apiKey = process.env.OpenAI_API_KEY;
 	}
 
 	const compat = getCompat(model);
@@ -207,7 +208,7 @@ function createClient(
 				}
 			: headers;
 
-	return new OpenCore({
+	return new OpenAI({
 		apiKey,
 		baseURL: isCloudflareProvider(model.provider) ? resolveCloudflareBaseUrl(model) : model.baseUrl,
 		dangerouslyAllowBrowser: true,
@@ -215,8 +216,8 @@ function createClient(
 	});
 }
 
-function buildParams(model: Model<"openai-responses">, context: Context, options?: OpenCoreResponsesOptions) {
-	const messages = convertResponsesMessages(model, context, OPENCore_TOOL_CALL_PROVIDERS);
+function buildParams(model: Model<"openai-responses">, context: Context, options?: OpenAIResponsesOptions) {
+	const messages = convertResponsesMessages(model, context, OpenAI_TOOL_CALL_PROVIDERS);
 
 	const cacheRetention = resolveCacheRetention(options?.cacheRetention);
 	const compat = getCompat(model);

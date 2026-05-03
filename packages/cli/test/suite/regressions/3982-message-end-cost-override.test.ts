@@ -1,4 +1,4 @@
-import { fauxAssistantMessage } from "@moodcli/core";
+import { fauxAssistantMessage } from "@mooncli/core";
 import { afterEach, describe, expect, it } from "vitest";
 import { createHarness, type Harness } from "../harness.js";
 
@@ -14,8 +14,8 @@ describe("regression #3982: message_end cost override", () => {
 	it("allows extensions to replace finalized assistant usage cost", async () => {
 		const harness = await createHarness({
 			extensionFactories: [
-				(moodcli) => {
-					moodcli.on("message_end", (event) => {
+				(Mooncli) => {
+					Mooncli.on("message_end", (event) => {
 						if (event.message.role !== "assistant") return;
 
 						return {

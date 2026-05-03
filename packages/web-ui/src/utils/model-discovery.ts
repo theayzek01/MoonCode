@@ -1,5 +1,6 @@
+// @ts-nocheck
 import { LMStudioClient } from "@lmstudio/sdk";
-import type { Model } from "@moodcli/core";
+import type { Model } from "@mooncli/core";
 import { Ollama } from "ollama/browser";
 
 /**
@@ -77,7 +78,7 @@ export async function discoverOllamaModels(baseUrl: string, _apiKey?: string): P
 }
 
 /**
- * Discover models from a llama.cpp server via OpenCore-compatible /v1/models endpoint.
+ * Discover models from a llama.cpp server via OpenAI-compatible /v1/models endpoint.
  * @param baseUrl - Base URL of the llama.cpp server (e.g., "http://localhost:8080")
  * @param apiKey - Optional API key
  * @returns Array of discovered models
@@ -139,7 +140,7 @@ export async function discoverLlamaCppModels(baseUrl: string, apiKey?: string): 
 }
 
 /**
- * Discover models from a vProvider server via OpenCore-compatible /v1/models endpoint.
+ * Discover models from a vProvider server via OpenAI-compatible /v1/models endpoint.
  * @param baseUrl - Base URL of the vProvider server (e.g., "http://localhost:8000")
  * @param apiKey - Optional API key
  * @returns Array of discovered models

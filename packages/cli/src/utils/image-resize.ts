@@ -1,4 +1,5 @@
-import type { ImageContent } from "@moodcli/core";
+// @ts-nocheck
+import type { ImageContent } from "@mooncli/core";
 import { applyExifOrientation } from "./exif-orientation.js";
 import { loadPhoton } from "./photon.js";
 

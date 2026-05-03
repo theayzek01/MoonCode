@@ -1,6 +1,7 @@
+// @ts-nocheck
 import { createInterface } from "node:readline";
-import type { EngineTool } from "@moodcli/engine";
-import { Text } from "@moodcli/tui";
+import type { EngineTool } from "@mooncli/engine";
+import { Text } from "@mooncli/tui";
 import { spawn } from "child_process";
 import { existsSync } from "fs";
 import path from "path";

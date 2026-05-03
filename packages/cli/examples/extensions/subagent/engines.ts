@@ -2,9 +2,9 @@
  * Engine discovery and configuration
  */
 
+import { getEngineDir, parseFrontmatter } from "Mooncli";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { getEngineDir, parseFrontmatter } from "moodcli";
 
 export type EngineScope = "user" | "project" | "both";
 
@@ -85,7 +85,7 @@ function isDirectory(p: string): boolean {
 function findNearestProjectEnginesDir(cwd: string): string | null {
 	let currentDir = cwd;
 	while (true) {
-		const candidate = path.join(currentDir, ".moodcli", "engines");
+		const candidate = path.join(currentDir, ".Mooncli", "engines");
 		if (isDirectory(candidate)) return candidate;
 
 		const parentDir = path.dirname(currentDir);
@@ -99,7 +99,8 @@ export function discoverEngines(cwd: string, scope: EngineScope): EngineDiscover
 	const projectEnginesDir = findNearestProjectEnginesDir(cwd);
 
 	const userEngines = scope === "project" ? [] : loadEnginesFromDir(userDir, "user");
-	const projectEngines = scope === "user" || !projectEnginesDir ? [] : loadEnginesFromDir(projectEnginesDir, "project");
+	const projectEngines =
+		scope === "user" || !projectEnginesDir ? [] : loadEnginesFromDir(projectEnginesDir, "project");
 
 	const engineMap = new Map<string, EngineConfig>();
 

@@ -11,7 +11,7 @@ import type { Api, Context, ImageContent, Model, StreamOptions, Tool, ToolResult
 type StreamOptionsWithExtras = StreamOptions & Record<string, unknown>;
 
 import { StringEnum } from "../src/utils/typebox-helpers.js";
-import { hasAzureOpenCoreCredentials, resolveAzureDeploymentName } from "./azure-utils.js";
+import { hasAzureOpenAICredentials, resolveAzureDeploymentName } from "./azure-utils.js";
 import { hasBedrockCredentials } from "./bedrock-utils.js";
 import { hasCloudflareAiGatewayCredentials, hasCloudflareWorkersCoreCredentials } from "./cloudflare-utils.js";
 import { resolveApiKey } from "./oauth.js";
@@ -421,7 +421,7 @@ describe("Generate E2E Tests", () => {
 		});
 	});
 
-	describe.skipIf(!process.env.OPENCore_API_KEY)("OpenCore Completions Provider (gpt-4o-mini)", () => {
+	describe.skipIf(!process.env.OpenAI_API_KEY)("OpenAI Completions Provider (gpt-4o-mini)", () => {
 		const { compat: _compat, ...baseModel } = getModel("openai", "gpt-4o-mini");
 		void _compat;
 		const llm: Model<"openai-completions"> = {
@@ -447,7 +447,7 @@ describe("Generate E2E Tests", () => {
 	});
 
 	describe.skipIf(!process.env.DEEPSEEK_API_KEY)(
-		"DeepSeek Provider (deepseek-v4-flash via OpenCore Completions)",
+		"DeepSeek Provider (deepseek-v4-flash via OpenAI Completions)",
 		() => {
 			const llm = getModel("deepseek", "deepseek-v4-flash");
 
@@ -473,7 +473,7 @@ describe("Generate E2E Tests", () => {
 		},
 	);
 
-	describe.skipIf(!process.env.OPENCore_API_KEY)("OpenCore Responses Provider (gpt-5.4)", () => {
+	describe.skipIf(!process.env.OpenAI_API_KEY)("OpenAI Responses Provider (gpt-5.4)", () => {
 		const llm = getModel("openai", "gpt-5.4");
 
 		it("should complete basic text generation", { retry: 3 }, async () => {
@@ -521,7 +521,7 @@ describe("Generate E2E Tests", () => {
 		});
 	});
 
-	describe.skipIf(!hasAzureOpenCoreCredentials())("Azure OpenCore Responses Provider (gpt-4o-mini)", () => {
+	describe.skipIf(!hasAzureOpenAICredentials())("Azure OpenAI Responses Provider (gpt-4o-mini)", () => {
 		const llm = getModel("azure-openai-responses", "gpt-4o-mini");
 		const azureDeploymentName = resolveAzureDeploymentName(llm.id);
 		const azureOptions = azureDeploymentName ? { azureDeploymentName } : {};
@@ -543,7 +543,7 @@ describe("Generate E2E Tests", () => {
 		});
 	});
 
-	describe.skipIf(!process.env.XCore_API_KEY)("xCore Provider (grok-code-fast-1 via OpenCore Completions)", () => {
+	describe.skipIf(!process.env.XCore_API_KEY)("xCore Provider (grok-code-fast-1 via OpenAI Completions)", () => {
 		const llm = getModel("xai", "grok-code-fast-1");
 
 		it("should complete basic text generation", { retry: 3 }, async () => {
@@ -567,7 +567,7 @@ describe("Generate E2E Tests", () => {
 		});
 	});
 
-	describe.skipIf(!process.env.GROQ_API_KEY)("Groq Provider (gpt-oss-20b via OpenCore Completions)", () => {
+	describe.skipIf(!process.env.GROQ_API_KEY)("Groq Provider (gpt-oss-20b via OpenAI Completions)", () => {
 		const llm = getModel("groq", "openai/gpt-oss-20b");
 
 		it("should complete basic text generation", { retry: 3 }, async () => {
@@ -591,7 +591,7 @@ describe("Generate E2E Tests", () => {
 		});
 	});
 
-	describe.skipIf(!process.env.CEREBRAS_API_KEY)("Cerebras Provider (gpt-oss-120b via OpenCore Completions)", () => {
+	describe.skipIf(!process.env.CEREBRAS_API_KEY)("Cerebras Provider (gpt-oss-120b via OpenAI Completions)", () => {
 		const llm = getModel("cerebras", "gpt-oss-120b");
 
 		it("should complete basic text generation", { retry: 3 }, async () => {
@@ -616,7 +616,7 @@ describe("Generate E2E Tests", () => {
 	});
 
 	describe.skipIf(!hasCloudflareWorkersCoreCredentials())(
-		"Cloudflare Workers Core Provider (Kimi K2.6 via OpenCore Completions)",
+		"Cloudflare Workers Core Provider (Kimi K2.6 via OpenAI Completions)",
 		() => {
 			const llm = getModel("cloudflare-workers-ai", "@cf/moonshotai/kimi-k2.6");
 
@@ -669,11 +669,11 @@ describe("Generate E2E Tests", () => {
 		},
 	);
 
-	describe.skipIf(!hasCloudflareAiGatewayCredentials() || !process.env.OPENCore_API_KEY)(
-		"Cloudflare Core Gateway → OpenCore BYOK (gpt-5.1 via /openai responses)",
+	describe.skipIf(!hasCloudflareAiGatewayCredentials() || !process.env.OpenAI_API_KEY)(
+		"Cloudflare Core Gateway → OpenAI BYOK (gpt-5.1 via /openai responses)",
 		() => {
 			const llm = getModel("cloudflare-ai-gateway", "gpt-5.1");
-			const options = { headers: { Authorization: `Bearer ${process.env.OPENCore_API_KEY}` } };
+			const options = { headers: { Authorization: `Bearer ${process.env.OpenAI_API_KEY}` } };
 			const thinkingOptions = {
 				...options,
 				thinkingEnabled: true,
@@ -735,7 +735,7 @@ describe("Generate E2E Tests", () => {
 		},
 	);
 
-	describe.skipIf(!process.env.HF_TOKEN)("Hugging Face Provider (Kimi-K2.5 via OpenCore Completions)", () => {
+	describe.skipIf(!process.env.HF_TOKEN)("Hugging Face Provider (Kimi-K2.5 via OpenAI Completions)", () => {
 		const llm = getModel("huggingface", "moonshotai/Kimi-K2.5");
 
 		it("should complete basic text generation", { retry: 3 }, async () => {
@@ -759,7 +759,7 @@ describe("Generate E2E Tests", () => {
 		});
 	});
 
-	describe.skipIf(!process.env.OPENROUTER_API_KEY)("OpenRouter Provider (glm-4.5v via OpenCore Completions)", () => {
+	describe.skipIf(!process.env.OPENROUTER_API_KEY)("OpenRouter Provider (glm-4.5v via OpenAI Completions)", () => {
 		const llm = getModel("openrouter", "z-ai/glm-4.5v");
 
 		it("should complete basic text generation", { retry: 3 }, async () => {
@@ -868,7 +868,7 @@ describe("Generate E2E Tests", () => {
 		},
 	);
 
-	describe.skipIf(!process.env.ZCore_API_KEY)("zCore Provider (glm-5.1 via OpenCore Completions)", () => {
+	describe.skipIf(!process.env.ZCore_API_KEY)("zCore Provider (glm-5.1 via OpenAI Completions)", () => {
 		const llm = getModel("zai", "glm-5.1");
 
 		it("should complete basic text generation", { retry: 3 }, async () => {
@@ -1118,7 +1118,7 @@ describe("Generate E2E Tests", () => {
 	);
 
 	// =========================================================================
-	// OAuth-based providers (credentials from ~/.moodcli/engine/oauth.json)
+	// OAuth-based providers (credentials from ~/.Mooncli/engine/oauth.json)
 	// Tokens are resolved at module level (see oauthTokens above)
 	// =========================================================================
 
@@ -1186,7 +1186,7 @@ describe("Generate E2E Tests", () => {
 		});
 	});
 
-	describe("GitHub Copilot Provider (gpt-5.3-codex via OpenCore Completions)", () => {
+	describe("GitHub Copilot Provider (gpt-5.3-codex via OpenAI Completions)", () => {
 		const llm = getModel("github-copilot", "gpt-5.3-codex");
 
 		it.skipIf(!githubCopilotToken)("should complete basic text generation", { retry: 3 }, async () => {
@@ -1244,7 +1244,7 @@ describe("Generate E2E Tests", () => {
 		});
 	});
 
-	describe("OpenCore Codex Provider (gpt-5.4)", () => {
+	describe("OpenAI Codex Provider (gpt-5.4)", () => {
 		const llm = getModel("openai-codex", "gpt-5.4");
 
 		it.skipIf(!openaiCodexToken)("should complete basic text generation", { retry: 3 }, async () => {
@@ -1272,7 +1272,7 @@ describe("Generate E2E Tests", () => {
 		});
 	});
 
-	describe("OpenCore Codex Provider (gpt-5.5)", () => {
+	describe("OpenAI Codex Provider (gpt-5.5)", () => {
 		const llm = getModel("openai-codex", "gpt-5.5");
 
 		it.skipIf(!openaiCodexToken)("should complete basic text generation", { retry: 3 }, async () => {
@@ -1300,7 +1300,7 @@ describe("Generate E2E Tests", () => {
 		});
 	});
 
-	describe("OpenCore Codex Provider (gpt-5.5 via WebSocket)", () => {
+	describe("OpenAI Codex Provider (gpt-5.5 via WebSocket)", () => {
 		const llm = getModel("openai-codex", "gpt-5.5");
 		const wsOptions = { apiKey: openaiCodexToken, transport: "websocket" as const };
 
@@ -1406,7 +1406,7 @@ describe("Generate E2E Tests", () => {
 		it("should pass requestMetadata to the SDK payload", { retry: 3 }, async () => {
 			const llmSonnet = getModel("amazon-bedrock", "global.anthropic.claude-sonnet-4-5-20250929-v1:0");
 			let capturedPayload: unknown;
-			const metadata = { app: "moodcli-test", env: "ci" };
+			const metadata = { app: "Mooncli-test", env: "ci" };
 			const response = await complete(
 				llmSonnet,
 				{
@@ -1469,7 +1469,7 @@ describe("Generate E2E Tests", () => {
 		}
 	}
 
-	describe.skipIf(!ollamaInstalled)("Ollama Provider (gpt-oss-20b via OpenCore Completions)", () => {
+	describe.skipIf(!ollamaInstalled)("Ollama Provider (gpt-oss-20b via OpenAI Completions)", () => {
 		let llm: Model<"openai-completions">;
 		let ollamaProcess: ChildProcess | null = null;
 

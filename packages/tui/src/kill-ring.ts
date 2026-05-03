@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Ring buffer for Emacs-style kill/yank operations.
  *

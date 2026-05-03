@@ -5,21 +5,21 @@
  * Uses `ctx.ui.setTitle()` to update the terminal title via the extension API.
  *
  * Usage:
- *   moodcli --extension examples/extensions/titlebar-spinner.ts
+ *   Mooncli --extension examples/extensions/titlebar-spinner.ts
  */
 
+import type { ExtensionAPI, ExtensionContext } from "Mooncli";
 import path from "node:path";
-import type { ExtensionAPI, ExtensionContext } from "moodcli";
 
 const BRCoreLLE_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
-function getBaseTitle(moodcli: ExtensionAPI): string {
+function getBaseTitle(Mooncli: ExtensionAPI): string {
 	const cwd = path.basename(process.cwd());
-	const session = moodcli.getSessionName();
+	const session = Mooncli.getSessionName();
 	return session ? `π - ${session} - ${cwd}` : `π - ${cwd}`;
 }
 
-export default function (moodcli: ExtensionAPI) {
+export default function (Mooncli: ExtensionAPI) {
 	let timer: ReturnType<typeof setInterval> | null = null;
 	let frameIndex = 0;
 
@@ -29,7 +29,7 @@ export default function (moodcli: ExtensionAPI) {
 			timer = null;
 		}
 		frameIndex = 0;
-		ctx.ui.setTitle(getBaseTitle(moodcli));
+		ctx.ui.setTitle(getBaseTitle(Mooncli));
 	}
 
 	function startAnimation(ctx: ExtensionContext) {
@@ -37,22 +37,22 @@ export default function (moodcli: ExtensionAPI) {
 		timer = setInterval(() => {
 			const frame = BRCoreLLE_FRAMES[frameIndex % BRCoreLLE_FRAMES.length];
 			const cwd = path.basename(process.cwd());
-			const session = moodcli.getSessionName();
+			const session = Mooncli.getSessionName();
 			const title = session ? `${frame} π - ${session} - ${cwd}` : `${frame} π - ${cwd}`;
 			ctx.ui.setTitle(title);
 			frameIndex++;
 		}, 80);
 	}
 
-	moodcli.on("engine_start", async (_event, ctx) => {
+	Mooncli.on("engine_start", async (_event, ctx) => {
 		startAnimation(ctx);
 	});
 
-	moodcli.on("engine_end", async (_event, ctx) => {
+	Mooncli.on("engine_end", async (_event, ctx) => {
 		stopAnimation(ctx);
 	});
 
-	moodcli.on("session_shutdown", async (_event, ctx) => {
+	Mooncli.on("session_shutdown", async (_event, ctx) => {
 		stopAnimation(ctx);
 	});
 }
