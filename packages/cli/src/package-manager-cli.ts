@@ -275,7 +275,7 @@ function updateTargetIncludesExtensions(target: UpdateTarget): boolean {
 }
 
 function printSelfUpdateUnavailable(npmCommand?: string[]): void {
-	console.error(`error: ${APP_NAME} cannot self-update this installation.`);
+	console.error("error: Mooncli cannot self-update this installation.");
 	console.error(getSelfUpdateUnavailableInstruction(PACKAGE_NAME, npmCommand));
 
 	const entrypoint = process.argv[1];
