@@ -930,7 +930,6 @@ export function buildRequest(
 		model: model.id,
 		request,
 		...(isAntigravity ? { requestType: "engine" } : {}),
-		userEngine: isAntigravity ? "antigravity" : "hodeuscli-cli",
 		requestId: `${isAntigravity ? "engine" : "Mooncli"}-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
 	};
 }
