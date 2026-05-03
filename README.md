@@ -1,6 +1,6 @@
-<p align center>
-  <a href="https://moodcli.dev">
-    <img alt="moodcli logosu" src="https://moodcli.dev/logo.svg" width="128">
+<p align="center">
+  <a href="https://github.com/theayzek01/hodeuscli">
+    <img alt="moodcli logosu" src="Moodcli.png" width="160">
   </a>
 </p>
 <p align="center">
