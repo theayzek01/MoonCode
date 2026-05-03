@@ -1,4 +1,4 @@
-import type { AgentState } from "@mariozechner/pi-agent-core";
+import type { AgentState } from "@moodcli/agent";
 import { Store } from "../store.js";
 import type { SessionData, SessionMetadata, StoreConfig } from "../types.js";
 

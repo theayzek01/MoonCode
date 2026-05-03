@@ -15,7 +15,9 @@
  */
 
 import { mkdtemp, writeFile } from "node:fs/promises";
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import { Text } from "@moodcli/tui";
+import { execSync } from "child_process";
+import type { ExtensionAPI } from "moodcli";
 import {
 	DEFAULT_MAX_BYTES,
 	DEFAULT_MAX_LINES,
@@ -23,9 +25,7 @@ import {
 	type TruncationResult,
 	truncateHead,
 	withFileMutationQueue,
-} from "@mariozechner/pi-coding-agent";
-import { Text } from "@mariozechner/pi-tui";
-import { execSync } from "child_process";
+} from "moodcli";
 import { tmpdir } from "os";
 import { join } from "path";
 import { Type } from "typebox";

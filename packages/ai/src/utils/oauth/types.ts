@@ -27,6 +27,7 @@ export interface OAuthLoginCallbacks {
 	onAuth: (info: OAuthAuthInfo) => void;
 	onPrompt: (prompt: OAuthPrompt) => Promise<string>;
 	onProgress?: (message: string) => void;
+	onInfo?: (lines: string[]) => void;
 	onManualCodeInput?: () => Promise<string>;
 	signal?: AbortSignal;
 }

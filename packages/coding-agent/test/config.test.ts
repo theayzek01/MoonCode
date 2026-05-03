@@ -87,60 +87,58 @@ describe("detectInstallMethod", () => {
 		);
 
 		expect(detectInstallMethod()).toBe("pnpm");
-		expect(getUpdateInstruction("@mariozechner/pi-coding-agent")).toBe(
-			"Run: pnpm install -g @mariozechner/pi-coding-agent",
-		);
+		expect(getUpdateInstruction("moodcli")).toBe("Run: pnpm install -g moodcli");
 	});
 
 	test("does not self-update unknown wrapper installs", () => {
 		setExecPath("/usr/local/bin/node");
 
 		expect(detectInstallMethod()).toBe("unknown");
-		expect(getSelfUpdateCommand("@mariozechner/pi-coding-agent")).toBeUndefined();
-		expect(getUpdateInstruction("@mariozechner/pi-coding-agent")).toBe(
-			"Update @mariozechner/pi-coding-agent using the package manager, wrapper, or source checkout that provides this installation.",
+		expect(getSelfUpdateCommand("moodcli")).toBeUndefined();
+		expect(getUpdateInstruction("moodcli")).toBe(
+			"Update moodcli using the package manager, wrapper, or source checkout that provides this installation.",
 		);
 	});
 
 	test("self-updates npm installs from custom prefixes", () => {
 		const { prefix } = createNpmPrefixInstall();
 
-		const command = getSelfUpdateCommand("@mariozechner/pi-coding-agent");
+		const command = getSelfUpdateCommand("moodcli");
 
 		expect(detectInstallMethod()).toBe("npm");
 		expect(command).toEqual({
 			command: "npm",
-			args: ["--prefix", prefix, "install", "-g", "@mariozechner/pi-coding-agent"],
-			display: `npm --prefix ${prefix} install -g @mariozechner/pi-coding-agent`,
+			args: ["--prefix", prefix, "install", "-g", "moodcli"],
+			display: `npm --prefix ${prefix} install -g moodcli`,
 		});
 	});
 
 	test("self-update respects configured npmCommand", () => {
 		const { prefix } = createNpmPrefixInstall();
 
-		const command = getSelfUpdateCommand("@mariozechner/pi-coding-agent", ["npm", "--prefix", prefix]);
+		const command = getSelfUpdateCommand("moodcli", ["npm", "--prefix", prefix]);
 
 		expect(command).toEqual({
 			command: "npm",
-			args: ["--prefix", prefix, "install", "-g", "@mariozechner/pi-coding-agent"],
-			display: `npm --prefix ${prefix} install -g @mariozechner/pi-coding-agent`,
+			args: ["--prefix", prefix, "install", "-g", "moodcli"],
+			display: `npm --prefix ${prefix} install -g moodcli`,
 		});
 	});
 
 	test("self-update treats empty npmCommand as unset", () => {
 		const { prefix } = createNpmPrefixInstall();
 
-		const command = getSelfUpdateCommand("@mariozechner/pi-coding-agent", []);
+		const command = getSelfUpdateCommand("moodcli", []);
 
-		expect(command?.args).toEqual(["--prefix", prefix, "install", "-g", "@mariozechner/pi-coding-agent"]);
+		expect(command?.args).toEqual(["--prefix", prefix, "install", "-g", "moodcli"]);
 	});
 
 	test("quotes npm self-update display paths", () => {
 		const { prefix } = createNpmPrefixInstall("pi prefix ");
 
-		const command = getSelfUpdateCommand("@mariozechner/pi-coding-agent");
+		const command = getSelfUpdateCommand("moodcli");
 
-		expect(command?.display).toBe(`npm --prefix "${prefix}" install -g @mariozechner/pi-coding-agent`);
+		expect(command?.display).toBe(`npm --prefix "${prefix}" install -g moodcli`);
 	});
 
 	test("does not infer Windows npm custom prefixes from package paths", () => {
@@ -149,21 +147,19 @@ describe("detectInstallMethod", () => {
 		setExecPath(`${packageDir}\\dist\\cli.js`);
 
 		expect(detectInstallMethod()).toBe("npm");
-		expect(getUpdateInstruction("@mariozechner/pi-coding-agent")).toBe(
-			"Run: npm install -g @mariozechner/pi-coding-agent",
-		);
+		expect(getUpdateInstruction("moodcli")).toBe("Run: npm install -g moodcli");
 	});
 
 	test("self-updates bun global installs from bun pm bin", () => {
 		createBunGlobalInstall();
 
-		const command = getSelfUpdateCommand("@mariozechner/pi-coding-agent");
+		const command = getSelfUpdateCommand("moodcli");
 
 		expect(detectInstallMethod()).toBe("bun");
 		expect(command).toEqual({
 			command: "bun",
-			args: ["install", "-g", "@mariozechner/pi-coding-agent"],
-			display: "bun install -g @mariozechner/pi-coding-agent",
+			args: ["install", "-g", "moodcli"],
+			display: "bun install -g moodcli",
 		});
 	});
 
@@ -171,9 +167,7 @@ describe("detectInstallMethod", () => {
 		const { packageDir } = createNpmPrefixInstall();
 		chmodSync(packageDir, 0o500);
 
-		expect(getSelfUpdateCommand("@mariozechner/pi-coding-agent")).toBeUndefined();
-		expect(getSelfUpdateUnavailableInstruction("@mariozechner/pi-coding-agent")).toContain(
-			"the install path is not writable",
-		);
+		expect(getSelfUpdateCommand("moodcli")).toBeUndefined();
+		expect(getSelfUpdateUnavailableInstruction("moodcli")).toContain("the install path is not writable");
 	});
 });

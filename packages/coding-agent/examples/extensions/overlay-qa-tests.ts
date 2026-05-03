@@ -19,10 +19,10 @@
  *   /overlay-streaming  - Multiple input panels with simulated streaming (Tab to cycle focus)
  */
 
-import type { ExtensionAPI, ExtensionCommandContext, Theme } from "@mariozechner/pi-coding-agent";
-import type { Component, OverlayAnchor, OverlayHandle, OverlayOptions, TUI } from "@mariozechner/pi-tui";
-import { matchesKey, truncateToWidth, visibleWidth } from "@mariozechner/pi-tui";
+import type { Component, OverlayAnchor, OverlayHandle, OverlayOptions, TUI } from "@moodcli/tui";
+import { matchesKey, truncateToWidth, visibleWidth } from "@moodcli/tui";
 import { spawn } from "child_process";
+import type { ExtensionAPI, ExtensionCommandContext, Theme } from "moodcli";
 
 // Global handle for toggle demo (in real code, use a more elegant pattern)
 let globalToggleHandle: OverlayHandle | null = null;

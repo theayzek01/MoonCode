@@ -1,12 +1,4 @@
-import {
-	Container,
-	type Focusable,
-	fuzzyFilter,
-	getKeybindings,
-	Input,
-	Spacer,
-	TruncatedText,
-} from "@mariozechner/pi-tui";
+import { Container, type Focusable, fuzzyFilter, getKeybindings, Input, Spacer, TruncatedText } from "@moodcli/tui";
 import type { AuthStatus, AuthStorage } from "../../../core/auth-storage.js";
 import { theme } from "../theme/theme.js";
 import { DynamicBorder } from "./dynamic-border.js";
@@ -66,7 +58,7 @@ export class OAuthSelectorComponent extends Container implements Focusable {
 		this.addChild(new Spacer(1));
 
 		// Add title
-		const title = mode === "login" ? "Select provider to configure:" : "Select provider to logout:";
+		const title = mode === "login" ? "Yapilandirmak icin saglayici secin:" : "Cikis yapmak icin saglayici secin:";
 		this.addChild(new TruncatedText(theme.fg("accent", theme.bold(title)), 1, 0));
 		this.addChild(new Spacer(1));
 
@@ -141,18 +133,18 @@ export class OAuthSelectorComponent extends Container implements Focusable {
 			const message =
 				this.allProviders.length === 0
 					? this.mode === "login"
-						? "No providers available"
-						: "No providers logged in. Use /login first."
-					: "No matching providers";
+						? "Kullanilabilir saglayici yok"
+						: "Giris yapmis saglayici yok. Once /login kullanin."
+					: "Eslesen saglayici yok";
 			this.listContainer.addChild(new TruncatedText(theme.fg("muted", `  ${message}`), 1, 0));
 		}
 	}
 
 	private formatStatusIndicator(provider: AuthSelectorProvider): string {
 		const credential = this.authStorage.get(provider.id);
-		if (credential?.type === provider.authType) return theme.fg("success", " ✓ configured");
+		if (credential?.type === provider.authType) return theme.fg("success", " ✓ yapilandirildi");
 		if (credential) {
-			const label = credential.type === "oauth" ? "subscription configured" : "API key configured";
+			const label = credential.type === "oauth" ? "abonelik yapilandirildi" : "API anahtari yapilandirildi";
 			return theme.fg("muted", " • ") + theme.fg("warning", label);
 		}
 		if (provider.authType !== "api_key") return theme.fg("muted", " • unconfigured");

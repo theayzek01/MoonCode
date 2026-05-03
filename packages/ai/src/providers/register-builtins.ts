@@ -14,6 +14,7 @@ import type { BedrockOptions } from "./amazon-bedrock.js";
 import type { AnthropicOptions } from "./anthropic.js";
 import type { AzureOpenAIResponsesOptions } from "./azure-openai-responses.js";
 import type { GoogleOptions } from "./google.js";
+import type { GoogleGeminiCliOptions } from "./google-antigravity.js";
 import type { GoogleVertexOptions } from "./google-vertex.js";
 import type { MistralOptions } from "./mistral.js";
 import type { OpenAICodexResponsesOptions } from "./openai-codex-responses.js";
@@ -73,6 +74,7 @@ interface OpenAIResponsesProviderModule {
 	streamSimpleOpenAIResponses: StreamFunction<"openai-responses", SimpleStreamOptions>;
 }
 
+
 interface BedrockProviderModule {
 	streamBedrock: (
 		model: Model<"bedrock-converse-stream">,
@@ -111,6 +113,9 @@ let openAICompletionsProviderModulePromise:
 	| undefined;
 let openAIResponsesProviderModulePromise:
 	| Promise<LazyProviderModule<"openai-responses", OpenAIResponsesOptions, SimpleStreamOptions>>
+	| undefined;
+let googleAntigravityProviderModulePromise:
+	| Promise<LazyProviderModule<"google-antigravity", GoogleGeminiCliOptions, SimpleStreamOptions>>
 	| undefined;
 let bedrockProviderModuleOverride:
 	| LazyProviderModule<"bedrock-converse-stream", BedrockOptions, SimpleStreamOptions>
@@ -304,6 +309,19 @@ function loadOpenAIResponsesProviderModule(): Promise<
 	return openAIResponsesProviderModulePromise;
 }
 
+function loadGoogleAntigravityProviderModule(): Promise<
+	LazyProviderModule<"google-antigravity", GoogleGeminiCliOptions, SimpleStreamOptions>
+> {
+	googleAntigravityProviderModulePromise ||= import("./google-antigravity.js").then((module) => {
+		const provider = module as any;
+		return {
+			stream: provider.streamGoogleGeminiCli,
+			streamSimple: provider.streamSimpleGoogleGeminiCli,
+		};
+	});
+	return googleAntigravityProviderModulePromise;
+}
+
 function loadBedrockProviderModule(): Promise<
 	LazyProviderModule<"bedrock-converse-stream", BedrockOptions, SimpleStreamOptions>
 > {
@@ -336,6 +354,8 @@ export const streamOpenAICompletions = createLazyStream(loadOpenAICompletionsPro
 export const streamSimpleOpenAICompletions = createLazySimpleStream(loadOpenAICompletionsProviderModule);
 export const streamOpenAIResponses = createLazyStream(loadOpenAIResponsesProviderModule);
 export const streamSimpleOpenAIResponses = createLazySimpleStream(loadOpenAIResponsesProviderModule);
+export const streamGoogleAntigravity = createLazyStream(loadGoogleAntigravityProviderModule);
+export const streamSimpleGoogleAntigravity = createLazySimpleStream(loadGoogleAntigravityProviderModule);
 const streamBedrockLazy = createLazyStream(loadBedrockProviderModule);
 const streamSimpleBedrockLazy = createLazySimpleStream(loadBedrockProviderModule);
 
@@ -362,6 +382,12 @@ export function registerBuiltInApiProviders(): void {
 		api: "openai-responses",
 		stream: streamOpenAIResponses,
 		streamSimple: streamSimpleOpenAIResponses,
+	});
+
+	registerApiProvider({
+		api: "google-antigravity",
+		stream: streamGoogleAntigravity,
+		streamSimple: streamSimpleGoogleAntigravity,
 	});
 
 	registerApiProvider({

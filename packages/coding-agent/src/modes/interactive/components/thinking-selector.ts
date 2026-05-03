@@ -1,5 +1,5 @@
-import type { ThinkingLevel } from "@mariozechner/pi-agent-core";
-import { Container, type SelectItem, SelectList, type SelectListLayoutOptions } from "@mariozechner/pi-tui";
+import type { ThinkingLevel } from "@moodcli/agent";
+import { Container, type SelectItem, SelectList, type SelectListLayoutOptions } from "@moodcli/tui";
 import { getSelectListTheme } from "../theme/theme.js";
 import { DynamicBorder } from "./dynamic-border.js";
 
@@ -9,12 +9,12 @@ const THINKING_SELECT_LIST_LAYOUT: SelectListLayoutOptions = {
 };
 
 const LEVEL_DESCRIPTIONS: Record<ThinkingLevel, string> = {
-	off: "No reasoning",
-	minimal: "Very brief reasoning (~1k tokens)",
-	low: "Light reasoning (~2k tokens)",
-	medium: "Moderate reasoning (~8k tokens)",
-	high: "Deep reasoning (~16k tokens)",
-	xhigh: "Maximum reasoning (~32k tokens)",
+	off: "Dusunme kapali",
+	minimal: "Cok kisa dusunme (~1k token)",
+	low: "Hafif dusunme (~2k token)",
+	medium: "Orta dusunme (~8k token)",
+	high: "Derin dusunme (~16k token)",
+	xhigh: "Maksimum dusunme (~32k token)",
 };
 
 /**

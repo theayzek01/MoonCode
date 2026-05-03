@@ -17,6 +17,7 @@ if (typeof process !== "undefined" && (process.versions?.node || process.version
 	});
 }
 
+import type { Api, Model } from "../../types.js";
 import { oauthErrorHtml, oauthSuccessHtml } from "./oauth-page.js";
 import { generatePKCE } from "./pkce.js";
 import type { OAuthCredentials, OAuthLoginCallbacks, OAuthPrompt, OAuthProviderInterface } from "./types.js";
@@ -447,5 +448,56 @@ export const openaiCodexOAuthProvider: OAuthProviderInterface = {
 
 	getApiKey(credentials: OAuthCredentials): string {
 		return credentials.access;
+	},
+
+	modifyModels(models: Model<Api>[], _credentials: OAuthCredentials): Model<Api>[] {
+		const codexModels: Model<Api>[] = [
+			{
+				id: "claude-sonnet-4.6",
+				name: "Claude Sonnet 4.6 (Codex)",
+				api: "anthropic-messages",
+				provider: "openai-codex",
+				baseUrl: "https://api.openai.com",
+				reasoning: true,
+				input: ["text", "image"],
+				cost: {
+					input: 0,
+					output: 0,
+					cacheRead: 0,
+					cacheWrite: 0,
+				},
+				contextWindow: 1000000,
+				maxTokens: 32000,
+			} as Model<"anthropic-messages">,
+			{
+				id: "claude-opus-4.6",
+				name: "Claude Opus 4.6 (Codex)",
+				api: "anthropic-messages",
+				provider: "openai-codex",
+				baseUrl: "https://api.openai.com",
+				reasoning: true,
+				thinkingLevelMap: { xhigh: "max" },
+				input: ["text", "image"],
+				cost: {
+					input: 0,
+					output: 0,
+					cacheRead: 0,
+					cacheWrite: 0,
+				},
+				contextWindow: 1000000,
+				maxTokens: 64000,
+			} as Model<"anthropic-messages">,
+		];
+
+		const result = [...models];
+		for (const cm of codexModels) {
+			const existingIndex = result.findIndex((m) => m.provider === "openai-codex" && m.id === cm.id);
+			if (existingIndex >= 0) {
+				result[existingIndex] = cm;
+			} else {
+				result.push(cm);
+			}
+		}
+		return result;
 	},
 };

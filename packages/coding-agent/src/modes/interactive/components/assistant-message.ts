@@ -1,5 +1,5 @@
-import type { AssistantMessage } from "@mariozechner/pi-ai";
-import { Container, Markdown, type MarkdownTheme, Spacer, Text } from "@mariozechner/pi-tui";
+import type { AssistantMessage } from "@moodcli/ai";
+import { Container, Markdown, type MarkdownTheme, Spacer, Text } from "@moodcli/tui";
 import { getMarkdownTheme, theme } from "../theme/theme.js";
 
 const OSC133_ZONE_START = "\x1b]133;A\x07";
@@ -21,7 +21,7 @@ export class AssistantMessageComponent extends Container {
 		message?: AssistantMessage,
 		hideThinkingBlock = false,
 		markdownTheme: MarkdownTheme = getMarkdownTheme(),
-		hiddenThinkingLabel = "Thinking...",
+		hiddenThinkingLabel = "Dusunuluyor...",
 	) {
 		super();
 
@@ -73,52 +73,73 @@ export class AssistantMessageComponent extends Container {
 	updateContent(message: AssistantMessage): void {
 		this.lastMessage = message;
 
-		// Clear content container
-		this.contentContainer.clear();
-
 		const hasVisibleContent = message.content.some(
 			(c) => (c.type === "text" && c.text.trim()) || (c.type === "thinking" && c.thinking.trim()),
 		);
 
-		if (hasVisibleContent) {
+		// Initialize spacer if needed
+		if (hasVisibleContent && this.contentContainer.children.length === 0) {
 			this.contentContainer.addChild(new Spacer(1));
 		}
 
-		// Render content in order
+		// Keep track of which content blocks we've rendered
+		let childIndex = hasVisibleContent ? 1 : 0;
+
 		for (let i = 0; i < message.content.length; i++) {
 			const content = message.content[i];
+			const hasVisibleContentAfter = message.content
+				.slice(i + 1)
+				.some((c) => (c.type === "text" && c.text.trim()) || (c.type === "thinking" && c.thinking.trim()));
+
 			if (content.type === "text" && content.text.trim()) {
-				// Assistant text messages with no background - trim the text
-				// Set paddingY=0 to avoid extra spacing before tool executions
-				this.contentContainer.addChild(new Markdown(content.text.trim(), 1, 0, this.markdownTheme));
+				const text = content.text.trim();
+				let component = this.contentContainer.children[childIndex] as Markdown | undefined;
+
+				if (!(component instanceof Markdown) || (component as any).isThinking) {
+					// Need a new text Markdown component
+					component = new Markdown(text, 1, 0, this.markdownTheme);
+					this.contentContainer.children[childIndex] = component;
+				} else {
+					component.setText(text);
+				}
+				childIndex++;
 			} else if (content.type === "thinking" && content.thinking.trim()) {
-				// Add spacing only when another visible assistant content block follows.
-				// This avoids a superfluous blank line before separately-rendered tool execution blocks.
-				const hasVisibleContentAfter = message.content
-					.slice(i + 1)
-					.some((c) => (c.type === "text" && c.text.trim()) || (c.type === "thinking" && c.thinking.trim()));
+				const thinking = content.thinking.trim();
 
 				if (this.hideThinkingBlock) {
-					// Show static thinking label when hidden
-					this.contentContainer.addChild(
-						new Text(theme.italic(theme.fg("thinkingText", this.hiddenThinkingLabel)), 1, 0),
-					);
-					if (hasVisibleContentAfter) {
-						this.contentContainer.addChild(new Spacer(1));
+					let component = this.contentContainer.children[childIndex] as Text | undefined;
+					if (!(component instanceof Text)) {
+						component = new Text(theme.italic(theme.fg("thinkingText", this.hiddenThinkingLabel)), 1, 0);
+						this.contentContainer.children[childIndex] = component;
 					}
+					childIndex++;
 				} else {
-					// Thinking traces in thinkingText color, italic
-					this.contentContainer.addChild(
-						new Markdown(content.thinking.trim(), 1, 0, this.markdownTheme, {
+					let component = this.contentContainer.children[childIndex] as Markdown | undefined;
+					if (!(component instanceof Markdown) || !(component as any).isThinking) {
+						component = new Markdown(thinking, 1, 0, this.markdownTheme, {
 							color: (text: string) => theme.fg("thinkingText", text),
 							italic: true,
-						}),
-					);
-					if (hasVisibleContentAfter) {
-						this.contentContainer.addChild(new Spacer(1));
+						});
+						(component as any).isThinking = true;
+						this.contentContainer.children[childIndex] = component;
+					} else {
+						component.setText(thinking);
 					}
+					childIndex++;
+				}
+
+				if (hasVisibleContentAfter) {
+					if (!(this.contentContainer.children[childIndex] instanceof Spacer)) {
+						this.contentContainer.children.splice(childIndex, 0, new Spacer(1));
+					}
+					childIndex++;
 				}
 			}
+		}
+
+		// Remove any extra children if content shrank
+		if (this.contentContainer.children.length > childIndex) {
+			this.contentContainer.children.splice(childIndex);
 		}
 
 		// Check if aborted - show after partial content

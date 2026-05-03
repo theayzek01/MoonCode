@@ -7,7 +7,7 @@ import * as crypto from "node:crypto";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { AgentMessage } from "@mariozechner/pi-agent-core";
+import type { AgentMessage } from "@moodcli/agent";
 import {
 	type AssistantMessage,
 	getProviders,
@@ -15,7 +15,7 @@ import {
 	type Message,
 	type Model,
 	type OAuthProviderId,
-} from "@mariozechner/pi-ai";
+} from "@moodcli/ai";
 import type {
 	AutocompleteItem,
 	AutocompleteProvider,
@@ -26,7 +26,7 @@ import type {
 	OverlayHandle,
 	OverlayOptions,
 	SlashCommand,
-} from "@mariozechner/pi-tui";
+} from "@moodcli/tui";
 import {
 	CombinedAutocompleteProvider,
 	type Component,
@@ -43,7 +43,7 @@ import {
 	TruncatedText,
 	TUI,
 	visibleWidth,
-} from "@mariozechner/pi-tui";
+} from "@moodcli/tui";
 import { spawn, spawnSync } from "child_process";
 import {
 	APP_NAME,
@@ -84,10 +84,10 @@ import { getChangelogPath, getNewEntries, parseChangelog } from "../../utils/cha
 import { copyToClipboard } from "../../utils/clipboard.js";
 import { extensionForImageMimeType, readClipboardImage } from "../../utils/clipboard-image.js";
 import { parseGitUrl } from "../../utils/git.js";
-import { getPiUserAgent } from "../../utils/pi-user-agent.js";
+import { getMoodcliUserAgent } from "../../utils/mood-user-agent.js";
 import { killTrackedDetachedChildren } from "../../utils/shell.js";
 import { ensureTool } from "../../utils/tools-manager.js";
-import { checkForNewPiVersion } from "../../utils/version-check.js";
+import { checkForNewMoodcliVersion } from "../../utils/version-check.js";
 import { ArminComponent } from "./components/armin.js";
 import { AssistantMessageComponent } from "./components/assistant-message.js";
 import { BashExecutionComponent } from "./components/bash-execution.js";
@@ -164,7 +164,7 @@ type CompactionQueuedMessage = {
 };
 
 const ANTHROPIC_SUBSCRIPTION_AUTH_WARNING =
-	"Anthropic subscription auth is active. Third-party harness usage draws from extra usage and is billed per token, not your Claude plan limits. Manage extra usage at https://claude.ai/settings/usage.";
+	"Anthropic abonelik yetkilendirmesi aktif. Ucuncu taraf kullanimi ek ucrete tabidir ve jeton basina ucretlendirilir. Ayarlari su adresten yonetebilirsiniz: https://claude.ai/settings/usage.";
 
 function isAnthropicSubscriptionAuthKey(apiKey: string | undefined): boolean {
 	return typeof apiKey === "string" && apiKey.startsWith("sk-ant-oat");
@@ -238,8 +238,8 @@ export class InteractiveMode {
 	private workingMessage: string | undefined = undefined;
 	private workingVisible = true;
 	private workingIndicatorOptions: LoaderIndicatorOptions | undefined = undefined;
-	private readonly defaultWorkingMessage = "Working...";
-	private readonly defaultHiddenThinkingLabel = "Thinking...";
+	private readonly defaultWorkingMessage = "Calisiyor...";
+	private readonly defaultHiddenThinkingLabel = "Dusunuyor...";
 	private hiddenThinkingLabel = this.defaultHiddenThinkingLabel;
 
 	private lastSigintTime = 0;
@@ -569,40 +569,43 @@ export class InteractiveMode {
 			const hint = (keybinding: AppKeybinding, description: string) => keyHint(keybinding, description);
 
 			const expandedInstructions = [
-				hint("app.interrupt", "to interrupt"),
-				hint("app.clear", "to clear"),
-				rawKeyHint(`${keyText("app.clear")} twice`, "to exit"),
-				hint("app.exit", "to exit (empty)"),
-				hint("app.suspend", "to suspend"),
-				keyHint("tui.editor.deleteToLineEnd", "to delete to end"),
-				hint("app.thinking.cycle", "to cycle thinking level"),
-				rawKeyHint(`${keyText("app.model.cycleForward")}/${keyText("app.model.cycleBackward")}`, "to cycle models"),
-				hint("app.model.select", "to select model"),
-				hint("app.tools.expand", "to expand tools"),
-				hint("app.thinking.toggle", "to expand thinking"),
-				hint("app.editor.external", "for external editor"),
-				rawKeyHint("/", "for commands"),
-				rawKeyHint("!", "to run bash"),
-				rawKeyHint("!!", "to run bash (no context)"),
-				hint("app.message.followUp", "to queue follow-up"),
-				hint("app.message.dequeue", "to edit all queued messages"),
-				hint("app.clipboard.pasteImage", "to paste image"),
-				rawKeyHint("drop files", "to attach"),
+				hint("app.interrupt", "durdurmak icin"),
+				hint("app.clear", "temizlemek icin"),
+				rawKeyHint(`${keyText("app.clear")} iki kez`, "cikmak icin"),
+				hint("app.exit", "cikmak icin (bosken)"),
+				hint("app.suspend", "askiya almak icin"),
+				keyHint("tui.editor.deleteToLineEnd", "satir sonuna kadar silmek icin"),
+				hint("app.thinking.cycle", "dusunme seviyesini degistirmek icin"),
+				rawKeyHint(
+					`${keyText("app.model.cycleForward")}/${keyText("app.model.cycleBackward")}`,
+					"modelleri dondurmek icin",
+				),
+				hint("app.model.select", "model secmek icin"),
+				hint("app.tools.expand", "araclari genisletmek icin"),
+				hint("app.thinking.toggle", "dusunmeyi genisletmek icin"),
+				hint("app.editor.external", "harici editor icin"),
+				rawKeyHint("/", "komutlar icin"),
+				rawKeyHint("!", "bash calistirmak icin"),
+				rawKeyHint("!!", "bash calistirmak icin (baglamsiz)"),
+				hint("app.message.followUp", "takip mesaji kuyruklamak icin"),
+				hint("app.message.dequeue", "tum kuyruklanan mesajlari duzenlemek icin"),
+				hint("app.clipboard.pasteImage", "resim yapistirmak icin"),
+				rawKeyHint("dosyalari birakin", "eklemek icin"),
 			].join("\n");
 			const compactInstructions = [
-				hint("app.interrupt", "interrupt"),
-				rawKeyHint(`${keyText("app.clear")}/${keyText("app.exit")}`, "clear/exit"),
-				rawKeyHint("/", "commands"),
+				hint("app.interrupt", "durdur"),
+				rawKeyHint(`${keyText("app.clear")}/${keyText("app.exit")}`, "temizle/cik"),
+				rawKeyHint("/", "komutlar"),
 				rawKeyHint("!", "bash"),
-				hint("app.tools.expand", "more"),
+				hint("app.tools.expand", "daha fazla"),
 			].join(theme.fg("muted", " · "));
 			const compactOnboarding = theme.fg(
 				"dim",
-				`Press ${keyText("app.tools.expand")} to show full startup help and loaded resources.`,
+				`Tam yardim ve yuklenen kaynaklari gormek icin ${keyText("app.tools.expand")} tusuna basin.`,
 			);
 			const onboarding = theme.fg(
 				"dim",
-				`Pi can explain its own features and look up its docs. Ask it how to use or extend Pi.`,
+				`Moodcli kendi ozelliklerini aciklayabilir ve dokumanlarina bakabilir. Nasil kullanildigini Moodcli'ye sorabilirsiniz.`,
 			);
 			this.builtInHeader = new ExpandableText(
 				() => `${logo}\n${compactInstructions}\n${compactOnboarding}\n\n${onboarding}`,
@@ -682,7 +685,7 @@ export class InteractiveMode {
 		await this.init();
 
 		// Start version check asynchronously
-		checkForNewPiVersion(this.version).then((newVersion) => {
+		checkForNewMoodcliVersion(this.version).then((newVersion) => {
 			if (newVersion) {
 				this.showNewVersionNotification(newVersion);
 			}
@@ -754,7 +757,7 @@ export class InteractiveMode {
 	}
 
 	private async checkForPackageUpdates(): Promise<string[]> {
-		if (process.env.PI_OFFLINE) {
+		if (process.env.MOOD_OFFLINE) {
 			return [];
 		}
 
@@ -812,7 +815,7 @@ export class InteractiveMode {
 		}
 
 		if (extendedKeysFormat === "xterm") {
-			return "tmux extended-keys-format is xterm. Pi works best with csi-u. Add `set -g extended-keys-format csi-u` to ~/.tmux.conf and restart tmux.";
+			return "tmux extended-keys-format is xterm. Moodcli works best with csi-u. Add `set -g extended-keys-format csi-u` to ~/.tmux.conf and restart tmux.";
 		}
 
 		return undefined;
@@ -850,7 +853,7 @@ export class InteractiveMode {
 	}
 
 	private reportInstallTelemetry(version: string): void {
-		if (process.env.PI_OFFLINE) {
+		if (process.env.MOOD_OFFLINE) {
 			return;
 		}
 
@@ -858,9 +861,10 @@ export class InteractiveMode {
 			return;
 		}
 
-		void fetch(`https://pi.dev/api/report-install?version=${encodeURIComponent(version)}`, {
+		void fetch(`https://moodcli.dev/api/report-install?version=${encodeURIComponent(version)}`, {
+			method: "POST",
 			headers: {
-				"User-Agent": getPiUserAgent(version),
+				"User-Agent": getMoodcliUserAgent(version),
 			},
 			signal: AbortSignal.timeout(5000),
 		})
@@ -2414,7 +2418,7 @@ export class InteractiveMode {
 			// Write to temp file
 			const tmpDir = os.tmpdir();
 			const ext = extensionForImageMimeType(image.mimeType) ?? "png";
-			const fileName = `pi-clipboard-${crypto.randomUUID()}.${ext}`;
+			const fileName = `mood-clipboard-${crypto.randomUUID()}.${ext}`;
 			const filePath = path.join(tmpDir, fileName);
 			fs.writeFileSync(filePath, Buffer.from(image.bytes));
 
@@ -2866,7 +2870,7 @@ export class InteractiveMode {
 					if (event.reason === "manual") {
 						this.showError("Compaction cancelled");
 					} else {
-						this.showStatus("Auto-compaction cancelled");
+						this.showStatus("Otomatik sikistirma iptal edildi");
 					}
 				} else if (event.result) {
 					this.chatContainer.clear();
@@ -3164,7 +3168,7 @@ export class InteractiveMode {
 		const compactionCount = allEntries.filter((e) => e.type === "compaction").length;
 		if (compactionCount > 0) {
 			const times = compactionCount === 1 ? "1 time" : `${compactionCount} times`;
-			this.showStatus(`Session compacted ${times}`);
+			this.showStatus(`Oturum ${times} kez sikistirildi`);
 		}
 	}
 
@@ -3258,7 +3262,7 @@ export class InteractiveMode {
 
 	private handleCtrlZ(): void {
 		if (process.platform === "win32") {
-			this.showStatus("Suspend to background is not supported on Windows");
+			this.showStatus("Arka plana alma Windows'ta desteklenmiyor");
 			return;
 		}
 
@@ -3328,9 +3332,9 @@ export class InteractiveMode {
 	private handleDequeue(): void {
 		const restored = this.restoreQueuedMessagesToEditor();
 		if (restored === 0) {
-			this.showStatus("No queued messages to restore");
+			this.showStatus("Geri yuklenecek kuyruklanmis mesaj yok");
 		} else {
-			this.showStatus(`Restored ${restored} queued message${restored > 1 ? "s" : ""} to editor`);
+			this.showStatus(`${restored} kuyruklanmis mesaj editoru geri yuklendi`);
 		}
 	}
 
@@ -3347,11 +3351,11 @@ export class InteractiveMode {
 	private cycleThinkingLevel(): void {
 		const newLevel = this.session.cycleThinkingLevel();
 		if (newLevel === undefined) {
-			this.showStatus("Current model does not support thinking");
+			this.showStatus("Mevcut model dusunmeyi desteklemiyor");
 		} else {
 			this.footer.invalidate();
 			this.updateEditorBorderColor();
-			this.showStatus(`Thinking level: ${newLevel}`);
+			this.showStatus(`Dusunme seviyesi: ${newLevel}`);
 		}
 	}
 
@@ -3366,7 +3370,7 @@ export class InteractiveMode {
 				this.updateEditorBorderColor();
 				const thinkingStr =
 					result.model.reasoning && result.thinkingLevel !== "off" ? ` (thinking: ${result.thinkingLevel})` : "";
-				this.showStatus(`Switched to ${result.model.name || result.model.id}${thinkingStr}`);
+				this.showStatus(`${result.model.name || result.model.id} modeline gecildi${thinkingStr}`);
 				void this.maybeWarnAboutAnthropicSubscriptionAuth(result.model);
 			}
 		} catch (error) {
@@ -3407,7 +3411,7 @@ export class InteractiveMode {
 			this.chatContainer.addChild(this.streamingComponent);
 		}
 
-		this.showStatus(`Thinking blocks: ${this.hideThinkingBlock ? "hidden" : "visible"}`);
+		this.showStatus(`Dusunme bloklari: ${this.hideThinkingBlock ? "gizli" : "gorunur"}`);
 	}
 
 	private openExternalEditor(): void {
@@ -3419,7 +3423,7 @@ export class InteractiveMode {
 		}
 
 		const currentText = this.editor.getExpandedText?.() ?? this.editor.getText();
-		const tmpFile = path.join(os.tmpdir(), `pi-editor-${Date.now()}.pi.md`);
+		const tmpFile = path.join(os.tmpdir(), `mood-editor-${Date.now()}.mood.md`);
 
 		try {
 			// Write current content to temp file
@@ -3600,7 +3604,7 @@ export class InteractiveMode {
 		this.editor.addToHistory?.(text);
 		this.editor.setText("");
 		this.updatePendingMessagesDisplay();
-		this.showStatus("Queued message for after compaction");
+		this.showStatus("Sikistirma sonrasi icin mesaj kuyruklandi");
 	}
 
 	private isExtensionCommand(text: string): boolean {
@@ -3994,7 +3998,7 @@ export class InteractiveMode {
 		const allModels = this.session.modelRegistry.getAvailable();
 
 		if (allModels.length === 0) {
-			this.showStatus("No models available");
+			this.showStatus("Kullanilabilir model yok");
 			return;
 		}
 
@@ -4053,7 +4057,7 @@ export class InteractiveMode {
 								? undefined // All enabled = clear filter
 								: enabledIds;
 						this.settingsManager.setEnabledModels(newPatterns ? [...newPatterns] : undefined);
-						this.showStatus("Model selection saved to settings");
+						this.showStatus("Model secimi ayarlara kaydedildi");
 					},
 					onCancel: () => {
 						done();
@@ -4069,7 +4073,7 @@ export class InteractiveMode {
 		const userMessages = this.session.getUserMessagesForForking();
 
 		if (userMessages.length === 0) {
-			this.showStatus("No messages to fork from");
+			this.showStatus("Catallanacak mesaj yok");
 			return;
 		}
 
@@ -4090,7 +4094,7 @@ export class InteractiveMode {
 						this.renderCurrentSessionState();
 						this.editor.setText(result.selectedText ?? "");
 						done();
-						this.showStatus("Forked to new session");
+						this.showStatus("Yeni oturuma catallandi");
 					} catch (error: unknown) {
 						done();
 						this.showError(error instanceof Error ? error.message : String(error));
@@ -4109,7 +4113,7 @@ export class InteractiveMode {
 	private async handleCloneCommand(): Promise<void> {
 		const leafId = this.sessionManager.getLeafId();
 		if (!leafId) {
-			this.showStatus("Nothing to clone yet");
+			this.showStatus("Henuz kopyalanacak bir sey yok");
 			return;
 		}
 
@@ -4122,7 +4126,7 @@ export class InteractiveMode {
 
 			this.renderCurrentSessionState();
 			this.editor.setText("");
-			this.showStatus("Cloned to new session");
+			this.showStatus("Yeni oturuma kopyalandi");
 		} catch (error: unknown) {
 			this.showError(error instanceof Error ? error.message : String(error));
 		}
@@ -4134,7 +4138,7 @@ export class InteractiveMode {
 		const initialFilterMode = this.settingsManager.getTreeFilterMode();
 
 		if (tree.length === 0) {
-			this.showStatus("No entries in session");
+			this.showStatus("Oturumda girdi yok");
 			return;
 		}
 
@@ -4147,7 +4151,7 @@ export class InteractiveMode {
 					// Selecting the current leaf is a no-op (already there)
 					if (entryId === realLeafId) {
 						done();
-						this.showStatus("Already at this point");
+						this.showStatus("Zaten bu noktadasiniz");
 						return;
 					}
 
@@ -4161,10 +4165,10 @@ export class InteractiveMode {
 					// Check if we should skip the prompt (user preference to always default to no summary)
 					if (!this.settingsManager.getBranchSummarySkipPrompt()) {
 						while (true) {
-							const summaryChoice = await this.showExtensionSelector("Summarize branch?", [
-								"No summary",
-								"Summarize",
-								"Summarize with custom prompt",
+							const summaryChoice = await this.showExtensionSelector("Dal ozetlensin mi?", [
+								"Ozet yok",
+								"Ozetle",
+								"Ozel istem ile ozetle",
 							]);
 
 							if (summaryChoice === undefined) {
@@ -4201,7 +4205,7 @@ export class InteractiveMode {
 							this.ui,
 							(spinner) => theme.fg("accent", spinner),
 							(text) => theme.fg("muted", text),
-							`Summarizing branch... (${keyText("app.interrupt")} to cancel)`,
+							`Dal ozetleniyor... (iptal etmek icin ${keyText("app.interrupt")})`,
 						);
 						this.statusContainer.addChild(summaryLoader);
 						this.ui.requestRender();
@@ -4215,12 +4219,12 @@ export class InteractiveMode {
 
 						if (result.aborted) {
 							// Summarization aborted - re-show tree selector with same selection
-							this.showStatus("Branch summarization cancelled");
+							this.showStatus("Dal ozetleme iptal edildi");
 							this.showTreeSelector(entryId);
 							return;
 						}
 						if (result.cancelled) {
-							this.showStatus("Navigation cancelled");
+							this.showStatus("Gezinti iptal edildi");
 							return;
 						}
 
@@ -4230,7 +4234,7 @@ export class InteractiveMode {
 						if (result.editorText && !this.editor.getText().trim()) {
 							this.editor.setText(result.editorText);
 						}
-						this.showStatus("Navigated to selected point");
+						this.showStatus("Secilen noktaya gidildi");
 						void this.flushCompactionQueue({ willRetry: false });
 					} catch (error) {
 						this.showError(error instanceof Error ? error.message : String(error));
@@ -4309,13 +4313,13 @@ export class InteractiveMode {
 				return result;
 			}
 			this.renderCurrentSessionState();
-			this.showStatus("Resumed session");
+			this.showStatus("Oturuma devam ediliyor");
 			return result;
 		} catch (error: unknown) {
 			if (error instanceof MissingSessionCwdError) {
 				const selectedCwd = await this.promptForMissingSessionCwd(error);
 				if (!selectedCwd) {
-					this.showStatus("Resume cancelled");
+					this.showStatus("Devam etme iptal edildi");
 					return { cancelled: true };
 				}
 				const result = await this.runtimeHost.switchSession(sessionPath, {
@@ -4326,7 +4330,7 @@ export class InteractiveMode {
 					return result;
 				}
 				this.renderCurrentSessionState();
-				this.showStatus("Resumed session in current cwd");
+				this.showStatus("Mevcut calisma dizininde oturuma devam ediliyor");
 				return result;
 			}
 			return this.handleFatalRuntimeError("Failed to resume session", error);
@@ -4379,11 +4383,11 @@ export class InteractiveMode {
 	}
 
 	private showLoginAuthTypeSelector(): void {
-		const subscriptionLabel = "Use a subscription";
-		const apiKeyLabel = "Use an API key";
+		const subscriptionLabel = "Abonelik kullan";
+		const apiKeyLabel = "API anahtari kullan";
 		this.showSelector((done) => {
 			const selector = new ExtensionSelectorComponent(
-				"Select authentication method:",
+				"Kimlik dogrulama yontemi secin:",
 				[subscriptionLabel, apiKeyLabel],
 				(option) => {
 					done();
@@ -4472,8 +4476,8 @@ export class InteractiveMode {
 						await this.updateAvailableProviderCount();
 						const message =
 							providerOption.authType === "oauth"
-								? `Logged out of ${providerOption.name}`
-								: `Removed stored API key for ${providerOption.name}. Environment variables and models.json config are unchanged.`;
+								? `${providerOption.name} oturumu kapatildi`
+								: `${providerOption.name} icin saklanan API anahtari kaldirildi. Ortam degiskenleri ve models.json yapilandirmasi degismedi.`;
 						this.showStatus(message);
 					} catch (error: unknown) {
 						this.showError(`Logout failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -4528,11 +4532,13 @@ export class InteractiveMode {
 		this.footer.invalidate();
 		this.updateEditorBorderColor();
 		if (selectedModel) {
-			this.showStatus(`${actionLabel}. Selected ${selectedModel.id}. Credentials saved to ${getAuthPath()}`);
+			this.showStatus(
+				`${actionLabel}. ${selectedModel.id} secildi. Kimlik bilgileri suraya kaydedildi: ${getAuthPath()}`,
+			);
 			void this.maybeWarnAboutAnthropicSubscriptionAuth(selectedModel);
 			this.checkDaxnutsEasterEgg(selectedModel);
 		} else {
-			this.showStatus(`${actionLabel}. Credentials saved to ${getAuthPath()}`);
+			this.showStatus(`${actionLabel}. Kimlik bilgileri suraya kaydedildi: ${getAuthPath()}`);
 			if (selectionError) {
 				this.showError(selectionError);
 			} else {
@@ -4688,6 +4694,9 @@ export class InteractiveMode {
 				onProgress: (message: string) => {
 					dialog.showProgress(message);
 				},
+				onInfo: (lines: string[]) => {
+					dialog.showInfo(lines);
+				},
 
 				onManualCodeInput: () => manualCodePromise,
 
@@ -4783,7 +4792,7 @@ export class InteractiveMode {
 			if (modelsJsonError) {
 				this.showError(`models.json error: ${modelsJsonError}`);
 			}
-			this.showStatus("Reloaded keybindings, extensions, skills, prompts, themes");
+			this.showStatus("Kisayollar, uzantilar, yetenekler, istemler ve temalar yeniden yuklendi");
 		} catch (error) {
 			dismissReloadBox(previousEditor as Component);
 			this.showError(`Reload failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -4796,10 +4805,10 @@ export class InteractiveMode {
 		try {
 			if (outputPath?.endsWith(".jsonl")) {
 				const filePath = this.session.exportToJsonl(outputPath);
-				this.showStatus(`Session exported to: ${filePath}`);
+				this.showStatus(`Oturum suraya aktarildi: ${filePath}`);
 			} else {
 				const filePath = await this.session.exportToHtml(outputPath);
-				this.showStatus(`Session exported to: ${filePath}`);
+				this.showStatus(`Oturum suraya aktarildi: ${filePath}`);
 			}
 		} catch (error: unknown) {
 			this.showError(`Failed to export session: ${error instanceof Error ? error.message : "Unknown error"}`);
@@ -4844,7 +4853,7 @@ export class InteractiveMode {
 
 		const confirmed = await this.showExtensionConfirm("Import session", `Replace current session with ${inputPath}?`);
 		if (!confirmed) {
-			this.showStatus("Import cancelled");
+			this.showStatus("Ice aktarma iptal edildi");
 			return;
 		}
 
@@ -4856,7 +4865,7 @@ export class InteractiveMode {
 			this.statusContainer.clear();
 			const result = await this.runtimeHost.importFromJsonl(inputPath);
 			if (result.cancelled) {
-				this.showStatus("Import cancelled");
+				this.showStatus("Ice aktarma iptal edildi");
 				return;
 			}
 			this.renderCurrentSessionState();
@@ -4865,16 +4874,16 @@ export class InteractiveMode {
 			if (error instanceof MissingSessionCwdError) {
 				const selectedCwd = await this.promptForMissingSessionCwd(error);
 				if (!selectedCwd) {
-					this.showStatus("Import cancelled");
+					this.showStatus("Ice aktarma iptal edildi");
 					return;
 				}
 				const result = await this.runtimeHost.importFromJsonl(inputPath, selectedCwd);
 				if (result.cancelled) {
-					this.showStatus("Import cancelled");
+					this.showStatus("Ice aktarma iptal edildi");
 					return;
 				}
 				this.renderCurrentSessionState();
-				this.showStatus(`Session imported from: ${inputPath}`);
+				this.showStatus(`Oturum suradan ice aktarildi: ${inputPath}`);
 				return;
 			}
 			if (error instanceof SessionImportFileNotFoundError) {
@@ -4932,7 +4941,7 @@ export class InteractiveMode {
 		loader.onAbort = () => {
 			proc?.kill();
 			restoreEditor();
-			this.showStatus("Share cancelled");
+			this.showStatus("Paylasim iptal edildi");
 		};
 
 		try {
@@ -4970,7 +4979,7 @@ export class InteractiveMode {
 
 			// Create the preview URL
 			const previewUrl = getShareViewerUrl(gistId);
-			this.showStatus(`Share URL: ${previewUrl}\nGist: ${gistUrl}`);
+			this.showStatus(`Paylasim URL'si: ${previewUrl}\nGist: ${gistUrl}`);
 		} catch (error: unknown) {
 			if (!loader.signal.aborted) {
 				restoreEditor();
@@ -4988,7 +4997,7 @@ export class InteractiveMode {
 
 		try {
 			await copyToClipboard(text);
-			this.showStatus("Copied last agent message to clipboard");
+			this.showStatus("Son temsilci mesaji panoya kopyalandi");
 		} catch (error) {
 			this.showError(error instanceof Error ? error.message : String(error));
 		}

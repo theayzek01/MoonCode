@@ -9207,8 +9207,8 @@ export const MODELS = {
 			reasoning: true,
 			input: ["text"],
 			cost: {
-				input: 0.21,
-				output: 0.7899999999999999,
+				input: 0.27,
+				output: 0.95,
 				cacheRead: 0.13,
 				cacheWrite: 0,
 			},
@@ -9318,7 +9318,7 @@ export const MODELS = {
 				cacheRead: 0.024999999999999998,
 				cacheWrite: 0.08333333333333334,
 			},
-			contextWindow: 1000000,
+			contextWindow: 1048576,
 			maxTokens: 8192,
 		} satisfies Model<"openai-completions">,
 		"google/gemini-2.0-flash-lite-001": {
@@ -11807,13 +11807,13 @@ export const MODELS = {
 			reasoning: true,
 			input: ["text"],
 			cost: {
-				input: 0.08,
-				output: 0.28,
+				input: 0.09,
+				output: 0.44999999999999996,
 				cacheRead: 0,
 				cacheWrite: 0,
 			},
 			contextWindow: 40960,
-			maxTokens: 16384,
+			maxTokens: 20000,
 		} satisfies Model<"openai-completions">,
 		"qwen/qwen3-30b-a3b-instruct-2507": {
 			id: "qwen/qwen3-30b-a3b-instruct-2507",

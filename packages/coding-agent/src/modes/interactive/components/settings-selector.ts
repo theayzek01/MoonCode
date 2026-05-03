@@ -1,5 +1,5 @@
-import type { ThinkingLevel } from "@mariozechner/pi-agent-core";
-import type { Transport } from "@mariozechner/pi-ai";
+import type { ThinkingLevel } from "@moodcli/agent";
+import type { Transport } from "@moodcli/ai";
 import {
 	Container,
 	getCapabilities,
@@ -10,7 +10,7 @@ import {
 	SettingsList,
 	Spacer,
 	Text,
-} from "@mariozechner/pi-tui";
+} from "@moodcli/tui";
 import type { WarningSettings } from "../../../core/settings-manager.js";
 import { getSelectListTheme, getSettingsListTheme, theme } from "../theme/theme.js";
 import { DynamicBorder } from "./dynamic-border.js";
@@ -21,12 +21,12 @@ const SETTINGS_SUBMENU_SELECT_LIST_LAYOUT: SelectListLayoutOptions = {
 };
 
 const THINKING_DESCRIPTIONS: Record<ThinkingLevel, string> = {
-	off: "No reasoning",
-	minimal: "Very brief reasoning (~1k tokens)",
-	low: "Light reasoning (~2k tokens)",
-	medium: "Moderate reasoning (~8k tokens)",
-	high: "Deep reasoning (~16k tokens)",
-	xhigh: "Maximum reasoning (~32k tokens)",
+	off: "Dusunce yok",
+	minimal: "Cok kisa dusunme (~1k token)",
+	low: "Hafif dusunme (~2k token)",
+	medium: "Orta seviye dusunme (~8k token)",
+	high: "Derin dusunme (~16k token)",
+	xhigh: "Maksimum dusunme (~32k token)",
 };
 
 export interface SettingsConfig {
@@ -186,7 +186,7 @@ class SelectSubmenu extends Container {
 
 		// Hint
 		this.addChild(new Spacer(1));
-		this.addChild(new Text(theme.fg("dim", "  Enter to select · Esc to go back"), 0, 0));
+		this.addChild(new Text(theme.fg("dim", "  Secmek icin Enter · Geri donmek icin Esc"), 0, 0));
 	}
 
 	handleInput(data: string): void {
@@ -209,8 +209,8 @@ export class SettingsSelectorComponent extends Container {
 		const items: SettingItem[] = [
 			{
 				id: "autocompact",
-				label: "Auto-compact",
-				description: "Automatically compact context when it gets too large",
+				label: "Otomatik sikistirma",
+				description: "Baglam cok buyudugunde otomatik olarak ozetle/sikistir",
 				currentValue: config.autoCompact ? "true" : "false",
 				values: ["true", "false"],
 			},
@@ -239,8 +239,8 @@ export class SettingsSelectorComponent extends Container {
 			},
 			{
 				id: "hide-thinking",
-				label: "Hide thinking",
-				description: "Hide thinking blocks in assistant responses",
+				label: "Dusunceleri gizle",
+				description: "Asistan yanitlarindaki dusunme bloklarini gizle",
 				currentValue: config.hideThinkingBlock ? "true" : "false",
 				values: ["true", "false"],
 			},
@@ -318,8 +318,8 @@ export class SettingsSelectorComponent extends Container {
 			},
 			{
 				id: "theme",
-				label: "Theme",
-				description: "Color theme for the interface",
+				label: "Tema",
+				description: "Arayuz icin renk temasi",
 				currentValue: config.currentTheme,
 				submenu: (currentValue, done) =>
 					new SelectSubmenu(

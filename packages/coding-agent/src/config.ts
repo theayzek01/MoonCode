@@ -222,7 +222,7 @@ export function getSelfUpdateCommand(packageName: string, npmCommand?: string[])
 export function getSelfUpdateUnavailableInstruction(packageName: string, npmCommand?: string[]): string {
 	const method = detectInstallMethod();
 	if (method === "bun-binary") {
-		return `Download from: https://github.com/badlogic/pi-mono/releases/latest`;
+		return `Download from: https://moodcli.dev/releases/latest`;
 	}
 	const command = getSelfUpdateCommandForMethod(method, packageName, npmCommand);
 	if (command) {
@@ -255,7 +255,7 @@ export function getUpdateInstruction(packageName: string): string {
  */
 export function getPackageDir(): string {
 	// Allow override via environment variable (useful for Nix/Guix where store paths tokenize poorly)
-	const envDir = process.env.PI_PACKAGE_DIR;
+	const envDir = process.env.MOOD_PACKAGE_DIR;
 	if (envDir) {
 		if (envDir === "~") return homedir();
 		if (envDir.startsWith("~/")) return homedir() + envDir.slice(1);
@@ -361,7 +361,7 @@ export function getBundledInteractiveAssetPath(name: string): string {
 interface PackageJson {
 	name?: string;
 	version?: string;
-	piConfig?: {
+	moodConfig?: {
 		name?: string;
 		configDir?: string;
 	};
@@ -369,14 +369,14 @@ interface PackageJson {
 
 const pkg = JSON.parse(readFileSync(getPackageJsonPath(), "utf-8")) as PackageJson;
 
-const piConfigName: string | undefined = pkg.piConfig?.name;
-export const PACKAGE_NAME: string = pkg.name || "@mariozechner/pi-coding-agent";
-export const APP_NAME: string = piConfigName || "pi";
-export const APP_TITLE: string = piConfigName ? APP_NAME : "π";
-export const CONFIG_DIR_NAME: string = pkg.piConfig?.configDir || ".pi";
+const moodConfigName: string | undefined = pkg.moodConfig?.name;
+export const PACKAGE_NAME: string = pkg.name || "moodcli";
+export const APP_NAME: string = moodConfigName || "mood";
+export const APP_TITLE: string = "Moodcli";
+export const CONFIG_DIR_NAME: string = pkg.moodConfig?.configDir || ".moodcli";
 export const VERSION: string = pkg.version || "0.0.0";
 
-// e.g., PI_CODING_AGENT_DIR or TAU_CODING_AGENT_DIR
+// e.g., MOOD_CODING_AGENT_DIR or TAU_CODING_AGENT_DIR
 export const ENV_AGENT_DIR = `${APP_NAME.toUpperCase()}_CODING_AGENT_DIR`;
 export const ENV_SESSION_DIR = `${APP_NAME.toUpperCase()}_CODING_AGENT_SESSION_DIR`;
 
@@ -386,11 +386,11 @@ export function expandTildePath(path: string): string {
 	return path;
 }
 
-const DEFAULT_SHARE_VIEWER_URL = "https://pi.dev/session/";
+const DEFAULT_SHARE_VIEWER_URL = "https://moodcli.dev/session/";
 
 /** Get the share viewer URL for a gist ID */
 export function getShareViewerUrl(gistId: string): string {
-	const baseUrl = process.env.PI_SHARE_VIEWER_URL || DEFAULT_SHARE_VIEWER_URL;
+	const baseUrl = process.env.MOOD_SHARE_VIEWER_URL || DEFAULT_SHARE_VIEWER_URL;
 	return `${baseUrl}#${gistId}`;
 }
 

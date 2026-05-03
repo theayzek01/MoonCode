@@ -5,8 +5,8 @@
  * without paying for an extra follow-up LLM turn.
  */
 
-import { defineTool, type ExtensionAPI } from "@mariozechner/pi-coding-agent";
-import { Text } from "@mariozechner/pi-tui";
+import { Text } from "@moodcli/tui";
+import { defineTool, type ExtensionAPI } from "moodcli";
 import { Type } from "typebox";
 
 interface StructuredOutputDetails {

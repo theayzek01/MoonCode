@@ -5,21 +5,21 @@ const UNKNOWN_PROVIDER = "unknown";
 
 export function getProviderLoginHelp(): string {
 	return [
-		"Use /login to log into a provider via OAuth or API key. See:",
+		"OAuth veya API anahtari ile bir saglayiciya giris yapmak icin /login kullanin. Bakiniz:",
 		`  ${join(getDocsPath(), "providers.md")}`,
 		`  ${join(getDocsPath(), "models.md")}`,
 	].join("\n");
 }
 
 export function formatNoModelsAvailableMessage(): string {
-	return `No models available. ${getProviderLoginHelp()}`;
+	return `Kullanilabilir model yok. ${getProviderLoginHelp()}`;
 }
 
 export function formatNoModelSelectedMessage(): string {
-	return `No model selected.\n\n${getProviderLoginHelp()}\n\nThen use /model to select a model.`;
+	return `Model secilmedi.\n\n${getProviderLoginHelp()}\n\nArdindan bir model secmek icin /model kullanin.`;
 }
 
 export function formatNoApiKeyFoundMessage(provider: string): string {
-	const providerDisplay = provider === UNKNOWN_PROVIDER ? "the selected model" : provider;
-	return `No API key found for ${providerDisplay}.\n\n${getProviderLoginHelp()}`;
+	const providerDisplay = provider === UNKNOWN_PROVIDER ? "secilen model" : provider;
+	return `${providerDisplay} icin API anahtari bulunamadi.\n\n${getProviderLoginHelp()}`;
 }

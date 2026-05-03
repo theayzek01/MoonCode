@@ -13,7 +13,7 @@ import {
 import { DefaultPackageManager } from "./core/package-manager.js";
 import { SettingsManager } from "./core/settings-manager.js";
 import { shouldUseWindowsShell } from "./utils/child-process.js";
-import { getLatestPiVersion, isNewerPackageVersion } from "./utils/version-check.js";
+import { getLatestMoodcliVersion, isNewerPackageVersion } from "./utils/version-check.js";
 
 export type PackageCommand = "install" | "remove" | "update" | "list";
 
@@ -295,7 +295,7 @@ async function shouldRunSelfUpdate(force: boolean): Promise<boolean> {
 
 	let latestVersion: string | undefined;
 	try {
-		latestVersion = await getLatestPiVersion(VERSION);
+		latestVersion = await getLatestMoodcliVersion(VERSION);
 	} catch {
 		return true;
 	}

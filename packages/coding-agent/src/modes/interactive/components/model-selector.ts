@@ -1,14 +1,5 @@
-import { type Model, modelsAreEqual } from "@mariozechner/pi-ai";
-import {
-	Container,
-	type Focusable,
-	fuzzyFilter,
-	getKeybindings,
-	Input,
-	Spacer,
-	Text,
-	type TUI,
-} from "@mariozechner/pi-tui";
+import { type Model, modelsAreEqual } from "@moodcli/ai";
+import { Container, type Focusable, fuzzyFilter, getKeybindings, Input, Spacer, Text, type TUI } from "@moodcli/tui";
 import type { ModelRegistry } from "../../../core/model-registry.js";
 import type { SettingsManager } from "../../../core/settings-manager.js";
 import { theme } from "../theme/theme.js";
@@ -93,7 +84,8 @@ export class ModelSelectorComponent extends Container implements Focusable {
 			this.scopeHintText = new Text(this.getScopeHintText(), 0, 0);
 			this.addChild(this.scopeHintText);
 		} else {
-			const hintText = "Only showing models from configured providers. Use /login to add providers.";
+			const hintText =
+				"Sadece yapilandirilmis saglayicilarin modelleri gosteriliyor. Saglayici eklemek icin /login kullanin.";
 			this.addChild(new Text(theme.fg("warning", hintText), 0, 0));
 		}
 		this.addChild(new Spacer(1));
@@ -194,13 +186,13 @@ export class ModelSelectorComponent extends Container implements Focusable {
 	}
 
 	private getScopeText(): string {
-		const allText = this.scope === "all" ? theme.fg("accent", "all") : theme.fg("muted", "all");
-		const scopedText = this.scope === "scoped" ? theme.fg("accent", "scoped") : theme.fg("muted", "scoped");
-		return `${theme.fg("muted", "Scope: ")}${allText}${theme.fg("muted", " | ")}${scopedText}`;
+		const allText = this.scope === "all" ? theme.fg("accent", "hepsi") : theme.fg("muted", "hepsi");
+		const scopedText = this.scope === "scoped" ? theme.fg("accent", "kisitli") : theme.fg("muted", "kisitli");
+		return `${theme.fg("muted", "Kapsam: ")}${allText}${theme.fg("muted", " | ")}${scopedText}`;
 	}
 
 	private getScopeHintText(): string {
-		return keyHint("tui.input.tab", "scope") + theme.fg("muted", " (all/scoped)");
+		return keyHint("tui.input.tab", "kapsam") + theme.fg("muted", " (hepsi/kisitli)");
 	}
 
 	private setScope(scope: ModelScope): void {
@@ -230,14 +222,28 @@ export class ModelSelectorComponent extends Container implements Focusable {
 	private updateList(): void {
 		this.listContainer.clear();
 
-		const maxVisible = 10;
+		if (this.errorMessage) {
+			const errorLines = this.errorMessage.split("\n");
+			for (const line of errorLines) {
+				this.listContainer.addChild(new Text(theme.fg("error", line), 0, 0));
+			}
+			return;
+		}
+
+		if (this.filteredModels.length === 0) {
+			this.listContainer.addChild(new Text(theme.fg("muted", "  Eslesen model bulunamadi"), 0, 0));
+			return;
+		}
+
+		const maxVisible = 12;
 		const startIndex = Math.max(
 			0,
 			Math.min(this.selectedIndex - Math.floor(maxVisible / 2), this.filteredModels.length - maxVisible),
 		);
 		const endIndex = Math.min(startIndex + maxVisible, this.filteredModels.length);
 
-		// Show visible slice of filtered models
+		let lastProvider = "";
+
 		for (let i = startIndex; i < endIndex; i++) {
 			const item = this.filteredModels[i];
 			if (!item) continue;
@@ -245,42 +251,54 @@ export class ModelSelectorComponent extends Container implements Focusable {
 			const isSelected = i === this.selectedIndex;
 			const isCurrent = modelsAreEqual(this.currentModel, item.model);
 
+			// Show provider as a category header if it changed (and not filtering)
+			if (!this.searchInput.getValue() && item.provider !== lastProvider) {
+				if (lastProvider !== "") this.listContainer.addChild(new Spacer(1));
+				this.listContainer.addChild(
+					new Text(theme.bold(theme.fg("dim", `── ${item.provider.toUpperCase()} ──`)), 2, 0),
+				);
+				lastProvider = item.provider;
+			}
+
 			let line = "";
+			const checkmark = isCurrent ? theme.fg("success", " ✓") : "";
+			const reasoningIcon = item.model.reasoning ? theme.fg("thinkingText", " ⚡") : "";
+
 			if (isSelected) {
 				const prefix = theme.fg("accent", "→ ");
-				const modelText = `${item.id}`;
-				const providerBadge = theme.fg("muted", `[${item.provider}]`);
-				const checkmark = isCurrent ? theme.fg("success", " ✓") : "";
-				line = `${prefix + theme.fg("accent", modelText)} ${providerBadge}${checkmark}`;
+				line = `${prefix}${theme.fg("accent", item.id)}${reasoningIcon}${checkmark}`;
 			} else {
-				const modelText = `  ${item.id}`;
-				const providerBadge = theme.fg("muted", `[${item.provider}]`);
-				const checkmark = isCurrent ? theme.fg("success", " ✓") : "";
-				line = `${modelText} ${providerBadge}${checkmark}`;
+				line = `  ${theme.fg("text", item.id)}${reasoningIcon}${checkmark}`;
 			}
 
 			this.listContainer.addChild(new Text(line, 0, 0));
 		}
 
-		// Add scroll indicator if needed
-		if (startIndex > 0 || endIndex < this.filteredModels.length) {
-			const scrollInfo = theme.fg("muted", `  (${this.selectedIndex + 1}/${this.filteredModels.length})`);
+		// Scroll indicator
+		if (this.filteredModels.length > maxVisible) {
+			this.listContainer.addChild(new Spacer(1));
+			const scrollInfo = theme.fg(
+				"muted",
+				`  [ Modeller: ${this.selectedIndex + 1} / ${this.filteredModels.length} ]`,
+			);
 			this.listContainer.addChild(new Text(scrollInfo, 0, 0));
 		}
 
-		// Show error message or "no results" if empty
-		if (this.errorMessage) {
-			// Show error in red
-			const errorLines = this.errorMessage.split("\n");
-			for (const line of errorLines) {
-				this.listContainer.addChild(new Text(theme.fg("error", line), 0, 0));
-			}
-		} else if (this.filteredModels.length === 0) {
-			this.listContainer.addChild(new Text(theme.fg("muted", "  No matching models"), 0, 0));
-		} else {
-			const selected = this.filteredModels[this.selectedIndex];
+		// Selected model details at the bottom
+		const selected = this.filteredModels[this.selectedIndex];
+		if (selected) {
 			this.listContainer.addChild(new Spacer(1));
-			this.listContainer.addChild(new Text(theme.fg("muted", `  Model Name: ${selected.model.name}`), 0, 0));
+			this.listContainer.addChild(new DynamicBorder());
+			this.listContainer.addChild(new Text(theme.bold(theme.fg("accent", ` ${selected.model.name}`)), 0, 0));
+
+			const contextWindow = selected.model.contextWindow
+				? `${Math.floor(selected.model.contextWindow / 1024)}k`
+				: "Bilinmiyor";
+			const details = theme.fg(
+				"muted",
+				` Saglayici: ${selected.provider} | Baglam: ${contextWindow} | Dusunme: ${selected.model.reasoning ? "Var" : "Yok"}`,
+			);
+			this.listContainer.addChild(new Text(details, 0, 0));
 		}
 	}
 

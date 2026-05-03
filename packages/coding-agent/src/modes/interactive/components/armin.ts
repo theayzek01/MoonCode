@@ -2,7 +2,7 @@
  * Armin says hi! A fun easter egg with animated XBM art.
  */
 
-import type { Component, TUI } from "@mariozechner/pi-tui";
+import type { Component, TUI } from "@moodcli/tui";
 import { theme } from "../theme/theme.js";
 
 // XBM image: 31x36 pixels, LSB first, 1=background, 0=foreground
@@ -99,7 +99,7 @@ export class ArminComponent implements Component {
 		});
 
 		// Add "ARMIN SAYS HI" at the end
-		const message = "ARMIN SAYS HI";
+		const message = "MOODCLI SELAM DER";
 		const msgPadRight = Math.max(0, width - padding - message.length);
 		this.cachedLines.push(` ${theme.fg("accent", message)}${" ".repeat(msgPadRight)}`);
 

@@ -1,4 +1,4 @@
-import type { Model } from "@mariozechner/pi-ai";
+import type { Model } from "@moodcli/ai";
 import {
 	Container,
 	type Focusable,
@@ -9,7 +9,7 @@ import {
 	matchesKey,
 	Spacer,
 	Text,
-} from "@mariozechner/pi-tui";
+} from "@moodcli/tui";
 import { theme } from "../theme/theme.js";
 import { DynamicBorder } from "./dynamic-border.js";
 import { keyText } from "./keybinding-hints.js";
@@ -196,7 +196,7 @@ export class ScopedModelsSelectorComponent extends Container implements Focusabl
 		this.listContainer.clear();
 
 		if (this.filteredItems.length === 0) {
-			this.listContainer.addChild(new Text(theme.fg("muted", "  No matching models"), 0, 0));
+			this.listContainer.addChild(new Text(theme.fg("muted", "  Eslesen model bulunamadi"), 0, 0));
 			return;
 		}
 
@@ -207,27 +207,55 @@ export class ScopedModelsSelectorComponent extends Container implements Focusabl
 		const endIndex = Math.min(startIndex + this.maxVisible, this.filteredItems.length);
 		const allEnabled = this.enabledIds === null;
 
+		let lastProvider = "";
+
 		for (let i = startIndex; i < endIndex; i++) {
 			const item = this.filteredItems[i]!;
 			const isSelected = i === this.selectedIndex;
+
+			// Show provider as a category header if it changed (and not filtering)
+			if (!this.searchInput.getValue() && item.model.provider !== lastProvider) {
+				if (lastProvider !== "") this.listContainer.addChild(new Spacer(1));
+				this.listContainer.addChild(
+					new Text(theme.bold(theme.fg("dim", `── ${item.model.provider.toUpperCase()} ──`)), 2, 0),
+				);
+				lastProvider = item.model.provider;
+			}
+
 			const prefix = isSelected ? theme.fg("accent", "→ ") : "  ";
 			const modelText = isSelected ? theme.fg("accent", item.model.id) : item.model.id;
-			const providerBadge = theme.fg("muted", ` [${item.model.provider}]`);
+			const reasoningIcon = item.model.reasoning ? theme.fg("thinkingText", " ⚡") : "";
 			const status = allEnabled ? "" : item.enabled ? theme.fg("success", " ✓") : theme.fg("dim", " ✗");
-			this.listContainer.addChild(new Text(`${prefix}${modelText}${providerBadge}${status}`, 0, 0));
+
+			this.listContainer.addChild(new Text(`${prefix}${modelText}${reasoningIcon}${status}`, 0, 0));
 		}
 
 		// Add scroll indicator if needed
-		if (startIndex > 0 || endIndex < this.filteredItems.length) {
+		if (this.filteredItems.length > this.maxVisible) {
+			this.listContainer.addChild(new Spacer(1));
 			this.listContainer.addChild(
-				new Text(theme.fg("muted", `  (${this.selectedIndex + 1}/${this.filteredItems.length})`), 0, 0),
+				new Text(
+					theme.fg("muted", `  [ Modeller: ${this.selectedIndex + 1} / ${this.filteredItems.length} ]`),
+					0,
+					0,
+				),
 			);
 		}
 
 		if (this.filteredItems.length > 0) {
 			const selected = this.filteredItems[this.selectedIndex];
 			this.listContainer.addChild(new Spacer(1));
-			this.listContainer.addChild(new Text(theme.fg("muted", `  Model Name: ${selected.model.name}`), 0, 0));
+			this.listContainer.addChild(new DynamicBorder());
+			this.listContainer.addChild(new Text(theme.bold(theme.fg("accent", ` ${selected.model.name}`)), 0, 0));
+
+			const contextWindow = selected.model.contextWindow
+				? `${Math.floor(selected.model.contextWindow / 1024)}k`
+				: "Bilinmiyor";
+			const details = theme.fg(
+				"muted",
+				` Saglayici: ${selected.model.provider} | Baglam: ${contextWindow} | Dusunme: ${selected.model.reasoning ? "Var" : "Yok"}`,
+			);
+			this.listContainer.addChild(new Text(details, 0, 0));
 		}
 	}
 

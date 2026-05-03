@@ -40,10 +40,10 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { Api, Model } from "@mariozechner/pi-ai";
-import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
-import { DynamicBorder, getAgentDir } from "@mariozechner/pi-coding-agent";
-import { Container, Key, type SelectItem, SelectList, Text } from "@mariozechner/pi-tui";
+import type { Api, Model } from "@moodcli/ai";
+import { Container, Key, type SelectItem, SelectList, Text } from "@moodcli/tui";
+import type { ExtensionAPI, ExtensionContext } from "moodcli";
+import { DynamicBorder, getAgentDir } from "moodcli";
 
 // Preset configuration
 interface Preset {

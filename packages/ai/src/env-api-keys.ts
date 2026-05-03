@@ -205,5 +205,9 @@ export function getEnvApiKey(provider: string): string | undefined {
 		}
 	}
 
+	if (provider === "ollama") {
+		return "ollama";
+	}
+
 	return undefined;
 }

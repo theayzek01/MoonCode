@@ -5,10 +5,10 @@
  * and provides a transformer to convert them to LLM-compatible messages.
  */
 
-import type { AgentMessage } from "@mariozechner/pi-agent-core";
-import type { ImageContent, Message, TextContent } from "@mariozechner/pi-ai";
+import type { AgentMessage } from "@moodcli/agent";
+import type { ImageContent, Message, TextContent } from "@moodcli/ai";
 
-export const COMPACTION_SUMMARY_PREFIX = `The conversation history before this point was compacted into the following summary:
+export const COMPACTION_SUMMARY_PREFIX = `Bu noktadan onceki konusma gecmisi su ozete sikistirildi:
 
 <summary>
 `;
@@ -16,7 +16,7 @@ export const COMPACTION_SUMMARY_PREFIX = `The conversation history before this p
 export const COMPACTION_SUMMARY_SUFFIX = `
 </summary>`;
 
-export const BRANCH_SUMMARY_PREFIX = `The following is a summary of a branch that this conversation came back from:
+export const BRANCH_SUMMARY_PREFIX = `Asagidaki, bu konusmanin geri dondugu bir dalin ozetidir:
 
 <summary>
 `;
@@ -67,7 +67,7 @@ export interface CompactionSummaryMessage {
 }
 
 // Extend CustomAgentMessages via declaration merging
-declare module "@mariozechner/pi-agent-core" {
+declare module "@moodcli/agent" {
 	interface CustomAgentMessages {
 		bashExecution: BashExecutionMessage;
 		custom: CustomMessage;
@@ -80,19 +80,19 @@ declare module "@mariozechner/pi-agent-core" {
  * Convert a BashExecutionMessage to user message text for LLM context.
  */
 export function bashExecutionToText(msg: BashExecutionMessage): string {
-	let text = `Ran \`${msg.command}\`\n`;
+	let text = `\`${msg.command}\` calistirildi\n`;
 	if (msg.output) {
 		text += `\`\`\`\n${msg.output}\n\`\`\``;
 	} else {
-		text += "(no output)";
+		text += "(cikti yok)";
 	}
 	if (msg.cancelled) {
-		text += "\n\n(command cancelled)";
+		text += "\n\n(komut iptal edildi)";
 	} else if (msg.exitCode !== null && msg.exitCode !== undefined && msg.exitCode !== 0) {
-		text += `\n\nCommand exited with code ${msg.exitCode}`;
+		text += `\n\nKomut su kodla cikti: ${msg.exitCode}`;
 	}
 	if (msg.truncated && msg.fullOutputPath) {
-		text += `\n\n[Output truncated. Full output: ${msg.fullOutputPath}]`;
+		text += `\n\n[Cikti kisaltildi. Tam cikti: ${msg.fullOutputPath}]`;
 	}
 	return text;
 }
