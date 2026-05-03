@@ -28,6 +28,7 @@ const BOX_ICON = "📦";
 const PLAN_ICON = "📋";
 const TRAJ_ICON = "➡️";
 
+// biome-ignore lint/complexity/noStaticOnlyClass: Static utility render methods are intentional here.
 export class RoboticsView {
 	/**
 	 * Robotics mode banner - terminal açıldığında göster.

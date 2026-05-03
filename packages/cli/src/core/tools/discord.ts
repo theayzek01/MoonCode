@@ -1,6 +1,6 @@
 // @ts-expect-error
 import type { EngineTool } from "@mooncli/engine";
-import { ChannelType, Client, GatewayIntentBits, type Guild, type TextChannel } from "discord.js";
+import { ChannelType, Client, GatewayIntentBits, type TextChannel } from "discord.js";
 import type { ToolDefinition } from "../extensions/index.js";
 
 let discordClient: Client | null = null;
@@ -157,7 +157,7 @@ export function createDiscordManageChannelTool(options?: DiscordToolOptions): En
 	};
 }
 
-export function createDiscordToolDefinitions(options?: DiscordToolOptions): ToolDefinition[] {
+export function createDiscordToolDefinitions(_options?: DiscordToolOptions): ToolDefinition[] {
 	const dummyExecute = async () => ({ content: [] });
 	return [
 		{

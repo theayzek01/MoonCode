@@ -1,14 +1,13 @@
 <p align="center">
   <a href="https://mooncli.dev">
-    <img alt="Mooncli" src="Mooncli.png" width="200">
+    <img alt="Mooncli" src="Mooncli.png" width="180">
   </a>
 </p>
 
-<h1 align="center">🌙 M O O N C L I</h1>
+<h1 align="center">Mooncli</h1>
 
 <p align="center">
-  <strong>Terminalinizdeki Zihin Sarayı.</strong><br>
-  Modern, hızlı ve tamamen özelleştirilebilir bir AI kodlama asistanı.
+  Modern, fast, extensible AI coding assistant for terminal workflows.
 </p>
 
 <p align="center">
@@ -19,88 +18,68 @@
 
 ---
 
-**Mooncli**, geliştiriciler için tasarlanmış minimal ama güçlü bir terminal asistanıdır. Kod yazma sürecinizi hızlandırmak için tasarlanmış olan Mooncli, **Model Context Protocol (MCP)** desteği ile harici servislerle (GitHub, Docker, Spotify vb.) kusursuz bir şekilde entegre olur.
+## Highlights
 
-### ✨ Neden Mooncli?
+- MCP-ready architecture
+- Rich interactive TUI
+- Multiple provider support (Gemini CLI, Codex, OpenRouter, Ollama, and more)
+- Robotics mode (vision + planning)
+- Discord integration from terminal
+- Extensions, skills, prompts, themes
 
-*   **MCP Entegrasyonu:** Dünyanın ilk MCP destekli CLI araçlarından biri. Gmail'den GitHub'a kadar tüm uygulamalarınızı AI'a bağlayın.
-*   **Premium TUI:** Ay temalı, göz yormayan, modern ve estetik bir terminal arayüzü.
-*   **Gelişmiş Modeller:** Claude 3.5 Sonnet, Opus 4.6 ve daha fazlası; Antigravity motoru ile emrinizde.
-*   **🤖 Robotics Mode:** Yerel Ollama VLM (Vision Language Model) entegrasyonu ile terminalden robotik kontrol, nesne tespiti ve görev planlama.
-*   **Tamamen Özelleştirilebilir:** Kendi [Uzantılarınızı](docs/extensions.md), [Yeteneklerinizi](docs/skills.md) ve [Temalarınızı](docs/themes.md) oluşturun.
-*   **Hızlı & Hafif:** Node.js ve TypeScript ile optimize edilmiş çekirdek; sıfır şişkinlik, maksimum verim.
-
-### 🚀 Hızlı Başlangıç
+## Install
 
 ```bash
 npm install -g mooncli
 ```
 
-Ardından asistanınızı başlatın:
+Run:
 
 ```bash
 mooncli
 ```
 
-### 🛠️ Yapılandırma
+## Authentication
 
-API anahtarlarınızı çevre değişkeni olarak ayarlayabilir veya interaktif modda `/login` komutunu kullanabilirsiniz:
+Use `/login` in interactive mode, or set environment variables.
+
+Example:
 
 ```bash
-export ANTHROPIC_API_KEY=sk-ant-...
+export GEMINI_API_KEY=your_key
 mooncli
 ```
 
-### 🔌 MCP Sunucularını Bağlama
+Provider docs:
 
-`.mooncli/settings.json` dosyanıza favori MCP sunucularınızı ekleyin:
+- `docs/providers.md`
+- `docs/models.md`
 
-```json
-{
-  "mcpServers": {
-    "github": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "..." }
-    }
-  }
-}
-```
+## Discord Integration
 
-### 🤖 Robotics Mode (Yeni!)
+Mooncli can manage your Discord bot directly.
 
-Mooncli artık yerel VLM modelleri (Ollama üzerinden) ile gerçek zamanlı robotik görev planlama ve görüntü analizi desteği sunuyor.
+Commands:
 
-1.  **Gereksinimler:** [Ollama](https://ollama.com/) kurun ve bir vision modeli çekin (`ollama pull qwen2.5-vl:7b`). Kamera desteği için sisteminizde `ffmpeg` yüklü olmalıdır.
-2.  **Etkinleştirme:** Terminalde `/robotics enable` yazın.
-3.  **Robot Fonksiyonları:** Robotunuzun API fonksiyonlarını içeren bir JSON dosyası oluşturun ve `/robotics functions robot_functions.json` ile tanıtın.
-4.  **Komutlar:**
-    *   `/robotics detect`: Nesne tespiti ve koordinat alma.
-    *   `/robotics plan "mavi küpü sepete koy"`: Doğal dili robot API çağrılarına dönüştürme.
-    *   `/robotics trajectory`: Robot kolu için yörünge planlama.
+- `/discord <bot_token>`: Validate and save token, then reload tools
+- `/discord`: Show current Discord connection summary
+- `/discord botinfo`: Fetch bot identity, status, and guild summary
+- `/discord off`: Disable Discord integration and unload Discord tools
 
-### 🎮 Discord Integration (Yeni!)
+When connected, footer shows `Discord bagli`.
 
-Mooncli artik Discord botunuzu yonetmenizi sagliyor. Sunucu duzenleme, kanal acma ve mesaj gonderme gibi islemleri AI yardimiyla yapabilirsiniz.
+## Robotics Mode
 
-1. **Baglanti:** `/discord <bot_token>` komutu ile bot tokeninizi girin.
-2. **Yonetim:** Artik botunuza Discord ile ilgili talimatlar verebilirsiniz:
-    - "Su sunucudaki kanallari listele."
-    - "Destek isminde yeni bir text kanali ac."
-    - "Genel kanalina 'Mooncli ile baglandim!' mesaji gonder."
-3. **Guvenlik:** Tokeniniz yerel ayarlarınızda guvenli bir sekilde saklanir.
+Basic commands:
 
----
+- `/robotics enable`
+- `/robotics status`
+- `/robotics detect`
+- `/robotics plan <instruction>`
 
-### 📊 Gerçek Zamanlı İlerleme Takibi
+See implementation details in `packages/cli/src/core/robotics`.
 
-Mooncli artık karmaşık projelerde veya çok adımlı görevlerde otomatik olarak ilerleme durumunu bildirir.
-- **Nasıl Çalışır?**: Bot, her işlem adımında terminale `(Bitmesine %X)` veya `(İlerleme: %X)` şeklinde bir not düşer.
-- **Faydası**: Uzun süren kod yazma veya refactor işlemlerinde botun ne aşamada olduğunu anlık olarak görebilirsiniz.
-
-### 🤝 Katkıda Bulunma
-
-Geliştirme ortamını kurmak için:
+## Development
 
 ```bash
 npm install
@@ -108,9 +87,18 @@ npm run build
 node packages/cli/dist/cli.js
 ```
 
+Useful:
+
+- `npm --prefix packages/cli run build`
+- `npm --prefix packages/cli test`
+
+## Project Docs
+
+- `docs/extensions.md`
+- `docs/skills.md`
+- `docs/themes.md`
+- `docs/prompts.md`
+
 ---
 
-<p align="center">
-  Düşün, Kodla, Mükemmelleştir. <br>
-  Made with 🌙 by Mooncli Team.
-</p>
+Built by the Mooncli team.

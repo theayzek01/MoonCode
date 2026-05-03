@@ -5000,6 +5000,56 @@ export class InteractiveMode {
 	}
 
 	private async handleDiscordCommand(args: string): Promise<void> {
+		const normalizedArgs = args.trim().toLowerCase();
+
+		if (normalizedArgs === "off") {
+			this.settingsManager.setDiscordToken(undefined);
+			this.showStatus("Discord baglantisi kapatildi.");
+			this.showStatus("Oturum yenileniyor...");
+			await this.handleReloadCommand();
+			return;
+		}
+
+		if (normalizedArgs === "botinfo") {
+			const token = this.settingsManager.getDiscordToken();
+			if (!token) {
+				this.showStatus("Discord tokeni ayarlanmamis.");
+				this.showStatus("Kullanim: /discord <bot_token>");
+				return;
+			}
+			this.showStatus("Discord bot bilgileri cekiliyor...");
+			try {
+				const { Client, GatewayIntentBits, PresenceUpdateStatus } = await import("discord.js");
+				const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
+				await client.login(token);
+
+				const user = client.user;
+				const guildCount = client.guilds.cache.size;
+				const guildsPreview = client.guilds.cache
+					.map((g) => g.name)
+					.slice(0, 10)
+					.join(", ");
+				const status = user?.presence?.status ?? PresenceUpdateStatus.Offline;
+
+				const lines = [
+					"Discord Bot Bilgisi",
+					`Tag: ${user?.tag ?? "unknown"}`,
+					`Bot ID: ${user?.id ?? "unknown"}`,
+					`Durum: ${status}`,
+					`Sunucu Sayisi: ${guildCount}`,
+					`Olusturulma: ${user?.createdAt?.toISOString?.() ?? "unknown"}`,
+					`Avatar: ${user?.displayAvatarURL?.() ?? "none"}`,
+					`Sunucular (ilk 10): ${guildsPreview || "-"}`,
+				];
+				client.destroy();
+				this.chatContainer.addChild(new Text(lines.join("\n"), 1, 0));
+				this.ui.requestRender();
+			} catch (err: any) {
+				this.showStatus(`Hata: Bot bilgileri alinamadi (${err.message})`);
+			}
+			return;
+		}
+
 		if (args) {
 			this.showStatus("Token kontrol ediliyor...");
 			try {

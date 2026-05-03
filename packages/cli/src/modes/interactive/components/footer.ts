@@ -162,6 +162,12 @@ export class FooterComponent implements Component {
 			rightSideWithoutProvider =
 				thinkingLevel === "off" ? `${modelName} • dusunme kapali` : `${modelName} • ${thinkingLevel}`;
 		}
+		const activeToolNames = this.session.getActiveToolNames();
+		const discordConnected =
+			activeToolNames.includes("discord_send_message") || activeToolNames.includes("discord_list_guilds");
+		if (discordConnected) {
+			rightSideWithoutProvider = `${rightSideWithoutProvider} • Discord bagli`;
+		}
 
 		// Prepend the provider in parentheses if there are multiple providers and there's enough room
 		let rightSide = rightSideWithoutProvider;
