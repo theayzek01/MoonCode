@@ -13,12 +13,12 @@
 		"moonSuccess": "#9cb8a6",
 		"moonError": "#c29ba4",
 		"moonWarning": "#c8b48f",
-		"selectedBg": "#2a2d34",
-		"userMsgBg": "#2b2d31",
-		"toolPendingBg": "#2b2f36",
-		"toolSuccessBg": "#2f343b",
-		"toolErrorBg": "#343038",
-		"customMsgBg": "#2f323a"
+		"selectedBg": 236,
+		"userMsgBg": 236,
+		"toolPendingBg": 236,
+		"toolSuccessBg": 236,
+		"toolErrorBg": 236,
+		"customMsgBg": 236
 	},
 	"colors": {
 		"accent": "moonAccent",
