@@ -454,10 +454,12 @@ function getBuiltinThemes(): Record<string, ThemeJson> {
 		const darkPath = path.join(themesDir, "dark.json");
 		const lightPath = path.join(themesDir, "light.json");
 		const moonPath = path.join(themesDir, "moon.json");
+		const softPath = path.join(themesDir, "soft.json");
 		BUILTIN_THEMES = {
 			dark: JSON.parse(fs.readFileSync(darkPath, "utf-8")) as ThemeJson,
 			light: JSON.parse(fs.readFileSync(lightPath, "utf-8")) as ThemeJson,
 			moon: JSON.parse(fs.readFileSync(moonPath, "utf-8")) as ThemeJson,
+			soft: JSON.parse(fs.readFileSync(softPath, "utf-8")) as ThemeJson,
 		};
 	}
 	return BUILTIN_THEMES;
