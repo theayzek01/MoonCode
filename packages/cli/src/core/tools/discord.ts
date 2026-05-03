@@ -71,9 +71,12 @@ export function createDiscordGetChannelsTool(options?: DiscordToolOptions): Engi
 				return { content: [{ type: "text", text: "Error: No Discord token provided." }], details: {} };
 			if (!guildId) return { content: [{ type: "text", text: "guildId is required." }], details: {} };
 			const client = await getDiscordClient(options.token);
-			const guild = client.guilds.cache.get(guildId);
+			const guild = await client.guilds.fetch(guildId).catch(() => null);
 			if (!guild) return { content: [{ type: "text", text: "Server not found." }], details: {} };
-			const channels = guild.channels.cache.map((c) => ({ id: c.id, name: c.name, type: ChannelType[c.type] }));
+			const fetchedChannels = await guild.channels.fetch();
+			const channels = fetchedChannels
+				.filter((c) => !!c)
+				.map((c) => ({ id: c!.id, name: c!.name, type: ChannelType[c!.type] }));
 			return {
 				content: [{ type: "text", text: JSON.stringify(channels, null, 2) }],
 				details: { ok: true, count: channels.length },
@@ -103,7 +106,7 @@ export function createDiscordSendMessageTool(options?: DiscordToolOptions): Engi
 			if (!channelId || !content)
 				return { content: [{ type: "text", text: "channelId and content are required." }], details: {} };
 			const client = await getDiscordClient(options.token);
-			const channel = client.channels.cache.get(channelId) as TextChannel;
+			const channel = (await client.channels.fetch(channelId).catch(() => null)) as TextChannel | null;
 			if (!channel) return { content: [{ type: "text", text: "Channel not found." }], details: {} };
 			const message = await channel.send(content);
 			return {
@@ -149,7 +152,7 @@ export function createDiscordManageChannelTool(options?: DiscordToolOptions): En
 			if (!guildId || !action)
 				return { content: [{ type: "text", text: "guildId and action are required." }], details: {} };
 			const client = await getDiscordClient(options.token);
-			const guild = client.guilds.cache.get(guildId);
+			const guild = await client.guilds.fetch(guildId).catch(() => null);
 			if (!guild) return { content: [{ type: "text", text: "Server not found." }], details: {} };
 
 			if (action === "create") {
@@ -166,7 +169,7 @@ export function createDiscordManageChannelTool(options?: DiscordToolOptions): En
 			} else if (action === "delete") {
 				if (!channelId)
 					return { content: [{ type: "text", text: "channelId is required for deletion." }], details: {} };
-				const channel = guild.channels.cache.get(channelId);
+				const channel = await guild.channels.fetch(channelId).catch(() => null);
 				if (!channel) return { content: [{ type: "text", text: "Channel not found." }], details: {} };
 				await channel.delete();
 				return { content: [{ type: "text", text: `Channel deleted.` }], details: { ok: true } };
