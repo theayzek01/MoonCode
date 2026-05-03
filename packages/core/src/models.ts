@@ -31,6 +31,140 @@ for (const id of defaultOllamaModels) {
 }
 modelRegistry.set("ollama", ollamaModels);
 
+// Inject Antigravity models (Image 1)
+const antigravityModels = new Map<string, Model<Api>>();
+const antigravityModelList: Model<Api>[] = [
+	{
+		id: "gemini-3.1-pro-high",
+		name: "Gemini 3.1 Pro (High)",
+		api: "google-antigravity",
+		provider: "google",
+		baseUrl: "",
+		reasoning: true,
+		input: ["text", "image"],
+		cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+		contextWindow: 2000000,
+		maxTokens: 8192,
+	},
+	{
+		id: "gemini-3.1-pro-low",
+		name: "Gemini 3.1 Pro (Low)",
+		api: "google-antigravity",
+		provider: "google",
+		baseUrl: "",
+		reasoning: true,
+		input: ["text", "image"],
+		cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+		contextWindow: 1000000,
+		maxTokens: 8192,
+	},
+	{
+		id: "gemini-3-flash",
+		name: "Gemini 3 Flash",
+		api: "google-antigravity",
+		provider: "google",
+		baseUrl: "",
+		reasoning: false,
+		input: ["text", "image"],
+		cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+		contextWindow: 1000000,
+		maxTokens: 8192,
+	},
+	{
+		id: "claude-sonnet-4.6-thinking",
+		name: "Claude Sonnet 4.6 (Thinking)",
+		api: "anthropic-messages",
+		provider: "anthropic",
+		baseUrl: "",
+		reasoning: true,
+		input: ["text", "image"],
+		cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+		contextWindow: 200000,
+		maxTokens: 8192,
+	},
+	{
+		id: "claude-opus-4.6-thinking",
+		name: "Claude Opus 4.6 (Thinking)",
+		api: "anthropic-messages",
+		provider: "anthropic",
+		baseUrl: "",
+		reasoning: true,
+		input: ["text", "image"],
+		cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+		contextWindow: 200000,
+		maxTokens: 8192,
+	},
+	{
+		id: "gpt-oss-120b-medium",
+		name: "GPT-OSS 120B (Medium)",
+		api: "openai-completions",
+		provider: "openai",
+		baseUrl: "",
+		reasoning: true,
+		input: ["text"],
+		cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+		contextWindow: 128000,
+		maxTokens: 4096,
+	},
+];
+for (const m of antigravityModelList) antigravityModels.set(m.id, m);
+modelRegistry.set("antigravity", antigravityModels);
+
+// Inject Gemini CLI models (Image 2)
+const geminiCliModels = new Map<string, Model<Api>>();
+const geminiCliModelList: Model<Api>[] = [
+	{
+		id: "gemini-3-flash-preview",
+		name: "gemini-3-flash-preview",
+		api: "google-generative-ai",
+		provider: "google",
+		baseUrl: "",
+		reasoning: false,
+		input: ["text", "image"],
+		cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+		contextWindow: 1000000,
+		maxTokens: 8192,
+	},
+	{
+		id: "gemini-3.1-flash-lite-preview",
+		name: "gemini-3.1-flash-lite-preview",
+		api: "google-generative-ai",
+		provider: "google",
+		baseUrl: "",
+		reasoning: false,
+		input: ["text", "image"],
+		cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+		contextWindow: 1000000,
+		maxTokens: 8192,
+	},
+	{
+		id: "gemini-2.5-flash",
+		name: "gemini-2.5-flash",
+		api: "google-generative-ai",
+		provider: "google",
+		baseUrl: "",
+		reasoning: false,
+		input: ["text", "image"],
+		cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+		contextWindow: 1000000,
+		maxTokens: 8192,
+	},
+	{
+		id: "gemini-2.5-flash-lite",
+		name: "gemini-2.5-flash-lite",
+		api: "google-generative-ai",
+		provider: "google",
+		baseUrl: "",
+		reasoning: false,
+		input: ["text", "image"],
+		cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+		contextWindow: 1000000,
+		maxTokens: 8192,
+	},
+];
+for (const m of geminiCliModelList) geminiCliModels.set(m.id, m);
+modelRegistry.set("geminicli", geminiCliModels);
+
 export function getModel(provider: string, modelId: string): Model<any> | undefined {
 	const providerModels = modelRegistry.get(provider);
 	return providerModels?.get(modelId);

@@ -81,6 +81,12 @@ Mooncli artık yerel VLM modelleri (Ollama üzerinden) ile gerçek zamanlı robo
 
 Daha fazla detay için [Robotics Guide](docs/robotics.md) (yakında) dokümanına göz atın.
 
+### 📊 Gerçek Zamanlı İlerleme Takibi
+
+Mooncli artık karmaşık projelerde veya çok adımlı görevlerde otomatik olarak ilerleme durumunu bildirir.
+- **Nasıl Çalışır?**: Bot, her işlem adımında terminale `(Bitmesine %X)` veya `(İlerleme: %X)` şeklinde bir not düşer.
+- **Faydası**: Uzun süren kod yazma veya refactor işlemlerinde botun ne aşamada olduğunu anlık olarak görebilirsiniz.
+
 ### 🤝 Katkıda Bulunma
 
 Geliştirme ortamını kurmak için:
