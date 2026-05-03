@@ -26,6 +26,7 @@
 *   **MCP Entegrasyonu:** Dünyanın ilk MCP destekli CLI araçlarından biri. Gmail'den GitHub'a kadar tüm uygulamalarınızı AI'a bağlayın.
 *   **Premium TUI:** Ay temalı, göz yormayan, modern ve estetik bir terminal arayüzü.
 *   **Gelişmiş Modeller:** Claude 3.5 Sonnet, Opus 4.6 ve daha fazlası; Antigravity motoru ile emrinizde.
+*   **🤖 Robotics Mode:** Yerel Ollama VLM (Vision Language Model) entegrasyonu ile terminalden robotik kontrol, nesne tespiti ve görev planlama.
 *   **Tamamen Özelleştirilebilir:** Kendi [Uzantılarınızı](docs/extensions.md), [Yeteneklerinizi](docs/skills.md) ve [Temalarınızı](docs/themes.md) oluşturun.
 *   **Hızlı & Hafif:** Node.js ve TypeScript ile optimize edilmiş çekirdek; sıfır şişkinlik, maksimum verim.
 
@@ -65,6 +66,20 @@ mooncli
   }
 }
 ```
+
+### 🤖 Robotics Mode (Yeni!)
+
+Mooncli artık yerel VLM modelleri (Ollama üzerinden) ile gerçek zamanlı robotik görev planlama ve görüntü analizi desteği sunuyor.
+
+1.  **Gereksinimler:** [Ollama](https://ollama.com/) kurun ve bir vision modeli çekin (`ollama pull qwen2.5-vl:7b`). Kamera desteği için sisteminizde `ffmpeg` yüklü olmalıdır.
+2.  **Etkinleştirme:** Terminalde `/robotics enable` yazın.
+3.  **Robot Fonksiyonları:** Robotunuzun API fonksiyonlarını içeren bir JSON dosyası oluşturun ve `/robotics functions robot_functions.json` ile tanıtın.
+4.  **Komutlar:**
+    *   `/robotics detect`: Nesne tespiti ve koordinat alma.
+    *   `/robotics plan "mavi küpü sepete koy"`: Doğal dili robot API çağrılarına dönüştürme.
+    *   `/robotics trajectory`: Robot kolu için yörünge planlama.
+
+Daha fazla detay için [Robotics Guide](docs/robotics.md) (yakında) dokümanına göz atın.
 
 ### 🤝 Katkıda Bulunma
 
