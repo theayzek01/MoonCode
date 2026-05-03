@@ -657,6 +657,13 @@ function getDefaultTheme(): string {
 	return "soft";
 }
 
+function normalizeThemeName(name: string | undefined): string {
+	if (!name) return getDefaultTheme();
+	// Keep legacy "moon" as a soft alias to avoid harsh blue tones.
+	if (name === "moon") return "soft";
+	return name;
+}
+
 // ============================================================================
 // Global Theme Instance
 // ============================================================================
@@ -694,7 +701,7 @@ export function setRegisteredThemes(themes: Theme[]): void {
 }
 
 export function initTheme(themeName?: string, enableWatcher: boolean = false): void {
-	const name = themeName ?? getDefaultTheme();
+	const name = normalizeThemeName(themeName);
 	currentThemeName = name;
 	try {
 		setGlobalTheme(loadTheme(name));
@@ -710,6 +717,7 @@ export function initTheme(themeName?: string, enableWatcher: boolean = false): v
 }
 
 export function setTheme(name: string, enableWatcher: boolean = false): { success: boolean; error?: string } {
+	name = normalizeThemeName(name);
 	currentThemeName = name;
 	try {
 		setGlobalTheme(loadTheme(name));
