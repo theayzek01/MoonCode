@@ -89,6 +89,7 @@ import { getMooncliUserEngine } from "../../utils/Moon-user-engine.js";
 import { killTrackedDetachedChildren } from "../../utils/shell.js";
 import { ensureTool } from "../../utils/tools-manager.js";
 import { checkForNewMooncliVersion } from "../../utils/version-check.js";
+import { handlePackageCommand } from "../../package-manager-cli.js";
 import { ArminComponent } from "./components/armin.js";
 import { AssistantMessageComponent } from "./components/assistant-message.js";
 import { BashExecutionComponent } from "./components/bash-execution.js";
@@ -2562,6 +2563,12 @@ export class InteractiveMode {
 				const args = text.startsWith("/discord ") ? text.slice(9).trim() : "";
 				this.editor.setText("");
 				await this.handleDiscordCommand(args);
+				return;
+			}
+			if (text === "/update" || text.startsWith("/update ")) {
+				const args = text.startsWith("/update ") ? text.slice(8).trim() : "";
+				this.editor.setText("");
+				await this.handleUpdateCommand(args);
 				return;
 			}
 			if (text === "/debug") {
@@ -5157,6 +5164,24 @@ export class InteractiveMode {
 		} catch (error) {
 			dismissReloadBox(previousEditor as Component);
 			this.showError(`Reload failed: ${error instanceof Error ? error.message : String(error)}`);
+		}
+	}
+
+	private async handleUpdateCommand(args: string): Promise<void> {
+		if (this.session.isStreaming || this.session.isCompacting) {
+			this.showWarning("Guncelleme icin mevcut islemin bitmesini bekleyin.");
+			return;
+		}
+
+		const parsedArgs = args ? args.split(/\s+/).filter(Boolean) : [];
+		this.showStatus("Guncelleme baslatiliyor...");
+		try {
+			await handlePackageCommand(["update", ...parsedArgs]);
+			this.showStatus("Guncelleme tamamlandi.");
+			this.showStatus("Degisiklikler icin /reload veya yeniden baslatma onerilir.");
+		} catch (err: any) {
+			const message = err instanceof Error ? err.message : String(err);
+			this.showStatus(`Hata: Guncelleme basarisiz (${message})`);
 		}
 	}
 
