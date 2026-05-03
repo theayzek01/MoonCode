@@ -14,8 +14,8 @@
 		"moonError": "#fda4af",
 		"moonWarning": "#fcd34d",
 		"selectedBg": "#2d3345",
-		"userMsgBg": "#2a3042",
-		"toolPendingBg": "#2a3040",
+		"userMsgBg": "#2b2d31",
+		"toolPendingBg": "#2b2f36",
 		"toolSuccessBg": "#24403a",
 		"toolErrorBg": "#46313a",
 		"customMsgBg": "#323952"
