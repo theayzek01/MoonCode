@@ -1,4 +1,5 @@
 import type { SimpleStreamOptions, StreamFunction, StreamOptions } from "../types.js";
+
 /**
  * Provider-specific options for the Mistral API.
  */

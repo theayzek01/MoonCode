@@ -26,8 +26,14 @@ export function createRoboticsDetectToolDefinition(options?: {
 			"Bir görüntüdeki nesneleri tespit eder ve [y, x] koordinatlarını (0-1000 normalize) döndürür. Robotik manipülasyon görevleri için nesne konumlarını bulmada kullanılır.",
 		parameters: Type.Object({
 			image_path: Type.String({ description: "Analiz edilecek görüntünün dosya yolu veya URL'si" }),
-			queries: Type.Optional(Type.Array(Type.String(), { description: "Aranacak nesne isimleri. Boş bırakılırsa tüm nesneleri tespit eder." })),
-			max_objects: Type.Optional(Type.Number({ description: "Maksimum tespit edilecek nesne sayısı. Varsayılan: 10" })),
+			queries: Type.Optional(
+				Type.Array(Type.String(), {
+					description: "Aranacak nesne isimleri. Boş bırakılırsa tüm nesneleri tespit eder.",
+				}),
+			),
+			max_objects: Type.Optional(
+				Type.Number({ description: "Maksimum tespit edilecek nesne sayısı. Varsayılan: 10" }),
+			),
 		}),
 		execute: async (args: { image_path: string; queries?: string[]; max_objects?: number }) => {
 			const capture = new ImageCapture();
@@ -230,7 +236,9 @@ export function createRoboticsPlanToolDefinition(options?: {
 		parameters: Type.Object({
 			instruction: Type.String({ description: "Robot görevi (ör: 'mavi bloğu turuncu kaseye koy')" }),
 			image_path: Type.Optional(Type.String({ description: "Sahne görüntüsü (opsiyonel ama önerilir)" })),
-			functions_path: Type.Optional(Type.String({ description: "Robot fonksiyon tanım JSON dosyası yolu (opsiyonel, settings'den alınır)" })),
+			functions_path: Type.Optional(
+				Type.String({ description: "Robot fonksiyon tanım JSON dosyası yolu (opsiyonel, settings'den alınır)" }),
+			),
 		}),
 		execute: async (args: { instruction: string; image_path?: string; functions_path?: string }) => {
 			const { OllamaVision } = await import("../robotics/ollama-vision.js");

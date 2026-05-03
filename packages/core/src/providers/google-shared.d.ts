@@ -3,6 +3,7 @@
  */
 import { type Content, FinishReason, FunctionCallingConfigMode, type Part } from "@google/genai";
 import type { Context, Model, StopReason, Tool } from "../types.js";
+
 type GoogleApiType = "google-generative-ai" | "google-vertex" | "google-antigravity" | "google-gemini-cli";
 /**
  * Thinking level for Gemini 3 models.

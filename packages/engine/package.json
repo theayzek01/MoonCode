@@ -1,6 +1,6 @@
 {
 	"name": "@mooncli/engine",
-	"version": "0.72.1",
+	"version": "0.72.2",
 	"description": "General-purpose state management engine",
 	"type": "module",
 	"main": "./dist/index.js",
@@ -18,7 +18,7 @@
 	},
 	"dependencies": {
 		"@modelcontextprotocol/sdk": "^1.29.0",
-		"@mooncli/core": "^0.72.1",
+		"@mooncli/core": "^0.72.2",
 		"typebox": "^1.1.24"
 	},
 	"keywords": [

@@ -1,4 +1,5 @@
 import type { AssistantMessageEventStream } from "./utils/event-stream.js";
+
 export type { AssistantMessageEventStream } from "./utils/event-stream.js";
 export type KnownApi =
 	| "openai-completions"
@@ -209,6 +210,7 @@ export interface ToolResultMessage<TDetails = any> {
 	timestamp: number;
 }
 export type Message = UserMessage | AssistantMessage | ToolResultMessage;
+
 import type { TSchema } from "typebox";
 export interface Tool<TParameters extends TSchema = TSchema> {
 	name: string;

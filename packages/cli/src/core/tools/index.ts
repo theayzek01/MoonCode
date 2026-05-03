@@ -11,6 +11,14 @@ export {
 	createLocalBashOperations,
 } from "./bash.js";
 export {
+	createDiscordGetChannelsTool,
+	createDiscordListGuildsTool,
+	createDiscordManageChannelTool,
+	createDiscordSendMessageTool,
+	createDiscordToolDefinitions,
+	type DiscordToolOptions,
+} from "./discord.js";
+export {
 	createEditTool,
 	createEditToolDefinition,
 	type EditOperations,
@@ -72,6 +80,14 @@ export {
 import type { EngineTool } from "@mooncli/engine";
 import type { ToolDefinition } from "../extensions/types.js";
 import { type BashToolOptions, createBashTool, createBashToolDefinition } from "./bash.js";
+import {
+	createDiscordGetChannelsTool,
+	createDiscordListGuildsTool,
+	createDiscordManageChannelTool,
+	createDiscordSendMessageTool,
+	createDiscordToolDefinitions,
+	type DiscordToolOptions,
+} from "./discord.js";
 import { createEditTool, createEditToolDefinition, type EditToolOptions } from "./edit.js";
 import { createFindTool, createFindToolDefinition, type FindToolOptions } from "./find.js";
 import { createGrepTool, createGrepToolDefinition, type GrepToolOptions } from "./grep.js";
@@ -81,8 +97,31 @@ import { createWriteTool, createWriteToolDefinition, type WriteToolOptions } fro
 
 export type Tool = EngineTool<any>;
 export type ToolDef = ToolDefinition<any, any>;
-export type ToolName = "read" | "bash" | "edit" | "write" | "grep" | "find" | "ls";
-export const allToolNames: Set<ToolName> = new Set(["read", "bash", "edit", "write", "grep", "find", "ls"]);
+export type ToolName =
+	| "read"
+	| "bash"
+	| "edit"
+	| "write"
+	| "grep"
+	| "find"
+	| "ls"
+	| "discord_list_guilds"
+	| "discord_get_channels"
+	| "discord_send_message"
+	| "discord_manage_channel";
+export const allToolNames: Set<ToolName> = new Set([
+	"read",
+	"bash",
+	"edit",
+	"write",
+	"grep",
+	"find",
+	"ls",
+	"discord_list_guilds",
+	"discord_get_channels",
+	"discord_send_message",
+	"discord_manage_channel",
+]);
 
 export interface ToolsOptions {
 	read?: ReadToolOptions;
@@ -92,6 +131,7 @@ export interface ToolsOptions {
 	grep?: GrepToolOptions;
 	find?: FindToolOptions;
 	ls?: LsToolOptions;
+	discord?: DiscordToolOptions;
 }
 
 export function createToolDefinition(toolName: ToolName, cwd: string, options?: ToolsOptions): ToolDef {
@@ -110,6 +150,11 @@ export function createToolDefinition(toolName: ToolName, cwd: string, options?: 
 			return createFindToolDefinition(cwd, options?.find);
 		case "ls":
 			return createLsToolDefinition(cwd, options?.ls);
+		case "discord_list_guilds":
+		case "discord_get_channels":
+		case "discord_send_message":
+		case "discord_manage_channel":
+			return createDiscordToolDefinitions(options?.discord).find((d) => d.name === toolName)!;
 		default:
 			throw new Error(`Unknown tool name: ${toolName}`);
 	}
@@ -131,6 +176,14 @@ export function createTool(toolName: ToolName, cwd: string, options?: ToolsOptio
 			return createFindTool(cwd, options?.find);
 		case "ls":
 			return createLsTool(cwd, options?.ls);
+		case "discord_list_guilds":
+			return createDiscordListGuildsTool(options?.discord);
+		case "discord_get_channels":
+			return createDiscordGetChannelsTool(options?.discord);
+		case "discord_send_message":
+			return createDiscordSendMessageTool(options?.discord);
+		case "discord_manage_channel":
+			return createDiscordManageChannelTool(options?.discord);
 		default:
 			throw new Error(`Unknown tool name: ${toolName}`);
 	}

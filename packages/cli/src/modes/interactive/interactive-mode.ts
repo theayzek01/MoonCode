@@ -240,7 +240,7 @@ export class InteractiveMode {
 	private workingMessage: string | undefined = undefined;
 	private workingVisible = true;
 	private workingIndicatorOptions: LoaderIndicatorOptions | undefined = undefined;
-	private readonly defaultWorkingMessage = "Islem Gerceklestiriliyor...";
+	private readonly defaultWorkingMessage = "Hazirlaniyor...";
 	private readonly defaultHiddenThinkingLabel = "Zihin Sarayinda Analiz Ediliyor...";
 	private hiddenThinkingLabel = this.defaultHiddenThinkingLabel;
 
@@ -1677,6 +1677,13 @@ export class InteractiveMode {
 		);
 	}
 
+	private setWorkingMessage(message: string | undefined): void {
+		this.workingMessage = message;
+		if (this.loadingAnimation) {
+			this.loadingAnimation.setMessage(message ?? this.defaultWorkingMessage);
+		}
+	}
+
 	private stopWorkingLoader(): void {
 		if (this.loadingAnimation) {
 			this.loadingAnimation.stop();
@@ -1949,12 +1956,7 @@ export class InteractiveMode {
 			notify: (message, type) => this.showExtensionNotify(message, type),
 			onTerminalInput: (handler) => this.addExtensionTerminalInputListener(handler),
 			setStatus: (key, text) => this.setExtensionStatus(key, text),
-			setWorkingMessage: (message) => {
-				this.workingMessage = message;
-				if (this.loadingAnimation) {
-					this.loadingAnimation.setMessage(message ?? this.defaultWorkingMessage);
-				}
-			},
+			setWorkingMessage: (message) => this.setWorkingMessage(message),
 			setWorkingVisible: (visible) => this.setWorkingVisible(visible),
 			setWorkingIndicator: (options) => this.setWorkingIndicator(options),
 			setHiddenThinkingLabel: (label) => this.setHiddenThinkingLabel(label),
@@ -2555,6 +2557,12 @@ export class InteractiveMode {
 				await this.handleRoboticsCommand(args);
 				return;
 			}
+			if (text === "/discord" || text.startsWith("/discord ")) {
+				const args = text.startsWith("/discord ") ? text.slice(9).trim() : "";
+				this.editor.setText("");
+				await this.handleDiscordCommand(args);
+				return;
+			}
 			if (text === "/debug") {
 				this.handleDebugCommand();
 				this.editor.setText("");
@@ -2644,6 +2652,7 @@ export class InteractiveMode {
 			await this.init();
 		}
 
+		this.updateWorkingMessageContextually(event);
 		this.footer.invalidate();
 
 		switch (event.type) {
@@ -2984,6 +2993,48 @@ export class InteractiveMode {
 				? [{ type: "text", text: message.content }]
 				: message.content.filter((c: { type: string }) => c.type === "text");
 		return textBlocks.map((c) => (c as { text: string }).text).join("");
+	}
+
+	private updateWorkingMessageContextually(event: EngineSessionEvent): void {
+		switch (event.type) {
+			case "engine_start":
+				this.setWorkingMessage("Hazirlaniyor...");
+				break;
+			case "message_update":
+				if (event.message.role === "assistant") {
+					const assistantMsg = event.message as AssistantMessage;
+					const content = assistantMsg.content;
+
+					// Check for tool calls first (highest priority)
+					const hasToolCall = content.some((c) => c.type === "toolCall");
+					if (hasToolCall) {
+						const lastTool = content.filter((c) => c.type === "toolCall").pop() as ToolCall;
+						if (lastTool) {
+							this.setWorkingMessage(`${lastTool.name} hazirlaniyor...`);
+							return;
+						}
+					}
+
+					// Check for thinking/reasoning
+					const isThinking = content.some((c) => c.type === "thinking");
+					const hasText = content.some((c) => c.type === "text" && c.text.trim().length > 0);
+
+					if (isThinking && !hasText) {
+						this.setWorkingMessage("Dusunuyor...");
+						return;
+					}
+
+					// Default to writing code if there's text or we're just generally responding
+					this.setWorkingMessage("Kodu yaziyor...");
+				}
+				break;
+			case "tool_execution_start":
+				this.setWorkingMessage(`${event.toolName} calistiriliyor...`);
+				break;
+			case "engine_end":
+				this.setWorkingMessage(undefined);
+				break;
+		}
 	}
 
 	/**
@@ -4944,6 +4995,26 @@ export class InteractiveMode {
 		} else {
 			this.chatContainer.addChild(new Text(RoboticsView.renderError(`Bilinmeyen robotics komutu: ${cmd}`), 1, 0));
 			this.ui.requestRender();
+		}
+	}
+
+	private async handleDiscordCommand(args: string): Promise<void> {
+		if (args) {
+			this.settingsManager.setDiscordToken(args);
+			this.showStatus("Discord tokeni kaydedildi. Baglaniyor...");
+			// Reload session to refresh tools with the new token
+			await this.handleReloadCommand();
+			return;
+		}
+
+		const currentToken = this.settingsManager.getDiscordToken();
+		if (currentToken) {
+			this.showStatus(`Discord baglantisi aktif. (Token: ${currentToken.slice(0, 5)}...)`);
+			this.showStatus("Tokeni degistirmek icin: /discord <yeni_token>");
+			this.showStatus("Discord araclarini artik kullanabilirsiniz.");
+		} else {
+			this.showStatus("Discord tokeni ayarlanmamis.");
+			this.showStatus("Kullanim: /discord <bot_token>");
 		}
 	}
 

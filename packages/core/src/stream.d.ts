@@ -8,6 +8,7 @@ import type {
 	ProviderStreamOptions,
 	SimpleStreamOptions,
 } from "./types.js";
+
 export { getEnvApiKey } from "./env-api-keys.js";
 export declare function stream<TApi extends Api>(
 	model: Model<TApi>,

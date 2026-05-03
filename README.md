@@ -79,7 +79,18 @@ Mooncli artık yerel VLM modelleri (Ollama üzerinden) ile gerçek zamanlı robo
     *   `/robotics plan "mavi küpü sepete koy"`: Doğal dili robot API çağrılarına dönüştürme.
     *   `/robotics trajectory`: Robot kolu için yörünge planlama.
 
-Daha fazla detay için [Robotics Guide](docs/robotics.md) (yakında) dokümanına göz atın.
+### 🎮 Discord Integration (Yeni!)
+
+Mooncli artik Discord botunuzu yonetmenizi sagliyor. Sunucu duzenleme, kanal acma ve mesaj gonderme gibi islemleri AI yardimiyla yapabilirsiniz.
+
+1. **Baglanti:** `/discord <bot_token>` komutu ile bot tokeninizi girin.
+2. **Yonetim:** Artik botunuza Discord ile ilgili talimatlar verebilirsiniz:
+    - "Su sunucudaki kanallari listele."
+    - "Destek isminde yeni bir text kanali ac."
+    - "Genel kanalina 'Mooncli ile baglandim!' mesaji gonder."
+3. **Guvenlik:** Tokeniniz yerel ayarlarınızda guvenli bir sekilde saklanir.
+
+---
 
 ### 📊 Gerçek Zamanlı İlerleme Takibi
 

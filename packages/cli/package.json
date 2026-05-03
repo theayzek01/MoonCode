@@ -1,6 +1,6 @@
 {
 	"name": "mooncli",
-	"version": "0.72.1",
+	"version": "0.72.2",
 	"description": "Modern Terminal Assistant",
 	"type": "module",
 	"moonConfig": {
@@ -41,13 +41,14 @@
 	},
 	"dependencies": {
 		"@mariozechner/jiti": "^2.6.2",
-		"@mooncli/engine": "^0.72.1",
-		"@mooncli/core": "^0.72.1",
-		"@mooncli/tui": "^0.72.1",
+		"@mooncli/core": "^0.72.2",
+		"@mooncli/engine": "^0.72.2",
+		"@mooncli/tui": "^0.72.2",
 		"@silvia-odwyer/photon-node": "^0.3.4",
 		"chalk": "^5.5.0",
 		"cli-highlight": "^2.1.11",
 		"diff": "^8.0.2",
+		"discord.js": "^14.26.4",
 		"extract-zip": "^2.0.1",
 		"file-type": "^21.1.1",
 		"glob": "^13.0.1",

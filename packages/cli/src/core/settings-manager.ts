@@ -130,6 +130,7 @@ export interface Settings {
 	sessionDir?: string; // Custom session storage directory (same format as --session-dir CLI flag)
 	mcpServers?: Record<string, McpServerConfig>; // MCP server configurations
 	robotics?: RoboticsSettings; // Robotics mode configuration
+	discordToken?: string; // Discord Bot Token
 }
 
 export interface McpServerConfig {
@@ -1141,6 +1142,16 @@ export class SettingsManager {
 		if (!this.globalSettings.robotics) this.globalSettings.robotics = {};
 		this.globalSettings.robotics.lastImagePath = path;
 		this.markModified("robotics", "lastImagePath");
+		this.save();
+	}
+
+	getDiscordToken(): string | undefined {
+		return this.settings.discordToken;
+	}
+
+	setDiscordToken(token: string | undefined): void {
+		this.globalSettings.discordToken = token;
+		this.markModified("discordToken");
 		this.save();
 	}
 }
