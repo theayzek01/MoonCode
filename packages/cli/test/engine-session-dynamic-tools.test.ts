@@ -134,6 +134,42 @@ describe("EngineSession dynamic tool registration", () => {
 		session.dispose();
 	});
 
+	it("activates Discord tools after a token is added and the session reloads", async () => {
+		const settingsManager = SettingsManager.create(tempDir, engineDir);
+		const sessionManager = SessionManager.inMemory();
+		const resourceLoader = new DefaultResourceLoader({
+			cwd: tempDir,
+			engineDir,
+			settingsManager,
+		});
+		await resourceLoader.reload();
+
+		const { session } = await createEngineSession({
+			cwd: tempDir,
+			engineDir,
+			model: getModel("anthropic", "claude-sonnet-4-5")!,
+			settingsManager,
+			sessionManager,
+			resourceLoader,
+		});
+
+		expect(session.getActiveToolNames()).not.toContain("discord_list_guilds");
+
+		settingsManager.setDiscordToken("test-token");
+		await session.reload();
+
+		expect(session.getActiveToolNames()).toEqual(
+			expect.arrayContaining([
+				"discord_list_guilds",
+				"discord_get_channels",
+				"discord_send_message",
+				"discord_manage_channel",
+			]),
+		);
+
+		session.dispose();
+	});
+
 	it("keeps custom tools active but omits them from available tools when promptSnippet is not provided", async () => {
 		const settingsManager = SettingsManager.create(tempDir, engineDir);
 		const sessionManager = SessionManager.inMemory();

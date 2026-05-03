@@ -29,7 +29,7 @@ import { exportFromFile } from "./core/export-html/index.js";
 import type { ExtensionFactory } from "./core/extensions/types.js";
 import { KeybindingsManager } from "./core/keybindings.js";
 import type { ModelRegistry } from "./core/model-registry.js";
-import { resolveCliModel, resolveModelScope, type ScopedModel } from "./core/model-resolver.js";
+import { normalizeProviderId, resolveCliModel, resolveModelScope, type ScopedModel } from "./core/model-resolver.js";
 import { restoreStdout, takeOverStdout } from "./core/output-guard.js";
 import type { CreateEngineSessionOptions } from "./core/sdk.js";
 import {
@@ -299,13 +299,14 @@ function buildSessionOptions(
 	const options: CreateEngineSessionOptions = {};
 	const diagnostics: EngineSessionRuntimeDiagnostic[] = [];
 	let cliThinkingFromModel = false;
+	const canonicalCliProvider = normalizeProviderId(parsed.provider);
 
 	// Model from CLI
 	// - supports --provider <name> --model <pattern>
 	// - supports --model <provider>/<pattern>
 	if (parsed.model) {
 		const resolved = resolveCliModel({
-			cliProvider: parsed.provider,
+			cliProvider: canonicalCliProvider,
 			cliModel: parsed.model,
 			modelRegistry,
 		});
@@ -328,7 +329,7 @@ function buildSessionOptions(
 
 	if (!options.model && scopedModels.length > 0 && !hasExistingSession) {
 		// Check if saved default is in scoped models - use it if so, otherwise first scoped model
-		const savedProvider = settingsManager.getDefaultProvider();
+		const savedProvider = normalizeProviderId(settingsManager.getDefaultProvider());
 		const savedModelId = settingsManager.getDefaultModel();
 		const savedModel = savedProvider && savedModelId ? modelRegistry.find(savedProvider, savedModelId) : undefined;
 		const savedInScope = savedModel ? scopedModels.find((sm) => modelsAreEqual(sm.model, savedModel)) : undefined;

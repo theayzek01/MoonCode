@@ -216,6 +216,7 @@ export function createAllToolDefinitions(cwd: string, options?: ToolsOptions): R
 		grep: createGrepToolDefinition(cwd, options?.grep),
 		find: createFindToolDefinition(cwd, options?.find),
 		ls: createLsToolDefinition(cwd, options?.ls),
+		...Object.fromEntries(createDiscordToolDefinitions(options?.discord).map((tool) => [tool.name, tool])),
 	};
 }
 
@@ -246,5 +247,9 @@ export function createAllTools(cwd: string, options?: ToolsOptions): Record<Tool
 		grep: createGrepTool(cwd, options?.grep),
 		find: createFindTool(cwd, options?.find),
 		ls: createLsTool(cwd, options?.ls),
+		discord_list_guilds: createDiscordListGuildsTool(options?.discord),
+		discord_get_channels: createDiscordGetChannelsTool(options?.discord),
+		discord_send_message: createDiscordSendMessageTool(options?.discord),
+		discord_manage_channel: createDiscordManageChannelTool(options?.discord),
 	};
 }

@@ -48,6 +48,16 @@ export const defaultModelPerProvider: Record<KnownProvider, string> = {
 	ollama: "qwen2.5-coder:7b",
 };
 
+const providerAliases: Record<string, string> = {
+	antigravity: "google-gemini-cli",
+	codex: "openai-codex",
+};
+
+export function normalizeProviderId(provider: string | undefined): string | undefined {
+	if (!provider) return undefined;
+	return providerAliases[provider.toLowerCase()] ?? provider;
+}
+
 export interface ScopedModel {
 	model: Model<Api>;
 	/** Thinking level if explicitly specified in pattern (e.g., "model:high"), undefined otherwise */
@@ -356,8 +366,9 @@ export function resolveCliModel(options: {
 		providerMap.set(m.provider.toLowerCase(), m.provider);
 	}
 
-	let provider = cliProvider ? providerMap.get(cliProvider.toLowerCase()) : undefined;
-	if (cliProvider && !provider) {
+	const normalizedCliProvider = normalizeProviderId(cliProvider);
+	let provider = normalizedCliProvider ? providerMap.get(normalizedCliProvider.toLowerCase()) : undefined;
+	if (normalizedCliProvider && !provider) {
 		return {
 			model: undefined,
 			warning: undefined,
@@ -398,7 +409,7 @@ export function resolveCliModel(options: {
 		}
 	}
 
-	if (cliProvider && provider) {
+	if (normalizedCliProvider && provider) {
 		// If both were provided, tolerate --model <provider>/<pattern> by stripping the provider prefix
 		const prefix = `${provider}/`;
 		if (cliModel.toLowerCase().startsWith(prefix.toLowerCase())) {
@@ -525,7 +536,8 @@ export async function findInitialModel(options: {
 
 	// 3. Try saved default from settings
 	if (defaultProvider && defaultModelId) {
-		const found = modelRegistry.find(defaultProvider, defaultModelId);
+		const canonicalDefaultProvider = normalizeProviderId(defaultProvider) ?? defaultProvider;
+		const found = modelRegistry.find(canonicalDefaultProvider, defaultModelId);
 		if (found) {
 			model = found;
 			if (defaultThinkingLevel) {
