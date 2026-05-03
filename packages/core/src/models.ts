@@ -108,7 +108,7 @@ const antigravityModelList: Model<Api>[] = [
 	},
 ];
 for (const m of antigravityModelList) antigravityModels.set(m.id, m);
-modelRegistry.set("antigravity", antigravityModels);
+modelRegistry.set("google-antigravity", antigravityModels);
 
 // Inject Gemini CLI models (Image 2)
 const geminiCliModels = new Map<string, Model<Api>>();
@@ -117,7 +117,7 @@ const geminiCliModelList: Model<Api>[] = [
 		id: "gemini-3-flash-preview",
 		name: "gemini-3-flash-preview",
 		api: "google-generative-ai",
-		provider: "google",
+		provider: "google-gemini-cli",
 		baseUrl: "",
 		reasoning: false,
 		input: ["text", "image"],
@@ -129,7 +129,7 @@ const geminiCliModelList: Model<Api>[] = [
 		id: "gemini-3.1-flash-lite-preview",
 		name: "gemini-3.1-flash-lite-preview",
 		api: "google-generative-ai",
-		provider: "google",
+		provider: "google-gemini-cli",
 		baseUrl: "",
 		reasoning: false,
 		input: ["text", "image"],
@@ -141,7 +141,7 @@ const geminiCliModelList: Model<Api>[] = [
 		id: "gemini-2.5-flash",
 		name: "gemini-2.5-flash",
 		api: "google-generative-ai",
-		provider: "google",
+		provider: "google-gemini-cli",
 		baseUrl: "",
 		reasoning: false,
 		input: ["text", "image"],
@@ -153,7 +153,7 @@ const geminiCliModelList: Model<Api>[] = [
 		id: "gemini-2.5-flash-lite",
 		name: "gemini-2.5-flash-lite",
 		api: "google-generative-ai",
-		provider: "google",
+		provider: "google-gemini-cli",
 		baseUrl: "",
 		reasoning: false,
 		input: ["text", "image"],
@@ -163,7 +163,7 @@ const geminiCliModelList: Model<Api>[] = [
 	},
 ];
 for (const m of geminiCliModelList) geminiCliModels.set(m.id, m);
-modelRegistry.set("geminicli", geminiCliModels);
+modelRegistry.set("google-gemini-cli", geminiCliModels);
 
 export function getModel(provider: string, modelId: string): Model<any> | undefined {
 	const providerModels = modelRegistry.get(provider);
