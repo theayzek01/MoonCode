@@ -221,6 +221,19 @@ function isGemini3Model(modelId: string): boolean {
 }
 
 /**
+ * Maps custom Mooncli model IDs back to the real IDs expected by the Cloud Code Assist API.
+ */
+function getApiModelId(modelId: string): string {
+	const id = modelId.toLowerCase();
+	if (id.includes("gemini-3.1-pro")) return "gemini-3.1-pro";
+	if (id.includes("gemini-3-flash")) return "gemini-3-flash";
+	if (id.includes("claude-sonnet-4.6")) return "claude-4.6-sonnet";
+	if (id.includes("claude-opus-4.6")) return "claude-4.6-opus";
+	if (id.includes("gpt-oss:120b-cloud")) return "gpt-oss:120b-cloud";
+	return modelId;
+}
+
+/**
  * Check if an error is retryable (rate limit, server error, network error, etc.)
  */
 function isRetryableError(status: number, errorText: string): boolean {
@@ -927,10 +940,11 @@ export function buildRequest(
 
 	return {
 		project: projectId,
-		model: model.id,
+		model: getApiModelId(model.id),
 		request,
 		...(isAntigravity ? { requestType: "engine" } : {}),
-		requestId: `${isAntigravity ? "engine" : "Mooncli"}-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+		userEngine: isAntigravity ? "antigravity" : "hodeuscli-cli",
+		requestId: `${isAntigravity ? "engine" : "moodcli"}-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
 	};
 }
 

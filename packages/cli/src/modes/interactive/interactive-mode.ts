@@ -568,12 +568,13 @@ export class InteractiveMode {
 			const banner = theme.fg(
 				"accent",
 				`
-    ${theme.bold("🌙 M O O N C L I")}
-    ${theme.fg("dim", "✧ ────────────── ✧")}
-   ${theme.fg("accent", "  .   *   .    *  ")}  ${theme.fg("muted", "Zihin Sarayinda Bir Rehber")}
-  ${theme.fg("accent", " *  .  🌙   .  * ")}  ${theme.fg("dim", `v${this.version}`)} ${theme.fg("success", "[MCP Ready]")}
-   ${theme.fg("accent", "  .   *   .    *  ")}
-    ${theme.fg("dim", "✧ ────────────── ✧")}  ${theme.fg("muted", "Dusun, Kodla, Mukemmellestir.")}
+      _.._      __  __  ____  ____  _  _  ___  _    ___
+    .' .-'`    (  \/  )(  _ \\(  _ \\( \\( )/ __)( )  (_  )
+   /  / {9}) {4}( {2}) {3}( ) {3}( ) {2}(( (__ {2}) __ ) (
+  |  |         (__/\\__)(____/(____/(_)\\_)\\___)(___)(___)
+   \\  \\         ${theme.fg("muted", "Zihin Sarayinda Bir Rehber")}
+    '._'-._     ${theme.fg("dim", `v${this.version}`)} ${theme.fg("success", "[MCP Ready]")}
+       \`""\`     ${theme.fg("muted", "Dusun, Kodla, Mukemmellestir.")}
 `,
 			);
 

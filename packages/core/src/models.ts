@@ -31,12 +31,24 @@ for (const id of defaultOllamaModels) {
 }
 modelRegistry.set("ollama", ollamaModels);
 
-// Inject Antigravity models (Image 1)
+// Inject Antigravity models (Image 1 & 2 Sync)
 const antigravityModels = new Map<string, Model<Api>>();
 const antigravityModelList: Model<Api>[] = [
 	{
-		id: "gemini-3.1-pro",
-		name: "Gemini 3.1 Pro (Preview)",
+		id: "gemini-3.1-pro-high",
+		name: "Gemini 3.1 Pro (High)",
+		api: "google-antigravity",
+		provider: "google",
+		baseUrl: "",
+		reasoning: true,
+		input: ["text", "image"],
+		cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+		contextWindow: 2000000,
+		maxTokens: 8192,
+	},
+	{
+		id: "gemini-3.1-pro-low",
+		name: "Gemini 3.1 Pro (Low)",
 		api: "google-antigravity",
 		provider: "google",
 		baseUrl: "",
@@ -59,8 +71,8 @@ const antigravityModelList: Model<Api>[] = [
 		maxTokens: 8192,
 	},
 	{
-		id: "claude-4.6-sonnet",
-		name: "Claude 4.6 Sonnet (Sandbox)",
+		id: "claude-sonnet-4.6-thinking",
+		name: "Claude Sonnet 4.6 (Thinking)",
 		api: "google-antigravity",
 		provider: "google",
 		baseUrl: "",
@@ -71,32 +83,20 @@ const antigravityModelList: Model<Api>[] = [
 		maxTokens: 8192,
 	},
 	{
-		id: "claude-3.7-sonnet",
-		name: "Claude 3.7 Sonnet",
+		id: "claude-opus-4.6-thinking",
+		name: "Claude Opus 4.6 (Thinking)",
 		api: "google-antigravity",
 		provider: "google",
 		baseUrl: "",
 		reasoning: true,
 		input: ["text", "image"],
 		cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-		contextWindow: 200000,
+		contextWindow: 1000000,
 		maxTokens: 8192,
 	},
 	{
-		id: "gpt-5.4-pro",
-		name: "GPT-5.4 Pro (Sandbox)",
-		api: "google-antigravity",
-		provider: "google",
-		baseUrl: "",
-		reasoning: true,
-		input: ["text", "image"],
-		cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-		contextWindow: 2000000,
-		maxTokens: 8192,
-	},
-	{
-		id: "gpt-5.3-ultra",
-		name: "GPT-5.3 Ultra (Sandbox)",
+		id: "gpt-oss:120b-cloud",
+		name: "GPT-OSS 120B (Medium)",
 		api: "google-antigravity",
 		provider: "google",
 		baseUrl: "",

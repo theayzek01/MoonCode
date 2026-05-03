@@ -19,8 +19,9 @@ export const defaultModelPerProvider: Record<KnownProvider, string> = {
 	"azure-openai-responses": "gpt-5.4",
 	"openai-codex": "gpt-5.5",
 	deepseek: "deepseek-v4-pro",
-	google: "gemini-3.1-pro-preview",
-	"google-vertex": "gemini-3.1-pro-preview",
+	google: "gemini-3.1-pro",
+	"google-vertex": "gemini-3.1-pro",
+	"google-gemini-cli": "gemini-3-flash-preview",
 	"github-copilot": "gpt-5.4",
 	openrouter: "moonshotai/kimi-k2.6",
 	"vercel-ai-gateway": "zai/glm-5.1",
@@ -44,7 +45,7 @@ export const defaultModelPerProvider: Record<KnownProvider, string> = {
 	"xiaomi-token-plan-cn": "mimo-v2.5-pro",
 	"xiaomi-token-plan-ams": "mimo-v2.5-pro",
 	"xiaomi-token-plan-sgp": "mimo-v2.5-pro",
-	ollama: "llama3.1:8b",
+	ollama: "qwen2.5-coder:7b",
 };
 
 export interface ScopedModel {
@@ -192,54 +193,46 @@ export function parseModelPattern(
 	availableModels: Model<Api>[],
 	options?: { allowInvalidThinkingLevelFallback?: boolean },
 ): ParsedModelResult {
-	// Try exact match first
+	// 1. Her şeyden önce tam ismi ara (İçinde : olsa bile)
 	const exactMatch = tryMatchModel(pattern, availableModels);
 	if (exactMatch) {
 		return { model: exactMatch, thinkingLevel: undefined, warning: undefined };
 	}
 
-	// No match - try splitting on last colon if present
+	// 2. Tam eşleşme yoksa : işaretine göre bölmeyi dene
 	const lastColonIndex = pattern.lastIndexOf(":");
 	if (lastColonIndex === -1) {
-		// No colons, pattern simply doesn't match any model
 		return { model: undefined, thinkingLevel: undefined, warning: undefined };
 	}
 
 	const prefix = pattern.substring(0, lastColonIndex);
 	const suffix = pattern.substring(lastColonIndex + 1);
 
+	// Eğer suffix geçerli bir thinking level ise (high, low vb.)
 	if (isValidThinkingLevel(suffix)) {
-		// Valid thinking level - recurse on prefix and use this level
 		const result = parseModelPattern(prefix, availableModels, options);
 		if (result.model) {
-			// Only use this thinking level if no warning from inner recursion
 			return {
 				model: result.model,
 				thinkingLevel: result.warning ? undefined : suffix,
 				warning: result.warning,
 			};
 		}
-		return result;
-	} else {
-		// Invalid suffix
-		const allowFallback = options?.allowInvalidThinkingLevelFallback ?? true;
-		if (!allowFallback) {
-			// In strict mode (CLI --model parsing), treat it as part of the model id and fail.
-			// This avoids accidentally resolving to a different model.
-			return { model: undefined, thinkingLevel: undefined, warning: undefined };
-		}
-
-		// Scope mode: recurse on prefix and warn
-		const result = parseModelPattern(prefix, availableModels, options);
-		if (result.model) {
-			return {
-				model: result.model,
-				thinkingLevel: undefined,
-				warning: `Invalid thinking level "${suffix}" in pattern "${pattern}". Using default instead.`,
-			};
-		}
-		return result;
 	}
+
+	// Suffix thinking level değilse, belki ID'nin kendisi : içeriyordur ama biz 1. adımda kaçırmışızdır.
+	// (Mesela fuzzy match için prefix'i tekrar dene)
+	const prefixMatch = tryMatchModel(prefix, availableModels);
+	if (prefixMatch) {
+		const allowFallback = options?.allowInvalidThinkingLevelFallback ?? true;
+		return {
+			model: prefixMatch,
+			thinkingLevel: undefined,
+			warning: allowFallback ? `Invalid thinking level "${suffix}" in pattern "${pattern}".` : undefined,
+		};
+	}
+
+	return { model: undefined, thinkingLevel: undefined, warning: undefined };
 }
 
 /**

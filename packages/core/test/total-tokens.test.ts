@@ -104,25 +104,29 @@ describe("totalTokens field", () => {
 	// =========================================================================
 
 	describe.skipIf(!process.env.ANTHROPIC_API_KEY)("Anthropic (API Key)", () => {
-		it("claude-sonnet-4-5 - should return totalTokens equal to sum of components", {
-			retry: 3,
-			timeout: 60000,
-		}, async () => {
-			const llm = getModel("anthropic", "claude-sonnet-4-5");
+		it(
+			"claude-sonnet-4-5 - should return totalTokens equal to sum of components",
+			{
+				retry: 3,
+				timeout: 60000,
+			},
+			async () => {
+				const llm = getModel("anthropic", "claude-sonnet-4-5");
 
-			console.log(`\nAnthropic / ${llm.id}:`);
-			const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.ANTHROPIC_API_KEY });
+				console.log(`\nAnthropic / ${llm.id}:`);
+				const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.ANTHROPIC_API_KEY });
 
-			logUsage("First request", first);
-			logUsage("Second request", second);
+				logUsage("First request", first);
+				logUsage("Second request", second);
 
-			assertTotalTokensEqualsComponents(first);
-			assertTotalTokensEqualsComponents(second);
+				assertTotalTokensEqualsComponents(first);
+				assertTotalTokensEqualsComponents(second);
 
-			// Anthropic should have cache activity
-			const hasCache = second.cacheRead > 0 || second.cacheWrite > 0 || first.cacheWrite > 0;
-			expect(hasCache).toBe(true);
-		});
+				// Anthropic should have cache activity
+				const hasCache = second.cacheRead > 0 || second.cacheWrite > 0 || first.cacheWrite > 0;
+				expect(hasCache).toBe(true);
+			},
+		);
 	});
 
 	describe("Anthropic (OAuth)", () => {
@@ -153,26 +157,30 @@ describe("totalTokens field", () => {
 	// =========================================================================
 
 	describe.skipIf(!process.env.OpenAI_API_KEY)("OpenAI Completions", () => {
-		it("gpt-4o-mini - should return totalTokens equal to sum of components", {
-			retry: 3,
-			timeout: 60000,
-		}, async () => {
-			const { compat: _compat, ...baseModel } = getModel("openai", "gpt-4o-mini")!;
-			void _compat;
-			const llm: Model<"openai-completions"> = {
-				...baseModel,
-				api: "openai-completions",
-			};
+		it(
+			"gpt-4o-mini - should return totalTokens equal to sum of components",
+			{
+				retry: 3,
+				timeout: 60000,
+			},
+			async () => {
+				const { compat: _compat, ...baseModel } = getModel("openai", "gpt-4o-mini")!;
+				void _compat;
+				const llm: Model<"openai-completions"> = {
+					...baseModel,
+					api: "openai-completions",
+				};
 
-			console.log(`\nOpenAI Completions / ${llm.id}:`);
-			const { first, second } = await testTotalTokensWithCache(llm);
+				console.log(`\nOpenAI Completions / ${llm.id}:`);
+				const { first, second } = await testTotalTokensWithCache(llm);
 
-			logUsage("First request", first);
-			logUsage("Second request", second);
+				logUsage("First request", first);
+				logUsage("Second request", second);
 
-			assertTotalTokensEqualsComponents(first);
-			assertTotalTokensEqualsComponents(second);
-		});
+				assertTotalTokensEqualsComponents(first);
+				assertTotalTokensEqualsComponents(second);
+			},
+		);
 	});
 
 	describe.skipIf(!process.env.OpenAI_API_KEY)("OpenAI Responses", () => {
@@ -191,23 +199,27 @@ describe("totalTokens field", () => {
 	});
 
 	describe.skipIf(!hasAzureOpenAICredentials())("Azure OpenAI Responses", () => {
-		it("gpt-4o-mini - should return totalTokens equal to sum of components", {
-			retry: 3,
-			timeout: 60000,
-		}, async () => {
-			const llm = getModel("azure-openai-responses", "gpt-4o-mini");
-			const azureDeploymentName = resolveAzureDeploymentName(llm.id);
-			const azureOptions = azureDeploymentName ? { azureDeploymentName } : {};
+		it(
+			"gpt-4o-mini - should return totalTokens equal to sum of components",
+			{
+				retry: 3,
+				timeout: 60000,
+			},
+			async () => {
+				const llm = getModel("azure-openai-responses", "gpt-4o-mini");
+				const azureDeploymentName = resolveAzureDeploymentName(llm.id);
+				const azureOptions = azureDeploymentName ? { azureDeploymentName } : {};
 
-			console.log(`\nAzure OpenAI Responses / ${llm.id}:`);
-			const { first, second } = await testTotalTokensWithCache(llm, azureOptions);
+				console.log(`\nAzure OpenAI Responses / ${llm.id}:`);
+				const { first, second } = await testTotalTokensWithCache(llm, azureOptions);
 
-			logUsage("First request", first);
-			logUsage("Second request", second);
+				logUsage("First request", first);
+				logUsage("Second request", second);
 
-			assertTotalTokensEqualsComponents(first);
-			assertTotalTokensEqualsComponents(second);
-		});
+				assertTotalTokensEqualsComponents(first);
+				assertTotalTokensEqualsComponents(second);
+			},
+		);
 	});
 
 	// =========================================================================
@@ -215,21 +227,25 @@ describe("totalTokens field", () => {
 	// =========================================================================
 
 	describe.skipIf(!process.env.GEMINI_API_KEY)("Google", () => {
-		it("gemini-2.0-flash - should return totalTokens equal to sum of components", {
-			retry: 3,
-			timeout: 60000,
-		}, async () => {
-			const llm = getModel("google", "gemini-2.0-flash");
+		it(
+			"gemini-2.0-flash - should return totalTokens equal to sum of components",
+			{
+				retry: 3,
+				timeout: 60000,
+			},
+			async () => {
+				const llm = getModel("google", "gemini-2.0-flash");
 
-			console.log(`\nGoogle / ${llm.id}:`);
-			const { first, second } = await testTotalTokensWithCache(llm);
+				console.log(`\nGoogle / ${llm.id}:`);
+				const { first, second } = await testTotalTokensWithCache(llm);
 
-			logUsage("First request", first);
-			logUsage("Second request", second);
+				logUsage("First request", first);
+				logUsage("Second request", second);
 
-			assertTotalTokensEqualsComponents(first);
-			assertTotalTokensEqualsComponents(second);
-		});
+				assertTotalTokensEqualsComponents(first);
+				assertTotalTokensEqualsComponents(second);
+			},
+		);
 	});
 
 	// =========================================================================
@@ -237,21 +253,25 @@ describe("totalTokens field", () => {
 	// =========================================================================
 
 	describe.skipIf(!process.env.XCore_API_KEY)("xCore", () => {
-		it("grok-3-fast - should return totalTokens equal to sum of components", {
-			retry: 3,
-			timeout: 60000,
-		}, async () => {
-			const llm = getModel("xai", "grok-3-fast");
+		it(
+			"grok-3-fast - should return totalTokens equal to sum of components",
+			{
+				retry: 3,
+				timeout: 60000,
+			},
+			async () => {
+				const llm = getModel("xai", "grok-3-fast");
 
-			console.log(`\nxCore / ${llm.id}:`);
-			const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.XCore_API_KEY });
+				console.log(`\nxCore / ${llm.id}:`);
+				const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.XCore_API_KEY });
 
-			logUsage("First request", first);
-			logUsage("Second request", second);
+				logUsage("First request", first);
+				logUsage("Second request", second);
 
-			assertTotalTokensEqualsComponents(first);
-			assertTotalTokensEqualsComponents(second);
-		});
+				assertTotalTokensEqualsComponents(first);
+				assertTotalTokensEqualsComponents(second);
+			},
+		);
 	});
 
 	// =========================================================================
@@ -259,21 +279,25 @@ describe("totalTokens field", () => {
 	// =========================================================================
 
 	describe.skipIf(!process.env.GROQ_API_KEY)("Groq", () => {
-		it("openai/gpt-oss-120b - should return totalTokens equal to sum of components", {
-			retry: 3,
-			timeout: 60000,
-		}, async () => {
-			const llm = getModel("groq", "openai/gpt-oss-120b");
+		it(
+			"openai/gpt-oss-120b - should return totalTokens equal to sum of components",
+			{
+				retry: 3,
+				timeout: 60000,
+			},
+			async () => {
+				const llm = getModel("groq", "openai/gpt-oss-120b");
 
-			console.log(`\nGroq / ${llm.id}:`);
-			const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.GROQ_API_KEY });
+				console.log(`\nGroq / ${llm.id}:`);
+				const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.GROQ_API_KEY });
 
-			logUsage("First request", first);
-			logUsage("Second request", second);
+				logUsage("First request", first);
+				logUsage("Second request", second);
 
-			assertTotalTokensEqualsComponents(first);
-			assertTotalTokensEqualsComponents(second);
-		});
+				assertTotalTokensEqualsComponents(first);
+				assertTotalTokensEqualsComponents(second);
+			},
+		);
 	});
 
 	// =========================================================================
@@ -281,21 +305,25 @@ describe("totalTokens field", () => {
 	// =========================================================================
 
 	describe.skipIf(!process.env.CEREBRAS_API_KEY)("Cerebras", () => {
-		it("gpt-oss-120b - should return totalTokens equal to sum of components", {
-			retry: 3,
-			timeout: 60000,
-		}, async () => {
-			const llm = getModel("cerebras", "gpt-oss-120b");
+		it(
+			"gpt-oss-120b - should return totalTokens equal to sum of components",
+			{
+				retry: 3,
+				timeout: 60000,
+			},
+			async () => {
+				const llm = getModel("cerebras", "gpt-oss-120b");
 
-			console.log(`\nCerebras / ${llm.id}:`);
-			const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.CEREBRAS_API_KEY });
+				console.log(`\nCerebras / ${llm.id}:`);
+				const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.CEREBRAS_API_KEY });
 
-			logUsage("First request", first);
-			logUsage("Second request", second);
+				logUsage("First request", first);
+				logUsage("Second request", second);
 
-			assertTotalTokensEqualsComponents(first);
-			assertTotalTokensEqualsComponents(second);
-		});
+				assertTotalTokensEqualsComponents(first);
+				assertTotalTokensEqualsComponents(second);
+			},
+		);
 	});
 
 	// =========================================================================
@@ -303,23 +331,27 @@ describe("totalTokens field", () => {
 	// =========================================================================
 
 	describe.skipIf(!hasCloudflareWorkersCoreCredentials())("Cloudflare Workers Core", () => {
-		it("@cf/moonshotai/kimi-k2.6 - should return totalTokens equal to sum of components", {
-			retry: 3,
-			timeout: 60000,
-		}, async () => {
-			const llm = getModel("cloudflare-workers-ai", "@cf/moonshotai/kimi-k2.6");
+		it(
+			"@cf/moonshotai/kimi-k2.6 - should return totalTokens equal to sum of components",
+			{
+				retry: 3,
+				timeout: 60000,
+			},
+			async () => {
+				const llm = getModel("cloudflare-workers-ai", "@cf/moonshotai/kimi-k2.6");
 
-			console.log(`\nCloudflare Workers Core / ${llm.id}:`);
-			const { first, second } = await testTotalTokensWithCache(llm, {
-				apiKey: process.env.CLOUDFLARE_API_KEY,
-			});
+				console.log(`\nCloudflare Workers Core / ${llm.id}:`);
+				const { first, second } = await testTotalTokensWithCache(llm, {
+					apiKey: process.env.CLOUDFLARE_API_KEY,
+				});
 
-			logUsage("First request", first);
-			logUsage("Second request", second);
+				logUsage("First request", first);
+				logUsage("Second request", second);
 
-			assertTotalTokensEqualsComponents(first);
-			assertTotalTokensEqualsComponents(second);
-		});
+				assertTotalTokensEqualsComponents(first);
+				assertTotalTokensEqualsComponents(second);
+			},
+		);
 	});
 
 	// =========================================================================
@@ -327,23 +359,27 @@ describe("totalTokens field", () => {
 	// =========================================================================
 
 	describe.skipIf(!hasCloudflareAiGatewayCredentials())("Cloudflare Core Gateway", () => {
-		it("workers-ai/@cf/moonshotai/kimi-k2.6 - should return totalTokens equal to sum of components", {
-			retry: 3,
-			timeout: 60000,
-		}, async () => {
-			const llm = getModel("cloudflare-ai-gateway", "workers-ai/@cf/moonshotai/kimi-k2.6");
+		it(
+			"workers-ai/@cf/moonshotai/kimi-k2.6 - should return totalTokens equal to sum of components",
+			{
+				retry: 3,
+				timeout: 60000,
+			},
+			async () => {
+				const llm = getModel("cloudflare-ai-gateway", "workers-ai/@cf/moonshotai/kimi-k2.6");
 
-			console.log(`\nCloudflare Core Gateway / ${llm.id}:`);
-			const { first, second } = await testTotalTokensWithCache(llm, {
-				apiKey: process.env.CLOUDFLARE_API_KEY,
-			});
+				console.log(`\nCloudflare Core Gateway / ${llm.id}:`);
+				const { first, second } = await testTotalTokensWithCache(llm, {
+					apiKey: process.env.CLOUDFLARE_API_KEY,
+				});
 
-			logUsage("First request", first);
-			logUsage("Second request", second);
+				logUsage("First request", first);
+				logUsage("Second request", second);
 
-			assertTotalTokensEqualsComponents(first);
-			assertTotalTokensEqualsComponents(second);
-		});
+				assertTotalTokensEqualsComponents(first);
+				assertTotalTokensEqualsComponents(second);
+			},
+		);
 	});
 
 	// =========================================================================
@@ -370,21 +406,25 @@ describe("totalTokens field", () => {
 	// =========================================================================
 
 	describe.skipIf(!process.env.ZCore_API_KEY)("z.ai", () => {
-		it("glm-4.5-air - should return totalTokens equal to sum of components", {
-			retry: 3,
-			timeout: 60000,
-		}, async () => {
-			const llm = getModel("zai", "glm-4.5-air");
+		it(
+			"glm-4.5-air - should return totalTokens equal to sum of components",
+			{
+				retry: 3,
+				timeout: 60000,
+			},
+			async () => {
+				const llm = getModel("zai", "glm-4.5-air");
 
-			console.log(`\nz.ai / ${llm.id}:`);
-			const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.ZCore_API_KEY });
+				console.log(`\nz.ai / ${llm.id}:`);
+				const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.ZCore_API_KEY });
 
-			logUsage("First request", first);
-			logUsage("Second request", second);
+				logUsage("First request", first);
+				logUsage("Second request", second);
 
-			assertTotalTokensEqualsComponents(first);
-			assertTotalTokensEqualsComponents(second);
-		});
+				assertTotalTokensEqualsComponents(first);
+				assertTotalTokensEqualsComponents(second);
+			},
+		);
 	});
 
 	// =========================================================================
@@ -392,21 +432,25 @@ describe("totalTokens field", () => {
 	// =========================================================================
 
 	describe.skipIf(!process.env.MISTRAL_API_KEY)("Mistral", () => {
-		it("devstral-medium-latest - should return totalTokens equal to sum of components", {
-			retry: 3,
-			timeout: 60000,
-		}, async () => {
-			const llm = getModel("mistral", "devstral-medium-latest");
+		it(
+			"devstral-medium-latest - should return totalTokens equal to sum of components",
+			{
+				retry: 3,
+				timeout: 60000,
+			},
+			async () => {
+				const llm = getModel("mistral", "devstral-medium-latest");
 
-			console.log(`\nMistral / ${llm.id}:`);
-			const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.MISTRAL_API_KEY });
+				console.log(`\nMistral / ${llm.id}:`);
+				const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.MISTRAL_API_KEY });
 
-			logUsage("First request", first);
-			logUsage("Second request", second);
+				logUsage("First request", first);
+				logUsage("Second request", second);
 
-			assertTotalTokensEqualsComponents(first);
-			assertTotalTokensEqualsComponents(second);
-		});
+				assertTotalTokensEqualsComponents(first);
+				assertTotalTokensEqualsComponents(second);
+			},
+		);
 	});
 
 	// =========================================================================
@@ -414,21 +458,25 @@ describe("totalTokens field", () => {
 	// =========================================================================
 
 	describe.skipIf(!process.env.MINIMAX_API_KEY)("MiniMax", () => {
-		it("MiniMax-M2.7 - should return totalTokens equal to sum of components", {
-			retry: 3,
-			timeout: 60000,
-		}, async () => {
-			const llm = getModel("minimax", "MiniMax-M2.7");
+		it(
+			"MiniMax-M2.7 - should return totalTokens equal to sum of components",
+			{
+				retry: 3,
+				timeout: 60000,
+			},
+			async () => {
+				const llm = getModel("minimax", "MiniMax-M2.7");
 
-			console.log(`\nMiniMax / ${llm.id}:`);
-			const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.MINIMAX_API_KEY });
+				console.log(`\nMiniMax / ${llm.id}:`);
+				const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.MINIMAX_API_KEY });
 
-			logUsage("First request", first);
-			logUsage("Second request", second);
+				logUsage("First request", first);
+				logUsage("Second request", second);
 
-			assertTotalTokensEqualsComponents(first);
-			assertTotalTokensEqualsComponents(second);
-		});
+				assertTotalTokensEqualsComponents(first);
+				assertTotalTokensEqualsComponents(second);
+			},
+		);
 	});
 
 	// =========================================================================
@@ -436,21 +484,25 @@ describe("totalTokens field", () => {
 	// =========================================================================
 
 	describe.skipIf(!process.env.XIAOMI_API_KEY)("Xiaomi MiMo (API billing)", () => {
-		it("mimo-v2.5-pro - should return totalTokens equal to sum of components", {
-			retry: 3,
-			timeout: 60000,
-		}, async () => {
-			const llm = getModel("xiaomi", "mimo-v2.5-pro");
+		it(
+			"mimo-v2.5-pro - should return totalTokens equal to sum of components",
+			{
+				retry: 3,
+				timeout: 60000,
+			},
+			async () => {
+				const llm = getModel("xiaomi", "mimo-v2.5-pro");
 
-			console.log(`\nXiaomi MiMo / ${llm.id}:`);
-			const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.XIAOMI_API_KEY });
+				console.log(`\nXiaomi MiMo / ${llm.id}:`);
+				const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.XIAOMI_API_KEY });
 
-			logUsage("First request", first);
-			logUsage("Second request", second);
+				logUsage("First request", first);
+				logUsage("Second request", second);
 
-			assertTotalTokensEqualsComponents(first);
-			assertTotalTokensEqualsComponents(second);
-		});
+				assertTotalTokensEqualsComponents(first);
+				assertTotalTokensEqualsComponents(second);
+			},
+		);
 	});
 
 	// =========================================================================
@@ -458,23 +510,27 @@ describe("totalTokens field", () => {
 	// =========================================================================
 
 	describe.skipIf(!process.env.XIAOMI_TOKEN_PLAN_CN_API_KEY)("Xiaomi MiMo Token Plan (CN)", () => {
-		it("mimo-v2.5-pro - should return totalTokens equal to sum of components", {
-			retry: 3,
-			timeout: 60000,
-		}, async () => {
-			const llm = getModel("xiaomi-token-plan-cn", "mimo-v2.5-pro");
+		it(
+			"mimo-v2.5-pro - should return totalTokens equal to sum of components",
+			{
+				retry: 3,
+				timeout: 60000,
+			},
+			async () => {
+				const llm = getModel("xiaomi-token-plan-cn", "mimo-v2.5-pro");
 
-			console.log(`\nXiaomi MiMo Token Plan CN / ${llm.id}:`);
-			const { first, second } = await testTotalTokensWithCache(llm, {
-				apiKey: process.env.XIAOMI_TOKEN_PLAN_CN_API_KEY,
-			});
+				console.log(`\nXiaomi MiMo Token Plan CN / ${llm.id}:`);
+				const { first, second } = await testTotalTokensWithCache(llm, {
+					apiKey: process.env.XIAOMI_TOKEN_PLAN_CN_API_KEY,
+				});
 
-			logUsage("First request", first);
-			logUsage("Second request", second);
+				logUsage("First request", first);
+				logUsage("Second request", second);
 
-			assertTotalTokensEqualsComponents(first);
-			assertTotalTokensEqualsComponents(second);
-		});
+				assertTotalTokensEqualsComponents(first);
+				assertTotalTokensEqualsComponents(second);
+			},
+		);
 	});
 
 	// =========================================================================
@@ -482,23 +538,27 @@ describe("totalTokens field", () => {
 	// =========================================================================
 
 	describe.skipIf(!process.env.XIAOMI_TOKEN_PLAN_AMS_API_KEY)("Xiaomi MiMo Token Plan (AMS)", () => {
-		it("mimo-v2.5-pro - should return totalTokens equal to sum of components", {
-			retry: 3,
-			timeout: 60000,
-		}, async () => {
-			const llm = getModel("xiaomi-token-plan-ams", "mimo-v2.5-pro");
+		it(
+			"mimo-v2.5-pro - should return totalTokens equal to sum of components",
+			{
+				retry: 3,
+				timeout: 60000,
+			},
+			async () => {
+				const llm = getModel("xiaomi-token-plan-ams", "mimo-v2.5-pro");
 
-			console.log(`\nXiaomi MiMo Token Plan AMS / ${llm.id}:`);
-			const { first, second } = await testTotalTokensWithCache(llm, {
-				apiKey: process.env.XIAOMI_TOKEN_PLAN_AMS_API_KEY,
-			});
+				console.log(`\nXiaomi MiMo Token Plan AMS / ${llm.id}:`);
+				const { first, second } = await testTotalTokensWithCache(llm, {
+					apiKey: process.env.XIAOMI_TOKEN_PLAN_AMS_API_KEY,
+				});
 
-			logUsage("First request", first);
-			logUsage("Second request", second);
+				logUsage("First request", first);
+				logUsage("Second request", second);
 
-			assertTotalTokensEqualsComponents(first);
-			assertTotalTokensEqualsComponents(second);
-		});
+				assertTotalTokensEqualsComponents(first);
+				assertTotalTokensEqualsComponents(second);
+			},
+		);
 	});
 
 	// =========================================================================
@@ -506,23 +566,27 @@ describe("totalTokens field", () => {
 	// =========================================================================
 
 	describe.skipIf(!process.env.XIAOMI_TOKEN_PLAN_SGP_API_KEY)("Xiaomi MiMo Token Plan (SGP)", () => {
-		it("mimo-v2.5-pro - should return totalTokens equal to sum of components", {
-			retry: 3,
-			timeout: 60000,
-		}, async () => {
-			const llm = getModel("xiaomi-token-plan-sgp", "mimo-v2.5-pro");
+		it(
+			"mimo-v2.5-pro - should return totalTokens equal to sum of components",
+			{
+				retry: 3,
+				timeout: 60000,
+			},
+			async () => {
+				const llm = getModel("xiaomi-token-plan-sgp", "mimo-v2.5-pro");
 
-			console.log(`\nXiaomi MiMo Token Plan SGP / ${llm.id}:`);
-			const { first, second } = await testTotalTokensWithCache(llm, {
-				apiKey: process.env.XIAOMI_TOKEN_PLAN_SGP_API_KEY,
-			});
+				console.log(`\nXiaomi MiMo Token Plan SGP / ${llm.id}:`);
+				const { first, second } = await testTotalTokensWithCache(llm, {
+					apiKey: process.env.XIAOMI_TOKEN_PLAN_SGP_API_KEY,
+				});
 
-			logUsage("First request", first);
-			logUsage("Second request", second);
+				logUsage("First request", first);
+				logUsage("Second request", second);
 
-			assertTotalTokensEqualsComponents(first);
-			assertTotalTokensEqualsComponents(second);
-		});
+				assertTotalTokensEqualsComponents(first);
+				assertTotalTokensEqualsComponents(second);
+			},
+		);
 	});
 
 	// =========================================================================
@@ -530,21 +594,25 @@ describe("totalTokens field", () => {
 	// =========================================================================
 
 	describe.skipIf(!process.env.KIMI_API_KEY)("Kimi For Coding", () => {
-		it("kimi-k2-thinking - should return totalTokens equal to sum of components", {
-			retry: 3,
-			timeout: 60000,
-		}, async () => {
-			const llm = getModel("kimi-coding", "kimi-k2-thinking");
+		it(
+			"kimi-k2-thinking - should return totalTokens equal to sum of components",
+			{
+				retry: 3,
+				timeout: 60000,
+			},
+			async () => {
+				const llm = getModel("kimi-coding", "kimi-k2-thinking");
 
-			console.log(`\nKimi For Coding / ${llm.id}:`);
-			const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.KIMI_API_KEY });
+				console.log(`\nKimi For Coding / ${llm.id}:`);
+				const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.KIMI_API_KEY });
 
-			logUsage("First request", first);
-			logUsage("Second request", second);
+				logUsage("First request", first);
+				logUsage("Second request", second);
 
-			assertTotalTokensEqualsComponents(first);
-			assertTotalTokensEqualsComponents(second);
-		});
+				assertTotalTokensEqualsComponents(first);
+				assertTotalTokensEqualsComponents(second);
+			},
+		);
 	});
 
 	// =========================================================================
@@ -552,21 +620,25 @@ describe("totalTokens field", () => {
 	// =========================================================================
 
 	describe.skipIf(!process.env.Core_GATEWAY_API_KEY)("Vercel Core Gateway", () => {
-		it("google/gemini-2.5-flash - should return totalTokens equal to sum of components", {
-			retry: 3,
-			timeout: 60000,
-		}, async () => {
-			const llm = getModel("vercel-ai-gateway", "google/gemini-2.5-flash");
+		it(
+			"google/gemini-2.5-flash - should return totalTokens equal to sum of components",
+			{
+				retry: 3,
+				timeout: 60000,
+			},
+			async () => {
+				const llm = getModel("vercel-ai-gateway", "google/gemini-2.5-flash");
 
-			console.log(`\nVercel Core Gateway / ${llm.id}:`);
-			const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.Core_GATEWAY_API_KEY });
+				console.log(`\nVercel Core Gateway / ${llm.id}:`);
+				const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.Core_GATEWAY_API_KEY });
 
-			logUsage("First request", first);
-			logUsage("Second request", second);
+				logUsage("First request", first);
+				logUsage("Second request", second);
 
-			assertTotalTokensEqualsComponents(first);
-			assertTotalTokensEqualsComponents(second);
-		});
+				assertTotalTokensEqualsComponents(first);
+				assertTotalTokensEqualsComponents(second);
+			},
+		);
 	});
 
 	// =========================================================================
@@ -574,85 +646,105 @@ describe("totalTokens field", () => {
 	// =========================================================================
 
 	describe.skipIf(!process.env.OPENROUTER_API_KEY)("OpenRouter", () => {
-		it("anthropic/claude-sonnet-4 - should return totalTokens equal to sum of components", {
-			retry: 3,
-			timeout: 60000,
-		}, async () => {
-			const llm = getModel("openrouter", "anthropic/claude-sonnet-4");
+		it(
+			"anthropic/claude-sonnet-4 - should return totalTokens equal to sum of components",
+			{
+				retry: 3,
+				timeout: 60000,
+			},
+			async () => {
+				const llm = getModel("openrouter", "anthropic/claude-sonnet-4");
 
-			console.log(`\nOpenRouter / ${llm.id}:`);
-			const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.OPENROUTER_API_KEY });
+				console.log(`\nOpenRouter / ${llm.id}:`);
+				const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.OPENROUTER_API_KEY });
 
-			logUsage("First request", first);
-			logUsage("Second request", second);
+				logUsage("First request", first);
+				logUsage("Second request", second);
 
-			assertTotalTokensEqualsComponents(first);
-			assertTotalTokensEqualsComponents(second);
-		});
+				assertTotalTokensEqualsComponents(first);
+				assertTotalTokensEqualsComponents(second);
+			},
+		);
 
-		it("deepseek/deepseek-chat - should return totalTokens equal to sum of components", {
-			retry: 3,
-			timeout: 60000,
-		}, async () => {
-			const llm = getModel("openrouter", "deepseek/deepseek-chat");
+		it(
+			"deepseek/deepseek-chat - should return totalTokens equal to sum of components",
+			{
+				retry: 3,
+				timeout: 60000,
+			},
+			async () => {
+				const llm = getModel("openrouter", "deepseek/deepseek-chat");
 
-			console.log(`\nOpenRouter / ${llm.id}:`);
-			const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.OPENROUTER_API_KEY });
+				console.log(`\nOpenRouter / ${llm.id}:`);
+				const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.OPENROUTER_API_KEY });
 
-			logUsage("First request", first);
-			logUsage("Second request", second);
+				logUsage("First request", first);
+				logUsage("Second request", second);
 
-			assertTotalTokensEqualsComponents(first);
-			assertTotalTokensEqualsComponents(second);
-		});
+				assertTotalTokensEqualsComponents(first);
+				assertTotalTokensEqualsComponents(second);
+			},
+		);
 
-		it("mistralai/mistral-small-3.2-24b-instruct - should return totalTokens equal to sum of components", {
-			retry: 3,
-			timeout: 60000,
-		}, async () => {
-			const llm = getModel("openrouter", "mistralai/mistral-small-3.2-24b-instruct");
+		it(
+			"mistralai/mistral-small-3.2-24b-instruct - should return totalTokens equal to sum of components",
+			{
+				retry: 3,
+				timeout: 60000,
+			},
+			async () => {
+				const llm = getModel("openrouter", "mistralai/mistral-small-3.2-24b-instruct");
 
-			console.log(`\nOpenRouter / ${llm.id}:`);
-			const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.OPENROUTER_API_KEY });
+				console.log(`\nOpenRouter / ${llm.id}:`);
+				const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.OPENROUTER_API_KEY });
 
-			logUsage("First request", first);
-			logUsage("Second request", second);
+				logUsage("First request", first);
+				logUsage("Second request", second);
 
-			assertTotalTokensEqualsComponents(first);
-			assertTotalTokensEqualsComponents(second);
-		});
+				assertTotalTokensEqualsComponents(first);
+				assertTotalTokensEqualsComponents(second);
+			},
+		);
 
-		it("google/gemini-2.0-flash-001 - should return totalTokens equal to sum of components", {
-			retry: 3,
-			timeout: 60000,
-		}, async () => {
-			const llm = getModel("openrouter", "google/gemini-2.0-flash-001");
+		it(
+			"google/gemini-2.0-flash-001 - should return totalTokens equal to sum of components",
+			{
+				retry: 3,
+				timeout: 60000,
+			},
+			async () => {
+				const llm = getModel("openrouter", "google/gemini-2.0-flash-001");
 
-			console.log(`\nOpenRouter / ${llm.id}:`);
-			const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.OPENROUTER_API_KEY });
+				console.log(`\nOpenRouter / ${llm.id}:`);
+				const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.OPENROUTER_API_KEY });
 
-			logUsage("First request", first);
-			logUsage("Second request", second);
+				logUsage("First request", first);
+				logUsage("Second request", second);
 
-			assertTotalTokensEqualsComponents(first);
-			assertTotalTokensEqualsComponents(second);
-		});
+				assertTotalTokensEqualsComponents(first);
+				assertTotalTokensEqualsComponents(second);
+			},
+		);
 
-		it("meta-llama/llama-4-scout - should return totalTokens equal to sum of components", {
-			retry: 3,
-			timeout: 60000,
-		}, async () => {
-			const llm = getModel("openrouter", "meta-llama/llama-4-scout");
+		it(
+			"meta-llama/llama-4-scout - should return totalTokens equal to sum of components",
+			{
+				retry: 3,
+				timeout: 60000,
+			},
+			async () => {
+				const llm = getModel("openrouter", "meta-llama/llama-4-scout");
 
-			console.log(`\nOpenRouter / ${llm.id}:`);
-			const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.OPENROUTER_API_KEY });
+				console.log(`\nOpenRouter / ${llm.id}:`);
+				const { first, second } = await testTotalTokensWithCache(llm, { apiKey: process.env.OPENROUTER_API_KEY });
 
-			logUsage("First request", first);
-			logUsage("Second request", second);
+				logUsage("First request", first);
+				logUsage("Second request", second);
 
-			assertTotalTokensEqualsComponents(first);
-			assertTotalTokensEqualsComponents(second);
-		});
+				assertTotalTokensEqualsComponents(first);
+				assertTotalTokensEqualsComponents(second);
+			},
+		);
 	});
 
 	// =========================================================================
@@ -702,21 +794,25 @@ describe("totalTokens field", () => {
 	// =========================================================================
 
 	describe.skipIf(!hasBedrockCredentials())("Amazon Bedrock", () => {
-		it("claude-sonnet-4-5 - should return totalTokens equal to sum of components", {
-			retry: 3,
-			timeout: 60000,
-		}, async () => {
-			const llm = getModel("amazon-bedrock", "global.anthropic.claude-sonnet-4-5-20250929-v1:0");
+		it(
+			"claude-sonnet-4-5 - should return totalTokens equal to sum of components",
+			{
+				retry: 3,
+				timeout: 60000,
+			},
+			async () => {
+				const llm = getModel("amazon-bedrock", "global.anthropic.claude-sonnet-4-5-20250929-v1:0");
 
-			console.log(`\nAmazon Bedrock / ${llm.id}:`);
-			const { first, second } = await testTotalTokensWithCache(llm);
+				console.log(`\nAmazon Bedrock / ${llm.id}:`);
+				const { first, second } = await testTotalTokensWithCache(llm);
 
-			logUsage("First request", first);
-			logUsage("Second request", second);
+				logUsage("First request", first);
+				logUsage("Second request", second);
 
-			assertTotalTokensEqualsComponents(first);
-			assertTotalTokensEqualsComponents(second);
-		});
+				assertTotalTokensEqualsComponents(first);
+				assertTotalTokensEqualsComponents(second);
+			},
+		);
 	});
 
 	// =========================================================================
