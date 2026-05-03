@@ -179,15 +179,18 @@ export function createDiscordManageChannelTool(options?: DiscordToolOptions): En
 	};
 }
 
-export function createDiscordToolDefinitions(_options?: DiscordToolOptions): ToolDefinition[] {
-	const dummyExecute = async () => ({ content: [], details: {} });
+export function createDiscordToolDefinitions(options?: DiscordToolOptions): ToolDefinition[] {
+	const listGuildsExecute = createDiscordListGuildsTool(options).execute;
+	const getChannelsExecute = createDiscordGetChannelsTool(options).execute;
+	const sendMessageExecute = createDiscordSendMessageTool(options).execute;
+	const manageChannelExecute = createDiscordManageChannelTool(options).execute;
 	return [
 		{
 			name: "discord_list_guilds",
 			label: "Discord: List Servers",
 			description: "List all Discord servers the bot is in.",
 			parameters: { type: "object", properties: {}, required: [] },
-			execute: dummyExecute,
+			execute: listGuildsExecute,
 		},
 		{
 			name: "discord_get_channels",
@@ -198,7 +201,7 @@ export function createDiscordToolDefinitions(_options?: DiscordToolOptions): Too
 				properties: { guildId: { type: "string" } },
 				required: ["guildId"],
 			},
-			execute: dummyExecute,
+			execute: getChannelsExecute,
 		},
 		{
 			name: "discord_send_message",
@@ -209,7 +212,7 @@ export function createDiscordToolDefinitions(_options?: DiscordToolOptions): Too
 				properties: { channelId: { type: "string" }, content: { type: "string" } },
 				required: ["channelId", "content"],
 			},
-			execute: dummyExecute,
+			execute: sendMessageExecute,
 		},
 		{
 			name: "discord_manage_channel",
@@ -226,7 +229,7 @@ export function createDiscordToolDefinitions(_options?: DiscordToolOptions): Too
 				},
 				required: ["guildId", "action"],
 			},
-			execute: dummyExecute,
+			execute: manageChannelExecute,
 		},
 	];
 }
