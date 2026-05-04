@@ -2572,8 +2572,12 @@ export class InteractiveMode {
 				await this.handleDiscordCommand(args);
 				return;
 			}
-			if (text === "/update" || text.startsWith("/update ")) {
-				const args = text.startsWith("/update ") ? text.slice(8).trim() : "";
+			if (text === "/update" || text.startsWith("/update ") || text === "/upgrade" || text.startsWith("/upgrade ")) {
+				const args = text.startsWith("/upgrade ")
+					? text.slice(9).trim()
+					: text.startsWith("/update ")
+						? text.slice(8).trim()
+						: "";
 				this.editor.setText("");
 				await this.handleUpdateCommand(args);
 				return;

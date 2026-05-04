@@ -28,6 +28,28 @@ npm install -g mooncli
 mooncli
 ```
 
+## Install & Update (Easy)
+
+Install:
+
+```bash
+npm install -g mooncli
+```
+
+Update from terminal (outside Mooncli):
+
+```bash
+mooncli update
+```
+
+Update from inside Mooncli interactive session:
+
+```text
+/update
+```
+
+If your install path is permission-protected, run with admin/sudo once for global update.
+
 ## Authentication
 
 Use `/login` in interactive mode, or set provider keys directly.
