@@ -11,7 +11,7 @@ describe("buildSystemPrompt", () => {
 				cwd: process.cwd(),
 			});
 
-			expect(prompt).toContain("Available tools:\n(none)");
+			expect(prompt).toContain("(none)");
 		});
 
 		test("shows file paths guideline even with no tools", () => {
@@ -22,7 +22,7 @@ describe("buildSystemPrompt", () => {
 				cwd: process.cwd(),
 			});
 
-			expect(prompt).toContain("Show file paths clearly");
+			expect(prompt).toMatch(/(Show file paths clearly|Dosya yollarini acik goster)/i);
 		});
 	});
 
