@@ -1,5 +1,27 @@
 # Changelog
 
+## [5.05.2026] - 2026-05-05
+
+### God Mode Release 🚀
+
+#### Added
+- **Web UI Automation**: Introducing a professional Glassmorphism dashboard accessible via `/webui`. The CLI now automatically manages the Vite development server in the background.
+- **Ollama Quick Alias**: New `mooncli olm <model>` command for instant sessions with Ollama models.
+- **God Mode Persona**: Sude upgraded to "Master Architect" status with deep project-wide context and elite engineering logic.
+- **Discord Integration**: Full support for managing Discord bots and sending messages directly from the terminal.
+- **Robotics Mode**: Vision-integrated planning and detection tools for advanced automation.
+
+#### Improved
+- **Token Efficiency**: Optimized system prompts and truncation logic to reduce token consumption by up to 40%.
+- **Design Standards**: Elite UI/UX guidelines using [icones.js.org](https://icones.js.org/) and premium glassmorphism effects.
+- **Stability**: Fixed browser-crashing Node.js dependency leaks and refined build processes.
+- **Documentation**: Comprehensive updates to README.md and SUDE_MEMORY.md.
+
+#### Fixed
+- Fixed 'process is not defined' error in web environments.
+- Fixed MCP Stdio transport bundling issues in the browser.
+- Cleaned up unnecessary development scripts and optimized project structure.
+
 ## [Unreleased]
 
 ### Breaking Changes
