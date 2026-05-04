@@ -10,24 +10,33 @@
 @import "tailwindcss";
 
 :root {
-	--color-background: #0f1115;
-	--color-foreground: #e2e8f0;
-	--color-muted: #1e222a;
-	--color-muted-foreground: #94a3b8;
-	--color-border: rgba(255, 255, 255, 0.08);
-	--color-card: rgba(20, 24, 30, 0.6);
-	--color-primary: #3b82f6;
-	--color-primary-foreground: #ffffff;
-	--color-accent: rgba(59, 130, 246, 0.1);
-	--color-accent-foreground: #60a5fa;
+	/* 3-color system */
+	--ui-bg: #0d1117;
+	--ui-text: #f5f7fa;
+	--ui-accent: #24c8a5;
+
+	/* Derived tokens */
+	--color-background: var(--ui-bg);
+	--color-foreground: var(--ui-text);
+	--color-muted: color-mix(in srgb, var(--ui-bg) 82%, var(--ui-text) 18%);
+	--color-muted-foreground: color-mix(in srgb, var(--ui-text) 62%, var(--ui-bg) 38%);
+	--color-border: color-mix(in srgb, var(--ui-text) 16%, transparent);
+	--color-card: color-mix(in srgb, var(--ui-bg) 88%, var(--ui-text) 12%);
+	--color-primary: var(--ui-accent);
+	--color-primary-foreground: var(--ui-bg);
+	--color-accent: color-mix(in srgb, var(--ui-accent) 22%, transparent);
+	--color-accent-foreground: var(--ui-accent);
 }
 
 body {
 	font-size: 15px;
 	-webkit-font-smoothing: antialiased;
-	background: radial-gradient(circle at top left, #161922 0%, #0f1115 50%, #0a0b0e 100%);
+	background:
+		radial-gradient(circle at 12% 10%, color-mix(in srgb, var(--ui-accent) 16%, transparent) 0%, transparent 40%),
+		radial-gradient(circle at 88% 88%, color-mix(in srgb, var(--ui-text) 8%, transparent) 0%, transparent 45%),
+		var(--ui-bg);
 	color: var(--color-foreground);
-	font-family: 'Inter', system-ui, -apple-system, sans-serif;
+	font-family: "Space Grotesk", "Segoe UI", sans-serif;
 }
 
 * {
@@ -50,7 +59,7 @@ body {
 }
 
 *::-webkit-scrollbar-thumb:hover {
-	background-color: #c7d5ea;
+	background-color: color-mix(in srgb, var(--ui-text) 28%, transparent);
 }
 
 /* Fix cursor for dialog close buttons */
@@ -77,9 +86,9 @@ body {
 .user-message-container {
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	position: relative;
-	background: rgba(30, 41, 59, 0.4);
-	border: 1px solid rgba(255, 255, 255, 0.05);
-	box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+	background: color-mix(in srgb, var(--ui-bg) 78%, var(--ui-accent) 22%);
+	border: 1px solid color-mix(in srgb, var(--ui-accent) 40%, transparent);
+	box-shadow: 0 10px 26px color-mix(in srgb, var(--ui-bg) 65%, transparent);
 	backdrop-filter: blur(12px);
 	-webkit-backdrop-filter: blur(12px);
 	border-radius: 12px;
