@@ -53,6 +53,8 @@ import {
 	getDebugLogPath,
 	getDocsPath,
 	getEngineDir,
+	getModelsPath,
+	getSelfUpdateCommand,
 	getShareViewerUrl,
 	VERSION,
 } from "../../config.js";
@@ -2408,6 +2410,7 @@ export class InteractiveMode {
 		this.defaultEditor.onAction("app.editor.external", () => this.openExternalEditor());
 		this.defaultEditor.onAction("app.message.followUp", () => this.handleFollowUp());
 		this.defaultEditor.onAction("app.message.dequeue", () => this.handleDequeue());
+		this.defaultEditor.onAction("app.message.executeBash", () => this.handleExecuteLastBash());
 		this.defaultEditor.onAction("app.session.new", () => this.handleClearCommand());
 		this.defaultEditor.onAction("app.session.tree", () => this.showTreeSelector());
 		this.defaultEditor.onAction("app.session.fork", () => this.showUserMessageSelector());
@@ -2573,6 +2576,12 @@ export class InteractiveMode {
 				const args = text.startsWith("/update ") ? text.slice(8).trim() : "";
 				this.editor.setText("");
 				await this.handleUpdateCommand(args);
+				return;
+			}
+			if (text === "/impmodel" || text.startsWith("/impmodel ")) {
+				const args = text.startsWith("/impmodel ") ? text.slice(10).trim() : "";
+				this.editor.setText("");
+				await this.handleImpModelCommand(args);
 				return;
 			}
 			if (text === "/debug") {
@@ -5181,6 +5190,53 @@ export class InteractiveMode {
 		}
 	}
 
+	private async handleImpModelCommand(args: string): Promise<void> {
+		if (!args) {
+			this.showStatus("Kullanım: /impmodel <model_adı>");
+			return;
+		}
+
+		const modelId = args.trim();
+		const modelsPath = getModelsPath();
+
+		try {
+			let config: any = { providers: {} };
+			if (fs.existsSync(modelsPath)) {
+				config = JSON.parse(fs.readFileSync(modelsPath, "utf8"));
+			}
+
+			if (!config.providers.ollama) {
+				config.providers.ollama = {
+					models: [],
+				};
+			}
+
+			if (!config.providers.ollama.models) {
+				config.providers.ollama.models = [];
+			}
+
+			const exists = config.providers.ollama.models.some((m: any) => m.id === modelId);
+			if (exists) {
+				this.showStatus(`Model "${modelId}" zaten ekli.`);
+				return;
+			}
+
+			config.providers.ollama.models.push({
+				id: modelId,
+				name: modelId,
+				api: "openai-completions",
+				baseUrl: "http://localhost:11434/v1",
+			});
+
+			fs.writeFileSync(modelsPath, JSON.stringify(config, null, 2));
+			this.showStatus(`Model "${modelId}" ollama saglayicisina eklendi.`);
+			this.showStatus("Degisikliklerin uygulanmasi icin oturum yenileniyor...");
+			await this.handleReloadCommand();
+		} catch (err: any) {
+			this.showError(`Model eklenirken hata olustu: ${err.message}`);
+		}
+	}
+
 	private async handleUpdateCommand(args: string): Promise<void> {
 		if (this.session.isStreaming || this.session.isCompacting) {
 			this.showWarning("Guncelleme icin mevcut islemin bitmesini bekleyin.");
@@ -5410,6 +5466,34 @@ export class InteractiveMode {
 		} catch (error) {
 			this.showError(error instanceof Error ? error.message : String(error));
 		}
+	}
+
+	private handleExecuteLastBash(): void {
+		const text = this.session.getLastAssistantText();
+		if (!text) {
+			this.showError("Henüz çalıştırılacak bir mesaj yok.");
+			return;
+		}
+
+		// Find the last bash or sh code block
+		const regex = /```(?:bash|sh)\n([\s\S]*?)```/gi;
+		let lastMatch: RegExpExecArray | null = null;
+		let match: RegExpExecArray | null;
+
+		while ((match = regex.exec(text)) !== null) {
+			lastMatch = match;
+		}
+
+		if (lastMatch && lastMatch[1]) {
+			const command = lastMatch[1].trim();
+			if (command) {
+				this.showStatus("Son bash komutu çalıştırılıyor...");
+				this.handleBashCommand(command, false);
+				return;
+			}
+		}
+
+		this.showError("Son asistan mesajında bash kod bloğu bulunamadı.");
 	}
 
 	private handleNameCommand(text: string): void {
@@ -5787,11 +5871,20 @@ export class InteractiveMode {
 					result.fullOutputPath,
 				);
 			}
+
+			// AUTO-FIX PROMPT
+			if (result.exitCode !== 0 && result.exitCode !== undefined && !result.cancelled) {
+				this.showStatus("⚠️ Komut hata verdi. Düzeltmek için Enter'a basın (Auto-Fix).");
+				this.editor.setValue(`Az önce çalıştırdığım \`${command}\` komutu şu hatayı verdi:\n\n\`\`\`\n${result.output?.trim()}\n\`\`\`\n\nLütfen bu hatayı analiz et ve nasıl çözeceğimizi söyle.`);
+			}
 		} catch (error) {
 			if (this.bashComponent) {
 				this.bashComponent.setComplete(undefined, false);
 			}
 			this.showError(`Bash komutu başarısız oldu: ${error instanceof Error ? error.message : "Bilinmeyen hata"}`);
+			// AUTO-FIX PROMPT
+			this.editor.setValue(`Lütfen az önce çalıştırdığım \`${command}\` komutunun hatasını düzelt.`);
+			this.showStatus("Otomatik düzeltme (Auto-Fix) için Enter'a basabilirsiniz.");
 		}
 
 		this.bashComponent = undefined;

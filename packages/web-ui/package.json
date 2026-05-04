@@ -1,6 +1,6 @@
 {
 	"name": "@mooncli/web-ui",
-	"version": "0.72.4",
+	"version": "5.05.2026-01:25",
 	"description": "Reusable web UI components for Core chat interfaces powered by @mooncli/core",
 	"type": "module",
 	"main": "dist/index.js",

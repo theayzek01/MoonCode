@@ -14,9 +14,11 @@ for (const [provider, models] of Object.entries(MODELS)) {
 
 // Inject Cloud Ollama models
 const cloudOllamaModels = new Map<string, Model<Api>>();
-const defaultCloudOllamaModels = ["kimi-k2.6:cloud", "glm-5.1:cloud", "qwen3.5:cloud", "minimax-m2.7:cloud"];
-
-const extraBuiltInOllamaModels = [
+const allOllamaModels = [
+	"kimi-k2.6:cloud",
+	"glm-5.1:cloud",
+	"qwen3.5:cloud",
+	"minimax-m2.7:cloud",
 	"deepseek-v4-pro:cloud",
 	"gpt-oss:120b-cloud",
 	"gemma4:31b-cloud",
@@ -26,7 +28,8 @@ const extraBuiltInOllamaModels = [
 	"qwen3.5:9b",
 	"gemma4:e4b",
 ];
-for (const id of [...defaultCloudOllamaModels, ...extraBuiltInOllamaModels]) {
+
+for (const id of allOllamaModels) {
 	cloudOllamaModels.set(id, {
 		id,
 		name: id,

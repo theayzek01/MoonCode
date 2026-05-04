@@ -1094,7 +1094,12 @@ export function getMarkdownTheme(): MarkdownTheme {
 		linkUrl: (text: string) => theme.fg("mdLinkUrl", text),
 		code: (text: string) => theme.fg("mdCode", text),
 		codeBlock: (text: string) => theme.fg("mdCodeBlock", text),
-		codeBlockBorder: (text: string) => theme.fg("mdCodeBlockBorder", text),
+		codeBlockBorder: (text: string) => {
+			if (text.startsWith("```bash") || text.startsWith("```sh")) {
+				return theme.fg("mdCodeBlockBorder", text) + theme.fg("dim", "  [Çalıştır: ctrl+e]");
+			}
+			return theme.fg("mdCodeBlockBorder", text);
+		},
 		quote: (text: string) => theme.fg("mdQuote", text),
 		quoteBorder: (text: string) => theme.fg("mdQuoteBorder", text),
 		hr: (text: string) => theme.fg("mdHr", text),

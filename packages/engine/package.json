@@ -1,6 +1,6 @@
 {
 	"name": "@mooncli/engine",
-	"version": "0.72.4",
+	"version": "5.05.2026-01:25",
 	"description": "General-purpose state management engine",
 	"type": "module",
 	"main": "./dist/index.js",

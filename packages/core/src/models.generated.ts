@@ -10103,6 +10103,23 @@ export const MODELS = {
 			contextWindow: 131072,
 			maxTokens: 4096,
 		} satisfies Model<"openai-completions">,
+		"mistralai/mistral-medium-3-5": {
+			id: "mistralai/mistral-medium-3-5",
+			name: "Mistral: Mistral Medium 3.5",
+			api: "openai-completions",
+			provider: "openrouter",
+			baseUrl: "https://openrouter.ai/api/v1",
+			reasoning: true,
+			input: ["text", "image"],
+			cost: {
+				input: 1.5,
+				output: 7.5,
+				cacheRead: 0,
+				cacheWrite: 0,
+			},
+			contextWindow: 262144,
+			maxTokens: 4096,
+		} satisfies Model<"openai-completions">,
 		"mistralai/mistral-medium-3.1": {
 			id: "mistralai/mistral-medium-3.1",
 			name: "Mistral: Mistral Medium 3.1",

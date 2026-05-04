@@ -10,23 +10,24 @@
 @import "tailwindcss";
 
 :root {
-	--color-background: #f5f7fb;
-	--color-foreground: #1f2937;
-	--color-muted: #eef2f8;
-	--color-muted-foreground: #64748b;
-	--color-border: #d8e1ee;
-	--color-card: #ffffff;
-	--color-primary: #6d8fd6;
-	--color-primary-foreground: #f8fbff;
-	--color-accent: #dfe9fb;
-	--color-accent-foreground: #2c456f;
+	--color-background: #0f1115;
+	--color-foreground: #e2e8f0;
+	--color-muted: #1e222a;
+	--color-muted-foreground: #94a3b8;
+	--color-border: rgba(255, 255, 255, 0.08);
+	--color-card: rgba(20, 24, 30, 0.6);
+	--color-primary: #3b82f6;
+	--color-primary-foreground: #ffffff;
+	--color-accent: rgba(59, 130, 246, 0.1);
+	--color-accent-foreground: #60a5fa;
 }
 
 body {
-	font-size: 16px;
+	font-size: 15px;
 	-webkit-font-smoothing: antialiased;
-	background: radial-gradient(circle at top, #f9fbff 0%, #f3f6fc 50%, #eef3fb 100%);
+	background: radial-gradient(circle at top left, #161922 0%, #0f1115 50%, #0a0b0e 100%);
 	color: var(--color-foreground);
+	font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 * {
@@ -66,18 +67,36 @@ body {
 	100% {
 		background-position: 200% 0;
 	}
+
+/* Fix cursor for dialog close buttons */
+.fixed.inset-0 button[aria-label*="Close"],
+.fixed.inset-0 button[type="button"] {
+	cursor: pointer;
+}
+
+/* Shimmer animation for thinking text */
+@keyframes shimmer {
+	0% {
+		background-position: -200% 0;
+	}
+	100% {
+		background-position: 200% 0;
+	}
 }
 
 .animate-shimmer {
 	animation: shimmer 2s ease-in-out infinite;
 }
 
-/* User message with fancy pill styling */
+/* User message with fancy pill styling - Glassmorphism Dark */
 .user-message-container {
-	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	position: relative;
-	background: linear-gradient(135deg, rgba(139, 170, 230, 0.16), rgba(186, 206, 243, 0.18), rgba(217, 227, 246, 0.24));
-	border: 1px solid rgba(132, 162, 221, 0.3);
-	backdrop-filter: blur(10px);
+	background: rgba(30, 41, 59, 0.4);
+	border: 1px solid rgba(255, 255, 255, 0.05);
+	box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+	border-radius: 12px;
 	max-width: 100%;
 }

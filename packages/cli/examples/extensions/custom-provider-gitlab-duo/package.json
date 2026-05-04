@@ -1,7 +1,7 @@
 {
   "name": "mooncli-extension-custom-provider-gitlab-duo",
   "private": true,
-  "version": "0.72.4",
+  "version": "5.05.2026-01:25",
   "type": "module",
   "scripts": {
     "clean": "echo 'nothing to clean'",

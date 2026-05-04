@@ -21,20 +21,11 @@ interface ScopedModelItem {
 type ModelScope = "all" | "scoped";
 
 /**
- * Component that renders a model selector with search
+ * Modern Model Selector - Redesigned for premium look and feel
  */
 export class ModelSelectorComponent extends Container implements Focusable {
 	private searchInput: Input;
-
-	// Focusable implementation - propagate to searchInput for IME cursor positioning
 	private _focused = false;
-	get focused(): boolean {
-		return this._focused;
-	}
-	set focused(value: boolean) {
-		this._focused = value;
-		this.searchInput.focused = value;
-	}
 	private listContainer: Container;
 	private allModels: ModelItem[] = [];
 	private scopedModelItems: ModelItem[] = [];
@@ -51,7 +42,6 @@ export class ModelSelectorComponent extends Container implements Focusable {
 	private scopedModels: ReadonlyArray<ScopedModelItem>;
 	private scope: ModelScope = "all";
 	private scopeText?: Text;
-	private scopeHintText?: Text;
 
 	constructor(
 		tui: TUI,
@@ -74,147 +64,109 @@ export class ModelSelectorComponent extends Container implements Focusable {
 		this.onSelectCallback = onSelect;
 		this.onCancelCallback = onCancel;
 
-		// Add top border
-		this.addChild(new DynamicBorder());
-		this.addChild(new Spacer(1));
-
-		// Add hint about model filtering
-		if (scopedModels.length > 0) {
-			this.scopeText = new Text(this.getScopeText(), 0, 0);
-			this.addChild(this.scopeText);
-			this.scopeHintText = new Text(this.getScopeHintText(), 0, 0);
-			this.addChild(this.scopeHintText);
-		} else {
-			const hintText =
-				"Sadece yapılandırılmış sağlayıcıların modelleri gösteriliyor. Sağlayıcı eklemek için /login kullanın.";
-			this.addChild(new Text(theme.fg("warning", hintText), 0, 0));
-		}
-		this.addChild(new Spacer(1));
-
-		// Create search input
-		this.searchInput = new Input();
-		if (initialSearchInput) {
-			this.searchInput.setValue(initialSearchInput);
-		}
-		this.searchInput.onSubmit = () => {
-			// Enter on search input selects the first filtered item
-			if (this.filteredModels[this.selectedIndex]) {
-				this.handleSelect(this.filteredModels[this.selectedIndex].model);
-			}
-		};
-		this.addChild(this.searchInput);
-
-		this.addChild(new Spacer(1));
-
-		// Create list container
-		this.listContainer = new Container();
-		this.addChild(this.listContainer);
-
-		this.addChild(new Spacer(1));
-
-		// Add bottom border
-		this.addChild(new DynamicBorder());
-
-		// Load models and do initial render
+		this.setupUI(initialSearchInput);
 		this.loadModels().then(() => {
 			if (initialSearchInput) {
 				this.filterModels(initialSearchInput);
 			} else {
 				this.updateList();
 			}
-			// Request re-render after models are loaded
 			this.tui.requestRender();
 		});
 	}
 
-	private async loadModels(): Promise<void> {
-		let models: ModelItem[];
+	get focused(): boolean { return this._focused; }
+	set focused(value: boolean) {
+		this._focused = value;
+		this.searchInput.focused = value;
+	}
 
-		// Refresh to pick up any changes to models.json
-		this.modelRegistry.refresh();
+	private setupUI(initialSearchInput?: string) {
+		this.addChild(new DynamicBorder());
+		this.addChild(new Spacer(1));
 
-		// Check for models.json errors
-		const loadError = this.modelRegistry.getError();
-		if (loadError) {
-			this.errorMessage = loadError;
+		const titleText = theme.bold(theme.fg("accent", " ❯ MODEL SEÇİMİ"));
+		this.addChild(new Text(titleText, 0, 0));
+		
+		if (this.scopedModels.length > 0) {
+			this.scopeText = new Text(this.getScopeText(), 1, 0);
+			this.addChild(this.scopeText);
 		}
 
-		// Load available models (built-in models still work even if models.json failed)
+		this.addChild(new Spacer(1));
+
+		this.searchInput = new Input();
+		if (initialSearchInput) this.searchInput.setValue(initialSearchInput);
+		
+		this.searchInput.onSubmit = () => {
+			if (this.filteredModels[this.selectedIndex]) {
+				this.handleSelect(this.filteredModels[this.selectedIndex].model);
+			}
+		};
+		this.addChild(this.searchInput);
+		this.addChild(new Spacer(1));
+
+		this.listContainer = new Container();
+		this.addChild(this.listContainer);
+
+		this.addChild(new Spacer(1));
+		this.addChild(new DynamicBorder());
+		
+		// Footer hints
+		const hints = `${keyHint("tui.select.up")}/${keyHint("tui.select.down")} seç • ${keyHint("tui.select.confirm")} onayla • ${keyHint("tui.select.cancel")} iptal`;
+		this.addChild(new Text(theme.fg("dim", ` ${hints}`), 0, 0));
+	}
+
+	private async loadModels(): Promise<void> {
+		this.modelRegistry.refresh();
+		const loadError = this.modelRegistry.getError();
+		if (loadError) this.errorMessage = loadError;
+
 		try {
 			const availableModels = await this.modelRegistry.getAvailable();
-			models = availableModels.map((model: Model<any>) => ({
-				provider: model.provider,
-				id: model.id,
-				model,
-			}));
+			this.allModels = this.sortModels(availableModels.map(m => ({ provider: m.provider, id: m.id, model: m })));
 		} catch (error) {
-			this.allModels = [];
-			this.scopedModelItems = [];
-			this.activeModels = [];
-			this.filteredModels = [];
 			this.errorMessage = error instanceof Error ? error.message : String(error);
 			return;
 		}
 
-		this.allModels = this.sortModels(models);
-		this.scopedModels = this.scopedModels.map((scoped) => {
-			const refreshed = this.modelRegistry.find(scoped.model.provider, scoped.model.id);
-			return refreshed ? { ...scoped, model: refreshed } : scoped;
-		});
-		this.scopedModelItems = this.scopedModels.map((scoped) => ({
-			provider: scoped.model.provider,
-			id: scoped.model.id,
-			model: scoped.model,
+		this.scopedModelItems = this.scopedModels.map(s => ({
+			provider: s.model.provider,
+			id: s.model.id,
+			model: s.model
 		}));
+
 		this.activeModels = this.scope === "scoped" ? this.scopedModelItems : this.allModels;
 		this.filteredModels = this.activeModels;
-		const currentIndex = this.filteredModels.findIndex((item) => modelsAreEqual(this.currentModel, item.model));
-		this.selectedIndex =
-			currentIndex >= 0 ? currentIndex : Math.min(this.selectedIndex, Math.max(0, this.filteredModels.length - 1));
+		
+		const currentIndex = this.filteredModels.findIndex(item => modelsAreEqual(this.currentModel, item.model));
+		this.selectedIndex = currentIndex >= 0 ? currentIndex : 0;
 	}
 
 	private sortModels(models: ModelItem[]): ModelItem[] {
-		const sorted = [...models];
-		// Sort: current model first, then by provider
-		sorted.sort((a, b) => {
+		return [...models].sort((a, b) => {
 			const aIsCurrent = modelsAreEqual(this.currentModel, a.model);
 			const bIsCurrent = modelsAreEqual(this.currentModel, b.model);
 			if (aIsCurrent && !bIsCurrent) return -1;
 			if (!aIsCurrent && bIsCurrent) return 1;
-			return a.provider.localeCompare(b.provider);
+			
+			// Provider sorting: ollama first, then alphabetically
+			if (a.provider === "ollama" && b.provider !== "ollama") return -1;
+			if (a.provider !== "ollama" && b.provider === "ollama") return 1;
+			
+			return a.provider.localeCompare(b.provider) || a.id.localeCompare(b.id);
 		});
-		return sorted;
 	}
 
 	private getScopeText(): string {
-		const allText = this.scope === "all" ? theme.fg("accent", "hepsi") : theme.fg("muted", "hepsi");
-		const scopedText = this.scope === "scoped" ? theme.fg("accent", "kısıtlı") : theme.fg("muted", "kısıtlı");
-		return `${theme.fg("muted", "Kapsam: ")}${allText}${theme.fg("muted", " | ")}${scopedText}`;
-	}
-
-	private getScopeHintText(): string {
-		return keyHint("tui.input.tab", "kapsam") + theme.fg("muted", " (hepsi/kısıtlı)");
-	}
-
-	private setScope(scope: ModelScope): void {
-		if (this.scope === scope) return;
-		this.scope = scope;
-		this.activeModels = this.scope === "scoped" ? this.scopedModelItems : this.allModels;
-		const currentIndex = this.activeModels.findIndex((item) => modelsAreEqual(this.currentModel, item.model));
-		this.selectedIndex = currentIndex >= 0 ? currentIndex : 0;
-		this.filterModels(this.searchInput.getValue());
-		if (this.scopeText) {
-			this.scopeText.setText(this.getScopeText());
-		}
+		const allTag = this.scope === "all" ? theme.bg("accent", theme.fg("bg", " HEPSİ ")) : theme.fg("dim", " HEPSİ ");
+		const scopedTag = this.scope === "scoped" ? theme.bg("accent", theme.fg("bg", " KISITLI ")) : theme.fg("dim", " KISITLI ");
+		return `${theme.fg("dim", "Kapsam [TAB]: ")}${allTag} ${scopedTag}`;
 	}
 
 	private filterModels(query: string): void {
 		this.filteredModels = query
-			? fuzzyFilter(
-					this.activeModels,
-					query,
-					({ id, provider }) => `${id} ${provider} ${provider}/${id} ${provider} ${id}`,
-				)
+			? fuzzyFilter(this.activeModels, query, ({ id, provider }) => `${provider}/${id} ${id}`)
 			: this.activeModels;
 		this.selectedIndex = Math.min(this.selectedIndex, Math.max(0, this.filteredModels.length - 1));
 		this.updateList();
@@ -224,134 +176,97 @@ export class ModelSelectorComponent extends Container implements Focusable {
 		this.listContainer.clear();
 
 		if (this.errorMessage) {
-			const errorLines = this.errorMessage.split("\n");
-			for (const line of errorLines) {
-				this.listContainer.addChild(new Text(theme.fg("error", line), 0, 0));
-			}
+			this.listContainer.addChild(new Text(theme.fg("error", ` ⚠ Hata: ${this.errorMessage}`), 1, 0));
 			return;
 		}
 
 		if (this.filteredModels.length === 0) {
-			this.listContainer.addChild(new Text(theme.fg("muted", "  Eşleşen model bulunamadı"), 0, 0));
+			this.listContainer.addChild(new Text(theme.fg("dim", "   Sonuç bulunamadı..."), 1, 0));
 			return;
 		}
 
-		const maxVisible = 12;
-		const startIndex = Math.max(
-			0,
-			Math.min(this.selectedIndex - Math.floor(maxVisible / 2), this.filteredModels.length - maxVisible),
-		);
+		const maxVisible = 10;
+		const startIndex = Math.max(0, Math.min(this.selectedIndex - 4, this.filteredModels.length - maxVisible));
 		const endIndex = Math.min(startIndex + maxVisible, this.filteredModels.length);
 
 		let lastProvider = "";
 
 		for (let i = startIndex; i < endIndex; i++) {
 			const item = this.filteredModels[i];
-			if (!item) continue;
-
 			const isSelected = i === this.selectedIndex;
 			const isCurrent = modelsAreEqual(this.currentModel, item.model);
 
-			// Show provider as a category header if it changed (and not filtering)
 			if (!this.searchInput.getValue() && item.provider !== lastProvider) {
-				if (lastProvider !== "") this.listContainer.addChild(new Spacer(1));
-				this.listContainer.addChild(
-					new Text(theme.bold(theme.fg("dim", `── ${item.provider.toUpperCase()} ──`)), 2, 0),
-				);
+				const providerLabel = item.provider.toUpperCase();
+				this.listContainer.addChild(new Text(theme.bold(theme.fg("dim", ` ── ${providerLabel} ──`)), 1, 0));
 				lastProvider = item.provider;
 			}
 
 			let line = "";
-			const checkmark = isCurrent ? theme.fg("success", " ✓") : "";
-			const reasoningIcon = item.model.reasoning ? theme.fg("thinkingText", " ⚡") : "";
-
+			const check = isCurrent ? theme.fg("success", " ●") : "  ";
+			const reasoning = item.model.reasoning ? theme.fg("warning", " ⚡") : "";
+			
 			if (isSelected) {
-				const prefix = theme.fg("accent", "→ ");
-				line = `${prefix}${theme.fg("accent", item.id)}${reasoningIcon}${checkmark}`;
+				line = theme.bg("selectedBg", theme.fg("accent", ` ❯ ${item.id} `)) + reasoning + check;
 			} else {
-				line = `  ${theme.fg("text", item.id)}${reasoningIcon}${checkmark}`;
+				line = theme.fg("text", `   ${item.id} `) + reasoning + check;
 			}
 
 			this.listContainer.addChild(new Text(line, 0, 0));
 		}
 
-		// Scroll indicator
-		if (this.filteredModels.length > maxVisible) {
-			this.listContainer.addChild(new Spacer(1));
-			const scrollInfo = theme.fg(
-				"muted",
-				`  [ Modeller: ${this.selectedIndex + 1} / ${this.filteredModels.length} ]`,
-			);
-			this.listContainer.addChild(new Text(scrollInfo, 0, 0));
-		}
-
-		// Selected model details at the bottom
+		// Selected Detail Panel
 		const selected = this.filteredModels[this.selectedIndex];
 		if (selected) {
 			this.listContainer.addChild(new Spacer(1));
-			this.listContainer.addChild(new DynamicBorder());
-			this.listContainer.addChild(new Text(theme.bold(theme.fg("accent", ` ${selected.model.name}`)), 0, 0));
-
-			const contextWindow = selected.model.contextWindow
-				? `${Math.floor(selected.model.contextWindow / 1024)}k`
-				: "Bilinmiyor";
-			const details = theme.fg(
-				"muted",
-				` Sağlayıcı: ${selected.provider} | Bağlam: ${contextWindow} | Düşünme: ${selected.model.reasoning ? "Var" : "Yok"}`,
-			);
-			this.listContainer.addChild(new Text(details, 0, 0));
+			const detailBox = new Container();
+			detailBox.addChild(new Text(theme.fg("accent", ` ╭─ Bilgi: ${selected.model.name}`), 0, 0));
+			const ctx = selected.model.contextWindow ? `${Math.floor(selected.model.contextWindow / 1024)}k` : "???";
+			const info = ` │ Sağlayıcı: ${selected.provider} • Bağlam: ${ctx} • Zihin: ${selected.model.reasoning ? "Aktif" : "Kapalı"}`;
+			detailBox.addChild(new Text(theme.fg("dim", info), 0, 0));
+			this.listContainer.addChild(detailBox);
 		}
 	}
 
 	handleInput(keyData: string): void {
 		const kb = getKeybindings();
+		
 		if (kb.matches(keyData, "tui.input.tab")) {
 			if (this.scopedModelItems.length > 0) {
-				const nextScope: ModelScope = this.scope === "all" ? "scoped" : "all";
-				this.setScope(nextScope);
-				if (this.scopeHintText) {
-					this.scopeHintText.setText(this.getScopeHintText());
-				}
+				this.scope = this.scope === "all" ? "scoped" : "all";
+				this.activeModels = this.scope === "scoped" ? this.scopedModelItems : this.allModels;
+				if (this.scopeText) this.scopeText.setText(this.getScopeText());
+				this.filterModels(this.searchInput.getValue());
 			}
 			return;
 		}
-		// Up arrow - wrap to bottom when at top
+
 		if (kb.matches(keyData, "tui.select.up")) {
 			if (this.filteredModels.length === 0) return;
-			this.selectedIndex = this.selectedIndex === 0 ? this.filteredModels.length - 1 : this.selectedIndex - 1;
+			this.selectedIndex = (this.selectedIndex - 1 + this.filteredModels.length) % this.filteredModels.length;
 			this.updateList();
-		}
-		// Down arrow - wrap to top when at bottom
-		else if (kb.matches(keyData, "tui.select.down")) {
+			this.tui.requestRender();
+		} else if (kb.matches(keyData, "tui.select.down")) {
 			if (this.filteredModels.length === 0) return;
-			this.selectedIndex = this.selectedIndex === this.filteredModels.length - 1 ? 0 : this.selectedIndex + 1;
+			this.selectedIndex = (this.selectedIndex + 1) % this.filteredModels.length;
 			this.updateList();
-		}
-		// Enter
-		else if (kb.matches(keyData, "tui.select.confirm")) {
-			const selectedModel = this.filteredModels[this.selectedIndex];
-			if (selectedModel) {
-				this.handleSelect(selectedModel.model);
-			}
-		}
-		// Escape or Ctrl+C
-		else if (kb.matches(keyData, "tui.select.cancel")) {
+			this.tui.requestRender();
+		} else if (kb.matches(keyData, "tui.select.confirm")) {
+			const sel = this.filteredModels[this.selectedIndex];
+			if (sel) this.handleSelect(sel.model);
+		} else if (kb.matches(keyData, "tui.select.cancel")) {
 			this.onCancelCallback();
-		}
-		// Pass everything else to search input
-		else {
+		} else {
 			this.searchInput.handleInput(keyData);
 			this.filterModels(this.searchInput.getValue());
+			this.tui.requestRender();
 		}
 	}
 
 	private handleSelect(model: Model<any>): void {
-		// Save as new default
 		this.settingsManager.setDefaultModelAndProvider(model.provider, model.id);
 		this.onSelectCallback(model);
 	}
 
-	getSearchInput(): Input {
-		return this.searchInput;
-	}
+	getSearchInput(): Input { return this.searchInput; }
 }
