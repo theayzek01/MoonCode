@@ -145,7 +145,7 @@ export class DaxnutsComponent implements Component {
 
 		lines.push("");
 		if (textPhase > 2 || this.tick >= this.maxTicks) {
-			lines.push(center(t.fg("dim", "Try OpenCode")));
+			lines.push(center(t.fg("dim", "OpenCode'u dene")));
 			lines.push(center(t.fg("mdLink", "https://mistral.ai/news/mistral-vibe-2-0")));
 		} else {
 			lines.push("");

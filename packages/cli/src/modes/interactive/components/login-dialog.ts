@@ -39,7 +39,7 @@ export class LoginDialogComponent extends Container implements Focusable {
 
 		const providerInfo = getOAuthProviders().find((p) => p.id === providerId);
 		const providerName = providerNameOverride || providerInfo?.name || providerId;
-		const title = titleOverride ?? `${providerName} oturumu ac`;
+		const title = titleOverride ?? `${providerName} oturumu aç`;
 
 		// Top border
 		this.addChild(new DynamicBorder());
@@ -75,11 +75,11 @@ export class LoginDialogComponent extends Container implements Focusable {
 	private cancel(): void {
 		this.abortController.abort();
 		if (this.inputRejecter) {
-			this.inputRejecter(new Error("Login cancelled"));
+			this.inputRejecter(new Error("Giriş iptal edildi"));
 			this.inputResolver = undefined;
 			this.inputRejecter = undefined;
 		}
-		this.onComplete(false, "Giris iptal edildi");
+		this.onComplete(false, "Giriş iptal edildi");
 	}
 
 	/**
@@ -90,7 +90,7 @@ export class LoginDialogComponent extends Container implements Focusable {
 		this.contentContainer.addChild(new Spacer(1));
 		this.contentContainer.addChild(new Text(theme.fg("accent", url), 1, 0));
 
-		const clickHint = process.platform === "darwin" ? "Acmak icin Cmd+tiklayin" : "Acmak icin Ctrl+tiklayin";
+		const clickHint = process.platform === "darwin" ? "Açmak için Cmd+tıklayın" : "Açmak için Ctrl+tıklayın";
 		const hyperlink = `\x1b]8;;${url}\x07${clickHint}\x1b]8;;\x07`;
 		this.contentContainer.addChild(new Text(theme.fg("dim", hyperlink), 1, 0));
 
@@ -113,7 +113,7 @@ export class LoginDialogComponent extends Container implements Focusable {
 		this.contentContainer.addChild(new Spacer(1));
 		this.contentContainer.addChild(new Text(theme.fg("dim", prompt), 1, 0));
 		this.contentContainer.addChild(this.input);
-		this.contentContainer.addChild(new Text(`(${keyHint("tui.select.cancel", "iptal etmek icin")})`, 1, 0));
+		this.contentContainer.addChild(new Text(`(${keyHint("tui.select.cancel", "iptal etmek için")})`, 1, 0));
 		this.tui.requestRender();
 
 		return new Promise((resolve, reject) => {
@@ -135,7 +135,7 @@ export class LoginDialogComponent extends Container implements Focusable {
 		this.contentContainer.addChild(this.input);
 		this.contentContainer.addChild(
 			new Text(
-				`(${keyHint("tui.select.cancel", "iptal etmek icin,")} ${keyHint("tui.select.confirm", "gondermek icin")})`,
+				`(${keyHint("tui.select.cancel", "iptal etmek için,")} ${keyHint("tui.select.confirm", "göndermek için")})`,
 				1,
 				0,
 			),
@@ -160,7 +160,7 @@ export class LoginDialogComponent extends Container implements Focusable {
 			this.contentContainer.addChild(new Text(line, 1, 0));
 		}
 		this.contentContainer.addChild(new Spacer(1));
-		this.contentContainer.addChild(new Text(`(${keyHint("tui.select.cancel", "kapatmak icin")})`, 1, 0));
+		this.contentContainer.addChild(new Text(`(${keyHint("tui.select.cancel", "kapatmak için")})`, 1, 0));
 		this.tui.requestRender();
 	}
 
@@ -170,7 +170,7 @@ export class LoginDialogComponent extends Container implements Focusable {
 	showWaiting(message: string): void {
 		this.contentContainer.addChild(new Spacer(1));
 		this.contentContainer.addChild(new Text(theme.fg("dim", message), 1, 0));
-		this.contentContainer.addChild(new Text(`(${keyHint("tui.select.cancel", "iptal etmek icin")})`, 1, 0));
+		this.contentContainer.addChild(new Text(`(${keyHint("tui.select.cancel", "iptal etmek için")})`, 1, 0));
 		this.tui.requestRender();
 	}
 

@@ -119,7 +119,7 @@ Content`,
 			expect(result.skills.some((r) => r.path === skillFile && r.enabled)).toBe(true);
 		});
 
-		it("should auto-discover root markdown skills from .Mooncli skill dirs", async () => {
+		it("should auto-discover root markdown skills from .mooncli skill dirs", async () => {
 			const skillFile = join(engineDir, "skills", "single-file.md");
 			mkdirSync(join(engineDir, "skills"), { recursive: true });
 			writeFileSync(
@@ -135,8 +135,8 @@ Content`,
 			expect(result.skills.some((r) => r.path === skillFile && r.enabled)).toBe(true);
 		});
 
-		it("should resolve project paths relative to .Mooncli", async () => {
-			const extDir = join(tempDir, ".Mooncli", "extensions");
+		it("should resolve project paths relative to .mooncli", async () => {
+			const extDir = join(tempDir, ".mooncli", "extensions");
 			mkdirSync(extDir, { recursive: true });
 			const extPath = join(extDir, "project-ext.ts");
 			writeFileSync(extPath, "export default function() {}");
@@ -188,15 +188,16 @@ Content`,
 				writeFileSync(join(sharedThemesDir, "shared.json"), JSON.stringify({ name: "shared-theme" }));
 
 				mkdirSync(join(engineDir), { recursive: true });
-				mkdirSync(join(tempDir, ".Mooncli"), { recursive: true });
-				symlinkSync(sharedExtensionsDir, join(engineDir, "extensions"), "dir");
-				symlinkSync(sharedSkillsDir, join(engineDir, "skills"), "dir");
-				symlinkSync(sharedPromptsDir, join(engineDir, "prompts"), "dir");
-				symlinkSync(sharedThemesDir, join(engineDir, "themes"), "dir");
-				symlinkSync(sharedExtensionsDir, join(tempDir, ".Mooncli", "extensions"), "dir");
-				symlinkSync(sharedSkillsDir, join(tempDir, ".Mooncli", "skills"), "dir");
-				symlinkSync(sharedPromptsDir, join(tempDir, ".Mooncli", "prompts"), "dir");
-				symlinkSync(sharedThemesDir, join(tempDir, ".Mooncli", "themes"), "dir");
+				mkdirSync(join(tempDir, ".mooncli"), { recursive: true });
+				const directoryLinkType = process.platform === "win32" ? "junction" : "dir";
+				symlinkSync(sharedExtensionsDir, join(engineDir, "extensions"), directoryLinkType);
+				symlinkSync(sharedSkillsDir, join(engineDir, "skills"), directoryLinkType);
+				symlinkSync(sharedPromptsDir, join(engineDir, "prompts"), directoryLinkType);
+				symlinkSync(sharedThemesDir, join(engineDir, "themes"), directoryLinkType);
+				symlinkSync(sharedExtensionsDir, join(tempDir, ".mooncli", "extensions"), directoryLinkType);
+				symlinkSync(sharedSkillsDir, join(tempDir, ".mooncli", "skills"), directoryLinkType);
+				symlinkSync(sharedPromptsDir, join(tempDir, ".mooncli", "prompts"), directoryLinkType);
+				symlinkSync(sharedThemesDir, join(tempDir, ".mooncli", "themes"), directoryLinkType);
 
 				const result = await packageManager.resolve();
 
@@ -228,7 +229,7 @@ Content`,
 		});
 
 		it("should auto-discover project prompts with overrides", async () => {
-			const promptsDir = join(tempDir, ".Mooncli", "prompts");
+			const promptsDir = join(tempDir, ".mooncli", "prompts");
 			mkdirSync(promptsDir, { recursive: true });
 			const promptPath = join(promptsDir, "is.md");
 			writeFileSync(promptPath, "Is prompt");
@@ -355,7 +356,7 @@ Content`,
 
 			try {
 				const cwd = join(tempDir, "scratch", "nested");
-				const localEngineDir = join(tempDir, ".Mooncli", "engine");
+				const localEngineDir = join(tempDir, ".mooncli", "engine");
 				const localSettingsManager = SettingsManager.inMemory();
 				mkdirSync(cwd, { recursive: true });
 				mkdirSync(localEngineDir, { recursive: true });
@@ -385,7 +386,7 @@ Content`,
 			}
 		});
 
-		it("should dedupe user skill entries when ~/.Mooncli/engine/skills is a symlink to ~/.engines/skills", async () => {
+		it("should dedupe user skill entries when ~/.mooncli/engine/skills is a symlink to ~/.engines/skills", async () => {
 			const previousHome = process.env.HOME;
 			process.env.HOME = tempDir;
 
@@ -436,10 +437,10 @@ Content`,
 			expect(result.skills.some((r) => r.path.includes("venv") && r.enabled)).toBe(false);
 		});
 
-		it("should not apply parent .gitignore to .Mooncli auto-discovery", async () => {
-			writeFileSync(join(tempDir, ".gitignore"), ".Mooncli\n");
+		it("should not apply parent .gitignore to .mooncli auto-discovery", async () => {
+			writeFileSync(join(tempDir, ".gitignore"), ".mooncli\n");
 
-			const skillDir = join(tempDir, ".Mooncli", "skills", "auto-skill");
+			const skillDir = join(tempDir, ".mooncli", "skills", "auto-skill");
 			mkdirSync(skillDir, { recursive: true });
 			const skillPath = join(skillDir, "SKILL.md");
 			writeFileSync(skillPath, "---\nname: auto-skill\ndescription: Auto\n---\nContent");
@@ -609,7 +610,7 @@ Content`,
 
 		it("should update git package dependencies with --omit=dev", async () => {
 			const source = "git:github.com/user/repo";
-			const targetDir = join(tempDir, ".Mooncli", "git", "github.com", "user", "repo");
+			const targetDir = join(tempDir, ".mooncli", "git", "github.com", "user", "repo");
 			mkdirSync(targetDir, { recursive: true });
 			writeFileSync(join(targetDir, "package.json"), JSON.stringify({ name: "repo", version: "1.0.0" }));
 			settingsManager.setProjectPackages([source]);
@@ -645,7 +646,7 @@ Content`,
 			});
 
 			const source = "git:github.com/user/repo";
-			const targetDir = join(tempDir, ".Mooncli", "git", "github.com", "user", "repo");
+			const targetDir = join(tempDir, ".mooncli", "git", "github.com", "user", "repo");
 			mkdirSync(targetDir, { recursive: true });
 			writeFileSync(join(targetDir, "package.json"), JSON.stringify({ name: "repo", version: "1.0.0" }));
 			settingsManager.setProjectPackages([source]);
@@ -795,7 +796,7 @@ Content`,
 			expect(settings.packages?.[0]).toBe(expected);
 		});
 
-		it("should store project local packages relative to .Mooncli settings base", () => {
+		it("should store project local packages relative to .mooncli settings base", () => {
 			const projectPkgDir = join(tempDir, "project-local-pkg");
 			mkdirSync(join(projectPkgDir, "extensions"), { recursive: true });
 			writeFileSync(join(projectPkgDir, "extensions", "index.ts"), "export default function() {}");
@@ -804,7 +805,7 @@ Content`,
 			expect(added).toBe(true);
 
 			const settings = settingsManager.getProjectSettings();
-			const rel = relative(join(tempDir, ".Mooncli"), projectPkgDir);
+			const rel = relative(join(tempDir, ".mooncli"), projectPkgDir);
 			const expected = rel.startsWith(".") ? rel : `./${rel}`;
 			expect(settings.packages?.[0]).toBe(expected);
 		});
@@ -1601,7 +1602,7 @@ export default function(api) { api.registerTool({ name: "test", description: "te
 
 	describe("offline mode and network timeouts", () => {
 		it("should update project npm packages using @latest when newer version is available", async () => {
-			const installedPath = join(tempDir, ".Mooncli", "npm", "node_modules", "example");
+			const installedPath = join(tempDir, ".mooncli", "npm", "node_modules", "example");
 			mkdirSync(installedPath, { recursive: true });
 			writeFileSync(join(installedPath, "package.json"), JSON.stringify({ name: "example", version: "1.0.0" }));
 			settingsManager.setProjectPackages(["npm:example"]);
@@ -1618,13 +1619,13 @@ export default function(api) { api.registerTool({ name: "test", description: "te
 			);
 			expect(runCommandSpy).toHaveBeenCalledWith(
 				"npm",
-				["install", "example@latest", "--prefix", join(tempDir, ".Mooncli", "npm")],
+				["install", "example@latest", "--prefix", join(tempDir, ".mooncli", "npm")],
 				undefined,
 			);
 		});
 
 		it("should skip project npm update when installed version matches latest", async () => {
-			const installedPath = join(tempDir, ".Mooncli", "npm", "node_modules", "example");
+			const installedPath = join(tempDir, ".mooncli", "npm", "node_modules", "example");
 			mkdirSync(installedPath, { recursive: true });
 			writeFileSync(join(installedPath, "package.json"), JSON.stringify({ name: "example", version: "1.2.3" }));
 			settingsManager.setProjectPackages(["npm:example"]);
@@ -1648,8 +1649,8 @@ export default function(api) { api.registerTool({ name: "test", description: "te
 			const userOldPath = join(engineDir, "node_modules", "user-old");
 			const userCurrentPath = join(engineDir, "node_modules", "user-current");
 			const userUnknownPath = join(engineDir, "node_modules", "user-unknown");
-			const projectOldPath = join(tempDir, ".Mooncli", "npm", "node_modules", "project-old");
-			const projectCurrentPath = join(tempDir, ".Mooncli", "npm", "node_modules", "project-current");
+			const projectOldPath = join(tempDir, ".mooncli", "npm", "node_modules", "project-old");
+			const projectCurrentPath = join(tempDir, ".mooncli", "npm", "node_modules", "project-current");
 			const installPaths = [userOldPath, userCurrentPath, userUnknownPath, projectOldPath, projectCurrentPath];
 			for (const installPath of installPaths) {
 				mkdirSync(installPath, { recursive: true });
@@ -1743,7 +1744,7 @@ export default function(api) { api.registerTool({ name: "test", description: "te
 			expect(runCommandSpy).toHaveBeenNthCalledWith(
 				2,
 				"npm",
-				["install", "project-old@latest", "project-missing@latest", "--prefix", join(tempDir, ".Mooncli", "npm")],
+				["install", "project-old@latest", "project-missing@latest", "--prefix", join(tempDir, ".mooncli", "npm")],
 				undefined,
 			);
 			expect(updateGitSpy).toHaveBeenCalledTimes(3);
@@ -1796,7 +1797,7 @@ export default function(api) { api.registerTool({ name: "test", description: "te
 		});
 
 		it("should not run npm view during resolve for installed unpinned packages", async () => {
-			const installedPath = join(tempDir, ".Mooncli", "npm", "node_modules", "example");
+			const installedPath = join(tempDir, ".mooncli", "npm", "node_modules", "example");
 			mkdirSync(join(installedPath, "extensions"), { recursive: true });
 			writeFileSync(join(installedPath, "package.json"), JSON.stringify({ name: "example", version: "1.0.0" }));
 			writeFileSync(join(installedPath, "extensions", "index.ts"), "export default function() {};");
@@ -1810,7 +1811,7 @@ export default function(api) { api.registerTool({ name: "test", description: "te
 		});
 
 		it("should reinstall pinned npm packages when installed version does not match", async () => {
-			const installedPath = join(tempDir, ".Mooncli", "npm", "node_modules", "example");
+			const installedPath = join(tempDir, ".mooncli", "npm", "node_modules", "example");
 			mkdirSync(installedPath, { recursive: true });
 			writeFileSync(join(installedPath, "package.json"), JSON.stringify({ name: "example", version: "1.0.0" }));
 			settingsManager.setProjectPackages(["npm:example@2.0.0"]);
@@ -1833,7 +1834,7 @@ export default function(api) { api.registerTool({ name: "test", description: "te
 		});
 
 		it("should report updates for installed unpinned npm packages", async () => {
-			const installedPath = join(tempDir, ".Mooncli", "npm", "node_modules", "example");
+			const installedPath = join(tempDir, ".mooncli", "npm", "node_modules", "example");
 			mkdirSync(installedPath, { recursive: true });
 			writeFileSync(join(installedPath, "package.json"), JSON.stringify({ name: "example", version: "1.0.0" }));
 			settingsManager.setProjectPackages(["npm:example"]);
@@ -1852,7 +1853,7 @@ export default function(api) { api.registerTool({ name: "test", description: "te
 		});
 
 		it("should skip pinned packages when checking for updates", async () => {
-			const installedNpmPath = join(tempDir, ".Mooncli", "npm", "node_modules", "example");
+			const installedNpmPath = join(tempDir, ".mooncli", "npm", "node_modules", "example");
 			mkdirSync(installedNpmPath, { recursive: true });
 			writeFileSync(join(installedNpmPath, "package.json"), JSON.stringify({ name: "example", version: "1.0.0" }));
 			const parsedGitSource = (packageManager as any).parseSource("git:github.com/example/repo@v1");

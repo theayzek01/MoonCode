@@ -422,8 +422,8 @@ export class InteractiveMode {
 				type: "warning" as const,
 				message:
 					command.invocationName === command.name
-						? `Extension command '/${command.name}' conflicts with built-in interactive command. Skipping in autocomplete.`
-						: `Extension command '/${command.name}' conflicts with built-in interactive command. Available as '/${command.invocationName}'.`,
+						? `Uzantı komutu '/${command.name}' yerleşik etkileşimli komutla çakışıyor. Otomatik tamamlamada atlanıyor.`
+						: `Uzantı komutu '/${command.name}' yerleşik etkileşimli komutla çakışıyor. '/${command.invocationName}' olarak kullanılabilir.`,
 				path: command.sourceInfo.path,
 			}));
 	}
@@ -535,10 +535,10 @@ export class InteractiveMode {
 		if (this.settingsManager.getCollapseChangelog()) {
 			const versionMatch = this.changelogMarkdown.match(/##\s+\[?(\d+\.\d+\.\d+)\]?/);
 			const latestVersion = versionMatch ? versionMatch[1] : this.version;
-			const condensedText = `Updated to v${latestVersion}. Use ${theme.bold("/changelog")} to view full changelog.`;
+			const condensedText = `v${latestVersion} sürümüne güncellendi. Tüm değişiklikleri görmek için ${theme.bold("/changelog")} komutunu kullanın.`;
 			this.chatContainer.addChild(new Text(condensedText, 1, 0));
 		} else {
-			this.chatContainer.addChild(new Text(theme.bold(theme.fg("accent", "What's New")), 1, 0));
+			this.chatContainer.addChild(new Text(theme.bold(theme.fg("accent", "Yenilikler")), 1, 0));
 			this.chatContainer.addChild(new Spacer(1));
 			this.chatContainer.addChild(
 				new Markdown(this.changelogMarkdown.trim(), 1, 0, this.getMarkdownThemeWithSettings()),
@@ -722,12 +722,12 @@ export class InteractiveMode {
 		const { migratedProviders, modelFallbackMessage, initialMessage, initialImages, initialMessages } = this.options;
 
 		if (migratedProviders && migratedProviders.length > 0) {
-			this.showWarning(`Migrated credentials to auth.json: ${migratedProviders.join(", ")}`);
+			this.showWarning(`Kimlik bilgileri auth.json dosyasına taşındı: ${migratedProviders.join(", ")}`);
 		}
 
 		const modelsJsonError = this.session.modelRegistry.getError();
 		if (modelsJsonError) {
-			this.showError(`models.json error: ${modelsJsonError}`);
+			this.showError(`models.json hatası: ${modelsJsonError}`);
 		}
 
 		if (modelFallbackMessage) {
@@ -741,7 +741,7 @@ export class InteractiveMode {
 			try {
 				await this.session.prompt(initialMessage, { images: initialImages });
 			} catch (error: unknown) {
-				const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+				const errorMessage = error instanceof Error ? error.message : "Bilinmeyen bir hata oluştu";
 				this.showError(errorMessage);
 			}
 		}
@@ -751,7 +751,7 @@ export class InteractiveMode {
 				try {
 					await this.session.prompt(message);
 				} catch (error: unknown) {
-					const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+					const errorMessage = error instanceof Error ? error.message : "Bilinmeyen bir hata oluştu";
 					this.showError(errorMessage);
 				}
 			}
@@ -763,7 +763,7 @@ export class InteractiveMode {
 			try {
 				await this.session.prompt(userInput);
 			} catch (error: unknown) {
-				const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+				const errorMessage = error instanceof Error ? error.message : "Bilinmeyen bir hata oluştu";
 				this.showError(errorMessage);
 			}
 		}
@@ -1420,7 +1420,9 @@ export class InteractiveMode {
 			const skillDiagnostics = skillsResult.diagnostics;
 			if (skillDiagnostics.length > 0) {
 				const warningLines = this.formatDiagnostics(skillDiagnostics, sourceInfos);
-				this.chatContainer.addChild(new Text(`${theme.fg("warning", "[Skill conflicts]")}\n${warningLines}`, 0, 0));
+				this.chatContainer.addChild(
+					new Text(`${theme.fg("warning", "[Yetenek çakışmaları]")}\n${warningLines}`, 0, 0),
+				);
 				this.chatContainer.addChild(new Spacer(1));
 			}
 
@@ -1428,7 +1430,7 @@ export class InteractiveMode {
 			if (promptDiagnostics.length > 0) {
 				const warningLines = this.formatDiagnostics(promptDiagnostics, sourceInfos);
 				this.chatContainer.addChild(
-					new Text(`${theme.fg("warning", "[Prompt conflicts]")}\n${warningLines}`, 0, 0),
+					new Text(`${theme.fg("warning", "[İstem çakışmaları]")}\n${warningLines}`, 0, 0),
 				);
 				this.chatContainer.addChild(new Spacer(1));
 			}
@@ -1451,7 +1453,7 @@ export class InteractiveMode {
 			if (extensionDiagnostics.length > 0) {
 				const warningLines = this.formatDiagnostics(extensionDiagnostics, sourceInfos);
 				this.chatContainer.addChild(
-					new Text(`${theme.fg("warning", "[Extension issues]")}\n${warningLines}`, 0, 0),
+					new Text(`${theme.fg("warning", "[Uzantı sorunları]")}\n${warningLines}`, 0, 0),
 				);
 				this.chatContainer.addChild(new Spacer(1));
 			}
@@ -1459,7 +1461,9 @@ export class InteractiveMode {
 			const themeDiagnostics = themesResult.diagnostics;
 			if (themeDiagnostics.length > 0) {
 				const warningLines = this.formatDiagnostics(themeDiagnostics, sourceInfos);
-				this.chatContainer.addChild(new Text(`${theme.fg("warning", "[Theme conflicts]")}\n${warningLines}`, 0, 0));
+				this.chatContainer.addChild(
+					new Text(`${theme.fg("warning", "[Tema çakışmaları]")}\n${warningLines}`, 0, 0),
+				);
 				this.chatContainer.addChild(new Spacer(1));
 			}
 		}
@@ -1497,7 +1501,7 @@ export class InteractiveMode {
 						if (!result.cancelled) {
 							this.renderCurrentSessionState();
 							this.editor.setText(result.selectedText ?? "");
-							this.showStatus("Forked to new session");
+							this.showStatus("Yeni oturuma çatallandı");
 						}
 						return { cancelled: result.cancelled };
 					} catch (error: unknown) {
@@ -1520,7 +1524,7 @@ export class InteractiveMode {
 					if (result.editorText && !this.editor.getText().trim()) {
 						this.editor.setText(result.editorText);
 					}
-					this.showStatus("Navigated to selected point");
+					this.showStatus("Seçilen noktaya gidildi");
 					void this.flushCompactionQueue({ willRetry: false });
 					return { cancelled: false };
 				},
@@ -1760,7 +1764,7 @@ export class InteractiveMode {
 				container.addChild(new Text(line, 1, 0));
 			}
 			if (content.length > InteractiveMode.MAX_WIDGET_LINES) {
-				container.addChild(new Text(theme.fg("muted", "... (widget truncated)"), 1, 0));
+				container.addChild(new Text(theme.fg("muted", "... (widget kesildi)"), 1, 0));
 			}
 			component = container;
 		} else {
@@ -1811,7 +1815,7 @@ export class InteractiveMode {
 		this.workingVisible = true;
 		this.setWorkingIndicator();
 		if (this.loadingAnimation) {
-			this.loadingAnimation.setMessage(`${this.defaultWorkingMessage} (${keyText("app.interrupt")} to interrupt)`);
+			this.loadingAnimation.setMessage(`${this.defaultWorkingMessage} (durdurmak için ${keyText("app.interrupt")})`);
 		}
 		this.setHiddenThinkingLabel();
 	}
@@ -2065,13 +2069,13 @@ export class InteractiveMode {
 		message: string,
 		opts?: ExtensionUIDialogOptions,
 	): Promise<boolean> {
-		const result = await this.showExtensionSelector(`${title}\n${message}`, ["Yes", "No"], opts);
-		return result === "Yes";
+		const result = await this.showExtensionSelector(`${title}\n${message}`, ["Evet", "Hayır"], opts);
+		return result === "Evet";
 	}
 
 	private async promptForMissingSessionCwd(error: MissingSessionCwdError): Promise<string | undefined> {
 		const confirmed = await this.showExtensionConfirm(
-			"Session cwd not found",
+			"Oturum çalışma dizini bulunamadı",
 			formatMissingSessionCwdPrompt(error.issue),
 		);
 		return confirmed ? error.issue.fallbackCwd : undefined;
@@ -2603,7 +2607,7 @@ export class InteractiveMode {
 				const command = isExcluded ? text.slice(2).trim() : text.slice(1).trim();
 				if (command) {
 					if (this.session.isBashRunning) {
-						this.showWarning("A bash command is already running. Press Esc to cancel it first.");
+						this.showWarning("Bir bash komutu zaten çalışıyor. İptal etmek için önce Esc tuşuna basın.");
 						this.editor.setText(text);
 						return;
 					}
@@ -2780,7 +2784,7 @@ export class InteractiveMode {
 
 					if (this.streamingMessage.stopReason === "aborted" || this.streamingMessage.stopReason === "error") {
 						if (!errorMessage) {
-							errorMessage = this.streamingMessage.errorMessage || "Error";
+							errorMessage = this.streamingMessage.errorMessage || "Hata";
 						}
 						for (const [, component] of this.pendingTools.entries()) {
 							component.updateResult({
@@ -2907,9 +2911,9 @@ export class InteractiveMode {
 				}
 				if (event.aborted) {
 					if (event.reason === "manual") {
-						this.showError("Compaction cancelled");
+						this.showError("Sıkıştırma iptal edildi");
 					} else {
-						this.showStatus("Otomatik sikistirma iptal edildi");
+						this.showStatus("Otomatik sıkıştırma iptal edildi");
 					}
 				} else if (event.result) {
 					this.chatContainer.clear();
@@ -2945,7 +2949,7 @@ export class InteractiveMode {
 				this.statusContainer.clear();
 				this.retryCountdown?.dispose();
 				const retryMessage = (seconds: number) =>
-					`Retrying (${event.attempt}/${event.maxAttempts}) in ${seconds}s... (${keyText("app.interrupt")} to cancel)`;
+					`Yeniden deneniyor (${event.attempt}/${event.maxAttempts}), ${seconds}s içinde... (iptal için ${keyText("app.interrupt")})`;
 				this.retryLoader = new Loader(
 					this.ui,
 					(spinner) => theme.fg("warning", spinner),
@@ -2985,7 +2989,9 @@ export class InteractiveMode {
 				}
 				// Show error only on final failure (success shows normal response)
 				if (!event.success) {
-					this.showError(`Retry failed after ${event.attempt} attempts: ${event.finalError || "Unknown error"}`);
+					this.showError(
+						`Yeniden deneme ${event.attempt} denemeden sonra başarısız oldu: ${event.finalError || "Bilinmeyen hata"}`,
+					);
 				}
 				this.ui.requestRender();
 				break;
@@ -3207,11 +3213,9 @@ export class InteractiveMode {
 							if (message.stopReason === "aborted") {
 								const retryAttempt = this.session.retryAttempt;
 								errorMessage =
-									retryAttempt > 0
-										? `Aborted after ${retryAttempt} retry attempt${retryAttempt > 1 ? "s" : ""}`
-										: "Operation aborted";
+									retryAttempt > 0 ? `${retryAttempt} denemeden sonra iptal edildi` : "İşlem iptal edildi";
 							} else {
-								errorMessage = message.errorMessage || "Error";
+								errorMessage = message.errorMessage || "Hata";
 							}
 							component.updateResult({ content: [{ type: "text", text: errorMessage }], isError: true });
 						} else {
@@ -3499,7 +3503,7 @@ export class InteractiveMode {
 		// Determine editor (respect $VISUAL, then $EDITOR)
 		const editorCmd = process.env.VISUAL || process.env.EDITOR;
 		if (!editorCmd) {
-			this.showWarning("No editor configured. Set $VISUAL or $EDITOR environment variable.");
+			this.showWarning("Düzenleyici yapılandırılmamış. $VISUAL veya $EDITOR ortam değişkenini ayarlayın.");
 			return;
 		}
 
@@ -3554,30 +3558,31 @@ export class InteractiveMode {
 
 	showError(errorMessage: string): void {
 		this.chatContainer.addChild(new Spacer(1));
-		this.chatContainer.addChild(new Text(theme.fg("error", `Error: ${errorMessage}`), 1, 0));
+		this.chatContainer.addChild(new Text(theme.fg("error", `Hata: ${errorMessage}`), 1, 0));
 		this.ui.requestRender();
 	}
 
 	showWarning(warningMessage: string): void {
 		this.chatContainer.addChild(new Spacer(1));
-		this.chatContainer.addChild(new Text(theme.fg("warning", `Warning: ${warningMessage}`), 1, 0));
+		this.chatContainer.addChild(new Text(theme.fg("warning", `Uyarı: ${warningMessage}`), 1, 0));
 		this.ui.requestRender();
 	}
 
 	showNewVersionNotification(newVersion: string): void {
 		const action = theme.fg("accent", `${APP_NAME} update`);
-		const updateInstruction = theme.fg("muted", `New version ${newVersion} is available. Run `) + action;
+		const updateInstruction =
+			theme.fg("muted", `Yeni sürüm ${newVersion} mevcut. Güncellemek için şunu çalıştırın: `) + action;
 		const changelogUrl = theme.fg(
 			"accent",
 			"https://github.com/badlogic/Mooncli-mono/blob/main/packages/cli/CHANGELOG.md",
 		);
-		const changelogLine = theme.fg("muted", "Changelog: ") + changelogUrl;
+		const changelogLine = theme.fg("muted", "Değişiklik Günlüğü: ") + changelogUrl;
 
 		this.chatContainer.addChild(new Spacer(1));
 		this.chatContainer.addChild(new DynamicBorder((text) => theme.fg("warning", text)));
 		this.chatContainer.addChild(
 			new Text(
-				`${theme.bold(theme.fg("warning", "Update Available"))}\n${updateInstruction}\n${changelogLine}`,
+				`${theme.bold(theme.fg("warning", "Güncelleme Mevcut"))}\n${updateInstruction}\n${changelogLine}`,
 				1,
 				0,
 			),
@@ -3588,14 +3593,15 @@ export class InteractiveMode {
 
 	showPackageUpdateNotification(packages: string[]): void {
 		const action = theme.fg("accent", `${APP_NAME} update`);
-		const updateInstruction = theme.fg("muted", "Package updates are available. Run ") + action;
+		const updateInstruction =
+			theme.fg("muted", "Paket güncellemeleri mevcut. Güncellemek için şunu çalıştırın: ") + action;
 		const packageLines = packages.map((pkg) => `- ${pkg}`).join("\n");
 
 		this.chatContainer.addChild(new Spacer(1));
 		this.chatContainer.addChild(new DynamicBorder((text) => theme.fg("warning", text)));
 		this.chatContainer.addChild(
 			new Text(
-				`${theme.bold(theme.fg("warning", "Package Updates Available"))}\n${updateInstruction}\n${theme.fg("muted", "Packages:")}\n${packageLines}`,
+				`${theme.bold(theme.fg("warning", "Paket Güncellemeleri Mevcut"))}\n${updateInstruction}\n${theme.fg("muted", "Paketler:")}\n${packageLines}`,
 				1,
 				0,
 			),
@@ -3646,15 +3652,15 @@ export class InteractiveMode {
 		if (steeringMessages.length > 0 || followUpMessages.length > 0) {
 			this.pendingMessagesContainer.addChild(new Spacer(1));
 			for (const message of steeringMessages) {
-				const text = theme.fg("dim", `Steering: ${message}`);
+				const text = theme.fg("dim", `Yönlendirme: ${message}`);
 				this.pendingMessagesContainer.addChild(new TruncatedText(text, 1, 0));
 			}
 			for (const message of followUpMessages) {
-				const text = theme.fg("dim", `Follow-up: ${message}`);
+				const text = theme.fg("dim", `Takip: ${message}`);
 				this.pendingMessagesContainer.addChild(new TruncatedText(text, 1, 0));
 			}
 			const dequeueHint = this.getAppKeyDisplay("app.message.dequeue");
-			const hintText = theme.fg("dim", `↳ ${dequeueHint} to edit all queued messages`);
+			const hintText = theme.fg("dim", `↳ Tüm kuyruğa alınmış mesajları düzenlemek için ${dequeueHint}`);
 			this.pendingMessagesContainer.addChild(new TruncatedText(hintText, 1, 0));
 		}
 	}
@@ -3685,7 +3691,7 @@ export class InteractiveMode {
 		this.editor.addToHistory?.(text);
 		this.editor.setText("");
 		this.updatePendingMessagesDisplay();
-		this.showStatus("Sikistirma sonrasi icin mesaj kuyruklandi");
+		this.showStatus("Sıkıştırma sonrası için mesaj kuyruklandı");
 	}
 
 	private isExtensionCommand(text: string): boolean {
@@ -4055,7 +4061,7 @@ export class InteractiveMode {
 						this.footer.invalidate();
 						this.updateEditorBorderColor();
 						done();
-						this.showStatus(`Model: ${model.id}`);
+						this.showStatus(`Model seçildi: ${model.id}`);
 						void this.maybeWarnAboutAnthropicSubscriptionAuth(model);
 						this.checkDaxnutsEasterEgg(model);
 					} catch (error) {
@@ -4079,7 +4085,7 @@ export class InteractiveMode {
 		const allModels = this.session.modelRegistry.getAvailable();
 
 		if (allModels.length === 0) {
-			this.showStatus("Kullanilabilir model yok");
+			this.showStatus("Kullanılabilir model yok");
 			return;
 		}
 
@@ -4138,7 +4144,7 @@ export class InteractiveMode {
 								? undefined // All enabled = clear filter
 								: enabledIds;
 						this.settingsManager.setEnabledModels(newPatterns ? [...newPatterns] : undefined);
-						this.showStatus("Model secimi ayarlara kaydedildi");
+						this.showStatus("Model seçimi ayarlara kaydedildi");
 					},
 					onCancel: () => {
 						done();
@@ -4154,7 +4160,7 @@ export class InteractiveMode {
 		const userMessages = this.session.getUserMessagesForForking();
 
 		if (userMessages.length === 0) {
-			this.showStatus("Catallanacak mesaj yok");
+			this.showStatus("Çatallanacak mesaj yok");
 			return;
 		}
 
@@ -4175,7 +4181,7 @@ export class InteractiveMode {
 						this.renderCurrentSessionState();
 						this.editor.setText(result.selectedText ?? "");
 						done();
-						this.showStatus("Yeni oturuma catallandi");
+						this.showStatus("Yeni oturuma çatallandı");
 					} catch (error: unknown) {
 						done();
 						this.showError(error instanceof Error ? error.message : String(error));
@@ -4194,7 +4200,7 @@ export class InteractiveMode {
 	private async handleCloneCommand(): Promise<void> {
 		const leafId = this.sessionManager.getLeafId();
 		if (!leafId) {
-			this.showStatus("Henuz kopyalanacak bir sey yok");
+			this.showStatus("Henüz kopyalanacak bir şey yok");
 			return;
 		}
 
@@ -4207,7 +4213,7 @@ export class InteractiveMode {
 
 			this.renderCurrentSessionState();
 			this.editor.setText("");
-			this.showStatus("Yeni oturuma kopyalandi");
+			this.showStatus("Yeni oturuma kopyalandı");
 		} catch (error: unknown) {
 			this.showError(error instanceof Error ? error.message : String(error));
 		}
@@ -4232,7 +4238,7 @@ export class InteractiveMode {
 					// Selecting the current leaf is a no-op (already there)
 					if (entryId === realLeafId) {
 						done();
-						this.showStatus("Zaten bu noktadasiniz");
+						this.showStatus("Zaten bu noktadasınız");
 						return;
 					}
 
@@ -4246,10 +4252,10 @@ export class InteractiveMode {
 					// Check if we should skip the prompt (user preference to always default to no summary)
 					if (!this.settingsManager.getBranchSummarySkipPrompt()) {
 						while (true) {
-							const summaryChoice = await this.showExtensionSelector("Dal ozetlensin mi?", [
-								"Ozet yok",
-								"Ozetle",
-								"Ozel istem ile ozetle",
+							const summaryChoice = await this.showExtensionSelector("Dal özetlensin mi?", [
+								"Özet yok",
+								"Özetle",
+								"Özel istem ile özetle",
 							]);
 
 							if (summaryChoice === undefined) {
@@ -4258,10 +4264,10 @@ export class InteractiveMode {
 								return;
 							}
 
-							wantsSummary = summaryChoice !== "No summary";
+							wantsSummary = summaryChoice !== "Özet yok";
 
-							if (summaryChoice === "Summarize with custom prompt") {
-								customInstructions = await this.showExtensionEditor("Custom summarization instructions");
+							if (summaryChoice === "Özel istem ile özetle") {
+								customInstructions = await this.showExtensionEditor("Özel özetleme talimatları");
 								if (customInstructions === undefined) {
 									// User cancelled - loop back to summary selector
 									continue;
@@ -4286,7 +4292,7 @@ export class InteractiveMode {
 							this.ui,
 							(spinner) => theme.fg("accent", spinner),
 							(text) => theme.fg("muted", text),
-							`Dal ozetleniyor... (iptal etmek icin ${keyText("app.interrupt")})`,
+							`Dal özetleniyor... (iptal etmek için ${keyText("app.interrupt")})`,
 						);
 						this.statusContainer.addChild(summaryLoader);
 						this.ui.requestRender();
@@ -4300,7 +4306,7 @@ export class InteractiveMode {
 
 						if (result.aborted) {
 							// Summarization aborted - re-show tree selector with same selection
-							this.showStatus("Dal ozetleme iptal edildi");
+							this.showStatus("Dal özetleme iptal edildi");
 							this.showTreeSelector(entryId);
 							return;
 						}
@@ -4315,7 +4321,7 @@ export class InteractiveMode {
 						if (result.editorText && !this.editor.getText().trim()) {
 							this.editor.setText(result.editorText);
 						}
-						this.showStatus("Secilen noktaya gidildi");
+						this.showStatus("Seçilen noktaya gidildi");
 						void this.flushCompactionQueue({ willRetry: false });
 					} catch (error) {
 						this.showError(error instanceof Error ? error.message : String(error));
@@ -4465,10 +4471,10 @@ export class InteractiveMode {
 
 	private showLoginAuthTypeSelector(): void {
 		const subscriptionLabel = "Abonelik kullan";
-		const apiKeyLabel = "API anahtari kullan";
+		const apiKeyLabel = "API anahtarı kullan";
 		this.showSelector((done) => {
 			const selector = new ExtensionSelectorComponent(
-				"Kimlik dogrulama yontemi secin:",
+				"Kimlik doğrulama yöntemi seçin:",
 				[subscriptionLabel, apiKeyLabel],
 				(option) => {
 					done();
@@ -4488,7 +4494,7 @@ export class InteractiveMode {
 		const providerOptions = this.getLoginProviderOptions(authType);
 		if (providerOptions.length === 0) {
 			this.showStatus(
-				authType === "oauth" ? "No subscription providers available." : "No API key providers available.",
+				authType === "oauth" ? "Abonelik sağlayıcısı bulunamadı." : "API anahtarı sağlayıcısı bulunamadı.",
 			);
 			return;
 		}
@@ -4533,7 +4539,7 @@ export class InteractiveMode {
 		const providerOptions = this.getLogoutProviderOptions();
 		if (providerOptions.length === 0) {
 			this.showStatus(
-				"No stored credentials to remove. /logout only removes credentials saved by /login; environment variables and models.json config are unchanged.",
+				"Kaldırılacak saklanmış kimlik bilgisi yok. /logout sadece /login ile kaydedilenleri kaldırır; ortam değişkenleri ve models.json ayarları değişmez.",
 			);
 			return;
 		}
@@ -4557,8 +4563,8 @@ export class InteractiveMode {
 						await this.updateAvailableProviderCount();
 						const message =
 							providerOption.authType === "oauth"
-								? `${providerOption.name} oturumu kapatildi`
-								: `${providerOption.name} icin saklanan API anahtari kaldirildi. Ortam degiskenleri ve models.json yapilandirmasi degismedi.`;
+								? `${providerOption.name} oturumu kapatıldı`
+								: `${providerOption.name} için saklanan API anahtarı kaldırıldı. Ortam değişkenleri ve models.json yapılandırması değişmedi.`;
 						this.showStatus(message);
 					} catch (error: unknown) {
 						this.showError(`Logout failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -4581,7 +4587,8 @@ export class InteractiveMode {
 	): Promise<void> {
 		this.session.modelRegistry.refresh();
 
-		const actionLabel = authType === "oauth" ? `Logged in to ${providerName}` : `Saved API key for ${providerName}`;
+		const actionLabel =
+			authType === "oauth" ? `${providerName} oturumu açıldı` : `${providerName} için API anahtarı kaydedildi`;
 
 		let selectedModel: Model<any> | undefined;
 		let selectionError: string | undefined;
@@ -4589,21 +4596,21 @@ export class InteractiveMode {
 			const availableModels = this.session.modelRegistry.getAvailable();
 			const providerModels = availableModels.filter((model) => model.provider === providerId);
 			if (!hasDefaultModelProvider(providerId)) {
-				selectionError = `${actionLabel}, but no default model is configured for provider "${providerId}". Use /model to select a model.`;
+				selectionError = `${actionLabel}, ancak "${providerId}" sağlayıcısı için varsayılan model yapılandırılmamış. Model seçmek için /model komutunu kullanın.`;
 			} else if (providerModels.length === 0) {
-				selectionError = `${actionLabel}, but no models are available for that provider. Use /model to select a model.`;
+				selectionError = `${actionLabel}, ancak bu sağlayıcı için kullanılabilir model yok. Model seçmek için /model komutunu kullanın.`;
 			} else {
 				const defaultModelId = defaultModelPerProvider[providerId];
 				selectedModel = providerModels.find((model) => model.id === defaultModelId);
 				if (!selectedModel) {
-					selectionError = `${actionLabel}, but its default model "${defaultModelId}" is not available. Use /model to select a model.`;
+					selectionError = `${actionLabel}, ancak varsayılan model "${defaultModelId}" mevcut değil. Model seçmek için /model komutunu kullanın.`;
 				} else {
 					try {
 						await this.session.setModel(selectedModel);
 					} catch (error: unknown) {
 						selectedModel = undefined;
 						const errorMessage = error instanceof Error ? error.message : String(error);
-						selectionError = `${actionLabel}, but selecting its default model failed: ${errorMessage}. Use /model to select a model.`;
+						selectionError = `${actionLabel}, ancak varsayılan model seçimi başarısız oldu: ${errorMessage}. Model seçmek için /model komutunu kullanın.`;
 					}
 				}
 			}
@@ -4614,12 +4621,12 @@ export class InteractiveMode {
 		this.updateEditorBorderColor();
 		if (selectedModel) {
 			this.showStatus(
-				`${actionLabel}. ${selectedModel.id} secildi. Kimlik bilgileri suraya kaydedildi: ${getAuthPath()}`,
+				`${actionLabel}. ${selectedModel.id} seçildi. Kimlik bilgileri şuraya kaydedildi: ${getAuthPath()}`,
 			);
 			void this.maybeWarnAboutAnthropicSubscriptionAuth(selectedModel);
 			this.checkDaxnutsEasterEgg(selectedModel);
 		} else {
-			this.showStatus(`${actionLabel}. Kimlik bilgileri suraya kaydedildi: ${getAuthPath()}`);
+			this.showStatus(`${actionLabel}. Kimlik bilgileri şuraya kaydedildi: ${getAuthPath()}`);
 			if (selectionError) {
 				this.showError(selectionError);
 			} else {
@@ -4644,9 +4651,12 @@ export class InteractiveMode {
 			"Amazon Bedrock setup",
 		);
 		dialog.showInfo([
-			theme.fg("text", "Amazon Bedrock uses AWS credentials instead of a single API key."),
-			theme.fg("text", "Configure an AWS profile, IAM keys, bearer token, or role-based credentials."),
-			theme.fg("muted", "See:"),
+			theme.fg("text", "Amazon Bedrock, tek bir API anahtarı yerine AWS kimlik bilgilerini kullanır."),
+			theme.fg(
+				"text",
+				"Bir AWS profili, IAM anahtarları, taşıyıcı jeton (bearer token) veya rol tabanlı kimlik bilgileri yapılandırın.",
+			),
+			theme.fg("muted", "Bakınız:"),
 			theme.fg("accent", `  ${path.join(getDocsPath(), "providers.md")}`),
 		]);
 
@@ -4681,9 +4691,9 @@ export class InteractiveMode {
 		};
 
 		try {
-			const apiKey = (await dialog.showPrompt("Enter API key:")).trim();
+			const apiKey = (await dialog.showPrompt("API anahtarını girin:")).trim();
 			if (!apiKey) {
-				throw new Error("API key cannot be empty.");
+				throw new Error("API anahtarı boş olamaz.");
 			}
 
 			this.session.modelRegistry.authStorage.set(providerId, { type: "api_key", key: apiKey });
@@ -4748,7 +4758,7 @@ export class InteractiveMode {
 					if (usesCallbackServer) {
 						// Show input for manual paste, racing with callback
 						dialog
-							.showManualInput("Paste redirect URL below, or complete login in browser:")
+							.showManualInput("Yönlendirme URL'sini aşağıya yapıştırın veya tarayıcıda girişi tamamlayın:")
 							.then((value) => {
 								if (value && manualCodeResolve) {
 									manualCodeResolve(value);
@@ -4763,7 +4773,7 @@ export class InteractiveMode {
 							});
 					} else if (providerId === "github-copilot") {
 						// GitHub Copilot polls after onAuth
-						dialog.showWaiting("Waiting for browser authentication...");
+						dialog.showWaiting("Tarayıcı kimlik doğrulaması bekleniyor...");
 					}
 					// For Anthropic: onPrompt is called immediately after
 				},
@@ -4791,7 +4801,7 @@ export class InteractiveMode {
 			restoreEditor();
 			const errorMsg = error instanceof Error ? error.message : String(error);
 			if (errorMsg !== "Login cancelled") {
-				this.showError(`Failed to login to ${providerName}: ${errorMsg}`);
+				this.showError(`Giriş başarısız: ${providerName}: ${errorMsg}`);
 			}
 		}
 	}
@@ -5089,11 +5099,11 @@ export class InteractiveMode {
 
 	private async handleReloadCommand(): Promise<void> {
 		if (this.session.isStreaming) {
-			this.showWarning("Wait for the current response to finish before reloading.");
+			this.showWarning("Yeniden yüklemeden önce mevcut yanıtın bitmesini bekleyin.");
 			return;
 		}
 		if (this.session.isCompacting) {
-			this.showWarning("Wait for compaction to finish before reloading.");
+			this.showWarning("Yeniden yüklemeden önce sıkıştırmanın bitmesini bekleyin.");
 			return;
 		}
 
@@ -5104,7 +5114,11 @@ export class InteractiveMode {
 		reloadBox.addChild(new DynamicBorder(borderColor));
 		reloadBox.addChild(new Spacer(1));
 		reloadBox.addChild(
-			new Text(theme.fg("muted", "Reloading keybindings, extensions, skills, prompts, themes..."), 1, 0),
+			new Text(
+				theme.fg("muted", "Kısayollar, uzantılar, yetenekler, istemler ve temalar yeniden yükleniyor..."),
+				1,
+				0,
+			),
 		);
 		reloadBox.addChild(new Spacer(1));
 		reloadBox.addChild(new DynamicBorder(borderColor));
@@ -5174,14 +5188,20 @@ export class InteractiveMode {
 		}
 
 		const parsedArgs = args ? args.split(/\s+/).filter(Boolean) : [];
-		this.showStatus("Guncelleme baslatiliyor...");
 		try {
+			this.ui.stop();
 			await handlePackageCommand(["update", ...parsedArgs]);
-			this.showStatus("Guncelleme tamamlandi.");
-			this.showStatus("Degisiklikler icin /reload veya yeniden baslatma onerilir.");
+			console.log("\nDevam etmek icin bir tusa basin...");
+			await this.ui.terminal.readKey();
 		} catch (err: any) {
 			const message = err instanceof Error ? err.message : String(err);
-			this.showStatus(`Hata: Guncelleme basarisiz (${message})`);
+			console.error(`\nHata: Guncelleme basarisiz (${message})`);
+			console.log("Devam etmek icin bir tusa basin...");
+			await this.ui.terminal.readKey();
+		} finally {
+			this.ui.start();
+			this.ui.requestRender(true);
+			this.showStatus("Guncelleme islemi tamamlandi. Degisiklikler icin /reload onerilir.");
 		}
 	}
 
@@ -5197,7 +5217,7 @@ export class InteractiveMode {
 				this.showStatus(`Oturum suraya aktarildi: ${filePath}`);
 			}
 		} catch (error: unknown) {
-			this.showError(`Failed to export session: ${error instanceof Error ? error.message : "Unknown error"}`);
+			this.showError(`Oturum dışa aktarılamadı: ${error instanceof Error ? error.message : "Bilinmeyen hata"}`);
 		}
 	}
 
@@ -5233,11 +5253,14 @@ export class InteractiveMode {
 	private async handleImportCommand(text: string): Promise<void> {
 		const inputPath = this.getPathCommandArgument(text, "/import");
 		if (!inputPath) {
-			this.showError("Usage: /import <path.jsonl>");
+			this.showError("Kullanım: /import <dosya_yolu.jsonl>");
 			return;
 		}
 
-		const confirmed = await this.showExtensionConfirm("Import session", `Replace current session with ${inputPath}?`);
+		const confirmed = await this.showExtensionConfirm(
+			"Oturumu içe aktar",
+			`Mevcut oturum ${inputPath} ile değiştirilsin mi?`,
+		);
 		if (!confirmed) {
 			this.showStatus("Ice aktarma iptal edildi");
 			return;
@@ -5255,7 +5278,7 @@ export class InteractiveMode {
 				return;
 			}
 			this.renderCurrentSessionState();
-			this.showStatus(`Session imported from: ${inputPath}`);
+			this.showStatus(`Oturum suradan ice aktarildi: ${inputPath}`);
 		} catch (error: unknown) {
 			if (error instanceof MissingSessionCwdError) {
 				const selectedCwd = await this.promptForMissingSessionCwd(error);
@@ -5273,10 +5296,10 @@ export class InteractiveMode {
 				return;
 			}
 			if (error instanceof SessionImportFileNotFoundError) {
-				this.showError(`Failed to import session: ${error.message}`);
+				this.showError(`İçe aktarma başarısız: ${error.message}`);
 				return;
 			}
-			await this.handleFatalRuntimeError("Failed to import session", error);
+			await this.handleFatalRuntimeError("Oturum içe aktarılamadı", error);
 		}
 	}
 
@@ -5285,11 +5308,11 @@ export class InteractiveMode {
 		try {
 			const authResult = spawnSync("gh", ["auth", "status"], { encoding: "utf-8" });
 			if (authResult.status !== 0) {
-				this.showError("GitHub CLI is not logged in. Run 'gh auth login' first.");
+				this.showError("GitHub CLI oturumu açılmamış. Önce 'gh auth login' komutunu çalıştırın.");
 				return;
 			}
 		} catch {
-			this.showError("GitHub CLI (gh) is not installed. Install it from https://cli.github.com/");
+			this.showError("GitHub CLI (gh) kurulu değil. https://cli.github.com/ adresinden kurun.");
 			return;
 		}
 
@@ -5298,12 +5321,12 @@ export class InteractiveMode {
 		try {
 			await this.session.exportToHtml(tmpFile);
 		} catch (error: unknown) {
-			this.showError(`Failed to export session: ${error instanceof Error ? error.message : "Unknown error"}`);
+			this.showError(`Oturum dışa aktarılamadı: ${error instanceof Error ? error.message : "Bilinmeyen hata"}`);
 			return;
 		}
 
 		// Show cancellable loader, replacing the editor
-		const loader = new BorderedLoader(this.ui, theme, "Creating gist...");
+		const loader = new BorderedLoader(this.ui, theme, "Gist oluşturuluyor...");
 		this.editorContainer.clear();
 		this.editorContainer.addChild(loader);
 		this.ui.setFocus(loader);
@@ -5327,7 +5350,7 @@ export class InteractiveMode {
 		loader.onAbort = () => {
 			proc?.kill();
 			restoreEditor();
-			this.showStatus("Paylasim iptal edildi");
+			this.showStatus("Paylaşım iptal edildi");
 		};
 
 		try {
@@ -5349,8 +5372,8 @@ export class InteractiveMode {
 			restoreEditor();
 
 			if (result.code !== 0) {
-				const errorMsg = result.stderr?.trim() || "Unknown error";
-				this.showError(`Failed to create gist: ${errorMsg}`);
+				const errorMsg = result.stderr?.trim() || "Bilinmeyen hata";
+				this.showError(`Gist oluşturulamadı: ${errorMsg}`);
 				return;
 			}
 
@@ -5359,7 +5382,7 @@ export class InteractiveMode {
 			const gistUrl = result.stdout?.trim();
 			const gistId = gistUrl?.split("/").pop();
 			if (!gistId) {
-				this.showError("Failed to parse gist ID from gh output");
+				this.showError("gh çıktısından gist ID'si alınamadı");
 				return;
 			}
 
@@ -5369,7 +5392,7 @@ export class InteractiveMode {
 		} catch (error: unknown) {
 			if (!loader.signal.aborted) {
 				restoreEditor();
-				this.showError(`Failed to create gist: ${error instanceof Error ? error.message : "Unknown error"}`);
+				this.showError(`Gist oluşturulamadı: ${error instanceof Error ? error.message : "Bilinmeyen hata"}`);
 			}
 		}
 	}
@@ -5377,13 +5400,13 @@ export class InteractiveMode {
 	private async handleCopyCommand(): Promise<void> {
 		const text = this.session.getLastAssistantText();
 		if (!text) {
-			this.showError("No engine messages to copy yet.");
+			this.showError("Henüz kopyalanacak bir mesaj yok.");
 			return;
 		}
 
 		try {
 			await copyToClipboard(text);
-			this.showStatus("Son temsilci mesaji panoya kopyalandi");
+			this.showStatus("Son asistan mesajı panoya kopyalandı");
 		} catch (error) {
 			this.showError(error instanceof Error ? error.message : String(error));
 		}
@@ -5395,9 +5418,9 @@ export class InteractiveMode {
 			const currentName = this.sessionManager.getSessionName();
 			if (currentName) {
 				this.chatContainer.addChild(new Spacer(1));
-				this.chatContainer.addChild(new Text(theme.fg("dim", `Session name: ${currentName}`), 1, 0));
+				this.chatContainer.addChild(new Text(theme.fg("dim", `Oturum ismi: ${currentName}`), 1, 0));
 			} else {
-				this.showWarning("Usage: /name <name>");
+				this.showWarning("Kullanım: /name <isim>");
 			}
 			this.ui.requestRender();
 			return;
@@ -5405,7 +5428,7 @@ export class InteractiveMode {
 
 		this.session.setSessionName(name);
 		this.chatContainer.addChild(new Spacer(1));
-		this.chatContainer.addChild(new Text(theme.fg("dim", `Session name set: ${name}`), 1, 0));
+		this.chatContainer.addChild(new Text(theme.fg("dim", `Oturum ismi ayarlandı: ${name}`), 1, 0));
 		this.ui.requestRender();
 	}
 
@@ -5413,32 +5436,32 @@ export class InteractiveMode {
 		const stats = this.session.getSessionStats();
 		const sessionName = this.sessionManager.getSessionName();
 
-		let info = `${theme.bold("Session Info")}\n\n`;
+		let info = `${theme.bold("Oturum Bilgisi")}\n\n`;
 		if (sessionName) {
-			info += `${theme.fg("dim", "Name:")} ${sessionName}\n`;
+			info += `${theme.fg("dim", "İsim:")} ${sessionName}\n`;
 		}
-		info += `${theme.fg("dim", "File:")} ${stats.sessionFile ?? "In-memory"}\n`;
-		info += `${theme.fg("dim", "ID:")} ${stats.sessionId}\n\n`;
-		info += `${theme.bold("Messages")}\n`;
-		info += `${theme.fg("dim", "User:")} ${stats.userMessages}\n`;
-		info += `${theme.fg("dim", "Assistant:")} ${stats.assistantMessages}\n`;
-		info += `${theme.fg("dim", "Tool Calls:")} ${stats.toolCalls}\n`;
-		info += `${theme.fg("dim", "Tool Results:")} ${stats.toolResults}\n`;
-		info += `${theme.fg("dim", "Total:")} ${stats.totalMessages}\n\n`;
-		info += `${theme.bold("Tokens")}\n`;
-		info += `${theme.fg("dim", "Input:")} ${stats.tokens.input.toLocaleString()}\n`;
-		info += `${theme.fg("dim", "Output:")} ${stats.tokens.output.toLocaleString()}\n`;
+		info += `${theme.fg("dim", "Dosya:")} ${stats.sessionFile ?? "Bellekte"}\n`;
+		info += `${theme.fg("dim", "Kimlik:")} ${stats.sessionId}\n\n`;
+		info += `${theme.bold("Mesajlar")}\n`;
+		info += `${theme.fg("dim", "Kullanıcı:")} ${stats.userMessages}\n`;
+		info += `${theme.fg("dim", "Asistan:")} ${stats.assistantMessages}\n`;
+		info += `${theme.fg("dim", "Araç Çağrıları:")} ${stats.toolCalls}\n`;
+		info += `${theme.fg("dim", "Araç Sonuçları:")} ${stats.toolResults}\n`;
+		info += `${theme.fg("dim", "Toplam:")} ${stats.totalMessages}\n\n`;
+		info += `${theme.bold("Jetonlar")}\n`;
+		info += `${theme.fg("dim", "Giriş:")} ${stats.tokens.input.toLocaleString()}\n`;
+		info += `${theme.fg("dim", "Çıkış:")} ${stats.tokens.output.toLocaleString()}\n`;
 		if (stats.tokens.cacheRead > 0) {
-			info += `${theme.fg("dim", "Cache Read:")} ${stats.tokens.cacheRead.toLocaleString()}\n`;
+			info += `${theme.fg("dim", "Önbellek Okuma:")} ${stats.tokens.cacheRead.toLocaleString()}\n`;
 		}
 		if (stats.tokens.cacheWrite > 0) {
-			info += `${theme.fg("dim", "Cache Write:")} ${stats.tokens.cacheWrite.toLocaleString()}\n`;
+			info += `${theme.fg("dim", "Önbellek Yazma:")} ${stats.tokens.cacheWrite.toLocaleString()}\n`;
 		}
-		info += `${theme.fg("dim", "Total:")} ${stats.tokens.total.toLocaleString()}\n`;
+		info += `${theme.fg("dim", "Toplam:")} ${stats.tokens.total.toLocaleString()}\n`;
 
 		if (stats.cost > 0) {
-			info += `\n${theme.bold("Cost")}\n`;
-			info += `${theme.fg("dim", "Total:")} ${stats.cost.toFixed(4)}`;
+			info += `\n${theme.bold("Maliyet")}\n`;
+			info += `${theme.fg("dim", "Toplam:")} ${stats.cost.toFixed(4)}`;
 		}
 
 		this.chatContainer.addChild(new Spacer(1));
@@ -5456,11 +5479,11 @@ export class InteractiveMode {
 						.reverse()
 						.map((e) => e.content)
 						.join("\n\n")
-				: "No changelog entries found.";
+				: "Değişiklik günlüğü kaydı bulunamadı.";
 
 		this.chatContainer.addChild(new Spacer(1));
 		this.chatContainer.addChild(new DynamicBorder());
-		this.chatContainer.addChild(new Text(theme.bold(theme.fg("accent", "What's New")), 1, 0));
+		this.chatContainer.addChild(new Text(theme.bold(theme.fg("accent", "Yenilikler")), 1, 0));
 		this.chatContainer.addChild(new Spacer(1));
 		this.chatContainer.addChild(new Markdown(changelogMarkdown, 1, 1, this.getMarkdownThemeWithSettings()));
 		this.chatContainer.addChild(new DynamicBorder());
@@ -5591,8 +5614,8 @@ export class InteractiveMode {
 		const shortcuts = extensionRunner.getShortcuts(this.keybindings.getEffectiveConfig());
 		if (shortcuts.size > 0) {
 			hotkeys += `
-**Extensions**
-| Key | Action |
+**Uzantılar**
+| Tuş | Eylem |
 |-----|--------|
 `;
 			for (const [key, shortcut] of shortcuts) {
@@ -5604,7 +5627,7 @@ export class InteractiveMode {
 
 		this.chatContainer.addChild(new Spacer(1));
 		this.chatContainer.addChild(new DynamicBorder());
-		this.chatContainer.addChild(new Text(theme.bold(theme.fg("accent", "Keyboard Shortcuts")), 1, 0));
+		this.chatContainer.addChild(new Text(theme.bold(theme.fg("accent", "Klavye Kısayolları")), 1, 0));
 		this.chatContainer.addChild(new Spacer(1));
 		this.chatContainer.addChild(new Markdown(hotkeys.trim(), 1, 1, this.getMarkdownThemeWithSettings()));
 		this.chatContainer.addChild(new DynamicBorder());
@@ -5624,7 +5647,7 @@ export class InteractiveMode {
 			}
 			this.renderCurrentSessionState();
 			this.chatContainer.addChild(new Spacer(1));
-			this.chatContainer.addChild(new Text(`${theme.fg("accent", "✓ New session started")}`, 1, 1));
+			this.chatContainer.addChild(new Text(`${theme.fg("accent", "✓ Yeni oturum başlatıldı")}`, 1, 1));
 			this.ui.requestRender();
 		} catch (error: unknown) {
 			await this.handleFatalRuntimeError("Failed to create session", error);
@@ -5638,18 +5661,18 @@ export class InteractiveMode {
 
 		const debugLogPath = getDebugLogPath();
 		const debugData = [
-			`Debug output at ${new Date().toISOString()}`,
+			`Hata ayıklama çıktısı: ${new Date().toISOString()}`,
 			`Terminal: ${width}x${height}`,
-			`Total lines: ${allLines.length}`,
+			`Toplam satır: ${allLines.length}`,
 			"",
-			"=== All rendered lines with visible widths ===",
+			"=== Görünür genişliklere sahip tüm işlenmiş satırlar ===",
 			...allLines.map((line, idx) => {
 				const vw = visibleWidth(line);
 				const escaped = JSON.stringify(line);
 				return `[${idx}] (w=${vw}) ${escaped}`;
 			}),
 			"",
-			"=== Engine messages (JSONL) ===",
+			"=== Motor mesajları (JSONL) ===",
 			...this.session.messages.map((msg) => JSON.stringify(msg)),
 			"",
 		].join("\n");
@@ -5659,7 +5682,7 @@ export class InteractiveMode {
 
 		this.chatContainer.addChild(new Spacer(1));
 		this.chatContainer.addChild(
-			new Text(`${theme.fg("accent", "✓ Debug log written")}\n${theme.fg("muted", debugLogPath)}`, 1, 1),
+			new Text(`${theme.fg("accent", "✓ Hata ayıklama günlüğü yazıldı")}\n${theme.fg("muted", debugLogPath)}`, 1, 1),
 		);
 		this.ui.requestRender();
 	}
@@ -5768,7 +5791,7 @@ export class InteractiveMode {
 			if (this.bashComponent) {
 				this.bashComponent.setComplete(undefined, false);
 			}
-			this.showError(`Bash command failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+			this.showError(`Bash komutu başarısız oldu: ${error instanceof Error ? error.message : "Bilinmeyen hata"}`);
 		}
 
 		this.bashComponent = undefined;
@@ -5780,7 +5803,7 @@ export class InteractiveMode {
 		const messageCount = entries.filter((e) => e.type === "message").length;
 
 		if (messageCount < 2) {
-			this.showWarning("Nothing to compact (no messages yet)");
+			this.showWarning("Sıkıştırılacak bir şey yok (henüz mesaj yok)");
 			return;
 		}
 

@@ -582,20 +582,20 @@ class TreeList implements Component {
 		let labels = "";
 		switch (this.filterMode) {
 			case "no-tools":
-				labels += " [no-tools]";
+				labels += " [araç-yok]";
 				break;
 			case "user-only":
-				labels += " [user]";
+				labels += " [kullanıcı]";
 				break;
 			case "labeled-only":
-				labels += " [labeled]";
+				labels += " [etiketli]";
 				break;
 			case "all":
-				labels += " [all]";
+				labels += " [tümü]";
 				break;
 		}
 		if (this.showLabelTimestamps) {
-			labels += " [+label time]";
+			labels += " [+etiket zamanı]";
 		}
 		return labels;
 	}
@@ -604,7 +604,7 @@ class TreeList implements Component {
 		const lines: string[] = [];
 
 		if (this.filteredNodes.length === 0) {
-			lines.push(truncateToWidth(theme.fg("muted", "  Girdi bulunamadi"), width));
+			lines.push(truncateToWidth(theme.fg("muted", "  Girdi bulunamadı"), width));
 			lines.push(truncateToWidth(theme.fg("muted", `  (0/0)${this.getStatusLabels()}`), width));
 			return lines;
 		}
@@ -1064,9 +1064,9 @@ class SearchLine implements Component {
 	render(width: number): string[] {
 		const query = this.treeList.getSearchQuery();
 		if (query) {
-			return [truncateToWidth(`  ${theme.fg("muted", "Type to search:")} ${theme.fg("accent", query)}`, width)];
+			return [truncateToWidth(`  ${theme.fg("muted", "Aramak için yazın:")} ${theme.fg("accent", query)}`, width)];
 		}
-		return [truncateToWidth(`  ${theme.fg("muted", "Type to search:")}`, width)];
+		return [truncateToWidth(`  ${theme.fg("muted", "Aramak için yazın:")}`, width)];
 	}
 
 	handleInput(_keyData: string): void {}
@@ -1103,11 +1103,11 @@ class LabelInput implements Component, Focusable {
 		const lines: string[] = [];
 		const indent = "  ";
 		const availableWidth = width - indent.length;
-		lines.push(truncateToWidth(`${indent}${theme.fg("muted", "Label (empty to remove):")}`, width));
+		lines.push(truncateToWidth(`${indent}${theme.fg("muted", "Etiket (kaldırmak için boş bırakın):")}`, width));
 		lines.push(...this.input.render(availableWidth).map((line) => truncateToWidth(`${indent}${line}`, width)));
 		lines.push(
 			truncateToWidth(
-				`${indent}${keyHint("tui.select.confirm", "save")}  ${keyHint("tui.select.cancel", "cancel")}`,
+				`${indent}${keyHint("tui.select.confirm", "kaydet")}  ${keyHint("tui.select.cancel", "iptal")}`,
 				width,
 			),
 		);
@@ -1177,7 +1177,7 @@ export class TreeSelectorComponent extends Container implements Focusable {
 
 		this.addChild(new Spacer(1));
 		this.addChild(new DynamicBorder());
-		this.addChild(new Text(theme.bold("  Session Tree"), 1, 0));
+		this.addChild(new Text(theme.bold("  Oturum Ağacı"), 1, 0));
 		const filterKeys = [
 			keyText("app.tree.filter.default"),
 			keyText("app.tree.filter.noTools"),
@@ -1190,7 +1190,7 @@ export class TreeSelectorComponent extends Container implements Focusable {
 			new TruncatedText(
 				theme.fg(
 					"muted",
-					`  ↑/↓: move. ←/→: page. ^←/^→ or Alt+←/Alt+→: fold/branch. ${keyText("app.tree.editLabel")}: label. ${filterKeys}: filters (${cycleKeys} cycle). ${keyText("app.tree.toggleLabelTimestamp")}: label time`,
+					`  ↑/↓: hareket. ←/→: sayfa. ^←/^→ veya Alt+←/Alt+→: katla/dal. ${keyText("app.tree.editLabel")}: etiketle. ${filterKeys}: filtreler (${cycleKeys} döngü). ${keyText("app.tree.toggleLabelTimestamp")}: etiket zamanı`,
 				),
 				0,
 				0,

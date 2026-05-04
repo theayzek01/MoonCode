@@ -537,18 +537,18 @@ function parseThemeJson(label: string, json: unknown): ThemeJson {
 			otherErrors.push(`  - ${path}: ${error.message}`);
 		}
 
-		let errorMessage = `Invalid theme "${label}":\n`;
+		let errorMessage = `Geçersiz tema "${label}":\n`;
 		if (missingColors.size > 0) {
-			errorMessage += "\nMissing required color tokens:\n";
+			errorMessage += "\nEksik gerekli renk tokenları:\n";
 			errorMessage += Array.from(missingColors)
 				.sort()
 				.map((color) => `  - ${color}`)
 				.join("\n");
-			errorMessage += '\n\nPlease add these colors to your theme\'s "colors" object.';
-			errorMessage += "\nSee the built-in themes (dark.json, light.json) for reference values.";
+			errorMessage += '\n\nLütfen bu renkleri temanızın "colors" nesnesine ekleyin.';
+			errorMessage += "\nReferans değerler için yerleşik temalara (dark.json, light.json) bakın.";
 		}
 		if (otherErrors.length > 0) {
-			errorMessage += `\n\nOther errors:\n${otherErrors.join("\n")}`;
+			errorMessage += `\n\nDiğer hatalar:\n${otherErrors.join("\n")}`;
 		}
 
 		throw new Error(errorMessage);

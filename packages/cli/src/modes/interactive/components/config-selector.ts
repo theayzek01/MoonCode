@@ -25,10 +25,10 @@ import { rawKeyHint } from "./keybinding-hints.js";
 type ResourceType = "extensions" | "skills" | "prompts" | "themes";
 
 const RESOURCE_TYPE_LABELS: Record<ResourceType, string> = {
-	extensions: "Extensions",
-	skills: "Skills",
-	prompts: "Prompts",
-	themes: "Themes",
+	extensions: "Uzantılar",
+	skills: "Yetenekler",
+	prompts: "İstemler",
+	themes: "Temalar",
 };
 
 interface ResourceItem {
@@ -58,13 +58,13 @@ interface ResourceGroup {
 
 function getGroupLabel(metadata: PathMetadata): string {
 	if (metadata.origin === "package") {
-		return `${metadata.source} (${metadata.scope})`;
+		return `${metadata.source} (${metadata.scope === "user" ? "kullanıcı" : "proje"})`;
 	}
 	// Top-level resources
 	if (metadata.source === "auto") {
-		return metadata.scope === "user" ? "User (~/.Mooncli/engine/)" : "Project (.Mooncli/)";
+		return metadata.scope === "user" ? "Kullanıcı (~/.mooncli/engine/)" : "Proje (.mooncli/)";
 	}
-	return metadata.scope === "user" ? "User settings" : "Project settings";
+	return metadata.scope === "user" ? "Kullanıcı ayarları" : "Proje ayarları";
 }
 
 function buildGroups(resolved: ResolvedPaths): ResourceGroup[] {
@@ -159,16 +159,16 @@ class ConfigSelectorHeader implements Component {
 	invalidate(): void {}
 
 	render(width: number): string[] {
-		const title = theme.bold("Resource Configuration");
+		const title = theme.bold("Kaynak Yapılandırması");
 		const sep = theme.fg("muted", " · ");
-		const hint = rawKeyHint("space", "toggle") + sep + rawKeyHint("esc", "close");
+		const hint = rawKeyHint("space", "değiştir") + sep + rawKeyHint("esc", "kapat");
 		const hintWidth = visibleWidth(hint);
 		const titleWidth = visibleWidth(title);
 		const spacing = Math.max(1, width - titleWidth - hintWidth);
 
 		return [
 			truncateToWidth(`${title}${" ".repeat(spacing)}${hint}`, width, ""),
-			theme.fg("muted", "Type to filter resources"),
+			theme.fg("muted", "Kaynakları filtrelemek için yazın"),
 		];
 	}
 }
@@ -314,7 +314,7 @@ class ResourceList implements Component, Focusable {
 		lines.push("");
 
 		if (this.filteredItems.length === 0) {
-			lines.push(theme.fg("muted", "  No resources found"));
+			lines.push(theme.fg("muted", "  Kaynak bulunamadı"));
 			return lines;
 		}
 

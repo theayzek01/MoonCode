@@ -79,12 +79,12 @@ export class ExtensionEditorComponent extends Container implements Focusable {
 		// Add hint
 		const hasExternalEditor = !!(process.env.VISUAL || process.env.EDITOR);
 		const hint =
-			keyHint("tui.select.confirm", "submit") +
+			keyHint("tui.select.confirm", "gönder") +
 			"  " +
-			keyHint("tui.input.newLine", "newline") +
+			keyHint("tui.input.newLine", "yeni satır") +
 			"  " +
-			keyHint("tui.select.cancel", "cancel") +
-			(hasExternalEditor ? `  ${keyHint("app.editor.external", "external editor")}` : "");
+			keyHint("tui.select.cancel", "iptal") +
+			(hasExternalEditor ? `  ${keyHint("app.editor.external", "harici düzenleyici")}` : "");
 		this.addChild(new Text(hint, 1, 0));
 
 		this.addChild(new Spacer(1));

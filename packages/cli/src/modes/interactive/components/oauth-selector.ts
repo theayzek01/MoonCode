@@ -59,7 +59,7 @@ export class OAuthSelectorComponent extends Container implements Focusable {
 		this.addChild(new Spacer(1));
 
 		// Add title
-		const title = mode === "login" ? "Yapilandirmak icin saglayici secin:" : "Cikis yapmak icin saglayici secin:";
+		const title = mode === "login" ? "Yapılandırmak için sağlayıcı seçin:" : "Çıkış yapmak için sağlayıcı seçin:";
 		this.addChild(new TruncatedText(theme.fg("accent", theme.bold(title)), 1, 0));
 		this.addChild(new Spacer(1));
 
@@ -134,36 +134,36 @@ export class OAuthSelectorComponent extends Container implements Focusable {
 			const message =
 				this.allProviders.length === 0
 					? this.mode === "login"
-						? "Kullanilabilir saglayici yok"
-						: "Giris yapmis saglayici yok. Once /login kullanin."
-					: "Eslesen saglayici yok";
+						? "Kullanılabilir sağlayıcı yok"
+						: "Giriş yapmış sağlayıcı yok. Önce /login kullanın."
+					: "Eşleşen sağlayıcı yok";
 			this.listContainer.addChild(new TruncatedText(theme.fg("muted", `  ${message}`), 1, 0));
 		}
 	}
 
 	private formatStatusIndicator(provider: AuthSelectorProvider): string {
 		const credential = this.authStorage.get(provider.id);
-		if (credential?.type === provider.authType) return theme.fg("success", " ✓ yapilandirildi");
+		if (credential?.type === provider.authType) return theme.fg("success", " ✓ yapılandırıldı");
 		if (credential) {
-			const label = credential.type === "oauth" ? "abonelik yapilandirildi" : "API anahtari yapilandirildi";
+			const label = credential.type === "oauth" ? "abonelik yapılandırıldı" : "API anahtarı yapılandırıldı";
 			return theme.fg("muted", " • ") + theme.fg("warning", label);
 		}
-		if (provider.authType !== "api_key") return theme.fg("muted", " • unconfigured");
+		if (provider.authType !== "api_key") return theme.fg("muted", " • yapılandırılmamış");
 
 		const status = this.getAuthStatus(provider.id);
 		switch (status.source) {
 			case "environment":
-				return theme.fg("success", ` ✓ env: ${status.label ?? "API key"}`);
+				return theme.fg("success", ` ✓ ortam: ${status.label ?? "API anahtarı"}`);
 			case "runtime":
-				return theme.fg("success", " ✓ runtime API key");
+				return theme.fg("success", " ✓ çalışma zamanı API anahtarı");
 			case "fallback":
-				return theme.fg("success", " ✓ custom API key");
+				return theme.fg("success", " ✓ özel API anahtarı");
 			case "models_json_key":
-				return theme.fg("success", " ✓ key in models.json");
+				return theme.fg("success", " ✓ models.json'daki anahtar");
 			case "models_json_command":
-				return theme.fg("success", " ✓ command in models.json");
+				return theme.fg("success", " ✓ models.json'daki komut");
 			default:
-				return theme.fg("muted", " • unconfigured");
+				return theme.fg("muted", " • yapılandırılmamış");
 		}
 	}
 

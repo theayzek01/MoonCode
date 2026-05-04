@@ -22,12 +22,12 @@ const SETTINGS_SUBMENU_SELECT_LIST_LAYOUT: SelectListLayoutOptions = {
 };
 
 const THINKING_DESCRIPTIONS: Record<ThinkingLevel, string> = {
-	off: "Dusunce yok",
-	minimal: "Cok kisa dusunme (~1k token)",
-	low: "Hafif dusunme (~2k token)",
-	medium: "Orta seviye dusunme (~8k token)",
-	high: "Derin dusunme (~16k token)",
-	xhigh: "Maksimum dusunme (~32k token)",
+	off: "Düşünce yok",
+	minimal: "Çok kısa düşünme (~1k token)",
+	low: "Hafif düşünme (~2k token)",
+	medium: "Orta seviye düşünme (~8k token)",
+	high: "Derin düşünme (~16k token)",
+	xhigh: "Maksimum düşünme (~32k token)",
 };
 
 export interface SettingsConfig {
@@ -101,8 +101,8 @@ class WarningSettingsSubmenu extends Container {
 		const items: SettingItem[] = [
 			{
 				id: "anthropic-extra-usage",
-				label: "Anthropic extra usage",
-				description: "Warn when Anthropic subscription auth may use paid extra usage",
+				label: "Anthropic ek kullanım",
+				description: "Anthropic abonelik yetkilendirmesi ek ücretli kullanım yapabileceğinde uyar",
 				currentValue: (this.state.anthropicExtraUsage ?? true) ? "true" : "false",
 				values: ["true", "false"],
 			},
@@ -187,7 +187,7 @@ class SelectSubmenu extends Container {
 
 		// Hint
 		this.addChild(new Spacer(1));
-		this.addChild(new Text(theme.fg("dim", "  Secmek icin Enter · Geri donmek icin Esc"), 0, 0));
+		this.addChild(new Text(theme.fg("dim", "  Seçmek için Enter · Geri dönmek için Esc"), 0, 0));
 	}
 
 	handleInput(data: string): void {
@@ -210,81 +210,81 @@ export class SettingsSelectorComponent extends Container {
 		const items: SettingItem[] = [
 			{
 				id: "autocompact",
-				label: "Otomatik sikistirma",
-				description: "Baglam cok buyudugunde otomatik olarak ozetle/sikistir",
+				label: "Otomatik sıkıştırma",
+				description: "Bağlam çok büyüdüğünde otomatik olarak özetle/sıkıştır",
 				currentValue: config.autoCompact ? "true" : "false",
 				values: ["true", "false"],
 			},
 			{
 				id: "steering-mode",
-				label: "Steering mode",
+				label: "Yönlendirme modu",
 				description:
-					"Enter while streaming queues steering messages. 'one-at-a-time': deliver one, wait for response. 'all': deliver all at once.",
+					"Akış sırasında Enter tuşu yönlendirme mesajlarını sıraya alır. 'one-at-a-time': birini gönder, yanıt bekle. 'all': hepsini birden gönder.",
 				currentValue: config.steeringMode,
 				values: ["one-at-a-time", "all"],
 			},
 			{
 				id: "follow-up-mode",
-				label: "Follow-up mode",
+				label: "Takip modu",
 				description:
-					"Alt+Enter queues follow-up messages until engine stops. 'one-at-a-time': deliver one, wait for response. 'all': deliver all at once.",
+					"Alt+Enter tuşu motor durana kadar takip mesajlarını sıraya alır. 'one-at-a-time': birini gönder, yanıt bekle. 'all': hepsini birden gönder.",
 				currentValue: config.followUpMode,
 				values: ["one-at-a-time", "all"],
 			},
 			{
 				id: "transport",
-				label: "Transport",
-				description: "Preferred transport for providers that support multiple transports",
+				label: "Taşıma protokolü",
+				description: "Birden fazla protokolü destekleyen sağlayıcılar için tercih edilen yöntem",
 				currentValue: config.transport,
 				values: ["sse", "websocket", "websocket-cached", "auto"],
 			},
 			{
 				id: "hide-thinking",
-				label: "Dusunceleri gizle",
-				description: "Asistan yanitlarindaki dusunme bloklarini gizle",
+				label: "Düşünceleri gizle",
+				description: "Asistan yanıtlarındaki düşünme bloklarını gizle",
 				currentValue: config.hideThinkingBlock ? "true" : "false",
 				values: ["true", "false"],
 			},
 			{
 				id: "collapse-changelog",
-				label: "Collapse changelog",
-				description: "Show condensed changelog after updates",
+				label: "Değişim günlüğünü daralt",
+				description: "Güncellemelerden sonra özet değişim günlüğünü göster",
 				currentValue: config.collapseChangelog ? "true" : "false",
 				values: ["true", "false"],
 			},
 			{
 				id: "quiet-startup",
-				label: "Quiet startup",
-				description: "Disable verbose printing at startup",
+				label: "Sessiz başlangıç",
+				description: "Başlangıçta ayrıntılı çıktıları devre dışı bırak",
 				currentValue: config.quietStartup ? "true" : "false",
 				values: ["true", "false"],
 			},
 			{
 				id: "install-telemetry",
-				label: "Install telemetry",
-				description: "Send an anonymous version/update ping after changelog-detected updates",
+				label: "Kurulum telemetrisi",
+				description: "Güncellemelerden sonra anonim bir sürüm/güncelleme bildirimi gönder",
 				currentValue: config.enableInstallTelemetry ? "true" : "false",
 				values: ["true", "false"],
 			},
 			{
 				id: "double-escape-action",
-				label: "Double-escape action",
-				description: "Action when pressing Escape twice with empty editor",
+				label: "Çift Escape eylemi",
+				description: "Editör boşken Escape tuşuna iki kez basıldığındaki eylem",
 				currentValue: config.doubleEscapeAction,
 				values: ["tree", "fork", "none"],
 			},
 			{
 				id: "tree-filter-mode",
-				label: "Tree filter mode",
-				description: "Default filter when opening /tree",
+				label: "Ağaç filtre modu",
+				description: "/tree komutu açıldığındaki varsayılan filtre",
 				currentValue: config.treeFilterMode,
 				values: ["default", "no-tools", "user-only", "labeled-only", "all"],
 			},
 			{
 				id: "warnings",
-				label: "Warnings",
-				description: "Enable or disable individual warnings",
-				currentValue: "configure",
+				label: "Uyarılar",
+				description: "Bireysel uyarıları etkinleştir veya devre dışı bırak",
+				currentValue: "yapılandır",
 				submenu: (_currentValue, done) =>
 					new WarningSettingsSubmenu(
 						currentWarnings,
@@ -297,13 +297,13 @@ export class SettingsSelectorComponent extends Container {
 			},
 			{
 				id: "thinking",
-				label: "Thinking level",
-				description: "Reasoning depth for thinking-capable models",
+				label: "Düşünme seviyesi",
+				description: "Düşünme yeteneğine sahip modeller için akıl yürütme derinliği",
 				currentValue: config.thinkingLevel,
 				submenu: (currentValue, done) =>
 					new SelectSubmenu(
-						"Thinking Level",
-						"Select reasoning depth for thinking-capable models",
+						"Düşünme Seviyesi",
+						"Düşünme yeteneğine sahip modeller için akıl yürütme derinliğini seçin",
 						config.availableThinkingLevels.map((level) => ({
 							value: level,
 							label: level,
@@ -320,12 +320,12 @@ export class SettingsSelectorComponent extends Container {
 			{
 				id: "theme",
 				label: "Tema",
-				description: "Arayuz icin renk temasi",
+				description: "Arayüz için renk teması",
 				currentValue: config.currentTheme,
 				submenu: (currentValue, done) =>
 					new SelectSubmenu(
-						"Theme",
-						"Select color theme",
+						"Tema",
+						"Renk temasını seçin",
 						config.availableThemes.map((t) => ({
 							value: t,
 							label: t,
@@ -353,15 +353,15 @@ export class SettingsSelectorComponent extends Container {
 			// Insert after autocompact
 			items.splice(1, 0, {
 				id: "show-images",
-				label: "Show images",
-				description: "Render images inline in terminal",
+				label: "Resimleri göster",
+				description: "Resimleri terminalde satır içi olarak işle",
 				currentValue: config.showImages ? "true" : "false",
 				values: ["true", "false"],
 			});
 			items.splice(2, 0, {
 				id: "image-width-cells",
-				label: "Image width",
-				description: "Preferred inline image width in terminal cells",
+				label: "Resim genişliği",
+				description: "Terminal hücrelerinde tercih edilen satır içi resim genişliği",
 				currentValue: String(config.imageWidthCells),
 				values: ["60", "80", "120"],
 			});
@@ -370,8 +370,8 @@ export class SettingsSelectorComponent extends Container {
 		// Image auto-resize toggle (always available, affects both attached and read images)
 		items.splice(supportsImages ? 3 : 1, 0, {
 			id: "auto-resize-images",
-			label: "Auto-resize images",
-			description: "Resize large images to 2000x2000 max for better model compatibility",
+			label: "Resimleri otomatik boyutlandır",
+			description: "Daha iyi model uyumluluğu için büyük resimleri maksimum 2000x2000 olarak boyutlandır",
 			currentValue: config.autoResizeImages ? "true" : "false",
 			values: ["true", "false"],
 		});
@@ -380,8 +380,8 @@ export class SettingsSelectorComponent extends Container {
 		const autoResizeIndex = items.findIndex((item) => item.id === "auto-resize-images");
 		items.splice(autoResizeIndex + 1, 0, {
 			id: "block-images",
-			label: "Block images",
-			description: "Prevent images from being sent to Provider providers",
+			label: "Resimleri engelle",
+			description: "Resimlerin sağlayıcılara gönderilmesini engelle",
 			currentValue: config.blockImages ? "true" : "false",
 			values: ["true", "false"],
 		});
@@ -390,8 +390,8 @@ export class SettingsSelectorComponent extends Container {
 		const blockImagesIndex = items.findIndex((item) => item.id === "block-images");
 		items.splice(blockImagesIndex + 1, 0, {
 			id: "skill-commands",
-			label: "Skill commands",
-			description: "Register skills as /skill:name commands",
+			label: "Yetenek komutları",
+			description: "Yetenekleri /skill:isim komutları olarak kaydet",
 			currentValue: config.enableSkillCommands ? "true" : "false",
 			values: ["true", "false"],
 		});
@@ -400,8 +400,8 @@ export class SettingsSelectorComponent extends Container {
 		const skillCommandsIndex = items.findIndex((item) => item.id === "skill-commands");
 		items.splice(skillCommandsIndex + 1, 0, {
 			id: "show-hardware-cursor",
-			label: "Show hardware cursor",
-			description: "Show the terminal cursor while still positioning it for IME support",
+			label: "Donanım imlecini göster",
+			description: "IME desteği için imleci konumlandırırken terminal imlecini de göster",
 			currentValue: config.showHardwareCursor ? "true" : "false",
 			values: ["true", "false"],
 		});
@@ -410,8 +410,8 @@ export class SettingsSelectorComponent extends Container {
 		const hardwareCursorIndex = items.findIndex((item) => item.id === "show-hardware-cursor");
 		items.splice(hardwareCursorIndex + 1, 0, {
 			id: "editor-padding",
-			label: "Editor padding",
-			description: "Horizontal padding for input editor (0-3)",
+			label: "Editör dolgusu",
+			description: "Giriş editörü için yatay dolgu (0-3)",
 			currentValue: String(config.editorPaddingX),
 			values: ["0", "1", "2", "3"],
 		});
@@ -420,8 +420,8 @@ export class SettingsSelectorComponent extends Container {
 		const editorPaddingIndex = items.findIndex((item) => item.id === "editor-padding");
 		items.splice(editorPaddingIndex + 1, 0, {
 			id: "autocomplete-max-visible",
-			label: "Autocomplete max items",
-			description: "Max visible items in autocomplete dropdown (3-20)",
+			label: "Otomatik tamamlama maks. öğe",
+			description: "Otomatik tamamlama açılır menüsünde görünecek maks. öğe (3-20)",
 			currentValue: String(config.autocompleteMaxVisible),
 			values: ["3", "5", "7", "10", "15", "20"],
 		});
@@ -430,8 +430,8 @@ export class SettingsSelectorComponent extends Container {
 		const autocompleteIndex = items.findIndex((item) => item.id === "autocomplete-max-visible");
 		items.splice(autocompleteIndex + 1, 0, {
 			id: "clear-on-shrink",
-			label: "Clear on shrink",
-			description: "Clear empty rows when content shrinks (may cause flicker)",
+			label: "Daralmada temizle",
+			description: "İçerik daraldığında boş satırları temizle (titremeye neden olabilir)",
 			currentValue: config.clearOnShrink ? "true" : "false",
 			values: ["true", "false"],
 		});
@@ -440,8 +440,8 @@ export class SettingsSelectorComponent extends Container {
 		const clearOnShrinkIndex = items.findIndex((item) => item.id === "clear-on-shrink");
 		items.splice(clearOnShrinkIndex + 1, 0, {
 			id: "terminal-progress",
-			label: "Terminal progress",
-			description: "Show OSC 9;4 progress indicators in the terminal tab bar",
+			label: "Terminal ilerlemesi",
+			description: "Terminal sekme çubuğunda OSC 9;4 ilerleme göstergelerini göster",
 			currentValue: config.showTerminalProgress ? "true" : "false",
 			values: ["true", "false"],
 		});

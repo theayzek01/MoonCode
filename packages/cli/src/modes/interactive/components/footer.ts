@@ -160,13 +160,13 @@ export class FooterComponent implements Component {
 		if (state.model?.reasoning) {
 			const thinkingLevel = state.thinkingLevel || "off";
 			rightSideWithoutProvider =
-				thinkingLevel === "off" ? `${modelName} • dusunme kapali` : `${modelName} • ${thinkingLevel}`;
+				thinkingLevel === "off" ? `${modelName} • düşünme kapalı` : `${modelName} • ${thinkingLevel}`;
 		}
 		const activeToolNames = this.session.getActiveToolNames();
 		const discordConnected =
 			activeToolNames.includes("discord_send_message") || activeToolNames.includes("discord_list_guilds");
 		if (discordConnected) {
-			rightSideWithoutProvider = `${rightSideWithoutProvider} • Discord bagli`;
+			rightSideWithoutProvider = `${rightSideWithoutProvider} • Discord bağlı`;
 		}
 
 		// Prepend the provider in parentheses if there are multiple providers and there's enough room

@@ -40,12 +40,12 @@ function formatSessionDate(date: Date): string {
 	const diffHours = Math.floor(diffMs / 3600000);
 	const diffDays = Math.floor(diffMs / 86400000);
 
-	if (diffMins < 1) return "now";
-	if (diffMins < 60) return `${diffMins}m`;
-	if (diffHours < 24) return `${diffHours}h`;
-	if (diffDays < 7) return `${diffDays}d`;
-	if (diffDays < 30) return `${Math.floor(diffDays / 7)}w`;
-	if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo`;
+	if (diffMins < 1) return "şimdi";
+	if (diffMins < 60) return `${diffMins}dk`;
+	if (diffHours < 24) return `${diffHours}sa`;
+	if (diffDays < 7) return `${diffDays}g`;
+	if (diffDays < 30) return `${Math.floor(diffDays / 7)}h`;
+	if (diffDays < 365) return `${Math.floor(diffDays / 30)}ay`;
 	return `${Math.floor(diffDays / 365)}y`;
 }
 
@@ -129,23 +129,23 @@ class SessionSelectorHeader implements Component {
 	invalidate(): void {}
 
 	render(width: number): string[] {
-		const title = this.scope === "current" ? "Oturuma Devam Et (Mevcut Klasor)" : "Oturuma Devam Et (Hepsi)";
+		const title = this.scope === "current" ? "Oturuma Devam Et (Mevcut Klasör)" : "Oturuma Devam Et (Tümü)";
 		const leftText = theme.bold(title);
 
-		const sortLabel = this.sortMode === "threaded" ? "Threaded" : this.sortMode === "recent" ? "Recent" : "Fuzzy";
-		const sortText = theme.fg("muted", "Sira: ") + theme.fg("accent", sortLabel);
+		const sortLabel = this.sortMode === "threaded" ? "Ağaç" : this.sortMode === "recent" ? "Son" : "Bulanık";
+		const sortText = theme.fg("muted", "Sıra: ") + theme.fg("accent", sortLabel);
 
-		const nameLabel = this.nameFilter === "all" ? "All" : "Named";
+		const nameLabel = this.nameFilter === "all" ? "Tümü" : "Adlı";
 		const nameText = theme.fg("muted", "Ad: ") + theme.fg("accent", nameLabel);
 
 		let scopeText: string;
 		if (this.loading) {
 			const progressText = this.loadProgress ? `${this.loadProgress.loaded}/${this.loadProgress.total}` : "...";
-			scopeText = `${theme.fg("muted", "○ Mevcut Klasor | ")}${theme.fg("accent", `Yukleniyor ${progressText}`)}`;
+			scopeText = `${theme.fg("muted", "○ Mevcut Klasör | ")}${theme.fg("accent", `Yükleniyor ${progressText}`)}`;
 		} else if (this.scope === "current") {
-			scopeText = `${theme.fg("accent", "◉ Mevcut Klasor")}${theme.fg("muted", " | ○ Hepsi")}`;
+			scopeText = `${theme.fg("accent", "◉ Mevcut Klasör")}${theme.fg("muted", " | ○ Tümü")}`;
 		} else {
-			scopeText = `${theme.fg("muted", "○ Mevcut Klasor | ")}${theme.fg("accent", "◉ Hepsi")}`;
+			scopeText = `${theme.fg("muted", "○ Mevcut Klasör | ")}${theme.fg("accent", "◉ Tümü")}`;
 		}
 
 		const rightText = truncateToWidth(`${scopeText}  ${nameText}  ${sortText}`, width, "");
@@ -409,16 +409,16 @@ class SessionList implements Component, Focusable {
 			if (this.nameFilter === "named") {
 				const toggleKey = keyText("app.session.toggleNamedFilter");
 				if (this.showCwd) {
-					emptyMessage = `  Adlandirilmis oturum bulunamadi. Hepsi icin ${toggleKey} tusuna basin.`;
+					emptyMessage = `  Adlandırılmış oturum bulunamadı. Tümü için ${toggleKey} tuşuna basın.`;
 				} else {
-					emptyMessage = `  Mevcut klasorde adlandirilmis oturum bulunamadi. Hepsi icin ${toggleKey} tusuna basin veya Tab'a basin.`;
+					emptyMessage = `  Mevcut klasörde adlandırılmış oturum bulunamadı. Tümü için ${toggleKey} tuşuna basın veya Tab'a basın.`;
 				}
 			} else if (this.showCwd) {
 				// "All" scope - no sessions anywhere that match filter
-				emptyMessage = "  Oturum bulunamadi";
+				emptyMessage = "  Oturum bulunamadı";
 			} else {
 				// "Current folder" scope - hint to try "all"
-				emptyMessage = "  Mevcut klasorde oturum bulunamadi. Hepsi icin Tab'a basin.";
+				emptyMessage = "  Mevcut klasörde oturum bulunamadı. Tümü için Tab'a basın.";
 			}
 			lines.push(theme.fg("muted", truncateToWidth(emptyMessage, width, "…")));
 			return lines;
@@ -832,12 +832,12 @@ export class SessionSelectorComponent extends Container implements Focusable {
 				const showCwd = this.scope === "all";
 				this.sessionList.setSessions(sessions, showCwd);
 
-				const msg = result.method === "trash" ? "Session moved to trash" : "Session deleted";
+				const msg = result.method === "trash" ? "Oturum çöpe taşındı" : "Oturum silindi";
 				this.header.setStatusMessage({ type: "info", message: msg }, 2000);
 				await this.refreshSessionsAfterMutation();
 			} else {
-				const errorMessage = result.error ?? "Unknown error";
-				this.header.setStatusMessage({ type: "error", message: `Failed to delete: ${errorMessage}` }, 3000);
+				const errorMessage = result.error ?? "Bilinmeyen hata";
+				this.header.setStatusMessage({ type: "error", message: `Silme başarısız: ${errorMessage}` }, 3000);
 			}
 
 			this.requestRender();
@@ -858,13 +858,16 @@ export class SessionSelectorComponent extends Container implements Focusable {
 		this.renameInput.focused = true;
 
 		const panel = new Container();
-		panel.addChild(new Text(theme.bold("Rename Session"), 1, 0));
+		panel.addChild(new Text(theme.bold("Oturumu Yeniden Adlandır"), 1, 0));
 		panel.addChild(new Spacer(1));
 		panel.addChild(this.renameInput);
 		panel.addChild(new Spacer(1));
 		panel.addChild(
 			new Text(
-				theme.fg("muted", `${keyText("tui.select.confirm")} to save · ${keyText("tui.select.cancel")} to cancel`),
+				theme.fg(
+					"muted",
+					`${keyText("tui.select.confirm")} kaydetmek için · ${keyText("tui.select.cancel")} iptal etmek için`,
+				),
 				1,
 				0,
 			),
@@ -964,7 +967,7 @@ export class SessionSelectorComponent extends Container implements Focusable {
 
 			const message = err instanceof Error ? err.message : String(err);
 			this.header.setLoading(false);
-			this.header.setStatusMessage({ type: "error", message: `Failed to load sessions: ${message}` }, 4000);
+			this.header.setStatusMessage({ type: "error", message: `Oturumlar yüklenemedi: ${message}` }, 4000);
 
 			if (reason === "initial") {
 				this.sessionList.setSessions([], showCwd);

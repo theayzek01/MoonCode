@@ -127,9 +127,13 @@ export class ScopedModelsSelectorComponent extends Container implements Focusabl
 		// Header
 		this.addChild(new DynamicBorder());
 		this.addChild(new Spacer(1));
-		this.addChild(new Text(theme.fg("accent", theme.bold("Model Configuration")), 0, 0));
+		this.addChild(new Text(theme.fg("accent", theme.bold("Model Yapılandırması")), 0, 0));
 		this.addChild(
-			new Text(theme.fg("muted", `Session-only. ${keyText("app.models.save")} to save to settings.`), 0, 0),
+			new Text(
+				theme.fg("muted", `Sadece bu oturum için. Ayarlara kaydetmek için ${keyText("app.models.save")}.`),
+				0,
+				0,
+			),
 		);
 		this.addChild(new Spacer(1));
 
@@ -165,18 +169,18 @@ export class ScopedModelsSelectorComponent extends Container implements Focusabl
 	private getFooterText(): string {
 		const enabledCount = this.enabledIds?.length ?? this.allIds.length;
 		const allEnabled = this.enabledIds === null;
-		const countText = allEnabled ? "all enabled" : `${enabledCount}/${this.allIds.length} enabled`;
+		const countText = allEnabled ? "hepsi etkin" : `${enabledCount}/${this.allIds.length} etkin`;
 		const parts = [
-			`${keyText("tui.select.confirm")} toggle`,
-			`${keyText("app.models.enableAll")} all`,
-			`${keyText("app.models.clearAll")} clear`,
-			`${keyText("app.models.toggleProvider")} provider`,
-			`${keyText("app.models.reorderUp")}/${keyText("app.models.reorderDown")} reorder`,
-			`${keyText("app.models.save")} save`,
+			`${keyText("tui.select.confirm")} değiştir`,
+			`${keyText("app.models.enableAll")} hepsi`,
+			`${keyText("app.models.clearAll")} temizle`,
+			`${keyText("app.models.toggleProvider")} sağlayıcı`,
+			`${keyText("app.models.reorderUp")}/${keyText("app.models.reorderDown")} sırala`,
+			`${keyText("app.models.save")} kaydet`,
 			countText,
 		];
 		return this.isDirty
-			? theme.fg("dim", `  ${parts.join(" · ")} `) + theme.fg("warning", "(unsaved)")
+			? theme.fg("dim", `  ${parts.join(" · ")} `) + theme.fg("warning", "(kaydedilmedi)")
 			: theme.fg("dim", `  ${parts.join(" · ")}`);
 	}
 
@@ -197,7 +201,7 @@ export class ScopedModelsSelectorComponent extends Container implements Focusabl
 		this.listContainer.clear();
 
 		if (this.filteredItems.length === 0) {
-			this.listContainer.addChild(new Text(theme.fg("muted", "  Eslesen model bulunamadi"), 0, 0));
+			this.listContainer.addChild(new Text(theme.fg("muted", "  Eşleşen model bulunamadı"), 0, 0));
 			return;
 		}
 
@@ -254,7 +258,7 @@ export class ScopedModelsSelectorComponent extends Container implements Focusabl
 				: "Bilinmiyor";
 			const details = theme.fg(
 				"muted",
-				` Saglayici: ${selected.model.provider} | Baglam: ${contextWindow} | Dusunme: ${selected.model.reasoning ? "Var" : "Yok"}`,
+				` Sağlayıcı: ${selected.model.provider} | Bağlam: ${contextWindow} | Düşünme: ${selected.model.reasoning ? "Var" : "Yok"}`,
 			);
 			this.listContainer.addChild(new Text(details, 0, 0));
 		}

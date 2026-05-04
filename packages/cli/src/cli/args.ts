@@ -118,7 +118,7 @@ export function parseArgs(args: string[]): Args {
 			} else {
 				result.diagnostics.push({
 					type: "warning",
-					message: `Invalid thinking level "${level}". Valid values: ${VALID_THINKING_LEVELS.join(", ")}`,
+					message: `Geçersiz düşünme seviyesi "${level}". Geçerli değerler: ${VALID_THINKING_LEVELS.join(", ")}`,
 				});
 			}
 		} else if (arg === "--print" || arg === "-p") {
@@ -175,7 +175,7 @@ export function parseArgs(args: string[]): Args {
 				}
 			}
 		} else if (arg.startsWith("-") && !arg.startsWith("--")) {
-			result.diagnostics.push({ type: "error", message: `Unknown option: ${arg}` });
+			result.diagnostics.push({ type: "error", message: `Bilinmeyen seçenek: ${arg}` });
 		} else if (!arg.startsWith("-")) {
 			result.messages.push(arg);
 		}
@@ -187,163 +187,163 @@ export function parseArgs(args: string[]): Args {
 export function printHelp(extensionFlags?: ExtensionFlag[]): void {
 	const extensionFlagsText =
 		extensionFlags && extensionFlags.length > 0
-			? `\n${chalk.bold("Extension CLI Flags:")}\n${extensionFlags
+			? `\n${chalk.bold("Eklenti CLI Bayrakları:")}\n${extensionFlags
 					.map((flag) => {
-						const value = flag.type === "string" ? " <value>" : "";
-						const description = flag.description ?? `Registered by ${flag.extensionPath}`;
+						const value = flag.type === "string" ? " <değer>" : "";
+						const description = flag.description ?? `${flag.extensionPath} tarafından kaydedildi`;
 						return `  --${flag.name}${value}`.padEnd(30) + description;
 					})
 					.join("\n")}\n`
 			: "";
-	console.log(`${chalk.bold(APP_NAME)} - Core coding assistant with read, bash, edit, write tools
+	console.log(`${chalk.bold(APP_NAME)} - Okuma, bash, düzenleme ve yazma araçlarına sahip çekirdek kodlama asistanı
 
-${chalk.bold("Usage:")}
-  ${APP_NAME} [options] [@files...] [messages...]
+${chalk.bold("Kullanım:")}
+  ${APP_NAME} [seçenekler] [@dosyalar...] [mesajlar...]
 
-${chalk.bold("Commands:")}
-  ${APP_NAME} install <source> [-l]     Install extension source and add to settings
-  ${APP_NAME} remove <source> [-l]      Remove extension source from settings
-  ${APP_NAME} uninstall <source> [-l]   Alias for remove
-  ${APP_NAME} update [source|self|Moon]   Update Mooncli and installed extensions
-  ${APP_NAME} list                      List installed extensions from settings
-  ${APP_NAME} config                    Open TUI to enable/disable package resources
-  ${APP_NAME} <command> --help          Show help for install/remove/uninstall/update/list
+${chalk.bold("Komutlar:")}
+  ${APP_NAME} install <kaynak> [-l]     Eklenti kaynağını yükle ve ayarlara ekle
+  ${APP_NAME} remove <kaynak> [-l]      Eklenti kaynağını ayarlardan kaldır
+  ${APP_NAME} uninstall <kaynak> [-l]   Kaldırmak için alternatif komut
+  ${APP_NAME} update [kaynak|self|Moon] Mooncli'yi ve yüklü eklentileri güncelle
+  ${APP_NAME} list                      Ayarlarda yüklü eklentileri listele
+  ${APP_NAME} config                    Paket kaynaklarını etkinleştirmek/devre dışı bırakmak için TUI'yi aç
+  ${APP_NAME} <komut> --help            Yükleme/kaldırma/güncelleme/listeleme için yardım göster
 
-${chalk.bold("Options:")}
-  --provider <name>              Provider name (default: google)
-  --model <pattern>              Model pattern or ID (supports "provider/id" and optional ":<thinking>")
-  --api-key <key>                API key (defaults to env vars)
-  --system-prompt <text>         System prompt (default: coding assistant prompt)
-  --append-system-prompt <text>  Append text or file contents to the system prompt (can be used multiple times)
-  --mode <mode>                  Output mode: text (default), json, or rpc
-  --print, -p                    Non-interactive mode: process prompt and exit
-  --continue, -c                 Continue previous session
-  --resume, -r                   Select a session to resume
-  --session <path|id>            Use specific session file or partial UUID
-  --fork <path|id>               Fork specific session file or partial UUID into a new session
-  --session-dir <dir>            Directory for session storage and lookup
-  --no-session                   Don't save session (ephemeral)
-  --models <patterns>            Comma-separated model patterns for Ctrl+P cycling
-                                 Supports globs (anthropic/*, *sonnet*) and fuzzy matching
-  --no-tools, -nt                Disable all tools by default (built-in and extension)
-  --no-builtin-tools, -nbt       Disable built-in tools by default but keep extension/custom tools enabled
-  --tools, -t <tools>            Comma-separated allowlist of tool names to enable
-                                 Applies to built-in, extension, and custom tools
-  --thinking <level>             Set thinking level: off, minimal, low, medium, high, xhigh
-  --extension, -e <path>         Load an extension file (can be used multiple times)
-  --no-extensions, -ne           Disable extension discovery (explicit -e paths still work)
-  --skill <path>                 Load a skill file or directory (can be used multiple times)
-  --no-skills, -ns               Disable skills discovery and loading
-  --prompt-template <path>       Load a prompt template file or directory (can be used multiple times)
-  --no-prompt-templates, -np     Disable prompt template discovery and loading
-  --theme <path>                 Load a theme file or directory (can be used multiple times)
-  --no-themes                    Disable theme discovery and loading
-  --no-context-files, -nc        Disable AGENTS.md and CLAUDE.md discovery and loading
-  --export <file>                Export session file to HTML and exit
-  --list-models [search]         List available models (with optional fuzzy search)
-  --verbose                      Force verbose startup (overrides quietStartup setting)
-  --offline                      Disable startup network operations (same as PI_OFFLINE=1)
-  --help, -h                     Show this help
-  --version, -v                  Show version number
+${chalk.bold("Seçenekler:")}
+  --provider <isim>              Sağlayıcı ismi (varsayılan: google)
+  --model <desen>                Model deseni veya ID'si ("provider/id" ve isteğe bağlı ":<düşünme>" destekler)
+  --api-key <anahtar>            API anahtarı (ortam değişkenlerine varsayılan olarak ayarlanır)
+  --system-prompt <metin>        Sistem istemi (varsayılan: kodlama asistanı istemi)
+  --append-system-prompt <metin> Sistem istemine metin veya dosya içeriği ekle (birden fazla kez kullanılabilir)
+  --mode <mod>                   Çıktı modu: text (varsayılan), json veya rpc
+  --print, -p                    Etkileşimsiz mod: istemi işle ve çık
+  --continue, -c                 Önceki oturuma devam et
+  --resume, -r                   Devam etmek için bir oturum seç
+  --session <yol|id>             Belirli bir oturum dosyasını veya kısmi UUID'yi kullan
+  --fork <yol|id>                Belirli bir oturum dosyasını veya kısmi UUID'yi yeni bir oturuma çatalla
+  --session-dir <dizin>          Oturum depolama ve arama dizini
+  --no-session                   Oturumu kaydetme (geçici)
+  --models <desenler>            Ctrl+P döngüsü için virgülle ayrılmış model desenleri
+                                 Glob'ları (anthropic/*, *sonnet*) ve bulanık eşleşmeyi destekler
+  --no-tools, -nt                Tüm araçları varsayılan olarak devre dışı bırak (yerleşik ve eklenti)
+  --no-builtin-tools, -nbt       Yerleşik araçları devre dışı bırak ama eklenti/özel araçları etkin tut
+  --tools, -t <araçlar>          Etkinleştirilecek araç isimlerinin virgülle ayrılmış izin listesi
+                                 Yerleşik, eklenti ve özel araçlar için geçerlidir
+  --thinking <seviye>            Düşünme seviyesini ayarla: off, minimal, low, medium, high, xhigh
+  --extension, -e <yol>          Bir eklenti dosyası yükle (birden fazla kez kullanılabilir)
+  --no-extensions, -ne           Eklenti keşfini devre dışı bırak (açık -e yolları hala çalışır)
+  --skill <yol>                  Bir yetenek dosyası veya dizini yükle (birden fazla kez kullanılabilir)
+  --no-skills, -ns               Yetenek keşfini ve yüklemesini devre dışı bırak
+  --prompt-template <yol>        Bir istem şablonu dosyası veya dizini yükle (birden fazla kez kullanılabilir)
+  --no-prompt-templates, -np     İstem şablonu keşfini ve yüklemesini devre dışı bırak
+  --theme <yol>                  Bir tema dosyası veya dizini yükle (birden fazla kez kullanılabilir)
+  --no-themes                    Tema keşfini ve yüklemesini devre dışı bırak
+  --no-context-files, -nc        AGENTS.md ve CLAUDE.md keşfini ve yüklemesini devre dışı bırak
+  --export <dosya>               Oturum dosyasını HTML'e aktar ve çık
+  --list-models [arama]          Mevcut modelleri listele (isteğe bağlı bulanık arama ile)
+  --verbose                      Zorunlu ayrıntılı başlatma (quietStartup ayarını geçersiz kılar)
+  --offline                      Başlangıç ağ işlemlerini devre dışı bırak (PI_OFFLINE=1 ile aynı)
+  --help, -h                     Bu yardımı göster
+  --version, -v                  Sürüm numarasını göster
 
-Extensions can register additional flags (e.g., --plan from plan-mode extension).${extensionFlagsText}
+Eklentiler ek bayraklar kaydedebilir (örneğin, plan-mode eklentisinden --plan).${extensionFlagsText}
 
-${chalk.bold("Examples:")}
-  # Interactive mode
+${chalk.bold("Örnekler:")}
+  # Etkileşimli mod
   ${APP_NAME}
 
-  # Interactive mode with initial prompt
-  ${APP_NAME} "List all .ts files in src/"
+  # İlk istemle etkileşimli mod
+  ${APP_NAME} "src/ dizinindeki tüm .ts dosyalarını listele"
 
-  # Include files in initial message
-  ${APP_NAME} @prompt.md @image.png "What color is the sky?"
+  # İlk mesaja dosyaları dahil et
+  ${APP_NAME} @prompt.md @image.png "Gökyüzü ne renk?"
 
-  # Non-interactive mode (process and exit)
-  ${APP_NAME} -p "List all .ts files in src/"
+  # Etkileşimsiz mod (işle ve çık)
+  ${APP_NAME} -p "src/ dizinindeki tüm .ts dosyalarını listele"
 
-  # Multiple messages (interactive)
-  ${APP_NAME} "Read package.json" "What dependencies do we have?"
+  # Birden fazla mesaj (etkileşimli)
+  ${APP_NAME} "package.json dosyasını oku" "Hangi bağımlılıklara sahibiz?"
 
-  # Continue previous session
-  ${APP_NAME} --continue "What did we discuss?"
+  # Önceki oturuma devam et
+  ${APP_NAME} --continue "Neyi tartışmıştık?"
 
-  # Use different model
-  ${APP_NAME} --provider openai --model gpt-4o-mini "Help me refactor this code"
+  # Farklı model kullan
+  ${APP_NAME} --provider openai --model gpt-4o-mini "Bu kodu refactor etmeme yardım et"
 
-  # Use model with provider prefix (no --provider needed)
-  ${APP_NAME} --model openai/gpt-4o "Help me refactor this code"
+  # Sağlayıcı ön ekiyle model kullan (--provider gerekmez)
+  ${APP_NAME} --model openai/gpt-4o "Bu kodu refactor etmeme yardım et"
 
-  # Use model with thinking level shorthand
-  ${APP_NAME} --model sonnet:high "Solve this complex problem"
+  # Düşünme seviyesi kısayoluyla model kullan
+  ${APP_NAME} --model sonnet:high "Bu karmaşık sorunu çöz"
 
-  # Limit model cycling to specific models
+  # Model döngüsünü belirli modellerle sınırla
   ${APP_NAME} --models claude-sonnet,claude-haiku,gpt-4o
 
-  # Limit to a specific provider with glob pattern
+  # Glob deseniyle belirli bir sağlayıcıyla sınırla
   ${APP_NAME} --models "github-copilot/*"
 
-  # Cycle models with fixed thinking levels
+  # Sabit düşünme seviyeleriyle modeller arasında döngü yap
   ${APP_NAME} --models sonnet:high,haiku:low
 
-  # Start with a specific thinking level
-  ${APP_NAME} --thinking high "Solve this complex problem"
+  # Belirli bir düşünme seviyesiyle başla
+  ${APP_NAME} --thinking high "Bu karmaşık sorunu çöz"
 
-  # Read-only mode (no file modifications possible)
-  ${APP_NAME} --tools read,grep,find,ls -p "Review the code in src/"
+  # Salt okunur mod (dosya değişikliği yapılamaz)
+  ${APP_NAME} --tools read,grep,find,ls -p "src/ dizinindeki kodu incele"
 
-  # Export a session file to HTML
+  # Bir oturum dosyasını HTML'e aktar
   ${APP_NAME} --export ~/${CONFIG_DIR_NAME}/engine/sessions/--path--/session.jsonl
-  ${APP_NAME} --export session.jsonl output.html
+  ${APP_NAME} --export session.jsonl cikti.html
 
-${chalk.bold("Environment Variables:")}
-  ANTHROPIC_API_KEY                - Anthropic Claude API key
-  ANTHROPIC_OAUTH_TOKEN            - Anthropic OAuth token (alternative to API key)
-  OpenAI_API_KEY                   - OpenAI GPT API key
-  AZURE_OpenAI_API_KEY             - Azure OpenAI API key
-  AZURE_OpenAI_BASE_URL            - Azure OpenAI/Cognitive Services base URL (e.g. https://{resource}.openai.azure.com)
-  AZURE_OpenAI_RESOURCE_NAME       - Azure OpenAI resource name (alternative to base URL)
-  AZURE_OpenAI_API_VERSION         - Azure OpenAI API version (default: v1)
-  AZURE_OpenAI_DEPLOYMENT_NAME_MAP - Azure OpenAI model=deployment map (comma-separated)
-  DEEPSEEK_API_KEY                 - DeepSeek API key
-  GEMINI_API_KEY                   - Google Gemini API key
-  GROQ_API_KEY                     - Groq API key
-  CEREBRAS_API_KEY                 - Cerebras API key
-  XCore_API_KEY                      - xCore Grok API key
-  FIREWORKS_API_KEY                - Fireworks API key
-  OPENROUTER_API_KEY               - OpenRouter API key
-  Core_GATEWAY_API_KEY               - Vercel Core Gateway API key
-  ZCore_API_KEY                      - ZCore API key
-  MISTRAL_API_KEY                  - Mistral API key
-  MINIMAX_API_KEY                  - MiniMax API key
-  MOONSHOT_API_KEY                 - Moonshot Core API key
-  OPENCODE_API_KEY                 - OpenCode Zen/OpenCode Go API key
-  KIMI_API_KEY                     - Kimi For Coding API key
-  CLOUDFLARE_API_KEY               - Cloudflare API token (Workers Core and Core Gateway)
-  CLOUDFLARE_ACCOUNT_ID            - Cloudflare account id (required for both)
-  CLOUDFLARE_GATEWAY_ID            - Cloudflare Core Gateway slug (required for Core Gateway)
-  XIAOMI_API_KEY                   - Xiaomi MiMo API key (api.xiaomimimo.com billing)
-  XIAOMI_TOKEN_PLAN_CN_API_KEY     - Xiaomi MiMo Token Plan API key (China region)
-  XIAOMI_TOKEN_PLAN_AMS_API_KEY    - Xiaomi MiMo Token Plan API key (Amsterdam region)
-  XIAOMI_TOKEN_PLAN_SGP_API_KEY    - Xiaomi MiMo Token Plan API key (Singapore region)
-  AWS_PROFILE                      - AWS profile for Amazon Bedrock
-  AWS_ACCESS_KEY_ID                - AWS access key for Amazon Bedrock
-  AWS_SECRET_ACCESS_KEY            - AWS secret key for Amazon Bedrock
-  AWS_BEARER_TOKEN_BEDROCK         - Bedrock API key (bearer token)
-  AWS_REGION                       - AWS region for Amazon Bedrock (e.g., us-east-1)
-  ${ENV_AGENT_DIR.padEnd(32)} - Config directory (default: ~/${CONFIG_DIR_NAME}/engine)
-  ${ENV_SESSION_DIR.padEnd(32)} - Session storage directory (overridden by --session-dir)
-  Moon_PACKAGE_DIR                 - Override package directory (for Nix/Guix store paths)
-  Moon_OFFLINE                     - Disable startup network operations when set to 1/true/yes
-  Moon_TELEMETRY                   - Override install telemetry when set to 1/true/yes or 0/false/no
-  Moon_SHARE_VIEWER_URL            - Base URL for /share command (default: https://Mooncli.dev/session/)
+${chalk.bold("Ortam Değişkenleri:")}
+  ANTHROPIC_API_KEY                - Anthropic Claude API anahtarı
+  ANTHROPIC_OAUTH_TOKEN            - Anthropic OAuth jetonu (API anahtarına alternatif)
+  OpenAI_API_KEY                   - OpenAI GPT API anahtarı
+  AZURE_OpenAI_API_KEY             - Azure OpenAI API anahtarı
+  AZURE_OpenAI_BASE_URL            - Azure OpenAI/Cognitive Services taban URL'si
+  AZURE_OpenAI_RESOURCE_NAME       - Azure OpenAI kaynak adı
+  AZURE_OpenAI_API_VERSION         - Azure OpenAI API sürümü (varsayılan: v1)
+  AZURE_OpenAI_DEPLOYMENT_NAME_MAP - Azure OpenAI model=deployment haritası (virgülle ayrılmış)
+  DEEPSEEK_API_KEY                 - DeepSeek API anahtarı
+  GEMINI_API_KEY                   - Google Gemini API anahtarı
+  GROQ_API_KEY                     - Groq API anahtarı
+  CEREBRAS_API_KEY                 - Cerebras API anahtarı
+  XCore_API_KEY                    - xCore Grok API anahtarı
+  FIREWORKS_API_KEY                - Fireworks API anahtarı
+  OPENROUTER_API_KEY               - OpenRouter API anahtarı
+  Core_GATEWAY_API_KEY             - Vercel Core Gateway API anahtarı
+  ZCore_API_KEY                    - ZCore API anahtarı
+  MISTRAL_API_KEY                  - Mistral API anahtarı
+  MINIMAX_API_KEY                  - MiniMax API anahtarı
+  MOONSHOT_API_KEY                 - Moonshot Core API anahtarı
+  OPENCODE_API_KEY                 - OpenCode Zen/OpenCode Go API anahtarı
+  KIMI_API_KEY                     - Kimi For Coding API anahtarı
+  CLOUDFLARE_API_KEY               - Cloudflare API jetonu
+  CLOUDFLARE_ACCOUNT_ID            - Cloudflare hesap kimliği
+  CLOUDFLARE_GATEWAY_ID            - Cloudflare Core Gateway slug'ı
+  XIAOMI_API_KEY                   - Xiaomi MiMo API anahtarı
+  XIAOMI_TOKEN_PLAN_CN_API_KEY     - Xiaomi MiMo Token Plan API anahtarı (Çin bölgesi)
+  XIAOMI_TOKEN_PLAN_AMS_API_KEY    - Xiaomi MiMo Token Plan API anahtarı (Amsterdam bölgesi)
+  XIAOMI_TOKEN_PLAN_SGP_API_KEY    - Xiaomi MiMo Token Plan API anahtarı (Singapur bölgesi)
+  AWS_PROFILE                      - Amazon Bedrock için AWS profili
+  AWS_ACCESS_KEY_ID                - Amazon Bedrock için AWS erişim anahtarı
+  AWS_SECRET_ACCESS_KEY            - Amazon Bedrock için AWS gizli anahtarı
+  AWS_BEARER_TOKEN_BEDROCK         - Bedrock API anahtarı (bearer token)
+  AWS_REGION                       - Amazon Bedrock için AWS bölgesi (örn. us-east-1)
+  ${ENV_AGENT_DIR.padEnd(32)} - Yapılandırma dizini (varsayılan: ~/${CONFIG_DIR_NAME}/engine)
+  ${ENV_SESSION_DIR.padEnd(32)} - Oturum depolama dizini (--session-dir ile geçersiz kılınır)
+  Moon_PACKAGE_DIR                 - Paket dizini geçersiz kılma
+  Moon_OFFLINE                     - Ayarlandığında başlangıç ağ işlemlerini devre dışı bırakır
+  Moon_TELEMETRY                   - Kurulum telemetrisini geçersiz kıl
+  Moon_SHARE_VIEWER_URL            - /share komutu için taban URL (varsayılan: https://Mooncli.dev/session/)
 
-${chalk.bold("Built-in Tool Names:")}
-  read   - Read file contents
-  bash   - Execute bash commands
-  edit   - Edit files with find/replace
-  write  - Write files (creates/overwrites)
-  grep   - Search file contents (read-only, off by default)
-  find   - Find files by glob pattern (read-only, off by default)
-  ls     - List directory contents (read-only, off by default)
+${chalk.bold("Yerleşik Araç İsimleri:")}
+  read   - Dosya içeriğini oku
+  bash   - Bash komutlarını yürüt
+  edit   - Bul/değiştir ile dosyaları düzenle
+  write  - Dosyaları yaz (oluşturur/üzerine yazar)
+  grep   - Dosya içeriğini ara (salt okunur, varsayılan olarak kapalı)
+  find   - Glob deseniyle dosyaları bul (salt okunur, varsayılan olarak kapalı)
+  ls     - Dizin içeriğini listele (salt okunur, varsayılan olarak kapalı)
 `);
 }

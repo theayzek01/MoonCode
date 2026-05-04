@@ -86,7 +86,7 @@ export class ModelSelectorComponent extends Container implements Focusable {
 			this.addChild(this.scopeHintText);
 		} else {
 			const hintText =
-				"Sadece yapilandirilmis saglayicilarin modelleri gosteriliyor. Saglayici eklemek icin /login kullanin.";
+				"Sadece yapılandırılmış sağlayıcıların modelleri gösteriliyor. Sağlayıcı eklemek için /login kullanın.";
 			this.addChild(new Text(theme.fg("warning", hintText), 0, 0));
 		}
 		this.addChild(new Spacer(1));
@@ -188,12 +188,12 @@ export class ModelSelectorComponent extends Container implements Focusable {
 
 	private getScopeText(): string {
 		const allText = this.scope === "all" ? theme.fg("accent", "hepsi") : theme.fg("muted", "hepsi");
-		const scopedText = this.scope === "scoped" ? theme.fg("accent", "kisitli") : theme.fg("muted", "kisitli");
+		const scopedText = this.scope === "scoped" ? theme.fg("accent", "kısıtlı") : theme.fg("muted", "kısıtlı");
 		return `${theme.fg("muted", "Kapsam: ")}${allText}${theme.fg("muted", " | ")}${scopedText}`;
 	}
 
 	private getScopeHintText(): string {
-		return keyHint("tui.input.tab", "kapsam") + theme.fg("muted", " (hepsi/kisitli)");
+		return keyHint("tui.input.tab", "kapsam") + theme.fg("muted", " (hepsi/kısıtlı)");
 	}
 
 	private setScope(scope: ModelScope): void {
@@ -232,7 +232,7 @@ export class ModelSelectorComponent extends Container implements Focusable {
 		}
 
 		if (this.filteredModels.length === 0) {
-			this.listContainer.addChild(new Text(theme.fg("muted", "  Eslesen model bulunamadi"), 0, 0));
+			this.listContainer.addChild(new Text(theme.fg("muted", "  Eşleşen model bulunamadı"), 0, 0));
 			return;
 		}
 
@@ -297,7 +297,7 @@ export class ModelSelectorComponent extends Container implements Focusable {
 				: "Bilinmiyor";
 			const details = theme.fg(
 				"muted",
-				` Saglayici: ${selected.provider} | Baglam: ${contextWindow} | Dusunme: ${selected.model.reasoning ? "Var" : "Yok"}`,
+				` Sağlayıcı: ${selected.provider} | Bağlam: ${contextWindow} | Düşünme: ${selected.model.reasoning ? "Var" : "Yok"}`,
 			);
 			this.listContainer.addChild(new Text(details, 0, 0));
 		}

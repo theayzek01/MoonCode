@@ -12,11 +12,22 @@ for (const [provider, models] of Object.entries(MODELS)) {
 	modelRegistry.set(provider, providerModels);
 }
 
-// Inject Ollama models
-const ollamaModels = new Map<string, Model<Api>>();
-const defaultOllamaModels = ["llama3.1:8b", "qwen2.5-coder:7b", "codellama", "mistral"];
-for (const id of defaultOllamaModels) {
-	ollamaModels.set(id, {
+// Inject Cloud Ollama models
+const cloudOllamaModels = new Map<string, Model<Api>>();
+const defaultCloudOllamaModels = ["kimi-k2.6:cloud", "glm-5.1:cloud", "qwen3.5:cloud", "minimax-m2.7:cloud"];
+
+const extraBuiltInOllamaModels = [
+	"deepseek-v4-pro:cloud",
+	"gpt-oss:120b-cloud",
+	"gemma4:31b-cloud",
+	"kimi-k2.5:cloud",
+	"gpt-oss:20b",
+	"anico:latest",
+	"qwen3.5:9b",
+	"gemma4:e4b",
+];
+for (const id of [...defaultCloudOllamaModels, ...extraBuiltInOllamaModels]) {
+	cloudOllamaModels.set(id, {
 		id,
 		name: id,
 		api: "openai-completions",
@@ -29,7 +40,7 @@ for (const id of defaultOllamaModels) {
 		maxTokens: 16384,
 	} as Model<Api>);
 }
-modelRegistry.set("ollama", ollamaModels);
+modelRegistry.set("ollama", cloudOllamaModels);
 
 // Inject Antigravity models (Image 1 & 2 Sync)
 const antigravityModels = new Map<string, Model<Api>>();

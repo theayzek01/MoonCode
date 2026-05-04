@@ -22,7 +22,7 @@ export class AssistantMessageComponent extends Container {
 		message?: AssistantMessage,
 		hideThinkingBlock = false,
 		markdownTheme: MarkdownTheme = getMarkdownTheme(),
-		hiddenThinkingLabel = "Dusunuluyor...",
+		hiddenThinkingLabel = "Düşünülüyor...",
 	) {
 		super();
 
@@ -152,7 +152,7 @@ export class AssistantMessageComponent extends Container {
 				const abortMessage =
 					message.errorMessage && message.errorMessage !== "Request was aborted"
 						? message.errorMessage
-						: "Operation aborted";
+						: "İşlem iptal edildi";
 				if (hasVisibleContent) {
 					this.contentContainer.addChild(new Spacer(1));
 				} else {
@@ -160,9 +160,9 @@ export class AssistantMessageComponent extends Container {
 				}
 				this.contentContainer.addChild(new Text(theme.fg("error", abortMessage), 1, 0));
 			} else if (message.stopReason === "error") {
-				const errorMsg = message.errorMessage || "Unknown error";
+				const errorMsg = message.errorMessage || "Bilinmeyen hata";
 				this.contentContainer.addChild(new Spacer(1));
-				this.contentContainer.addChild(new Text(theme.fg("error", `Error: ${errorMsg}`), 1, 0));
+				this.contentContainer.addChild(new Text(theme.fg("error", `Hata: ${errorMsg}`), 1, 0));
 			}
 		}
 	}

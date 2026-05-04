@@ -35,7 +35,7 @@ class UserMessageList implements Component {
 		const lines: string[] = [];
 
 		if (this.messages.length === 0) {
-			lines.push(theme.fg("muted", "  Kullanici mesaji bulunamadi"));
+			lines.push(theme.fg("muted", "  Kullanıcı mesajı bulunamadı"));
 			return lines;
 		}
 
@@ -121,12 +121,12 @@ export class UserMessageSelectorComponent extends Container {
 
 		// Add header
 		this.addChild(new Spacer(1));
-		this.addChild(new Text(theme.bold("Mesajdan Catalla"), 1, 0));
+		this.addChild(new Text(theme.bold("Mesajdan Çatalla"), 1, 0));
 		this.addChild(
 			new Text(
 				theme.fg(
 					"muted",
-					"O noktaya kadarki aktif yolu yeni bir oturuma kopyalamak icin bir kullanici mesaji secin",
+					"O noktaya kadarki aktif yolu yeni bir oturuma kopyalamak için bir kullanıcı mesajı seçin",
 				),
 				1,
 				0,

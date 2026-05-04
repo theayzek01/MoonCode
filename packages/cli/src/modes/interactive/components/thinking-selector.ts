@@ -10,12 +10,12 @@ const THINKING_SELECT_LIST_LAYOUT: SelectListLayoutOptions = {
 };
 
 const LEVEL_DESCRIPTIONS: Record<ThinkingLevel, string> = {
-	off: "Dusunme kapali",
-	minimal: "Cok kisa dusunme (~1k token)",
-	low: "Hafif dusunme (~2k token)",
-	medium: "Orta dusunme (~8k token)",
-	high: "Derin dusunme (~16k token)",
-	xhigh: "Maksimum dusunme (~32k token)",
+	off: "Düşünme kapalı",
+	minimal: "Çok kısa düşünme (~1k token)",
+	low: "Hafif düşünme (~2k token)",
+	medium: "Orta düşünme (~8k token)",
+	high: "Derin düşünme (~16k token)",
+	xhigh: "Maksimum düşünme (~32k token)",
 };
 
 /**

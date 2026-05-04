@@ -49,7 +49,7 @@ export class McpSelectorComponent extends Container implements Focusable {
 		this.addChild(new DynamicBorder());
 		this.addChild(new Spacer(1));
 
-		this.addChild(new TruncatedText(theme.fg("accent", theme.bold("Model Context Protocol (MCP) Menu:")), 1, 0));
+		this.addChild(new TruncatedText(theme.fg("accent", theme.bold("Model Bağlam Protokolü (MCP) Menüsü:")), 1, 0));
 		this.addChild(new TruncatedText(theme.fg("muted", this.mcpStatusMessage), 1, 0));
 		this.addChild(new Spacer(1));
 
@@ -115,7 +115,7 @@ export class McpSelectorComponent extends Container implements Focusable {
 		}
 
 		if (this.filteredOptions.length === 0) {
-			this.listContainer.addChild(new TruncatedText(theme.fg("muted", `  Secenek bulunamadi`), 1, 0));
+			this.listContainer.addChild(new TruncatedText(theme.fg("muted", `  Seçenek bulunamadı`), 1, 0));
 		}
 	}
 

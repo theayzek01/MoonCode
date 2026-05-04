@@ -65,7 +65,7 @@ export class ExtensionInputComponent extends Container implements Focusable {
 		this.addChild(this.input);
 		this.addChild(new Spacer(1));
 		this.addChild(
-			new Text(`${keyHint("tui.select.confirm", "submit")}  ${keyHint("tui.select.cancel", "cancel")}`, 1, 0),
+			new Text(`${keyHint("tui.select.confirm", "gönder")}  ${keyHint("tui.select.cancel", "iptal")}`, 1, 0),
 		);
 		this.addChild(new Spacer(1));
 		this.addChild(new DynamicBorder());

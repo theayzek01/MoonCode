@@ -231,15 +231,19 @@ export function parseModelPattern(
 	}
 
 	// Suffix thinking level değilse, belki ID'nin kendisi : içeriyordur ama biz 1. adımda kaçırmışızdır.
-	// (Mesela fuzzy match için prefix'i tekrar dene)
-	const prefixMatch = tryMatchModel(prefix, availableModels);
-	if (prefixMatch) {
+	// Ya da zincirleme geçersiz bir suffix ("model:high:random" gibi) olabilir. Recursive bir kez daha deneyelim.
+	const fallbackResult = parseModelPattern(prefix, availableModels, options);
+	if (fallbackResult.model) {
 		const allowFallback = options?.allowInvalidThinkingLevelFallback ?? true;
-		return {
-			model: prefixMatch,
-			thinkingLevel: undefined,
-			warning: allowFallback ? `Invalid thinking level "${suffix}" in pattern "${pattern}".` : undefined,
-		};
+		if (allowFallback) {
+			return {
+				model: fallbackResult.model,
+				thinkingLevel: undefined, // Invalid seviye verildiğinde thinking seviyesini temizle
+				warning: `Invalid thinking level "${suffix}" in pattern "${pattern}".`,
+			};
+		}
+		// Fallback yasaksa, bu suffixi atıp modeli kabul edemeyiz.
+		return { model: undefined, thinkingLevel: undefined, warning: undefined };
 	}
 
 	return { model: undefined, thinkingLevel: undefined, warning: undefined };
@@ -385,6 +389,27 @@ export function resolveCliModel(options: {
 	let inferredProvider = false;
 
 	if (!provider) {
+		// Önce hiçbir provider inference yapmadan, doğrudan tam ID (thinking level suffix'i ile bile)
+		// şeklinde bir eşleşme olup olmadığını parseModelPattern ile deneyelim.
+		// Bu sayede "openai/gpt-4o:extended" OpenRouter modeli doğrudan bulunabilir.
+		const parseTry = parseModelPattern(cliModel, availableModels, { allowInvalidThinkingLevelFallback: false });
+		if (parseTry.model) {
+			const idLower = parseTry.model.id.toLowerCase();
+			const fullIdLower = `${parseTry.model.provider}/${idLower}`.toLowerCase();
+			const cliModelLower = cliModel.toLowerCase();
+
+			// Bulunan model gerçekten bizim yazdığımız şeyin bir ID'si mi (yani exact match mi)?
+			if (cliModelLower.startsWith(idLower) || cliModelLower.startsWith(fullIdLower)) {
+				return {
+					model: parseTry.model,
+					thinkingLevel: parseTry.thinkingLevel,
+					warning: parseTry.warning,
+					error: undefined,
+				};
+			}
+		}
+
+		// Yukarıda exact match bulamadıysak, slash'e göre provider ayırmayı deneyelim.
 		const slashIndex = cliModel.indexOf("/");
 		if (slashIndex !== -1) {
 			const maybeProvider = cliModel.substring(0, slashIndex);
