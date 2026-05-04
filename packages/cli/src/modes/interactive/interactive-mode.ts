@@ -3065,8 +3065,15 @@ export class InteractiveMode {
 				break;
 			case "engine_end":
 				this.setWorkingMessage(undefined);
+				this.notifyCompletion();
 				break;
 		}
+	}
+
+	private notifyCompletion(): void {
+		// Terminal bell for quick background/other-tab awareness.
+		process.stdout.write("\u0007");
+		this.showStatus("Proje bitti. Islem tamamlandi.");
 	}
 
 	/**
