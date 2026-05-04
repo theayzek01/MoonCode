@@ -45,7 +45,7 @@ import {
 	TUI,
 	visibleWidth,
 } from "@mooncli/tui";
-import { spawn, spawnSync } from "child_process";
+import { exec, spawn, spawnSync } from "child_process";
 import {
 	APP_NAME,
 	APP_TITLE,
@@ -54,7 +54,6 @@ import {
 	getDocsPath,
 	getEngineDir,
 	getModelsPath,
-	getSelfUpdateCommand,
 	getShareViewerUrl,
 	VERSION,
 } from "../../config.js";
@@ -300,6 +299,7 @@ export class InteractiveMode {
 
 	// Shutdown state
 	private shutdownRequested = false;
+	private webUiProcess: any = undefined;
 
 	// Extension UI state
 	private extensionSelector: ExtensionSelectorComponent | undefined = undefined;
@@ -2582,6 +2582,11 @@ export class InteractiveMode {
 				const args = text.startsWith("/impmodel ") ? text.slice(10).trim() : "";
 				this.editor.setText("");
 				await this.handleImpModelCommand(args);
+				return;
+			}
+			if (text === "/webui") {
+				this.handleWebUiCommand();
+				this.editor.setText("");
 				return;
 			}
 			if (text === "/debug") {
@@ -5480,11 +5485,13 @@ export class InteractiveMode {
 		let lastMatch: RegExpExecArray | null = null;
 		let match: RegExpExecArray | null;
 
-		while ((match = regex.exec(text)) !== null) {
+		match = regex.exec(text);
+		while (match !== null) {
 			lastMatch = match;
+			match = regex.exec(text);
 		}
 
-		if (lastMatch && lastMatch[1]) {
+		if (lastMatch?.[1]) {
 			const command = lastMatch[1].trim();
 			if (command) {
 				this.showStatus("Son bash komutu çalıştırılıyor...");
@@ -5738,6 +5745,36 @@ export class InteractiveMode {
 		}
 	}
 
+	private handleWebUiCommand(): void {
+		const url = "http://localhost:5173";
+		const openCmd = process.platform === "darwin" ? "open" : process.platform === "win32" ? "start" : "xdg-open";
+
+		if (this.webUiProcess) {
+			exec(`${openCmd} ${url}`);
+			this.showStatus(`Web arayüzü açılıyor: ${url}`);
+			return;
+		}
+
+		this.showStatus("Web sunucusu başlatılıyor (bu birkaç saniye sürebilir)...");
+		try {
+			const npmCmd = process.platform === "win32" ? "npm.cmd" : "npm";
+			this.webUiProcess = spawn(npmCmd, ["run", "dev", "--prefix", "packages/web-ui/example"], {
+				detached: true,
+				stdio: "ignore",
+				shell: true,
+			});
+			this.webUiProcess.unref();
+
+			// Give the server a few seconds to start before opening the browser
+			setTimeout(() => {
+				exec(`${openCmd} ${url}`);
+				this.showStatus(`Web arayüzü hazır: ${url}`);
+			}, 3500);
+		} catch (error) {
+			this.showError(`Sunucu başlatılamadı: ${error instanceof Error ? error.message : "Bilinmeyen hata"}`);
+		}
+	}
+
 	private handleDebugCommand(): void {
 		const width = this.ui.terminal.columns;
 		const height = this.ui.terminal.rows;
@@ -5875,7 +5912,9 @@ export class InteractiveMode {
 			// AUTO-FIX PROMPT
 			if (result.exitCode !== 0 && result.exitCode !== undefined && !result.cancelled) {
 				this.showStatus("⚠️ Komut hata verdi. Düzeltmek için Enter'a basın (Auto-Fix).");
-				this.editor.setValue(`Az önce çalıştırdığım \`${command}\` komutu şu hatayı verdi:\n\n\`\`\`\n${result.output?.trim()}\n\`\`\`\n\nLütfen bu hatayı analiz et ve nasıl çözeceğimizi söyle.`);
+				this.editor.setValue(
+					`Az önce çalıştırdığım \`${command}\` komutu şu hatayı verdi:\n\n\`\`\`\n${result.output?.trim()}\n\`\`\`\n\nLütfen bu hatayı analiz et ve nasıl çözeceğimizi söyle.`,
+				);
 			}
 		} catch (error) {
 			if (this.bashComponent) {
@@ -5914,6 +5953,17 @@ export class InteractiveMode {
 	}
 
 	stop(): void {
+		if (this.webUiProcess) {
+			try {
+				if (process.platform === "win32") {
+					spawn("taskkill", ["/F", "/T", "/PID", String(this.webUiProcess.pid)], { shell: true });
+				} else {
+					process.kill(-this.webUiProcess.pid);
+				}
+			} catch {
+				// Ignore cleanup errors
+			}
+		}
 		this.unregisterSignalHandlers();
 		if (this.settingsManager.getShowTerminalProgress()) {
 			this.ui.terminal.setProgress(false);

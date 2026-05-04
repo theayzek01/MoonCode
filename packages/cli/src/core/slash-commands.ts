@@ -45,5 +45,6 @@ export const BUILTIN_SLASH_COMMANDS: ReadonlyArray<BuiltinSlashCommand> = [
 	{ name: "robotics", description: "Robotics mode - goruntu analizi, nesne tespiti, yorunge planlama" },
 	{ name: "discord", description: "Discord entegrasyonu ve bot yonetimi" },
 	{ name: "update", description: "Mooncli ve uzantilari hizlica guncelle" },
+	{ name: "webui", description: "Web arayuzunu tarayicida ac" },
 	{ name: "impmodel", description: "Yeni bir modeli ollama saglayicisina ekle" },
 ];

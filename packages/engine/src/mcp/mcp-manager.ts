@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+// StdioClientTransport is imported dynamically to avoid browser crashes
 import type { EngineTool } from "../types.js";
 
 export interface McpServerConfig {
@@ -20,6 +20,14 @@ export class McpManager {
 	constructor(private configs: McpServerConfig[]) {}
 
 	async initialize(): Promise<void> {
+		if (typeof window !== "undefined") {
+			console.warn("[MCP] Stdio transport is not supported in the browser environment.");
+			return;
+		}
+
+		const transportPath = "@modelcontextprotocol/sdk/client/stdio.js";
+		const { StdioClientTransport } = await import(transportPath);
+
 		for (const config of this.configs) {
 			try {
 				const transport = new StdioClientTransport({

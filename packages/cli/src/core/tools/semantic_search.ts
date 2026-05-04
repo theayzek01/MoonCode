@@ -3,21 +3,20 @@ import type { EngineTool } from "@mooncli/engine";
 import { spawn } from "child_process";
 import { Type } from "typebox";
 import { getShellEnv } from "../../utils/shell.js";
+import type { ToolDefinition } from "../extensions/types.js";
 import { wrapToolDefinition } from "./tool-definition-wrapper.js";
 import { truncateTail } from "./truncate.js";
-import type { ToolDefinition } from "../extensions/types.js";
 
 const semanticSearchSchema = Type.Object({
 	query: Type.String({ description: "Arama yapılacak semantik kelime, fonksiyon adı veya mantık özeti" }),
 });
 
-export function createSemanticSearchToolDefinition(
-	cwd: string,
-): ToolDefinition<typeof semanticSearchSchema, any, any> {
+export function createSemanticSearchToolDefinition(cwd: string): ToolDefinition<typeof semanticSearchSchema, any, any> {
 	return {
 		name: "semantic_search",
 		label: "semantic_search",
-		description: "Proje genelinde akıllı semantik arama (MCP Indexing). Fonksiyonları, sınıfları ve mantığı bulmak için context ile birlikte arar.",
+		description:
+			"Proje genelinde akıllı semantik arama (MCP Indexing). Fonksiyonları, sınıfları ve mantığı bulmak için context ile birlikte arar.",
 		promptSnippet: "Projede akıllı semantik bağlam ara (MCP tabanlı)",
 		parameters: semanticSearchSchema,
 		async execute(_id, { query }, signal) {
@@ -43,7 +42,7 @@ export function createSemanticSearchToolDefinition(
 					else signal.addEventListener("abort", onAbort, { once: true });
 				}
 
-				child.on("close", (code) => {
+				child.on("close", (_code) => {
 					if (signal) signal.removeEventListener("abort", onAbort);
 					if (signal?.aborted) {
 						reject(new Error("aborted"));

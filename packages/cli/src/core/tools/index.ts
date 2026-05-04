@@ -60,6 +60,10 @@ export {
 	type ReadToolOptions,
 } from "./read.js";
 export {
+	createSemanticSearchTool,
+	createSemanticSearchToolDefinition,
+} from "./semantic_search.js";
+export {
 	DEFAULT_MAX_BYTES,
 	DEFAULT_MAX_LINES,
 	formatSize,
@@ -76,10 +80,6 @@ export {
 	type WriteToolInput,
 	type WriteToolOptions,
 } from "./write.js";
-export {
-	createSemanticSearchTool,
-	createSemanticSearchToolDefinition,
-} from "./semantic_search.js";
 
 import type { EngineTool } from "@mooncli/engine";
 import type { ToolDefinition } from "../extensions/types.js";
@@ -97,8 +97,8 @@ import { createFindTool, createFindToolDefinition, type FindToolOptions } from "
 import { createGrepTool, createGrepToolDefinition, type GrepToolOptions } from "./grep.js";
 import { createLsTool, createLsToolDefinition, type LsToolOptions } from "./ls.js";
 import { createReadTool, createReadToolDefinition, type ReadToolOptions } from "./read.js";
-import { createWriteTool, createWriteToolDefinition, type WriteToolOptions } from "./write.js";
 import { createSemanticSearchTool, createSemanticSearchToolDefinition } from "./semantic_search.js";
+import { createWriteTool, createWriteToolDefinition, type WriteToolOptions } from "./write.js";
 
 export type Tool = EngineTool<any>;
 export type ToolDef = ToolDefinition<any, any>;

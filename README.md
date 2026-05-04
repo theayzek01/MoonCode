@@ -23,6 +23,8 @@
 - MCP-ready architecture
 - Rich interactive TUI
 - Multiple provider support (Gemini CLI, Codex, OpenRouter, Ollama, and more)
+- **Web UI Access**: Launch a professional Glassmorphism dashboard with `/webui`
+- **Ollama Alias**: Quick start sessions with `mooncli olm <model>`
 - Robotics mode (vision + planning)
 - Discord integration from terminal
 - Extensions, skills, prompts, themes

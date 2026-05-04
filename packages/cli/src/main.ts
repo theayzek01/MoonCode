@@ -429,6 +429,7 @@ export interface MainOptions {
 
 export async function main(args: string[], options?: MainOptions) {
 	resetTimings();
+
 	const offlineMode = args.includes("--offline") || isTruthyEnvFlag(process.env.PI_OFFLINE);
 	if (offlineMode) {
 		process.env.PI_OFFLINE = "1";
@@ -441,6 +442,11 @@ export async function main(args: string[], options?: MainOptions) {
 
 	if (await handleConfigCommand(args)) {
 		return;
+	}
+
+	if (args[0] === "olm" && args[1]) {
+		const modelName = args[1];
+		args.splice(0, 2, "--provider", "ollama", "--model", modelName);
 	}
 
 	const parsed = parseArgs(args);

@@ -75,7 +75,9 @@ export class ModelSelectorComponent extends Container implements Focusable {
 		});
 	}
 
-	get focused(): boolean { return this._focused; }
+	get focused(): boolean {
+		return this._focused;
+	}
 	set focused(value: boolean) {
 		this._focused = value;
 		this.searchInput.focused = value;
@@ -87,7 +89,7 @@ export class ModelSelectorComponent extends Container implements Focusable {
 
 		const titleText = theme.bold(theme.fg("accent", " ❯ MODEL SEÇİMİ"));
 		this.addChild(new Text(titleText, 0, 0));
-		
+
 		if (this.scopedModels.length > 0) {
 			this.scopeText = new Text(this.getScopeText(), 1, 0);
 			this.addChild(this.scopeText);
@@ -97,7 +99,7 @@ export class ModelSelectorComponent extends Container implements Focusable {
 
 		this.searchInput = new Input();
 		if (initialSearchInput) this.searchInput.setValue(initialSearchInput);
-		
+
 		this.searchInput.onSubmit = () => {
 			if (this.filteredModels[this.selectedIndex]) {
 				this.handleSelect(this.filteredModels[this.selectedIndex].model);
@@ -111,7 +113,7 @@ export class ModelSelectorComponent extends Container implements Focusable {
 
 		this.addChild(new Spacer(1));
 		this.addChild(new DynamicBorder());
-		
+
 		// Footer hints
 		const hints = `${keyHint("tui.select.up")}/${keyHint("tui.select.down")} seç • ${keyHint("tui.select.confirm")} onayla • ${keyHint("tui.select.cancel")} iptal`;
 		this.addChild(new Text(theme.fg("dim", ` ${hints}`), 0, 0));
@@ -124,22 +126,22 @@ export class ModelSelectorComponent extends Container implements Focusable {
 
 		try {
 			const availableModels = await this.modelRegistry.getAvailable();
-			this.allModels = this.sortModels(availableModels.map(m => ({ provider: m.provider, id: m.id, model: m })));
+			this.allModels = this.sortModels(availableModels.map((m) => ({ provider: m.provider, id: m.id, model: m })));
 		} catch (error) {
 			this.errorMessage = error instanceof Error ? error.message : String(error);
 			return;
 		}
 
-		this.scopedModelItems = this.scopedModels.map(s => ({
+		this.scopedModelItems = this.scopedModels.map((s) => ({
 			provider: s.model.provider,
 			id: s.model.id,
-			model: s.model
+			model: s.model,
 		}));
 
 		this.activeModels = this.scope === "scoped" ? this.scopedModelItems : this.allModels;
 		this.filteredModels = this.activeModels;
-		
-		const currentIndex = this.filteredModels.findIndex(item => modelsAreEqual(this.currentModel, item.model));
+
+		const currentIndex = this.filteredModels.findIndex((item) => modelsAreEqual(this.currentModel, item.model));
 		this.selectedIndex = currentIndex >= 0 ? currentIndex : 0;
 	}
 
@@ -149,18 +151,19 @@ export class ModelSelectorComponent extends Container implements Focusable {
 			const bIsCurrent = modelsAreEqual(this.currentModel, b.model);
 			if (aIsCurrent && !bIsCurrent) return -1;
 			if (!aIsCurrent && bIsCurrent) return 1;
-			
+
 			// Provider sorting: ollama first, then alphabetically
 			if (a.provider === "ollama" && b.provider !== "ollama") return -1;
 			if (a.provider !== "ollama" && b.provider === "ollama") return 1;
-			
+
 			return a.provider.localeCompare(b.provider) || a.id.localeCompare(b.id);
 		});
 	}
 
 	private getScopeText(): string {
 		const allTag = this.scope === "all" ? theme.bg("accent", theme.fg("bg", " HEPSİ ")) : theme.fg("dim", " HEPSİ ");
-		const scopedTag = this.scope === "scoped" ? theme.bg("accent", theme.fg("bg", " KISITLI ")) : theme.fg("dim", " KISITLI ");
+		const scopedTag =
+			this.scope === "scoped" ? theme.bg("accent", theme.fg("bg", " KISITLI ")) : theme.fg("dim", " KISITLI ");
 		return `${theme.fg("dim", "Kapsam [TAB]: ")}${allTag} ${scopedTag}`;
 	}
 
@@ -205,7 +208,7 @@ export class ModelSelectorComponent extends Container implements Focusable {
 			let line = "";
 			const check = isCurrent ? theme.fg("success", " ●") : "  ";
 			const reasoning = item.model.reasoning ? theme.fg("warning", " ⚡") : "";
-			
+
 			if (isSelected) {
 				line = theme.bg("selectedBg", theme.fg("accent", ` ❯ ${item.id} `)) + reasoning + check;
 			} else {
@@ -230,7 +233,7 @@ export class ModelSelectorComponent extends Container implements Focusable {
 
 	handleInput(keyData: string): void {
 		const kb = getKeybindings();
-		
+
 		if (kb.matches(keyData, "tui.input.tab")) {
 			if (this.scopedModelItems.length > 0) {
 				this.scope = this.scope === "all" ? "scoped" : "all";
@@ -268,5 +271,7 @@ export class ModelSelectorComponent extends Container implements Focusable {
 		this.onSelectCallback(model);
 	}
 
-	getSearchInput(): Input { return this.searchInput; }
+	getSearchInput(): Input {
+		return this.searchInput;
+	}
 }
