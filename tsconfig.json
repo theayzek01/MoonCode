@@ -15,11 +15,9 @@
 			"@mooncli/cli/*": ["./packages/cli/src/*"],
 			"typebox": ["./node_modules/typebox"],
 			"@mooncli/tui": ["./packages/tui/src/index.ts"],
-			"@mooncli/tui/*": ["./packages/tui/src/*"],
-			"@mooncli/web-ui": ["./packages/web-ui/src/index.ts"],
-			"@mooncli/web-ui/*": ["./packages/web-ui/src/*"]
+			"@mooncli/tui/*": ["./packages/tui/src/*"]
 		}
 	},
 	"include": ["packages/*/src/**/*", "packages/*/test/**/*", "packages/cli/examples/**/*"],
-	"exclude": ["packages/web-ui/**/*", "**/dist/**"]
+	"exclude": ["**/dist/**"]
 }

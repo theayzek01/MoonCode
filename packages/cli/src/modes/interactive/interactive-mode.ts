@@ -45,7 +45,7 @@ import {
 	TUI,
 	visibleWidth,
 } from "@mooncli/tui";
-import { exec, spawn, spawnSync } from "child_process";
+import { spawnSync } from "child_process";
 import {
 	APP_NAME,
 	APP_TITLE,
@@ -2586,11 +2586,6 @@ export class InteractiveMode {
 				const args = text.startsWith("/impmodel ") ? text.slice(10).trim() : "";
 				this.editor.setText("");
 				await this.handleImpModelCommand(args);
-				return;
-			}
-			if (text === "/webui") {
-				this.handleWebUiCommand();
-				this.editor.setText("");
 				return;
 			}
 			if (text === "/debug") {
@@ -5753,36 +5748,6 @@ export class InteractiveMode {
 			this.ui.requestRender();
 		} catch (error: unknown) {
 			await this.handleFatalRuntimeError("Failed to create session", error);
-		}
-	}
-
-	private handleWebUiCommand(): void {
-		const url = "http://localhost:5173";
-		const openCmd = process.platform === "darwin" ? "open" : process.platform === "win32" ? "start" : "xdg-open";
-
-		if (this.webUiProcess) {
-			exec(`${openCmd} ${url}`);
-			this.showStatus(`Web arayüzü açılıyor: ${url}`);
-			return;
-		}
-
-		this.showStatus("Web sunucusu başlatılıyor (bu birkaç saniye sürebilir)...");
-		try {
-			const npmCmd = process.platform === "win32" ? "npm.cmd" : "npm";
-			this.webUiProcess = spawn(npmCmd, ["run", "dev", "--prefix", "packages/web-ui/example"], {
-				detached: true,
-				stdio: "ignore",
-				shell: true,
-			});
-			this.webUiProcess.unref();
-
-			// Give the server a few seconds to start before opening the browser
-			setTimeout(() => {
-				exec(`${openCmd} ${url}`);
-				this.showStatus(`Web arayüzü hazır: ${url}`);
-			}, 3500);
-		} catch (error) {
-			this.showError(`Sunucu başlatılamadı: ${error instanceof Error ? error.message : "Bilinmeyen hata"}`);
 		}
 	}
 

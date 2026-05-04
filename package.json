@@ -4,7 +4,6 @@
 	"type": "module",
 	"workspaces": [
 		"packages/*",
-		"packages/web-ui/example",
 		"packages/cli/examples/extensions/with-deps",
 		"packages/cli/examples/extensions/custom-provider-anthropic",
 		"packages/cli/examples/extensions/custom-provider-gitlab-duo",
@@ -12,10 +11,10 @@
 	],
 	"scripts": {
 		"clean": "npm run clean --workspaces",
-		"build": "cd packages/tui && npm run build && cd ../core && npm run build && cd ../engine && npm run build && cd ../cli && npm run build && cd ../web-ui && npm run build",
-		"dev": "concurrently --names \"core,engine,cli,web-ui,tui\" --prefix-colors \"cyan,yellow,red,green,magenta\" \"cd packages/core && npm run dev\" \"cd packages/engine && npm run dev\" \"cd packages/cli && npm run dev\" \"cd packages/web-ui && npm run dev\" \"cd packages/tui && npm run dev\"",
-		"dev:tsc": "concurrently --names \"core,web-ui\" --prefix-colors \"cyan,green\" \"cd packages/core && npm run dev:tsc\" \"cd packages/web-ui && npm run dev:tsc\"",
-		"check": "biome check --write --error-on-warnings . && tsc --noEmit -p tsconfig.release.json && npm run check:browser-smoke && cd packages/web-ui && npm run check",
+		"build": "cd packages/tui && npm run build && cd ../core && npm run build && cd ../engine && npm run build && cd ../cli && npm run build",
+		"dev": "concurrently --names \"core,engine,cli,tui\" --prefix-colors \"cyan,yellow,red,magenta\" \"cd packages/core && npm run dev\" \"cd packages/engine && npm run dev\" \"cd packages/cli && npm run dev\" \"cd packages/tui && npm run dev\"",
+		"dev:tsc": "cd packages/core && npm run dev:tsc",
+		"check": "biome check --write --error-on-warnings . && tsc --noEmit -p tsconfig.release.json && npm run check:browser-smoke",
 		"check:browser-smoke": "node scripts/check-browser-smoke.mjs",
 		"profile:tui": "node scripts/profile-cli-node.mjs --mode tui",
 		"profile:rpc": "node scripts/profile-cli-node.mjs --mode rpc",
