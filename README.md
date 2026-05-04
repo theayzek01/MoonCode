@@ -1,106 +1,79 @@
 <p align="center">
-  <a href="https://mooncli.dev">
-    <img alt="Mooncli" src="Mooncli.png" width="180">
-  </a>
+  <img src="Mooncli.png" alt="Mooncli logo" width="180" />
 </p>
 
 <h1 align="center">Mooncli</h1>
 
-<p align="center">
-  Modern, fast, extensible AI coding assistant for terminal workflows.
-</p>
+<p align="center"><strong>AI-first terminal coding assistant with TUI, Web UI, MCP, extensions, and multi-provider support.</strong></p>
 
 <p align="center">
-  <a href="https://discord.com/invite/3cU7Bz4UPx"><img alt="Discord" src="https://img.shields.io/badge/discord-community-5865F2?style=flat-square&logo=discord&logoColor=white" /></a>
-  <a href="https://mooncli.dev"><img alt="Website" src="https://img.shields.io/badge/website-mooncli.dev-blue?style=flat-square" /></a>
-  <a href="https://www.npmjs.com/package/mooncli"><img alt="NPM Version" src="https://img.shields.io/npm/v/mooncli?style=flat-square&color=cb3837" /></a>
+  <a href="https://mooncli.dev"><img alt="Website" src="https://img.shields.io/badge/website-mooncli.dev-0ea5e9?style=for-the-badge" /></a>
+  <a href="https://www.npmjs.com/package/mooncli"><img alt="npm" src="https://img.shields.io/npm/v/mooncli?style=for-the-badge&color=cb3837" /></a>
+  <a href="https://discord.com/invite/3cU7Bz4UPx"><img alt="Discord" src="https://img.shields.io/badge/discord-community-5865F2?style=for-the-badge&logo=discord&logoColor=white" /></a>
 </p>
 
----
+## Why Mooncli
 
-## Highlights
-
+- Fast terminal-native workflow
+- Rich interactive TUI + modern Web UI (`/webui`)
 - MCP-ready architecture
-- Rich interactive TUI
-- Multiple provider support (Gemini CLI, Codex, OpenRouter, Ollama, and more)
-- **Web UI Access**: Launch a professional Glassmorphism dashboard with `/webui`
-- **Ollama Alias**: Quick start sessions with `mooncli olm <model>`
-- Robotics mode (vision + planning)
-- Discord integration from terminal
-- Extensions, skills, prompts, themes
+- Multiple model providers (Gemini CLI, Codex, OpenRouter, Ollama, and more)
+- Extensions, skills, themes, prompts
+- Robotics and Discord integrations
 
-## Install
+## Quick Start
 
 ```bash
 npm install -g mooncli
-```
-
-Run:
-
-```bash
 mooncli
 ```
 
 ## Authentication
 
-Use `/login` in interactive mode, or set environment variables.
-
-Example:
+Use `/login` in interactive mode, or set provider keys directly.
 
 ```bash
 export GEMINI_API_KEY=your_key
 mooncli
 ```
 
-Provider docs:
+## Core Commands
 
-- `docs/providers.md`
-- `docs/models.md`
-
-## Discord Integration
-
-Mooncli can manage your Discord bot directly.
-
-Commands:
-
-- `/discord <bot_token>`: Validate and save token, then reload tools
-- `/discord`: Show current Discord connection summary
-- `/discord botinfo`: Fetch bot identity, status, and guild summary
-- `/discord off`: Disable Discord integration and unload Discord tools
-
-When connected, footer shows `Discord bagli`.
-
-## Robotics Mode
-
-Basic commands:
-
-- `/robotics enable`
-- `/robotics status`
-- `/robotics detect`
-- `/robotics plan <instruction>`
-
-See implementation details in `packages/cli/src/core/robotics`.
+- `/webui`: open the web dashboard
+- `mooncli olm <model>`: Ollama quick alias
+- `/discord <bot_token>`: connect Discord bot
+- `/robotics enable`: enable robotics mode
 
 ## Development
 
 ```bash
 npm install
+npm run check
 npm run build
+npm run test
 node packages/cli/dist/cli.js
 ```
 
-Useful:
+## Documentation
 
-- `npm --prefix packages/cli run build`
-- `npm --prefix packages/cli test`
-
-## Project Docs
-
+- `CONTRIBUTING.md`
+- `PHILOSOPHY.md`
+- `PROJECT_LOG.md`
+- `docs/providers.md`
+- `docs/models.md`
 - `docs/extensions.md`
 - `docs/skills.md`
 - `docs/themes.md`
 - `docs/prompts.md`
 
----
+## Project Structure
 
-Built by the Mooncli team.
+- `packages/cli`: command and interactive runtime
+- `packages/core`: providers, models, core utilities
+- `packages/engine`: execution and orchestration
+- `packages/tui`: terminal UI components
+- `packages/web-ui`: web dashboard
+
+## License
+
+MIT - see `LICENSE`.

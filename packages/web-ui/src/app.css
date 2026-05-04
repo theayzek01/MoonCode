@@ -67,21 +67,6 @@ body {
 	100% {
 		background-position: 200% 0;
 	}
-
-/* Fix cursor for dialog close buttons */
-.fixed.inset-0 button[aria-label*="Close"],
-.fixed.inset-0 button[type="button"] {
-	cursor: pointer;
-}
-
-/* Shimmer animation for thinking text */
-@keyframes shimmer {
-	0% {
-		background-position: -200% 0;
-	}
-	100% {
-		background-position: 200% 0;
-	}
 }
 
 .animate-shimmer {
