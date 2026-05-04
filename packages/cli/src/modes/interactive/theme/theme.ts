@@ -451,15 +451,15 @@ let BUILTIN_THEMES: Record<string, ThemeJson> | undefined;
 function getBuiltinThemes(): Record<string, ThemeJson> {
 	if (!BUILTIN_THEMES) {
 		const themesDir = getThemesDir();
-		const darkPath = path.join(themesDir, "dark.json");
-		const lightPath = path.join(themesDir, "light.json");
-		const moonPath = path.join(themesDir, "moon.json");
-		const softPath = path.join(themesDir, "soft.json");
+		const northLightPath = path.join(themesDir, "north-light.json");
+		const northDarkPath = path.join(themesDir, "north-dark.json");
+		const darkXPath = path.join(themesDir, "darkx.json");
+		const smootPath = path.join(themesDir, "smoot.json");
 		BUILTIN_THEMES = {
-			dark: JSON.parse(fs.readFileSync(darkPath, "utf-8")) as ThemeJson,
-			light: JSON.parse(fs.readFileSync(lightPath, "utf-8")) as ThemeJson,
-			moon: JSON.parse(fs.readFileSync(moonPath, "utf-8")) as ThemeJson,
-			soft: JSON.parse(fs.readFileSync(softPath, "utf-8")) as ThemeJson,
+			"North light": JSON.parse(fs.readFileSync(northLightPath, "utf-8")) as ThemeJson,
+			"North Dark": JSON.parse(fs.readFileSync(northDarkPath, "utf-8")) as ThemeJson,
+			DarkX: JSON.parse(fs.readFileSync(darkXPath, "utf-8")) as ThemeJson,
+			Smoot: JSON.parse(fs.readFileSync(smootPath, "utf-8")) as ThemeJson,
 		};
 	}
 	return BUILTIN_THEMES;
@@ -654,13 +654,15 @@ function _detectTerminalBackground(): "dark" | "light" {
 }
 
 function getDefaultTheme(): string {
-	return "soft";
+	return "Smoot";
 }
 
 function normalizeThemeName(name: string | undefined): string {
 	if (!name) return getDefaultTheme();
-	// Keep legacy "moon" as a soft alias to avoid harsh blue tones.
-	if (name === "moon") return "soft";
+	if (name === "moon") return "Smoot";
+	if (name === "dark") return "North Dark";
+	if (name === "light") return "North light";
+	if (name === "soft") return "Smoot";
 	return name;
 }
 
@@ -757,7 +759,7 @@ function startThemeWatcher(): void {
 	stopThemeWatcher();
 
 	// Only watch if it's a custom theme (not built-in)
-	if (!currentThemeName || currentThemeName === "dark" || currentThemeName === "light") {
+	if (!currentThemeName || currentThemeName in getBuiltinThemes()) {
 		return;
 	}
 
