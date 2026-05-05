@@ -30,6 +30,7 @@ import type { ExtensionFactory } from "./core/extensions/types.js";
 import { KeybindingsManager } from "./core/keybindings.js";
 import type { ModelRegistry } from "./core/model-registry.js";
 import { normalizeProviderId, resolveCliModel, resolveModelScope, type ScopedModel } from "./core/model-resolver.js";
+import { handleOllamaCommand } from "./core/ollama-optimizer.js";
 import { restoreStdout, takeOverStdout } from "./core/output-guard.js";
 import type { CreateEngineSessionOptions } from "./core/sdk.js";
 import {
@@ -441,6 +442,10 @@ export async function main(args: string[], options?: MainOptions) {
 	}
 
 	if (await handleConfigCommand(args)) {
+		return;
+	}
+
+	if (await handleOllamaCommand(args)) {
 		return;
 	}
 

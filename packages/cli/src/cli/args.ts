@@ -207,6 +207,8 @@ ${chalk.bold("Komutlar:")}
   ${APP_NAME} update [kaynak|self|Moon] Mooncli'yi ve yüklü eklentileri güncelle
   ${APP_NAME} list                      Ayarlarda yüklü eklentileri listele
   ${APP_NAME} config                    Paket kaynaklarını etkinleştirmek/devre dışı bırakmak için TUI'yi aç
+  ${APP_NAME} ollama doctor             Yerel Ollama bağlantısını ve modelleri kontrol et
+  ${APP_NAME} ollama profile <profil>   Ollama hız/RAM profil komutlarını yazdır
   ${APP_NAME} <komut> --help            Yükleme/kaldırma/güncelleme/listeleme için yardım göster
 
 ${chalk.bold("Seçenekler:")}
@@ -266,6 +268,12 @@ ${chalk.bold("Örnekler:")}
 
   # Önceki oturuma devam et
   ${APP_NAME} --continue "Neyi tartışmıştık?"
+
+  # Yerel Ollama modelini hızlı başlat
+  ${APP_NAME} olm qwen2.5-coder:7b "Bu kodu refactor etmeme yardım et"
+
+  # Ollama düşük RAM / yüksek hız profilini hazırla
+  ${APP_NAME} ollama profile turbo
 
   # Farklı model kullan
   ${APP_NAME} --provider openai --model gpt-4o-mini "Bu kodu refactor etmeme yardım et"

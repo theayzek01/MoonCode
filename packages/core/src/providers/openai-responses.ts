@@ -160,6 +160,19 @@ export const streamSimpleOpenAIResponses: StreamFunction<"openai-responses", Sim
 	} satisfies OpenAIResponsesOptions);
 };
 
+function openAIFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+	if (init === undefined && typeof Request !== "undefined" && input instanceof Request) {
+		return globalThis.fetch(input.url, {
+			method: input.method,
+			headers: input.headers,
+			body: input.body,
+			duplex: "half",
+			signal: input.signal,
+		} as RequestInit);
+	}
+	return globalThis.fetch(input, init);
+}
+
 function createClient(
 	model: Model<"openai-responses">,
 	context: Context,
@@ -213,6 +226,7 @@ function createClient(
 		baseURL: isCloudflareProvider(model.provider) ? resolveCloudflareBaseUrl(model) : model.baseUrl,
 		dangerouslyAllowBrowser: true,
 		defaultHeaders,
+		fetch: openAIFetch,
 	});
 }
 
