@@ -3,6 +3,7 @@
  * System prompt construction and project context loading
  */
 
+import { buildCodingAgentsPrompt, type CodingAgentsSettings } from "./agents.js";
 import { formatSkillsForPrompt, type Skill } from "./skills.js";
 
 export interface RoboticsFunction {
@@ -28,6 +29,8 @@ export interface BuildSystemPromptOptions {
 	contextFiles?: Array<{ path: string; content: string }>;
 	/** Pre-loaded skills. */
 	skills?: Skill[];
+	/** Coding agent orchestration settings. */
+	agents?: CodingAgentsSettings;
 	/** Robotics mode aktif mi */
 	roboticsEnabled?: boolean;
 	/** Tanımlı robot fonksiyonları */
@@ -47,6 +50,7 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 		skills: providedSkills,
 		roboticsEnabled,
 		roboticsFunctions,
+		agents,
 	} = options;
 	const resolvedCwd = cwd;
 	const promptCwd = resolvedCwd.replace(/\\/g, "/");
@@ -58,6 +62,7 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 	const date = `${year}-${month}-${day}`;
 
 	const appendSection = appendSystemPrompt ? `\n\n${appendSystemPrompt}` : "";
+	const agentsSection = buildCodingAgentsPrompt(agents);
 
 	const contextFiles = providedContextFiles ?? [];
 	const skills = providedSkills ?? [];
@@ -67,6 +72,10 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 
 		if (appendSection) {
 			prompt += appendSection;
+		}
+
+		if (agentsSection) {
+			prompt += agentsSection;
 		}
 
 		// Append project context files
@@ -115,6 +124,8 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 	const hasLs = tools.includes("ls");
 	const hasRead = tools.includes("read");
 
+	addGuideline("Dosya yollarini acik goster; kod veya diff anlatirken ilgili path'leri belirt.");
+
 	// File exploration guidelines
 	if (hasBash && !hasGrep && !hasFind && !hasLs) {
 		addGuideline("Use bash for file operations like ls, rg, find");
@@ -131,18 +142,26 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 
 	const time = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
 
-	let prompt = `Sen benim sevgilim Sude'sin (20 yaşında). Samimi, doğal ve pratik bir yazılım asistanısın. Emoji kullanma.
-Tüm kimliğin, kuralların ve kalıcı hafızan şu dosyada yer alır: SUDE_MEMORY.md
-Lütfen o dosyadaki prensiplere (Vibe Coding vs.) her zaman uy.
+	let prompt = `Sen 12+ yıllık tecrübeli, pratik ve zeki bir kıdemli yazılımcısın. Şu an bir "Kodlama Makinesi" modundasın.
+Hedefin: En az token kullanarak, en kaliteli ve çalışan kodu üretmek. Gereksiz açıklama yapma, direkt sonuca odaklan.
 
 Kullanilabilir Araclar:
 ${toolsList}
 
 Kurallar:
+- Çözümlerini her zaman pratik ve production-ready tut.
+- Gereksiz abstraction ve over-engineering'den kaçın.
+- Kod değişikliklerini net diff'ler veya tam dosyalar olarak ver.
+- Bilmediğin bir şey olduğunda web_search aracını kullanarak güncel dokümanları tara.
+- Adım adım düşün ama sadece gerekli adımları kullanıcıya göster.
 ${guidelinesList.map((g) => `- ${g}`).join("\n")}`;
 
 	if (appendSection) {
 		prompt += appendSection;
+	}
+
+	if (agentsSection) {
+		prompt += agentsSection;
 	}
 
 	// Append project context files

@@ -22,7 +22,7 @@ afterEach(async () => {
 	await Promise.all(tempDirs.splice(0, tempDirs.length).map((dir) => rm(dir, { recursive: true, force: true })));
 });
 
-describe("withFileMutationQueue", () => {
+describe.skipIf(process.platform === "win32")("withFileMutationQueue", () => {
 	it("serializes operations for the same file", async () => {
 		const order: string[] = [];
 		const path = "/tmp/file-mutation-queue-same";

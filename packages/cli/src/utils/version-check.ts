@@ -52,7 +52,7 @@ export async function getLatestMooncliVersion(
 	currentVersion: string,
 	options: { timeoutMs?: number } = {},
 ): Promise<string | undefined> {
-	if (process.env.Moon_SKIP_VERSION_CHECK || process.env.Moon_OFFLINE) return undefined;
+	if (process.env.MoonCLI_SKIP_VERSION_CHECK || process.env.MoonCLI_OFFLINE) return undefined;
 
 	const response = await fetch(LATEST_VERSION_URL, {
 		headers: {

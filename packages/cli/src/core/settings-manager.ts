@@ -5,6 +5,7 @@ import { homedir } from "os";
 import { dirname, join } from "path";
 import lockfile from "proper-lockfile";
 import { CONFIG_DIR_NAME, getEngineDir } from "../config.js";
+import type { CodingAgentMode, CodingAgentsSettings, CodingAgentVerbosity } from "./agents.js";
 
 export interface CompactionSettings {
 	enabled?: boolean; // default: true
@@ -56,6 +57,8 @@ export interface MarkdownSettings {
 export interface WarningSettings {
 	anthropicExtraUsage?: boolean; // default: true
 }
+
+export type CodingAgentSettings = CodingAgentsSettings;
 
 export interface RoboticsSettings {
 	enabled?: boolean; // default: false
@@ -129,6 +132,7 @@ export interface Settings {
 	warnings?: WarningSettings;
 	sessionDir?: string; // Custom session storage directory (same format as --session-dir CLI flag)
 	mcpServers?: Record<string, McpServerConfig>; // MCP server configurations
+	agents?: CodingAgentSettings; // Company-style coding agent orchestration
 	robotics?: RoboticsSettings; // Robotics mode configuration
 	discordToken?: string; // Discord Bot Token
 }
@@ -1093,6 +1097,55 @@ export class SettingsManager {
 	setWarnings(warnings: WarningSettings): void {
 		this.globalSettings.warnings = { ...warnings };
 		this.markModified("warnings");
+		this.save();
+	}
+
+	// =========================================================================
+	// Agent Settings
+	// =========================================================================
+
+	getAgentsSettings(): CodingAgentSettings {
+		const configured = this.settings.agents ?? {};
+		const mode = configured.mode ?? (configured.enabled === false ? "off" : "auto");
+		return {
+			...configured,
+			enabled: configured.enabled ?? mode !== "off",
+			mode,
+			verbosity: configured.verbosity ?? "summary",
+		};
+	}
+
+	getAgentsEnabled(): boolean {
+		const settings = this.getAgentsSettings();
+		return settings.enabled !== false && settings.mode !== "off";
+	}
+
+	setAgentsEnabled(enabled: boolean): void {
+		if (!this.globalSettings.agents) this.globalSettings.agents = {};
+		this.globalSettings.agents.enabled = enabled;
+		this.globalSettings.agents.mode = enabled
+			? this.globalSettings.agents.mode === "off"
+				? "auto"
+				: (this.globalSettings.agents.mode ?? "auto")
+			: "off";
+		this.markModified("agents", "enabled");
+		this.markModified("agents", "mode");
+		this.save();
+	}
+
+	setAgentsMode(mode: CodingAgentMode): void {
+		if (!this.globalSettings.agents) this.globalSettings.agents = {};
+		this.globalSettings.agents.mode = mode;
+		this.globalSettings.agents.enabled = mode !== "off";
+		this.markModified("agents", "mode");
+		this.markModified("agents", "enabled");
+		this.save();
+	}
+
+	setAgentsVerbosity(verbosity: CodingAgentVerbosity): void {
+		if (!this.globalSettings.agents) this.globalSettings.agents = {};
+		this.globalSettings.agents.verbosity = verbosity;
+		this.markModified("agents", "verbosity");
 		this.save();
 	}
 

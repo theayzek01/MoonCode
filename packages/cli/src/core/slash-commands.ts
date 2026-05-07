@@ -42,6 +42,7 @@ export const BUILTIN_SLASH_COMMANDS: ReadonlyArray<BuiltinSlashCommand> = [
 		description: "Klavye kisayollarini, uzantilari, yetenekleri, istemleri ve temalari yeniden yukle",
 	},
 	{ name: "quit", description: `${APP_NAME}'den cik` },
+	{ name: "agents", description: "Agent sistemi - sirket gibi kodlama orkestrasyonu" },
 	{ name: "robotics", description: "Robotics mode - goruntu analizi, nesne tespiti, yorunge planlama" },
 	{ name: "discord", description: "Discord entegrasyonu ve bot yonetimi" },
 	{ name: "update", description: "Mooncli ve uzantilari hizlica guncelle" },

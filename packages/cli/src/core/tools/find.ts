@@ -233,6 +233,7 @@ export function createFindToolDefinition(
 							"--color=never",
 							"--hidden",
 							"--no-require-git",
+							"--path-separator=/",
 							"--max-results",
 							String(effectiveLimit),
 						];

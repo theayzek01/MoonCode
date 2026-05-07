@@ -74,6 +74,35 @@ describe("buildSystemPrompt", () => {
 		});
 	});
 
+	describe("agent system", () => {
+		test("includes company-style coding agents when enabled", () => {
+			const prompt = buildSystemPrompt({
+				selectedTools: ["read", "bash"],
+				agents: { enabled: true, mode: "always", verbosity: "summary" },
+				contextFiles: [],
+				skills: [],
+				cwd: process.cwd(),
+			});
+
+			expect(prompt).toContain("## Agent System (Company Mode)");
+			expect(prompt).toContain("Patron / Orchestrator");
+			expect(prompt).toContain("Backend Muhendisi");
+			expect(prompt).toContain("Integrator / Reviewer");
+		});
+
+		test("omits company-style coding agents when disabled", () => {
+			const prompt = buildSystemPrompt({
+				selectedTools: ["read", "bash"],
+				agents: { enabled: false, mode: "off", verbosity: "summary" },
+				contextFiles: [],
+				skills: [],
+				cwd: process.cwd(),
+			});
+
+			expect(prompt).not.toContain("## Agent System (Company Mode)");
+		});
+	});
+
 	describe("prompt guidelines", () => {
 		test("appends promptGuidelines to default guidelines", () => {
 			const prompt = buildSystemPrompt({

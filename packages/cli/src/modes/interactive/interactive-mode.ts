@@ -2560,6 +2560,12 @@ export class InteractiveMode {
 				await this.handleReloadCommand();
 				return;
 			}
+			if (text === "/agents" || text.startsWith("/agents ")) {
+				const args = text.startsWith("/agents ") ? text.slice(8).trim() : "";
+				this.editor.setText("");
+				this.handleAgentsCommand(args);
+				return;
+			}
 			if (text === "/robotics" || text.startsWith("/robotics ")) {
 				const args = text.startsWith("/robotics ") ? text.slice(10).trim() : "";
 				this.editor.setText("");
@@ -4829,6 +4835,90 @@ export class InteractiveMode {
 	// =========================================================================
 	// Command handlers
 	// =========================================================================
+
+	private handleAgentsCommand(args: string): void {
+		const parts = args.split(/\s+/).filter(Boolean);
+		const cmd = parts[0]?.toLowerCase();
+		const settings = this.session.getAgentsSettings();
+
+		if (!cmd || cmd === "help") {
+			this.chatContainer.addChild(new Text(this.renderAgentsHelp(), 1, 0));
+			this.ui.requestRender();
+			return;
+		}
+
+		if (cmd === "status") {
+			const enabled = settings.enabled !== false && settings.mode !== "off";
+			this.chatContainer.addChild(
+				new Text(
+					[
+						"Agent Sistemi",
+						`Durum: ${enabled ? "acik" : "kapali"}`,
+						`Mode: ${settings.mode ?? "auto"}`,
+						`Gorunum: ${settings.verbosity ?? "summary"}`,
+						"Kullanim: /agents enable | disable | mode auto|always|off | verbosity quiet|summary|verbose",
+					].join("\n"),
+					1,
+					0,
+				),
+			);
+			this.ui.requestRender();
+			return;
+		}
+
+		if (cmd === "enable" || cmd === "on") {
+			this.session.enableAgentsMode();
+			this.showStatus("Agent sistemi acildi. Artik kompleks kod islerinde Patron + uzman ekip gibi ilerleyecek.");
+			return;
+		}
+
+		if (cmd === "disable" || cmd === "off") {
+			this.session.disableAgentsMode();
+			this.showStatus("Agent sistemi kapatildi.");
+			return;
+		}
+
+		if (cmd === "mode") {
+			const mode = parts[1]?.toLowerCase();
+			if (mode !== "auto" && mode !== "always" && mode !== "off") {
+				this.showError("Gecersiz agent mode. Kullanim: /agents mode auto|always|off");
+				return;
+			}
+			this.session.setAgentsMode(mode);
+			this.showStatus(`Agent mode guncellendi: ${mode}`);
+			return;
+		}
+
+		if (cmd === "verbosity" || cmd === "visible") {
+			const verbosity = parts[1]?.toLowerCase();
+			if (verbosity !== "quiet" && verbosity !== "summary" && verbosity !== "verbose") {
+				this.showError("Gecersiz agent gorunumu. Kullanim: /agents verbosity quiet|summary|verbose");
+				return;
+			}
+			this.session.setAgentsVerbosity(verbosity);
+			this.showStatus(`Agent gorunumu guncellendi: ${verbosity}`);
+			return;
+		}
+
+		this.showError(`Bilinmeyen agents komutu: ${cmd}`);
+	}
+
+	private renderAgentsHelp(): string {
+		return [
+			"Agent Sistemi",
+			"Mooncli kod islerini kucuk bir yazilim sirketi gibi organize eder.",
+			"Patron kapsami belirler; Mimar, Backend, Frontend, QA, Security ve Integrator kendi alanindan kontrol eder.",
+			"",
+			"Komutlar:",
+			"  /agents status",
+			"  /agents enable",
+			"  /agents disable",
+			"  /agents mode auto|always|off",
+			"  /agents verbosity quiet|summary|verbose",
+			"",
+			"Oneri: auto + summary. Basit islerde susar, kompleks projede ekip gibi calisir.",
+		].join("\n");
+	}
 
 	private async handleRoboticsCommand(args: string): Promise<void> {
 		const parts = args.split(" ");

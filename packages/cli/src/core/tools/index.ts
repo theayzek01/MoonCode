@@ -74,6 +74,12 @@ export {
 	truncateTail,
 } from "./truncate.js";
 export {
+	createWebSearchTool,
+	createWebSearchToolDefinition,
+	type WebSearchToolDetails,
+	type WebSearchToolInput,
+} from "./web-search.js";
+export {
 	createWriteTool,
 	createWriteToolDefinition,
 	type WriteOperations,
@@ -98,6 +104,7 @@ import { createGrepTool, createGrepToolDefinition, type GrepToolOptions } from "
 import { createLsTool, createLsToolDefinition, type LsToolOptions } from "./ls.js";
 import { createReadTool, createReadToolDefinition, type ReadToolOptions } from "./read.js";
 import { createSemanticSearchTool, createSemanticSearchToolDefinition } from "./semantic_search.js";
+import { createWebSearchTool, createWebSearchToolDefinition } from "./web-search.js";
 import { createWriteTool, createWriteToolDefinition, type WriteToolOptions } from "./write.js";
 
 export type Tool = EngineTool<any>;
@@ -110,6 +117,7 @@ export type ToolName =
 	| "grep"
 	| "find"
 	| "ls"
+	| "web_search"
 	| "semantic_search"
 	| "discord_list_guilds"
 	| "discord_get_channels"
@@ -123,6 +131,7 @@ export const allToolNames: Set<ToolName> = new Set([
 	"grep",
 	"find",
 	"ls",
+	"web_search",
 	"semantic_search",
 	"discord_list_guilds",
 	"discord_get_channels",
@@ -157,6 +166,8 @@ export function createToolDefinition(toolName: ToolName, cwd: string, options?: 
 			return createFindToolDefinition(cwd, options?.find);
 		case "ls":
 			return createLsToolDefinition(cwd, options?.ls);
+		case "web_search":
+			return createWebSearchToolDefinition();
 		case "semantic_search":
 			return createSemanticSearchToolDefinition(cwd);
 		case "discord_list_guilds":
@@ -185,6 +196,8 @@ export function createTool(toolName: ToolName, cwd: string, options?: ToolsOptio
 			return createFindTool(cwd, options?.find);
 		case "ls":
 			return createLsTool(cwd, options?.ls);
+		case "web_search":
+			return createWebSearchTool();
 		case "semantic_search":
 			return createSemanticSearchTool(cwd);
 		case "discord_list_guilds":
@@ -216,6 +229,7 @@ export function createReadOnlyToolDefinitions(cwd: string, options?: ToolsOption
 		createFindToolDefinition(cwd, options?.find),
 		createLsToolDefinition(cwd, options?.ls),
 		createSemanticSearchToolDefinition(cwd),
+		createWebSearchToolDefinition(),
 	];
 }
 
@@ -228,6 +242,7 @@ export function createAllToolDefinitions(cwd: string, options?: ToolsOptions): R
 		grep: createGrepToolDefinition(cwd, options?.grep),
 		find: createFindToolDefinition(cwd, options?.find),
 		ls: createLsToolDefinition(cwd, options?.ls),
+		web_search: createWebSearchToolDefinition(),
 		semantic_search: createSemanticSearchToolDefinition(cwd),
 		...Object.fromEntries(createDiscordToolDefinitions(options?.discord).map((tool) => [tool.name, tool])),
 	};
@@ -249,6 +264,7 @@ export function createReadOnlyTools(cwd: string, options?: ToolsOptions): Tool[]
 		createFindTool(cwd, options?.find),
 		createLsTool(cwd, options?.ls),
 		createSemanticSearchTool(cwd),
+		createWebSearchTool(),
 	];
 }
 
@@ -261,6 +277,7 @@ export function createAllTools(cwd: string, options?: ToolsOptions): Record<Tool
 		grep: createGrepTool(cwd, options?.grep),
 		find: createFindTool(cwd, options?.find),
 		ls: createLsTool(cwd, options?.ls),
+		web_search: createWebSearchTool(),
 		semantic_search: createSemanticSearchTool(cwd),
 		discord_list_guilds: createDiscordListGuildsTool(options?.discord),
 		discord_get_channels: createDiscordGetChannelsTool(options?.discord),

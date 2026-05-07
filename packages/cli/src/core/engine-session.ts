@@ -28,6 +28,7 @@ import type { Engine, EngineEvent, EngineMessage, EngineState, EngineTool, Think
 import { theme } from "../modes/interactive/theme/theme.js";
 import { stripFrontmatter } from "../utils/frontmatter.js";
 import { sleep } from "../utils/sleep.js";
+import type { CodingAgentMode, CodingAgentVerbosity } from "./agents.js";
 import { formatNoApiKeyFoundMessage, formatNoModelSelectedMessage } from "./auth-guidance.js";
 import { type BashResult, executeBashWithOperations } from "./bash-executor.js";
 import {
@@ -950,6 +951,8 @@ export class EngineSession {
 		const loadedSkills = this._resourceLoader.getSkills().skills;
 		const loadedContextFiles = this._resourceLoader.getEnginesFiles().enginesFiles;
 
+		const agents = this.settingsManager.getAgentsSettings();
+
 		// Robotics settings inject
 		const roboticsEnabled = this.settingsManager.getRoboticsEnabled();
 		let roboticsFunctions: RoboticsFunction[] | undefined;
@@ -973,10 +976,44 @@ export class EngineSession {
 			selectedTools: validToolNames,
 			toolSnippets,
 			promptGuidelines,
+			agents,
 			roboticsEnabled,
 			roboticsFunctions,
 		};
 		return buildSystemPrompt(this._baseSystemPromptOptions);
+	}
+
+	// =========================================================================
+	// Agent System
+	// =========================================================================
+
+	private _refreshBaseSystemPrompt(): void {
+		this._baseSystemPrompt = this._rebuildSystemPrompt(this.getActiveToolNames());
+		this.engine.state.systemPrompt = this._baseSystemPrompt;
+	}
+
+	getAgentsSettings() {
+		return this.settingsManager.getAgentsSettings();
+	}
+
+	enableAgentsMode(): void {
+		this.settingsManager.setAgentsEnabled(true);
+		this._refreshBaseSystemPrompt();
+	}
+
+	disableAgentsMode(): void {
+		this.settingsManager.setAgentsEnabled(false);
+		this._refreshBaseSystemPrompt();
+	}
+
+	setAgentsMode(mode: CodingAgentMode): void {
+		this.settingsManager.setAgentsMode(mode);
+		this._refreshBaseSystemPrompt();
+	}
+
+	setAgentsVerbosity(verbosity: CodingAgentVerbosity): void {
+		this.settingsManager.setAgentsVerbosity(verbosity);
+		this._refreshBaseSystemPrompt();
 	}
 
 	// =========================================================================
@@ -2499,6 +2536,7 @@ export class EngineSession {
 					"bash",
 					"edit",
 					"write",
+					"web_search",
 					...(discordToken
 						? ["discord_list_guilds", "discord_get_channels", "discord_send_message", "discord_manage_channel"]
 						: []),
@@ -2525,8 +2563,9 @@ export class EngineSession {
 					"discord_get_channels",
 					"discord_send_message",
 					"discord_manage_channel",
+					"web_search",
 				]
-			: activeToolNames;
+			: [...activeToolNames, "web_search"];
 		this._buildRuntime({
 			activeToolNames: nextActiveToolNames,
 			flagValues: previousFlagValues,

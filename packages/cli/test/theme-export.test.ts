@@ -21,17 +21,17 @@ describe("getThemeExportColors", () => {
 
 	beforeEach(() => {
 		tempRoot = mkdtempSync(join(tmpdir(), "Mooncli-theme-export-"));
-		previousEngineDir = process.env.PI_CODING_AGENT_DIR;
-		process.env.PI_CODING_AGENT_DIR = join(tempRoot, "engine");
-		mkdirSync(join(process.env.PI_CODING_AGENT_DIR, "themes"), { recursive: true });
+		previousEngineDir = process.env.MOON_CODING_AGENT_DIR;
+		process.env.MOON_CODING_AGENT_DIR = join(tempRoot, "engine");
+		mkdirSync(join(process.env.MOON_CODING_AGENT_DIR, "themes"), { recursive: true });
 	});
 
 	afterEach(() => {
 		rmSync(tempRoot, { recursive: true, force: true });
 		if (previousEngineDir === undefined) {
-			delete process.env.PI_CODING_AGENT_DIR;
+			delete process.env.MOON_CODING_AGENT_DIR;
 		} else {
-			process.env.PI_CODING_AGENT_DIR = previousEngineDir;
+			process.env.MOON_CODING_AGENT_DIR = previousEngineDir;
 		}
 	});
 
@@ -58,7 +58,7 @@ describe("getThemeExportColors", () => {
 		};
 
 		writeFileSync(
-			join(process.env.PI_CODING_AGENT_DIR!, "themes", "custom-export-vars.json"),
+			join(process.env.MOON_CODING_AGENT_DIR!, "themes", "custom-export-vars.json"),
 			JSON.stringify(customTheme, null, 2),
 		);
 
@@ -91,7 +91,7 @@ describe("getThemeExportColors", () => {
 		};
 
 		writeFileSync(
-			join(process.env.PI_CODING_AGENT_DIR!, "themes", "custom-export-recursive.json"),
+			join(process.env.MOON_CODING_AGENT_DIR!, "themes", "custom-export-recursive.json"),
 			JSON.stringify(customTheme, null, 2),
 		);
 

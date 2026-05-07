@@ -12,7 +12,7 @@ describe("package commands", () => {
 	let packageDir: string;
 	let originalCwd: string;
 	let originalEngineDir: string | undefined;
-	let originalPiPackageDir: string | undefined;
+	let originalMoonPackageDir: string | undefined;
 	let originalExitCode: typeof process.exitCode;
 	let originalExecPath: string;
 
@@ -27,7 +27,7 @@ describe("package commands", () => {
 
 		originalCwd = process.cwd();
 		originalEngineDir = process.env[ENV_AGENT_DIR];
-		originalPiPackageDir = process.env.PI_PACKAGE_DIR;
+		originalMoonPackageDir = process.env.PI_PACKAGE_DIR;
 		originalExitCode = process.exitCode;
 		originalExecPath = process.execPath;
 		process.exitCode = undefined;
@@ -43,10 +43,10 @@ describe("package commands", () => {
 		} else {
 			process.env[ENV_AGENT_DIR] = originalEngineDir;
 		}
-		if (originalPiPackageDir === undefined) {
+		if (originalMoonPackageDir === undefined) {
 			delete process.env.PI_PACKAGE_DIR;
 		} else {
-			process.env.PI_PACKAGE_DIR = originalPiPackageDir;
+			process.env.PI_PACKAGE_DIR = originalMoonPackageDir;
 		}
 		Object.defineProperty(process, "execPath", { value: originalExecPath, configurable: true });
 		rmSync(tempDir, { recursive: true, force: true });
@@ -87,8 +87,8 @@ describe("package commands", () => {
 			await expect(main(["install", "--help"])).resolves.toBeUndefined();
 
 			const stdout = logSpy.mock.calls.map(([message]) => String(message)).join("\n");
-			expect(stdout).toContain("Usage:");
-			expect(stdout).toContain("Mooncli install <source> [-l]");
+			expect(stdout).toContain("Kullanım:");
+			expect(stdout).toContain(`${"Moon"} install <source> [-l]`);
 			expect(errorSpy).not.toHaveBeenCalled();
 			expect(process.exitCode).toBeUndefined();
 		} finally {
@@ -104,8 +104,8 @@ describe("package commands", () => {
 			await expect(main(["install", "--unknown"])).resolves.toBeUndefined();
 
 			const stderr = errorSpy.mock.calls.map(([message]) => String(message)).join("\n");
-			expect(stderr).toContain('Unknown option --unknown for "install".');
-			expect(stderr).toContain('Use "Mooncli --help" or "Mooncli install <source> [-l]".');
+			expect(stderr).toContain('"install" için bilinmeyen seçenek: --unknown.');
+			expect(stderr).toContain('"Moon --help" veya "Moon install <source> [-l]"');
 			expect(process.exitCode).toBe(1);
 		} finally {
 			errorSpy.mockRestore();
@@ -119,8 +119,8 @@ describe("package commands", () => {
 			await expect(main(["install"])).resolves.toBeUndefined();
 
 			const stderr = errorSpy.mock.calls.map(([message]) => String(message)).join("\n");
-			expect(stderr).toContain("Missing install source.");
-			expect(stderr).toContain("Usage: Mooncli install <source> [-l]");
+			expect(stderr).toContain("install kaynağı eksik.");
+			expect(stderr).toContain("Kullanım: Moon install <source> [-l]");
 			expect(stderr).not.toContain("at ");
 			expect(process.exitCode).toBe(1);
 		} finally {
@@ -151,7 +151,7 @@ else fs.writeFileSync(${JSON.stringify(recordPath)},JSON.stringify(args));
 			join(projectDir, ".Mooncli", "settings.json"),
 			JSON.stringify({ npmCommand: [originalExecPath, fakeNpmPath, "--prefix", projectPrefix] }, null, 2),
 		);
-		process.env.PI_PACKAGE_DIR = selfPackageDir;
+		process.env.MOON_PACKAGE_DIR = selfPackageDir;
 		Object.defineProperty(process, "execPath", {
 			value: join(selfPackageDir, "dist", "cli.js"),
 			configurable: true,

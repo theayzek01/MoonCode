@@ -81,15 +81,19 @@ function getAliases(): Record<string, string> {
 		if (fs.existsSync(workspacePath)) {
 			return workspacePath;
 		}
-		return fileURLToPath(import.meta.resolve(specifier));
+		try {
+			return fileURLToPath(import.meta.resolve(specifier));
+		} catch {
+			return require.resolve(specifier);
+		}
 	};
 
 	_aliases = {
 		Mooncli: packageIndex,
 		"@mooncli/engine": resolveWorkspaceOrImport("engine/dist/index.js", "@mooncli/engine"),
 		"@mooncli/tui": resolveWorkspaceOrImport("tui/dist/index.js", "@mooncli/tui"),
-		"@mooncli/core": resolveWorkspaceOrImport("ai/dist/index.js", "@mooncli/core"),
-		"@mooncli/core/oauth": resolveWorkspaceOrImport("ai/dist/oauth.js", "@mooncli/core/oauth"),
+		"@mooncli/core": resolveWorkspaceOrImport("core/dist/index.js", "@mooncli/core"),
+		"@mooncli/core/oauth": resolveWorkspaceOrImport("core/dist/oauth.js", "@mooncli/core/oauth"),
 		typebox: typeboxEntry,
 		"typebox/compile": typeboxCompileEntry,
 		"typebox/value": typeboxValueEntry,

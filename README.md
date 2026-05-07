@@ -19,6 +19,7 @@
 - MCP-ready architecture
 - Multiple model providers (Gemini CLI, Codex, OpenRouter, Ollama, and more)
 - Extensions, skills, themes, prompts
+- Company-style Agent System for complex coding tasks
 - Robotics and Discord integrations
 
 ## Quick Start
@@ -62,6 +63,7 @@ mooncli
 ## Core Commands
 
 - `/webui`: open the web dashboard
+- `/agents`: configure the company-style coding Agent System
 - `mooncli olm <model>`: Ollama quick alias
 - `/discord <bot_token>`: connect Discord bot
 - `/robotics enable`: enable robotics mode

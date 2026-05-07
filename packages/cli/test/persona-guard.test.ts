@@ -1,13 +1,12 @@
-import { strict as assert } from "node:assert";
-import { describe, it } from "node:test";
+import { describe, expect, it } from "vitest";
 import { assertNoPersonaLeak } from "../src/core/tools/persona-guard.js";
 
 describe("persona guard", () => {
 	it("allows regular code content", () => {
-		assert.doesNotThrow(() => assertNoPersonaLeak("export const ok = true;\n"));
+		expect(() => assertNoPersonaLeak("export const ok = true;\n")).not.toThrow();
 	});
 
 	it("blocks persona tokens in content", () => {
-		assert.throws(() => assertNoPersonaLeak("// sude burada\nconst x = 1;\n"), /persona guard/i);
+		expect(() => assertNoPersonaLeak("// sude burada\nconst x = 1;\n")).toThrow(/persona guard/i);
 	});
 });

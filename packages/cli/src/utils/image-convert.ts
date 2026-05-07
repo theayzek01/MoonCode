@@ -35,7 +35,8 @@ export async function convertToPng(
 		} finally {
 			image.free();
 		}
-	} catch {
+	} catch (e) {
+		console.error("Photon error in convertToPng:", e);
 		// Conversion failed
 		return null;
 	}

@@ -27,8 +27,10 @@ async function captureOpenAIResponseHeaders(
 ): Promise<{ sessionId: string | null; clientRequestId: string | null }> {
 	const captured = { sessionId: null as string | null, clientRequestId: null as string | null };
 	vi.spyOn(globalThis, "fetch").mockImplementation(async (_input, init) => {
-		captured.sessionId = getHeader(init?.headers, "session_id");
-		captured.clientRequestId = getHeader(init?.headers, "x-client-request-id");
+		const requestHeaders = (_input instanceof Request ? _input.headers : null) as CapturedHeaders;
+		captured.sessionId = getHeader(init?.headers, "session_id") ?? getHeader(requestHeaders, "session_id");
+		captured.clientRequestId =
+			getHeader(init?.headers, "x-client-request-id") ?? getHeader(requestHeaders, "x-client-request-id");
 		return new Response("data: [DONE]\n\n", {
 			status: 200,
 			headers: { "content-type": "text/event-stream" },
@@ -143,7 +145,12 @@ describe("openai-responses provider defaults", () => {
 		["gpt-5.5", "priority", 2.5],
 		["gpt-5.5", "flex", 0.5],
 	] as const)("applies %s %s service-tier cost multiplier", async (modelId, serviceTier, multiplier) => {
-		const model = getModel("openai", modelId);
+		const baseModel = getModel("openai", modelId);
+		const model = {
+			...baseModel,
+			id: modelId,
+			cost: { input: 2.5, output: 15, cacheRead: 0.25, cacheWrite: 0, total: 0 },
+		} as any;
 		const sse = `${[
 			`data: ${JSON.stringify({
 				type: "response.completed",

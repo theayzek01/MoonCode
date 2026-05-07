@@ -93,6 +93,7 @@ describe("Cache Retention (PI_CACHE_RETENTION)", () => {
 			try {
 				const s = streamAnthropic(proxyModel, context, {
 					apiKey: "fake-key",
+					maxRetries: 0,
 					onPayload: (payload) => {
 						capturedPayload = payload;
 					},
@@ -124,6 +125,7 @@ describe("Cache Retention (PI_CACHE_RETENTION)", () => {
 			try {
 				const s = streamAnthropic(proxyModel, context, {
 					apiKey: "fake-key",
+					maxRetries: 0,
 					cacheRetention: "long",
 					onPayload: (payload) => {
 						capturedPayload = payload;
@@ -150,6 +152,7 @@ describe("Cache Retention (PI_CACHE_RETENTION)", () => {
 			try {
 				const s = streamAnthropic(baseModel, context, {
 					apiKey: "fake-key",
+					maxRetries: 0,
 					cacheRetention: "none",
 					onPayload: (payload) => {
 						capturedPayload = payload;
@@ -176,6 +179,7 @@ describe("Cache Retention (PI_CACHE_RETENTION)", () => {
 			try {
 				const s = streamAnthropic(baseModel, context, {
 					apiKey: "fake-key",
+					maxRetries: 0,
 					onPayload: (payload) => {
 						capturedPayload = payload;
 					},
@@ -204,6 +208,7 @@ describe("Cache Retention (PI_CACHE_RETENTION)", () => {
 			try {
 				const s = streamAnthropic(baseModel, context, {
 					apiKey: "fake-key",
+					maxRetries: 0,
 					cacheRetention: "long",
 					onPayload: (payload) => {
 						capturedPayload = payload;
@@ -285,6 +290,7 @@ describe("Cache Retention (PI_CACHE_RETENTION)", () => {
 			try {
 				const s = streamOpenAIResponses(proxyModel, context, {
 					apiKey: "fake-key",
+					maxRetries: 0,
 					onPayload: (payload) => {
 						capturedPayload = payload;
 					},
@@ -314,6 +320,7 @@ describe("Cache Retention (PI_CACHE_RETENTION)", () => {
 			try {
 				const s = streamOpenAIResponses(model, context, {
 					apiKey: "fake-key",
+					maxRetries: 0,
 					cacheRetention: "long",
 					sessionId: "session-compat-false",
 					onPayload: (payload) => {
@@ -341,6 +348,7 @@ describe("Cache Retention (PI_CACHE_RETENTION)", () => {
 			try {
 				const s = streamOpenAIResponses(model, context, {
 					apiKey: "fake-key",
+					maxRetries: 0,
 					cacheRetention: "none",
 					sessionId: "session-1",
 					onPayload: (payload) => {
@@ -369,6 +377,7 @@ describe("Cache Retention (PI_CACHE_RETENTION)", () => {
 			try {
 				const s = streamOpenAIResponses(model, context, {
 					apiKey: "fake-key",
+					maxRetries: 0,
 					cacheRetention: "long",
 					sessionId: "session-2",
 					onPayload: (payload) => {
@@ -413,6 +422,7 @@ describe("Cache Retention (PI_CACHE_RETENTION)", () => {
 			try {
 				const s = streamOpenAICompletions(createCompletionsModel(), context, {
 					apiKey: "fake-key",
+					maxRetries: 0,
 					cacheRetention: "long",
 					sessionId: "session-completions",
 					onPayload: (payload) => {
@@ -439,6 +449,7 @@ describe("Cache Retention (PI_CACHE_RETENTION)", () => {
 			try {
 				const s = streamOpenAICompletions(createCompletionsModel({ supportsLongCacheRetention: false }), context, {
 					apiKey: "fake-key",
+					maxRetries: 0,
 					cacheRetention: "long",
 					sessionId: "session-completions-false",
 					onPayload: (payload) => {
