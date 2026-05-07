@@ -17,40 +17,47 @@ export interface BuiltinSlashCommand {
 }
 
 export const BUILTIN_SLASH_COMMANDS: ReadonlyArray<BuiltinSlashCommand> = [
-	{ name: "settings", description: "Ayarlar menusunu ac" },
-	{ name: "model", description: "Model sec (secici arayuzunu acar)" },
-	{ name: "scoped-models", description: "Ctrl+P ile gecis yapilacak modelleri ac/kapat" },
-	{ name: "export", description: "Oturumu disari aktar (HTML varsayilan, veya yol belirtin: .html/.jsonl)" },
-	{ name: "import", description: "Bir JSONL dosyasindan oturumu ice aktar ve devam et" },
-	{ name: "share", description: "Oturumu gizli bir GitHub gist olarak paylas" },
-	{ name: "copy", description: "Son temsilci mesajini panoya kopyala" },
-	{ name: "name", description: "Oturum goruntu adini ayarla" },
-	{ name: "session", description: "Oturum bilgisini ve istatistiklerini goster" },
-	{ name: "context", description: "Context window kullanimi ve token dagiliminini goster" },
-	{ name: "plan", description: "Plan modunu ac/kapat - read-only analiz modu (on|off)" },
-	{ name: "init", description: "Proje icin MOON.md / AGENTS.md dosyasi olustur" },
-	{ name: "changelog", description: "Degisim gunlugu girdilerini goster" },
-	{ name: "hotkeys", description: "Tum klavye kisayollarini goster" },
-	{ name: "fork", description: "Onceki bir kullanici mesajindan yeni bir catal olustur" },
-	{ name: "clone", description: "Mevcut oturumu mevcut konumda cogalt" },
-	{ name: "tree", description: "Oturum agacinda gezinin (dallari degistirin)" },
-	{ name: "login", description: "Saglayici kimlik dogrulamasini yapilandir" },
-	{ name: "logout", description: "Saglayici kimlik dogrulamasini kaldir" },
-	{ name: "new", description: "Yeni bir oturum baslat" },
-	{ name: "compact", description: "Oturum baglamini manuel olarak sikistir" },
-	{ name: "resume", description: "Farkli bir oturuma devam et" },
-	{ name: "mcp", description: "Bagli MCP sunucularini goster" },
-	{
-		name: "reload",
-		description: "Klavye kisayollarini, uzantilari, yetenekleri, istemleri ve temalari yeniden yukle",
-	},
-	{ name: "quit", description: `${APP_NAME}'den cik` },
-	{ name: "agentmode", description: "Agent sistemini tek komutla ac/kapat: /agentmode on|off" },
-	{ name: "agents", description: "Agent sistemi - sirket gibi kodlama orkestrasyonu" },
-	{ name: "workspace", description: "Agent sirket ortamını ve departmanlari goster" },
-	{ name: "robotics", description: "Robotics mode - goruntu analizi, nesne tespiti, yorunge planlama" },
-	{ name: "discord", description: "Discord entegrasyonu ve bot yonetimi" },
-	{ name: "update", description: "Mooncli ve uzantilari hizlica guncelle" },
-	{ name: "upgrade", description: "/update kisayolu (Mooncli ve uzantilari gunceller)" },
-	{ name: "impmodel", description: "Yeni bir modeli ollama saglayicisina ekle" },
+	// 📂 OTURUM & BAĞLAM YÖNETİMİ
+	{ name: "new", description: "Yeni ve temiz bir oturum başlat" },
+	{ name: "resume", description: "Geçmiş bir oturuma geri dön" },
+	{ name: "session", description: "Mevcut oturumun istatistiklerini ve durumunu göster" },
+	{ name: "context", description: "Context (bağlam) penceresi doluluk oranını göster" },
+	{ name: "compact", description: "Oturum geçmişini manuel olarak sıkıştır (token tasarrufu)" },
+	{ name: "name", description: "Mevcut oturumun başlığını değiştir" },
+	{ name: "plan", description: "Plan modunu aç/kapat (Sadece okuma ve analiz yapar)" },
+
+	// 🤖 YAPAY ZEKA & MODEL
+	{ name: "model", description: "Kullanılacak yapay zeka modelini değiştir" },
+	{ name: "scoped-models", description: "Hızlı model geçiş (Ctrl+P) listesini düzenle" },
+	{ name: "impmodel", description: "Ollama veya yerel sağlayıcıya yeni model ekle" },
+	{ name: "agentmode", description: "Çoklu Agent sistemini (Şirket Modu) aç/kapat" },
+	{ name: "workspace", description: "Agent departmanlarını ve çalışma alanını görüntüle" },
+
+	// 🔄 DOSYA & GEÇMİŞ İŞLEMLERİ
+	{ name: "init", description: "Bu proje için kurallar dosyası (MOON.md) oluştur" },
+	{ name: "fork", description: "Geçmiş bir mesajdan yeni bir alternatif dal (fork) oluştur" },
+	{ name: "clone", description: "Mevcut oturumu birebir kopyala" },
+	{ name: "tree", description: "Oturumun mesaj dalları (branches) arasında gezin" },
+	{ name: "copy", description: "Yapay zekanın son mesajını panoya kopyala" },
+
+	// 🔗 ENTEGRASYON & PAYLAŞIM
+	{ name: "export", description: "Oturumu dışa aktar (HTML veya JSONL olarak)" },
+	{ name: "import", description: "JSONL dosyasından eski bir oturumu içe aktar" },
+	{ name: "share", description: "Oturumu gizli bir GitHub Gist bağlantısı olarak paylaş" },
+	{ name: "mcp", description: "Bağlı olan MCP (Model Context Protocol) sunucularını listele" },
+	{ name: "discord", description: "Discord entegrasyonunu yönet" },
+	{ name: "robotics", description: "Robotik modunu yapılandır (Görüntü ve sahne analizi)" },
+
+	// ⚙️ SİSTEM & AYARLAR
+	{ name: "settings", description: "Genel ayarlar menüsünü aç" },
+	{ name: "login", description: "API anahtarlarını (Provider) yapılandır" },
+	{ name: "logout", description: "Kayıtlı API kimlik doğrulamasını sil" },
+	{ name: "hotkeys", description: "Tüm klavye kısayollarını listele" },
+	{ name: "changelog", description: "Sürüm notlarını ve yenilikleri göster" },
+	{ name: "reload", description: "Uzantıları, temaları ve kısayolları yeniden yükle" },
+	{ name: "update", description: "Mooncli uygulamasını en son sürüme güncelle" },
+	// { name: "upgrade", description: "/update ile aynı" }, // Kopya komut kalabalık yapmaması için gizlenebilir, ama interactive-mode.ts hala tanıyor.
+
+	// 🚪 ÇIKIŞ
+	{ name: "quit", description: `${APP_NAME} uygulamasından çık` },
 ];
