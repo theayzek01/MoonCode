@@ -280,6 +280,9 @@ export class InteractiveMode {
 	// Track if editor is in bash mode (text starts with !)
 	private isBashMode = false;
 
+	// Plan Mode: read-only analiz modu (write/edit/bash tool'lari devre disi)
+	private isPlanMode = false;
+
 	// Track current bash execution component
 	private bashComponent: BashExecutionComponent | undefined = undefined;
 
@@ -2629,6 +2632,22 @@ export class InteractiveMode {
 			if (text === "/quit") {
 				this.editor.setText("");
 				await this.shutdown();
+				return;
+			}
+			if (text === "/context") {
+				this.handleContextCommand();
+				this.editor.setText("");
+				return;
+			}
+			if (text === "/plan" || text.startsWith("/plan ")) {
+				const arg = text.startsWith("/plan ") ? text.slice(6).trim() : "";
+				this.editor.setText("");
+				this.handlePlanCommand(arg);
+				return;
+			}
+			if (text === "/init") {
+				this.editor.setText("");
+				await this.handleInitCommand();
 				return;
 			}
 
@@ -5698,6 +5717,152 @@ export class InteractiveMode {
 		this.chatContainer.addChild(new Spacer(1));
 		this.chatContainer.addChild(new Text(info, 1, 0));
 		this.ui.requestRender();
+	}
+
+	// -------------------------------------------------------------------------
+	// /context — Context window kullanim gosterge
+	// -------------------------------------------------------------------------
+	private handleContextCommand(): void {
+		const stats = this.session.getSessionStats();
+		const usage = stats.contextUsage;
+
+		let info = `${theme.bold("Context Window Durumu")}\n\n`;
+
+		if (usage) {
+			const usedTokens = usage.inputTokens ?? stats.tokens.input;
+			const maxTokens = usage.contextWindowSize;
+			const usedPct = maxTokens > 0 ? Math.min(100, Math.round((usedTokens / maxTokens) * 100)) : 0;
+
+			// Renk: %0-60 yesil, %60-85 sari, %85+ kirmizi
+			const barColor: ThemeColor = usedPct >= 85 ? "error" : usedPct >= 60 ? "warning" : "success";
+			const filledLen = Math.round((usedPct / 100) * 30);
+			const bar = theme.fg(barColor, "█".repeat(filledLen)) + theme.fg("dim", "░".repeat(30 - filledLen));
+
+			info += `${bar} ${theme.bold(`${usedPct}%`)}\n`;
+			info += `${theme.fg("dim", "Kullanilan:")} ${usedTokens.toLocaleString()} / ${maxTokens.toLocaleString()} token\n`;
+			info += `${theme.fg("dim", "Kalan:")}    ${(maxTokens - usedTokens).toLocaleString()} token\n\n`;
+		} else {
+			info += `${theme.fg("dim", "Giriş:")} ${stats.tokens.input.toLocaleString()} token\n`;
+			info += `${theme.fg("dim", "Cikis:")} ${stats.tokens.output.toLocaleString()} token\n`;
+			info += `${theme.fg("dim", "Toplam:")} ${stats.tokens.total.toLocaleString()} token\n\n`;
+			info += `${theme.fg("muted", "Not: Tam context window bilgisi bu model icin mevcut degil")}\n`;
+		}
+
+		info += `${theme.bold("Mesajlar")}\n`;
+		info += `${theme.fg("dim", "Kullanici:")} ${stats.userMessages}  ${theme.fg("dim", "Asistan:")} ${stats.assistantMessages}  ${theme.fg("dim", "Arac:")} ${stats.toolCalls}\n`;
+		info += `\n${theme.fg("muted", "Ipucu: Context doluyorsa /compact ile sikistrabilirsin")}\n`;
+
+		this.chatContainer.addChild(new Spacer(1));
+		this.chatContainer.addChild(new Text(info, 1, 0));
+		this.ui.requestRender();
+	}
+
+	// -------------------------------------------------------------------------
+	// /plan — Read-only analiz modu (Claude Code Plan Mode benzeri)
+	// -------------------------------------------------------------------------
+	private handlePlanCommand(arg: string): void {
+		const enable = arg === "on" ? true : arg === "off" ? false : !this.isPlanMode;
+
+		if (enable === this.isPlanMode) {
+			this.showStatus(
+				this.isPlanMode
+					? "Plan modu zaten aktif. /plan off ile kapat."
+					: "Plan modu zaten kapali. /plan on ile ac.",
+			);
+			return;
+		}
+
+		this.isPlanMode = enable;
+
+		if (enable) {
+			// Plan mode: write, edit, bash toollarini kaldir
+			this.session.setActiveToolsByName(["read", "grep", "find", "ls", "web_search"]);
+			const msg =
+				`${theme.bold(theme.fg("accent", "Plan Modu Aktif"))}\n\n` +
+				`${theme.fg("dim", "Dosya yazma ve bash devre disi. Model sadece okuyabilir ve analiz yapabilir.")}\n` +
+				`${theme.fg("dim", "Onay vermeden hicbir degisiklik yapilmayacak.")}\n\n` +
+				`${theme.fg("muted", "/plan off ile normal moda don.")}\n`;
+			this.chatContainer.addChild(new Spacer(1));
+			this.chatContainer.addChild(new Text(msg, 1, 0));
+			this.showStatus("[PLAN] Plan modu aktif - model sadece okuyabilir");
+		} else {
+			// Normal moda don: tum toollar geri
+			this.session.setActiveToolsByName(["read", "bash", "edit", "write", "grep", "find", "ls", "web_search"]);
+			const msg =
+				`${theme.bold(theme.fg("success", "Normal Mod"))}\n\n` +
+				`${theme.fg("dim", "Tum toollar yeniden aktif. Dosya yazma ve bash kullanilabilir.")}\n`;
+			this.chatContainer.addChild(new Spacer(1));
+			this.chatContainer.addChild(new Text(msg, 1, 0));
+			this.showStatus("Plan modu kapandi - tum toollar aktif");
+		}
+		this.footer.invalidate();
+		this.ui.requestRender();
+	}
+
+	// -------------------------------------------------------------------------
+	// /init — MOON.md workspace belgesi olustur
+	// -------------------------------------------------------------------------
+	private async handleInitCommand(): Promise<void> {
+		const cwd = this.sessionManager.getCwd();
+		const moonPath = path.join(cwd, "MOON.md");
+		const agentsPath = path.join(cwd, "AGENTS.md");
+
+		const targetPath = fs.existsSync(agentsPath) ? agentsPath : moonPath;
+		const fileName = path.basename(targetPath);
+
+		if (fs.existsSync(targetPath)) {
+			this.showStatus(`${fileName} zaten mevcut - uzerine yazilmadi`);
+			return;
+		}
+
+		const projectName = path.basename(cwd);
+		const content = [
+			`# ${projectName} — Proje Kurallari`,
+			"",
+			"## Genel Prensipler",
+			"",
+			"- Kodu kisa, okunabilir ve production-ready tut",
+			"- Over-engineering ve gereksiz abstraction'dan kacin",
+			"- Her degisiklikten once repo baglamini oku",
+			"",
+			"## Teknoloji Stack",
+			"",
+			"<!-- Proje teknolojilerini buraya ekle -->",
+			"",
+			"## Kod Standartlari",
+			"",
+			"<!-- Linting, formatting, test gereksinimleri -->",
+			"",
+			"## Dizin Yapisi",
+			"",
+			"<!-- Onemli dizinleri ve amaclarini acikla -->",
+			"",
+			"## Calistirmak icin",
+			"",
+			"```bash",
+			"# Gelistirme",
+			"npm run dev",
+			"",
+			"# Build",
+			"npm run build",
+			"",
+			"# Kontrol",
+			"npm run check",
+			"```",
+		].join("\n");
+
+		try {
+			fs.writeFileSync(targetPath, content, "utf-8");
+			const msg =
+				`${theme.bold(theme.fg("success", `${fileName} olusturuldu`))}\n\n` +
+				`${theme.fg("dim", targetPath)}\n\n` +
+				`${theme.fg("muted", "Proje kurallarin ve stack bilgini dosyaya ekle. Mooncli her oturumda okuyacak.")}\n`;
+			this.chatContainer.addChild(new Spacer(1));
+			this.chatContainer.addChild(new Text(msg, 1, 0));
+			this.ui.requestRender();
+		} catch (err) {
+			this.showError(`${fileName} olusturulamadi: ${err instanceof Error ? err.message : String(err)}`);
+		}
 	}
 
 	private handleChangelogCommand(): void {

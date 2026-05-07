@@ -1,104 +1,139 @@
-<p align="center">
-  <img src="Mooncli.png" alt="Mooncli logo" width="180" />
-</p>
+<div align="center">
 
-<h1 align="center">Mooncli</h1>
+<img src="Mooncli.png" alt="Mooncli" width="140" />
 
-<p align="center"><strong>AI-first terminal coding assistant with TUI, Web UI, MCP, extensions, and multi-provider support.</strong></p>
+# Mooncli
 
-<p align="center">
-  <a href="https://mooncli.dev"><img alt="Website" src="https://img.shields.io/badge/website-mooncli.dev-0ea5e9?style=for-the-badge" /></a>
-  <a href="https://www.npmjs.com/package/mooncli"><img alt="npm" src="https://img.shields.io/npm/v/mooncli?style=for-the-badge&color=cb3837" /></a>
-  <a href="https://discord.com/invite/3cU7Bz4UPx"><img alt="Discord" src="https://img.shields.io/badge/discord-community-5865F2?style=for-the-badge&logo=discord&logoColor=white" /></a>
-</p>
+**An agentic coding assistant that lives in your terminal.**
 
-## Why Mooncli
+Multi-provider · Multi-model · MCP-ready · Local-first · Open source
 
-- Fast terminal-native workflow
-- Rich interactive TUI + modern Web UI (`/webui`)
-- MCP-ready architecture
-- Multiple model providers (Gemini CLI, Codex, OpenRouter, Ollama, and more)
-- Extensions, skills, themes, prompts
-- Company-style Agent System for complex coding tasks
-- Robotics and Discord integrations
+[![npm](https://img.shields.io/npm/v/mooncli?style=flat-square&color=0ea5e9&label=npm)](https://www.npmjs.com/package/mooncli)
+[![License: MIT](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)](LICENSE)
+[![Discord](https://img.shields.io/badge/discord-community-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.com/invite/3cU7Bz4UPx)
 
-## Quick Start
+</div>
+
+---
+
+## What it does
+
+Mooncli is a terminal-based coding agent. You ask it to build features, fix bugs, or refactor code — it reads your files, reasons about the codebase, makes changes, and runs commands. All inside your terminal, without leaving the keyboard.
+
+It connects to over 20 AI providers (cloud and local) and treats your project as the source of truth, not a conversation in a browser tab.
+
+---
+
+## Providers supported
+
+| Category | Providers |
+|---|---|
+| Cloud | Anthropic, OpenAI, Google Gemini, DeepSeek, Mistral, xAI, Groq, Cerebras, ZAI, MiniMax, Kimi, Fireworks, HuggingFace, OpenRouter, Vercel AI Gateway, Amazon Bedrock, Azure OpenAI, GitHub Copilot |
+| Local | **Ollama** (any model), OpenAI-compatible endpoints |
+
+---
+
+## Getting started
 
 ```bash
 npm install -g mooncli
 mooncli
 ```
 
-## Install & Update (Easy)
-
-Install:
+Set your API key for any provider:
 
 ```bash
-npm install -g mooncli
-```
-
-Update from terminal (outside Mooncli):
-
-```bash
-mooncli update
-```
-
-Update from inside Mooncli interactive session:
-
-```text
-/update
-```
-
-If your install path is permission-protected, run with admin/sudo once for global update.
-
-## Authentication
-
-Use `/login` in interactive mode, or set provider keys directly.
-
-```bash
+# Gemini (free tier available)
 export GEMINI_API_KEY=your_key
-mooncli
+
+# Anthropic
+export ANTHROPIC_API_KEY=your_key
+
+# Or use Ollama locally — no key needed
+ollama pull qwen2.5-coder:7b
+mooncli --provider ollama
 ```
 
-## Core Commands
+You can also log in interactively inside the terminal with `/login`.
 
-- `/webui`: open the web dashboard
-- `/agentmode on|off`: toggle the company-style coding Agent System
-- `/workspace`: show the company-style agent workspace
-- `mooncli olm <model>`: Ollama quick alias
-- `/discord <bot_token>`: connect Discord bot
-- `/robotics enable`: enable robotics mode
+---
+
+## Key features
+
+**Agent system** — Mooncli uses a company-style orchestration layer: Patron (orchestrator), Architect, Backend, Frontend, Security, Test, DevOps, and Integrator agents collaborate on complex tasks. Enable with `/agentmode on`.
+
+**Plan mode** — `/plan` switches to read-only mode. The model analyzes and proposes changes without touching any files. Review the plan, then run `/plan off` to execute.
+
+**Context window monitor** — `/context` shows how much of the context window is in use, in real time. Compaction happens automatically when needed, or manually with `/compact`.
+
+**Ollama / local model optimization** — When using a local model, Mooncli automatically compresses the system prompt and applies optimal `num_ctx`, `num_batch`, and `keep_alive` settings. Profiles: `turbo` (8K), `balanced` (16K), `quality` (32K).
+
+**MCP support** — Connect external tools, databases, and APIs via the Model Context Protocol. Managed with `/mcp`.
+
+**Skills** — Drop a `.md` file into your project to teach the model your conventions, stack, or design system. Loaded automatically.
+
+**Extensions** — Extend the runtime with custom tools, commands, themes, and slash commands.
+
+**Themes** — Built-in themes: `moon`, `neon`, `brutal`, and more. Switch with `--theme`.
+
+---
+
+## Inside the terminal
+
+```
+/model           switch model mid-session
+/plan            read-only planning mode
+/context         token usage monitor
+/compact         compress context manually
+/agentmode on    enable company-style agents
+/workspace       show agent workspace
+/init            create MOON.md for this project
+/fork            branch session from a previous message
+/export          export session as HTML or JSONL
+/mcp             show connected MCP servers
+```
+
+---
+
+## Ollama quick start
+
+```bash
+# Install Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Pull a coding model
+ollama pull qwen2.5-coder:7b
+
+# Run with balanced profile (16K context)
+MOONCLI_OLLAMA_MODE=balanced mooncli --provider ollama
+```
+
+---
+
+## Project layout
+
+```
+packages/
+  cli/       Terminal runtime, interactive TUI, slash commands
+  core/      Providers, model definitions, auth
+  engine/    Orchestration loop, tool execution, compaction
+  tui/       Terminal UI component library
+  web-ui/    Web dashboard (optional)
+```
+
+---
 
 ## Development
 
 ```bash
+git clone https://github.com/theayzek01/hodeuscli
+cd hodeuscli
 npm install
-npm run check
-npm run build
-npm run test
-node packages/cli/dist/cli.js
+npm run check     # lint + typecheck
 ```
 
-## Documentation
-
-- `CONTRIBUTING.md`
-- `PHILOSOPHY.md`
-- `PROJECT_LOG.md`
-- `docs/providers.md`
-- `docs/models.md`
-- `docs/extensions.md`
-- `docs/skills.md`
-- `docs/themes.md`
-- `docs/prompts.md`
-
-## Project Structure
-
-- `packages/cli`: command and interactive runtime
-- `packages/core`: providers, models, core utilities
-- `packages/engine`: execution and orchestration
-- `packages/tui`: terminal UI components
-- `packages/web-ui`: web dashboard
+---
 
 ## License
 
-MIT - see `LICENSE`.
+MIT — see [LICENSE](LICENSE).

@@ -967,6 +967,12 @@ export class EngineSession {
 			}
 		}
 
+		// Ollama veya local model ise compactMode ac - kucuk context window tasarrufu
+		const currentModel = this.engine.state.model;
+		const isLocalModel =
+			currentModel?.provider === "ollama" ||
+			(currentModel?.provider === "openai" && process.env.MOONCLI_COMPACT_PROMPT === "true");
+
 		this._baseSystemPromptOptions = {
 			cwd: this._cwd,
 			skills: loadedSkills,
@@ -979,6 +985,7 @@ export class EngineSession {
 			agents,
 			roboticsEnabled,
 			roboticsFunctions,
+			compactMode: isLocalModel,
 		};
 		return buildSystemPrompt(this._baseSystemPromptOptions);
 	}

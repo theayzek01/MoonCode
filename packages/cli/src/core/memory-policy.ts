@@ -6,24 +6,49 @@ export interface MemorySignal {
 	timestamp: string;
 	text: string;
 	tag: "preference" | "workflow";
+	weight?: number; // 1-10 arası önem skoru, yoksa 5 varsayılan
 }
 
 const MEMORY_FILE = join(getEngineDir(), "memory-signals.json");
+const MAX_SIGNALS = 80; // 200'den 80'e: context window için çok daha verimli
+const MIN_TEXT_LEN = 20; // 24'ten 20'ye: kısa ama anlamlı sinyaller de yakalansın
+const MAX_TEXT_LEN = 400; // Yeni: aşırı uzun sinyalleri kırp
+
+const SIGNAL_PATTERNS = /tercih|preference|always|her zaman|workflow|akis|daima|istiyorum|yapma|kullan|tercih et/i;
 
 export function shouldPersistMemorySignal(text: string): boolean {
-	const normalized = text.toLowerCase();
-	if (normalized.length < 24) return false;
-	return /tercih|preference|always|her zaman|workflow|akis/i.test(normalized);
+	const normalized = text.toLowerCase().trim();
+	if (normalized.length < MIN_TEXT_LEN) return false;
+	if (normalized.length > 2000) return false; // Devasa text'leri sinyal olarak kaydetme
+	return SIGNAL_PATTERNS.test(normalized);
 }
 
 export function persistMemorySignal(text: string): void {
-	const tag: MemorySignal["tag"] = /tercih|preference|always|her zaman/i.test(text) ? "preference" : "workflow";
-	const next: MemorySignal = { timestamp: new Date().toISOString(), text, tag };
+	const tag: MemorySignal["tag"] = /tercih|preference|always|her zaman|daima|istiyorum/i.test(text)
+		? "preference"
+		: "workflow";
+
+	// Metni makul uzunlukta tut
+	const trimmedText = text.length > MAX_TEXT_LEN ? `${text.slice(0, MAX_TEXT_LEN)}…` : text;
+
+	const next: MemorySignal = {
+		timestamp: new Date().toISOString(),
+		text: trimmedText,
+		tag,
+		weight: 5,
+	};
+
 	const all = loadMemorySignals();
 	all.push(next);
-	const deduped = dedupeSignals(all).slice(-200);
+
+	// Dedupe ve limit uygula - eski duplicate'ları at, yenileri tut
+	const deduped = dedupeSignals(all);
+	// Ağırlığa göre sırala, en önemlileri tut
+	const sorted = deduped.sort((a, b) => (b.weight ?? 5) - (a.weight ?? 5));
+	const final = sorted.slice(0, MAX_SIGNALS);
+
 	if (!existsSync(dirname(MEMORY_FILE))) mkdirSync(dirname(MEMORY_FILE), { recursive: true });
-	writeFileSync(MEMORY_FILE, `${JSON.stringify(deduped, null, 2)}\n`, "utf-8");
+	writeFileSync(MEMORY_FILE, `${JSON.stringify(final, null, 2)}\n`, "utf-8");
 }
 
 export function loadMemorySignals(): MemorySignal[] {
@@ -38,20 +63,42 @@ export function loadMemorySignals(): MemorySignal[] {
 }
 
 function dedupeSignals(signals: MemorySignal[]): MemorySignal[] {
-	const seen = new Set<string>();
-	const out: MemorySignal[] = [];
+	const seen = new Map<string, MemorySignal>();
 	for (const s of signals) {
-		const key = `${s.tag}:${s.text.trim().toLowerCase()}`;
-		if (seen.has(key)) continue;
-		seen.add(key);
-		out.push(s);
+		// Benzerlik key'i: tag + ilk 80 karakter (tam metin değil)
+		const key = `${s.tag}:${s.text.slice(0, 80).trim().toLowerCase()}`;
+		const existing = seen.get(key);
+		if (!existing) {
+			seen.set(key, s);
+		} else {
+			// Aynı key için daha yeni olanı tut, weight'i yükselt (sık tekrar = önemli)
+			const existingWeight = existing.weight ?? 5;
+			seen.set(key, {
+				...s,
+				timestamp: s.timestamp > existing.timestamp ? s.timestamp : existing.timestamp,
+				weight: Math.min(10, existingWeight + 1),
+			});
+		}
 	}
-	return out;
+	return Array.from(seen.values());
 }
 
-export function getMemoryPreface(limit = 5): string {
-	const items = loadMemorySignals().slice(-limit);
+/**
+ * Memory preface oluşturur. Local modeller için `compact` mod çok daha kısa çıktı verir.
+ */
+export function getMemoryPreface(limit = 8, compact = false): string {
+	const items = loadMemorySignals()
+		.sort((a, b) => (b.weight ?? 5) - (a.weight ?? 5))
+		.slice(0, limit);
+
 	if (items.length === 0) return "";
+
+	if (compact) {
+		// Local model için ultra kısa format
+		const lines = items.map((s) => `[${s.tag[0].toUpperCase()}] ${s.text}`);
+		return `Kullanıcı tercihleri:\n${lines.join("\n")}\n`;
+	}
+
 	const lines = items.map((s) => `- [${s.tag}] ${s.text}`);
-	return `User memory signals:\n${lines.join("\n")}\n`;
+	return `Kullanıcı bellek sinyalleri:\n${lines.join("\n")}\n`;
 }

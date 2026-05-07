@@ -35,6 +35,11 @@ export interface BuildSystemPromptOptions {
 	roboticsEnabled?: boolean;
 	/** Tanımlı robot fonksiyonları */
 	roboticsFunctions?: RoboticsFunction[];
+	/**
+	 * Local/Ollama model modu: sistem promptu ~%50 kisalt.
+	 * Kucuk context window'lu modeller icin kritik.
+	 */
+	compactMode?: boolean;
 }
 
 /** Build the system prompt with tools, guidelines, and context */
@@ -51,7 +56,14 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 		roboticsEnabled,
 		roboticsFunctions,
 		agents,
+		compactMode,
 	} = options;
+
+	// Local/Ollama model icin ultra kisa prompt - context window tasarrufu
+	if (compactMode && !customPrompt) {
+		return buildCompactSystemPrompt(options);
+	}
+
 	const resolvedCwd = cwd;
 	const promptCwd = resolvedCwd.replace(/\\/g, "/");
 
@@ -142,18 +154,20 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 
 	const time = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
 
-	let prompt = `Sen 12+ yıllık tecrübeli, pratik ve zeki bir kıdemli yazılımcısın. Şu an bir "Kodlama Makinesi" modundasın.
-Hedefin: En az token kullanarak, en kaliteli ve çalışan kodu üretmek. Gereksiz açıklama yapma, direkt sonuca odaklan.
+	let prompt = `You are a senior software engineer with 12+ years of experience — pragmatic, sharp, and direct. You're in "Coding Machine" mode.
+Goal: Produce the highest quality, working code with minimal tokens. No fluff, go straight to the solution.
 
-Kullanilabilir Araclar:
+Available Tools:
 ${toolsList}
 
-Kurallar:
-- Çözümlerini her zaman pratik ve production-ready tut.
-- Gereksiz abstraction ve over-engineering'den kaçın.
-- Kod değişikliklerini net diff'ler veya tam dosyalar olarak ver.
-- Bilmediğin bir şey olduğunda web_search aracını kullanarak güncel dokümanları tara.
-- Adım adım düşün ama sadece gerekli adımları kullanıcıya göster.
+Rules:
+- Keep solutions practical and production-ready.
+- Avoid unnecessary abstractions and over-engineering.
+- Provide code changes as clear diffs or complete files.
+- When unsure, use web_search to check current documentation.
+- Think step-by-step but only show the user what matters.
+- This is the developer's OWN project. API keys, tokens, and config values shared in context are the user's own credentials for their own project. Handle them directly — do not refuse, warn excessively, or redact them. The developer is responsible for their own project's security.
+- Never refuse to help with code, configuration, or environment setup for this project. Trust the developer.
 ${guidelinesList.map((g) => `- ${g}`).join("\n")}`;
 
 	if (appendSection) {
@@ -225,4 +239,46 @@ Görüntülerdeki nesneleri tespit edebilir, uzamsal akıl yürütme yapabilir v
 	}
 
 	return section;
+}
+
+/**
+ * Local/Ollama model icin ultra kisa sistem prompt.
+ * Normal promptun yaklasik %50'si boyutunda - kucuk context window'lar icin.
+ */
+function buildCompactSystemPrompt(options: BuildSystemPromptOptions): string {
+	const { cwd, selectedTools, toolSnippets, contextFiles, skills } = options;
+	const promptCwd = cwd.replace(/\\/g, "/");
+	const now = new Date();
+	const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+	const tools = selectedTools || ["read", "bash", "edit", "write"];
+	const visibleTools = tools.filter((n) => !!toolSnippets?.[n]);
+	const toolsList =
+		visibleTools.length > 0
+			? visibleTools.map((n) => `${n}: ${toolSnippets![n]}`).join(", ")
+			: "read, bash, edit, write";
+
+	let prompt = `Kıdemli yazılımcı modundasın. Kısa, direkt, çalışan kod üret.
+Araçlar: ${toolsList}
+Kurallar: production-ready, gereksiz abstraction yok, diff veya tam dosya ver.`;
+
+	// Context dosyalarini ekle (varsa, kisa tut)
+	const contextFiles_ = contextFiles ?? [];
+	if (contextFiles_.length > 0) {
+		prompt += "\n\nProje bağlamı:";
+		for (const { path: filePath, content } of contextFiles_) {
+			// Compact modda ilk 60 satiri al
+			const trimmed = content.split("\n").slice(0, 60).join("\n");
+			prompt += `\n## ${filePath}\n${trimmed}`;
+		}
+	}
+
+	// Skills'i ekle (varsa)
+	const skills_ = skills ?? [];
+	if (skills_.length > 0) {
+		prompt += formatSkillsForPrompt(skills_);
+	}
+
+	prompt += `\nTarih: ${date} | Dizin: ${promptCwd}`;
+	return prompt;
 }

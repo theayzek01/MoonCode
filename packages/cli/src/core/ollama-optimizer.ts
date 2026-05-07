@@ -4,24 +4,27 @@ const DEFAULT_BASE_URL = "http://localhost:11434";
 const PROFILE_VALUES = {
 	turbo: {
 		MOONCLI_OLLAMA_MODE: "turbo",
-		MOONCLI_OLLAMA_NUM_CTX: "4096",
-		MOONCLI_OLLAMA_NUM_BATCH: "512",
+		MOONCLI_OLLAMA_NUM_CTX: "8192", // 4K→8K: 4K ile gerçek kod analizi imkansız
+		MOONCLI_OLLAMA_NUM_BATCH: "1024", // daha büyük batch = prefill hızlanır
 		MOONCLI_OLLAMA_LOW_VRAM: "true",
-		MOONCLI_OLLAMA_KEEP_ALIVE: "30m",
+		MOONCLI_OLLAMA_NUM_THREAD: "0", // 0 = Ollama otomatik belirlesin
+		MOONCLI_OLLAMA_KEEP_ALIVE: "1h", // 30m→1h: model yeniden yükleme gecikti
 	},
 	balanced: {
 		MOONCLI_OLLAMA_MODE: "balanced",
-		MOONCLI_OLLAMA_NUM_CTX: "8192",
-		MOONCLI_OLLAMA_NUM_BATCH: "512",
-		MOONCLI_OLLAMA_LOW_VRAM: "true",
-		MOONCLI_OLLAMA_KEEP_ALIVE: "30m",
+		MOONCLI_OLLAMA_NUM_CTX: "16384", // 8K→16K: orta büyüklük dosyalar sığsın
+		MOONCLI_OLLAMA_NUM_BATCH: "1024",
+		MOONCLI_OLLAMA_LOW_VRAM: "false",
+		MOONCLI_OLLAMA_NUM_THREAD: "0",
+		MOONCLI_OLLAMA_KEEP_ALIVE: "2h",
 	},
 	quality: {
 		MOONCLI_OLLAMA_MODE: "quality",
-		MOONCLI_OLLAMA_NUM_CTX: "12288",
-		MOONCLI_OLLAMA_NUM_BATCH: "256",
+		MOONCLI_OLLAMA_NUM_CTX: "32768", // 12K→32K: büyük dosya/codebase analizi
+		MOONCLI_OLLAMA_NUM_BATCH: "512", // büyük ctx'te daha küçük batch daha kararlı
 		MOONCLI_OLLAMA_LOW_VRAM: "false",
-		MOONCLI_OLLAMA_KEEP_ALIVE: "1h",
+		MOONCLI_OLLAMA_NUM_THREAD: "0",
+		MOONCLI_OLLAMA_KEEP_ALIVE: "4h",
 	},
 } as const;
 
@@ -78,9 +81,11 @@ function printUsage(): void {
   mooncli ollama profile <turbo|balanced|quality>
 
 ${chalk.bold("Profil etkisi:")}
-  turbo     Düşük RAM, hızlı cevap, 4K context
-  balanced  Varsayılan optimum, 8K context
-  quality   Daha uzun çıktı, daha yüksek RAM, 12K context
+  turbo     Düşük RAM, hızlı, ${chalk.cyan("8K")} context  — günlük kullanım, küçük dosyalar
+  balanced  Denge, ${chalk.cyan("16K")} context — kod tabanı analizi, orta projeler
+  quality   Yüksek RAM, ${chalk.cyan("32K")} context — büyük dosyalar, derin analiz
+
+${chalk.dim("İpucu: Eğer modeliniz yavaşsa önce turbo deneyin. RAM yetersizse balanced'a geçin.")}
 
 Çalıştır: Ctrl + E`);
 }
