@@ -7,6 +7,10 @@
 - Added the `/agents` command and company-style coding Agent System prompt orchestration.
 - Added the `/workspace` command to show the company-style agent workspace.
 
+### Changed
+
+- Updated the `/workspace` view with a colorful pixel-art styled company dashboard.
+
 ## [0.72.2]
 ### Added
 - 🎮 **Discord Integration**: Manage servers, channels, and messages using the new `/discord` command and AI-driven tools.

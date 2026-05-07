@@ -169,38 +169,85 @@ export interface CodingWorkspaceRenderOptions {
 	activeTools?: readonly string[];
 	modelName?: string;
 	cwd?: string;
+	color?: boolean;
+}
+
+const ANSI_RESET = "\u001b[0m";
+const ANSI_BOLD = "\u001b[1m";
+const ANSI_DIM = "\u001b[2m";
+
+const DEPARTMENT_COLORS: Record<CodingAgentDepartment, number> = {
+	leadership: 214,
+	engineering: 45,
+	product: 201,
+	quality: 82,
+	delivery: 141,
+};
+
+function ansi256(code: number, text: string, enabled: boolean): string {
+	return enabled ? `\u001b[38;5;${code}m${text}${ANSI_RESET}` : text;
+}
+
+function bold(text: string, enabled: boolean): string {
+	return enabled ? `${ANSI_BOLD}${text}${ANSI_RESET}` : text;
+}
+
+function dim(text: string, enabled: boolean): string {
+	return enabled ? `${ANSI_DIM}${text}${ANSI_RESET}` : text;
+}
+
+function paintStatus(text: string, enabled: boolean, colorEnabled: boolean): string {
+	return ansi256(enabled ? 82 : 203, text, colorEnabled);
+}
+
+function workspaceRow(label: string, value: string, colorEnabled: boolean): string {
+	return `║ ${ansi256(244, label.padEnd(15), colorEnabled)} ${value}`;
+}
+
+function pixelHeader(colorEnabled: boolean): string[] {
+	const top = `┏${"━".repeat(62)}┓`;
+	const mid = "┃  ▓▒░  Mooncli Company Workspace  ░▒▓                       ┃";
+	const bot = `┗${"━".repeat(62)}┛`;
+	return [
+		ansi256(99, top, colorEnabled),
+		ansi256(213, bold(mid, colorEnabled), colorEnabled),
+		ansi256(99, bot, colorEnabled),
+	];
 }
 
 export function renderCodingAgentsWorkspace(
 	settings: CodingAgentsSettings | undefined,
 	options: CodingWorkspaceRenderOptions = {},
 ): string {
+	const colorEnabled = options.color ?? true;
 	const mode = normalizeMode(settings?.mode, settings?.enabled);
 	const enabled = (settings?.enabled ?? mode !== "off") && mode !== "off";
 	const verbosity = normalizeVerbosity(settings?.verbosity);
 	const agentStatus = enabled ? (mode === "always" ? "always-on" : "standby/auto") : "offline";
+	const statusBadge = `[${agentStatus}]`;
 	const lines: string[] = [
-		"Mooncli Company Workspace",
-		"=========================",
-		`Durum: ${enabled ? "acik" : "kapali"}`,
-		`Mode: ${mode}`,
-		`Gorunum: ${verbosity}`,
+		...pixelHeader(colorEnabled),
+		workspaceRow("Durum", paintStatus(enabled ? "acik" : "kapali", enabled, colorEnabled), colorEnabled),
+		workspaceRow("Mode", ansi256(117, mode, colorEnabled), colorEnabled),
+		workspaceRow("Gorunum", ansi256(177, verbosity, colorEnabled), colorEnabled),
 	];
 
 	if (options.modelName) {
-		lines.push(`Model: ${options.modelName}`);
+		lines.push(workspaceRow("Model", ansi256(229, options.modelName, colorEnabled), colorEnabled));
 	}
 	if (options.cwd) {
-		lines.push(`Workspace: ${options.cwd}`);
+		lines.push(workspaceRow("Workspace", ansi256(153, options.cwd, colorEnabled), colorEnabled));
 	}
 	if (options.activeTools && options.activeTools.length > 0) {
-		lines.push(`Aktif tool sayisi: ${options.activeTools.length}`);
+		lines.push(
+			workspaceRow("Aktif tools", ansi256(120, String(options.activeTools.length), colorEnabled), colorEnabled),
+		);
 	}
 
 	lines.push(
-		"",
-		"Sirket Plani:",
-		"  Brief -> Patron Plan -> Uzman Agentlar -> Quality Gate -> Integrator -> Ship",
+		ansi256(99, `╠${"═".repeat(62)}╣`, colorEnabled),
+		`${ansi256(213, "▓", colorEnabled)} ${bold("Sirket Plani", colorEnabled)}`,
+		`  ${ansi256(117, "BRIEF", colorEnabled)} ${dim("▸", colorEnabled)} ${ansi256(214, "PATRON PLAN", colorEnabled)} ${dim("▸", colorEnabled)} ${ansi256(201, "UZMAN AGENTLAR", colorEnabled)} ${dim("▸", colorEnabled)} ${ansi256(82, "QUALITY GATE", colorEnabled)} ${dim("▸", colorEnabled)} ${ansi256(141, "INTEGRATOR", colorEnabled)} ${dim("▸", colorEnabled)} ${ansi256(229, "SHIP", colorEnabled)}`,
 		"",
 	);
 
@@ -208,14 +255,20 @@ export function renderCodingAgentsWorkspace(
 		const agents = DEFAULT_CODING_AGENT_PROFILES.filter((agent) => agent.department === department);
 		if (agents.length === 0) continue;
 
-		lines.push(`${DEPARTMENT_LABELS[department]}:`);
+		const departmentColor = DEPARTMENT_COLORS[department];
+		lines.push(ansi256(departmentColor, `╔═ ${DEPARTMENT_LABELS[department]} ${"═".repeat(42)}`, colorEnabled));
 		for (const agent of agents) {
-			lines.push(`  [${agentStatus}] ${agent.name}`);
-			lines.push(`      ${agent.focus}`);
+			lines.push(
+				`║ ${ansi256(departmentColor, "██", colorEnabled)} ${ansi256(244, statusBadge, colorEnabled)} ${bold(agent.name, colorEnabled)}`,
+			);
+			lines.push(`║    ${dim(agent.focus, colorEnabled)}`);
 		}
-		lines.push("");
+		lines.push(ansi256(departmentColor, `╚${"═".repeat(62)}`, colorEnabled), "");
 	}
 
-	lines.push("Komutlar:", "  /agents status", "  /agents enable", "  /agents mode auto|always|off");
+	lines.push(
+		`${ansi256(213, "▓", colorEnabled)} ${bold("Komutlar", colorEnabled)}`,
+		`  ${ansi256(117, "/workspace", colorEnabled)}  ${ansi256(117, "/agents status", colorEnabled)}  ${ansi256(117, "/agents enable", colorEnabled)}  ${ansi256(117, "/agents mode auto|always|off", colorEnabled)}`,
+	);
 	return lines.join("\n").trimEnd();
 }
