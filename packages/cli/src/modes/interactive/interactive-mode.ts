@@ -578,7 +578,7 @@ export class InteractiveMode {
     ░░░░        M O O N C L I
   ▒▒▒▒▒▒▒▒      
  ▓▓▓████▓▓▓     ${theme.fg("muted", "Zihin Sarayinda Bir Rehber")}
- ██████████     ${theme.fg("dim", `v${this.version}`)}  ${theme.bg("white", theme.fg("black", " MCP Ready "))}
+ ██████████     ${theme.fg("dim", `v${this.version}`)}  ${theme.fg("success", "[MCP Ready]")}
  ██████████     ${theme.fg("muted", "Dusun, Kodla, Mukemmellestir.")}
  ▓▓▓████▓▓▓
   ▒▒▒▒▒▒▒▒
