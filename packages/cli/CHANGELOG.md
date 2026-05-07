@@ -4,6 +4,7 @@
 
 ### Added
 
+- Added the `/agentmode on|off` command for one-command Agent System toggling.
 - Added the `/agents` command and company-style coding Agent System prompt orchestration.
 - Added the `/workspace` command to show the company-style agent workspace.
 

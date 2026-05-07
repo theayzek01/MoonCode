@@ -268,7 +268,7 @@ export function renderCodingAgentsWorkspace(
 
 	lines.push(
 		`${ansi256(213, "▓", colorEnabled)} ${bold("Komutlar", colorEnabled)}`,
-		`  ${ansi256(117, "/workspace", colorEnabled)}  ${ansi256(117, "/agents status", colorEnabled)}  ${ansi256(117, "/agents enable", colorEnabled)}  ${ansi256(117, "/agents mode auto|always|off", colorEnabled)}`,
+		`  ${ansi256(117, "/agentmode on", colorEnabled)}  ${ansi256(117, "/agentmode off", colorEnabled)}  ${ansi256(117, "/workspace", colorEnabled)}  ${ansi256(117, "/agents status", colorEnabled)}`,
 	);
 	return lines.join("\n").trimEnd();
 }

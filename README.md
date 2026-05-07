@@ -63,7 +63,7 @@ mooncli
 ## Core Commands
 
 - `/webui`: open the web dashboard
-- `/agents`: configure the company-style coding Agent System
+- `/agentmode on|off`: toggle the company-style coding Agent System
 - `/workspace`: show the company-style agent workspace
 - `mooncli olm <model>`: Ollama quick alias
 - `/discord <bot_token>`: connect Discord bot

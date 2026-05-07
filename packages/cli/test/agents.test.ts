@@ -19,10 +19,13 @@ describe("agent workspace", () => {
 		expect(output).toContain("UI/UX Agent");
 		expect(output).toContain("DevOps Agent");
 		expect(output).toContain("Code Reviewer Agent");
-		expect(output).toContain("/agents mode auto|always|off");
+		expect(output).toContain("/agentmode on");
+		expect(output).toContain("/agentmode off");
 	});
 
-	test("registers workspace as a built-in slash command", () => {
-		expect(BUILTIN_SLASH_COMMANDS.map((command) => command.name)).toContain("workspace");
+	test("registers agent commands as built-in slash commands", () => {
+		const commandNames = BUILTIN_SLASH_COMMANDS.map((command) => command.name);
+		expect(commandNames).toContain("agentmode");
+		expect(commandNames).toContain("workspace");
 	});
 });

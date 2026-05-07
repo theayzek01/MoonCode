@@ -42,6 +42,7 @@ export const BUILTIN_SLASH_COMMANDS: ReadonlyArray<BuiltinSlashCommand> = [
 		description: "Klavye kisayollarini, uzantilari, yetenekleri, istemleri ve temalari yeniden yukle",
 	},
 	{ name: "quit", description: `${APP_NAME}'den cik` },
+	{ name: "agentmode", description: "Agent sistemini tek komutla ac/kapat: /agentmode on|off" },
 	{ name: "agents", description: "Agent sistemi - sirket gibi kodlama orkestrasyonu" },
 	{ name: "workspace", description: "Agent sirket ortamını ve departmanlari goster" },
 	{ name: "robotics", description: "Robotics mode - goruntu analizi, nesne tespiti, yorunge planlama" },

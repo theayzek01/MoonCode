@@ -2561,6 +2561,12 @@ export class InteractiveMode {
 				await this.handleReloadCommand();
 				return;
 			}
+			if (text === "/agentmode" || text.startsWith("/agentmode ")) {
+				const args = text.startsWith("/agentmode ") ? text.slice(11).trim() : "";
+				this.editor.setText("");
+				this.handleAgentModeCommand(args);
+				return;
+			}
 			if (text === "/agents" || text.startsWith("/agents ")) {
 				const args = text.startsWith("/agents ") ? text.slice(8).trim() : "";
 				this.editor.setText("");
@@ -4853,6 +4859,24 @@ export class InteractiveMode {
 		this.ui.requestRender();
 	}
 
+	private handleAgentModeCommand(args: string): void {
+		const mode = args.trim().toLowerCase();
+		if (mode === "on") {
+			this.session.enableAgentsMode();
+			this.showStatus("Agent mode acildi. Artik kompleks islerde sirket gibi calisir.");
+			return;
+		}
+		if (mode === "off") {
+			this.session.disableAgentsMode();
+			this.showStatus("Agent mode kapatildi.");
+			return;
+		}
+
+		const settings = this.session.getAgentsSettings();
+		const enabled = settings.enabled !== false && settings.mode !== "off";
+		this.showStatus(`Kullanim: /agentmode on|off (su an: ${enabled ? "on" : "off"})`);
+	}
+
 	private handleAgentsCommand(args: string): void {
 		const parts = args.split(/\s+/).filter(Boolean);
 		const cmd = parts[0]?.toLowerCase();
@@ -4927,6 +4951,8 @@ export class InteractiveMode {
 			"Patron kapsami belirler; Mimar, Backend, Frontend, QA, Security ve Integrator kendi alanindan kontrol eder.",
 			"",
 			"Komutlar:",
+			"  /agentmode on",
+			"  /agentmode off",
 			"  /workspace",
 			"  /agents status",
 			"  /agents enable",
