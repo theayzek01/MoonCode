@@ -85,9 +85,11 @@ describe("buildSystemPrompt", () => {
 			});
 
 			expect(prompt).toContain("## Agent System (Company Mode)");
-			expect(prompt).toContain("Patron / Orchestrator");
-			expect(prompt).toContain("Backend Muhendisi");
-			expect(prompt).toContain("Integrator / Reviewer");
+			expect(prompt).toContain("Patron Agent / Orchestrator");
+			expect(prompt).toContain("Backend Agent");
+			expect(prompt).toContain("UI/UX Agent");
+			expect(prompt).toContain("DevOps Agent");
+			expect(prompt).toContain("Code Reviewer Agent");
 		});
 
 		test("omits company-style coding agents when disabled", () => {

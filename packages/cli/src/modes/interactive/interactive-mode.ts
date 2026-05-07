@@ -57,6 +57,7 @@ import {
 	getShareViewerUrl,
 	VERSION,
 } from "../../config.js";
+import { renderCodingAgentsWorkspace } from "../../core/agents.js";
 import { type EngineSession, type EngineSessionEvent, parseSkillBlock } from "../../core/engine-session.js";
 import { type EngineSessionRuntime, SessionImportFileNotFoundError } from "../../core/engine-session-runtime.js";
 import type {
@@ -2566,6 +2567,11 @@ export class InteractiveMode {
 				this.handleAgentsCommand(args);
 				return;
 			}
+			if (text === "/workspace") {
+				this.editor.setText("");
+				this.handleWorkspaceCommand();
+				return;
+			}
 			if (text === "/robotics" || text.startsWith("/robotics ")) {
 				const args = text.startsWith("/robotics ") ? text.slice(10).trim() : "";
 				this.editor.setText("");
@@ -4836,6 +4842,17 @@ export class InteractiveMode {
 	// Command handlers
 	// =========================================================================
 
+	private handleWorkspaceCommand(): void {
+		const model = this.session.model;
+		const text = renderCodingAgentsWorkspace(this.session.getAgentsSettings(), {
+			activeTools: this.session.getActiveToolNames(),
+			cwd: this.sessionManager.getCwd(),
+			modelName: model?.name ?? model?.id,
+		});
+		this.chatContainer.addChild(new Text(text, 1, 0));
+		this.ui.requestRender();
+	}
+
 	private handleAgentsCommand(args: string): void {
 		const parts = args.split(/\s+/).filter(Boolean);
 		const cmd = parts[0]?.toLowerCase();
@@ -4910,6 +4927,7 @@ export class InteractiveMode {
 			"Patron kapsami belirler; Mimar, Backend, Frontend, QA, Security ve Integrator kendi alanindan kontrol eder.",
 			"",
 			"Komutlar:",
+			"  /workspace",
 			"  /agents status",
 			"  /agents enable",
 			"  /agents disable",

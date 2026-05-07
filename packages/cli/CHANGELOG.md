@@ -5,6 +5,7 @@
 ### Added
 
 - Added the `/agents` command and company-style coding Agent System prompt orchestration.
+- Added the `/workspace` command to show the company-style agent workspace.
 
 ## [0.72.2]
 ### Added

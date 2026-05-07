@@ -64,6 +64,7 @@ mooncli
 
 - `/webui`: open the web dashboard
 - `/agents`: configure the company-style coding Agent System
+- `/workspace`: show the company-style agent workspace
 - `mooncli olm <model>`: Ollama quick alias
 - `/discord <bot_token>`: connect Discord bot
 - `/robotics enable`: enable robotics mode
