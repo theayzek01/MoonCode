@@ -7,7 +7,6 @@ const PROFILE_VALUES = {
 		MOONCLI_OLLAMA_NUM_CTX: "8192", // 4K→8K: 4K ile gerçek kod analizi imkansız
 		MOONCLI_OLLAMA_NUM_BATCH: "1024", // daha büyük batch = prefill hızlanır
 		MOONCLI_OLLAMA_LOW_VRAM: "true",
-		MOONCLI_OLLAMA_NUM_THREAD: "0", // 0 = Ollama otomatik belirlesin
 		MOONCLI_OLLAMA_KEEP_ALIVE: "1h", // 30m→1h: model yeniden yükleme gecikti
 	},
 	balanced: {
@@ -15,7 +14,6 @@ const PROFILE_VALUES = {
 		MOONCLI_OLLAMA_NUM_CTX: "16384", // 8K→16K: orta büyüklük dosyalar sığsın
 		MOONCLI_OLLAMA_NUM_BATCH: "1024",
 		MOONCLI_OLLAMA_LOW_VRAM: "false",
-		MOONCLI_OLLAMA_NUM_THREAD: "0",
 		MOONCLI_OLLAMA_KEEP_ALIVE: "2h",
 	},
 	quality: {
@@ -23,7 +21,6 @@ const PROFILE_VALUES = {
 		MOONCLI_OLLAMA_NUM_CTX: "32768", // 12K→32K: büyük dosya/codebase analizi
 		MOONCLI_OLLAMA_NUM_BATCH: "512", // büyük ctx'te daha küçük batch daha kararlı
 		MOONCLI_OLLAMA_LOW_VRAM: "false",
-		MOONCLI_OLLAMA_NUM_THREAD: "0",
 		MOONCLI_OLLAMA_KEEP_ALIVE: "4h",
 	},
 } as const;

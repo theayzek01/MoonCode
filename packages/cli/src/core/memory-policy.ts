@@ -94,11 +94,11 @@ export function getMemoryPreface(limit = 8, compact = false): string {
 	if (items.length === 0) return "";
 
 	if (compact) {
-		// Local model için ultra kısa format
+		// Ultra-short format for local models
 		const lines = items.map((s) => `[${s.tag[0].toUpperCase()}] ${s.text}`);
-		return `Kullanıcı tercihleri:\n${lines.join("\n")}\n`;
+		return `User preferences:\n${lines.join("\n")}\n`;
 	}
 
 	const lines = items.map((s) => `- [${s.tag}] ${s.text}`);
-	return `Kullanıcı bellek sinyalleri:\n${lines.join("\n")}\n`;
+	return `User memory signals:\n${lines.join("\n")}\n`;
 }
