@@ -575,13 +575,14 @@ export class InteractiveMode {
 			const banner = theme.fg(
 				"accent",
 				`
-      _.._      █▀▄▀█ █▀▀█ █▀▀█ █▀▀▄ █▀▀ █   ▀█▀
-    .' .-'\`     █ ▀ █ █  █ █  █ █  █ █   █    █ 
-   /  /         ▀   ▀ ▀▀▀▀ ▀▀▀▀ ▀  ▀ ▀▀▀ ▀▀▀ ▀▀▀
-  |  |          
-   \\  \\         ${theme.fg("muted", "Zihin Sarayinda Bir Rehber")}
-    '._'-._     ${theme.fg("dim", `v${this.version}`)} ${theme.fg("success", "[MCP Ready]")}
-       \`""\`     ${theme.fg("muted", "Dusun, Kodla, Mukemmellestir.")}
+    ░░░░        M O O N C L I
+  ▒▒▒▒▒▒▒▒      
+ ▓▓▓████▓▓▓     ${theme.fg("muted", "Zihin Sarayinda Bir Rehber")}
+ ██████████     ${theme.fg("dim", `v${this.version}`)}  ${theme.bg("white", theme.fg("black", " MCP Ready "))}
+ ██████████     ${theme.fg("muted", "Dusun, Kodla, Mukemmellestir.")}
+ ▓▓▓████▓▓▓
+  ▒▒▒▒▒▒▒▒
+    ░░░░
 `,
 			);
 
@@ -613,6 +614,11 @@ export class InteractiveMode {
 				rawKeyHint("dosyalari surukleyin", "projeye eklemek icin"),
 			].join("\n");
 
+			const divider = theme.fg(
+				"dim",
+				"────────────────────────────────────────────────────────────────────────────────",
+			);
+
 			const compactInstructions = [
 				hint("app.interrupt", "durdur"),
 				rawKeyHint(`${keyText("app.clear")}/${keyText("app.exit")}`, "temizle/cik"),
@@ -622,13 +628,13 @@ export class InteractiveMode {
 			].join(theme.fg("dim", " • "));
 
 			const onboarding =
-				theme.fg("muted", "✨ Mooncli ile hayallerini koda dok. Yardim icin ") +
+				theme.fg("muted", "✦ Mooncli ile hayallerini koda dok. Yardim icin ") +
 				keyText("app.tools.expand") +
 				theme.fg("muted", " tusuna bas.");
 
 			this.builtInHeader = new ExpandableText(
-				() => `${banner}\n ${compactInstructions}\n\n ${onboarding}\n`,
-				() => `${banner}\n${expandedInstructions}\n\n${onboarding}`,
+				() => `${banner}\n${divider}\n\n ${compactInstructions}\n\n ${onboarding}\n`,
+				() => `${banner}\n${divider}\n\n${expandedInstructions}\n\n ${onboarding}`,
 				this.getStartupExpansionState(),
 				1,
 				0,
