@@ -115,26 +115,37 @@ done
 
 echo "==> Creating release archives..."
 
+copy_if_exists() {
+    local src="$1"
+    local dst="$2"
+    if [[ -e "$src" ]]; then
+        cp -r "$src" "$dst"
+    else
+        echo "WARN: missing optional asset: $src"
+    fi
+}
+
 # Copy shared files to each platform directory
 for platform in "${PLATFORMS[@]}"; do
     cp package.json binaries/$platform/
     cp README.md binaries/$platform/
     cp CHANGELOG.md binaries/$platform/
-    cp ../../node_modules/@silvia-odwyer/photon-node/photon_rs_bg.wasm binaries/$platform/
+
+    copy_if_exists "../../node_modules/@silvia-odwyer/photon-node/photon_rs_bg.wasm" "binaries/$platform/"
     mkdir -p binaries/$platform/theme
     cp dist/modes/interactive/theme/*.json binaries/$platform/theme/
     mkdir -p binaries/$platform/assets
     cp dist/modes/interactive/assets/* binaries/$platform/assets/
-    cp -r dist/core/export-html binaries/$platform/
-    cp -r docs binaries/$platform/
-    cp -r examples binaries/$platform/
+    copy_if_exists "dist/core/export-html" "binaries/$platform/"
+    copy_if_exists "docs" "binaries/$platform/"
+    copy_if_exists "examples" "binaries/$platform/"
 
     # Copy koffi native module for Windows (needed for VT input support)
     if [[ "$platform" == "windows-x64" ]]; then
         mkdir -p binaries/$platform/node_modules/koffi/build/koffi/win32_x64
-        cp ../../node_modules/koffi/index.js binaries/$platform/node_modules/koffi/
-        cp ../../node_modules/koffi/package.json binaries/$platform/node_modules/koffi/
-        cp ../../node_modules/koffi/build/koffi/win32_x64/koffi.node binaries/$platform/node_modules/koffi/build/koffi/win32_x64/
+        copy_if_exists "../../node_modules/koffi/index.js" "binaries/$platform/node_modules/koffi/"
+        copy_if_exists "../../node_modules/koffi/package.json" "binaries/$platform/node_modules/koffi/"
+        copy_if_exists "../../node_modules/koffi/build/koffi/win32_x64/koffi.node" "binaries/$platform/node_modules/koffi/build/koffi/win32_x64/"
     fi
 done
 
