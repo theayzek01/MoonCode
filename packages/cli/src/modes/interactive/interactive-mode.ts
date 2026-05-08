@@ -112,6 +112,7 @@ import { keyHint, keyText, rawKeyHint } from "./components/keybinding-hints.js";
 import { LoginDialogComponent } from "./components/login-dialog.js";
 import { McpSelectorComponent } from "./components/mcp-selector.js";
 import { ModelSelectorComponent } from "./components/model-selector.js";
+import { MooncliHeaderComponent } from "./components/mooncli-header.js";
 import { type AuthSelectorProvider, OAuthSelectorComponent } from "./components/oauth-selector.js";
 import { ScopedModelsSelectorComponent } from "./components/scoped-models-selector.js";
 import { SessionSelectorComponent } from "./components/session-selector.js";
@@ -184,6 +185,7 @@ function hasDefaultModelProvider(providerId: string): providerId is keyof typeof
 }
 
 const BEDROCK_PROVIDER_ID = "amazon-bedrock";
+const MOONCLI_WORKING_FRAMES = ["🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘"];
 
 const BUILT_IN_MODEL_PROVIDERS = new Set<string>(getProviders());
 
@@ -572,20 +574,6 @@ export class InteractiveMode {
 
 		// Add header with keybindings from config (unless silenced)
 		if (this.options.verbose || !this.settingsManager.getQuietStartup()) {
-			const banner = theme.fg(
-				"accent",
-				`
-    ░░░░        M O O N C L I
-  ▒▒▒▒▒▒▒▒      
- ▓▓▓████▓▓▓     ${theme.fg("muted", "Zihin Sarayinda Bir Rehber")}
- ██████████     ${theme.fg("dim", `v${this.version}`)}  ${theme.fg("success", "[MCP Ready]")}
- ██████████     ${theme.fg("muted", "Dusun, Kodla, Mukemmellestir.")}
- ▓▓▓████▓▓▓
-  ▒▒▒▒▒▒▒▒
-    ░░░░
-`,
-			);
-
 			// Build startup instructions using keybinding hint helpers
 			const hint = (keybinding: AppKeybinding, description: string) => keyHint(keybinding, description);
 
@@ -614,11 +602,6 @@ export class InteractiveMode {
 				rawKeyHint("dosyalari surukleyin", "projeye eklemek icin"),
 			].join("\n");
 
-			const divider = theme.fg(
-				"dim",
-				"────────────────────────────────────────────────────────────────────────────────",
-			);
-
 			const compactInstructions = [
 				hint("app.interrupt", "durdur"),
 				rawKeyHint(`${keyText("app.clear")}/${keyText("app.exit")}`, "temizle/cik"),
@@ -627,18 +610,14 @@ export class InteractiveMode {
 				hint("app.tools.expand", "yardim"),
 			].join(theme.fg("dim", " • "));
 
-			const onboarding =
-				theme.fg("muted", "✦ Mooncli ile hayallerini koda dok. Yardim icin ") +
-				keyText("app.tools.expand") +
-				theme.fg("muted", " tusuna bas.");
-
-			this.builtInHeader = new ExpandableText(
-				() => `${banner}\n${divider}\n\n ${compactInstructions}\n\n ${onboarding}\n`,
-				() => `${banner}\n${divider}\n\n${expandedInstructions}\n\n ${onboarding}`,
-				this.getStartupExpansionState(),
-				1,
-				0,
-			);
+			this.builtInHeader = new MooncliHeaderComponent(this.ui, {
+				version: this.version,
+				compactInstructions,
+				expandedInstructions,
+				expanded: this.getStartupExpansionState(),
+				paddingX: 1,
+				paddingY: 0,
+			});
 
 			// Setup UI layout
 			this.headerContainer.addChild(new Spacer(1));
@@ -1689,9 +1668,9 @@ export class InteractiveMode {
 		return new Loader(
 			this.ui,
 			(spinner) => theme.fg("accent", spinner),
-			(text) => theme.fg("muted", text),
+			(text) => theme.fg("muted", `▓▒░ ${text}`),
 			this.getWorkingLoaderMessage(),
-			this.workingIndicatorOptions,
+			this.workingIndicatorOptions ?? { frames: MOONCLI_WORKING_FRAMES, intervalMs: 140 },
 		);
 	}
 
@@ -6428,6 +6407,9 @@ export class InteractiveMode {
 			this.loadingAnimation = undefined;
 		}
 		this.clearExtensionTerminalInputListeners();
+		if (this.builtInHeader && "dispose" in this.builtInHeader && typeof this.builtInHeader.dispose === "function") {
+			this.builtInHeader.dispose();
+		}
 		this.footer.dispose();
 		this.footerDataProvider.dispose();
 		if (this.unsubscribe) {
