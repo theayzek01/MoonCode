@@ -185,7 +185,7 @@ function hasDefaultModelProvider(providerId: string): providerId is keyof typeof
 }
 
 const BEDROCK_PROVIDER_ID = "amazon-bedrock";
-const MOONCLI_WORKING_FRAMES = ["🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘"];
+const MOONCLI_WORKING_FRAMES = ["·", "•", "●", "•"];
 
 const BUILT_IN_MODEL_PROVIDERS = new Set<string>(getProviders());
 
@@ -1668,9 +1668,9 @@ export class InteractiveMode {
 		return new Loader(
 			this.ui,
 			(spinner) => theme.fg("accent", spinner),
-			(text) => theme.fg("muted", `▓▒░ ${text}`),
+			(text) => theme.fg("muted", text),
 			this.getWorkingLoaderMessage(),
-			this.workingIndicatorOptions ?? { frames: MOONCLI_WORKING_FRAMES, intervalMs: 140 },
+			this.workingIndicatorOptions ?? { frames: MOONCLI_WORKING_FRAMES, intervalMs: 180 },
 		);
 	}
 

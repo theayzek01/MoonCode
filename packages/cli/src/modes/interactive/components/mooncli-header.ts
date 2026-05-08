@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Text, type TUI, visibleWidth } from "@mooncli/tui";
+import { Text, visibleWidth } from "@mooncli/tui";
 import type { AppKeybinding } from "../../../core/keybindings.js";
 import { theme } from "../theme/theme.js";
 import { keyText } from "./keybinding-hints.js";
@@ -13,48 +13,28 @@ export interface MooncliHeaderOptions {
 	paddingY?: number;
 }
 
-const ORBS = ["◐", "◓", "◑", "◒"];
-const SCAN = ["▰▱▱▱▱▱▱", "▰▰▱▱▱▱▱", "▰▰▰▱▱▱▱", "▰▰▰▰▱▱▱", "▰▰▰▰▰▱▱", "▰▰▰▰▰▰▱", "▰▰▰▰▰▰▰"];
-const SPARKS = ["✦", "✧", "◆", "◇", "✶", "✹"];
-const FLOW = ["BRIEF", "PLAN", "AGENTS", "QUALITY", "SHIP"];
-const CHIPS = ["RAG", "DIFF", "SHIP", "WEB", "CI", "OLLAMA", "MARKET"];
-
 function padAnsi(line: string, width: number): string {
 	return `${line}${" ".repeat(Math.max(0, width - visibleWidth(line)))}`;
 }
 
-function centerAnsi(line: string, width: number): string {
-	const left = Math.max(0, Math.floor((width - visibleWidth(line)) / 2));
-	return `${" ".repeat(left)}${line}`;
+function rule(width: number): string {
+	return theme.fg("borderMuted", "─".repeat(Math.max(1, width)));
 }
 
-function chip(label: string, active: boolean): string {
-	const color = active ? "success" : "muted";
-	return theme.fg(color, active ? `▓ ${label}` : `░ ${label}`);
-}
-
-function commandHint(command: string, description: string): string {
+function hint(command: string, description: string): string {
 	return `${theme.fg("accent", command)} ${theme.fg("muted", description)}`;
 }
 
 export class MooncliHeaderComponent extends Text {
-	private frame = 0;
 	private expanded: boolean;
-	private timer?: NodeJS.Timeout;
 
 	constructor(
-		private tui: TUI,
+		_tui: unknown,
 		private options: MooncliHeaderOptions,
 	) {
 		super("", options.paddingX ?? 1, options.paddingY ?? 0);
 		this.expanded = options.expanded ?? false;
 		this.refresh();
-		this.timer = setInterval(() => {
-			this.frame = (this.frame + 1) % 10_000;
-			this.refresh();
-			this.tui.requestRender();
-		}, 220);
-		this.timer.unref?.();
 	}
 
 	setExpanded(expanded: boolean): void {
@@ -62,67 +42,42 @@ export class MooncliHeaderComponent extends Text {
 		this.refresh();
 	}
 
-	dispose(): void {
-		if (this.timer) clearInterval(this.timer);
-		this.timer = undefined;
-	}
+	dispose(): void {}
 
 	private build(width = 88): string {
-		const inner = Math.max(54, Math.min(96, width - 4));
-		const orb = ORBS[this.frame % ORBS.length];
-		const spark = SPARKS[this.frame % SPARKS.length];
-		const scan = SCAN[this.frame % SCAN.length];
-		const activeFlow = this.frame % FLOW.length;
-		const activeChip = this.frame % CHIPS.length;
+		const inner = Math.max(46, Math.min(96, width - 2));
+		const title = `${theme.bold("Mooncli")} ${theme.fg("dim", `v${this.options.version}`)}`;
+		const subtitle = theme.fg("muted", "minimal agentic workspace");
+		const quick = [
+			hint("/model", "model seç"),
+			hint("/index", "projeyi tara"),
+			hint("/diff", "değişiklikleri gör"),
+			hint("/web", "dashboard"),
+			hint("/ship", "yayınla"),
+		].join(theme.fg("dim", "  ·  "));
 
-		const title = `${theme.fg("accent", "▓▒░")} ${theme.bold("MOONCLI COMPANY WORKSPACE")} ${theme.fg("accent", "░▒▓")}`;
-		const subtitle = `${theme.fg("muted", "agentic terminal · pixel ui · live coding floor")} ${theme.fg("dim", `v${this.options.version}`)}`;
-		const top = theme.fg("borderAccent", `╔${"═".repeat(inner)}╗`);
-		const bottom = theme.fg("borderAccent", `╚${"═".repeat(inner)}╝`);
-		const sep = theme.fg("border", `╠${"═".repeat(inner)}╣`);
-		const line = (body: string) =>
-			`${theme.fg("borderAccent", "║")} ${padAnsi(body, inner - 2)} ${theme.fg("borderAccent", "║")}`;
-
-		const moon = [
-			`${theme.fg("dim", "      ░░░░      ")} ${theme.fg("accent", orb)} ${theme.fg("success", scan)}`,
-			`${theme.fg("muted", "   ▒▒▓████▓▒▒   ")} ${theme.fg("warning", spark)} ${theme.fg("muted", "systems warming up")}`,
-			`${theme.fg("accent", "  ▓██████████▓  ")} ${theme.fg("dim", "MCP · tools · sessions · workspace")}`,
-			`${theme.fg("muted", "   ▒▒▓████▓▒▒   ")} ${theme.fg("success", "online")}`,
+		const compact = [
+			`${title}  ${subtitle}`,
+			rule(inner),
+			quick,
+			theme.fg("muted", `Yardım: /  ·  detay: ${keyText("app.tools.expand" as AppKeybinding)}`),
 		];
 
-		const flow = FLOW.map((part, index) => {
-			const painted = index === activeFlow ? theme.fg("success", `▶ ${part}`) : theme.fg("muted", part);
-			return painted;
-		}).join(theme.fg("dim", "  ─  "));
-
-		const chips = CHIPS.map((label, index) => chip(label, index === activeChip)).join(theme.fg("dim", "  "));
-		const compact = [
-			this.options.compactInstructions,
-			`${theme.fg("muted", "quick:")} ${commandHint("/workspace", "company floor")} ${theme.fg("dim", "•")} ${commandHint("/diff", "preview")} ${theme.fg("dim", "•")} ${commandHint("/web", "dashboard")} ${theme.fg("dim", "•")} ${commandHint("/ship", "push")}`,
-		].join("\n");
+		if (!this.expanded) return compact.map((line) => padAnsi(line, inner)).join("\n");
 
 		const expanded = [
-			this.options.expandedInstructions,
+			...compact,
 			"",
-			`${theme.bold("Yeni paneller")}: ${commandHint("/index", "codebase RAG")}  ${commandHint("/ollama models", "local models")}  ${commandHint("/marketplace", "extensions")}`,
-			`${theme.bold("Akış")}: brief → plan → agents → quality gate → integrator → ship`,
-			`${theme.fg("muted", "ipucu:")} ${keyText("app.tools.expand" as AppKeybinding)} header detaylarını aç/kapatır`,
-		].join("\n");
-
-		const body = [
-			top,
-			line(centerAnsi(title, inner - 2)),
-			line(centerAnsi(subtitle, inner - 2)),
-			sep,
-			...moon.map(line),
-			line(""),
-			line(flow),
-			line(chips),
-			sep,
-			...(this.expanded ? expanded : compact).split("\n").map(line),
-			bottom,
+			theme.bold("Başlangıç akışı"),
+			`${theme.fg("dim", "1.")} ${hint("/index", "kod tabanını hazırla")}`,
+			`${theme.fg("dim", "2.")} Normal yaz: ${theme.fg("muted", "ne yapmak istediğini anlat")}`,
+			`${theme.fg("dim", "3.")} ${hint("/diff", "son değişiklikleri kontrol et")}`,
+			`${theme.fg("dim", "4.")} ${hint("/ship", "branch/commit/push/PR akışı")}`,
+			"",
+			theme.bold("Kısayollar"),
+			this.options.expandedInstructions,
 		];
-		return body.join("\n");
+		return expanded.map((line) => padAnsi(line, inner)).join("\n");
 	}
 
 	render(width: number): string[] {
