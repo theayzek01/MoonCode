@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Build moodcli binaries for all platforms locally.
+# Build mooncli binaries for all platforms locally.
 # Mirrors .github/workflows/build-binaries.yml
 #
 # Usage:
@@ -12,11 +12,11 @@
 #
 # Output:
 #   packages/cli/binaries/
-#     moodcli-darwin-arm64.tar.gz
-#     moodcli-darwin-x64.tar.gz
-#     moodcli-linux-x64.tar.gz
-#     moodcli-linux-arm64.tar.gz
-#     moodcli-windows-x64.zip
+#     mooncli-darwin-arm64.tar.gz
+#     mooncli-darwin-x64.tar.gz
+#     mooncli-linux-x64.tar.gz
+#     mooncli-linux-arm64.tar.gz
+#     mooncli-windows-x64.zip
 
 set -euo pipefail
 
@@ -107,9 +107,9 @@ for platform in "${PLATFORMS[@]}"; do
     # call site has a try/catch fallback. For Windows builds, we copy the
     # appropriate .node file alongside the binary below.
     if [[ "$platform" == "windows-x64" ]]; then
-        bun build --compile --external koffi --target=bun-$platform ./dist/bun/cli.js --outfile binaries/$platform/moodcli.exe
+        bun build --compile --external koffi --target=bun-$platform ./dist/bun/cli.js --outfile binaries/$platform/mooncli.exe
     else
-        bun build --compile --external koffi --target=bun-$platform ./dist/bun/cli.js --outfile binaries/$platform/moodcli
+        bun build --compile --external koffi --target=bun-$platform ./dist/bun/cli.js --outfile binaries/$platform/mooncli
     fi
 done
 
@@ -144,12 +144,12 @@ cd binaries
 for platform in "${PLATFORMS[@]}"; do
     if [[ "$platform" == "windows-x64" ]]; then
         # Windows (zip)
-        echo "Creating moodcli-$platform.zip..."
-        (cd $platform && zip -r ../moodcli-$platform.zip .)
+        echo "Creating mooncli-$platform.zip..."
+        (cd $platform && zip -r ../mooncli-$platform.zip .)
     else
         # Unix platforms (tar.gz) - use wrapper directory for mise compatibility
-        echo "Creating moodcli-$platform.tar.gz..."
-        mv $platform moodcli && tar -czf moodcli-$platform.tar.gz moodcli && mv moodcli $platform
+        echo "Creating mooncli-$platform.tar.gz..."
+        mv $platform mooncli && tar -czf mooncli-$platform.tar.gz mooncli && mv mooncli $platform
     fi
 done
 
@@ -158,9 +158,9 @@ echo "==> Extracting archives for testing..."
 for platform in "${PLATFORMS[@]}"; do
     rm -rf $platform
     if [[ "$platform" == "windows-x64" ]]; then
-        mkdir -p $platform && (cd $platform && unzip -q ../moodcli-$platform.zip)
+        mkdir -p $platform && (cd $platform && unzip -q ../mooncli-$platform.zip)
     else
-        tar -xzf moodcli-$platform.tar.gz && mv moodcli $platform
+        tar -xzf mooncli-$platform.tar.gz && mv mooncli $platform
     fi
 done
 
@@ -171,5 +171,5 @@ ls -lh *.tar.gz *.zip 2>/dev/null || true
 echo ""
 echo "Extracted directories for testing:"
 for platform in "${PLATFORMS[@]}"; do
-    echo "  binaries/$platform/moodcli"
+    echo "  binaries/$platform/mooncli"
 done

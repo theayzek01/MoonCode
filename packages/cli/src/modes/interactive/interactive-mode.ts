@@ -5475,7 +5475,7 @@ export class InteractiveMode {
 	private async handleWebCommand(): Promise<void> {
 		try {
 			if (!this.webUiProcess) {
-				const server = await import("../../../../web-ui/src/server.js");
+				const server = await import("../../core/web-ui-server.js");
 				this.webUiProcess = server.startWebUiServer({ port: 3131 });
 			}
 			const url = this.webUiProcess.url || "http://127.0.0.1:3131";

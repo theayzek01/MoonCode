@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to build (e.g., v0.12.0)'
+        description: 'Tag to build (e.g., v8.05.2026)'
         required: true
         type: string
 
@@ -21,59 +21,61 @@ jobs:
       RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.RELEASE_TAG }}
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2.0.1
+        uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.2.20
 
       - name: Setup Node.js
-        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        uses: actions/setup-node@v4
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
+          cache: npm
 
       - name: Build binaries
         run: ./scripts/build-binaries.sh
 
       - name: Extract changelog for this version
         id: changelog
+        shell: bash
         run: |
-          VERSION="${RELEASE_TAG}"
-          VERSION="${VERSION#v}"  # Remove 'v' prefix
-          
-          # Extract changelog section for this version
+          VERSION="${RELEASE_TAG#v}"
           cd packages/cli
-          awk "/^## \[${VERSION}\]/{flag=1; next} /^## \[/{flag=0} flag" CHANGELOG.md > /tmp/release-notes.md
-          
-          # If empty, use a default message
+          awk "/^## \\[${VERSION}\\]/{flag=1; next} /^## \\[/{flag=0} flag" CHANGELOG.md > /tmp/release-notes.md
           if [ ! -s /tmp/release-notes.md ]; then
-            echo "Release ${VERSION}" > /tmp/release-notes.md
+            cat > /tmp/release-notes.md <<EOF
+          Release ${VERSION}
+
+          - Windows x64 binary
+          - Linux x64 / arm64 binaries
+          - macOS x64 / arm64 binaries
+          EOF
           fi
 
       - name: Create GitHub Release and upload binaries
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
         run: |
           cd packages/cli/binaries
-          
-          # Create release with changelog notes (or update if exists)
           gh release create "${RELEASE_TAG}" \
             --title "${RELEASE_TAG}" \
             --notes-file /tmp/release-notes.md \
-            pi-darwin-arm64.tar.gz \
-            pi-darwin-x64.tar.gz \
-            pi-linux-x64.tar.gz \
-            pi-linux-arm64.tar.gz \
-            pi-windows-x64.zip \
+            mooncli-darwin-arm64.tar.gz \
+            mooncli-darwin-x64.tar.gz \
+            mooncli-linux-x64.tar.gz \
+            mooncli-linux-arm64.tar.gz \
+            mooncli-windows-x64.zip \
             2>/dev/null || \
           gh release upload "${RELEASE_TAG}" \
-            pi-darwin-arm64.tar.gz \
-            pi-darwin-x64.tar.gz \
-            pi-linux-x64.tar.gz \
-            pi-linux-arm64.tar.gz \
-            pi-windows-x64.zip \
+            mooncli-darwin-arm64.tar.gz \
+            mooncli-darwin-x64.tar.gz \
+            mooncli-linux-x64.tar.gz \
+            mooncli-linux-arm64.tar.gz \
+            mooncli-windows-x64.zip \
             --clobber
