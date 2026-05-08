@@ -2544,6 +2544,7 @@ export class EngineSession {
 					"edit",
 					"write",
 					"web_search",
+					"git_ship",
 					...(discordToken
 						? ["discord_list_guilds", "discord_get_channels", "discord_send_message", "discord_manage_channel"]
 						: []),

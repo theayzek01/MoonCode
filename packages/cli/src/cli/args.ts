@@ -12,6 +12,9 @@ export type Mode = "text" | "json" | "rpc";
 
 export interface Args {
 	provider?: string;
+	headless?: boolean;
+	timeout?: number;
+	outputFormat?: "json" | "text";
 	model?: string;
 	apiKey?: string;
 	systemPrompt?: string;
@@ -72,6 +75,13 @@ export function parseArgs(args: string[]): Args {
 			result.help = true;
 		} else if (arg === "--version" || arg === "-v") {
 			result.version = true;
+		} else if (arg === "--headless") {
+			result.headless = true;
+		} else if (arg === "--timeout" && i + 1 < args.length) {
+			result.timeout = Number(args[++i]);
+		} else if (arg === "--output-format" && i + 1 < args.length) {
+			const value = args[++i];
+			if (value === "json" || value === "text") result.outputFormat = value;
 		} else if (arg === "--mode" && i + 1 < args.length) {
 			const mode = args[++i];
 			if (mode === "text" || mode === "json" || mode === "rpc") {
@@ -209,6 +219,7 @@ ${chalk.bold("Komutlar:")}
   ${APP_NAME} config                    Paket kaynaklarını etkinleştirmek/devre dışı bırakmak için TUI'yi aç
   ${APP_NAME} ollama doctor             Yerel Ollama bağlantısını ve modelleri kontrol et
   ${APP_NAME} ollama profile <profil>   Ollama hız/RAM profil komutlarını yazdır
+  echo '{"type":"prompt","text":"Fix lint"}' | ${APP_NAME} --headless --timeout 120
   ${APP_NAME} <komut> --help            Yükleme/kaldırma/güncelleme/listeleme için yardım göster
 
 ${chalk.bold("Seçenekler:")}
@@ -218,6 +229,9 @@ ${chalk.bold("Seçenekler:")}
   --system-prompt <metin>        Sistem istemi (varsayılan: kodlama asistanı istemi)
   --append-system-prompt <metin> Sistem istemine metin veya dosya içeriği ekle (birden fazla kez kullanılabilir)
   --mode <mod>                   Çıktı modu: text (varsayılan), json veya rpc
+  --headless                     CI/headless JSON stdin/stdout modu
+  --timeout <sn>                 Headless zaman aşımı (saniye)
+  --output-format <json|text>    Headless çıktı formatı
   --print, -p                    Etkileşimsiz mod: istemi işle ve çık
   --continue, -c                 Önceki oturuma devam et
   --resume, -r                   Devam etmek için bir oturum seç

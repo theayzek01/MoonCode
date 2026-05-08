@@ -27,7 +27,7 @@ const PROFILE_VALUES = {
 
 type Profile = keyof typeof PROFILE_VALUES;
 
-interface OllamaModelTag {
+export interface OllamaModelTag {
 	name: string;
 	size?: number;
 	modified_at?: string;
@@ -72,9 +72,71 @@ async function fetchJson<T>(path: string): Promise<T> {
 	return (await response.json()) as T;
 }
 
+export async function getLocalModels(): Promise<OllamaModelTag[]> {
+	const tags = await fetchJson<OllamaTagsResponse>("/api/tags");
+	return tags.models ?? [];
+}
+
+export async function checkModelAvailability(modelName: string): Promise<boolean> {
+	const normalized = modelName.trim().toLowerCase();
+	if (!normalized) return false;
+	const models = await getLocalModels();
+	return models.some((m) => m.name.toLowerCase() === normalized || m.name.toLowerCase().split(":")[0] === normalized);
+}
+
+export async function getRunningModels(): Promise<string[]> {
+	try {
+		const ps = await fetchJson<{ models?: OllamaModelTag[] }>("/api/ps");
+		return (ps.models ?? []).map((m) => m.name);
+	} catch {
+		return [];
+	}
+}
+
+export async function pullModel(modelName: string, onProgress?: (event: any) => void): Promise<void> {
+	const response = await fetch(`${baseUrl()}/api/pull`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ name: modelName, stream: true }),
+	});
+	if (!response.ok || !response.body) throw new Error(`${response.status} ${response.statusText}`);
+	const reader = response.body.getReader();
+	const decoder = new TextDecoder();
+	let buffer = "";
+	for (;;) {
+		const { done, value } = await reader.read();
+		if (done) break;
+		buffer += decoder.decode(value, { stream: true });
+		const lines = buffer.split("\n");
+		buffer = lines.pop() ?? "";
+		for (const line of lines) {
+			if (!line.trim()) continue;
+			const event = JSON.parse(line);
+			onProgress?.(event);
+			if (event.error) throw new Error(event.error);
+		}
+	}
+}
+
+export async function suggestModels(): Promise<OllamaModelTag[]> {
+	const local = await getLocalModels().catch(() => []);
+	const popular = [
+		"qwen2.5-coder:7b",
+		"qwen2.5-coder:14b",
+		"deepseek-coder-v2:16b",
+		"codestral:22b",
+		"llama3.1:8b",
+		"mistral-nemo:12b",
+	];
+	const localNames = new Set(local.map((m) => m.name));
+	return [...local, ...popular.filter((name) => !localNames.has(name)).map((name) => ({ name }))];
+}
+
 function printUsage(): void {
 	console.log(`${chalk.bold("Kullanım:")}
   mooncli ollama doctor
+  mooncli ollama models
+  mooncli ollama pull <model>
   mooncli ollama profile <turbo|balanced|quality>
 
 ${chalk.bold("Profil etkisi:")}
@@ -132,6 +194,31 @@ export async function handleOllamaCommand(args: string[]): Promise<boolean> {
 	const subcommand = args[1] ?? "doctor";
 	if (subcommand === "doctor" || subcommand === "status") {
 		await printDoctor();
+		return true;
+	}
+	if (subcommand === "models" || subcommand === "list") {
+		const models = await getLocalModels();
+		const running = new Set(await getRunningModels());
+		if (models.length === 0) console.log(chalk.yellow("Yerel Ollama modeli yok."));
+		for (const model of models) {
+			const mark = running.has(model.name) ? chalk.green("●") : chalk.dim("○");
+			console.log(`${mark} ${chalk.cyan(model.name)} ${chalk.dim(formatBytes(model.size))}`);
+		}
+		return true;
+	}
+	if (subcommand === "pull") {
+		const model = args[2];
+		if (!model) {
+			console.log(chalk.yellow("Kullanım: mooncli ollama pull <model>"));
+			return true;
+		}
+		await pullModel(model, (event) => {
+			const total = event.total || 0;
+			const completed = event.completed || 0;
+			const pct = total ? ` ${Math.round((completed / total) * 100)}%` : "";
+			if (event.status) process.stdout.write(`\r${event.status}${pct}     `);
+		});
+		console.log(`\n${chalk.green("Model hazır:")} ${model}`);
 		return true;
 	}
 	if (subcommand === "profile") {

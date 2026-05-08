@@ -3,6 +3,7 @@ import type { EngineTool } from "@mooncli/engine";
 import { spawn } from "child_process";
 import { Type } from "typebox";
 import { getShellEnv } from "../../utils/shell.js";
+import { formatSearchResults, searchProject } from "../codebase-index/index.js";
 import type { ToolDefinition } from "../extensions/types.js";
 import { wrapToolDefinition } from "./tool-definition-wrapper.js";
 import { truncateTail } from "./truncate.js";
@@ -11,59 +12,98 @@ const semanticSearchSchema = Type.Object({
 	query: Type.String({ description: "Arama yapılacak semantik kelime, fonksiyon adı veya mantık özeti" }),
 });
 
+// git grep fallback - index hazır değilse veya hata olursa
+function gitGrepFallback(cwd: string, query: string, signal?: AbortSignal): Promise<string> {
+	return new Promise((resolve, reject) => {
+		const child = spawn("git", ["grep", "-i", "-n", "-C", "2", query], {
+			cwd,
+			env: getShellEnv(),
+			shell: true,
+		});
+
+		let output = "";
+		child.stdout?.on("data", (chunk) => {
+			output += chunk.toString();
+		});
+		child.stderr?.on("data", (chunk) => {
+			output += chunk.toString();
+		});
+
+		const onAbort = () => child.kill();
+		if (signal) {
+			if (signal.aborted) onAbort();
+			else signal.addEventListener("abort", onAbort, { once: true });
+		}
+
+		child.on("close", () => {
+			if (signal) signal.removeEventListener("abort", onAbort);
+			if (signal?.aborted) {
+				reject(new Error("aborted"));
+				return;
+			}
+			resolve(output);
+		});
+		child.on("error", reject);
+	});
+}
+
 export function createSemanticSearchToolDefinition(cwd: string): ToolDefinition<typeof semanticSearchSchema, any, any> {
 	return {
 		name: "semantic_search",
 		label: "semantic_search",
 		description:
-			"Proje genelinde akıllı semantik arama (MCP Indexing). Fonksiyonları, sınıfları ve mantığı bulmak için context ile birlikte arar.",
-		promptSnippet: "Projede akıllı semantik bağlam ara (MCP tabanlı)",
+			"Proje genelinde akıllı semantik arama. Fonksiyonları, sınıfları, değişkenleri ve mantığı bulmak için TF-IDF tabanlı codebase indexing kullanır. git grep'ten çok daha akıllı.",
+		promptSnippet: "Projede akıllı semantik bağlam ara (codebase RAG)",
 		parameters: semanticSearchSchema,
 		async execute(_id, { query }, signal) {
-			return new Promise((resolve, reject) => {
-				// Use git grep with context to approximate a semantic code search
-				const child = spawn("git", ["grep", "-i", "-n", "-C", "2", query], {
-					cwd,
-					env: getShellEnv(),
-					shell: true,
-				});
+			if (signal?.aborted) throw new Error("aborted");
 
-				let output = "";
-				child.stdout?.on("data", (chunk) => {
-					output += chunk.toString();
-				});
-				child.stderr?.on("data", (chunk) => {
-					output += chunk.toString();
-				});
+			try {
+				// Önce RAG engine'i dene
+				const results = searchProject(cwd, query, 8);
 
-				const onAbort = () => child.kill();
-				if (signal) {
-					if (signal.aborted) onAbort();
-					else signal.addEventListener("abort", onAbort, { once: true });
+				if (results.length > 0) {
+					const formatted = formatSearchResults(results);
+					const truncation = truncateTail(formatted, { maxLines: 500 });
+					return {
+						content: [{ type: "text", text: truncation.content || "" }],
+					};
 				}
 
-				child.on("close", (_code) => {
-					if (signal) signal.removeEventListener("abort", onAbort);
-					if (signal?.aborted) {
-						reject(new Error("aborted"));
-						return;
-					}
+				// RAG sonuç bulamadıysa git grep fallback
+				const grepOutput = await gitGrepFallback(cwd, query, signal);
+				if (!grepOutput.trim()) {
+					return {
+						content: [{ type: "text", text: `"${query}" ile eşleşen sonuç bulunamadı.` }],
+					};
+				}
+				const truncation = truncateTail(grepOutput, { maxLines: 500 });
+				return {
+					content: [{ type: "text", text: truncation.content || "" }],
+				};
+			} catch (err) {
+				if (err instanceof Error && err.message === "aborted") throw err;
 
-					if (!output.trim()) {
-						resolve({
-							content: [{ type: "text", text: `"${query}" ile eşleşen semantik bir sonuç bulunamadı.` }],
-						});
-						return;
+				// Herhangi bir hata olursa git grep'e düş
+				try {
+					const grepOutput = await gitGrepFallback(cwd, query, signal);
+					if (!grepOutput.trim()) {
+						return {
+							content: [{ type: "text", text: `"${query}" ile eşleşen sonuç bulunamadı.` }],
+						};
 					}
-
-					const truncation = truncateTail(output, { maxLines: 500 });
-					resolve({
+					const truncation = truncateTail(grepOutput, { maxLines: 500 });
+					return {
 						content: [{ type: "text", text: truncation.content || "" }],
-					});
-				});
-
-				child.on("error", reject);
-			});
+					};
+				} catch {
+					return {
+						content: [
+							{ type: "text", text: `Arama hatası: ${err instanceof Error ? err.message : String(err)}` },
+						],
+					};
+				}
+			}
 		},
 		renderCall(args, theme) {
 			return {
