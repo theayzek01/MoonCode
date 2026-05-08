@@ -1,6 +1,6 @@
 /**
- * Gemini CLI OAuth flow (Google Cloud Code Assist)
- * Standard Gemini models only (gemini-2.0-flash, gemini-2.5-*)
+ * Antigravity OAuth flow (Gemini 3, Claude, GPT-OSS via Google Cloud)
+ * Uses different OAuth credentials than google-gemini-cli for access to additional models.
  *
  * NOTE: This module uses Node.js http.createServer for the OAuth callback.
  * It is only intended for CLI use, not browser environments.
@@ -11,7 +11,7 @@ import { oauthErrorHtml, oauthSuccessHtml } from "./oauth-page.js";
 import { generatePKCE } from "./pkce.js";
 import type { OAuthCredentials, OAuthLoginCallbacks, OAuthProviderInterface } from "./types.js";
 
-type GeminiCredentials = OAuthCredentials & {
+type AntigravityCredentials = OAuthCredentials & {
 	projectId: string;
 };
 
@@ -25,20 +25,28 @@ if (typeof process !== "undefined" && (process.versions?.node || process.version
 	});
 }
 
+// Antigravity OAuth credentials (different from Gemini CLI)
 const decode = (s: string) => atob(s);
 const CLIENT_ID = decode(
-	"NjgxMjU1ODA5Mzk1LW9vOGZ0Mm9wcmRybnA5ZTNhcWY2YXYzaG1kaWIxMzVqLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29t",
+	"MTA3MTAwNjA2MDU5MS10bWhzc2luMmgyMWxjcmUyMzV2dG9sb2poNGc0MDNlcC5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbQ==",
 );
-const CLIENT_SECRET = decode("R09DU1BYLTR1SGdNUG0tMW83U2stZ2VWNkN1NWNsWEZzeGw=");
-const REDIRECT_URI = "http://localhost:8085/oauth2callback";
+const CLIENT_SECRET = decode("R09DU1BYLUs1OEZXUjQ4NkxkTEoxbUxCOHNYQzR6NnFEQWY=");
+const REDIRECT_URI = "http://localhost:51121/oauth-callback";
+
+// Antigravity requires additional scopes
 const SCOPES = [
 	"https://www.googleapis.com/auth/cloud-platform",
 	"https://www.googleapis.com/auth/userinfo.email",
 	"https://www.googleapis.com/auth/userinfo.profile",
+	"https://www.googleapis.com/auth/cclog",
+	"https://www.googleapis.com/auth/experimentsandconfigs",
 ];
+
 const AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
-const CODE_ASSIST_ENDPOINT = "https://cloudcode-pa.googleapis.com";
+
+// Fallback project ID when discovery fails
+const DEFAULT_PROJECT_ID = "rising-fact-p41fc";
 
 type CallbackServerInfo = {
 	server: Server;
@@ -55,7 +63,7 @@ async function getNodeCreateServer(): Promise<typeof import("node:http").createS
 		await _httpImportPromise;
 	}
 	if (_createServer) return _createServer;
-	throw new Error("Gemini CLI OAuth is only available in Node.js environments");
+	throw new Error("Antigravity OAuth is only available in Node.js environments");
 }
 
 async function startCallbackServer(): Promise<CallbackServerInfo> {
@@ -73,9 +81,9 @@ async function startCallbackServer(): Promise<CallbackServerInfo> {
 		});
 
 		const server = createServer((req, res) => {
-			const url = new URL(req.url || "", `http://localhost:8085`);
+			const url = new URL(req.url || "", `http://localhost:51121`);
 
-			if (url.pathname === "/oauth2callback") {
+			if (url.pathname === "/oauth-callback") {
 				const code = url.searchParams.get("code");
 				const state = url.searchParams.get("state");
 				const error = url.searchParams.get("error");
@@ -104,7 +112,7 @@ async function startCallbackServer(): Promise<CallbackServerInfo> {
 			reject(err);
 		});
 
-		server.listen(8085, CALLBACK_HOST, () => {
+		server.listen(51121, CALLBACK_HOST, () => {
 			resolve({
 				server,
 				cancelWait: () => {
@@ -136,219 +144,69 @@ function parseRedirectUrl(input: string): { code?: string; state?: string } {
 }
 
 interface LoadCodeAssistPayload {
-	cloudaicompanionProject?: string;
+	cloudaicompanionProject?: string | { id?: string };
 	currentTier?: { id?: string };
 	allowedTiers?: Array<{ id?: string; isDefault?: boolean }>;
 }
 
 /**
- * Long-running operation response from onboardUser
- */
-interface LongRunningOperationResponse {
-	name?: string;
-	done?: boolean;
-	response?: {
-		cloudaicompanionProject?: { id?: string };
-	};
-}
-
-// Tier IDs as used by the Cloud Code API
-const TIER_FREE = "free-tier";
-const TIER_LEGACY = "legacy-tier";
-const TIER_STANDARD = "standard-tier";
-
-interface GoogleRpcErrorResponse {
-	error?: {
-		details?: Array<{ reason?: string }>;
-	};
-}
-
-/**
- * Wait helper for onboarding retries
- */
-function wait(ms: number): Promise<void> {
-	return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-/**
- * Get default tier from allowed tiers
- */
-function getDefaultTier(allowedTiers?: Array<{ id?: string; isDefault?: boolean }>): { id?: string } {
-	if (!allowedTiers || allowedTiers.length === 0) return { id: TIER_LEGACY };
-	const defaultTier = allowedTiers.find((t) => t.isDefault);
-	return defaultTier ?? { id: TIER_LEGACY };
-}
-
-function isVpcScAffectedUser(payload: unknown): boolean {
-	if (!payload || typeof payload !== "object") return false;
-	if (!("error" in payload)) return false;
-	const error = (payload as GoogleRpcErrorResponse).error;
-	if (!error?.details || !Array.isArray(error.details)) return false;
-	return error.details.some((detail) => detail.reason === "SECURITY_POLICY_VIOLATED");
-}
-
-/**
- * Poll a long-running operation until completion
- */
-async function pollOperation(
-	operationName: string,
-	headers: Record<string, string>,
-	onProgress?: (message: string) => void,
-): Promise<LongRunningOperationResponse> {
-	let attempt = 0;
-	while (true) {
-		if (attempt > 0) {
-			onProgress?.(`Waiting for project provisioning (attempt ${attempt + 1})...`);
-			await wait(5000);
-		}
-
-		const response = await fetch(`${CODE_ASSIST_ENDPOINT}/v1internal/${operationName}`, {
-			method: "GET",
-			headers,
-		});
-
-		if (!response.ok) {
-			throw new Error(`Failed to poll operation: ${response.status} ${response.statusText}`);
-		}
-
-		const data = (await response.json()) as LongRunningOperationResponse;
-		if (data.done) {
-			return data;
-		}
-
-		attempt += 1;
-	}
-}
-
-/**
- * Discover or provision a Google Cloud project for the user
+ * Discover or provision a project for the user
  */
 async function discoverProject(accessToken: string, onProgress?: (message: string) => void): Promise<string> {
-	// Check for user-provided project ID via environment variable
-	const envProjectId = process.env.GOOGLE_CLOUD_PROJECT || process.env.GOOGLE_CLOUD_PROJECT_ID;
-
 	const headers = {
 		Authorization: `Bearer ${accessToken}`,
 		"Content-Type": "application/json",
 		"User-Agent": "google-api-nodejs-client/9.15.1",
-		"X-Goog-Api-Client": "gl-node/22.17.0",
-	};
-
-	// Try to load existing project via loadCodeAssist
-	onProgress?.("Checking for existing Cloud Code Assist project...");
-	const loadResponse = await fetch(`${CODE_ASSIST_ENDPOINT}/v1internal:loadCodeAssist`, {
-		method: "POST",
-		headers,
-		body: JSON.stringify({
-			cloudaicompanionProject: envProjectId,
-			metadata: {
-				ideType: "IDE_UNSPECIFIED",
-				platform: "PLATFORM_UNSPECIFIED",
-				pluginType: "GEMINI",
-				duetProject: envProjectId,
-			},
-		}),
-	});
-
-	let data: LoadCodeAssistPayload;
-
-	if (!loadResponse.ok) {
-		let errorPayload: unknown;
-		try {
-			errorPayload = await loadResponse.clone().json();
-		} catch {
-			errorPayload = undefined;
-		}
-
-		if (isVpcScAffectedUser(errorPayload)) {
-			data = { currentTier: { id: TIER_STANDARD } };
-		} else {
-			const errorText = await loadResponse.text();
-			throw new Error(`loadCodeAssist failed: ${loadResponse.status} ${loadResponse.statusText}: ${errorText}`);
-		}
-	} else {
-		data = (await loadResponse.json()) as LoadCodeAssistPayload;
-	}
-
-	// If user already has a current tier and project, use it
-	if (data.currentTier) {
-		if (data.cloudaicompanionProject) {
-			return data.cloudaicompanionProject;
-		}
-		// User has a tier but no managed project - they need to provide one via env var
-		if (envProjectId) {
-			return envProjectId;
-		}
-		throw new Error(
-			"This account requires setting the GOOGLE_CLOUD_PROJECT or GOOGLE_CLOUD_PROJECT_ID environment variable. " +
-				"See https://goo.gle/gemini-cli-auth-docs#workspace-gca",
-		);
-	}
-
-	// User needs to be onboarded - get the default tier
-	const tier = getDefaultTier(data.allowedTiers);
-	const tierId = tier?.id ?? TIER_FREE;
-
-	if (tierId !== TIER_FREE && !envProjectId) {
-		throw new Error(
-			"This account requires setting the GOOGLE_CLOUD_PROJECT or GOOGLE_CLOUD_PROJECT_ID environment variable. " +
-				"See https://goo.gle/gemini-cli-auth-docs#workspace-gca",
-		);
-	}
-
-	onProgress?.("Provisioning Cloud Code Assist project (this may take a moment)...");
-
-	// Build onboard request - for free tier, don't include project ID (Google provisions one)
-	// For other tiers, include the user's project ID if available
-	const onboardBody: Record<string, unknown> = {
-		tierId,
-		metadata: {
+		"X-Goog-Api-Client": "google-cloud-sdk vscode_cloudshelleditor/0.1",
+		"Client-Metadata": JSON.stringify({
 			ideType: "IDE_UNSPECIFIED",
 			platform: "PLATFORM_UNSPECIFIED",
 			pluginType: "GEMINI",
-		},
+		}),
 	};
 
-	if (tierId !== TIER_FREE && envProjectId) {
-		onboardBody.cloudaicompanionProject = envProjectId;
-		(onboardBody.metadata as Record<string, unknown>).duetProject = envProjectId;
+	// Try endpoints in order: prod first, then sandbox
+	const endpoints = ["https://cloudcode-pa.googleapis.com", "https://daily-cloudcode-pa.sandbox.googleapis.com"];
+
+	onProgress?.("Checking for existing project...");
+
+	for (const endpoint of endpoints) {
+		try {
+			const loadResponse = await fetch(`${endpoint}/v1internal:loadCodeAssist`, {
+				method: "POST",
+				headers,
+				body: JSON.stringify({
+					metadata: {
+						ideType: "IDE_UNSPECIFIED",
+						platform: "PLATFORM_UNSPECIFIED",
+						pluginType: "GEMINI",
+					},
+				}),
+			});
+
+			if (loadResponse.ok) {
+				const data = (await loadResponse.json()) as LoadCodeAssistPayload;
+
+				// Handle both string and object formats
+				if (typeof data.cloudaicompanionProject === "string" && data.cloudaicompanionProject) {
+					return data.cloudaicompanionProject;
+				}
+				if (
+					data.cloudaicompanionProject &&
+					typeof data.cloudaicompanionProject === "object" &&
+					data.cloudaicompanionProject.id
+				) {
+					return data.cloudaicompanionProject.id;
+				}
+			}
+		} catch {
+			// Try next endpoint
+		}
 	}
 
-	// Start onboarding - this returns a long-running operation
-	const onboardResponse = await fetch(`${CODE_ASSIST_ENDPOINT}/v1internal:onboardUser`, {
-		method: "POST",
-		headers,
-		body: JSON.stringify(onboardBody),
-	});
-
-	if (!onboardResponse.ok) {
-		const errorText = await onboardResponse.text();
-		throw new Error(`onboardUser failed: ${onboardResponse.status} ${onboardResponse.statusText}: ${errorText}`);
-	}
-
-	let lroData = (await onboardResponse.json()) as LongRunningOperationResponse;
-
-	// If the operation isn't done yet, poll until completion
-	if (!lroData.done && lroData.name) {
-		lroData = await pollOperation(lroData.name, headers, onProgress);
-	}
-
-	// Try to get project ID from the response
-	const projectId = lroData.response?.cloudaicompanionProject?.id;
-	if (projectId) {
-		return projectId;
-	}
-
-	// If no project ID from onboarding, fall back to env var
-	if (envProjectId) {
-		return envProjectId;
-	}
-
-	throw new Error(
-		"Could not discover or provision a Google Cloud project. " +
-			"Try setting the GOOGLE_CLOUD_PROJECT or GOOGLE_CLOUD_PROJECT_ID environment variable. " +
-			"See https://goo.gle/gemini-cli-auth-docs#workspace-gca",
-	);
+	// Use fallback project ID
+	onProgress?.("Using default project...");
+	return DEFAULT_PROJECT_ID;
 }
 
 /**
@@ -373,9 +231,9 @@ async function getUserEmail(accessToken: string): Promise<string | undefined> {
 }
 
 /**
- * Refresh Google Cloud Code Assist token
+ * Refresh Antigravity token
  */
-export async function refreshGoogleCloudToken(refreshToken: string, projectId: string): Promise<OAuthCredentials> {
+export async function refreshAntigravityToken(refreshToken: string, projectId: string): Promise<OAuthCredentials> {
 	const response = await fetch(TOKEN_URL, {
 		method: "POST",
 		headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -389,7 +247,7 @@ export async function refreshGoogleCloudToken(refreshToken: string, projectId: s
 
 	if (!response.ok) {
 		const error = await response.text();
-		throw new Error(`Google Cloud token refresh failed: ${error}`);
+		throw new Error(`Antigravity token refresh failed: ${error}`);
 	}
 
 	const data = (await response.json()) as {
@@ -407,14 +265,14 @@ export async function refreshGoogleCloudToken(refreshToken: string, projectId: s
 }
 
 /**
- * Login with Gemini CLI (Google Cloud Code Assist) OAuth
+ * Login with Antigravity OAuth
  *
  * @param onAuth - Callback with URL and optional instructions
  * @param onProgress - Optional progress callback
  * @param onManualCodeInput - Optional promise that resolves with user-pasted redirect URL.
  *                            Races with browser callback - whichever completes first wins.
  */
-export async function loginGeminiCli(
+export async function loginAntigravity(
 	onAuth: (info: { url: string; instructions?: string }) => void,
 	onProgress?: (message: string) => void,
 	onManualCodeInput?: () => Promise<string>,
@@ -573,25 +431,25 @@ export async function loginGeminiCli(
 	}
 }
 
-export const geminiCliOAuthProvider: OAuthProviderInterface = {
-	id: "google-gemini-cli",
-	name: "Google Cloud Code Assist (Gemini CLI)",
+export const antigravityOAuthProvider: OAuthProviderInterface = {
+	id: "google-antigravity",
+	name: "Antigravity (Gemini 3, Claude, GPT-OSS)",
 	usesCallbackServer: true,
 
 	async login(callbacks: OAuthLoginCallbacks): Promise<OAuthCredentials> {
-		return loginGeminiCli(callbacks.onAuth, callbacks.onProgress, callbacks.onManualCodeInput);
+		return loginAntigravity(callbacks.onAuth, callbacks.onProgress, callbacks.onManualCodeInput);
 	},
 
 	async refreshToken(credentials: OAuthCredentials): Promise<OAuthCredentials> {
-		const creds = credentials as GeminiCredentials;
+		const creds = credentials as AntigravityCredentials;
 		if (!creds.projectId) {
-			throw new Error("Google Cloud credentials missing projectId");
+			throw new Error("Antigravity credentials missing projectId");
 		}
-		return refreshGoogleCloudToken(creds.refresh, creds.projectId);
+		return refreshAntigravityToken(creds.refresh, creds.projectId);
 	},
 
 	getApiKey(credentials: OAuthCredentials): string {
-		const creds = credentials as GeminiCredentials;
+		const creds = credentials as AntigravityCredentials;
 		return JSON.stringify({ token: creds.access, projectId: creds.projectId });
 	},
 };

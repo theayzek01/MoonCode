@@ -14,8 +14,7 @@ import { AssistantMessageEventStream } from "../utils/event-stream.js";
 import type { BedrockOptions } from "./amazon-bedrock.js";
 import type { AnthropicOptions } from "./anthropic.js";
 import type { AzureOpenAIResponsesOptions } from "./azure-openai-responses.js";
-import type { GoogleOptions } from "./google.js";
-import type { GoogleGeminiCliOptions } from "./google-antigravity.js";
+import type { GoogleGeminiCliOptions } from "./google-gemini-cli.js";
 import type { GoogleVertexOptions } from "./google-vertex.js";
 import type { MistralOptions } from "./mistral.js";
 import type { OpenAICodexResponsesOptions } from "./openai-codex-responses.js";
@@ -113,6 +112,9 @@ let OpenAICompletionsProviderModulePromise:
 	| undefined;
 let OpenAIResponsesProviderModulePromise:
 	| Promise<LazyProviderModule<"openai-responses", OpenAIResponsesOptions, SimpleStreamOptions>>
+	| undefined;
+let googleGeminiCliProviderModulePromise:
+	| Promise<LazyProviderModule<"google-gemini-cli", GoogleGeminiCliOptions, SimpleStreamOptions>>
 	| undefined;
 let googleAntigravityProviderModulePromise:
 	| Promise<LazyProviderModule<"google-antigravity", GoogleGeminiCliOptions, SimpleStreamOptions>>
@@ -309,10 +311,23 @@ function loadOpenAIResponsesProviderModule(): Promise<
 	return OpenAIResponsesProviderModulePromise;
 }
 
+function loadGoogleGeminiCliProviderModule(): Promise<
+	LazyProviderModule<"google-gemini-cli", GoogleGeminiCliOptions, SimpleStreamOptions>
+> {
+	googleGeminiCliProviderModulePromise ||= import("./google-gemini-cli.js").then((module) => {
+		const provider = module as any;
+		return {
+			stream: provider.streamGoogleGeminiCli,
+			streamSimple: provider.streamSimpleGoogleGeminiCli,
+		};
+	});
+	return googleGeminiCliProviderModulePromise;
+}
+
 function loadGoogleAntigravityProviderModule(): Promise<
 	LazyProviderModule<"google-antigravity", GoogleGeminiCliOptions, SimpleStreamOptions>
 > {
-	googleAntigravityProviderModulePromise ||= import("./google-antigravity.js").then((module) => {
+	googleAntigravityProviderModulePromise ||= import("./google-gemini-cli.js").then((module) => {
 		const provider = module as any;
 		return {
 			stream: provider.streamGoogleGeminiCli,
@@ -354,6 +369,8 @@ export const streamOpenAICompletions = createLazyStream(loadOpenAICompletionsPro
 export const streamSimpleOpenAICompletions = createLazySimpleStream(loadOpenAICompletionsProviderModule);
 export const streamOpenAIResponses = createLazyStream(loadOpenAIResponsesProviderModule);
 export const streamSimpleOpenAIResponses = createLazySimpleStream(loadOpenAIResponsesProviderModule);
+export const streamGoogleGeminiCli = createLazyStream(loadGoogleGeminiCliProviderModule);
+export const streamSimpleGoogleGeminiCli = createLazySimpleStream(loadGoogleGeminiCliProviderModule);
 export const streamGoogleAntigravity = createLazyStream(loadGoogleAntigravityProviderModule);
 export const streamSimpleGoogleAntigravity = createLazySimpleStream(loadGoogleAntigravityProviderModule);
 const streamBedrockLazy = createLazyStream(loadBedrockProviderModule);
@@ -382,6 +399,12 @@ export function registerBuiltInApiProviders(): void {
 		api: "openai-responses",
 		stream: streamOpenAIResponses,
 		streamSimple: streamSimpleOpenAIResponses,
+	});
+
+	registerApiProvider({
+		api: "google-gemini-cli",
+		stream: streamGoogleGeminiCli,
+		streamSimple: streamSimpleGoogleGeminiCli,
 	});
 
 	registerApiProvider({

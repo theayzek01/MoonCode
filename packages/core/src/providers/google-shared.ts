@@ -1,6 +1,5 @@
-// @ts-nocheck
 /**
- * Shared utilities for Google Generative Core and Google Vertex providers.
+ * Shared utilities for Google Generative AI and Google Cloud Code Assist providers.
  */
 
 import { type Content, FinishReason, FunctionCallingConfigMode, type Part } from "@google/genai";
@@ -8,18 +7,14 @@ import type { Context, ImageContent, Model, StopReason, TextContent, Tool } from
 import { sanitizeSurrogates } from "../utils/sanitize-unicode.js";
 import { transformMessages } from "./transform-messages.js";
 
-type GoogleApiType = "google-generative-ai" | "google-vertex" | "google-antigravity" | "google-gemini-cli";
+type GoogleApiType = "google-generative-ai" | "google-gemini-cli" | "google-vertex";
 
-/**
- * Thinking level for Gemini 3 models.
- * Mirrors Google's ThinkingLevel enum values.
- */
-export type GoogleThinkingLevel = "THINKING_LEVEL_UNSPECIFIED" | "MINIMAL" | "LOW" | "MEDIUM" | "HIGH";
+export type GoogleThinkingLevel = "LOW" | "HIGH";
 
 /**
  * Determines whether a streamed Gemini `Part` should be treated as "thinking".
  *
- * Protocol note (Gemini / Vertex Core thought signatures):
+ * Protocol note (Gemini / Vertex AI thought signatures):
  * - `thought: true` is the definitive marker for thinking content (thought summaries).
  * - `thoughtSignature` is an encrypted representation of the model's internal thought process
  *   used to preserve reasoning context across multi-turn interactions.
@@ -51,6 +46,11 @@ export function retainThoughtSignature(existing: string | undefined, incoming: s
 
 // Thought signatures must be base64 for Google APIs (TYPE_BYTES).
 const base64SignaturePattern = /^[A-Za-z0-9+/]+={0,2}$/;
+
+// Sentinel value that tells the Gemini API to skip thought signature validation.
+// Used for unsigned function call parts (e.g. replayed from providers without thought signatures).
+// See: https://ai.google.dev/gemini-api/docs/thought-signatures
+const SKIP_THOUGHT_SIGNATURE = "skip_thought_signature_validator";
 
 function isValidThoughtSignature(signature: string | undefined): boolean {
 	if (!signature) return false;
@@ -131,7 +131,7 @@ export function convertMessages<T extends GoogleApiType>(model: Model<T>, contex
 
 			for (const block of msg.content) {
 				if (block.type === "text") {
-					// Skip empty text blocks
+					// Skip empty text blocks - they can cause issues with some models (e.g. Claude via Antigravity)
 					if (!block.text || block.text.trim() === "") continue;
 					const thoughtSignature = resolveThoughtSignature(isSameProviderAndModel, block.textSignature);
 					parts.push({
@@ -157,13 +157,18 @@ export function convertMessages<T extends GoogleApiType>(model: Model<T>, contex
 					}
 				} else if (block.type === "toolCall") {
 					const thoughtSignature = resolveThoughtSignature(isSameProviderAndModel, block.thoughtSignature);
+					// Gemini 3 requires thoughtSignature on all function calls when thinking mode is enabled.
+					// Use the skip_thought_signature_validator sentinel for unsigned function calls
+					// (e.g. replayed from providers without thought signatures like Claude via Antigravity).
+					const isGemini3 = model.id.toLowerCase().includes("gemini-3");
+					const effectiveSignature = thoughtSignature || (isGemini3 ? SKIP_THOUGHT_SIGNATURE : undefined);
 					const part: Part = {
 						functionCall: {
 							name: block.name,
 							args: block.arguments ?? {},
 							...(requiresToolCallId(model.id) ? { id: block.id } : {}),
 						},
-						...(thoughtSignature && { thoughtSignature }),
+						...(effectiveSignature && { thoughtSignature: effectiveSignature }),
 					};
 					parts.push(part);
 				}
@@ -187,7 +192,7 @@ export function convertMessages<T extends GoogleApiType>(model: Model<T>, contex
 
 			// Gemini 3+ models support multimodal function responses with images nested inside
 			// functionResponse.parts. Claude and other non-Gemini models behind Cloud Code Assist /
-			// Gemini < 3 still needs a separate user image turn.
+			// Antigravity also accept this shape. Gemini < 3 still needs a separate user image turn.
 			const modelSupportsMultimodalFunctionResponse = supportsMultimodalFunctionResponse(model.id);
 
 			// Use "output" key for success, "error" key for errors as per SDK documentation
@@ -213,7 +218,7 @@ export function convertMessages<T extends GoogleApiType>(model: Model<T>, contex
 			// Cloud Code Assist API requires all function responses to be in a single user turn.
 			// Check if the last content is already a user turn with function responses and merge.
 			const lastContent = contents[contents.length - 1];
-			if (lastContent?.role === "user" && lastContent.parts?.some((p: any) => p.functionResponse)) {
+			if (lastContent?.role === "user" && lastContent.parts?.some((p) => p.functionResponse)) {
 				lastContent.parts.push(functionResponsePart);
 			} else {
 				contents.push({
@@ -330,7 +335,7 @@ export function mapStopReason(reason: FinishReason): StopReason {
 		case FinishReason.NO_IMAGE:
 			return "error";
 		default: {
-			const _exhaustive: never = reason as any;
+			const _exhaustive: never = reason;
 			throw new Error(`Unhandled stop reason: ${_exhaustive}`);
 		}
 	}
