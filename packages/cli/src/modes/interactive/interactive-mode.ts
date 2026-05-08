@@ -112,6 +112,7 @@ import { keyHint, keyText, rawKeyHint } from "./components/keybinding-hints.js";
 import { LoginDialogComponent } from "./components/login-dialog.js";
 import { McpSelectorComponent } from "./components/mcp-selector.js";
 import { ModelSelectorComponent } from "./components/model-selector.js";
+import { MooncliHeaderComponent } from "./components/mooncli-header.js";
 import { type AuthSelectorProvider, OAuthSelectorComponent } from "./components/oauth-selector.js";
 import { ScopedModelsSelectorComponent } from "./components/scoped-models-selector.js";
 import { SessionSelectorComponent } from "./components/session-selector.js";
@@ -184,6 +185,7 @@ function hasDefaultModelProvider(providerId: string): providerId is keyof typeof
 }
 
 const BEDROCK_PROVIDER_ID = "amazon-bedrock";
+const MOONCLI_WORKING_FRAMES = ["🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘"];
 
 const BUILT_IN_MODEL_PROVIDERS = new Set<string>(getProviders());
 
@@ -572,20 +574,6 @@ export class InteractiveMode {
 
 		// Add header with keybindings from config (unless silenced)
 		if (this.options.verbose || !this.settingsManager.getQuietStartup()) {
-			const banner = theme.fg(
-				"accent",
-				`
-    ░░░░        M O O N C L I
-  ▒▒▒▒▒▒▒▒      
- ▓▓▓████▓▓▓     ${theme.fg("muted", "Zihin Sarayinda Bir Rehber")}
- ██████████     ${theme.fg("dim", `v${this.version}`)}  ${theme.fg("success", "[MCP Ready]")}
- ██████████     ${theme.fg("muted", "Dusun, Kodla, Mukemmellestir.")}
- ▓▓▓████▓▓▓
-  ▒▒▒▒▒▒▒▒
-    ░░░░
-`,
-			);
-
 			// Build startup instructions using keybinding hint helpers
 			const hint = (keybinding: AppKeybinding, description: string) => keyHint(keybinding, description);
 
@@ -614,11 +602,6 @@ export class InteractiveMode {
 				rawKeyHint("dosyalari surukleyin", "projeye eklemek icin"),
 			].join("\n");
 
-			const divider = theme.fg(
-				"dim",
-				"────────────────────────────────────────────────────────────────────────────────",
-			);
-
 			const compactInstructions = [
 				hint("app.interrupt", "durdur"),
 				rawKeyHint(`${keyText("app.clear")}/${keyText("app.exit")}`, "temizle/cik"),
@@ -627,18 +610,14 @@ export class InteractiveMode {
 				hint("app.tools.expand", "yardim"),
 			].join(theme.fg("dim", " • "));
 
-			const onboarding =
-				theme.fg("muted", "✦ Mooncli ile hayallerini koda dok. Yardim icin ") +
-				keyText("app.tools.expand") +
-				theme.fg("muted", " tusuna bas.");
-
-			this.builtInHeader = new ExpandableText(
-				() => `${banner}\n${divider}\n\n ${compactInstructions}\n\n ${onboarding}\n`,
-				() => `${banner}\n${divider}\n\n${expandedInstructions}\n\n ${onboarding}`,
-				this.getStartupExpansionState(),
-				1,
-				0,
-			);
+			this.builtInHeader = new MooncliHeaderComponent(this.ui, {
+				version: this.version,
+				compactInstructions,
+				expandedInstructions,
+				expanded: this.getStartupExpansionState(),
+				paddingX: 1,
+				paddingY: 0,
+			});
 
 			// Setup UI layout
 			this.headerContainer.addChild(new Spacer(1));
@@ -1689,9 +1668,9 @@ export class InteractiveMode {
 		return new Loader(
 			this.ui,
 			(spinner) => theme.fg("accent", spinner),
-			(text) => theme.fg("muted", text),
+			(text) => theme.fg("muted", `▓▒░ ${text}`),
 			this.getWorkingLoaderMessage(),
-			this.workingIndicatorOptions,
+			this.workingIndicatorOptions ?? { frames: MOONCLI_WORKING_FRAMES, intervalMs: 140 },
 		);
 	}
 
@@ -2615,6 +2594,41 @@ export class InteractiveMode {
 				await this.handleImpModelCommand(args);
 				return;
 			}
+			if (text === "/index" || text.startsWith("/index ")) {
+				this.editor.setText("");
+				await this.handleIndexCommand(text.startsWith("/index ") ? text.slice(7).trim() : "");
+				return;
+			}
+			if (text === "/ship" || text.startsWith("/ship ")) {
+				this.editor.setText("");
+				await this.handleShipCommand(text.startsWith("/ship ") ? text.slice(6).trim() : "");
+				return;
+			}
+			if (text === "/git" || text.startsWith("/git ")) {
+				this.editor.setText("");
+				await this.handleGitCommand(text.startsWith("/git ") ? text.slice(5).trim() : "status");
+				return;
+			}
+			if (text === "/ollama" || text.startsWith("/ollama ")) {
+				this.editor.setText("");
+				await this.handleOllamaSlashCommand(text.startsWith("/ollama ") ? text.slice(8).trim() : "models");
+				return;
+			}
+			if (text === "/diff") {
+				this.editor.setText("");
+				await this.handleDiffCommand();
+				return;
+			}
+			if (text === "/web" || text.startsWith("/web ")) {
+				this.editor.setText("");
+				await this.handleWebCommand();
+				return;
+			}
+			if (text === "/marketplace" || text.startsWith("/marketplace ")) {
+				this.editor.setText("");
+				await this.handleMarketplaceCommand(text.startsWith("/marketplace ") ? text.slice(13).trim() : "");
+				return;
+			}
 			if (text === "/debug") {
 				this.handleDebugCommand();
 				this.editor.setText("");
@@ -3350,8 +3364,18 @@ export class InteractiveMode {
 	}
 
 	private handleCtrlD(): void {
-		// Only called when editor is empty (enforced by CustomEditor)
-		void this.shutdown();
+		// Diff preview shortcut; if there is no diff, keep the old empty-editor exit behavior.
+		void (async () => {
+			try {
+				const { getFullDiff } = await import("../../core/git-utils.js");
+				const diff = await getFullDiff(this.sessionManager.getCwd());
+				if (diff && diff !== "Diff yok.") {
+					await this.handleDiffCommand();
+					return;
+				}
+			} catch {}
+			await this.shutdown();
+		})();
 	}
 
 	/**
@@ -5360,6 +5384,135 @@ export class InteractiveMode {
 		}
 	}
 
+	private async handleIndexCommand(args: string): Promise<void> {
+		const { buildIndex, getIndexStats } = await import("../../core/codebase-index/index.js");
+		const cwd = this.sessionManager.getCwd();
+		if (args === "status") {
+			const stats = getIndexStats(cwd);
+			this.showStatus(
+				stats
+					? `Index: ${stats.fileCount} dosya, ${stats.chunkCount} chunk, ${Math.round(stats.ageMs / 1000)}sn önce`
+					: "Index yok.",
+			);
+			return;
+		}
+		this.showStatus("Index oluşturuluyor...");
+		const index = buildIndex(cwd, args === "force");
+		this.showStatus(`Index hazır: ${index.fileCount} dosya, ${index.chunkCount} chunk.`);
+	}
+
+	private async handleGitCommand(args: string): Promise<void> {
+		const git = await import("../../core/git-utils.js");
+		const cwd = this.sessionManager.getCwd();
+		const [cmd, ...rest] = args.split(/\s+/).filter(Boolean);
+		try {
+			if (!cmd || cmd === "status") this.showStatus(await git.getGitStatus(cwd));
+			else if (cmd === "commit")
+				this.showStatus(await git.commitAll(cwd, rest.join(" ") || "chore: update via mooncli"));
+			else if (cmd === "branch")
+				this.showStatus(`Branch: ${await git.createBranch(cwd, rest.join("-") || "mooncli/update")}`);
+			else if (cmd === "push") this.showStatus(await git.pushBranch(cwd));
+			else this.showStatus("Kullanım: /git status | /git commit <mesaj> | /git branch <ad> | /git push");
+		} catch (err: any) {
+			this.showError(`Git hata: ${err.message}`);
+		}
+	}
+
+	private async handleShipCommand(args: string): Promise<void> {
+		const { shipChanges } = await import("../../core/git-utils.js");
+		try {
+			this.showStatus("Ship başlıyor: branch + commit + push + PR...");
+			const result = await shipChanges(this.sessionManager.getCwd(), { message: args || undefined });
+			this.showStatus(
+				[`Ship tamam: ${result.branch}`, result.diffStat, result.prUrl ? `PR: ${result.prUrl}` : ""]
+					.filter(Boolean)
+					.join("\n"),
+			);
+		} catch (err: any) {
+			this.showError(`Ship hata: ${err.message}`);
+		}
+	}
+
+	private async handleOllamaSlashCommand(args: string): Promise<void> {
+		const ollama = await import("../../core/ollama-optimizer.js");
+		const [cmd, ...rest] = args.split(/\s+/).filter(Boolean);
+		try {
+			if (!cmd || cmd === "models" || cmd === "list") {
+				const models = await ollama.getLocalModels();
+				this.showStatus(
+					models.length
+						? models.map((m: any) => `${m.name} (${m.details?.parameter_size || "?"})`).join("\n")
+						: "Yerel model yok.",
+				);
+			} else if (cmd === "pull") {
+				const model = rest.join(" ");
+				if (!model) return this.showStatus("Kullanım: /ollama pull <model>");
+				this.showStatus(`Model çekiliyor: ${model}`);
+				await ollama.pullModel(
+					model,
+					(e: any) =>
+						e.status &&
+						this.showStatus(`${e.status}${e.total ? ` ${Math.round((e.completed / e.total) * 100)}%` : ""}`),
+				);
+				this.showStatus(`Model hazır: ${model}`);
+			} else this.showStatus("Kullanım: /ollama models | /ollama pull <model>");
+		} catch (err: any) {
+			this.showError(`Ollama hata: ${err.message}`);
+		}
+	}
+
+	private async handleDiffCommand(): Promise<void> {
+		const { getFullDiff, getDiffSummary } = await import("../../core/git-utils.js");
+		try {
+			const stat = await getDiffSummary(this.sessionManager.getCwd());
+			const diff = await getFullDiff(this.sessionManager.getCwd());
+			this.showStatus(`${stat}\n\n${diff.slice(0, 12000)}`);
+		} catch (err: any) {
+			this.showError(`Diff hata: ${err.message}`);
+		}
+	}
+
+	private async handleWebCommand(): Promise<void> {
+		try {
+			if (!this.webUiProcess) {
+				const server = await import("../../../../web-ui/src/server.js");
+				this.webUiProcess = server.startWebUiServer({ port: 3131 });
+			}
+			const url = this.webUiProcess.url || "http://127.0.0.1:3131";
+			const opener = process.platform === "win32" ? "cmd" : process.platform === "darwin" ? "open" : "xdg-open";
+			const args = process.platform === "win32" ? ["/c", "start", "", url] : [url];
+			spawnSync(opener, args, { stdio: "ignore", shell: false });
+			this.showStatus(`Web-UI açık: ${url}`);
+		} catch (err: any) {
+			this.showError(`Web-UI hata: ${err.message}`);
+		}
+	}
+
+	private async handleMarketplaceCommand(args: string): Promise<void> {
+		const marketplace = await import("../../core/marketplace.js");
+		try {
+			const [cmd, ...rest] = args.split(/\s+/).filter(Boolean);
+			const entries = await marketplace.fetchRegistry();
+			if (cmd === "install") {
+				const name = rest.join(" ");
+				const entry = entries.find((e: any) => e.name === name);
+				if (!entry) return this.showStatus(`Marketplace entry bulunamadı: ${name}`);
+				const pm = new DefaultPackageManager({
+					cwd: this.sessionManager.getCwd(),
+					engineDir: getEngineDir(),
+					settingsManager: this.settingsManager,
+				});
+				await marketplace.installMarketplaceEntry(pm, entry);
+				this.showStatus(`Kuruldu: ${entry.name}`);
+				return;
+			}
+			const query = cmd === "search" ? rest.join(" ") : args;
+			this.showStatus(marketplace.formatRegistryEntries(marketplace.searchRegistry(entries, query), 12));
+		} catch (err: any) {
+			this.showError(`Marketplace hata: ${err.message}`);
+		}
+	}
+
 	private async handleImpModelCommand(args: string): Promise<void> {
 		if (!args) {
 			this.showStatus("Kullanım: /impmodel <model_adı>");
@@ -6254,6 +6407,9 @@ export class InteractiveMode {
 			this.loadingAnimation = undefined;
 		}
 		this.clearExtensionTerminalInputListeners();
+		if (this.builtInHeader && "dispose" in this.builtInHeader && typeof this.builtInHeader.dispose === "function") {
+			this.builtInHeader.dispose();
+		}
 		this.footer.dispose();
 		this.footerDataProvider.dispose();
 		if (this.unsubscribe) {

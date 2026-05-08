@@ -205,13 +205,28 @@ function workspaceRow(label: string, value: string, colorEnabled: boolean): stri
 }
 
 function pixelHeader(colorEnabled: boolean): string[] {
-	const top = `┏${"━".repeat(62)}┓`;
-	const mid = "┃  ▓▒░  Mooncli Company Workspace  ░▒▓                       ┃";
-	const bot = `┗${"━".repeat(62)}┛`;
+	const top = `╔${"═".repeat(72)}╗`;
+	const title = "║  ▓▒░  Mooncli Company Workspace  ░▒▓   agentic command floor     ║";
+	const moon = "║     ◐  ░░▒▒▓▓████▓▓▒▒░░     RAG · DIFF · SHIP · WEB · CI         ║";
+	const bot = `╚${"═".repeat(72)}╝`;
 	return [
 		ansi256(99, top, colorEnabled),
-		ansi256(213, bold(mid, colorEnabled), colorEnabled),
+		ansi256(213, bold(title, colorEnabled), colorEnabled),
+		ansi256(45, moon, colorEnabled),
 		ansi256(99, bot, colorEnabled),
+	];
+}
+
+function progressRail(parts: string[], colorEnabled: boolean): string {
+	return parts
+		.map((part, index) => ansi256([117, 214, 201, 82, 141, 229][index % 6], part, colorEnabled))
+		.join(dim(" ━▶ ", colorEnabled));
+}
+
+function agentCard(agent: CodingAgentProfile, statusBadge: string, color: number, colorEnabled: boolean): string[] {
+	return [
+		`║ ${ansi256(color, "▣", colorEnabled)} ${ansi256(244, statusBadge, colorEnabled)} ${bold(agent.name, colorEnabled)}`,
+		`║    ${ansi256(245, "focus", colorEnabled)} ${dim(agent.focus, colorEnabled)}`,
 	];
 }
 
@@ -245,9 +260,12 @@ export function renderCodingAgentsWorkspace(
 	}
 
 	lines.push(
-		ansi256(99, `╠${"═".repeat(62)}╣`, colorEnabled),
-		`${ansi256(213, "▓", colorEnabled)} ${bold("Sirket Plani", colorEnabled)}`,
-		`  ${ansi256(117, "BRIEF", colorEnabled)} ${dim("▸", colorEnabled)} ${ansi256(214, "PATRON PLAN", colorEnabled)} ${dim("▸", colorEnabled)} ${ansi256(201, "UZMAN AGENTLAR", colorEnabled)} ${dim("▸", colorEnabled)} ${ansi256(82, "QUALITY GATE", colorEnabled)} ${dim("▸", colorEnabled)} ${ansi256(141, "INTEGRATOR", colorEnabled)} ${dim("▸", colorEnabled)} ${ansi256(229, "SHIP", colorEnabled)}`,
+		ansi256(99, `╠${"═".repeat(72)}╣`, colorEnabled),
+		`${ansi256(213, "▓", colorEnabled)} ${bold("Sirket Plani", colorEnabled)} ${dim("/ animated pipeline", colorEnabled)}`,
+		`  ${progressRail(["BRIEF", "PATRON PLAN", "UZMAN AGENTLAR", "QUALITY GATE", "INTEGRATOR", "SHIP"], colorEnabled)}`,
+		"",
+		`${ansi256(45, "▓", colorEnabled)} ${bold("Paneller", colorEnabled)}`,
+		`  ${ansi256(120, "RAG INDEX", colorEnabled)} ${dim("/index", colorEnabled)}   ${ansi256(201, "LIVE DIFF", colorEnabled)} ${dim("/diff", colorEnabled)}   ${ansi256(229, "WEB DASH", colorEnabled)} ${dim("/web", colorEnabled)}   ${ansi256(214, "SHIP ROOM", colorEnabled)} ${dim("/ship", colorEnabled)}`,
 		"",
 	);
 
@@ -256,19 +274,17 @@ export function renderCodingAgentsWorkspace(
 		if (agents.length === 0) continue;
 
 		const departmentColor = DEPARTMENT_COLORS[department];
-		lines.push(ansi256(departmentColor, `╔═ ${DEPARTMENT_LABELS[department]} ${"═".repeat(42)}`, colorEnabled));
+		lines.push(ansi256(departmentColor, `╔═ ${DEPARTMENT_LABELS[department]} ${"═".repeat(52)}`, colorEnabled));
 		for (const agent of agents) {
-			lines.push(
-				`║ ${ansi256(departmentColor, "██", colorEnabled)} ${ansi256(244, statusBadge, colorEnabled)} ${bold(agent.name, colorEnabled)}`,
-			);
-			lines.push(`║    ${dim(agent.focus, colorEnabled)}`);
+			lines.push(...agentCard(agent, statusBadge, departmentColor, colorEnabled));
 		}
-		lines.push(ansi256(departmentColor, `╚${"═".repeat(62)}`, colorEnabled), "");
+		lines.push(ansi256(departmentColor, `╚${"═".repeat(72)}`, colorEnabled), "");
 	}
 
 	lines.push(
 		`${ansi256(213, "▓", colorEnabled)} ${bold("Komutlar", colorEnabled)}`,
 		`  ${ansi256(117, "/agentmode on", colorEnabled)}  ${ansi256(117, "/agentmode off", colorEnabled)}  ${ansi256(117, "/workspace", colorEnabled)}  ${ansi256(117, "/agents status", colorEnabled)}`,
+		`  ${ansi256(120, "/index status", colorEnabled)}  ${ansi256(201, "/diff", colorEnabled)}  ${ansi256(229, "/web", colorEnabled)}  ${ansi256(214, "/ship", colorEnabled)}  ${ansi256(141, "/marketplace", colorEnabled)}`,
 	);
 	return lines.join("\n").trimEnd();
 }

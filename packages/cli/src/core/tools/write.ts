@@ -1,6 +1,8 @@
 // @ts-nocheck
 import type { EngineTool } from "@mooncli/engine";
 import { Container, Text } from "@mooncli/tui";
+import { createPatch } from "diff";
+import { existsSync, readFileSync } from "fs";
 import { mkdir as fsMkdir, writeFile as fsWriteFile } from "fs/promises";
 import { dirname } from "path";
 import { type Static, Type } from "typebox";
@@ -19,6 +21,9 @@ const writeSchema = Type.Object({
 });
 
 export type WriteToolInput = Static<typeof writeSchema>;
+export interface WriteToolDetails {
+	diff?: string;
+}
 
 /**
  * Pluggable operations for the write tool.
@@ -205,7 +210,7 @@ export function createWriteToolDefinition(
 			return withFileMutationQueue(
 				absolutePath,
 				() =>
-					new Promise<{ content: Array<{ type: "text"; text: string }>; details: undefined }>(
+					new Promise<{ content: Array<{ type: "text"; text: string }>; details: WriteToolDetails | undefined }>(
 						(resolve, reject) => {
 							if (signal?.aborted) {
 								reject(new Error("Operation aborted"));
@@ -220,6 +225,7 @@ export function createWriteToolDefinition(
 							(async () => {
 								try {
 									assertNoPersonaLeak(content);
+									const before = existsSync(absolutePath) ? readFileSync(absolutePath, "utf-8") : "";
 									// Create parent directories if needed.
 									await ops.mkdir(dir);
 									if (aborted) return;
@@ -227,11 +233,12 @@ export function createWriteToolDefinition(
 									await ops.writeFile(absolutePath, content);
 									if (aborted) return;
 									signal?.removeEventListener("abort", onAbort);
+									const diff = createPatch(path, before, content, "before", "after");
 									resolve({
 										content: [
 											{ type: "text", text: `Successfully wrote ${content.length} bytes to ${path}` },
 										],
-										details: undefined,
+										details: { diff },
 									});
 								} catch (error: any) {
 									signal?.removeEventListener("abort", onAbort);

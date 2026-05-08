@@ -1,5 +1,8 @@
 // @ts-nocheck
 import { CancellableLoader, Container, Loader, Spacer, Text, type TUI } from "@mooncli/tui";
+
+const PIXEL_FRAMES = ["◢", "◣", "◤", "◥", "◆", "◇"];
+
 import type { Theme } from "../theme/theme.js";
 import { DynamicBorder } from "./dynamic-border.js";
 import { keyHint } from "./keybinding-hints.js";
@@ -19,16 +22,18 @@ export class BorderedLoader extends Container {
 			this.loader = new CancellableLoader(
 				tui,
 				(s) => theme.fg("accent", s),
-				(s) => theme.fg("muted", s),
+				(s) => theme.fg("muted", `▓ ${s}`),
 				message,
+				{ frames: PIXEL_FRAMES, intervalMs: 120 },
 			);
 		} else {
 			this.signalController = new AbortController();
 			this.loader = new Loader(
 				tui,
 				(s) => theme.fg("accent", s),
-				(s) => theme.fg("muted", s),
+				(s) => theme.fg("muted", `▓ ${s}`),
 				message,
+				{ frames: PIXEL_FRAMES, intervalMs: 120 },
 			);
 		}
 		this.addChild(this.loader);

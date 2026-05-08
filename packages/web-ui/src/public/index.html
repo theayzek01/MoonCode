@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="tr">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Mooncli Dashboard</title>
+	<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+	<div class="stars"></div>
+	<div id="app">
+		<header class="topbar">
+			<div class="brand"><span class="orb">◐</span><b>MOONCLI</b><small>company workspace</small></div>
+			<div class="pipeline"><span>BRIEF</span><i></i><span>PLAN</span><i></i><span>AGENTS</span><i></i><span>QUALITY</span><i></i><span>SHIP</span></div>
+		</header>
+		<aside><h1>Sessions</h1><div id="sessions"></div></aside>
+		<main><div id="chat" class="panel">Oturum seç</div></main>
+		<section><h2>Stats</h2><div class="cards"><div class="card">RAG<br><b>online</b></div><div class="card">DIFF<br><b>ready</b></div><div class="card">SHIP<br><b>armed</b></div></div><pre id="stats">-</pre></section>
+	</div>
+	<script src="/app.js"></script>
+</body>
+</html>

@@ -31,6 +31,16 @@ function formatTokens(count: number): string {
  * Footer component that shows pwd, token stats, and context usage.
  * Computes token/context stats from session, gets git branch and extension statuses from provider.
  */
+function statusChip(label: string, active: boolean): string {
+	return theme.fg(active ? "success" : "dim", `${active ? "◆" : "◇"} ${label}`);
+}
+
+function progressBar(percent: number, width: number): string {
+	const clamped = Math.max(0, Math.min(100, Number.isFinite(percent) ? percent : 0));
+	const filled = Math.round((clamped / 100) * width);
+	return `${theme.fg(clamped > 90 ? "error" : clamped > 70 ? "warning" : "success", "█".repeat(filled))}${theme.fg("dim", "░".repeat(Math.max(0, width - filled)))}`;
+}
+
 export class FooterComponent implements Component {
 	private autoCompactEnabled = true;
 
@@ -208,8 +218,25 @@ export class FooterComponent implements Component {
 		const remainder = statsLine.slice(statsLeft.length); // padding + rightSide
 		const dimRemainder = theme.fg("dim", remainder);
 
-		const pwdLine = truncateToWidth(theme.fg("dim", pwd), width, theme.fg("dim", "..."));
-		const lines = [pwdLine, dimStatsLeft + dimRemainder];
+		const frame = Math.floor(Date.now() / 350) % 4;
+		const pulse = ["◐", "◓", "◑", "◒"][frame];
+		const toolSet = new Set(activeToolNames);
+		const featureLine = [
+			statusChip("RAG", toolSet.has("semantic_search")),
+			statusChip("DIFF", true),
+			statusChip("SHIP", toolSet.has("git_ship")),
+			statusChip("WEB", true),
+			statusChip("CI", true),
+			statusChip("DISCORD", discordConnected),
+		].join(theme.fg("dim", "  "));
+		const footerRail = `${theme.fg("accent", pulse)} ${progressBar(contextPercentValue, Math.min(24, Math.max(10, Math.floor(width / 5))))} ${theme.fg("muted", contextPercentDisplay)}`;
+		const pwdLine = truncateToWidth(
+			`${theme.fg("accent", "▣")} ${theme.fg("dim", pwd)}`,
+			width,
+			theme.fg("dim", "..."),
+		);
+		const chipLine = truncateToWidth(`${footerRail}  ${featureLine}`, width, theme.fg("dim", "..."));
+		const lines = [pwdLine, chipLine, dimStatsLeft + dimRemainder];
 
 		// Add extension statuses on a single line, sorted by key alphabetically
 		const extensionStatuses = this.footerData.getExtensionStatuses();

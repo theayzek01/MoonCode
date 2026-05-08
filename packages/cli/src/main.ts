@@ -30,7 +30,7 @@ import type { ExtensionFactory } from "./core/extensions/types.js";
 import { KeybindingsManager } from "./core/keybindings.js";
 import type { ModelRegistry } from "./core/model-registry.js";
 import { normalizeProviderId, resolveCliModel, resolveModelScope, type ScopedModel } from "./core/model-resolver.js";
-import { handleOllamaCommand } from "./core/ollama-optimizer.js";
+import { checkModelAvailability, handleOllamaCommand, pullModel } from "./core/ollama-optimizer.js";
 import { restoreStdout, takeOverStdout } from "./core/output-guard.js";
 import type { CreateEngineSessionOptions } from "./core/sdk.js";
 import {
@@ -43,7 +43,7 @@ import { SessionManager } from "./core/session-manager.js";
 import { SettingsManager } from "./core/settings-manager.js";
 import { printTimings, resetTimings, time } from "./core/timings.js";
 import { runMigrations, showDeprecationWarnings } from "./migrations.js";
-import { InteractiveMode, runPrintMode, runRpcMode } from "./modes/index.js";
+import { InteractiveMode, runHeadlessMode, runPrintMode, runRpcMode } from "./modes/index.js";
 import { ExtensionSelectorComponent } from "./modes/interactive/components/extension-selector.js";
 import { initTheme, stopThemeWatcher } from "./modes/interactive/theme/theme.js";
 import { handleConfigCommand, handlePackageCommand } from "./package-manager-cli.js";
@@ -95,9 +95,12 @@ function isTruthyEnvFlag(value: string | undefined): boolean {
 	return value === "1" || value.toLowerCase() === "true" || value.toLowerCase() === "yes";
 }
 
-type AppMode = "interactive" | "print" | "json" | "rpc";
+type AppMode = "interactive" | "print" | "json" | "rpc" | "headless";
 
 function resolveAppMode(parsed: Args, stdinIsTTY: boolean): AppMode {
+	if (parsed.headless) {
+		return "headless";
+	}
 	if (parsed.mode === "rpc") {
 		return "rpc";
 	}
@@ -476,6 +479,21 @@ export async function main(args: string[], options?: MainOptions) {
 		process.exit(0);
 	}
 
+	if (parsed.provider === "ollama" && parsed.model && !parsed.headless) {
+		try {
+			const available = await checkModelAvailability(parsed.model);
+			if (!available && (await promptConfirm(`Ollama model yok: ${parsed.model}. Çekeyim mi?`))) {
+				await pullModel(parsed.model, (event) => {
+					const pct = event.total ? ` ${Math.round((event.completed / event.total) * 100)}%` : "";
+					if (event.status) process.stderr.write(`\r${event.status}${pct}     `);
+				});
+				process.stderr.write("\n");
+			}
+		} catch {
+			// Ollama kapalıysa normal hata akışına bırak.
+		}
+	}
+
 	if (parsed.export) {
 		let result: string;
 		try {
@@ -648,7 +666,7 @@ export async function main(args: string[], options?: MainOptions) {
 
 	// Read piped stdin content (if any) - skip for RPC mode which uses stdin for JSON-RPC
 	let stdinContent: string | undefined;
-	if (appMode !== "rpc") {
+	if (appMode !== "rpc" && appMode !== "headless") {
 		stdinContent = await readPipedStdin();
 		if (stdinContent !== undefined && appMode === "interactive") {
 			appMode = "print";
@@ -692,6 +710,15 @@ export async function main(args: string[], options?: MainOptions) {
 	if (appMode === "rpc") {
 		printTimings();
 		await runRpcMode(runtime);
+	} else if (appMode === "headless") {
+		const exitCode = await runHeadlessMode(runtime, {
+			timeoutSeconds: parsed.timeout,
+			outputFormat: parsed.outputFormat,
+		});
+		stopThemeWatcher();
+		restoreStdout();
+		if (exitCode !== 0) process.exitCode = exitCode;
+		return;
 	} else if (appMode === "interactive") {
 		if (scopedModels.length > 0 && (parsed.verbose || !settingsManager.getQuietStartup())) {
 			const modelList = scopedModels
