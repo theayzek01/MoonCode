@@ -594,4 +594,70 @@ export const geminiCliOAuthProvider: OAuthProviderInterface = {
 		const creds = credentials as GeminiCredentials;
 		return JSON.stringify({ token: creds.access, projectId: creds.projectId });
 	},
+
+	modifyModels(models: any[], _credentials: OAuthCredentials): any[] {
+		const geminiCliModels = [
+			{
+				id: "gemini-1.5-pro",
+				name: "Gemini 1.5 Pro",
+				api: "google-antigravity",
+				provider: "google-gemini-cli",
+				reasoning: false,
+				baseUrl: "",
+				input: ["text", "image"],
+				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+				contextWindow: 1000000,
+				maxTokens: 8192,
+			},
+			{
+				id: "gemini-1.5-flash",
+				name: "Gemini 1.5 Flash",
+				api: "google-antigravity",
+				provider: "google-gemini-cli",
+				reasoning: false,
+				baseUrl: "",
+				input: ["text", "image"],
+				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+				contextWindow: 1000000,
+				maxTokens: 8192,
+			},
+			{
+				id: "gemini-2.0-flash",
+				name: "Gemini 2.0 Flash",
+				api: "google-antigravity",
+				provider: "google-gemini-cli",
+				reasoning: false,
+				baseUrl: "",
+				input: ["text", "image"],
+				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+				contextWindow: 1048576,
+				maxTokens: 8192,
+			},
+			{
+				id: "gemini-2.5-pro",
+				name: "Gemini 2.5 Pro",
+				api: "google-antigravity",
+				provider: "google-gemini-cli",
+				reasoning: true,
+				baseUrl: "",
+				input: ["text", "image"],
+				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+				contextWindow: 1048576,
+				maxTokens: 65536,
+			},
+			{
+				id: "gemini-2.5-flash",
+				name: "Gemini 2.5 Flash",
+				api: "google-antigravity",
+				provider: "google-gemini-cli",
+				reasoning: true,
+				baseUrl: "",
+				input: ["text", "image"],
+				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+				contextWindow: 1048576,
+				maxTokens: 65536,
+			},
+		];
+		return [...models, ...geminiCliModels];
+	},
 };

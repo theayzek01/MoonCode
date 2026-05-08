@@ -462,7 +462,7 @@ export const antigravityOAuthProvider: OAuthProviderInterface = {
 				baseUrl: "",
 				input: ["text", "image"],
 				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-				contextWindow: 2097152,
+				contextWindow: 1048576,
 				maxTokens: 128000,
 			},
 			{
@@ -502,6 +502,18 @@ export const antigravityOAuthProvider: OAuthProviderInterface = {
 				maxTokens: 64000,
 			},
 			{
+				id: "gpt-5.5-pro",
+				name: "GPT-5.5 Pro (Sandbox)",
+				api: "google-antigravity",
+				provider: "antigravity",
+				reasoning: true,
+				baseUrl: "",
+				input: ["text", "image"],
+				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+				contextWindow: 2000000,
+				maxTokens: 128000,
+			},
+			{
 				id: "gpt-5.4-pro",
 				name: "GPT-5.4 Pro (Sandbox)",
 				api: "google-antigravity",
@@ -524,6 +536,18 @@ export const antigravityOAuthProvider: OAuthProviderInterface = {
 				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
 				contextWindow: 1000000,
 				maxTokens: 128000,
+			},
+			{
+				id: "gpt-oss:120b-cloud",
+				name: "GPT OSS 120B Cloud",
+				api: "google-antigravity",
+				provider: "antigravity",
+				reasoning: true,
+				baseUrl: "",
+				input: ["text"],
+				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+				contextWindow: 128000,
+				maxTokens: 64000,
 			},
 		];
 		return [...models, ...antigravityModels];

@@ -26,18 +26,13 @@ import { sanitizeSurrogates } from "../utils/sanitize-unicode.js";
 import {
 	convertMessages,
 	convertTools,
+	type GoogleThinkingLevel,
 	isThinkingPart,
 	mapStopReasonString,
 	mapToolChoice,
 	retainThoughtSignature,
 } from "./google-shared.js";
 import { buildBaseOptions, clampReasoning } from "./simple-options.js";
-
-/**
- * Thinking level for Gemini 3 models.
- * Mirrors Google's ThinkingLevel enum values.
- */
-export type GoogleThinkingLevel = "THINKING_LEVEL_UNSPECIFIED" | "MINIMAL" | "LOW" | "MEDIUM" | "HIGH";
 
 export interface GoogleGeminiCliOptions extends StreamOptions {
 	toolChoice?: "auto" | "none" | "any";
@@ -331,8 +326,8 @@ interface CloudCodeAssistResponseChunk {
 	traceId?: string;
 }
 
-export const streamGoogleGeminiCli: StreamFunction<"google-gemini-cli", GoogleGeminiCliOptions> = (
-	model: Model<"google-gemini-cli">,
+export const streamGoogleGeminiCli: StreamFunction<"google-antigravity", GoogleGeminiCliOptions> = (
+	model: Model<"google-antigravity">,
 	context: Context,
 	options?: GoogleGeminiCliOptions,
 ): AssistantMessageEventStream => {
@@ -342,7 +337,7 @@ export const streamGoogleGeminiCli: StreamFunction<"google-gemini-cli", GoogleGe
 		const output: AssistantMessage = {
 			role: "assistant",
 			content: [],
-			api: "google-gemini-cli" as Api,
+			api: "google-antigravity" as Api,
 			provider: model.provider,
 			model: model.id,
 			usage: {
@@ -819,8 +814,8 @@ export const streamGoogleGeminiCli: StreamFunction<"google-gemini-cli", GoogleGe
 	return stream;
 };
 
-export const streamSimpleGoogleGeminiCli: StreamFunction<"google-gemini-cli", SimpleStreamOptions> = (
-	model: Model<"google-gemini-cli">,
+export const streamSimpleGoogleGeminiCli: StreamFunction<"google-antigravity", SimpleStreamOptions> = (
+	model: Model<"google-antigravity">,
 	context: Context,
 	options?: SimpleStreamOptions,
 ): AssistantMessageEventStream => {
@@ -875,7 +870,7 @@ export const streamSimpleGoogleGeminiCli: StreamFunction<"google-gemini-cli", Si
 };
 
 export function buildRequest(
-	model: Model<"google-gemini-cli">,
+	model: Model<"google-antigravity">,
 	context: Context,
 	projectId: string,
 	options: GoogleGeminiCliOptions = {},

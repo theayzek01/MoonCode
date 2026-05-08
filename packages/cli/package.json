@@ -1,6 +1,6 @@
 {
 	"name": "mooncli",
-	"version": "8.05.2026",
+	"version": "8.05.2026-v2",
 	"description": "Modern Terminal Assistant",
 	"type": "module",
 	"moonConfig": {
