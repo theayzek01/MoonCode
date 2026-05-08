@@ -9,7 +9,7 @@ import { transformMessages } from "./transform-messages.js";
 
 type GoogleApiType = "google-generative-ai" | "google-gemini-cli" | "google-vertex";
 
-export type GoogleThinkingLevel = "LOW" | "HIGH";
+export type GoogleThinkingLevel = "MINIMAL" | "LOW" | "MEDIUM" | "HIGH";
 
 /**
  * Determines whether a streamed Gemini `Part` should be treated as "thinking".
