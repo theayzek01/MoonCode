@@ -51,31 +51,39 @@ jobs:
             cat > /tmp/release-notes.md <<EOF
           Release ${VERSION}
 
-          - Windows x64 binary
-          - Linux x64 / arm64 binaries
-          - macOS x64 / arm64 binaries
+          Minimal UI refresh + Mooncli v2 workspace features.
+
+          Binaries:
+          - Windows x64
+          - Linux x64 / arm64
+          - macOS x64 / arm64
           EOF
           fi
 
-      - name: Create GitHub Release and upload binaries
+      - name: Create or update GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
           cd packages/cli/binaries
-          gh release create "${RELEASE_TAG}" \
-            --title "${RELEASE_TAG}" \
-            --notes-file /tmp/release-notes.md \
-            mooncli-darwin-arm64.tar.gz \
-            mooncli-darwin-x64.tar.gz \
-            mooncli-linux-x64.tar.gz \
-            mooncli-linux-arm64.tar.gz \
-            mooncli-windows-x64.zip \
-            2>/dev/null || \
-          gh release upload "${RELEASE_TAG}" \
-            mooncli-darwin-arm64.tar.gz \
-            mooncli-darwin-x64.tar.gz \
-            mooncli-linux-x64.tar.gz \
-            mooncli-linux-arm64.tar.gz \
-            mooncli-windows-x64.zip \
-            --clobber
+          assets=(
+            mooncli-darwin-arm64.tar.gz
+            mooncli-darwin-x64.tar.gz
+            mooncli-linux-x64.tar.gz
+            mooncli-linux-arm64.tar.gz
+            mooncli-windows-x64.zip
+          )
+
+          for asset in "${assets[@]}"; do
+            test -f "$asset" || { echo "Missing asset: $asset"; exit 1; }
+          done
+
+          if gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
+            gh release edit "${RELEASE_TAG}" --title "${RELEASE_TAG}" --notes-file /tmp/release-notes.md
+          else
+            gh release create "${RELEASE_TAG}" --title "${RELEASE_TAG}" --notes-file /tmp/release-notes.md
+          fi
+
+          for asset in "${assets[@]}"; do
+            gh release upload "${RELEASE_TAG}" "$asset" --clobber
+          done
