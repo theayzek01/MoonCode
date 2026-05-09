@@ -7,15 +7,15 @@
  * try to refresh tokens simultaneously.
  */
 
+import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import {
 	findEnvKeys,
 	getEnvApiKey,
 	type OAuthCredentials,
 	type OAuthLoginCallbacks,
 	type OAuthProviderId,
-} from "@mooncli/core";
-import { getOAuthApiKey, getOAuthProvider, getOAuthProviders } from "@mooncli/core/oauth";
-import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+} from "mooncli-core";
+import { getOAuthApiKey, getOAuthProvider, getOAuthProviders } from "mooncli-core/oauth";
 import { dirname, join } from "path";
 import lockfile from "proper-lockfile";
 import { getEngineDir } from "../config.js";

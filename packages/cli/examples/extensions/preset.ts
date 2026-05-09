@@ -42,8 +42,8 @@ import type { ExtensionAPI, ExtensionContext } from "Mooncli";
 import { DynamicBorder, getEngineDir } from "Mooncli";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { Api, Model } from "@mooncli/core";
-import { Container, Key, type SelectItem, SelectList, Text } from "@mooncli/tui";
+import type { Api, Model } from "mooncli-core";
+import { Container, Key, type SelectItem, SelectList, Text } from "mooncli-tui";
 
 // Preset configuration
 interface Preset {

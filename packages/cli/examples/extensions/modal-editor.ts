@@ -10,7 +10,7 @@
  */
 
 import { CustomEditor, type ExtensionAPI } from "Mooncli";
-import { matchesKey, truncateToWidth, visibleWidth } from "@mooncli/tui";
+import { matchesKey, truncateToWidth, visibleWidth } from "mooncli-tui";
 
 // Normal mode key mappings: key -> escape sequence (or null for mode switch)
 const NORMAL_KEYS: Record<string, string | null> = {

@@ -4,8 +4,8 @@
  */
 
 import { access, readFile, stat } from "node:fs/promises";
-import type { ImageContent } from "@mooncli/core";
 import chalk from "chalk";
+import type { ImageContent } from "mooncli-core";
 import { resolve } from "path";
 import { resolveReadPath } from "../core/tools/path-utils.js";
 import { formatDimensionNote, resizeImage } from "../utils/image-resize.js";

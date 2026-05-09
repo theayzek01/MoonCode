@@ -1,5 +1,5 @@
 // @ts-nocheck
-export function getMooncliUserEngine(version: string): string {
+export function getHodeusUserEngine(version: string): string {
 	const runtime = process.versions.bun ? `bun/${process.versions.bun}` : `node/${process.version}`;
-	return `Mooncli/${version} (${process.platform}; ${runtime}; ${process.arch})`;
+	return `Hodeus/${version} (${process.platform}; ${runtime}; ${process.arch})`;
 }

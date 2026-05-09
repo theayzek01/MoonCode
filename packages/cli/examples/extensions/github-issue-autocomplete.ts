@@ -7,7 +7,7 @@ import {
 	type AutocompleteProvider,
 	type AutocompleteSuggestions,
 	fuzzyFilter,
-} from "@mooncli/tui";
+} from "mooncli-tui";
 
 type GitHubIssue = {
 	number: number;

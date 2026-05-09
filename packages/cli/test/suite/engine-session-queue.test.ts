@@ -1,6 +1,6 @@
 import type { ExtensionAPI } from "Mooncli";
-import { fauxAssistantMessage, fauxToolCall } from "@mooncli/core";
-import type { EngineTool } from "@mooncli/engine";
+import { fauxAssistantMessage, fauxToolCall } from "mooncli-core";
+import type { EngineTool } from "mooncli-engine";
 import { Type } from "typebox";
 import { afterEach, describe, expect, it } from "vitest";
 import { createHarness, getAssistantTexts, getMessageText, getUserTexts, type Harness } from "./harness.js";

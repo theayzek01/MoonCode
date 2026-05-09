@@ -3,8 +3,8 @@
  * CLI argument parsing and help display
  */
 
-import type { ThinkingLevel } from "@mooncli/engine";
 import chalk from "chalk";
+import type { ThinkingLevel } from "mooncli-engine";
 import { APP_NAME, CONFIG_DIR_NAME, ENV_AGENT_DIR, ENV_SESSION_DIR } from "../config.js";
 import type { ExtensionFlag } from "../core/extensions/types.js";
 

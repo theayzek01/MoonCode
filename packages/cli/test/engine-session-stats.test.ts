@@ -1,5 +1,5 @@
-import { type AssistantMessage, getModel, type Usage } from "@mooncli/core";
-import { Engine } from "@mooncli/engine";
+import { type AssistantMessage, getModel, type Usage } from "mooncli-core";
+import { Engine } from "mooncli-engine";
 import { describe, expect, it } from "vitest";
 import { AuthStorage } from "../src/core/auth-storage.js";
 import { EngineSession } from "../src/core/engine-session.js";

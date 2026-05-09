@@ -3,9 +3,9 @@
 	"compilerOptions": {
 		"outDir": "./dist",
 		"paths": {
-			"@mooncli/core": ["../core/dist/index.js"],
-			"@mooncli/engine": ["../engine/dist/index.js"],
-			"@mooncli/tui": ["../tui/dist/index.js"]
+			"hodeus-core": ["../core/dist/index.js"],
+			"hodeus-engine": ["../engine/dist/index.js"],
+			"hodeus-tui": ["../tui/dist/index.js"]
 		}
 	},
 	"include": ["src/**/*.ts"],

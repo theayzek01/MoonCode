@@ -1,14 +1,21 @@
 {
   "manifest_version": 3,
-  "name": "Mooncli Browser Bridge",
+  "name": "Hodeus Browser Bridge",
   "version": "0.1.1",
-  "description": "Connects Chrome tabs to the local Mooncli terminal session.",
+  "description": "Connects Chrome tabs to the local Hodeus terminal session.",
   "permissions": ["tabs", "scripting", "debugger", "activeTab", "storage", "alarms"],
   "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background.js"
   },
+  "icons": {
+    "16": "icon.png",
+    "32": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
   "action": {
-    "default_title": "Mooncli Browser Bridge"
+    "default_icon": "icon.png",
+    "default_title": "Hodeus Browser Bridge"
   }
 }

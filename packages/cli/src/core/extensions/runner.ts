@@ -3,9 +3,9 @@
  * Extension runner - executes extensions and manages their lifecycle.
  */
 
-import type { ImageContent, Model } from "@mooncli/core";
-import type { EngineMessage } from "@mooncli/engine";
-import type { KeyId } from "@mooncli/tui";
+import type { ImageContent, Model } from "mooncli-core";
+import type { EngineMessage } from "mooncli-engine";
+import type { KeyId } from "mooncli-tui";
 import { type Theme, theme } from "../../modes/interactive/theme/theme.js";
 import type { ResourceDiagnostic } from "../diagnostics.js";
 import type { KeybindingsConfig } from "../keybindings.js";

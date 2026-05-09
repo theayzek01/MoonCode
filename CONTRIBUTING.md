@@ -1,4 +1,4 @@
-# Contributing to moodcli
+# Contributing to mooncli
 
 This guide exists to save both sides time.
 
@@ -8,7 +8,7 @@ This guide exists to save both sides time.
 
 Using Core to write code is fine. Submitting Core-generated slop without understanding it is not.
 
-If you use an engine, run it from the `moodcli-mono` root directory so it picks up `AGENTS.md` automatically. Your engine must follow the rules and guidelines in that file.
+If you use an engine, run it from the root directory so it picks up `docs/AGENTS.md` automatically. Your engine must follow the rules and guidelines in that file.
 
 ## Contribution Gate
 
@@ -60,11 +60,11 @@ Both must pass.
 
 Do not edit `CHANGELOG.md`. Changelog entries are added by maintainers.
 
-If you are adding a new provider to `packages/ai`, see `AGENTS.md` for required tests.
+If you are adding a new provider, see `docs/AGENTS.md` for required tests.
 
 ## Philosophy
 
-moodcli's core is minimal. If your feature does not belong in the core, it should be an extension. PRs that bloat the core will likely be rejected.
+mooncli's core is minimal. If your feature does not belong in the core, it should be an extension. PRs that bloat the core will likely be rejected.
 
 ## Questions?
 
@@ -74,7 +74,7 @@ Ask on [Discord](https://discord.com/invite/nKXTsAcmbT).
 
 ### Why are new issues and PRs auto-closed?
 
-moodcli receives more issues than the maintainers can responsibly review in real time. Many reports do not meet the quality bar in this guide or do not follow CONTRIBUTING.md. Some are slung at the repository mindlessly via an engine instead of being reviewed and shaped by the person submitting them. Auto-closing creates a buffer so maintainers can review the tracker on their own schedule and reopen the issues that meet the quality bar.
+mooncli receives more issues than the maintainers can responsibly review in real time. Many reports do not meet the quality bar in this guide or do not follow CONTRIBUTING.md. Some are slung at the repository mindlessly via an engine instead of being reviewed and shaped by the person submitting them. Auto-closing creates a buffer so maintainers can review the tracker on their own schedule and reopen the issues that meet the quality bar.
 
 ### Why are weekend issues not reviewed?
 

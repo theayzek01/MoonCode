@@ -8,9 +8,9 @@
 
 import { resolve } from "node:path";
 import { createInterface } from "node:readline";
-import { type ImageContent, modelsAreEqual } from "@mooncli/core";
-import { ProcessTerminal, setKeybindings, TUI } from "@mooncli/tui";
 import chalk from "chalk";
+import { type ImageContent, modelsAreEqual } from "hodeus-core";
+import { ProcessTerminal, setKeybindings, TUI } from "hodeus-tui";
 import { type Args, type Mode, parseArgs, printHelp } from "./cli/args.js";
 import { processFileArguments } from "./cli/file-processor.js";
 import { buildInitialMessage } from "./cli/initial-message.js";
@@ -437,7 +437,7 @@ export async function main(args: string[], options?: MainOptions) {
 
 	if (args[0] === "browser-bridge") {
 		const status = startBrowserBridgeServer({ keepAlive: true });
-		console.log(`Mooncli Browser Bridge listening on ws://127.0.0.1:${status.port}/ws`);
+		console.log(`Hodeus Browser Bridge listening on ws://127.0.0.1:${status.port}/ws`);
 		console.log(`Health: http://127.0.0.1:${status.port}/health`);
 		process.on("SIGINT", () => process.exit(0));
 		await new Promise(() => {});

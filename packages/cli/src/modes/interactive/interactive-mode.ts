@@ -8,6 +8,7 @@ import * as crypto from "node:crypto";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
+import { spawnSync } from "child_process";
 import {
 	type AssistantMessage,
 	getProviders,
@@ -15,8 +16,8 @@ import {
 	type Message,
 	type Model,
 	type OAuthProviderId,
-} from "@mooncli/core";
-import type { EngineMessage } from "@mooncli/engine";
+} from "hodeus-core";
+import type { EngineMessage } from "hodeus-engine";
 import type {
 	AutocompleteItem,
 	AutocompleteProvider,
@@ -27,7 +28,7 @@ import type {
 	OverlayHandle,
 	OverlayOptions,
 	SlashCommand,
-} from "@mooncli/tui";
+} from "hodeus-tui";
 import {
 	CombinedAutocompleteProvider,
 	type Component,
@@ -44,8 +45,7 @@ import {
 	TruncatedText,
 	TUI,
 	visibleWidth,
-} from "@mooncli/tui";
-import { spawnSync } from "child_process";
+} from "hodeus-tui";
 import {
 	APP_NAME,
 	APP_TITLE,
@@ -89,10 +89,10 @@ import { getChangelogPath, getNewEntries, parseChangelog } from "../../utils/cha
 import { copyToClipboard } from "../../utils/clipboard.js";
 import { extensionForImageMimeType, readClipboardImage } from "../../utils/clipboard-image.js";
 import { parseGitUrl } from "../../utils/git.js";
-import { getMooncliUserEngine } from "../../utils/Moon-user-engine.js";
+import { getHodeusUserEngine } from "../../utils/moon-user-engine.js";
 import { killTrackedDetachedChildren } from "../../utils/shell.js";
 import { ensureTool } from "../../utils/tools-manager.js";
-import { checkForNewMooncliVersion } from "../../utils/version-check.js";
+import { checkForNewHodeusVersion } from "../../utils/version-check.js";
 import { ArminComponent } from "./components/armin.js";
 import { AssistantMessageComponent } from "./components/assistant-message.js";
 import { BashExecutionComponent } from "./components/bash-execution.js";
@@ -113,7 +113,7 @@ import { keyHint, keyText, rawKeyHint } from "./components/keybinding-hints.js";
 import { LoginDialogComponent } from "./components/login-dialog.js";
 import { McpSelectorComponent } from "./components/mcp-selector.js";
 import { ModelSelectorComponent } from "./components/model-selector.js";
-import { MooncliHeaderComponent } from "./components/mooncli-header.js";
+import { HodeusHeaderComponent } from "./components/mooncli-header.js";
 import { type AuthSelectorProvider, OAuthSelectorComponent } from "./components/oauth-selector.js";
 import { ScopedModelsSelectorComponent } from "./components/scoped-models-selector.js";
 import { SessionSelectorComponent } from "./components/session-selector.js";
@@ -186,7 +186,7 @@ function hasDefaultModelProvider(providerId: string): providerId is keyof typeof
 }
 
 const BEDROCK_PROVIDER_ID = "amazon-bedrock";
-const MOONCLI_WORKING_FRAMES = ["·", "•", "●", "•"];
+const HODEUS_WORKING_FRAMES = ["·", "•", "●", "•"];
 
 const BUILT_IN_MODEL_PROVIDERS = new Set<string>(getProviders());
 
@@ -611,7 +611,7 @@ export class InteractiveMode {
 				hint("app.tools.expand", "yardim"),
 			].join(theme.fg("dim", " • "));
 
-			this.builtInHeader = new MooncliHeaderComponent(this.ui, {
+			this.builtInHeader = new HodeusHeaderComponent(this.ui, {
 				version: this.version,
 				compactInstructions,
 				expandedInstructions,
@@ -690,7 +690,7 @@ export class InteractiveMode {
 		await this.init();
 
 		// Start version check asynchronously
-		checkForNewMooncliVersion(this.version).then((newVersion) => {
+		checkForNewHodeusVersion(this.version).then((newVersion) => {
 			if (newVersion) {
 				this.showNewVersionNotification(newVersion);
 			}
@@ -820,7 +820,7 @@ export class InteractiveMode {
 		}
 
 		if (extendedKeysFormat === "xterm") {
-			return "tmux extended-keys-format is xterm. Mooncli works best with csi-u. Add `set -g extended-keys-format csi-u` to ~/.tmux.conf and restart tmux.";
+			return "tmux extended-keys-format is xterm. Hodeus works best with csi-u. Add `set -g extended-keys-format csi-u` to ~/.tmux.conf and restart tmux.";
 		}
 
 		return undefined;
@@ -866,10 +866,10 @@ export class InteractiveMode {
 			return;
 		}
 
-		void fetch(`https://Mooncli.dev/api/report-install?version=${encodeURIComponent(version)}`, {
+		void fetch(`https://hodeus.dev/api/report-install?version=${encodeURIComponent(version)}`, {
 			method: "POST",
 			headers: {
-				"User-Engine": getMooncliUserEngine(version),
+				"User-Engine": getHodeusUserEngine(version),
 			},
 			signal: AbortSignal.timeout(5000),
 		})
@@ -1671,7 +1671,7 @@ export class InteractiveMode {
 			(spinner) => theme.fg("accent", spinner),
 			(text) => theme.fg("muted", text),
 			this.getWorkingLoaderMessage(),
-			this.workingIndicatorOptions ?? { frames: MOONCLI_WORKING_FRAMES, intervalMs: 180 },
+			this.workingIndicatorOptions ?? { frames: HODEUS_WORKING_FRAMES, intervalMs: 180 },
 		);
 	}
 
@@ -3673,7 +3673,7 @@ export class InteractiveMode {
 			theme.fg("muted", `Yeni sürüm ${newVersion} mevcut. Güncellemek için şunu çalıştırın: `) + action;
 		const changelogUrl = theme.fg(
 			"accent",
-			"https://github.com/badlogic/Mooncli-mono/blob/main/packages/cli/CHANGELOG.md",
+			"https://github.com/theayzek01/hodeuscli/blob/main/packages/cli/CHANGELOG.md",
 		);
 		const changelogLine = theme.fg("muted", "Değişiklik Günlüğü: ") + changelogUrl;
 
@@ -5101,7 +5101,7 @@ export class InteractiveMode {
 	private renderAgentsHelp(): string {
 		return [
 			"Agent Sistemi",
-			"Mooncli kod islerini kucuk bir yazilim sirketi gibi organize eder.",
+			"Hodeus kod islerini kucuk bir yazilim sirketi gibi organize eder.",
 			"Patron kapsami belirler; Mimar, Backend, Frontend, QA, Security ve Integrator kendi alanindan kontrol eder.",
 			"",
 			"Komutlar:",
@@ -5513,9 +5513,9 @@ export class InteractiveMode {
 		try {
 			if (!cmd || cmd === "status") this.showStatus(await git.getGitStatus(cwd));
 			else if (cmd === "commit")
-				this.showStatus(await git.commitAll(cwd, rest.join(" ") || "chore: update via mooncli"));
+				this.showStatus(await git.commitAll(cwd, rest.join(" ") || "chore: update via hodeus"));
 			else if (cmd === "branch")
-				this.showStatus(`Branch: ${await git.createBranch(cwd, rest.join("-") || "mooncli/update")}`);
+				this.showStatus(`Branch: ${await git.createBranch(cwd, rest.join("-") || "hodeus/update")}`);
 			else if (cmd === "push") this.showStatus(await git.pushBranch(cwd));
 			else this.showStatus("Kullanım: /git status | /git commit <mesaj> | /git branch <ad> | /git push");
 		} catch (err: any) {
@@ -6120,7 +6120,7 @@ export class InteractiveMode {
 			const msg =
 				`${theme.bold(theme.fg("success", `${fileName} olusturuldu`))}\n\n` +
 				`${theme.fg("dim", targetPath)}\n\n` +
-				`${theme.fg("muted", "Proje kurallarin ve stack bilgini dosyaya ekle. Mooncli her oturumda okuyacak.")}\n`;
+				`${theme.fg("muted", "Proje kurallarin ve stack bilgini dosyaya ekle. Hodeus her oturumda okuyacak.")}\n`;
 			this.chatContainer.addChild(new Spacer(1));
 			this.chatContainer.addChild(new Text(msg, 1, 0));
 			this.ui.requestRender();

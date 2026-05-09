@@ -1,5 +1,5 @@
-import { fauxAssistantMessage, fauxToolCall, type Model } from "@mooncli/core";
-import type { EngineTool, ThinkingLevel } from "@mooncli/engine";
+import { fauxAssistantMessage, fauxToolCall, type Model } from "mooncli-core";
+import type { EngineTool, ThinkingLevel } from "mooncli-engine";
 import { Type } from "typebox";
 import { afterEach, describe, expect, it } from "vitest";
 import type { ExtensionAPI } from "../../src/index.js";

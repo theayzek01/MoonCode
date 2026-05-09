@@ -21,14 +21,14 @@ import type {
 	SimpleStreamOptions,
 	TextContent,
 	ToolResultMessage,
-} from "@mooncli/core";
+} from "mooncli-core";
 import type {
 	EngineMessage,
 	EngineToolResult,
 	EngineToolUpdateCallback,
 	ThinkingLevel,
 	ToolExecutionMode,
-} from "@mooncli/engine";
+} from "mooncli-engine";
 import type {
 	AutocompleteItem,
 	AutocompleteProvider,
@@ -39,7 +39,7 @@ import type {
 	OverlayHandle,
 	OverlayOptions,
 	TUI,
-} from "@mooncli/tui";
+} from "mooncli-tui";
 import type { Static, TSchema } from "typebox";
 import type { Theme } from "../../modes/interactive/theme/theme.js";
 import type { BashResult } from "../bash-executor.js";

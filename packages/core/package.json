@@ -1,6 +1,6 @@
 {
-	"name": "@mooncli/core",
-	"version": "9.05.3",
+	"name": "hodeus-core",
+	"version": "9.5.4",
 	"description": "Unified Core Engine for Modern Apps",
 	"type": "module",
 	"main": "./dist/index.js",
@@ -52,7 +52,7 @@
 		}
 	},
 	"bin": {
-		"mooncli-core": "./dist/cli.js"
+		"hodeus-core": "./dist/cli.js"
 	},
 	"files": [
 		"dist",

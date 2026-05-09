@@ -11,8 +11,8 @@
  */
 
 import type { ExtensionAPI, ExtensionContext, Theme } from "Mooncli";
-import { StringEnum } from "@mooncli/core";
-import { matchesKey, Text, truncateToWidth } from "@mooncli/tui";
+import { StringEnum } from "mooncli-core";
+import { matchesKey, Text, truncateToWidth } from "mooncli-tui";
 import { Type } from "typebox";
 
 interface Todo {

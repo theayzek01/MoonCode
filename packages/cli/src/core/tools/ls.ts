@@ -1,7 +1,8 @@
 // @ts-nocheck
-import type { EngineTool } from "@mooncli/engine";
-import { Text } from "@mooncli/tui";
+
 import { existsSync, readdirSync, statSync } from "fs";
+import type { EngineTool } from "mooncli-engine";
+import { Text } from "mooncli-tui";
 import nodePath from "path";
 import { type Static, Type } from "typebox";
 import { keyHint } from "../../modes/interactive/components/keybinding-hints.js";

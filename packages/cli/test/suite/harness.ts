@@ -5,10 +5,10 @@
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { FauxModelDefinition, FauxProviderRegistration, FauxResponseStep, Model } from "@mooncli/core";
-import { registerFauxProvider } from "@mooncli/core";
-import type { EngineMessage, EngineTool } from "@mooncli/engine";
-import { Engine } from "@mooncli/engine";
+import type { FauxModelDefinition, FauxProviderRegistration, FauxResponseStep, Model } from "mooncli-core";
+import { registerFauxProvider } from "mooncli-core";
+import type { EngineMessage, EngineTool } from "mooncli-engine";
+import { Engine } from "mooncli-engine";
 import { AuthStorage } from "../../src/core/auth-storage.js";
 import { EngineSession, type EngineSessionEvent } from "../../src/core/engine-session.js";
 import type { ExtensionRunner } from "../../src/core/extensions/index.js";

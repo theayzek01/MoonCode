@@ -21,7 +21,7 @@ import {
 	type SimpleStreamOptions,
 	streamSimpleAnthropic,
 	streamSimpleOpenAIResponses,
-} from "@mooncli/core";
+} from "mooncli-core";
 
 // =============================================================================
 // Constants

@@ -11,11 +11,11 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createJiti } from "@mariozechner/jiti";
-import * as _bundledPiAi from "@mooncli/core";
-import * as _bundledPiAiOauth from "@mooncli/core/oauth";
-import * as _bundledPiEngineCore from "@mooncli/engine";
-import type { KeyId } from "@mooncli/tui";
-import * as _bundledPiTui from "@mooncli/tui";
+import * as _bundledPiAi from "mooncli-core";
+import * as _bundledPiAiOauth from "mooncli-core/oauth";
+import * as _bundledPiEngineCore from "mooncli-engine";
+import type { KeyId } from "mooncli-tui";
+import * as _bundledPiTui from "mooncli-tui";
 // Static imports of packages that extensions may use.
 // These MUST be static so Bun bundles them into the compiled binary.
 // The virtualModules option then makes them available to extensions.
@@ -50,10 +50,10 @@ const VIRTUAL_MODULES: Record<string, unknown> = {
 	"@sinclair/typebox": _bundledTypebox,
 	"@sinclair/typebox/compile": _bundledTypeboxCompile,
 	"@sinclair/typebox/value": _bundledTypeboxValue,
-	"@mooncli/engine": _bundledPiEngineCore,
-	"@mooncli/tui": _bundledPiTui,
-	"@mooncli/core": _bundledPiAi,
-	"@mooncli/core/oauth": _bundledPiAiOauth,
+	"mooncli-engine": _bundledPiEngineCore,
+	"mooncli-tui": _bundledPiTui,
+	"mooncli-core": _bundledPiAi,
+	"mooncli-core/oauth": _bundledPiAiOauth,
 	Mooncli: _bundledPiCodingEngine,
 };
 
@@ -90,10 +90,10 @@ function getAliases(): Record<string, string> {
 
 	_aliases = {
 		Mooncli: packageIndex,
-		"@mooncli/engine": resolveWorkspaceOrImport("engine/dist/index.js", "@mooncli/engine"),
-		"@mooncli/tui": resolveWorkspaceOrImport("tui/dist/index.js", "@mooncli/tui"),
-		"@mooncli/core": resolveWorkspaceOrImport("core/dist/index.js", "@mooncli/core"),
-		"@mooncli/core/oauth": resolveWorkspaceOrImport("core/dist/oauth.js", "@mooncli/core/oauth"),
+		"mooncli-engine": resolveWorkspaceOrImport("engine/dist/index.js", "mooncli-engine"),
+		"mooncli-tui": resolveWorkspaceOrImport("tui/dist/index.js", "mooncli-tui"),
+		"mooncli-core": resolveWorkspaceOrImport("core/dist/index.js", "mooncli-core"),
+		"mooncli-core/oauth": resolveWorkspaceOrImport("core/dist/oauth.js", "mooncli-core/oauth"),
 		typebox: typeboxEntry,
 		"typebox/compile": typeboxCompileEntry,
 		"typebox/value": typeboxValueEntry,

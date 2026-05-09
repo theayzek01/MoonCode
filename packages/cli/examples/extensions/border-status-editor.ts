@@ -1,6 +1,6 @@
 import { CustomEditor, type ExtensionAPI, type ExtensionContext, type KeybindingsManager } from "Mooncli";
-import type { Component, EditorTheme, TUI } from "@mooncli/tui";
-import { truncateToWidth, visibleWidth } from "@mooncli/tui";
+import type { Component, EditorTheme, TUI } from "mooncli-tui";
+import { truncateToWidth, visibleWidth } from "mooncli-tui";
 
 function fitBorder(
 	left: string,

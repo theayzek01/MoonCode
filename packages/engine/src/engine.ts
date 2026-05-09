@@ -8,7 +8,7 @@ import {
 	type TextContent,
 	type ThinkingBudgets,
 	type Transport,
-} from "@mooncli/core";
+} from "mooncli-core";
 import { runEngineLoop, runEngineLoopContinue } from "./engine-loop.js";
 import type {
 	AfterToolCallContext,

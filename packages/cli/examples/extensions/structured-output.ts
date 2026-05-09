@@ -6,7 +6,7 @@
  */
 
 import { defineTool, type ExtensionAPI } from "Mooncli";
-import { Text } from "@mooncli/tui";
+import { Text } from "mooncli-tui";
 import { Type } from "typebox";
 
 interface StructuredOutputDetails {

@@ -1,4 +1,4 @@
-import { fauxAssistantMessage } from "@mooncli/core";
+import { fauxAssistantMessage } from "mooncli-core";
 import { afterEach, describe, expect, it } from "vitest";
 import { createHarness, type Harness } from "../harness.js";
 

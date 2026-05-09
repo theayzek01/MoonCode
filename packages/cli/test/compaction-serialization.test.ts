@@ -1,4 +1,4 @@
-import type { Message } from "@mooncli/core";
+import type { Message } from "mooncli-core";
 import { describe, expect, it } from "vitest";
 import { serializeConversation } from "../src/core/compaction/utils.js";
 

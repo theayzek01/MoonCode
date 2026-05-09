@@ -1,6 +1,6 @@
 // @ts-nocheck
-import type { EngineTool } from "@mooncli/engine";
-import { Text } from "@mooncli/tui";
+import type { EngineTool } from "mooncli-engine";
+import { Text } from "mooncli-tui";
 import { type Static, Type } from "typebox";
 import type { Theme } from "../../modes/interactive/theme/theme.js";
 import type { ToolDefinition, ToolRenderResultOptions } from "../extensions/types.js";

@@ -21,9 +21,9 @@
  */
 
 import { type ExtensionAPI, getEngineDir, withFileMutationQueue } from "Mooncli";
-import type { TextContent } from "@mooncli/core";
 import { constants, readFileSync } from "fs";
 import { access, appendFile, readFile } from "fs/promises";
+import type { TextContent } from "mooncli-core";
 import { join, resolve } from "path";
 import { Type } from "typebox";
 

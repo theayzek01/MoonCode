@@ -16,15 +16,15 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, resolve } from "node:path";
-import type { AssistantMessage, ImageContent, Message, Model, TextContent } from "@mooncli/core";
+import type { AssistantMessage, ImageContent, Message, Model, TextContent } from "mooncli-core";
 import {
 	clampThinkingLevel,
 	getSupportedThinkingLevels,
 	isContextOverflow,
 	modelsAreEqual,
 	resetApiProviders,
-} from "@mooncli/core";
-import type { Engine, EngineEvent, EngineMessage, EngineState, EngineTool, ThinkingLevel } from "@mooncli/engine";
+} from "mooncli-core";
+import type { Engine, EngineEvent, EngineMessage, EngineState, EngineTool, ThinkingLevel } from "mooncli-engine";
 import { theme } from "../modes/interactive/theme/theme.js";
 import { stripFrontmatter } from "../utils/frontmatter.js";
 import { sleep } from "../utils/sleep.js";
@@ -191,7 +191,7 @@ export interface EngineSessionConfig {
 	/** Session start event metadata emitted when extensions bind to this runtime. */
 	sessionStartEvent?: SessionStartEvent;
 	/** Optional MCP manager for this session. */
-	mcpManager?: import("@mooncli/engine").McpManager;
+	mcpManager?: import("mooncli-engine").McpManager;
 }
 
 export interface ExtensionBindings {
@@ -315,7 +315,7 @@ export class EngineSession {
 	private _extensionErrorListener?: ExtensionErrorListener;
 	private _extensionErrorUnsubscriber?: () => void;
 
-	private _mcpManager?: import("@mooncli/engine").McpManager;
+	private _mcpManager?: import("mooncli-engine").McpManager;
 	public get mcpManager() {
 		return this._mcpManager;
 	}

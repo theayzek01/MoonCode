@@ -4,7 +4,7 @@
  */
 
 import type { ExtensionAPI } from "Mooncli";
-import { isKeyRelease, Key, matchesKey, visibleWidth } from "@mooncli/tui";
+import { isKeyRelease, Key, matchesKey, visibleWidth } from "mooncli-tui";
 
 const GAME_WIDTH = 60;
 const GAME_HEIGHT = 24;

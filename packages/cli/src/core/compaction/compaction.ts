@@ -6,9 +6,9 @@
  * and after compaction the session is reloaded.
  */
 
-import type { AssistantMessage, Model, Usage } from "@mooncli/core";
-import { completeSimple } from "@mooncli/core";
-import type { EngineMessage, ThinkingLevel } from "@mooncli/engine";
+import type { AssistantMessage, Model, Usage } from "mooncli-core";
+import { completeSimple } from "mooncli-core";
+import type { EngineMessage, ThinkingLevel } from "mooncli-engine";
 import {
 	convertToLlm,
 	createBranchSummaryMessage,

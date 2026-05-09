@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { Text, type TUI } from "@mooncli/tui";
+import { Text, type TUI } from "mooncli-tui";
 import stripAnsi from "strip-ansi";
 import { Type } from "typebox";
 import { beforeAll, describe, expect, test } from "vitest";

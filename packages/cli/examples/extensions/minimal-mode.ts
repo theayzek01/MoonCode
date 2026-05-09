@@ -26,7 +26,7 @@ import {
 	createReadTool,
 	createWriteTool,
 } from "Mooncli";
-import { Text } from "@mooncli/tui";
+import { Text } from "mooncli-tui";
 import { homedir } from "os";
 
 /**

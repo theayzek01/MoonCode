@@ -1,4 +1,6 @@
 // @ts-nocheck
+
+import { existsSync, readFileSync } from "fs";
 import {
 	type Keybinding,
 	type KeybindingDefinitions,
@@ -6,8 +8,7 @@ import {
 	type KeyId,
 	TUI_KEYBINDINGS,
 	KeybindingsManager as TuiKeybindingsManager,
-} from "@mooncli/tui";
-import { existsSync, readFileSync } from "fs";
+} from "mooncli-tui";
 import { join } from "path";
 import { getEngineDir } from "../config.js";
 
@@ -58,7 +59,7 @@ export interface AppKeybindings {
 
 export type AppKeybinding = keyof AppKeybindings;
 
-declare module "@mooncli/tui" {
+declare module "mooncli-tui" {
 	interface Keybindings extends AppKeybindings {}
 }
 

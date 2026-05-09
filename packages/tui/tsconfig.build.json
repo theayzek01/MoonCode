@@ -4,7 +4,7 @@
 		"outDir": "./dist",
 		"rootDir": "./src",
 		"paths": {
-			"@mooncli/core": ["../core/dist/index.js"]
+			"hodeus-core": ["../core/dist/index.js"]
 		}
 	},
 	"include": ["src/**/*.ts"],

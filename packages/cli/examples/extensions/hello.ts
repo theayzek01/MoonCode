@@ -3,7 +3,7 @@
  */
 
 import { defineTool, type ExtensionAPI } from "Mooncli";
-import { Type } from "@mooncli/core";
+import { Type } from "mooncli-core";
 
 const helloTool = defineTool({
 	name: "hello",

@@ -5,7 +5,7 @@
  */
 
 import { AuthStorage, createEngineSession, ModelRegistry } from "Mooncli";
-import { getModel } from "@mooncli/core";
+import { getModel } from "mooncli-core";
 
 // Set up auth storage and model registry
 const authStorage = AuthStorage.create();

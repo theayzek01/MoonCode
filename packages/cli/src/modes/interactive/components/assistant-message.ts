@@ -1,6 +1,6 @@
 // @ts-nocheck
-import type { AssistantMessage } from "@mooncli/core";
-import { Container, Markdown, type MarkdownTheme, Spacer, Text } from "@mooncli/tui";
+import type { AssistantMessage } from "mooncli-core";
+import { Container, Markdown, type MarkdownTheme, Spacer, Text } from "mooncli-tui";
 import { getMarkdownTheme, theme } from "../theme/theme.js";
 
 const OSC133_ZONE_START = "\x1b]133;A\x07";

@@ -1,6 +1,7 @@
 // @ts-nocheck
-import type { EngineTool } from "@mooncli/engine";
+
 import { ChannelType, Client, GatewayIntentBits, type TextChannel } from "discord.js";
+import type { EngineTool } from "mooncli-engine";
 import type { ToolDefinition } from "../extensions/index.js";
 
 let discordClient: Client | null = null;

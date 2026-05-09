@@ -17,10 +17,10 @@ import { spawn } from "node:child_process";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { Message } from "@mooncli/core";
-import { StringEnum } from "@mooncli/core";
-import type { EngineToolResult } from "@mooncli/engine";
-import { Container, Markdown, Spacer, Text } from "@mooncli/tui";
+import type { Message } from "mooncli-core";
+import { StringEnum } from "mooncli-core";
+import type { EngineToolResult } from "mooncli-engine";
+import { Container, Markdown, Spacer, Text } from "mooncli-tui";
 import { Type } from "typebox";
 import { discoverEngines, type EngineConfig, type EngineScope } from "./engines.js";
 

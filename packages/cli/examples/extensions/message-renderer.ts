@@ -8,7 +8,7 @@
  */
 
 import type { ExtensionAPI } from "Mooncli";
-import { Box, Text } from "@mooncli/tui";
+import { Box, Text } from "mooncli-tui";
 
 export default function (Mooncli: ExtensionAPI) {
 	// Register custom renderer for "status-update" messages

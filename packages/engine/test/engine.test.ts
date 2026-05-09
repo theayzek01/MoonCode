@@ -1,4 +1,4 @@
-import { type AssistantMessage, type AssistantMessageEvent, EventStream, getModel } from "@mooncli/core";
+import { type AssistantMessage, type AssistantMessageEvent, EventStream, getModel } from "mooncli-core";
 import { describe, expect, it } from "vitest";
 import { Engine } from "../src/index.js";
 

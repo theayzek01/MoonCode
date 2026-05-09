@@ -18,8 +18,8 @@
  */
 
 import type { ExtensionAPI, ExtensionContext, Theme, ToolExecutionMode } from "Mooncli";
-import { StringEnum } from "@mooncli/core";
-import { type Component, matchesKey, Text, truncateToWidth, visibleWidth } from "@mooncli/tui";
+import { StringEnum } from "mooncli-core";
+import { type Component, matchesKey, Text, truncateToWidth, visibleWidth } from "mooncli-tui";
 import { Type } from "typebox";
 
 // Thrown from the tool on illegal actions. The engine runtime surfaces thrown

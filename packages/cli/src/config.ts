@@ -223,7 +223,7 @@ export function getSelfUpdateCommand(packageName: string, npmCommand?: string[])
 export function getSelfUpdateUnavailableInstruction(packageName: string, npmCommand?: string[]): string {
 	const method = detectInstallMethod();
 	if (method === "bun-binary") {
-		return `Download from: https://mooncli.dev/releases/latest`;
+		return `Download from: https://hodeus.dev/releases/latest`;
 	}
 	const command = getSelfUpdateCommandForMethod(method, packageName, npmCommand);
 	if (command) {
@@ -354,10 +354,10 @@ interface PackageJson {
 const pkg = JSON.parse(readFileSync(getPackageJsonPath(), "utf-8")) as PackageJson;
 
 const moonConfigName: string | undefined = pkg.moonConfig?.name;
-export const PACKAGE_NAME: string = pkg.name || "mooncli";
-export const APP_NAME: string = moonConfigName || "moon";
-export const APP_TITLE: string = "Mooncli";
-export const CONFIG_DIR_NAME: string = pkg.moonConfig?.configDir || ".mooncli";
+export const PACKAGE_NAME: string = pkg.name || "hodeus";
+export const APP_NAME: string = moonConfigName || "hodeus";
+export const APP_TITLE: string = "Hodeus";
+export const CONFIG_DIR_NAME: string = pkg.moonConfig?.configDir || ".hodeus";
 export const VERSION: string = pkg.version || "0.0.0";
 
 export const ENV_AGENT_DIR = `${APP_NAME.toUpperCase()}_CODING_AGENT_DIR`;
@@ -369,7 +369,7 @@ export function expandTildePath(path: string): string {
 	return path;
 }
 
-const DEFAULT_SHARE_VIEWER_URL = "https://mooncli.dev/session/";
+const DEFAULT_SHARE_VIEWER_URL = "https://hodeus.dev/session/";
 
 /** Get the share viewer URL for a gist ID */
 export function getShareViewerUrl(gistId: string): string {

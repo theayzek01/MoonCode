@@ -13,9 +13,9 @@
  */
 
 import type { ExtensionAPI, ExtensionContext } from "Mooncli";
-import type { AssistantMessage, TextContent } from "@mooncli/core";
-import type { EngineMessage } from "@mooncli/engine";
-import { Key } from "@mooncli/tui";
+import type { AssistantMessage, TextContent } from "mooncli-core";
+import type { EngineMessage } from "mooncli-engine";
+import { Key } from "mooncli-tui";
 import { extractTodoItems, isSafeCommand, markCompletedSteps, type TodoItem } from "./utils.js";
 
 // Tools

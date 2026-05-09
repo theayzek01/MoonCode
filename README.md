@@ -1,13 +1,13 @@
 <div align="center">
-  <img src="assets/Moon-cli-banner.png" alt="Mooncli Banner" width="100%" />
+  <img src="assets/Moon-cli-banner.png" alt="Hodeus Banner" width="100%" />
 
   <br />
 
-  [![npm](https://img.shields.io/npm/v/mooncli?style=for-the-badge&color=0ea5e9&labelColor=1e293b)](https://www.npmjs.com/package/mooncli)
+  [![npm](https://img.shields.io/npm/v/hodeus?style=for-the-badge&color=0ea5e9&labelColor=1e293b)](https://www.npmjs.com/package/hodeus)
   [![License: MIT](https://img.shields.io/badge/license-MIT-22c55e?style=for-the-badge&labelColor=1e293b)](LICENSE)
   [![Discord](https://img.shields.io/badge/discord-community-5865F2?style=for-the-badge&logo=discord&logoColor=white&labelColor=1e293b)](https://discord.com/invite/3cU7Bz4UPx)
 
-  ### **Mooncli**
+  ### **Hodeus**
   *An agentic coding assistant that lives in your terminal.*
 
   **Multi-provider · Multi-model · MCP-ready · Local-first · Open source**
@@ -16,9 +16,9 @@
 
 ---
 
-## ⚡ What is Mooncli?
+## ⚡ What is Hodeus?
 
-Mooncli is a high-performance, terminal-based coding agent designed for developers who prefer staying in their flow. Unlike browser-based LLM chats, Mooncli treats your codebase as the source of truth—reading files, reasoning about architecture, and executing changes directly.
+Hodeus is a high-performance, terminal-based coding agent designed for developers who prefer staying in their flow. Unlike browser-based LLM chats, Hodeus treats your codebase as the source of truth—reading files, reasoning about architecture, and executing changes directly.
 
 - **🚀 Keyboard-Centric:** No more context-switching to browser tabs.
 - **🧠 Agentic Intelligence:** Sophisticated orchestration for complex multi-file tasks.
@@ -29,7 +29,7 @@ Mooncli is a high-performance, terminal-based coding agent designed for develope
 
 ## 🏗️ Supported Providers
 
-Mooncli bridges the gap between cloud power and local privacy.
+Hodeus bridges the gap between cloud power and local privacy.
 
 | Category | Providers |
 | :--- | :--- |
@@ -42,23 +42,26 @@ Mooncli bridges the gap between cloud power and local privacy.
 
 Get up and running in seconds.
 
+### Global Installation
 ```bash
 # Install globally via npm
-npm install -g mooncli-terminal
+npm install -g hodeus
 
 # Launch the interactive workspace
-mooncli
+hodeus
 ```
 
-### Configure Your Brain
+### Local Development (Plug & Play)
 ```bash
-# Set your preferred cloud provider
-export GEMINI_API_KEY=your_key
-export ANTHROPIC_API_KEY=your_key
+# Clone the repository
+git clone https://github.com/theayzek01/hodeuscli
+cd hodeuscli
 
-# Or go fully local
-ollama pull qwen2.5-coder:7b
-mooncli --provider ollama
+# Install and build (automatic)
+npm install
+
+# Run directly
+npm start
 ```
 
 ---
@@ -66,16 +69,16 @@ mooncli --provider ollama
 ## ✨ Key Features
 
 ### 🏢 Multi-Agent Orchestration
-Enable a full "virtual company" with `/agentmode on`. Mooncli spawns specialized agents (Architect, Frontend, Backend, Security, Test) that collaborate under a Patron orchestrator to solve large-scale problems.
+Enable a full "virtual company" with `/agentmode on`. Hodeus spawns specialized agents (Architect, Frontend, Backend, Security, Test) that collaborate under a Patron orchestrator to solve large-scale problems.
 
 ### 🗺️ Plan Mode
 Switch to `/plan` for a read-only analysis. The model will scan your project and propose a detailed implementation plan without making any changes. Review it, refine it, then execute.
 
 ### 🌐 Chrome Browser Bridge
-Full web interaction. Mooncli connects to a bundled Chrome extension, allowing the assistant to browse docs, test web apps, and interact with live pages through `/browser`.
+Full web interaction. Hodeus connects to a bundled Chrome extension, allowing the assistant to browse docs, test web apps, and interact with live pages through `/browser`.
 
 ### 🗜️ Context Management
-Keep your sessions lean. Mooncli features automatic and manual context compaction (`/compact`) and a real-time token usage monitor (`/context`).
+Keep your sessions lean. Hodeus features automatic and manual context compaction (`/compact`) and a real-time token usage monitor (`/context`).
 
 ---
 
@@ -95,28 +98,24 @@ Keep your sessions lean. Mooncli features automatic and manual context compactio
 
 ---
 
-## 🛠️ Development & Contribution
+## 🛠️ Contribution
 
 We love contributions! Whether it's adding a new provider, fixing a bug, or improving documentation.
 
 ```bash
-# Clone the repository
-git clone https://github.com/theayzek01/hodeuscli
-
-# Install dependencies
-npm install
-
 # Run checks (lint + typecheck)
 npm run check
 
-# Build and run locally
+# Build everything
 npm run build
+
+# Run CLI
 node packages/cli/dist/cli.js
 ```
 
 ---
 
 <div align="center">
-  <p>Built with ❤️ by the Mooncli community.</p>
+  <p>Built with ❤️ by the Hodeus community.</p>
   <p>Released under the <a href="LICENSE">MIT License</a>.</p>
 </div>

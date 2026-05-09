@@ -9,8 +9,8 @@
  */
 
 import type { ExtensionAPI } from "Mooncli";
-import type { AssistantMessage } from "@mooncli/core";
-import { truncateToWidth, visibleWidth } from "@mooncli/tui";
+import type { AssistantMessage } from "mooncli-core";
+import { truncateToWidth, visibleWidth } from "mooncli-tui";
 
 export default function (Mooncli: ExtensionAPI) {
 	let enabled = false;

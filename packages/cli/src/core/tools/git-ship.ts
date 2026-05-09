@@ -1,5 +1,5 @@
 // @ts-nocheck
-import type { EngineTool } from "@mooncli/engine";
+import type { EngineTool } from "mooncli-engine";
 import { Type } from "typebox";
 import type { ToolDefinition } from "../extensions/types.js";
 import {

@@ -1,8 +1,8 @@
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { fauxAssistantMessage, fauxToolCall, type Model } from "@mooncli/core";
-import type { EngineTool } from "@mooncli/engine";
+import { fauxAssistantMessage, fauxToolCall, type Model } from "mooncli-core";
+import type { EngineTool } from "mooncli-engine";
 import { Type } from "typebox";
 import { afterEach, describe, expect, it } from "vitest";
 import type { PromptTemplate } from "../../src/core/prompt-templates.js";

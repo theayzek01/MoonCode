@@ -9,7 +9,7 @@
  */
 
 import type { ExtensionAPI, ExtensionCommandContext, Theme } from "Mooncli";
-import { CURSOR_MARKER, type Focusable, matchesKey, visibleWidth } from "@mooncli/tui";
+import { CURSOR_MARKER, type Focusable, matchesKey, visibleWidth } from "mooncli-tui";
 
 export default function (Mooncli: ExtensionAPI) {
 	Mooncli.registerCommand("overlay-test", {

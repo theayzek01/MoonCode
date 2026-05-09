@@ -11,7 +11,7 @@ import {
 	streamSimple,
 	type ToolResultMessage,
 	validateToolArguments,
-} from "@mooncli/core";
+} from "mooncli-core";
 import type {
 	EngineContext,
 	EngineEvent,

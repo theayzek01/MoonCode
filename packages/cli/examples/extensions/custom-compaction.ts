@@ -15,7 +15,7 @@
 
 import type { ExtensionAPI } from "Mooncli";
 import { convertToLlm, serializeConversation } from "Mooncli";
-import { complete } from "@mooncli/core";
+import { complete } from "mooncli-core";
 
 export default function (Mooncli: ExtensionAPI) {
 	Mooncli.on("session_before_compact", async (event, ctx) => {

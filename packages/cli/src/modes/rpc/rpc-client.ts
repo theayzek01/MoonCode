@@ -6,8 +6,8 @@
  */
 
 import { type ChildProcess, spawn } from "node:child_process";
-import type { ImageContent } from "@mooncli/core";
-import type { EngineEvent, EngineMessage, ThinkingLevel } from "@mooncli/engine";
+import type { ImageContent } from "mooncli-core";
+import type { EngineEvent, EngineMessage, ThinkingLevel } from "mooncli-engine";
 import type { BashResult } from "../../core/bash-executor.js";
 import type { CompactionResult } from "../../core/compaction/index.js";
 import type { SessionStats } from "../../core/engine-session.js";

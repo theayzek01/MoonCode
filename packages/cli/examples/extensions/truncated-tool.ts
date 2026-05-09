@@ -24,8 +24,8 @@ import {
 	withFileMutationQueue,
 } from "Mooncli";
 import { mkdtemp, writeFile } from "node:fs/promises";
-import { Text } from "@mooncli/tui";
 import { execSync } from "child_process";
+import { Text } from "mooncli-tui";
 import { tmpdir } from "os";
 import { join } from "path";
 import { Type } from "typebox";

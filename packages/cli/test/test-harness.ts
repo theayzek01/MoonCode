@@ -22,10 +22,10 @@ import type {
 	ThinkingContent,
 	ToolCall,
 	Usage,
-} from "@mooncli/core";
-import { createAssistantMessageEventStream } from "@mooncli/core";
-import type { EngineTool } from "@mooncli/engine";
-import { Engine } from "@mooncli/engine";
+} from "mooncli-core";
+import { createAssistantMessageEventStream } from "mooncli-core";
+import type { EngineTool } from "mooncli-engine";
+import { Engine } from "mooncli-engine";
 import { AuthStorage } from "../src/core/auth-storage.js";
 import { EngineSession, type EngineSessionEvent } from "../src/core/engine-session.js";
 import { ModelRegistry } from "../src/core/model-registry.js";

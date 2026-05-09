@@ -1,9 +1,10 @@
 // @ts-nocheck
-import type { EngineTool } from "@mooncli/engine";
-import { Container, Text } from "@mooncli/tui";
+
 import { createPatch } from "diff";
 import { existsSync, readFileSync } from "fs";
 import { mkdir as fsMkdir, writeFile as fsWriteFile } from "fs/promises";
+import type { EngineTool } from "mooncli-engine";
+import { Container, Text } from "mooncli-tui";
 import { dirname } from "path";
 import { type Static, Type } from "typebox";
 import { keyHint } from "../../modes/interactive/components/keybinding-hints.js";

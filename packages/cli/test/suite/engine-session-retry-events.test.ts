@@ -1,5 +1,5 @@
-import { fauxAssistantMessage, fauxThinking, fauxToolCall } from "@mooncli/core";
-import type { EngineTool } from "@mooncli/engine";
+import { fauxAssistantMessage, fauxThinking, fauxToolCall } from "mooncli-core";
+import type { EngineTool } from "mooncli-engine";
 import { Type } from "typebox";
 import { afterEach, describe, expect, it } from "vitest";
 import { createHarness, type Harness } from "./harness.js";

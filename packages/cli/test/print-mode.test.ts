@@ -1,4 +1,4 @@
-import type { AssistantMessage, ImageContent } from "@mooncli/core";
+import type { AssistantMessage, ImageContent } from "mooncli-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { SessionShutdownEvent } from "../src/index.js";
 import { runPrintMode } from "../src/modes/print-mode.js";

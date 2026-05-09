@@ -11,7 +11,7 @@
 
 import type { ExtensionAPI, ExtensionContext, ToolInfo } from "Mooncli";
 import { getSettingsListTheme } from "Mooncli";
-import { Container, type SettingItem, SettingsList } from "@mooncli/tui";
+import { Container, type SettingItem, SettingsList } from "mooncli-tui";
 
 // State persisted to session
 interface ToolsState {

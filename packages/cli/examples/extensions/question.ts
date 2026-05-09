@@ -5,7 +5,7 @@
  */
 
 import type { ExtensionAPI } from "Mooncli";
-import { Editor, type EditorTheme, Key, matchesKey, Text, truncateToWidth } from "@mooncli/tui";
+import { Editor, type EditorTheme, Key, matchesKey, Text, truncateToWidth } from "mooncli-tui";
 import { Type } from "typebox";
 
 interface OptionWithDesc {

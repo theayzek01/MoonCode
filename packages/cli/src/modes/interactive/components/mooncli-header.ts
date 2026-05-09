@@ -1,10 +1,10 @@
 // @ts-nocheck
-import { Text, visibleWidth } from "@mooncli/tui";
+import { Text, visibleWidth } from "hodeus-tui";
 import type { AppKeybinding } from "../../../core/keybindings.js";
 import { theme } from "../theme/theme.js";
 import { keyText } from "./keybinding-hints.js";
 
-export interface MooncliHeaderOptions {
+export interface HodeusHeaderOptions {
 	version: string;
 	compactInstructions: string;
 	expandedInstructions: string;
@@ -25,12 +25,12 @@ function hint(command: string, description: string): string {
 	return `${theme.fg("accent", command)} ${theme.fg("muted", description)}`;
 }
 
-export class MooncliHeaderComponent extends Text {
+export class HodeusHeaderComponent extends Text {
 	private expanded: boolean;
 
 	constructor(
 		_tui: unknown,
-		private options: MooncliHeaderOptions,
+		private options: HodeusHeaderOptions,
 	) {
 		super("", options.paddingX ?? 1, options.paddingY ?? 0);
 		this.expanded = options.expanded ?? false;
@@ -46,7 +46,7 @@ export class MooncliHeaderComponent extends Text {
 
 	private build(width = 88): string {
 		const inner = Math.max(46, Math.min(96, width - 2));
-		const title = `${theme.bold("Mooncli")} ${theme.fg("dim", `v${this.options.version}`)}`;
+		const title = `${theme.bold("Hodeus")} ${theme.fg("dim", `v${this.options.version}`)}`;
 		const subtitle = theme.fg("muted", "minimal agentic workspace");
 		const quick = [
 			hint("/models", "model seç"),

@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, realpathSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { getModel } from "@mooncli/core";
+import { getModel } from "mooncli-core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createEngineSession } from "../src/core/sdk.js";
 import { SessionManager } from "../src/core/session-manager.js";

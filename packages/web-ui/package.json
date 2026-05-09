@@ -1,6 +1,6 @@
 {
-	"name": "@mooncli/web-ui",
-	"version": "9.05.3",
+	"name": "mooncli-web-ui",
+	"version": "9.5.4",
 	"type": "module",
 	"private": true,
 	"main": "src/server.ts",

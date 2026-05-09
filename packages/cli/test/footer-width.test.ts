@@ -1,4 +1,4 @@
-import { visibleWidth } from "@mooncli/tui";
+import { visibleWidth } from "mooncli-tui";
 import { beforeAll, describe, expect, it } from "vitest";
 import type { EngineSession } from "../src/core/engine-session.js";
 import type { ReadonlyFooterDataProvider } from "../src/core/footer-data-provider.js";

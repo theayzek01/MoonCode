@@ -12,8 +12,8 @@ import {
 	getModel,
 	type ImageContent,
 	type TextContent,
-} from "@mooncli/core";
-import { Engine } from "@mooncli/engine";
+} from "mooncli-core";
+import { Engine } from "mooncli-engine";
 import { Type } from "typebox";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { AuthStorage } from "../src/core/auth-storage.js";

@@ -1,7 +1,7 @@
 import type { ExtensionAPI, ExtensionCommandContext } from "Mooncli";
 import { DynamicBorder, getMarkdownTheme } from "Mooncli";
-import { complete, getModel } from "@mooncli/core";
-import { Container, Markdown, matchesKey, Text } from "@mooncli/tui";
+import { complete, getModel } from "mooncli-core";
+import { Container, Markdown, matchesKey, Text } from "mooncli-tui";
 
 type ContentBlock = {
 	type?: string;

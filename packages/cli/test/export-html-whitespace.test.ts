@@ -1,5 +1,5 @@
-import type { Component } from "@mooncli/tui";
 import { readFileSync } from "fs";
+import type { Component } from "mooncli-tui";
 import { describe, expect, it } from "vitest";
 import { ansiLinesToHtml } from "../src/core/export-html/ansi-to-html.js";
 import { createToolHtmlRenderer } from "../src/core/export-html/tool-renderer.js";

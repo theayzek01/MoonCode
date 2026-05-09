@@ -27,7 +27,7 @@
 
 import type { BashToolDetails, EditToolDetails, ExtensionAPI, ReadToolDetails } from "Mooncli";
 import { createBashTool, createEditTool, createReadTool, createWriteTool } from "Mooncli";
-import { Text } from "@mooncli/tui";
+import { Text } from "mooncli-tui";
 
 export default function (Mooncli: ExtensionAPI) {
 	const cwd = process.cwd();

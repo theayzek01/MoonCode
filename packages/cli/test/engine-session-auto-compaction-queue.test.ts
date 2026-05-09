@@ -1,8 +1,8 @@
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { type AssistantMessage, getModel } from "@mooncli/core";
-import { Engine } from "@mooncli/engine";
+import { type AssistantMessage, getModel } from "mooncli-core";
+import { Engine } from "mooncli-engine";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthStorage } from "../src/core/auth-storage.js";
 import { EngineSession } from "../src/core/engine-session.js";

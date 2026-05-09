@@ -14,8 +14,8 @@
 
 import type { ExtensionAPI, SessionEntry } from "Mooncli";
 import { BorderedLoader, convertToLlm, serializeConversation } from "Mooncli";
-import { complete, type Message } from "@mooncli/core";
-import type { EngineMessage } from "@mooncli/engine";
+import { complete, type Message } from "mooncli-core";
+import type { EngineMessage } from "mooncli-engine";
 
 const SYSTEM_PROMPT = `You are a context transfer assistant. Given a conversation history and the user's goal for a new thread, generate a focused prompt that:
 

@@ -44,7 +44,7 @@
 When creating issues:
 
 - Add `pkg:*` labels to indicate which package(s) the issue affects
-  - Available labels: `pkg:engine`, `pkg:ai`, `pkg:cli`, `pkg:tui`, `pkg:web-ui`
+  - Available labels: `pkg:engine`, `pkg:core`, `pkg:cli`, `pkg:tui`, `pkg:web-ui`
 - If an issue spans multiple packages, add all relevant labels
 
 When posting issue/PR comments:
@@ -67,29 +67,29 @@ When closing issues via commit:
 - If the user approves: create a feature branch, pull PR, rebase on main, apply adjustments, commit, merge into main, push, close PR, and leave a comment in the user's tone
 - You never open PRs yourself. We work in feature branches until everything is according to the user's requirements, then merge into main, and push.
 
-## Testing moodcli Interactive Mode with tmux
+## Testing mooncli Interactive Mode with tmux
 
-To test moodcli's TUI in a controlled terminal environment:
+To test mooncli's TUI in a controlled terminal environment:
 
 ```bash
 # Create tmux session with specific dimensions
-tmux new-session -d -s moodcli-test -x 80 -y 24
+tmux new-session -d -s mooncli-test -x 80 -y 24
 
-# Start moodcli from source
-tmux send-keys -t moodcli-test "cd /Users/badlogic/workspaces/moodcli-mono && ./moodcli-test.sh" Enter
+# Start mooncli from source
+tmux send-keys -t mooncli-test "npm run build && node packages/cli/dist/cli.js" Enter
 
 # Wait for startup, then capture output
-sleep 3 && tmux capture-pane -t moodcli-test -p
+sleep 3 && tmux capture-pane -t mooncli-test -p
 
 # Send input
-tmux send-keys -t moodcli-test "your prompt here" Enter
+tmux send-keys -t mooncli-test "your prompt here" Enter
 
 # Send special keys
-tmux send-keys -t moodcli-test Escape
-tmux send-keys -t moodcli-test C-o  # ctrl+o
+tmux send-keys -t mooncli-test Escape
+tmux send-keys -t mooncli-test C-o  # ctrl+o
 
 # Cleanup
-tmux kill-session -t moodcli-test
+tmux kill-session -t mooncli-test
 ```
 
 ## Changelog
@@ -116,21 +116,21 @@ Use these sections under `## [Unreleased]`:
 
 ### Attribution
 
-- **Internal changes (from issues)**: `Fixed foo bar ([#123](https://github.com/badlogic/moodcli-mono/issues/123))`
-- **External contributions**: `Added feature X ([#456](https://github.com/badlogic/moodcli-mono/pull/456) by [@username](https://github.com/username))`
+- **Internal changes (from issues)**: `Fixed foo bar ([#123](https://github.com/theayzek01/hodeuscli/issues/123))`
+- **External contributions**: `Added feature X ([#456](https://github.com/theayzek01/hodeuscli/pull/456) by [@username](https://github.com/username))`
 
-## Adding a New Provider Provider (packages/ai)
+## Adding a New Provider (packages/core)
 
 Adding a new provider requires changes across multiple files:
 
-### 1. Core Types (`packages/ai/src/types.ts`)
+### 1. Core Types (`packages/core/src/types.ts`)
 
 - Add API identifier to `Api` type union (e.g., `"bedrock-converse-stream"`)
 - Create options interface extending `StreamOptions`
 - Add mapping to `ApiOptionsMap`
 - Add provider name to `KnownProvider` type union
 
-### 2. Provider Implementation (`packages/ai/src/providers/`)
+### 2. Provider Implementation (`packages/core/src/providers/`)
 
 Create provider file exporting:
 
@@ -142,20 +142,20 @@ Create provider file exporting:
 
 ### 3. Provider Exports and Lazy Registration
 
-- Add a package subpath export in `packages/ai/package.json` pointing at `./dist/providers/<provider>.js`
-- Add `export type` re-exports in `packages/ai/src/index.ts` for provider option types that should remain available from the root entry
-- Register the provider in `packages/ai/src/providers/register-builtins.ts` via lazy loader wrappers, do not statically import provider implementation modules there
-- Add credential detection in `packages/ai/src/env-api-keys.ts`
+- Add a package subpath export in `packages/core/package.json` pointing at `./dist/providers/<provider>.js`
+- Add `export type` re-exports in `packages/core/src/index.ts` for provider option types that should remain available from the root entry
+- Register the provider in `packages/core/src/providers/register-builtins.ts` via lazy loader wrappers, do not statically import provider implementation modules there
+- Add credential detection in `packages/core/src/env-api-keys.ts`
 
-### 4. Model Generation (`packages/ai/scripts/generate-models.ts`)
+### 4. Model Generation (`packages/core/scripts/generate-models.ts`)
 
 - Add logic to fetch/parse models from provider source
 - Map to standardized `Model` interface
 
-### 5. Tests (`packages/ai/test/`)
+### 5. Tests (`packages/core/test/`)
 
-- Always add the provider to `stream.test.ts` with at least one representative model, even if it reuses an existing API implementation such as `openai-completions`.
-- Add the provider to the broader provider matrix where applicable: `tokens.test.ts`, `abort.test.ts`, `empty.test.ts`, `context-overflow.test.ts`, `image-limits.test.ts`, `unicode-surrogate.test.ts`, `tool-call-without-result.test.ts`, `image-tool-result.test.ts`, `total-tokens.test.ts`, `cross-provider-handoff.test.ts`.
+- Always add the provider to `stream.test.ts` with at least one representative model.
+- Add the provider to the broader provider matrix where applicable.
 - For `cross-provider-handoff.test.ts`, add at least one provider/model pair. If the provider exposes multiple model families (for example GPT and Claude), add at least one pair per family.
 - For non-standard auth, create utility (e.g., `bedrock-utils.ts`) with credential detection.
 
@@ -169,8 +169,8 @@ Create provider file exporting:
 
 ### 7. Documentation
 
-- `packages/ai/README.md`: Add to providers table, document options/auth, add env vars
-- `packages/ai/CHANGELOG.md`: Add entry under `## [Unreleased]`
+- `packages/core/README.md`: Add to providers table, document options/auth, add env vars
+- `packages/core/CHANGELOG.md`: Add entry under `## [Unreleased]`
 
 ## Releasing
 
@@ -205,7 +205,7 @@ Multiple engines may work on different files in the same worktree simultaneously
 - ALWAYS use `git add <specific-file-paths>` listing only files you modified
 - Before committing, run `git status` and verify you are only staging YOUR files
 - Track which files you created/modified/deleted during the session
-- It is always fine to include `packages/ai/src/models.generated.ts` in a commit alongside the actual files you want to commit
+- It is always fine to include `packages/core/src/models.generated.ts` in a commit alongside the actual files you want to commit
 
 ### Forbidden Git Operations
 

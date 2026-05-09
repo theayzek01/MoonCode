@@ -13,7 +13,7 @@ import {
 	SessionManager,
 	SettingsManager,
 } from "Mooncli";
-import { getModel } from "@mooncli/core";
+import { getModel } from "mooncli-core";
 
 // Custom auth storage location
 const authStorage = AuthStorage.create("/tmp/my-engine/auth.json");

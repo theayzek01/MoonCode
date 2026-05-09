@@ -3,7 +3,7 @@
  */
 
 import type { ExtensionAPI } from "Mooncli";
-import { matchesKey, visibleWidth } from "@mooncli/tui";
+import { matchesKey, visibleWidth } from "mooncli-tui";
 
 const GAME_WIDTH = 40;
 const GAME_HEIGHT = 15;

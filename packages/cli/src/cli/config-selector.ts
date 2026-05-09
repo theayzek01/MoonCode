@@ -3,7 +3,7 @@
  * TUI config selector for `Mooncli config` command
  */
 
-import { ProcessTerminal, TUI } from "@mooncli/tui";
+import { ProcessTerminal, TUI } from "mooncli-tui";
 import type { ResolvedPaths } from "../core/package-manager.js";
 import type { SettingsManager } from "../core/settings-manager.js";
 import { ConfigSelectorComponent } from "../modes/interactive/components/config-selector.js";

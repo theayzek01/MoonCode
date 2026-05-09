@@ -1,5 +1,5 @@
 const BRIDGE_URL = "ws://127.0.0.1:3132/ws";
-const VERSION = "0.1.1";
+const VERSION = "0.2.0";
 const HEARTBEAT_INTERVAL_MS = 20000;
 
 let socket;
@@ -10,14 +10,14 @@ setBadge(false, "starting");
 connect();
 chrome.runtime.onStartup.addListener(connect);
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.alarms.create("mooncli-bridge-reconnect", { periodInMinutes: 0.5 });
+  chrome.alarms.create("hodeus-bridge-reconnect", { periodInMinutes: 0.5 });
   connect();
 });
 chrome.action.onClicked.addListener(connect);
 chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === "mooncli-bridge-reconnect") connect();
+  if (alarm.name === "hodeus-bridge-reconnect") connect();
 });
-chrome.alarms.create("mooncli-bridge-reconnect", { periodInMinutes: 0.5 });
+chrome.alarms.create("hodeus-bridge-reconnect", { periodInMinutes: 0.5 });
 
 function connect() {
   if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
@@ -62,7 +62,7 @@ function scheduleReconnect() {
   clearTimeout(reconnectTimer);
   clearInterval(heartbeatTimer);
   setBadge(false, "disconnected");
-  reconnectTimer = setTimeout(connect, 1000);
+  reconnectTimer = setTimeout(connect, 2000);
 }
 
 function sendHello() {
@@ -70,7 +70,7 @@ function sendHello() {
     type: "hello",
     extensionId: chrome.runtime.id,
     version: VERSION,
-    capabilities: ["tabs", "page", "debugger", "screenshot", "scroll", "console_logs", "read_dom"]
+    capabilities: ["tabs", "page", "debugger", "screenshot", "scroll", "console_logs", "read_dom", "hover", "press_key", "get_elements"]
   });
 }
 
@@ -86,8 +86,8 @@ function updateBadgeFromSocket() {
 
 function setBadge(connected, title) {
   chrome.action.setBadgeText({ text: connected ? "ON" : "OFF" });
-  chrome.action.setBadgeBackgroundColor({ color: connected ? "#16a34a" : "#dc2626" });
-  chrome.action.setTitle({ title: `Mooncli Browser Bridge: ${title}` });
+  chrome.action.setBadgeBackgroundColor({ color: connected ? "#0ea5e9" : "#64748b" });
+  chrome.action.setTitle({ title: `Hodeus Browser Bridge: ${title}` });
 }
 
 async function executeCommand(action, args) {
@@ -140,9 +140,6 @@ async function executePage(args) {
   const tabId = tab.id;
   if (tabId === undefined) throw new Error("No target tab id");
 
-    return result?.result;
-  }
-  
   if (action === "scroll") {
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
@@ -167,12 +164,13 @@ async function executePage(args) {
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
       func: () => {
-        // Basit bir markdown benzeri çıktı oluştur
         const walk = (node) => {
           if (node.nodeType === 3) return node.textContent.trim();
           if (node.nodeType !== 1) return "";
-          let children = Array.from(node.childNodes).map(walk).join(" ");
           const tag = node.tagName.toLowerCase();
+          if (["script", "style", "noscript"].includes(tag)) return "";
+          
+          let children = Array.from(node.childNodes).map(walk).filter(x => x).join(" ");
           if (["h1", "h2", "h3"].includes(tag)) return `\n# ${children}\n`;
           if (tag === "a") return `[${children}](${node.href})`;
           if (tag === "button") return `[BUTTON: ${children}]`;
@@ -181,6 +179,7 @@ async function executePage(args) {
         };
         return {
           url: location.href,
+          title: document.title,
           content: walk(document.body).replace(/\s+/g, " ").slice(0, 15000)
         };
       }
@@ -189,7 +188,6 @@ async function executePage(args) {
   }
 
   if (action === "read") {
-    // Mevcut read koduna ek olarak overlay inject et (her okumada kontrol bizde olduğunu gösterelim)
     injectOverlay(tabId);
     const maxChars = Number.isFinite(args.maxChars) ? Number(args.maxChars) : 12000;
     const [result] = await chrome.scripting.executeScript({
@@ -212,11 +210,13 @@ async function executePage(args) {
 
   if (action === "click") {
     if (!args.selector) throw new Error("click requires selector");
+    injectOverlay(tabId, `Clicking ${args.selector}`);
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
       func: (selector) => {
         const element = document.querySelector(selector);
         if (!element) return { clicked: false, reason: "selector not found" };
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
         element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
         return { clicked: true, selector, text: element.textContent?.trim().slice(0, 200) || "" };
       },
@@ -225,8 +225,24 @@ async function executePage(args) {
     return result?.result;
   }
 
+  if (action === "hover") {
+    if (!args.selector) throw new Error("hover requires selector");
+    const [result] = await chrome.scripting.executeScript({
+      target: { tabId },
+      func: (selector) => {
+        const element = document.querySelector(selector);
+        if (!element) return { hovered: false, reason: "selector not found" };
+        element.dispatchEvent(new MouseEvent("mouseover", { bubbles: true, cancelable: true, view: window }));
+        return { hovered: true, selector };
+      },
+      args: [args.selector]
+    });
+    return result?.result;
+  }
+
   if (action === "type") {
     if (!args.selector) throw new Error("type requires selector");
+    injectOverlay(tabId, `Typing into ${args.selector}`);
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
       func: (selector, text) => {
@@ -240,6 +256,42 @@ async function executePage(args) {
         return { typed: true, selector };
       },
       args: [args.selector, args.text ?? ""]
+    });
+    return result?.result;
+  }
+
+  if (action === "press_key") {
+    if (!args.key) throw new Error("press_key requires key");
+    const [result] = await chrome.scripting.executeScript({
+      target: { tabId },
+      func: (key) => {
+        const opts = { key, bubbles: true, cancelable: true };
+        document.activeElement.dispatchEvent(new KeyboardEvent("keydown", opts));
+        document.activeElement.dispatchEvent(new KeyboardEvent("keypress", opts));
+        document.activeElement.dispatchEvent(new KeyboardEvent("keyup", opts));
+        return { pressed: key };
+      },
+      args: [args.key]
+    });
+    return result?.result;
+  }
+
+  if (action === "get_elements") {
+    const [result] = await chrome.scripting.executeScript({
+      target: { tabId },
+      func: () => {
+        const elements = Array.from(document.querySelectorAll('a, button, input, select, textarea, [role="button"], [onclick]'));
+        return elements.map(el => ({
+          tag: el.tagName.toLowerCase(),
+          text: el.textContent?.trim().slice(0, 50),
+          id: el.id,
+          class: el.className,
+          placeholder: el.placeholder,
+          type: el.type,
+          role: el.getAttribute('role'),
+          isVisible: el.offsetWidth > 0 && el.offsetHeight > 0
+        })).filter(el => el.isVisible);
+      }
     });
     return result?.result;
   }
@@ -277,9 +329,7 @@ async function evaluateWithDebugger(tabId, expression) {
     if (attached) {
       try {
         await chrome.debugger.detach(target);
-      } catch {
-        // ignore detach failures
-      }
+      } catch { }
     }
   }
 }
@@ -302,8 +352,6 @@ function tabSummary(tab) {
     windowId: tab.windowId,
     active: tab.active,
     pinned: tab.pinned,
-    audible: tab.audible,
-    muted: tab.mutedInfo?.muted,
     title: tab.title,
     url: tab.url,
     status: tab.status
@@ -315,8 +363,6 @@ async function getConsoleLogs(tabId) {
   await chrome.debugger.attach(target, "1.3");
   try {
     await chrome.debugger.sendCommand(target, "Log.enable");
-    // Bir süre beklemiyoruz, sadece mevcutları almaya çalışıyoruz (aslında Log.enable sonrası gelmeli)
-    // Ama debugger'da Runtime.getConsoleMessages daha garantidir
     const response = await chrome.debugger.sendCommand(target, "Runtime.getConsoleMessages");
     return response.messages || [];
   } finally {
@@ -324,26 +370,29 @@ async function getConsoleLogs(tabId) {
   }
 }
 
-async function injectOverlay(tabId) {
+async function injectOverlay(tabId, message = "Hodeus Controlling") {
   chrome.scripting.executeScript({
     target: { tabId },
-    func: () => {
-      if (document.getElementById("mooncli-overlay")) return;
-      const overlay = document.createElement("div");
-      overlay.id = "mooncli-overlay";
+    func: (msg) => {
+      const id = "hodeus-overlay";
+      let overlay = document.getElementById(id);
+      if (!overlay) {
+        overlay = document.createElement("div");
+        overlay.id = id;
+        document.body.appendChild(overlay);
+      }
       overlay.innerHTML = `
-        <div style="position: fixed; top: 0; left: 0; right: 0; height: 4px; background: #3b82f6; z-index: 999999; animation: pulse 2s infinite;"></div>
-        <div style="position: fixed; top: 10px; right: 10px; background: rgba(30, 41, 59, 0.9); color: white; padding: 8px 12px; border-radius: 8px; font-family: sans-serif; font-size: 12px; z-index: 999999; border: 1px solid #3b82f6; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);">
-          <span style="display: inline-block; width: 8px; height: 8px; background: #3b82f6; border-radius: 50%; margin-right: 8px;"></span>
-          Mooncli Controlling
+        <div style="position: fixed; top: 0; left: 0; right: 0; height: 4px; background: #0ea5e9; z-index: 999999; animation: hodeus-pulse 2s infinite;"></div>
+        <div style="position: fixed; top: 10px; right: 10px; background: rgba(15, 23, 42, 0.9); color: white; padding: 8px 16px; border-radius: 12px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; z-index: 999999; border: 1px solid #0ea5e9; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.2); backdrop-filter: blur(8px); display: flex; align-items: center; gap: 10px;">
+          <span style="display: inline-block; width: 10px; height: 10px; background: #0ea5e9; border-radius: 50%; box-shadow: 0 0 10px #0ea5e9;"></span>
+          ${msg}
         </div>
         <style>
-          @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+          @keyframes hodeus-pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
         </style>
       `;
-      document.body.appendChild(overlay);
-      // 10 saniye sonra kaldır
-      setTimeout(() => overlay.remove(), 10000);
-    }
+      setTimeout(() => { if (overlay) overlay.remove(); }, 5000);
+    },
+    args: [message]
   });
 }

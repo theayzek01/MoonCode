@@ -1,10 +1,10 @@
 // @ts-nocheck
 import { basename, dirname, isAbsolute, relative, resolve as resolvePath, sep } from "node:path";
-import type { Api, ImageContent, Model, TextContent } from "@mooncli/core";
-import type { EngineTool } from "@mooncli/engine";
-import { Text } from "@mooncli/tui";
 import { constants } from "fs";
 import { access as fsAccess, readFile as fsReadFile } from "fs/promises";
+import type { Api, ImageContent, Model, TextContent } from "mooncli-core";
+import type { EngineTool } from "mooncli-engine";
+import { Text } from "mooncli-tui";
 import { type Static, Type } from "typebox";
 import { getReadmePath } from "../../config.js";
 import { keyHint, keyText } from "../../modes/interactive/components/keybinding-hints.js";

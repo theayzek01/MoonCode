@@ -6,9 +6,9 @@
  * a summary of the branch being left so context isn't lost.
  */
 
-import type { Model } from "@mooncli/core";
-import { completeSimple } from "@mooncli/core";
-import type { EngineMessage } from "@mooncli/engine";
+import type { Model } from "mooncli-core";
+import { completeSimple } from "mooncli-core";
+import type { EngineMessage } from "mooncli-engine";
 import {
 	convertToLlm,
 	createBranchSummaryMessage,

@@ -4,9 +4,9 @@
  * Run with: npx tsx test/streaming-render-debug.ts
  */
 
-import type { AssistantMessage } from "@mooncli/core";
-import { ProcessTerminal, TUI } from "@mooncli/tui";
 import { readFileSync } from "fs";
+import type { AssistantMessage } from "mooncli-core";
+import { ProcessTerminal, TUI } from "mooncli-tui";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { AssistantMessageComponent } from "../src/modes/interactive/components/assistant-message.js";

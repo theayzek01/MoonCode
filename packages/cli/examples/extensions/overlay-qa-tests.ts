@@ -20,9 +20,9 @@
  */
 
 import type { ExtensionAPI, ExtensionCommandContext, Theme } from "Mooncli";
-import type { Component, OverlayAnchor, OverlayHandle, OverlayOptions, TUI } from "@mooncli/tui";
-import { matchesKey, truncateToWidth, visibleWidth } from "@mooncli/tui";
 import { spawn } from "child_process";
+import type { Component, OverlayAnchor, OverlayHandle, OverlayOptions, TUI } from "mooncli-tui";
+import { matchesKey, truncateToWidth, visibleWidth } from "mooncli-tui";
 
 // Global handle for toggle demo (in real code, use a more elegant pattern)
 let globalToggleHandle: OverlayHandle | null = null;

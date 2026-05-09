@@ -1,6 +1,7 @@
 // @ts-nocheck
-import type { EngineTool } from "@mooncli/engine";
+
 import { spawn } from "child_process";
+import type { EngineTool } from "mooncli-engine";
 import { Type } from "typebox";
 import { getShellEnv } from "../../utils/shell.js";
 import { formatSearchResults, searchProject } from "../codebase-index/index.js";

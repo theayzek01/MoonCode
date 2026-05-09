@@ -1,15 +1,14 @@
 {
-	"name": "mooncli-terminal",
-	"version": "9.05.3",
+	"name": "hodeus",
+	"version": "9.5.4",
 	"description": "Modern Terminal Assistant",
 	"type": "module",
 	"moonConfig": {
-		"name": "Moon",
-		"configDir": ".mooncli"
+		"name": "Hodeus",
+		"configDir": ".hodeus"
 	},
 	"bin": {
-		"Moon": "dist/cli.js",
-		"mooncli": "dist/cli.js"
+		"hodeus": "dist/cli.js"
 	},
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
@@ -42,9 +41,6 @@
 	},
 	"dependencies": {
 		"@mariozechner/jiti": "^2.6.2",
-		"@mooncli/core": "^9.05.3",
-		"@mooncli/engine": "^9.05.3",
-		"@mooncli/tui": "^9.05.3",
 		"@silvia-odwyer/photon-node": "^0.3.4",
 		"chalk": "^5.5.0",
 		"cli-highlight": "^2.1.11",
@@ -62,7 +58,10 @@
 		"typebox": "^1.1.24",
 		"undici": "^7.25.0",
 		"uuid": "^14.0.0",
-		"yaml": "^2.8.2"
+		"yaml": "^2.8.2",
+		"hodeus-core": "^9.5.4",
+		"hodeus-engine": "^9.5.4",
+		"hodeus-tui": "^9.5.4"
 	},
 	"overrides": {
 		"rimraf": "6.1.2",

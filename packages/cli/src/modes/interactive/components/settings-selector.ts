@@ -1,6 +1,6 @@
 // @ts-nocheck
-import type { Transport } from "@mooncli/core";
-import type { ThinkingLevel } from "@mooncli/engine";
+import type { Transport } from "mooncli-core";
+import type { ThinkingLevel } from "mooncli-engine";
 import {
 	Container,
 	getCapabilities,
@@ -11,7 +11,7 @@ import {
 	SettingsList,
 	Spacer,
 	Text,
-} from "@mooncli/tui";
+} from "mooncli-tui";
 import type { WarningSettings } from "../../../core/settings-manager.js";
 import { getSelectListTheme, getSettingsListTheme, theme } from "../theme/theme.js";
 import { DynamicBorder } from "./dynamic-border.js";

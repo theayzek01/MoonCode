@@ -5,9 +5,9 @@
 import { chmodSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { getModel, type OAuthCredentials, type OAuthProvider } from "@mooncli/core";
-import { getOAuthApiKey } from "@mooncli/core/oauth";
-import { Engine } from "@mooncli/engine";
+import { getModel, type OAuthCredentials, type OAuthProvider } from "mooncli-core";
+import { getOAuthApiKey } from "mooncli-core/oauth";
+import { Engine } from "mooncli-engine";
 import { AuthStorage } from "../src/core/auth-storage.js";
 import { EngineSession } from "../src/core/engine-session.js";
 import { createEventBus } from "../src/core/event-bus.js";
