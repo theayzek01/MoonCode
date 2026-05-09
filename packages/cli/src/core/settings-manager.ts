@@ -5,6 +5,14 @@ import { homedir } from "os";
 import { dirname, join } from "path";
 import lockfile from "proper-lockfile";
 import { CONFIG_DIR_NAME, getEngineDir } from "../config.js";
+import {
+	type AffectiveMode,
+	type AffectiveSettings,
+	type AffectiveState,
+	createInitialAffectiveState,
+	type NormalizedAffectiveSettings,
+	normalizeAffectiveSettings,
+} from "./affect.js";
 import type { CodingAgentMode, CodingAgentsSettings, CodingAgentVerbosity } from "./agents.js";
 
 export interface CompactionSettings {
@@ -133,6 +141,7 @@ export interface Settings {
 	sessionDir?: string; // Custom session storage directory (same format as --session-dir CLI flag)
 	mcpServers?: Record<string, McpServerConfig>; // MCP server configurations
 	agents?: CodingAgentSettings; // Company-style coding agent orchestration
+	affect?: AffectiveSettings; // Persistent affective control layer
 	robotics?: RoboticsSettings; // Robotics mode configuration
 	discordToken?: string; // Discord Bot Token
 }
@@ -1097,6 +1106,46 @@ export class SettingsManager {
 	setWarnings(warnings: WarningSettings): void {
 		this.globalSettings.warnings = { ...warnings };
 		this.markModified("warnings");
+		this.save();
+	}
+
+	// =========================================================================
+	// Affective State Settings
+	// =========================================================================
+
+	getAffectiveSettings(): NormalizedAffectiveSettings {
+		return normalizeAffectiveSettings(this.settings.affect);
+	}
+
+	setAffectiveEnabled(enabled: boolean): void {
+		if (!this.globalSettings.affect) this.globalSettings.affect = {};
+		this.globalSettings.affect.enabled = enabled;
+		if (!this.globalSettings.affect.state) {
+			this.globalSettings.affect.state = this.getAffectiveSettings().state;
+		}
+		this.markModified("affect", "enabled");
+		this.markModified("affect", "state");
+		this.save();
+	}
+
+	setAffectiveMode(mode: AffectiveMode): void {
+		if (!this.globalSettings.affect) this.globalSettings.affect = {};
+		this.globalSettings.affect.mode = mode;
+		this.markModified("affect", "mode");
+		this.save();
+	}
+
+	setAffectiveState(state: AffectiveState): void {
+		if (!this.globalSettings.affect) this.globalSettings.affect = {};
+		this.globalSettings.affect.state = { ...state };
+		this.markModified("affect", "state");
+		this.save();
+	}
+
+	resetAffectiveState(): void {
+		if (!this.globalSettings.affect) this.globalSettings.affect = {};
+		this.globalSettings.affect.state = createInitialAffectiveState();
+		this.markModified("affect", "state");
 		this.save();
 	}
 

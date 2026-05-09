@@ -48,6 +48,8 @@ export const BUILTIN_SLASH_COMMANDS: ReadonlyArray<BuiltinSlashCommand> = [
 	{ name: "agentmode", description: "Agent sistemini tek komutla ac/kapat: /agentmode on|off" },
 	{ name: "agents", description: "Agent sistemi - sirket gibi kodlama orkestrasyonu" },
 	{ name: "workspace", description: "Agent sirket ortamını ve departmanlari goster" },
+	{ name: "mood", description: "Affective state layer: status/explain/on/off/reset/mode" },
+	{ name: "browser", description: "Chrome extension bridge durumunu ve kurulum yolunu goster" },
 	{ name: "robotics", description: "Robotics mode - goruntu analizi, nesne tespiti, yorunge planlama" },
 	{ name: "discord", description: "Discord entegrasyonu ve bot yonetimi" },
 	{ name: "update", description: "Mooncli ve uzantilari hizlica guncelle" },

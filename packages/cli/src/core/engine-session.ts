@@ -28,9 +28,20 @@ import type { Engine, EngineEvent, EngineMessage, EngineState, EngineTool, Think
 import { theme } from "../modes/interactive/theme/theme.js";
 import { stripFrontmatter } from "../utils/frontmatter.js";
 import { sleep } from "../utils/sleep.js";
+import {
+	type AffectiveMode,
+	appraiseAssistantOutcome,
+	appraiseUserInput,
+	buildAffectiveSystemPrompt,
+	inferAssistantAffectiveOutcome,
+	type NormalizedAffectiveSettings,
+	renderAffectiveExplanation,
+	renderAffectiveStatus,
+} from "./affect.js";
 import type { CodingAgentMode, CodingAgentVerbosity } from "./agents.js";
 import { formatNoApiKeyFoundMessage, formatNoModelSelectedMessage } from "./auth-guidance.js";
 import { type BashResult, executeBashWithOperations } from "./bash-executor.js";
+import { getBrowserBridgeStatus, startBrowserBridgeServer } from "./browser-bridge-server.js";
 import {
 	type CompactionResult,
 	calculateContextTokens,
@@ -337,6 +348,7 @@ export class EngineSession {
 		this._baseToolsOverride = config.baseToolsOverride;
 		this._sessionStartEvent = config.sessionStartEvent ?? { type: "session_start", reason: "startup" };
 		this._mcpManager = config.mcpManager;
+		startBrowserBridgeServer();
 
 		// Always subscribe to engine events for internal handling
 		// (session persistence, extensions, auto-compaction, retry logic)
@@ -568,6 +580,8 @@ export class EngineSession {
 				if (assistantMsg.stopReason !== "error") {
 					this._overflowRecoveryAttempted = false;
 				}
+
+				this._recordAffectiveAssistantOutcome(assistantMsg);
 
 				// Reset retry counter immediately on successful assistant response
 				// This prevents accumulation across multiple Provider calls within a turn
@@ -811,6 +825,10 @@ export class EngineSession {
 		return this.engine.state.tools.map((t) => t.name);
 	}
 
+	getBrowserBridgeStatus() {
+		return getBrowserBridgeStatus();
+	}
+
 	/**
 	 * Get all configured tools with name, description, parameter schema, and source metadata.
 	 */
@@ -952,6 +970,7 @@ export class EngineSession {
 		const loadedContextFiles = this._resourceLoader.getEnginesFiles().enginesFiles;
 
 		const agents = this.settingsManager.getAgentsSettings();
+		const affectivePrompt = buildAffectiveSystemPrompt(this.settingsManager.getAffectiveSettings());
 
 		// Robotics settings inject
 		const roboticsEnabled = this.settingsManager.getRoboticsEnabled();
@@ -983,6 +1002,7 @@ export class EngineSession {
 			toolSnippets,
 			promptGuidelines,
 			agents,
+			affectivePrompt,
 			roboticsEnabled,
 			roboticsFunctions,
 			compactMode: isLocalModel,
@@ -1096,6 +1116,57 @@ export class EngineSession {
 	}
 
 	// =========================================================================
+	// Affective State Layer
+	// =========================================================================
+
+	getAffectiveSettings(): NormalizedAffectiveSettings {
+		return this.settingsManager.getAffectiveSettings();
+	}
+
+	getAffectiveStatus(): string {
+		return renderAffectiveStatus(this.settingsManager.getAffectiveSettings());
+	}
+
+	getAffectiveExplanation(): string {
+		return renderAffectiveExplanation(this.settingsManager.getAffectiveSettings());
+	}
+
+	enableAffectiveMode(): void {
+		this.settingsManager.setAffectiveEnabled(true);
+		this._refreshBaseSystemPrompt();
+	}
+
+	disableAffectiveMode(): void {
+		this.settingsManager.setAffectiveEnabled(false);
+		this._refreshBaseSystemPrompt();
+	}
+
+	setAffectiveMode(mode: AffectiveMode): void {
+		this.settingsManager.setAffectiveMode(mode);
+		this._refreshBaseSystemPrompt();
+	}
+
+	resetAffectiveState(): void {
+		this.settingsManager.resetAffectiveState();
+		this._refreshBaseSystemPrompt();
+	}
+
+	private _recordAffectiveUserInput(text: string): void {
+		const settings = this.settingsManager.getAffectiveSettings();
+		if (!settings.enabled) return;
+		this.settingsManager.setAffectiveState(appraiseUserInput(settings.state, text));
+		this._refreshBaseSystemPrompt();
+	}
+
+	private _recordAffectiveAssistantOutcome(message: AssistantMessage): void {
+		const settings = this.settingsManager.getAffectiveSettings();
+		if (!settings.enabled) return;
+		const outcome = inferAssistantAffectiveOutcome(message);
+		this.settingsManager.setAffectiveState(appraiseAssistantOutcome(settings.state, outcome));
+		this._refreshBaseSystemPrompt();
+	}
+
+	// =========================================================================
 	// Prompting
 	// =========================================================================
 
@@ -1197,6 +1268,8 @@ export class EngineSession {
 			if (lastAssistant) {
 				await this._checkCompaction(lastAssistant, false);
 			}
+
+			this._recordAffectiveUserInput(expandedText);
 
 			// Build messages array (custom message if any, then user message)
 			messages = [];
@@ -2545,6 +2618,8 @@ export class EngineSession {
 					"write",
 					"web_search",
 					"git_ship",
+					"browser_tabs",
+					"browser_page",
 					...(discordToken
 						? ["discord_list_guilds", "discord_get_channels", "discord_send_message", "discord_manage_channel"]
 						: []),

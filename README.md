@@ -74,6 +74,8 @@ You can also log in interactively inside the terminal with `/login`.
 
 **Extensions** — Extend the runtime with custom tools, commands, themes, and slash commands.
 
+**Chrome browser bridge** — Load the bundled Chrome extension from `packages/cli/browser-extension/chrome`, then use `/browser` to verify the local bridge. The assistant can use `browser_tabs` and `browser_page` to inspect tabs, navigate, read pages, click, type, screenshot, and evaluate JavaScript through Chrome's debugger permission.
+
 **Themes** — Built-in themes: `moon`, `neon`, `brutal`, and more. Switch with `--theme`.
 
 ---
@@ -87,6 +89,8 @@ You can also log in interactively inside the terminal with `/login`.
 /compact         compress context manually
 /agentmode on    enable company-style agents
 /workspace       show agent workspace
+/mood            inspect/toggle affective state layer (`/mood explain` for journal)
+/browser         show Chrome extension bridge status
 /init            create MOON.md for this project
 /fork            branch session from a previous message
 /export          export session as HTML or JSONL

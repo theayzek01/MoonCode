@@ -1,6 +1,6 @@
 {
 	"name": "@mooncli/web-ui",
-	"version": "8.05.2026",
+	"version": "9.05.2026",
 	"type": "module",
 	"private": true,
 	"main": "src/server.ts",

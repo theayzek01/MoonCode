@@ -11,6 +11,15 @@ export {
 	createLocalBashOperations,
 } from "./bash.js";
 export {
+	type BrowserPageToolInput,
+	type BrowserTabsToolInput,
+	type BrowserToolDetails,
+	createBrowserPageTool,
+	createBrowserPageToolDefinition,
+	createBrowserTabsTool,
+	createBrowserTabsToolDefinition,
+} from "./browser.js";
+export {
 	createDiscordGetChannelsTool,
 	createDiscordListGuildsTool,
 	createDiscordManageChannelTool,
@@ -92,6 +101,12 @@ import type { EngineTool } from "@mooncli/engine";
 import type { ToolDefinition } from "../extensions/types.js";
 import { type BashToolOptions, createBashTool, createBashToolDefinition } from "./bash.js";
 import {
+	createBrowserPageTool,
+	createBrowserPageToolDefinition,
+	createBrowserTabsTool,
+	createBrowserTabsToolDefinition,
+} from "./browser.js";
+import {
 	createDiscordGetChannelsTool,
 	createDiscordListGuildsTool,
 	createDiscordManageChannelTool,
@@ -122,6 +137,8 @@ export type ToolName =
 	| "web_search"
 	| "semantic_search"
 	| "git_ship"
+	| "browser_tabs"
+	| "browser_page"
 	| "discord_list_guilds"
 	| "discord_get_channels"
 	| "discord_send_message"
@@ -137,6 +154,8 @@ export const allToolNames: Set<ToolName> = new Set([
 	"web_search",
 	"semantic_search",
 	"git_ship",
+	"browser_tabs",
+	"browser_page",
 	"discord_list_guilds",
 	"discord_get_channels",
 	"discord_send_message",
@@ -176,6 +195,10 @@ export function createToolDefinition(toolName: ToolName, cwd: string, options?: 
 			return createSemanticSearchToolDefinition(cwd);
 		case "git_ship":
 			return createGitShipToolDefinition(cwd);
+		case "browser_tabs":
+			return createBrowserTabsToolDefinition();
+		case "browser_page":
+			return createBrowserPageToolDefinition();
 		case "discord_list_guilds":
 		case "discord_get_channels":
 		case "discord_send_message":
@@ -208,6 +231,10 @@ export function createTool(toolName: ToolName, cwd: string, options?: ToolsOptio
 			return createSemanticSearchTool(cwd);
 		case "git_ship":
 			return createGitShipTool(cwd);
+		case "browser_tabs":
+			return createBrowserTabsTool();
+		case "browser_page":
+			return createBrowserPageTool();
 		case "discord_list_guilds":
 			return createDiscordListGuildsTool(options?.discord);
 		case "discord_get_channels":
@@ -253,6 +280,8 @@ export function createAllToolDefinitions(cwd: string, options?: ToolsOptions): R
 		web_search: createWebSearchToolDefinition(),
 		semantic_search: createSemanticSearchToolDefinition(cwd),
 		git_ship: createGitShipToolDefinition(cwd),
+		browser_tabs: createBrowserTabsToolDefinition(),
+		browser_page: createBrowserPageToolDefinition(),
 		...Object.fromEntries(createDiscordToolDefinitions(options?.discord).map((tool) => [tool.name, tool])),
 	};
 }
@@ -289,6 +318,8 @@ export function createAllTools(cwd: string, options?: ToolsOptions): Record<Tool
 		web_search: createWebSearchTool(),
 		semantic_search: createSemanticSearchTool(cwd),
 		git_ship: createGitShipTool(cwd),
+		browser_tabs: createBrowserTabsTool(),
+		browser_page: createBrowserPageTool(),
 		discord_list_guilds: createDiscordListGuildsTool(options?.discord),
 		discord_get_channels: createDiscordGetChannelsTool(options?.discord),
 		discord_send_message: createDiscordSendMessageTool(options?.discord),

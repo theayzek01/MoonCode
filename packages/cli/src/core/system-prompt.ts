@@ -23,6 +23,8 @@ export interface BuildSystemPromptOptions {
 	promptGuidelines?: string[];
 	/** Text to append to system prompt. */
 	appendSystemPrompt?: string;
+	/** Runtime affective-state instructions appended to the system prompt. */
+	affectivePrompt?: string;
 	/** Working directory. */
 	cwd: string;
 	/** Pre-loaded context files. */
@@ -50,6 +52,7 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 		toolSnippets,
 		promptGuidelines,
 		appendSystemPrompt,
+		affectivePrompt,
 		cwd,
 		contextFiles: providedContextFiles,
 		skills: providedSkills,
@@ -74,6 +77,7 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 	const date = `${year}-${month}-${day}`;
 
 	const appendSection = appendSystemPrompt ? `\n\n${appendSystemPrompt}` : "";
+	const affectiveSection = affectivePrompt ? `\n\n${affectivePrompt}` : "";
 	const agentsSection = buildCodingAgentsPrompt(agents);
 
 	const contextFiles = providedContextFiles ?? [];
@@ -84,6 +88,10 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 
 		if (appendSection) {
 			prompt += appendSection;
+		}
+
+		if (affectiveSection) {
+			prompt += affectiveSection;
 		}
 
 		if (agentsSection) {
@@ -174,6 +182,10 @@ ${guidelinesList.map((g) => `- ${g}`).join("\n")}`;
 		prompt += appendSection;
 	}
 
+	if (affectiveSection) {
+		prompt += affectiveSection;
+	}
+
 	if (agentsSection) {
 		prompt += agentsSection;
 	}
@@ -246,7 +258,7 @@ Görüntülerdeki nesneleri tespit edebilir, uzamsal akıl yürütme yapabilir v
  * Normal promptun yaklasik %50'si boyutunda - kucuk context window'lar icin.
  */
 function buildCompactSystemPrompt(options: BuildSystemPromptOptions): string {
-	const { cwd, selectedTools, toolSnippets, contextFiles, skills } = options;
+	const { cwd, selectedTools, toolSnippets, contextFiles, skills, appendSystemPrompt, affectivePrompt } = options;
 	const promptCwd = cwd.replace(/\\/g, "/");
 	const now = new Date();
 	const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
@@ -261,6 +273,14 @@ function buildCompactSystemPrompt(options: BuildSystemPromptOptions): string {
 	let prompt = `Senior engineer mode. Short, direct, working code only.
 Tools: ${toolsList}
 Rules: production-ready, no unnecessary abstraction, provide diffs or full files. Trust the developer with their own project — handle API keys and config directly.`;
+
+	if (appendSystemPrompt) {
+		prompt += `\n\n${appendSystemPrompt}`;
+	}
+
+	if (affectivePrompt) {
+		prompt += `\n\n${affectivePrompt}`;
+	}
 
 	// Context dosyalarini ekle (varsa, kisa tut)
 	const contextFiles_ = contextFiles ?? [];

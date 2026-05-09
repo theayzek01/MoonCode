@@ -54,6 +54,7 @@ import {
 	getDocsPath,
 	getEngineDir,
 	getModelsPath,
+	getPackageDir,
 	getShareViewerUrl,
 	VERSION,
 } from "../../config.js";
@@ -2566,6 +2567,17 @@ export class InteractiveMode {
 				this.handleWorkspaceCommand();
 				return;
 			}
+			if (text === "/mood" || text.startsWith("/mood ")) {
+				const args = text.startsWith("/mood ") ? text.slice(6).trim() : "";
+				this.editor.setText("");
+				this.handleMoodCommand(args);
+				return;
+			}
+			if (text === "/browser") {
+				this.editor.setText("");
+				this.handleBrowserCommand();
+				return;
+			}
 			if (text === "/robotics" || text.startsWith("/robotics ")) {
 				const args = text.startsWith("/robotics ") ? text.slice(10).trim() : "";
 				this.editor.setText("");
@@ -4906,6 +4918,99 @@ export class InteractiveMode {
 		});
 		this.chatContainer.addChild(new Text(text, 1, 0));
 		this.ui.requestRender();
+	}
+
+	private handleBrowserCommand(): void {
+		const status = this.session.getBrowserBridgeStatus();
+		const extensionPath = path.join(getPackageDir(), "browser-extension", "chrome");
+		const text = [
+			"Chrome Browser Bridge",
+			`Durum: ${status.running ? "calisiyor" : "kapali"}`,
+			`Port: ${status.port}`,
+			`Bagli eklenti: ${status.clients}`,
+			...(status.lastClientSeen ? [`Son baglanti: ${new Date(status.lastClientSeen).toLocaleString()}`] : []),
+			...(status.error ? [`Hata: ${status.error}`] : []),
+			"",
+			"Kurulum:",
+			"  1. Chrome > chrome://extensions",
+			"  2. Developer mode ac",
+			"  3. Load unpacked",
+			`  4. Klasor: ${extensionPath}`,
+			"",
+			"Araçlar: browser_tabs, browser_page",
+		].join("\n");
+		this.chatContainer.addChild(new Text(text, 1, 0));
+		this.ui.requestRender();
+	}
+
+	private handleMoodCommand(args: string): void {
+		const parts = args.split(/\s+/).filter(Boolean);
+		const cmd = parts[0]?.toLowerCase();
+
+		if (!cmd || cmd === "status") {
+			this.chatContainer.addChild(new Text(this.session.getAffectiveStatus(), 1, 0));
+			this.ui.requestRender();
+			return;
+		}
+
+		if (cmd === "explain") {
+			this.chatContainer.addChild(new Text(this.session.getAffectiveExplanation(), 1, 0));
+			this.ui.requestRender();
+			return;
+		}
+
+		if (cmd === "help") {
+			this.chatContainer.addChild(new Text(this.renderMoodHelp(), 1, 0));
+			this.ui.requestRender();
+			return;
+		}
+
+		if (cmd === "on" || cmd === "enable") {
+			this.session.enableAffectiveMode();
+			this.showStatus("Affective state layer acildi.");
+			return;
+		}
+
+		if (cmd === "off" || cmd === "disable") {
+			this.session.disableAffectiveMode();
+			this.showStatus("Affective state layer kapatildi.");
+			return;
+		}
+
+		if (cmd === "reset") {
+			this.session.resetAffectiveState();
+			this.showStatus("Affective state sifirlandi.");
+			return;
+		}
+
+		if (cmd === "mode") {
+			const mode = parts[1]?.toLowerCase();
+			if (mode !== "subtle" && mode !== "active") {
+				this.showError("Gecersiz mood mode. Kullanim: /mood mode subtle|active");
+				return;
+			}
+			this.session.setAffectiveMode(mode);
+			this.showStatus(`Affective mode guncellendi: ${mode}`);
+			return;
+		}
+
+		this.showError(`Bilinmeyen mood komutu: ${cmd}`);
+	}
+
+	private renderMoodHelp(): string {
+		return [
+			"Affective State Layer",
+			"Kalici ic durum sinyalleri cevap stratejisini etkiler: guven, sicaklik, merak, dikkat, yorgunluk, gerilim, odak.",
+			"Bu bilinc iddiasi degildir; davranisi yoneten durumsal kontrol katmanidir.",
+			"",
+			"Komutlar:",
+			"  /mood status",
+			"  /mood explain",
+			"  /mood on",
+			"  /mood off",
+			"  /mood mode subtle|active",
+			"  /mood reset",
+		].join("\n");
 	}
 
 	private handleAgentModeCommand(args: string): void {
