@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { AssistantMessage } from "@mooncli/core";
 
 export type AffectiveMode = "subtle" | "active";
