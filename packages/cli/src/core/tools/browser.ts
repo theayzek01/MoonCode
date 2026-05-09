@@ -29,12 +29,21 @@ const browserPageSchema = Type.Object({
 		Type.Literal("type"),
 		Type.Literal("screenshot"),
 		Type.Literal("evaluate"),
+		Type.Literal("scroll"),
+		Type.Literal("console_logs"),
+		Type.Literal("read_dom"),
 	]),
 	tabId: Type.Optional(Type.Number({ description: "Chrome tab id. Defaults to active tab." })),
 	selector: Type.Optional(Type.String({ description: "CSS selector for click/type actions" })),
 	text: Type.Optional(Type.String({ description: "Text for type action" })),
 	script: Type.Optional(Type.String({ description: "JavaScript expression for evaluate action via Chrome debugger" })),
 	maxChars: Type.Optional(Type.Number({ description: "Maximum text characters for read action" })),
+	direction: Type.Optional(
+		Type.Union([Type.Literal("up"), Type.Literal("down"), Type.Literal("top"), Type.Literal("bottom")], {
+			description: "Direction for scroll action",
+		}),
+	),
+	amount: Type.Optional(Type.Number({ description: "Pixels to scroll for up/down actions" })),
 });
 
 export type BrowserTabsToolInput = Static<typeof browserTabsSchema>;
@@ -98,10 +107,13 @@ export function createBrowserPageToolDefinition(): ToolDefinition<typeof browser
 		name: "browser_page",
 		label: "browser_page",
 		description:
-			"Read or operate the current Chrome page through the Mooncli Chrome extension. Actions: read, click, type, screenshot, evaluate.",
+			"Read or operate the current Chrome page through the Mooncli Chrome extension. Actions: read, click, type, screenshot, evaluate, scroll, console_logs, read_dom.",
 		promptSnippet: "Read or operate the connected Chrome page",
 		promptGuidelines: [
 			"Use browser_page read to get page title, URL, selection, and visible text.",
+			"Use browser_page read_dom for a structured text representation of the page elements.",
+			"Use browser_page scroll to navigate through long pages.",
+			"Use browser_page console_logs to debug JavaScript errors or see page logs.",
 			"For browser_page evaluate, prefer short JavaScript expressions and return serializable data.",
 		],
 		parameters: browserPageSchema,

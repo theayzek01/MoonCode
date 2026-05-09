@@ -49,7 +49,7 @@ export class MooncliHeaderComponent extends Text {
 		const title = `${theme.bold("Mooncli")} ${theme.fg("dim", `v${this.options.version}`)}`;
 		const subtitle = theme.fg("muted", "minimal agentic workspace");
 		const quick = [
-			hint("/model", "model seç"),
+			hint("/models", "model seç"),
 			hint("/index", "projeyi tara"),
 			hint("/browser", "Chrome bridge"),
 			hint("/diff", "değişiklikleri gör"),

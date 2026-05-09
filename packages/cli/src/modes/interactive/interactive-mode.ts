@@ -2463,10 +2463,10 @@ export class InteractiveMode {
 				await this.showModelsSelector();
 				return;
 			}
-			if (text === "/model" || text.startsWith("/model ")) {
-				const searchTerm = text.startsWith("/model ") ? text.slice(7).trim() : undefined;
+			if (text === "/models" || text.startsWith("/models ")) {
+				const searchTerm = text.startsWith("/models ") ? text.slice(8).trim() : undefined;
 				this.editor.setText("");
-				await this.handleModelCommand(searchTerm);
+				await this.handleModelsCommand(searchTerm);
 				return;
 			}
 			if (text === "/export" || text.startsWith("/export ")) {
@@ -4065,9 +4065,9 @@ export class InteractiveMode {
 		});
 	}
 
-	private async handleModelCommand(searchTerm?: string): Promise<void> {
+	private async handleModelsCommand(searchTerm?: string): Promise<void> {
 		if (!searchTerm) {
-			this.showModelSelector();
+			this.showSingleModelSelector();
 			return;
 		}
 
@@ -4086,7 +4086,7 @@ export class InteractiveMode {
 			return;
 		}
 
-		this.showModelSelector(searchTerm);
+		this.showSingleModelSelector(searchTerm);
 	}
 
 	private async findExactModelMatch(searchTerm: string): Promise<Model<any> | undefined> {
@@ -4146,7 +4146,7 @@ export class InteractiveMode {
 		}
 	}
 
-	private showModelSelector(initialSearchInput?: string): void {
+	private showSingleModelSelector(initialSearchInput?: string): void {
 		this.showSelector((done) => {
 			const selector = new ModelSelectorComponent(
 				this.ui,
@@ -4695,21 +4695,21 @@ export class InteractiveMode {
 			const availableModels = this.session.modelRegistry.getAvailable();
 			const providerModels = availableModels.filter((model) => model.provider === providerId);
 			if (!hasDefaultModelProvider(providerId)) {
-				selectionError = `${actionLabel}, ancak "${providerId}" sağlayıcısı için varsayılan model yapılandırılmamış. Model seçmek için /model komutunu kullanın.`;
+				selectionError = `${actionLabel}, ancak "${providerId}" sağlayıcısı için varsayılan model yapılandırılmamış. Model seçmek için /models komutunu kullanın.`;
 			} else if (providerModels.length === 0) {
-				selectionError = `${actionLabel}, ancak bu sağlayıcı için kullanılabilir model yok. Model seçmek için /model komutunu kullanın.`;
+				selectionError = `${actionLabel}, ancak bu sağlayıcı için kullanılabilir model yok. Model seçmek için /models komutunu kullanın.`;
 			} else {
 				const defaultModelId = defaultModelPerProvider[providerId];
 				selectedModel = providerModels.find((model) => model.id === defaultModelId);
 				if (!selectedModel) {
-					selectionError = `${actionLabel}, ancak varsayılan model "${defaultModelId}" mevcut değil. Model seçmek için /model komutunu kullanın.`;
+					selectionError = `${actionLabel}, ancak varsayılan model "${defaultModelId}" mevcut değil. Model seçmek için /models komutunu kullanın.`;
 				} else {
 					try {
 						await this.session.setModel(selectedModel);
 					} catch (error: unknown) {
 						selectedModel = undefined;
 						const errorMessage = error instanceof Error ? error.message : String(error);
-						selectionError = `${actionLabel}, ancak varsayılan model seçimi başarısız oldu: ${errorMessage}. Model seçmek için /model komutunu kullanın.`;
+						selectionError = `${actionLabel}, ancak varsayılan model seçimi başarısız oldu: ${errorMessage}. Model seçmek için /models komutunu kullanın.`;
 					}
 				}
 			}

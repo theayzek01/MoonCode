@@ -70,7 +70,7 @@ function sendHello() {
     type: "hello",
     extensionId: chrome.runtime.id,
     version: VERSION,
-    capabilities: ["tabs", "page", "debugger", "screenshot"]
+    capabilities: ["tabs", "page", "debugger", "screenshot", "scroll", "console_logs", "read_dom"]
   });
 }
 
@@ -140,7 +140,57 @@ async function executePage(args) {
   const tabId = tab.id;
   if (tabId === undefined) throw new Error("No target tab id");
 
+    return result?.result;
+  }
+  
+  if (action === "scroll") {
+    const [result] = await chrome.scripting.executeScript({
+      target: { tabId },
+      func: (direction, amount) => {
+        const val = amount || 500;
+        if (direction === "up") window.scrollBy(0, -val);
+        else if (direction === "down") window.scrollBy(0, val);
+        else if (direction === "top") window.scrollTo(0, 0);
+        else if (direction === "bottom") window.scrollTo(0, document.body.scrollHeight);
+        return { scrolled: true, direction, position: window.scrollY };
+      },
+      args: [args.direction || "down", args.amount]
+    });
+    return result?.result;
+  }
+
+  if (action === "console_logs") {
+    return getConsoleLogs(tabId);
+  }
+
+  if (action === "read_dom") {
+    const [result] = await chrome.scripting.executeScript({
+      target: { tabId },
+      func: () => {
+        // Basit bir markdown benzeri çıktı oluştur
+        const walk = (node) => {
+          if (node.nodeType === 3) return node.textContent.trim();
+          if (node.nodeType !== 1) return "";
+          let children = Array.from(node.childNodes).map(walk).join(" ");
+          const tag = node.tagName.toLowerCase();
+          if (["h1", "h2", "h3"].includes(tag)) return `\n# ${children}\n`;
+          if (tag === "a") return `[${children}](${node.href})`;
+          if (tag === "button") return `[BUTTON: ${children}]`;
+          if (tag === "input") return `[INPUT: ${node.type} ${node.placeholder || ""}]`;
+          return children;
+        };
+        return {
+          url: location.href,
+          content: walk(document.body).replace(/\s+/g, " ").slice(0, 15000)
+        };
+      }
+    });
+    return result?.result;
+  }
+
   if (action === "read") {
+    // Mevcut read koduna ek olarak overlay inject et (her okumada kontrol bizde olduğunu gösterelim)
+    injectOverlay(tabId);
     const maxChars = Number.isFinite(args.maxChars) ? Number(args.maxChars) : 12000;
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
@@ -258,4 +308,42 @@ function tabSummary(tab) {
     url: tab.url,
     status: tab.status
   };
+}
+
+async function getConsoleLogs(tabId) {
+  const target = { tabId };
+  await chrome.debugger.attach(target, "1.3");
+  try {
+    await chrome.debugger.sendCommand(target, "Log.enable");
+    // Bir süre beklemiyoruz, sadece mevcutları almaya çalışıyoruz (aslında Log.enable sonrası gelmeli)
+    // Ama debugger'da Runtime.getConsoleMessages daha garantidir
+    const response = await chrome.debugger.sendCommand(target, "Runtime.getConsoleMessages");
+    return response.messages || [];
+  } finally {
+    await chrome.debugger.detach(target);
+  }
+}
+
+async function injectOverlay(tabId) {
+  chrome.scripting.executeScript({
+    target: { tabId },
+    func: () => {
+      if (document.getElementById("mooncli-overlay")) return;
+      const overlay = document.createElement("div");
+      overlay.id = "mooncli-overlay";
+      overlay.innerHTML = `
+        <div style="position: fixed; top: 0; left: 0; right: 0; height: 4px; background: #3b82f6; z-index: 999999; animation: pulse 2s infinite;"></div>
+        <div style="position: fixed; top: 10px; right: 10px; background: rgba(30, 41, 59, 0.9); color: white; padding: 8px 12px; border-radius: 8px; font-family: sans-serif; font-size: 12px; z-index: 999999; border: 1px solid #3b82f6; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);">
+          <span style="display: inline-block; width: 8px; height: 8px; background: #3b82f6; border-radius: 50%; margin-right: 8px;"></span>
+          Mooncli Controlling
+        </div>
+        <style>
+          @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        </style>
+      `;
+      document.body.appendChild(overlay);
+      // 10 saniye sonra kaldır
+      setTimeout(() => overlay.remove(), 10000);
+    }
+  });
 }
