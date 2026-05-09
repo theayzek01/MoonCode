@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="Moon-cli-banner.png" alt="Mooncli Banner" width="100%" />
+  <img src="assets/Moon-cli-banner.png" alt="Mooncli Banner" width="100%" />
 
   <br />
 
