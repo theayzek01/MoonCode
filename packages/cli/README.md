@@ -26,7 +26,7 @@ This package contains the command-line interface (CLI) for Mooncli. It provides 
 ## 📦 Installation
 
 ```bash
-npm install -g mooncli
+npm install -g mooncli-terminal
 ```
 
 ## 📖 Usage

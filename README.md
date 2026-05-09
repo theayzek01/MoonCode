@@ -44,7 +44,7 @@ Get up and running in seconds.
 
 ```bash
 # Install globally via npm
-npm install -g mooncli
+npm install -g mooncli-terminal
 
 # Launch the interactive workspace
 mooncli
