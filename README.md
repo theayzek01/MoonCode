@@ -1,145 +1,122 @@
 <div align="center">
+  <img src="Moon-cli-banner.png" alt="Mooncli Banner" width="100%" />
 
-<img src="Moon-cli-banner.png" alt="Mooncli Banner" width="100%" />
-<br />
-<img src="Moon-cli-logo.png" alt="Mooncli Logo" width="140" />
+  <br />
 
-# Mooncli
+  [![npm](https://img.shields.io/npm/v/mooncli?style=for-the-badge&color=0ea5e9&labelColor=1e293b)](https://www.npmjs.com/package/mooncli)
+  [![License: MIT](https://img.shields.io/badge/license-MIT-22c55e?style=for-the-badge&labelColor=1e293b)](LICENSE)
+  [![Discord](https://img.shields.io/badge/discord-community-5865F2?style=for-the-badge&logo=discord&logoColor=white&labelColor=1e293b)](https://discord.com/invite/3cU7Bz4UPx)
 
-**An agentic coding assistant that lives in your terminal.**
+  ### **Mooncli**
+  *An agentic coding assistant that lives in your terminal.*
 
-Multi-provider · Multi-model · MCP-ready · Local-first · Open source
-
-[![npm](https://img.shields.io/npm/v/mooncli?style=flat-square&color=0ea5e9&label=npm)](https://www.npmjs.com/package/mooncli)
-[![License: MIT](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)](LICENSE)
-[![Discord](https://img.shields.io/badge/discord-community-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.com/invite/3cU7Bz4UPx)
+  **Multi-provider · Multi-model · MCP-ready · Local-first · Open source**
 
 </div>
 
 ---
 
-## What it does
+## ⚡ What is Mooncli?
 
-Mooncli is a terminal-based coding agent. You ask it to build features, fix bugs, or refactor code — it reads your files, reasons about the codebase, makes changes, and runs commands. All inside your terminal, without leaving the keyboard.
+Mooncli is a high-performance, terminal-based coding agent designed for developers who prefer staying in their flow. Unlike browser-based LLM chats, Mooncli treats your codebase as the source of truth—reading files, reasoning about architecture, and executing changes directly.
 
-It connects to over 20 AI providers (cloud and local) and treats your project as the source of truth, not a conversation in a browser tab.
+- **🚀 Keyboard-Centric:** No more context-switching to browser tabs.
+- **🧠 Agentic Intelligence:** Sophisticated orchestration for complex multi-file tasks.
+- **🔒 Local-First:** Full privacy with Ollama and local model support.
+- **🛠️ Extensible:** Custom tools, skills, and themes to match your workflow.
 
 ---
 
-## Providers supported
+## 🏗️ Supported Providers
+
+Mooncli bridges the gap between cloud power and local privacy.
 
 | Category | Providers |
-|---|---|
-| Cloud | Anthropic, OpenAI, Google Gemini, DeepSeek, Mistral, xAI, Groq, Cerebras, ZAI, MiniMax, Kimi, Fireworks, HuggingFace, OpenRouter, Vercel AI Gateway, Amazon Bedrock, Azure OpenAI, GitHub Copilot |
-| Local | **Ollama** (any model), OpenAI-compatible endpoints |
+| :--- | :--- |
+| **Cloud** | Anthropic (Claude 3.5/3.7), OpenAI (o1/o3), Google Gemini, DeepSeek, Mistral, xAI, Groq, Cerebras, OpenRouter, AWS Bedrock, Azure, GitHub Copilot |
+| **Local** | **Ollama** (Qwen2.5-Coder, Llama 3, etc.), OpenAI-compatible local endpoints |
 
 ---
 
-## Getting started
+## 🚀 Quick Start
+
+Get up and running in seconds.
 
 ```bash
+# Install globally via npm
 npm install -g mooncli
+
+# Launch the interactive workspace
 mooncli
 ```
 
-Set your API key for any provider:
-
+### Configure Your Brain
 ```bash
-# Gemini (free tier available)
+# Set your preferred cloud provider
 export GEMINI_API_KEY=your_key
-
-# Anthropic
 export ANTHROPIC_API_KEY=your_key
 
-# Or use Ollama locally — no key needed
+# Or go fully local
 ollama pull qwen2.5-coder:7b
 mooncli --provider ollama
 ```
 
-You can also log in interactively inside the terminal with `/login`.
+---
+
+## ✨ Key Features
+
+### 🏢 Multi-Agent Orchestration
+Enable a full "virtual company" with `/agentmode on`. Mooncli spawns specialized agents (Architect, Frontend, Backend, Security, Test) that collaborate under a Patron orchestrator to solve large-scale problems.
+
+### 🗺️ Plan Mode
+Switch to `/plan` for a read-only analysis. The model will scan your project and propose a detailed implementation plan without making any changes. Review it, refine it, then execute.
+
+### 🌐 Chrome Browser Bridge
+Full web interaction. Mooncli connects to a bundled Chrome extension, allowing the assistant to browse docs, test web apps, and interact with live pages through `/browser`.
+
+### 🗜️ Context Management
+Keep your sessions lean. Mooncli features automatic and manual context compaction (`/compact`) and a real-time token usage monitor (`/context`).
 
 ---
 
-## Key features
+## ⌨️ Interactive Commands
 
-**Agent system** — Mooncli uses a company-style orchestration layer: Patron (orchestrator), Architect, Backend, Frontend, Security, Test, DevOps, and Integrator agents collaborate on complex tasks. Enable with `/agentmode on`.
-
-**Plan mode** — `/plan` switches to read-only mode. The model analyzes and proposes changes without touching any files. Review the plan, then run `/plan off` to execute.
-
-**Context window monitor** — `/context` shows how much of the context window is in use, in real time. Compaction happens automatically when needed, or manually with `/compact`.
-
-**Ollama / local model optimization** — When using a local model, Mooncli automatically compresses the system prompt and applies optimal `num_ctx`, `num_batch`, and `keep_alive` settings. Profiles: `turbo` (8K), `balanced` (16K), `quality` (32K).
-
-**MCP support** — Connect external tools, databases, and APIs via the Model Context Protocol. Managed with `/mcp`.
-
-**Skills** — Drop a `.md` file into your project to teach the model your conventions, stack, or design system. Loaded automatically.
-
-**Extensions** — Extend the runtime with custom tools, commands, themes, and slash commands.
-
-**Chrome browser bridge** — Load the bundled Chrome extension from `packages/cli/browser-extension/chrome`, then use `/browser` to verify the local bridge. The assistant can use `browser_tabs` and `browser_page` to inspect tabs, navigate, read pages, click, type, screenshot, and evaluate JavaScript through Chrome's debugger permission.
-
-**Themes** — Built-in themes: `moon`, `neon`, `brutal`, and more. Switch with `--theme`.
+| Command | Action |
+| :--- | :--- |
+| `/models` | Switch active model mid-session |
+| `/agentmode` | Toggle multi-agent orchestration |
+| `/plan` | Enter/Exit read-only planning mode |
+| `/index` | Index codebase for semantic search |
+| `/browser` | Verify Chrome bridge status |
+| `/mcp` | Manage Model Context Protocol servers |
+| `/context` | Monitor token & context window usage |
+| `/export` | Export session to HTML or JSONL |
+| `/mood` | Inspect the agent's affective state layer |
 
 ---
 
-## Inside the terminal
+## 🛠️ Development & Contribution
 
-```
-/models          switch model mid-session
-/plan            read-only planning mode
-/context         token usage monitor
-/compact         compress context manually
-/agentmode on    enable company-style agents
-/workspace       show agent workspace
-/mood            inspect/toggle affective state layer (`/mood explain` for journal)
-/browser         show Chrome extension bridge status
-/init            create MOON.md for this project
-/fork            branch session from a previous message
-/export          export session as HTML or JSONL
-/mcp             show connected MCP servers
-```
-
----
-
-## Ollama quick start
+We love contributions! Whether it's adding a new provider, fixing a bug, or improving documentation.
 
 ```bash
-# Install Ollama
-curl -fsSL https://ollama.com/install.sh | sh
-
-# Pull a coding model
-ollama pull qwen2.5-coder:7b
-
-# Run with balanced profile (16K context)
-MOONCLI_OLLAMA_MODE=balanced mooncli --provider ollama
-```
-
----
-
-## Project layout
-
-```
-packages/
-  cli/       Terminal runtime, interactive TUI, slash commands
-  core/      Providers, model definitions, auth
-  engine/    Orchestration loop, tool execution, compaction
-  tui/       Terminal UI component library
-  web-ui/    Web dashboard (optional)
-```
-
----
-
-## Development
-
-```bash
+# Clone the repository
 git clone https://github.com/theayzek01/hodeuscli
-cd hodeuscli
+
+# Install dependencies
 npm install
-npm run check     # lint + typecheck
+
+# Run checks (lint + typecheck)
+npm run check
+
+# Build and run locally
+npm run build
+node packages/cli/dist/cli.js
 ```
 
 ---
 
-## License
-
-MIT — see [LICENSE](LICENSE).
+<div align="center">
+  <p>Built with ❤️ by the Mooncli community.</p>
+  <p>Released under the <a href="LICENSE">MIT License</a>.</p>
+</div>
