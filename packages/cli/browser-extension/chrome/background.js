@@ -1,5 +1,5 @@
 const BRIDGE_URL = "ws://127.0.0.1:3132/ws";
-const VERSION = "0.1.0";
+const VERSION = "0.1.1";
 const HEARTBEAT_INTERVAL_MS = 20000;
 
 let socket;

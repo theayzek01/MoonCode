@@ -19,6 +19,7 @@ import { selectSession } from "./cli/session-picker.js";
 import { ENV_SESSION_DIR, expandTildePath, getEngineDir, VERSION } from "./config.js";
 import { formatNoModelsAvailableMessage } from "./core/auth-guidance.js";
 import { AuthStorage } from "./core/auth-storage.js";
+import { getBrowserBridgeStatus, startBrowserBridgeServer } from "./core/browser-bridge-server.js";
 import { type CreateEngineSessionRuntimeFactory, createEngineSessionRuntime } from "./core/engine-session-runtime.js";
 import {
 	createEngineSessionFromServices,
@@ -434,6 +435,17 @@ export interface MainOptions {
 export async function main(args: string[], options?: MainOptions) {
 	resetTimings();
 
+	if (args[0] === "browser-bridge") {
+		const status = startBrowserBridgeServer({ keepAlive: true });
+		console.log(`Mooncli Browser Bridge listening on ws://127.0.0.1:${status.port}/ws`);
+		console.log(`Health: http://127.0.0.1:${status.port}/health`);
+		process.on("SIGINT", () => process.exit(0));
+		await new Promise(() => {});
+		return;
+	}
+
+	startBrowserBridgeServer();
+
 	const offlineMode = args.includes("--offline") || isTruthyEnvFlag(process.env.PI_OFFLINE);
 	if (offlineMode) {
 		process.env.PI_OFFLINE = "1";
@@ -476,6 +488,11 @@ export async function main(args: string[], options?: MainOptions) {
 
 	if (parsed.version) {
 		console.log(VERSION);
+		process.exit(0);
+	}
+
+	if (parsed.messages.length === 1 && parsed.messages[0] === "browser-status") {
+		console.log(JSON.stringify(getBrowserBridgeStatus(), null, 2));
 		process.exit(0);
 	}
 

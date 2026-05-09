@@ -2,7 +2,7 @@
 
 Development install:
 
-1. Start Mooncli.
+1. Start Mooncli, or run `mooncli browser-bridge` to keep only the bridge server alive.
 2. Open `chrome://extensions`.
 3. Enable **Developer mode**.
 4. Click **Load unpacked**.

@@ -219,6 +219,7 @@ ${chalk.bold("Komutlar:")}
   ${APP_NAME} config                    Paket kaynaklarını etkinleştirmek/devre dışı bırakmak için TUI'yi aç
   ${APP_NAME} ollama doctor             Yerel Ollama bağlantısını ve modelleri kontrol et
   ${APP_NAME} ollama profile <profil>   Ollama hız/RAM profil komutlarını yazdır
+  ${APP_NAME} browser-bridge            Sadece Chrome extension bridge server'ını çalıştır
   echo '{"type":"prompt","text":"Fix lint"}' | ${APP_NAME} --headless --timeout 120
   ${APP_NAME} <komut> --help            Yükleme/kaldırma/güncelleme/listeleme için yardım göster
 

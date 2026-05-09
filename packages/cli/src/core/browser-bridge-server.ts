@@ -52,7 +52,7 @@ let startupError: string | undefined;
 const clients = new Map<string, BrowserBridgeClient>();
 const pendingCommands = new Map<string, PendingCommand>();
 
-export function startBrowserBridgeServer(options: { port?: number } = {}): BrowserBridgeStatus {
+export function startBrowserBridgeServer(options: { port?: number; keepAlive?: boolean } = {}): BrowserBridgeStatus {
 	port = options.port ?? Number(process.env.MOONCLI_BROWSER_BRIDGE_PORT || DEFAULT_PORT);
 	if (server) return getBrowserBridgeStatus();
 
@@ -73,7 +73,9 @@ export function startBrowserBridgeServer(options: { port?: number } = {}): Brows
 		startupError = error.code === "EADDRINUSE" ? `Port ${port} is already in use` : error.message;
 	});
 	server.listen(port, "127.0.0.1");
-	server.unref();
+	if (!options.keepAlive) {
+		server.unref();
+	}
 	return getBrowserBridgeStatus();
 }
 
