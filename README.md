@@ -1,6 +1,8 @@
 <div align="center">
 
-<img src="Mooncli.png" alt="Mooncli" width="140" />
+<img src="Moon-cli-banner.png" alt="Mooncli Banner" width="100%" />
+<br />
+<img src="Moon-cli-logo.png" alt="Mooncli Logo" width="140" />
 
 # Mooncli
 
@@ -83,7 +85,7 @@ You can also log in interactively inside the terminal with `/login`.
 ## Inside the terminal
 
 ```
-/model           switch model mid-session
+/models          switch model mid-session
 /plan            read-only planning mode
 /context         token usage monitor
 /compact         compress context manually

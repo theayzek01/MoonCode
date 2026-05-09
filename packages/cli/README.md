@@ -1,6 +1,6 @@
 <p align="center">
-  <a href="https://Mooncli.dev">
-    <img alt="Mooncli logo" src="https://Mooncli.dev/logo.svg" width="128">
+  <a href="https://github.com/theayzek01/hodeuscli">
+    <img alt="Mooncli logo" src="../../Moon-cli-logo.png" width="128">
   </a>
 </p>
 <p align="center">
