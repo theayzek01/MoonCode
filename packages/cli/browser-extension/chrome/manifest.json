@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Hodeus Browser Bridge",
-  "version": "0.1.1",
+  "version": "9.0.5",
   "description": "Connects Chrome tabs to the local Hodeus terminal session.",
   "permissions": ["tabs", "scripting", "debugger", "activeTab", "storage", "alarms"],
   "host_permissions": ["<all_urls>"],
