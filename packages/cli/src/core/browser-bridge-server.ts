@@ -43,7 +43,7 @@ interface BrowserBridgeClient {
 	send(message: BrowserCommandMessage): void;
 }
 
-const DEFAULT_PORT = 3132;
+const DEFAULT_PORT = 3133;
 const MAX_FRAME_BYTES = 10 * 1024 * 1024;
 
 let server: Server | undefined;
@@ -53,7 +53,7 @@ const clients = new Map<string, BrowserBridgeClient>();
 const pendingCommands = new Map<string, PendingCommand>();
 
 export function startBrowserBridgeServer(options: { port?: number; keepAlive?: boolean } = {}): BrowserBridgeStatus {
-	port = options.port ?? Number(process.env.MOONCLI_BROWSER_BRIDGE_PORT || DEFAULT_PORT);
+	port = options.port ?? Number(process.env.HODEUS_BROWSER_BRIDGE_PORT || DEFAULT_PORT);
 	if (server) return getBrowserBridgeStatus();
 
 	startupError = undefined;

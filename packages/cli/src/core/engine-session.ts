@@ -990,7 +990,7 @@ export class EngineSession {
 		const currentModel = this.engine.state.model;
 		const isLocalModel =
 			currentModel?.provider === "ollama" ||
-			(currentModel?.provider === "openai" && process.env.MOONCLI_COMPACT_PROMPT === "true");
+			(currentModel?.provider === "openai" && process.env.HODEUS_COMPACT_PROMPT === "true");
 
 		this._baseSystemPromptOptions = {
 			cwd: this._cwd,

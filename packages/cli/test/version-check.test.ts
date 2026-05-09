@@ -6,20 +6,20 @@ import {
 	isNewerPackageVersion,
 } from "../src/utils/version-check.js";
 
-const originalSkipVersionCheck = process.env.MoonCLI_SKIP_VERSION_CHECK;
-const originalOffline = process.env.MoonCLI_OFFLINE;
+const originalSkipVersionCheck = process.env.HODEUS_SKIP_VERSION_CHECK;
+const originalOffline = process.env.HODEUS_OFFLINE;
 
 afterEach(() => {
 	vi.unstubAllGlobals();
 	if (originalSkipVersionCheck === undefined) {
-		delete process.env.MoonCLI_SKIP_VERSION_CHECK;
+		delete process.env.HODEUS_SKIP_VERSION_CHECK;
 	} else {
-		process.env.MoonCLI_SKIP_VERSION_CHECK = originalSkipVersionCheck;
+		process.env.HODEUS_SKIP_VERSION_CHECK = originalSkipVersionCheck;
 	}
 	if (originalOffline === undefined) {
-		delete process.env.MoonCLI_OFFLINE;
+		delete process.env.HODEUS_OFFLINE;
 	} else {
-		process.env.MoonCLI_OFFLINE = originalOffline;
+		process.env.HODEUS_OFFLINE = originalOffline;
 	}
 });
 
@@ -57,7 +57,7 @@ describe("version checks", () => {
 	});
 
 	it("skips api calls when version checks are disabled", async () => {
-		process.env.MoonCLI_SKIP_VERSION_CHECK = "1";
+		process.env.HODEUS_SKIP_VERSION_CHECK = "1";
 		const fetchMock = vi.fn();
 		vi.stubGlobal("fetch", fetchMock);
 

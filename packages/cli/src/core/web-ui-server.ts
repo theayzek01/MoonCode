@@ -83,7 +83,7 @@ function serveStaticFile(res: ServerResponse, root: string, pathname: string): v
 }
 
 export function startWebUiServer(options: { port?: number; staticRoot?: string } = {}) {
-	const port = options.port || Number(process.env.MOONCLI_WEB_PORT || 3131);
+	const port = options.port || Number(process.env.HODEUS_WEB_PORT || 3131);
 	const server = createServer((req, res) => {
 		const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
 		if (url.pathname === "/api/sessions") {

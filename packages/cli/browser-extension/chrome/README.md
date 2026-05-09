@@ -14,5 +14,5 @@ Tools exposed to Hodeus:
 - `browser_tabs`: list, active, open, close, focus, reload, navigate.
 - `browser_page`: read, click, type, screenshot, evaluate.
 
-The bridge listens only on `127.0.0.1:3132` and accepts WebSocket connections from browser-extension origins.
+The bridge listens only on `127.0.0.1:3133` and accepts WebSocket connections from browser-extension origins.
 

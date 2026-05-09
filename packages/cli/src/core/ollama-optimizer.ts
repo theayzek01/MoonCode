@@ -3,25 +3,25 @@ import chalk from "chalk";
 const DEFAULT_BASE_URL = "http://localhost:11434";
 const PROFILE_VALUES = {
 	turbo: {
-		MOONCLI_OLLAMA_MODE: "turbo",
-		MOONCLI_OLLAMA_NUM_CTX: "8192", // 4K→8K: 4K ile gerçek kod analizi imkansız
-		MOONCLI_OLLAMA_NUM_BATCH: "1024", // daha büyük batch = prefill hızlanır
-		MOONCLI_OLLAMA_LOW_VRAM: "true",
-		MOONCLI_OLLAMA_KEEP_ALIVE: "1h", // 30m→1h: model yeniden yükleme gecikti
+		HODEUS_OLLAMA_MODE: "turbo",
+		HODEUS_OLLAMA_NUM_CTX: "8192", // 4K→8K: 4K ile gerçek kod analizi imkansız
+		HODEUS_OLLAMA_NUM_BATCH: "1024", // daha büyük batch = prefill hızlanır
+		HODEUS_OLLAMA_LOW_VRAM: "true",
+		HODEUS_OLLAMA_KEEP_ALIVE: "1h", // 30m→1h: model yeniden yükleme gecikti
 	},
 	balanced: {
-		MOONCLI_OLLAMA_MODE: "balanced",
-		MOONCLI_OLLAMA_NUM_CTX: "16384", // 8K→16K: orta büyüklük dosyalar sığsın
-		MOONCLI_OLLAMA_NUM_BATCH: "1024",
-		MOONCLI_OLLAMA_LOW_VRAM: "false",
-		MOONCLI_OLLAMA_KEEP_ALIVE: "2h",
+		HODEUS_OLLAMA_MODE: "balanced",
+		HODEUS_OLLAMA_NUM_CTX: "16384", // 8K→16K: orta büyüklük dosyalar sığsın
+		HODEUS_OLLAMA_NUM_BATCH: "1024",
+		HODEUS_OLLAMA_LOW_VRAM: "false",
+		HODEUS_OLLAMA_KEEP_ALIVE: "2h",
 	},
 	quality: {
-		MOONCLI_OLLAMA_MODE: "quality",
-		MOONCLI_OLLAMA_NUM_CTX: "32768", // 12K→32K: büyük dosya/codebase analizi
-		MOONCLI_OLLAMA_NUM_BATCH: "512", // büyük ctx'te daha küçük batch daha kararlı
-		MOONCLI_OLLAMA_LOW_VRAM: "false",
-		MOONCLI_OLLAMA_KEEP_ALIVE: "4h",
+		HODEUS_OLLAMA_MODE: "quality",
+		HODEUS_OLLAMA_NUM_CTX: "32768", // 12K→32K: büyük dosya/codebase analizi
+		HODEUS_OLLAMA_NUM_BATCH: "512", // büyük ctx'te daha küçük batch daha kararlı
+		HODEUS_OLLAMA_LOW_VRAM: "false",
+		HODEUS_OLLAMA_KEEP_ALIVE: "4h",
 	},
 } as const;
 
@@ -182,7 +182,7 @@ async function printDoctor(): Promise<void> {
 		console.log(chalk.yellow("Ollama çalışmıyor. Önce `ollama serve` başlat."));
 	}
 
-	const activeProfile = process.env.MOONCLI_OLLAMA_MODE || "balanced";
+	const activeProfile = process.env.HODEUS_OLLAMA_MODE || "balanced";
 	console.log(`${chalk.dim("Aktif profil:")} ${activeProfile}`);
 	console.log(chalk.dim("Hız/RAM için öneri:"));
 	console.log(`  ${psSetCommand(PROFILE_VALUES.turbo)}`);

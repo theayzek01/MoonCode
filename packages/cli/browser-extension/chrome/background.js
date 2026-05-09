@@ -1,4 +1,4 @@
-const BRIDGE_URL = "ws://127.0.0.1:3132/ws";
+const BRIDGE_URL = "ws://127.0.0.1:3133/ws";
 const VERSION = "0.2.0";
 const HEARTBEAT_INTERVAL_MS = 20000;
 
@@ -86,7 +86,7 @@ function updateBadgeFromSocket() {
 
 function setBadge(connected, title) {
   chrome.action.setBadgeText({ text: connected ? "ON" : "OFF" });
-  chrome.action.setBadgeBackgroundColor({ color: connected ? "#0ea5e9" : "#64748b" });
+  chrome.action.setBadgeBackgroundColor({ color: connected ? "#22c55e" : "#ef4444" });
   chrome.action.setTitle({ title: `Hodeus Browser Bridge: ${title}` });
 }
 
@@ -391,7 +391,7 @@ async function injectOverlay(tabId, message = "Hodeus Controlling") {
           @keyframes hodeus-pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
         </style>
       `;
-      setTimeout(() => { if (overlay) overlay.remove(); }, 5000);
+      setTimeout(() => { if (overlay) overlay.remove(); }, 10000);
     },
     args: [message]
   });
