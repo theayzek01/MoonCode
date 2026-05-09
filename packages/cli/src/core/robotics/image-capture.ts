@@ -43,7 +43,7 @@ export class ImageCapture {
 	 */
 	fromWebcam(device?: string): Buffer {
 		const platform = process.platform;
-		const tmpPath = resolve(process.cwd(), ".mooncli-capture-tmp.jpg");
+		const tmpPath = resolve(process.cwd(), ".Hodeus-capture-tmp.jpg");
 
 		let cmd: string;
 		if (platform === "win32") {

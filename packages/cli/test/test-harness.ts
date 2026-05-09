@@ -22,10 +22,10 @@ import type {
 	ThinkingContent,
 	ToolCall,
 	Usage,
-} from "mooncli-core";
-import { createAssistantMessageEventStream } from "mooncli-core";
-import type { EngineTool } from "mooncli-engine";
-import { Engine } from "mooncli-engine";
+} from "hodeus-core";
+import { createAssistantMessageEventStream } from "hodeus-core";
+import type { EngineTool } from "hodeus-engine";
+import { Engine } from "hodeus-engine";
 import { AuthStorage } from "../src/core/auth-storage.js";
 import { EngineSession, type EngineSessionEvent } from "../src/core/engine-session.js";
 import { ModelRegistry } from "../src/core/model-registry.js";
@@ -356,7 +356,7 @@ export interface Harness {
 }
 
 function createTempDir(): string {
-	const tempDir = join(tmpdir(), `Mooncli-harness-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+	const tempDir = join(tmpdir(), `Hodeus-harness-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 	mkdirSync(tempDir, { recursive: true });
 	return tempDir;
 }

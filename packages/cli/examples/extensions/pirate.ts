@@ -5,18 +5,18 @@
  * change engine behavior based on extension state.
  *
  * Usage:
- * 1. Copy this file to ~/.Mooncli/engine/extensions/ or your project's .Mooncli/extensions/
+ * 1. Copy this file to ~/.Hodeus/engine/extensions/ or your project's .Hodeus/extensions/
  * 2. Use /pirate to toggle pirate mode
  * 3. When enabled, the engine will respond like a pirate
  */
 
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "Hodeus";
 
-export default function pirateExtension(Mooncli: ExtensionAPI) {
+export default function pirateExtension(Hodeus: ExtensionAPI) {
 	let pirateMode = false;
 
 	// Register /pirate command to toggle pirate mode
-	Mooncli.registerCommand("pirate", {
+	Hodeus.registerCommand("pirate", {
 		description: "Toggle pirate mode (engine speaks like a pirate)",
 		handler: async (_args, ctx) => {
 			pirateMode = !pirateMode;
@@ -25,7 +25,7 @@ export default function pirateExtension(Mooncli: ExtensionAPI) {
 	});
 
 	// Append to system prompt when pirate mode is enabled
-	Mooncli.on("before_engine_start", async (event) => {
+	Hodeus.on("before_engine_start", async (event) => {
 		if (pirateMode) {
 			return {
 				systemPrompt:

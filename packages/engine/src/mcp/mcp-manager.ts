@@ -37,7 +37,7 @@ export class McpManager {
 				});
 
 				const client = new Client(
-					{ name: "Mooncli-MCP-Manager", version: "1.0.0" },
+					{ name: "Hodeus-MCP-Manager", version: "1.0.0" },
 					{ capabilities: { tools: {} } },
 				);
 

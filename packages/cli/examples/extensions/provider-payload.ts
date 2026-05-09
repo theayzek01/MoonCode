@@ -1,18 +1,18 @@
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "Hodeus";
 import { appendFileSync } from "node:fs";
 import { join } from "node:path";
 
-export default function (Mooncli: ExtensionAPI) {
-	const logFile = join(process.cwd(), ".Mooncli", "provider-payload.log");
+export default function (Hodeus: ExtensionAPI) {
+	const logFile = join(process.cwd(), ".Hodeus", "provider-payload.log");
 
-	Mooncli.on("before_provider_request", (event) => {
+	Hodeus.on("before_provider_request", (event) => {
 		appendFileSync(logFile, `${JSON.stringify(event.payload, null, 2)}\n\n`, "utf8");
 
 		// Optional: replace the payload instead of only logging it.
 		// return { ...event.payload, temperature: 0 };
 	});
 
-	Mooncli.on("after_provider_response", (event) => {
+	Hodeus.on("after_provider_response", (event) => {
 		appendFileSync(logFile, `[${event.status}] ${JSON.stringify(event.headers)}\n\n`, "utf8");
 	});
 }

@@ -3,8 +3,8 @@
  * Uses Kitty keyboard protocol for smooth movement (press/release detection)
  */
 
-import type { ExtensionAPI } from "Mooncli";
-import { isKeyRelease, Key, matchesKey, visibleWidth } from "mooncli-tui";
+import type { ExtensionAPI } from "Hodeus";
+import { isKeyRelease, Key, matchesKey, visibleWidth } from "hodeus-tui";
 
 const GAME_WIDTH = 60;
 const GAME_HEIGHT = 24;
@@ -524,8 +524,8 @@ class SpaceInvadersComponent {
 
 const INVADERS_SAVE_TYPE = "space-invaders-save";
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.registerCommand("invaders", {
+export default function (Hodeus: ExtensionAPI) {
+	Hodeus.registerCommand("invaders", {
 		description: "Play Space Invaders!",
 
 		handler: async (_args, ctx) => {
@@ -550,7 +550,7 @@ export default function (Mooncli: ExtensionAPI) {
 					tui,
 					() => done(undefined),
 					(state) => {
-						Mooncli.appendEntry(INVADERS_SAVE_TYPE, state);
+						Hodeus.appendEntry(INVADERS_SAVE_TYPE, state);
 					},
 					savedState,
 				);

@@ -1,8 +1,8 @@
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { type AssistantMessage, type AssistantMessageEvent, EventStream, getModel } from "mooncli-core";
-import { Engine, type EngineEvent, type EngineTool } from "mooncli-engine";
+import { type AssistantMessage, type AssistantMessageEvent, EventStream, getModel } from "hodeus-core";
+import { Engine, type EngineEvent, type EngineTool } from "hodeus-engine";
 import { Type } from "typebox";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { AuthStorage } from "../src/core/auth-storage.js";
@@ -55,7 +55,7 @@ describe("EngineSession retry", () => {
 	let tempDir: string;
 
 	beforeEach(() => {
-		tempDir = join(tmpdir(), `Mooncli-retry-test-${Date.now()}`);
+		tempDir = join(tmpdir(), `Hodeus-retry-test-${Date.now()}`);
 		mkdirSync(tempDir, { recursive: true });
 	});
 

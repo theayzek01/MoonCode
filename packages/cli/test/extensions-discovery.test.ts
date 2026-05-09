@@ -12,7 +12,7 @@ describe("extensions discovery", () => {
 	let extensionsDir: string;
 
 	beforeEach(() => {
-		tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "Mooncli-ext-test-"));
+		tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "Hodeus-ext-test-"));
 		extensionsDir = path.join(tempDir, "extensions");
 		fs.mkdirSync(extensionsDir);
 	});
@@ -22,15 +22,15 @@ describe("extensions discovery", () => {
 	});
 
 	const extensionCode = `
-		export default function(Mooncli) {
-			Mooncli.registerCommand("test", { handler: async () => {} });
+		export default function(Hodeus) {
+			Hodeus.registerCommand("test", { handler: async () => {} });
 		}
 	`;
 
 	const extensionCodeWithTool = (toolName: string) => `
 		import { Type } from "typebox";
-		export default function(Mooncli) {
-			Mooncli.registerTool({
+		export default function(Hodeus) {
+			Hodeus.registerTool({
 				name: "${toolName}",
 				label: "${toolName}",
 				description: "Test tool",
@@ -99,7 +99,7 @@ describe("extensions discovery", () => {
 		expect(result.extensions[0].path).toContain("index.ts");
 	});
 
-	it("discovers subdirectory with package.json Mooncli field", async () => {
+	it("discovers subdirectory with package.json Hodeus field", async () => {
 		const subdir = path.join(extensionsDir, "my-package");
 		const srcDir = path.join(subdir, "src");
 		fs.mkdirSync(subdir);
@@ -109,7 +109,7 @@ describe("extensions discovery", () => {
 			path.join(subdir, "package.json"),
 			JSON.stringify({
 				name: "my-package",
-				Mooncli: {
+				Hodeus: {
 					extensions: ["./src/main.ts"],
 				},
 			}),
@@ -132,7 +132,7 @@ describe("extensions discovery", () => {
 			path.join(subdir, "package.json"),
 			JSON.stringify({
 				name: "my-package",
-				Mooncli: {
+				Hodeus: {
 					extensions: ["./ext1.ts", "./ext2.ts"],
 				},
 			}),
@@ -144,7 +144,7 @@ describe("extensions discovery", () => {
 		expect(result.extensions).toHaveLength(2);
 	});
 
-	it("package.json with Mooncli field takes precedence over index.ts", async () => {
+	it("package.json with Hodeus field takes precedence over index.ts", async () => {
 		const subdir = path.join(extensionsDir, "my-package");
 		fs.mkdirSync(subdir);
 		fs.writeFileSync(path.join(subdir, "index.ts"), extensionCodeWithTool("from-index"));
@@ -153,7 +153,7 @@ describe("extensions discovery", () => {
 			path.join(subdir, "package.json"),
 			JSON.stringify({
 				name: "my-package",
-				Mooncli: {
+				Hodeus: {
 					extensions: ["./custom.ts"],
 				},
 			}),
@@ -169,7 +169,7 @@ describe("extensions discovery", () => {
 		expect(result.extensions[0].tools.has("from-index")).toBe(false);
 	});
 
-	it("ignores package.json without Mooncli field, falls back to index.ts", async () => {
+	it("ignores package.json without Hodeus field, falls back to index.ts", async () => {
 		const subdir = path.join(extensionsDir, "my-package");
 		fs.mkdirSync(subdir);
 		fs.writeFileSync(path.join(subdir, "index.ts"), extensionCode);
@@ -227,7 +227,7 @@ describe("extensions discovery", () => {
 		const subdir2 = path.join(extensionsDir, "with-manifest");
 		fs.mkdirSync(subdir2);
 		fs.writeFileSync(path.join(subdir2, "entry.ts"), extensionCode);
-		fs.writeFileSync(path.join(subdir2, "package.json"), JSON.stringify({ Mooncli: { extensions: ["./entry.ts"] } }));
+		fs.writeFileSync(path.join(subdir2, "package.json"), JSON.stringify({ Hodeus: { extensions: ["./entry.ts"] } }));
 
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
@@ -242,7 +242,7 @@ describe("extensions discovery", () => {
 		fs.writeFileSync(
 			path.join(subdir, "package.json"),
 			JSON.stringify({
-				Mooncli: {
+				Hodeus: {
 					extensions: ["./exists.ts", "./missing.ts"],
 				},
 			}),
@@ -312,8 +312,8 @@ describe("extensions discovery", () => {
 
 	it("registers message renderers", async () => {
 		const extCode = `
-			export default function(Mooncli) {
-				Mooncli.registerMessageRenderer("my-custom-type", (message, options, theme) => {
+			export default function(Hodeus) {
+				Hodeus.registerMessageRenderer("my-custom-type", (message, options, theme) => {
 					return null; // Use default rendering
 				});
 			}
@@ -329,7 +329,7 @@ describe("extensions discovery", () => {
 
 	it("reports error when extension throws during initialization", async () => {
 		const extCode = `
-			export default function(Mooncli) {
+			export default function(Hodeus) {
 				throw new Error("Initialization failed!");
 			}
 		`;
@@ -344,8 +344,8 @@ describe("extensions discovery", () => {
 
 	it("reports error when extension has no default export", async () => {
 		const extCode = `
-			export function notDefault(Mooncli) {
-				Mooncli.registerCommand("test", { handler: async () => {} });
+			export function notDefault(Hodeus) {
+				Hodeus.registerCommand("test", { handler: async () => {} });
 			}
 		`;
 		fs.writeFileSync(path.join(extensionsDir, "no-default.ts"), extCode);
@@ -378,10 +378,10 @@ describe("extensions discovery", () => {
 
 	it("loads extension with event handlers", async () => {
 		const extCode = `
-			export default function(Mooncli) {
-				Mooncli.on("engine_start", async () => {});
-				Mooncli.on("tool_call", async (event) => undefined);
-				Mooncli.on("engine_end", async () => {});
+			export default function(Hodeus) {
+				Hodeus.on("engine_start", async () => {});
+				Hodeus.on("tool_call", async (event) => undefined);
+				Hodeus.on("engine_end", async () => {});
 			}
 		`;
 		fs.writeFileSync(path.join(extensionsDir, "with-handlers.ts"), extCode);
@@ -397,8 +397,8 @@ describe("extensions discovery", () => {
 
 	it("loads extension with shortcuts", async () => {
 		const extCode = `
-			export default function(Mooncli) {
-				Mooncli.registerShortcut("ctrl+t", {
+			export default function(Hodeus) {
+				Hodeus.registerShortcut("ctrl+t", {
 					description: "Test shortcut",
 					handler: async (ctx) => {},
 				});
@@ -415,8 +415,8 @@ describe("extensions discovery", () => {
 
 	it("loads extension with flags", async () => {
 		const extCode = `
-			export default function(Mooncli) {
-				Mooncli.registerFlag("my-flag", {
+			export default function(Hodeus) {
+				Hodeus.registerFlag("my-flag", {
 					description: "My custom flag",
 					handler: async (value) => {},
 				});

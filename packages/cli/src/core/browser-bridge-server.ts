@@ -104,7 +104,7 @@ export async function sendBrowserCommand(
 	const client = getLatestClient();
 	if (!client) {
 		throw new Error(
-			`No Chrome extension connected. Load packages/cli/browser-extension/chrome in Chrome and keep Mooncli running. Bridge: ws://127.0.0.1:${port}/ws`,
+			`No Chrome extension connected. Load packages/cli/browser-extension/chrome in Chrome and keep Hodeus running. Bridge: ws://127.0.0.1:${port}/ws`,
 		);
 	}
 

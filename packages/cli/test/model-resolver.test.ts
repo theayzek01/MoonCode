@@ -1,4 +1,4 @@
-import type { Model } from "mooncli-core";
+import type { Model } from "hodeus-core";
 import { describe, expect, test } from "vitest";
 import {
 	defaultModelPerProvider,

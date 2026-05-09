@@ -1,5 +1,5 @@
 {
-  "name": "mooncli-extension-custom-provider-gitlab-duo",
+  "name": "Hodeus-extension-custom-provider-gitlab-duo",
   "private": true,
   "version": "5.05.2026-01:25",
   "type": "module",
@@ -8,9 +8,10 @@
     "build": "echo 'nothing to build'",
     "check": "echo 'nothing to check'"
   },
-  "mooncli": {
+  "Hodeus": {
     "extensions": [
       "./index.ts"
     ]
   }
 }
+

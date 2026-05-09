@@ -1,6 +1,6 @@
-import { CustomEditor, type ExtensionAPI, type ExtensionContext, type KeybindingsManager } from "Mooncli";
-import type { Component, EditorTheme, TUI } from "mooncli-tui";
-import { truncateToWidth, visibleWidth } from "mooncli-tui";
+import { CustomEditor, type ExtensionAPI, type ExtensionContext, type KeybindingsManager } from "Hodeus";
+import type { Component, EditorTheme, TUI } from "hodeus-tui";
+import { truncateToWidth, visibleWidth } from "hodeus-tui";
 
 function fitBorder(
 	left: string,
@@ -63,7 +63,7 @@ class EmptyFooter implements Component {
 	invalidate(): void {}
 }
 
-export default function (Mooncli: ExtensionAPI) {
+export default function (Hodeus: ExtensionAPI) {
 	let isWorking = false;
 	let spinnerIndex = 0;
 	let spinnerTimer: ReturnType<typeof setInterval> | undefined;
@@ -77,7 +77,7 @@ export default function (Mooncli: ExtensionAPI) {
 		}
 	};
 
-	Mooncli.on("engine_start", () => {
+	Hodeus.on("engine_start", () => {
 		isWorking = true;
 		stopSpinner();
 		spinnerTimer = setInterval(() => {
@@ -87,27 +87,25 @@ export default function (Mooncli: ExtensionAPI) {
 		activeTui?.requestRender();
 	});
 
-	Mooncli.on("engine_end", () => {
+	Hodeus.on("engine_end", () => {
 		isWorking = false;
 		stopSpinner();
 		activeTui?.requestRender();
 	});
 
-	Mooncli.on("session_shutdown", () => {
+	Hodeus.on("session_shutdown", () => {
 		stopSpinner();
 		activeTui = undefined;
 	});
 
-	Mooncli.on("session_start", (_event, ctx) => {
+	Hodeus.on("session_start", (_event, ctx) => {
 		ctx.ui.setWorkingVisible(false);
 		ctx.ui.setFooter(() => new EmptyFooter());
 
 		let branch: string | undefined;
 
 		const refreshBranch = async () => {
-			const result = await Mooncli.exec("git", ["branch", "--show-current"], { cwd: ctx.cwd }).catch(
-				() => undefined,
-			);
+			const result = await Hodeus.exec("git", ["branch", "--show-current"], { cwd: ctx.cwd }).catch(() => undefined);
 			const stdout = result?.stdout.trim();
 			branch = stdout && stdout.length > 0 ? stdout : undefined;
 			activeTui?.requestRender();
@@ -126,7 +124,7 @@ export default function (Mooncli: ExtensionAPI) {
 
 				const thm = ctx.ui.theme;
 				const model = ctx.model ? `${ctx.model.provider}/${ctx.model.id}` : "no model";
-				const thinking = Mooncli.getThinkingLevel();
+				const thinking = Hodeus.getThinkingLevel();
 				const topLeft = isWorking ? thm.fg("accent", ` ${spinnerFrames[spinnerIndex]} `) : "";
 				const topRight = "";
 				const bottomLeft = thm.fg("muted", ` ${model} · ${formatThinking(thinking)} `);

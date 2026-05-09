@@ -1,5 +1,5 @@
 {
-	"$schema": "https://raw.githubusercontent.com/badlogic/Mooncli-mono/main/packages/cli/src/modes/interactive/theme/theme-schema.json",
+	"$schema": "https://raw.githubusercontent.com/badlogic/Hodeus-mono/main/packages/cli/src/modes/interactive/theme/theme-schema.json",
 	"name": "soft",
 	"vars": {
 		"softBg": "#1e2227",
@@ -85,3 +85,4 @@
 		"infoBg": "#3b4252"
 	}
 }
+

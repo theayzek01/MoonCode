@@ -1,6 +1,6 @@
 # Examples
 
-Example code for Mooncli-cli SDK and extensions.
+Example code for Hodeus-cli SDK and extensions.
 
 ## Directories
 
@@ -23,3 +23,4 @@ Example extensions demonstrating:
 - [SDK Reference](sdk/README.md)
 - [Extensions Documentation](../docs/extensions.md)
 - [Skills Documentation](../docs/skills.md)
+

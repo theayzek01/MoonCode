@@ -8,11 +8,11 @@
  * are currently active, respecting whatever the user has configured.
  *
  * Usage:
- * 1. Copy this file to ~/.Mooncli/engine/extensions/ or your project's .Mooncli/extensions/
+ * 1. Copy this file to ~/.Hodeus/engine/extensions/ or your project's .Hodeus/extensions/
  * 2. Use the extension — it automatically adapts to your active tools and skills
  */
 
-import type { BuildSystemPromptOptions, ExtensionAPI } from "Mooncli";
+import type { BuildSystemPromptOptions, ExtensionAPI } from "Hodeus";
 
 /**
  * Adds tool-specific guidance that adapts to the active tool set.
@@ -83,8 +83,8 @@ If you have additional requirements, configure them via --append-system-prompt o
 	return extensionSpecific;
 }
 
-export default function promptCustomizer(Mooncli: ExtensionAPI) {
-	Mooncli.on("before_engine_start", async (event) => {
+export default function promptCustomizer(Hodeus: ExtensionAPI) {
+	Hodeus.on("before_engine_start", async (event) => {
 		const { systemPrompt, systemPromptOptions } = event;
 
 		const customPrompt = addToolGuidance(systemPromptOptions, systemPrompt);

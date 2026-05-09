@@ -2,8 +2,8 @@
 
 import { constants } from "fs";
 import { access as fsAccess, readFile as fsReadFile, writeFile as fsWriteFile } from "fs/promises";
-import type { EngineTool } from "mooncli-engine";
-import { Box, Container, Spacer, Text } from "mooncli-tui";
+import type { EngineTool } from "hodeus-engine";
+import { Box, Container, Spacer, Text } from "hodeus-tui";
 import { type Static, Type } from "typebox";
 import { renderDiff } from "../../modes/interactive/components/diff.js";
 import type { ToolDefinition } from "../extensions/types.js";

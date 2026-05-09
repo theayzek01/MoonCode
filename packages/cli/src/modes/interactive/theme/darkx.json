@@ -1,5 +1,5 @@
 {
-	"$schema": "https://raw.githubusercontent.com/badlogic/Mooncli-mono/main/packages/cli/src/modes/interactive/theme/theme-schema.json",
+	"$schema": "https://raw.githubusercontent.com/badlogic/Hodeus-mono/main/packages/cli/src/modes/interactive/theme/theme-schema.json",
 	"name": "DarkX",
 	"vars": {
 		"accent": "#ff4d4f",
@@ -72,3 +72,4 @@
 		"infoBg": "#2a1616"
 	}
 }
+

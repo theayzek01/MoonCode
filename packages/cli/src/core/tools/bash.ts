@@ -4,8 +4,8 @@ import { createWriteStream, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawn } from "child_process";
-import type { EngineTool } from "mooncli-engine";
-import { Container, Text, truncateToWidth } from "mooncli-tui";
+import type { EngineTool } from "hodeus-engine";
+import { Container, Text, truncateToWidth } from "hodeus-tui";
 import { type Static, Type } from "typebox";
 import { keyHint } from "../../modes/interactive/components/keybinding-hints.js";
 import { truncateToVisualLines } from "../../modes/interactive/components/visual-truncate.js";
@@ -28,7 +28,7 @@ import { DEFAULT_MAX_BYTES, DEFAULT_MAX_LINES, formatSize, type TruncationResult
  */
 function getTempFilePath(): string {
 	const id = randomBytes(8).toString("hex");
-	return join(tmpdir(), `Mooncli-bash-${id}.log`);
+	return join(tmpdir(), `Hodeus-bash-${id}.log`);
 }
 
 const bashSchema = Type.Object({
@@ -68,9 +68,9 @@ export interface BashOperations {
 }
 
 /**
- * Create bash operations using Mooncli's built-in local shell execution backend.
+ * Create bash operations using Hodeus's built-in local shell execution backend.
  *
- * This is useful for extensions that intercept user_bash and still want Mooncli's
+ * This is useful for extensions that intercept user_bash and still want Hodeus's
  * standard local shell behavior while wrapping or rewriting commands.
  */
 export function createLocalBashOperations(options?: { shellPath?: string }): BashOperations {

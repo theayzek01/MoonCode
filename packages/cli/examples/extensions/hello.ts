@@ -2,8 +2,8 @@
  * Hello Tool - Minimal custom tool example
  */
 
-import { defineTool, type ExtensionAPI } from "Mooncli";
-import { Type } from "mooncli-core";
+import { defineTool, type ExtensionAPI } from "Hodeus";
+import { Type } from "hodeus-core";
 
 const helloTool = defineTool({
 	name: "hello",
@@ -21,6 +21,6 @@ const helloTool = defineTool({
 	},
 });
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.registerTool(helloTool);
+export default function (Hodeus: ExtensionAPI) {
+	Hodeus.registerTool(helloTool);
 }

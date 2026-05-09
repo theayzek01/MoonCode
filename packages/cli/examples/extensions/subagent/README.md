@@ -4,7 +4,7 @@ Delegate tasks to specialized subengines with isolated context windows.
 
 ## Features
 
-- **Isolated context**: Each subengine runs in a separate `Mooncli` process
+- **Isolated context**: Each subengine runs in a separate `Hodeus` process
 - **Streaming output**: See tool calls and progress as they happen
 - **Parallel streaming**: All parallel tasks stream updates simultaneously
 - **Markdown rendering**: Final output rendered with proper formatting (expanded view)
@@ -35,30 +35,30 @@ From the repository root, symlink the files:
 
 ```bash
 # Symlink the extension (must be in a subdirectory with index.ts)
-mkdir -p ~/.Mooncli/engine/extensions/subengine
-ln -sf "$(pwd)/packages/cli/examples/extensions/subengine/index.ts" ~/.Mooncli/engine/extensions/subengine/index.ts
-ln -sf "$(pwd)/packages/cli/examples/extensions/subengine/engines.ts" ~/.Mooncli/engine/extensions/subengine/engines.ts
+mkdir -p ~/.Hodeus/engine/extensions/subengine
+ln -sf "$(pwd)/packages/cli/examples/extensions/subengine/index.ts" ~/.Hodeus/engine/extensions/subengine/index.ts
+ln -sf "$(pwd)/packages/cli/examples/extensions/subengine/engines.ts" ~/.Hodeus/engine/extensions/subengine/engines.ts
 
 # Symlink engines
-mkdir -p ~/.Mooncli/engine/engines
+mkdir -p ~/.Hodeus/engine/engines
 for f in packages/cli/examples/extensions/subengine/engines/*.md; do
-  ln -sf "$(pwd)/$f" ~/.Mooncli/engine/engines/$(basename "$f")
+  ln -sf "$(pwd)/$f" ~/.Hodeus/engine/engines/$(basename "$f")
 done
 
 # Symlink workflow prompts
-mkdir -p ~/.Mooncli/engine/prompts
+mkdir -p ~/.Hodeus/engine/prompts
 for f in packages/cli/examples/extensions/subengine/prompts/*.md; do
-  ln -sf "$(pwd)/$f" ~/.Mooncli/engine/prompts/$(basename "$f")
+  ln -sf "$(pwd)/$f" ~/.Hodeus/engine/prompts/$(basename "$f")
 done
 ```
 
 ## Security Model
 
-This tool executes a separate `Mooncli` subprocess with a delegated system prompt and tool/model configuration.
+This tool executes a separate `Hodeus` subprocess with a delegated system prompt and tool/model configuration.
 
-**Project-local engines** (`.Mooncli/engines/*.md`) are repo-controlled prompts that can instruct the model to read files, run bash commands, etc.
+**Project-local engines** (`.Hodeus/engines/*.md`) are repo-controlled prompts that can instruct the model to read files, run bash commands, etc.
 
-**Default behavior:** Only loads **user-level engines** from `~/.Mooncli/engine/engines`.
+**Default behavior:** Only loads **user-level engines** from `~/.Hodeus/engine/engines`.
 
 To enable project-local engines, pass `engineScope: "both"` (or `"project"`). Only do this for repositories you trust.
 
@@ -136,8 +136,8 @@ System prompt for the engine goes here.
 ```
 
 **Locations:**
-- `~/.Mooncli/engine/engines/*.md` - User-level (always loaded)
-- `.Mooncli/engines/*.md` - Project-level (only with `engineScope: "project"` or `"both"`)
+- `~/.Hodeus/engine/engines/*.md` - User-level (always loaded)
+- `.Hodeus/engines/*.md` - Project-level (only with `engineScope: "project"` or `"both"`)
 
 Project engines override user engines with the same name when `engineScope: "both"`.
 
@@ -170,3 +170,4 @@ Project engines override user engines with the same name when `engineScope: "bot
 - Output truncated to last 10 items in collapsed view (expand to see all)
 - Engines discovered fresh on each invocation (allows editing mid-session)
 - Parallel mode limited to 8 tasks, 4 concurrent
+

@@ -4,7 +4,7 @@
  * Context files provide project-specific instructions loaded into the system prompt.
  */
 
-import { createEngineSession, DefaultResourceLoader, getEngineDir, SessionManager } from "Mooncli";
+import { createEngineSession, DefaultResourceLoader, getEngineDir, SessionManager } from "Hodeus";
 
 // Disable context files entirely by returning an empty list in enginesFilesOverride.
 const loader = new DefaultResourceLoader({

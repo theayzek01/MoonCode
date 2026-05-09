@@ -2,7 +2,7 @@
 /**
  * Live probe for OpenAI Codex Responses websocket-cached mode.
  *
- * Runs a simple tool loop directly against the Mooncli-ai provider source so it does not
+ * Runs a simple tool loop directly against the Hodeus-ai provider source so it does not
  * depend on built dist packages or cli SDK wiring.
  */
 
@@ -37,7 +37,7 @@ function parseArgs(argv: string[]): Args {
 	let transport: Transport = "websocket-cached";
 	let maxTokens = DEFAULT_MAX_TOKENS;
 	let reasoning: ThinkingLevel = "low";
-	let sessionId = `Mooncli-ai-codex-ws-cached-probe-${Date.now()}`;
+	let sessionId = `Hodeus-ai-codex-ws-cached-probe-${Date.now()}`;
 
 	for (let i = 0; i < argv.length; i++) {
 		const arg = argv[i];
@@ -107,7 +107,7 @@ function buildPrompt(turn: number): string {
 	];
 	for (let i = 1; i <= 180; i++) {
 		lines.push(
-			`Turn ${turn} synthetic record ${String(i).padStart(3, "0")}: alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu nu xi omicron Mooncli rho sigma tau upsilon phi chi psi omega.`,
+			`Turn ${turn} synthetic record ${String(i).padStart(3, "0")}: alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu nu xi omicron Hodeus rho sigma tau upsilon phi chi psi omega.`,
 		);
 	}
 	return lines.join("\n");

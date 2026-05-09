@@ -1,5 +1,5 @@
 // @ts-nocheck
-import type { ImageContent } from "mooncli-core";
+import type { ImageContent } from "hodeus-core";
 import type { Args } from "./args.js";
 
 export interface InitialMessageInput {

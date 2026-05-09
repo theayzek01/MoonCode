@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Container, Text } from "mooncli-tui";
+import { Container, Text } from "hodeus-tui";
 import type { RegistryEntry } from "../../../core/marketplace.js";
 import { theme } from "../theme/theme.js";
 

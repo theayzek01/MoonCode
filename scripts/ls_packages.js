@@ -19,4 +19,5 @@ function walk(dir) {
   }
   return results;
 }
-fs.writeFileSync('C:\\Users\\ozenc\\OneDrive\\Desktop\\Mooncli2\\hodeuscli\\out.txt', walk('C:\\Users\\ozenc\\OneDrive\\Desktop\\Mooncli2\\hodeuscli\\packages').join('\n'));
+fs.writeFileSync('C:\\Users\\ozenc\\OneDrive\\Desktop\\Hodeus2\\hodeuscli\\out.txt', walk('C:\\Users\\ozenc\\OneDrive\\Desktop\\Hodeus2\\hodeuscli\\packages').join('\n'));
+

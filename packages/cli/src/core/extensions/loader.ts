@@ -11,11 +11,11 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createJiti } from "@mariozechner/jiti";
-import * as _bundledPiAi from "mooncli-core";
-import * as _bundledPiAiOauth from "mooncli-core/oauth";
-import * as _bundledPiEngineCore from "mooncli-engine";
-import type { KeyId } from "mooncli-tui";
-import * as _bundledPiTui from "mooncli-tui";
+import * as _bundledPiAi from "hodeus-core";
+import * as _bundledPiAiOauth from "hodeus-core/oauth";
+import * as _bundledPiEngineCore from "hodeus-engine";
+import type { KeyId } from "hodeus-tui";
+import * as _bundledPiTui from "hodeus-tui";
 // Static imports of packages that extensions may use.
 // These MUST be static so Bun bundles them into the compiled binary.
 // The virtualModules option then makes them available to extensions.
@@ -24,7 +24,7 @@ import * as _bundledTypeboxCompile from "typebox/compile";
 import * as _bundledTypeboxValue from "typebox/value";
 import { CONFIG_DIR_NAME, getEngineDir, isBunBinary } from "../../config.js";
 // NOTE: This import works because loader.ts exports are NOT re-exported from index.ts,
-// avoiding a circular dependency. Extensions can import from Mooncli.
+// avoiding a circular dependency. Extensions can import from Hodeus.
 import * as _bundledPiCodingEngine from "../../index.js";
 import { createEventBus, type EventBus } from "../event-bus.js";
 import type { ExecOptions } from "../exec.js";
@@ -50,11 +50,11 @@ const VIRTUAL_MODULES: Record<string, unknown> = {
 	"@sinclair/typebox": _bundledTypebox,
 	"@sinclair/typebox/compile": _bundledTypeboxCompile,
 	"@sinclair/typebox/value": _bundledTypeboxValue,
-	"mooncli-engine": _bundledPiEngineCore,
-	"mooncli-tui": _bundledPiTui,
-	"mooncli-core": _bundledPiAi,
-	"mooncli-core/oauth": _bundledPiAiOauth,
-	Mooncli: _bundledPiCodingEngine,
+	"hodeus-engine": _bundledPiEngineCore,
+	"hodeus-tui": _bundledPiTui,
+	"hodeus-core": _bundledPiAi,
+	"hodeus-core/oauth": _bundledPiAiOauth,
+	Hodeus: _bundledPiCodingEngine,
 };
 
 const require = createRequire(import.meta.url);
@@ -89,11 +89,11 @@ function getAliases(): Record<string, string> {
 	};
 
 	_aliases = {
-		Mooncli: packageIndex,
-		"mooncli-engine": resolveWorkspaceOrImport("engine/dist/index.js", "mooncli-engine"),
-		"mooncli-tui": resolveWorkspaceOrImport("tui/dist/index.js", "mooncli-tui"),
-		"mooncli-core": resolveWorkspaceOrImport("core/dist/index.js", "mooncli-core"),
-		"mooncli-core/oauth": resolveWorkspaceOrImport("core/dist/oauth.js", "mooncli-core/oauth"),
+		Hodeus: packageIndex,
+		"hodeus-engine": resolveWorkspaceOrImport("engine/dist/index.js", "hodeus-engine"),
+		"hodeus-tui": resolveWorkspaceOrImport("tui/dist/index.js", "hodeus-tui"),
+		"hodeus-core": resolveWorkspaceOrImport("core/dist/index.js", "hodeus-core"),
+		"hodeus-core/oauth": resolveWorkspaceOrImport("core/dist/oauth.js", "hodeus-core/oauth"),
 		typebox: typeboxEntry,
 		"typebox/compile": typeboxCompileEntry,
 		"typebox/value": typeboxValueEntry,
@@ -169,7 +169,7 @@ export function createExtensionRuntime(): ExtensionRuntime {
 		invalidate: (message) => {
 			state.staleMessage ??=
 				message ??
-				"This extension ctx is stale after session replacement or reload. Do not use a captured Mooncli or command ctx after ctx.newSession(), ctx.fork(), ctx.switchSession(), or ctx.reload(). For newSession, fork, and switchSession, move post-replacement work into withSession and use the ctx passed to withSession. For reload, do not use the old ctx after await ctx.reload().";
+				"This extension ctx is stale after session replacement or reload. Do not use a captured Hodeus or command ctx after ctx.newSession(), ctx.fork(), ctx.switchSession(), or ctx.reload(). For newSession, fork, and switchSession, move post-replacement work into withSession and use the ctx passed to withSession. For reload, do not use the old ctx after await ctx.reload().";
 		},
 		// Pre-bind: queue registrations so bindCore() can flush them once the
 		// model registry is available. bindCore() replaces both with direct calls.
@@ -461,8 +461,8 @@ function readPiManifest(packageJsonPath: string): PiManifest | null {
 	try {
 		const content = fs.readFileSync(packageJsonPath, "utf-8");
 		const pkg = JSON.parse(content);
-		if (pkg.Mooncli && typeof pkg.Mooncli === "object") {
-			return pkg.Mooncli as PiManifest;
+		if (pkg.Hodeus && typeof pkg.Hodeus === "object") {
+			return pkg.Hodeus as PiManifest;
 		}
 		return null;
 	} catch {
@@ -478,13 +478,13 @@ function isExtensionFile(name: string): boolean {
  * Resolve extension entry points from a directory.
  *
  * Checks for:
- * 1. package.json with "Mooncli.extensions" field -> returns declared paths
+ * 1. package.json with "Hodeus.extensions" field -> returns declared paths
  * 2. index.ts or index.js -> returns the index file
  *
  * Returns resolved paths or null if no entry points found.
  */
 function resolveExtensionEntries(dir: string): string[] | null {
-	// Check for package.json with "Mooncli" field first
+	// Check for package.json with "Hodeus" field first
 	const packageJsonPath = path.join(dir, "package.json");
 	if (fs.existsSync(packageJsonPath)) {
 		const manifest = readPiManifest(packageJsonPath);
@@ -521,7 +521,7 @@ function resolveExtensionEntries(dir: string): string[] | null {
  * Discovery rules:
  * 1. Direct files: `extensions/*.ts` or `*.js` → load
  * 2. Subdirectory with index: `extensions/* /index.ts` or `index.js` → load
- * 3. Subdirectory with package.json: `extensions/* /package.json` with "Mooncli" field → load what it declares
+ * 3. Subdirectory with package.json: `extensions/* /package.json` with "Hodeus" field → load what it declares
  *
  * No recursion beyond one level. Complex packages must use package.json manifest.
  */
@@ -593,7 +593,7 @@ export async function discoverAndLoadExtensions(
 	for (const p of configuredPaths) {
 		const resolved = resolvePath(p, cwd);
 		if (fs.existsSync(resolved) && fs.statSync(resolved).isDirectory()) {
-			// Check for package.json with Mooncli manifest or index.ts
+			// Check for package.json with Hodeus manifest or index.ts
 			const entries = resolveExtensionEntries(resolved);
 			if (entries) {
 				addPaths(entries);

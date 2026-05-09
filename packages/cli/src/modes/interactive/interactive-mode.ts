@@ -109,11 +109,11 @@ import { ExtensionEditorComponent } from "./components/extension-editor.js";
 import { ExtensionInputComponent } from "./components/extension-input.js";
 import { ExtensionSelectorComponent } from "./components/extension-selector.js";
 import { FooterComponent } from "./components/footer.js";
+import { HodeusHeaderComponent } from "./components/hodeus-header.js";
 import { keyHint, keyText, rawKeyHint } from "./components/keybinding-hints.js";
 import { LoginDialogComponent } from "./components/login-dialog.js";
 import { McpSelectorComponent } from "./components/mcp-selector.js";
 import { ModelSelectorComponent } from "./components/model-selector.js";
-import { HodeusHeaderComponent } from "./components/mooncli-header.js";
 import { type AuthSelectorProvider, OAuthSelectorComponent } from "./components/oauth-selector.js";
 import { ScopedModelsSelectorComponent } from "./components/scoped-models-selector.js";
 import { SessionSelectorComponent } from "./components/session-selector.js";
@@ -762,7 +762,7 @@ export class InteractiveMode {
 	}
 
 	private async checkForPackageUpdates(): Promise<string[]> {
-		if (process.env.Moon_OFFLINE) {
+		if (process.env.HODEUS_OFFLINE) {
 			return [];
 		}
 
@@ -858,7 +858,7 @@ export class InteractiveMode {
 	}
 
 	private reportInstallTelemetry(version: string): void {
-		if (process.env.Moon_OFFLINE) {
+		if (process.env.HODEUS_OFFLINE) {
 			return;
 		}
 

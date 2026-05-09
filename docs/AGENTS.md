@@ -67,29 +67,29 @@ When closing issues via commit:
 - If the user approves: create a feature branch, pull PR, rebase on main, apply adjustments, commit, merge into main, push, close PR, and leave a comment in the user's tone
 - You never open PRs yourself. We work in feature branches until everything is according to the user's requirements, then merge into main, and push.
 
-## Testing mooncli Interactive Mode with tmux
+## Testing Hodeus Interactive Mode with tmux
 
-To test mooncli's TUI in a controlled terminal environment:
+To test Hodeus's TUI in a controlled terminal environment:
 
 ```bash
 # Create tmux session with specific dimensions
-tmux new-session -d -s mooncli-test -x 80 -y 24
+tmux new-session -d -s Hodeus-test -x 80 -y 24
 
-# Start mooncli from source
-tmux send-keys -t mooncli-test "npm run build && node packages/cli/dist/cli.js" Enter
+# Start Hodeus from source
+tmux send-keys -t Hodeus-test "npm run build && node packages/cli/dist/cli.js" Enter
 
 # Wait for startup, then capture output
-sleep 3 && tmux capture-pane -t mooncli-test -p
+sleep 3 && tmux capture-pane -t Hodeus-test -p
 
 # Send input
-tmux send-keys -t mooncli-test "your prompt here" Enter
+tmux send-keys -t Hodeus-test "your prompt here" Enter
 
 # Send special keys
-tmux send-keys -t mooncli-test Escape
-tmux send-keys -t mooncli-test C-o  # ctrl+o
+tmux send-keys -t Hodeus-test Escape
+tmux send-keys -t Hodeus-test C-o  # ctrl+o
 
 # Cleanup
-tmux kill-session -t mooncli-test
+tmux kill-session -t Hodeus-test
 ```
 
 ## Changelog
@@ -244,3 +244,4 @@ git pull --rebase && git push
 ### User override
 
 If the user instructions conflict with rules set out here, ask for confirmation that they want to override the rules. Only then execute their instructions.
+

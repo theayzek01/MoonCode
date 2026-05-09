@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { fauxAssistantMessage, registerFauxProvider } from "mooncli-core";
+import { fauxAssistantMessage, registerFauxProvider } from "hodeus-core";
 import { afterEach, describe, expect, it } from "vitest";
 import { AuthStorage } from "../../../src/core/auth-storage.js";
 import type { EngineSession } from "../../../src/core/engine-session.js";
@@ -36,7 +36,7 @@ describe("regression #2860: replaced session callbacks", () => {
 	});
 
 	async function createRuntimeForTest(extensionFactory: ExtensionFactory, responses: string[]) {
-		const tempDir = join(tmpdir(), `Mooncli-2860-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+		const tempDir = join(tmpdir(), `Hodeus-2860-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 		mkdirSync(tempDir, { recursive: true });
 
 		const faux = registerFauxProvider({
@@ -54,8 +54,8 @@ describe("regression #2860: replaced session callbacks", () => {
 				authStorage,
 				resourceLoaderOptions: {
 					extensionFactories: [
-						(Mooncli: ExtensionAPI) => {
-							Mooncli.registerProvider(faux.getModel().provider, {
+						(Hodeus: ExtensionAPI) => {
+							Hodeus.registerProvider(faux.getModel().provider, {
 								baseUrl: faux.getModel().baseUrl,
 								apiKey: "faux-key",
 								api: faux.api,
@@ -70,7 +70,7 @@ describe("regression #2860: replaced session callbacks", () => {
 									maxTokens: registeredModel.maxTokens,
 								})),
 							});
-							extensionFactory(Mooncli);
+							extensionFactory(Hodeus);
 						},
 					],
 					noSkills: true,
@@ -139,7 +139,7 @@ describe("regression #2860: replaced session callbacks", () => {
 		return { runtime, faux };
 	}
 
-	it("rebinds before withSession, targets the replacement session, and invalidates stale Mooncli/ctx", async () => {
+	it("rebinds before withSession, targets the replacement session, and invalidates stale Hodeus/ctx", async () => {
 		const events: string[] = [];
 		let oldCtx: ExtensionCommandContext | undefined;
 		let oldPi: ExtensionAPI | undefined;
@@ -149,19 +149,19 @@ describe("regression #2860: replaced session callbacks", () => {
 		let replacementSessionFile: string | undefined;
 		let instanceId = 0;
 		const { runtime } = await createRuntimeForTest(
-			(Mooncli) => {
+			(Hodeus) => {
 				const currentInstance = ++instanceId;
-				Mooncli.on("session_start", () => {
+				Hodeus.on("session_start", () => {
 					events.push(`start:${currentInstance}`);
 				});
-				Mooncli.on("session_shutdown", () => {
+				Hodeus.on("session_shutdown", () => {
 					events.push(`shutdown:${currentInstance}`);
 				});
-				Mooncli.registerCommand("repro", {
+				Hodeus.registerCommand("repro", {
 					description: "repro",
 					handler: async (_args, ctx) => {
 						oldCtx = ctx;
-						oldPi = Mooncli;
+						oldPi = Hodeus;
 						oldSessionFile = ctx.sessionManager.getSessionFile();
 						await ctx.newSession({
 							parentSession: oldSessionFile,
@@ -204,8 +204,8 @@ describe("regression #2860: replaced session callbacks", () => {
 
 	it("supports withSession for fork", async () => {
 		const { runtime } = await createRuntimeForTest(
-			(Mooncli) => {
-				Mooncli.registerCommand("fork-it", {
+			(Hodeus) => {
+				Hodeus.registerCommand("fork-it", {
 					description: "fork-it",
 					handler: async (_args, ctx) => {
 						const leafId = ctx.sessionManager.getLeafId();
@@ -238,8 +238,8 @@ describe("regression #2860: replaced session callbacks", () => {
 	it("supports withSession for switchSession", async () => {
 		let targetSessionPath = "";
 		const { runtime } = await createRuntimeForTest(
-			(Mooncli) => {
-				Mooncli.registerCommand("switch-it", {
+			(Hodeus) => {
+				Hodeus.registerCommand("switch-it", {
 					description: "switch-it",
 					handler: async (_args, ctx) => {
 						await ctx.switchSession(targetSessionPath, {

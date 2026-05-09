@@ -10,8 +10,8 @@
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { getModel } from "mooncli-core";
-import { Engine } from "mooncli-engine";
+import { getModel } from "hodeus-core";
+import { Engine } from "hodeus-engine";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { AuthStorage } from "../src/core/auth-storage.js";
 import { EngineSession, type EngineSessionEvent } from "../src/core/engine-session.js";
@@ -29,7 +29,7 @@ describe.skipIf(!API_KEY)("EngineSession compaction e2e", () => {
 
 	beforeEach(() => {
 		// Create temp directory for session files
-		tempDir = join(tmpdir(), `Mooncli-compaction-test-${Date.now()}`);
+		tempDir = join(tmpdir(), `Hodeus-compaction-test-${Date.now()}`);
 		mkdirSync(tempDir, { recursive: true });
 
 		// Track events

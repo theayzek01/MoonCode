@@ -2,10 +2,10 @@
  * Minimal SDK Usage
  *
  * Uses all defaults: discovers skills, extensions, tools, context files
- * from cwd and ~/.Mooncli/engine. Model chosen from settings or first available.
+ * from cwd and ~/.Hodeus/engine. Model chosen from settings or first available.
  */
 
-import { createEngineSession } from "Mooncli";
+import { createEngineSession } from "Hodeus";
 
 const { session } = await createEngineSession();
 

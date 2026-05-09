@@ -725,13 +725,13 @@ export function buildRequest(model, context, projectId, options = {}, isAntigrav
         request,
         ...(isAntigravity ? { requestType: "engine" } : {}),
         userEngine: isAntigravity ? "antigravity" : "hodeuscli-cli",
-        requestId: `${isAntigravity ? "engine" : "Mooncli"}-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+        requestId: `${isAntigravity ? "engine" : "Hodeus"}-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
     };
 }
 function getDisabledThinkingConfig(modelId) {
     // Google docs: Gemini 3.1 Pro cannot disable thinking, and Gemini 3 Flash / Flash-Lite
     // do not support full thinking-off either. For Gemini 3 models, use the lowest supported
-    // thinkingLevel without includeThoughts so hidden thinking remains invisible to Mooncli.
+    // thinkingLevel without includeThoughts so hidden thinking remains invisible to Hodeus.
     if (isGemini3ProModel(modelId)) {
         return { thinkingLevel: "LOW" };
     }
@@ -764,3 +764,4 @@ function getGeminiCliThinkingLevel(effort, modelId) {
     }
 }
 //# sourceMappingURL=google-antigravity.js.map
+

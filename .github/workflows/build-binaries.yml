@@ -51,7 +51,7 @@ jobs:
             cat > /tmp/release-notes.md <<EOF
           Release ${VERSION}
 
-          Minimal UI refresh + Mooncli v2 workspace features.
+          Minimal UI refresh + Hodeus v2 workspace features.
 
           Binaries:
           - Windows x64
@@ -67,11 +67,11 @@ jobs:
         run: |
           cd packages/cli/binaries
           assets=(
-            mooncli-darwin-arm64.tar.gz
-            mooncli-darwin-x64.tar.gz
-            mooncli-linux-x64.tar.gz
-            mooncli-linux-arm64.tar.gz
-            mooncli-windows-x64.zip
+            Hodeus-darwin-arm64.tar.gz
+            Hodeus-darwin-x64.tar.gz
+            Hodeus-linux-x64.tar.gz
+            Hodeus-linux-arm64.tar.gz
+            Hodeus-windows-x64.zip
           )
 
           for asset in "${assets[@]}"; do
@@ -87,3 +87,4 @@ jobs:
           for asset in "${assets[@]}"; do
             gh release upload "${RELEASE_TAG}" "$asset" --clobber
           done
+

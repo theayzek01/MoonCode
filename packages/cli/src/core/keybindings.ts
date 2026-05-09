@@ -8,7 +8,7 @@ import {
 	type KeyId,
 	TUI_KEYBINDINGS,
 	KeybindingsManager as TuiKeybindingsManager,
-} from "mooncli-tui";
+} from "hodeus-tui";
 import { join } from "path";
 import { getEngineDir } from "../config.js";
 
@@ -59,7 +59,7 @@ export interface AppKeybindings {
 
 export type AppKeybinding = keyof AppKeybindings;
 
-declare module "mooncli-tui" {
+declare module "hodeus-tui" {
 	interface Keybindings extends AppKeybindings {}
 }
 

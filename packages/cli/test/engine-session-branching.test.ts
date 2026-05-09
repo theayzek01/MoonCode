@@ -10,7 +10,7 @@
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { getModel } from "mooncli-core";
+import { getModel } from "hodeus-core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { AuthStorage } from "../src/core/auth-storage.js";
 import type { EngineSession } from "../src/core/engine-session.js";
@@ -31,7 +31,7 @@ describe.skipIf(!API_KEY)("EngineSession forking", () => {
 	let sessionManager: SessionManager;
 
 	beforeEach(() => {
-		tempDir = join(tmpdir(), `Mooncli-branching-test-${Date.now()}`);
+		tempDir = join(tmpdir(), `Hodeus-branching-test-${Date.now()}`);
 		mkdirSync(tempDir, { recursive: true });
 	});
 

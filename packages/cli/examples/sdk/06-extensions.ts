@@ -5,15 +5,15 @@
  * They provide a unified system for extensions, custom tools, commands, and more.
  *
  * By default, extension files are discovered from:
- * - ~/.Mooncli/engine/extensions/
- * - <cwd>/.Mooncli/extensions/
+ * - ~/.Hodeus/engine/extensions/
+ * - <cwd>/.Hodeus/extensions/
  * - Paths specified in settings.json "extensions" array
  *
  * An extension is a TypeScript file that exports a default function:
- *   export default function (Mooncli: ExtensionAPI) { ... }
+ *   export default function (Hodeus: ExtensionAPI) { ... }
  */
 
-import { createEngineSession, DefaultResourceLoader, getEngineDir, SessionManager } from "Mooncli";
+import { createEngineSession, DefaultResourceLoader, getEngineDir, SessionManager } from "Hodeus";
 
 // Extensions are discovered automatically from standard locations.
 // You can also add paths via settings.json or DefaultResourceLoader options.
@@ -23,8 +23,8 @@ const resourceLoader = new DefaultResourceLoader({
 	engineDir: getEngineDir(),
 	additionalExtensionPaths: ["./my-logging-extension.ts", "./my-safety-extension.ts"],
 	extensionFactories: [
-		(Mooncli) => {
-			Mooncli.on("engine_start", () => {
+		(Hodeus) => {
+			Hodeus.on("engine_start", () => {
 				console.log("[Inline Extension] Engine starting");
 			});
 		},
@@ -48,25 +48,25 @@ console.log();
 
 // Example extension file (./my-logging-extension.ts):
 /*
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "Hodeus";
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.on("engine_start", async () => {
+export default function (Hodeus: ExtensionAPI) {
+	Hodeus.on("engine_start", async () => {
 		console.log("[Extension] Engine starting");
 	});
 
-	Mooncli.on("tool_call", async (event) => {
+	Hodeus.on("tool_call", async (event) => {
 		console.log(\`[Extension] Tool: \${event.toolName}\`);
 		// Return { block: true, reason: "..." } to block execution
 		return undefined;
 	});
 
-	Mooncli.on("engine_end", async (event) => {
+	Hodeus.on("engine_end", async (event) => {
 		console.log(\`[Extension] Done, \${event.messages.length} messages\`);
 	});
 
 	// Register a custom tool
-	Mooncli.registerTool({
+	Hodeus.registerTool({
 		name: "my_tool",
 		label: "My Tool",
 		description: "Does something useful",
@@ -80,7 +80,7 @@ export default function (Mooncli: ExtensionAPI) {
 	});
 
 	// Register a command
-	Mooncli.registerCommand("mycommand", {
+	Hodeus.registerCommand("mycommand", {
 		description: "Do something",
 		handler: async (args, ctx) => {
 			ctx.ui.notify(\`Command executed with: \${args}\`);

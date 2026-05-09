@@ -373,11 +373,11 @@ describe("skills", () => {
 		});
 
 		it("should expand ~ in skillPaths", () => {
-			const homeSkillsDir = join(homedir(), ".Mooncli/engine/skills");
+			const homeSkillsDir = join(homedir(), ".Hodeus/engine/skills");
 			const { skills: withTilde } = loadSkills({
 				engineDir: emptyEngineDir,
 				cwd: emptyCwd,
-				skillPaths: ["~/.Mooncli/engine/skills"],
+				skillPaths: ["~/.Hodeus/engine/skills"],
 				includeDefaults: true,
 			});
 			const { skills: withoutTilde } = loadSkills({

@@ -1,8 +1,8 @@
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { fauxAssistantMessage, fauxToolCall, type Model } from "mooncli-core";
-import type { EngineTool } from "mooncli-engine";
+import { fauxAssistantMessage, fauxToolCall, type Model } from "hodeus-core";
+import type { EngineTool } from "hodeus-engine";
 import { Type } from "typebox";
 import { afterEach, describe, expect, it } from "vitest";
 import type { PromptTemplate } from "../../src/core/prompt-templates.js";
@@ -144,7 +144,7 @@ describe("EngineSession prompt characterization", () => {
 	});
 
 	it("expands skill commands before sending the prompt", async () => {
-		const tempDir = join(tmpdir(), `Mooncli-skill-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+		const tempDir = join(tmpdir(), `Hodeus-skill-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 		mkdirSync(tempDir, { recursive: true });
 		tempDirs.push(tempDir);
 		const skillPath = join(tempDir, "test-skill.md");
@@ -227,8 +227,8 @@ describe("EngineSession prompt characterization", () => {
 		const commandRuns: string[] = [];
 		const harness = await createHarness({
 			extensionFactories: [
-				(Mooncli) => {
-					Mooncli.registerCommand("testcmd", {
+				(Hodeus) => {
+					Hodeus.registerCommand("testcmd", {
 						description: "Test command",
 						handler: async (args) => {
 							commandRuns.push(args);

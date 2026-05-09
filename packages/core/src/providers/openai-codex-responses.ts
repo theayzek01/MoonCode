@@ -1115,8 +1115,8 @@ function buildBaseCodexHeaders(
 	}
 	headers.set("Authorization", `Bearer ${token}`);
 	headers.set("chatgpt-account-id", accountId);
-	headers.set("originator", "Mooncli");
-	const userEngine = _os ? `Mooncli (${_os.platform()} ${_os.release()}; ${_os.arch()})` : "Mooncli (browser)";
+	headers.set("originator", "Hodeus");
+	const userEngine = _os ? `Hodeus (${_os.platform()} ${_os.release()}; ${_os.arch()})` : "Hodeus (browser)";
 	headers.set("User-Engine", userEngine);
 	return headers;
 }

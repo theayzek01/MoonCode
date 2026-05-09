@@ -2,7 +2,7 @@
  * Engine discovery and configuration
  */
 
-import { getEngineDir, parseFrontmatter } from "Mooncli";
+import { getEngineDir, parseFrontmatter } from "Hodeus";
 import * as fs from "node:fs";
 import * as path from "node:path";
 
@@ -85,7 +85,7 @@ function isDirectory(p: string): boolean {
 function findNearestProjectEnginesDir(cwd: string): string | null {
 	let currentDir = cwd;
 	while (true) {
-		const candidate = path.join(currentDir, ".Mooncli", "engines");
+		const candidate = path.join(currentDir, ".Hodeus", "engines");
 		if (isDirectory(candidate)) return candidate;
 
 		const parentDir = path.dirname(currentDir);

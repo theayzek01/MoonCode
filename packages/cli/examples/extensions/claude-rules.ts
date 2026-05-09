@@ -12,12 +12,12 @@
  * - Organize with subdirectories: Group related rules (e.g., frontend/, backend/)
  *
  * Usage:
- * 1. Copy this file to ~/.Mooncli/engine/extensions/ or your project's .Mooncli/extensions/
+ * 1. Copy this file to ~/.Hodeus/engine/extensions/ or your project's .Hodeus/extensions/
  * 2. Create .claude/rules/ folder in your project root
  * 3. Add .md files with your rules
  */
 
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "Hodeus";
 import * as fs from "node:fs";
 import * as path from "node:path";
 
@@ -46,12 +46,12 @@ function findMarkdownFiles(dir: string, basePath: string = ""): string[] {
 	return results;
 }
 
-export default function claudeRulesExtension(Mooncli: ExtensionAPI) {
+export default function claudeRulesExtension(Hodeus: ExtensionAPI) {
 	let ruleFiles: string[] = [];
 	let rulesDir: string = "";
 
 	// Scan for rules on session start
-	Mooncli.on("session_start", async (_event, ctx) => {
+	Hodeus.on("session_start", async (_event, ctx) => {
 		rulesDir = path.join(ctx.cwd, ".claude", "rules");
 		ruleFiles = findMarkdownFiles(rulesDir);
 
@@ -61,7 +61,7 @@ export default function claudeRulesExtension(Mooncli: ExtensionAPI) {
 	});
 
 	// Append available rules to system prompt
-	Mooncli.on("before_engine_start", async (event) => {
+	Hodeus.on("before_engine_start", async (event) => {
 		if (ruleFiles.length === 0) {
 			return;
 		}

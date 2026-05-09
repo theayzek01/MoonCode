@@ -16,15 +16,15 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, resolve } from "node:path";
-import type { AssistantMessage, ImageContent, Message, Model, TextContent } from "mooncli-core";
+import type { AssistantMessage, ImageContent, Message, Model, TextContent } from "hodeus-core";
 import {
 	clampThinkingLevel,
 	getSupportedThinkingLevels,
 	isContextOverflow,
 	modelsAreEqual,
 	resetApiProviders,
-} from "mooncli-core";
-import type { Engine, EngineEvent, EngineMessage, EngineState, EngineTool, ThinkingLevel } from "mooncli-engine";
+} from "hodeus-core";
+import type { Engine, EngineEvent, EngineMessage, EngineState, EngineTool, ThinkingLevel } from "hodeus-engine";
 import { theme } from "../modes/interactive/theme/theme.js";
 import { stripFrontmatter } from "../utils/frontmatter.js";
 import { sleep } from "../utils/sleep.js";
@@ -191,7 +191,7 @@ export interface EngineSessionConfig {
 	/** Session start event metadata emitted when extensions bind to this runtime. */
 	sessionStartEvent?: SessionStartEvent;
 	/** Optional MCP manager for this session. */
-	mcpManager?: import("mooncli-engine").McpManager;
+	mcpManager?: import("hodeus-engine").McpManager;
 }
 
 export interface ExtensionBindings {
@@ -315,7 +315,7 @@ export class EngineSession {
 	private _extensionErrorListener?: ExtensionErrorListener;
 	private _extensionErrorUnsubscriber?: () => void;
 
-	private _mcpManager?: import("mooncli-engine").McpManager;
+	private _mcpManager?: import("hodeus-engine").McpManager;
 	public get mcpManager() {
 		return this._mcpManager;
 	}
@@ -776,7 +776,7 @@ export class EngineSession {
 	 */
 	dispose(): void {
 		this._extensionRunner.invalidate(
-			"This extension ctx is stale after session replacement or reload. Do not use a captured Mooncli or command ctx after ctx.newSession(), ctx.fork(), ctx.switchSession(), or ctx.reload(). For newSession, fork, and switchSession, move post-replacement work into withSession and use the ctx passed to withSession. For reload, do not use the old ctx after await ctx.reload().",
+			"This extension ctx is stale after session replacement or reload. Do not use a captured Hodeus or command ctx after ctx.newSession(), ctx.fork(), ctx.switchSession(), or ctx.reload(). For newSession, fork, and switchSession, move post-replacement work into withSession and use the ctx passed to withSession. For reload, do not use the old ctx after await ctx.reload().",
 		);
 		this._disconnectFromEngine();
 		this._mcpManager?.dispose();
@@ -1172,7 +1172,7 @@ export class EngineSession {
 
 	/**
 	 * Send a prompt to the engine.
-	 * - Handles extension commands (registered via Mooncli.registerCommand) immediately, even during streaming
+	 * - Handles extension commands (registered via Hodeus.registerCommand) immediately, even during streaming
 	 * - Expands file-based prompt templates by default
 	 * - During streaming, queues via steer() or followUp() based on streamingBehavior option
 	 * - Validates model and API key before sending (when not streaming)
@@ -1191,7 +1191,7 @@ export class EngineSession {
 
 		try {
 			// Handle extension commands first (execute immediately, even during streaming)
-			// Extension commands manage their own Provider interaction via Mooncli.sendMessage()
+			// Extension commands manage their own Provider interaction via Hodeus.sendMessage()
 			if (expandPromptTemplates && text.startsWith("/")) {
 				const handled = await this._tryExecuteExtensionCommand(text);
 				if (handled) {

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import type { EngineTool } from "mooncli-engine";
+import type { EngineTool } from "hodeus-engine";
 import { Type } from "typebox";
 import type { ToolDefinition } from "../extensions/types.js";
 import {
@@ -41,12 +41,11 @@ export function createGitShipToolDefinition(cwd: string): ToolDefinition<typeof 
 			const action = input.action || "status";
 			let text = "";
 			if (action === "status") text = await getGitStatus(cwd);
-			else if (action === "branch")
-				text = `Branch: ${await createBranch(cwd, input.branchName || "mooncli/update")}`;
-			else if (action === "commit") text = await commitAll(cwd, input.message || "chore: update via mooncli");
+			else if (action === "branch") text = `Branch: ${await createBranch(cwd, input.branchName || "Hodeus/update")}`;
+			else if (action === "commit") text = await commitAll(cwd, input.message || "chore: update via Hodeus");
 			else if (action === "push") text = await pushBranch(cwd, input.branchName);
 			else if (action === "pr")
-				text = await createPR(cwd, input.message || "Mooncli changes", await getDiffSummary(cwd), input.branchName);
+				text = await createPR(cwd, input.message || "Hodeus changes", await getDiffSummary(cwd), input.branchName);
 			else {
 				const result = await shipChanges(cwd, { message: input.message, branchName: input.branchName });
 				text = [

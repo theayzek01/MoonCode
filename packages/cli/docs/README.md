@@ -1,3 +1,4 @@
-# Mooncli CLI Docs
+# Hodeus CLI Docs
 
 Runtime documentation assets for packaged and binary releases.
+

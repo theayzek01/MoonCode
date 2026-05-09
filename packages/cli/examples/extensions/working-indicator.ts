@@ -2,10 +2,10 @@
  * Working Indicator Extension
  *
  * Demonstrates `ctx.ui.setWorkingIndicator()` for customizing the inline
- * working indicator shown while Mooncli is streaming a response.
+ * working indicator shown while Hodeus is streaming a response.
  *
  * Usage:
- *   Mooncli --extension examples/extensions/working-indicator.ts
+ *   Hodeus --extension examples/extensions/working-indicator.ts
  *
  * Commands:
  *   /working-indicator           Show current mode
@@ -13,10 +13,10 @@
  *   /working-indicator pulse     Use a custom animated indicator
  *   /working-indicator none      Hide the indicator entirely
  *   /working-indicator spinner   Restore an animated spinner
- *   /working-indicator reset     Restore Mooncli's default spinner
+ *   /working-indicator reset     Restore Hodeus's default spinner
  */
 
-import type { ExtensionAPI, ExtensionContext, WorkingIndicatorOptions } from "Mooncli";
+import type { ExtensionAPI, ExtensionContext, WorkingIndicatorOptions } from "Hodeus";
 
 type WorkingIndicatorMode = "dot" | "none" | "pulse" | "spinner" | "default";
 
@@ -79,11 +79,11 @@ function describeMode(mode: WorkingIndicatorMode): string {
 		case "spinner":
 			return "custom spinner";
 		case "default":
-			return "Mooncli default spinner";
+			return "Hodeus default spinner";
 	}
 }
 
-export default function (Mooncli: ExtensionAPI) {
+export default function (Hodeus: ExtensionAPI) {
 	let mode: WorkingIndicatorMode = "spinner";
 
 	const applyIndicator = (ctx: ExtensionContext) => {
@@ -91,11 +91,11 @@ export default function (Mooncli: ExtensionAPI) {
 		ctx.ui.setStatus("working-indicator", ctx.ui.theme.fg("dim", `Indicator: ${describeMode(mode)}`));
 	};
 
-	Mooncli.on("session_start", async (_event, ctx) => {
+	Hodeus.on("session_start", async (_event, ctx) => {
 		applyIndicator(ctx);
 	});
 
-	Mooncli.registerCommand("working-indicator", {
+	Hodeus.registerCommand("working-indicator", {
 		description: "Set the streaming working indicator: dot, pulse, none, spinner, or reset.",
 		handler: async (args, ctx) => {
 			const nextMode = args.trim().toLowerCase();

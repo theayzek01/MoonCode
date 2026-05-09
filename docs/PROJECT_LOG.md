@@ -1,4 +1,4 @@
-# Mooncli Project Log
+# Hodeus Project Log
 
 ## [2026-05-03]
 ### Added
@@ -15,3 +15,4 @@
 - Installed `discord.js`.
 - Built the project successfully.
 - Ran `npm audit fix` to secure dependencies.
+

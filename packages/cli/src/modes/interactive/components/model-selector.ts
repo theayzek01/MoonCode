@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { type Model, modelsAreEqual } from "mooncli-core";
-import { Container, type Focusable, fuzzyFilter, getKeybindings, Input, Spacer, Text, type TUI } from "mooncli-tui";
+import { type Model, modelsAreEqual } from "hodeus-core";
+import { Container, type Focusable, fuzzyFilter, getKeybindings, Input, Spacer, Text, type TUI } from "hodeus-tui";
 import type { ModelRegistry } from "../../../core/model-registry.js";
 import type { SettingsManager } from "../../../core/settings-manager.js";
 import { theme } from "../theme/theme.js";

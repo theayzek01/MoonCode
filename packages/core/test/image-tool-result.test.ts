@@ -405,7 +405,7 @@ describe("Tool Results with Images", () => {
 	});
 
 	// =========================================================================
-	// OAuth-based providers (credentials from ~/.Mooncli/engine/oauth.json)
+	// OAuth-based providers (credentials from ~/.Hodeus/engine/oauth.json)
 	// =========================================================================
 
 	describe("Anthropic OAuth Provider (claude-sonnet-4-5)", () => {

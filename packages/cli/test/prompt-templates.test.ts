@@ -389,7 +389,7 @@ describe("parseCommandArgs + substituteArgs integration", () => {
 // ============================================================================
 
 describe("loadPromptTemplates - argument-hint", () => {
-	const testDir = join(tmpdir(), `Mooncli-test-prompts-${Date.now()}`);
+	const testDir = join(tmpdir(), `Hodeus-test-prompts-${Date.now()}`);
 
 	function writeTemplate(name: string, content: string) {
 		mkdirSync(testDir, { recursive: true });

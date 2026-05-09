@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
-import type { AssistantMessage, Usage } from "mooncli-core";
-import { getModel } from "mooncli-core";
-import type { EngineMessage } from "mooncli-engine";
+import type { AssistantMessage, Usage } from "hodeus-core";
+import { getModel } from "hodeus-core";
+import type { EngineMessage } from "hodeus-engine";
 import { join } from "path";
 import { beforeEach, describe, expect, it } from "vitest";
 import {

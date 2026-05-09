@@ -1,14 +1,14 @@
 /**
- * Mooncli Notify Extension
+ * Hodeus Notify Extension
  *
- * Sends a native terminal notification when Mooncli engine is done and waiting for input.
+ * Sends a native terminal notification when Hodeus engine is done and waiting for input.
  * Supports multiple terminal protocols:
  * - OSC 777: Ghostty, iTerm2, WezTerm, rxvt-unicode
  * - OSC 99: Kitty
  * - Windows toast: Windows Terminal (WSL)
  */
 
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "Hodeus";
 
 function windowsToastScript(title: string, body: string): string {
 	const type = "Windows.UI.Notifications";
@@ -48,8 +48,8 @@ function notify(title: string, body: string): void {
 	}
 }
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.on("engine_end", async () => {
-		notify("Mooncli", "Ready for input");
+export default function (Hodeus: ExtensionAPI) {
+	Hodeus.on("engine_end", async () => {
+		notify("Hodeus", "Ready for input");
 	});
 }

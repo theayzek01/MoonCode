@@ -5,8 +5,8 @@
  * without paying for an extra follow-up Provider turn.
  */
 
-import { defineTool, type ExtensionAPI } from "Mooncli";
-import { Text } from "mooncli-tui";
+import { defineTool, type ExtensionAPI } from "Hodeus";
+import { Text } from "hodeus-tui";
 import { Type } from "typebox";
 
 interface StructuredOutputDetails {
@@ -60,6 +60,6 @@ const structuredOutputTool = defineTool({
 	},
 });
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.registerTool(structuredOutputTool);
+export default function (Hodeus: ExtensionAPI) {
+	Hodeus.registerTool(structuredOutputTool);
 }

@@ -3,11 +3,11 @@
  * Print mode (single-shot): Send prompts, output result, exit.
  *
  * Used for:
- * - `Mooncli -p "prompt"` - text output
- * - `Mooncli --mode json "prompt"` - JSON event stream
+ * - `Hodeus -p "prompt"` - text output
+ * - `Hodeus --mode json "prompt"` - JSON event stream
  */
 
-import type { AssistantMessage, ImageContent } from "mooncli-core";
+import type { AssistantMessage, ImageContent } from "hodeus-core";
 import type { EngineSessionRuntime } from "../core/engine-session-runtime.js";
 import { flushRawStdout, writeRawStdout } from "../core/output-guard.js";
 import { killTrackedDetachedChildren } from "../utils/shell.js";

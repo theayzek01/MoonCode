@@ -4,7 +4,7 @@
  * Shows how to replace or modify the default system prompt.
  */
 
-import { createEngineSession, DefaultResourceLoader, getEngineDir, SessionManager } from "Mooncli";
+import { createEngineSession, DefaultResourceLoader, getEngineDir, SessionManager } from "Hodeus";
 
 const cwd = process.cwd();
 const engineDir = getEngineDir();
@@ -15,7 +15,7 @@ const loader1 = new DefaultResourceLoader({
 	engineDir,
 	systemPromptOverride: () => `You are a helpful assistant that speaks like a pirate.
 Always end responses with "Arrr!"`,
-	// Needed to avoid DefaultResourceLoader appending APPEND_SYSTEM.md from ~/.Mooncli/engine or <cwd>/.Mooncli.
+	// Needed to avoid DefaultResourceLoader appending APPEND_SYSTEM.md from ~/.Hodeus/engine or <cwd>/.Hodeus.
 	appendSystemPromptOverride: () => [],
 });
 await loader1.reload();

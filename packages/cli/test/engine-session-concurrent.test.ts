@@ -12,8 +12,8 @@ import {
 	getModel,
 	type ImageContent,
 	type TextContent,
-} from "mooncli-core";
-import { Engine } from "mooncli-engine";
+} from "hodeus-core";
+import { Engine } from "hodeus-engine";
 import { Type } from "typebox";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { AuthStorage } from "../src/core/auth-storage.js";
@@ -63,7 +63,7 @@ describe("EngineSession concurrent prompt guard", () => {
 	let tempDir: string;
 
 	beforeEach(() => {
-		tempDir = join(tmpdir(), `Mooncli-concurrent-test-${Date.now()}`);
+		tempDir = join(tmpdir(), `Hodeus-concurrent-test-${Date.now()}`);
 		mkdirSync(tempDir, { recursive: true });
 	});
 
@@ -240,11 +240,11 @@ describe("EngineSession concurrent prompt guard", () => {
 		authStorage.setRuntimeApiKey("anthropic", "test-key");
 
 		const extensionsResult = await createTestExtensionsResult([
-			(Mooncli) => {
-				(globalThis as typeof globalThis & { testExtensionApi?: unknown }).testExtensionApi = Mooncli;
+			(Hodeus) => {
+				(globalThis as typeof globalThis & { testExtensionApi?: unknown }).testExtensionApi = Hodeus;
 			},
-			(Mooncli) => {
-				Mooncli.on("input", async (event) => {
+			(Hodeus) => {
+				Hodeus.on("input", async (event) => {
 					lastInputSource = event.source;
 				});
 			},
@@ -268,16 +268,16 @@ describe("EngineSession concurrent prompt guard", () => {
 		await new Promise((resolve) => setTimeout(resolve, 10));
 		expect(session.isStreaming).toBe(true);
 
-		const Mooncli = (
+		const Hodeus = (
 			globalThis as typeof globalThis & {
 				testExtensionApi?: {
 					sendUserMessage: (content: string, options?: { deliverAs?: "steer" | "followUp" }) => void;
 				};
 			}
 		).testExtensionApi;
-		expect(Mooncli).toBeDefined();
+		expect(Hodeus).toBeDefined();
 
-		Mooncli!.sendUserMessage("Steer from extension", { deliverAs: "steer" });
+		Hodeus!.sendUserMessage("Steer from extension", { deliverAs: "steer" });
 		await new Promise((resolve) => setTimeout(resolve, 25));
 
 		expect(session.pendingMessageCount).toBe(1);

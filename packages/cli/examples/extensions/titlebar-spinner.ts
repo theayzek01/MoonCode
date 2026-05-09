@@ -5,21 +5,21 @@
  * Uses `ctx.ui.setTitle()` to update the terminal title via the extension API.
  *
  * Usage:
- *   Mooncli --extension examples/extensions/titlebar-spinner.ts
+ *   Hodeus --extension examples/extensions/titlebar-spinner.ts
  */
 
-import type { ExtensionAPI, ExtensionContext } from "Mooncli";
+import type { ExtensionAPI, ExtensionContext } from "Hodeus";
 import path from "node:path";
 
 const BRCoreLLE_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
-function getBaseTitle(Mooncli: ExtensionAPI): string {
+function getBaseTitle(Hodeus: ExtensionAPI): string {
 	const cwd = path.basename(process.cwd());
-	const session = Mooncli.getSessionName();
+	const session = Hodeus.getSessionName();
 	return session ? `π - ${session} - ${cwd}` : `π - ${cwd}`;
 }
 
-export default function (Mooncli: ExtensionAPI) {
+export default function (Hodeus: ExtensionAPI) {
 	let timer: ReturnType<typeof setInterval> | null = null;
 	let frameIndex = 0;
 
@@ -29,7 +29,7 @@ export default function (Mooncli: ExtensionAPI) {
 			timer = null;
 		}
 		frameIndex = 0;
-		ctx.ui.setTitle(getBaseTitle(Mooncli));
+		ctx.ui.setTitle(getBaseTitle(Hodeus));
 	}
 
 	function startAnimation(ctx: ExtensionContext) {
@@ -37,22 +37,22 @@ export default function (Mooncli: ExtensionAPI) {
 		timer = setInterval(() => {
 			const frame = BRCoreLLE_FRAMES[frameIndex % BRCoreLLE_FRAMES.length];
 			const cwd = path.basename(process.cwd());
-			const session = Mooncli.getSessionName();
+			const session = Hodeus.getSessionName();
 			const title = session ? `${frame} π - ${session} - ${cwd}` : `${frame} π - ${cwd}`;
 			ctx.ui.setTitle(title);
 			frameIndex++;
 		}, 80);
 	}
 
-	Mooncli.on("engine_start", async (_event, ctx) => {
+	Hodeus.on("engine_start", async (_event, ctx) => {
 		startAnimation(ctx);
 	});
 
-	Mooncli.on("engine_end", async (_event, ctx) => {
+	Hodeus.on("engine_end", async (_event, ctx) => {
 		stopAnimation(ctx);
 	});
 
-	Mooncli.on("session_shutdown", async (_event, ctx) => {
+	Hodeus.on("session_shutdown", async (_event, ctx) => {
 		stopAnimation(ctx);
 	});
 }

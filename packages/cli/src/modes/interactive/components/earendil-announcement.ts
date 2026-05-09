@@ -1,6 +1,6 @@
 // @ts-nocheck
 import * as fs from "node:fs";
-import { Container, Image, Spacer, Text } from "mooncli-tui";
+import { Container, Image, Spacer, Text } from "hodeus-tui";
 import { getBundledInteractiveAssetPath } from "../../../config.js";
 import { theme } from "../theme/theme.js";
 import { DynamicBorder } from "./dynamic-border.js";
@@ -30,7 +30,7 @@ export class EarendilAnnouncementComponent extends Container {
 		super();
 
 		this.addChild(new DynamicBorder((text) => theme.fg("accent", text)));
-		this.addChild(new Text(theme.bold(theme.fg("accent", "Mooncli yayında!")), 1, 0));
+		this.addChild(new Text(theme.bold(theme.fg("accent", "Hodeus yayında!")), 1, 0));
 		this.addChild(new Spacer(1));
 		this.addChild(new Text(theme.fg("muted", "Blog yazısını oku:"), 1, 0));
 		this.addChild(new Text(theme.fg("mdLink", BLOG_URL), 1, 0));

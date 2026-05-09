@@ -3,15 +3,15 @@
  *
  * Demonstrates ctx.getSystemPrompt() for accessing the effective system prompt.
  */
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "Hodeus";
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.on("engine_start", (_event, ctx) => {
+export default function (Hodeus: ExtensionAPI) {
+	Hodeus.on("engine_start", (_event, ctx) => {
 		const prompt = ctx.getSystemPrompt();
 		ctx.ui.setStatus("system-prompt", `System: ${prompt.length} chars`);
 	});
 
-	Mooncli.on("session_shutdown", (_event, ctx) => {
+	Hodeus.on("session_shutdown", (_event, ctx) => {
 		ctx.ui.setStatus("system-prompt", undefined);
 	});
 }

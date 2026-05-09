@@ -1,5 +1,5 @@
 {
-	"name": "mooncli-web-ui",
+	"name": "Hodeus-web-ui",
 	"version": "9.5.4",
 	"type": "module",
 	"private": true,
@@ -12,3 +12,4 @@
 	"dependencies": {},
 	"devDependencies": {}
 }
+

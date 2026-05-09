@@ -1,5 +1,5 @@
-import type { AssistantMessage, Model } from "mooncli-core";
-import type { EngineMessage } from "mooncli-engine";
+import type { AssistantMessage, Model } from "hodeus-core";
+import type { EngineMessage } from "hodeus-engine";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { generateSummary } from "../src/core/compaction/index.js";
 
@@ -7,8 +7,8 @@ const { completeSimpleMock } = vi.hoisted(() => ({
 	completeSimpleMock: vi.fn(),
 }));
 
-vi.mock("mooncli-core", async (importOriginal) => {
-	const actual = await importOriginal<typeof import("mooncli-core")>();
+vi.mock("hodeus-core", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("hodeus-core")>();
 	return {
 		...actual,
 		completeSimple: completeSimpleMock,

@@ -1,5 +1,5 @@
 {
-	"name": "mooncli-extension-sandbox",
+	"name": "Hodeus-extension-sandbox",
 	"private": true,
 	"version": "5.05.2026-01:25",
 	"type": "module",
@@ -8,7 +8,7 @@
 		"build": "echo 'nothing to build'",
 		"check": "echo 'nothing to check'"
 	},
-	"mooncli": {
+	"Hodeus": {
 		"extensions": [
 			"./index.ts"
 		]
@@ -17,3 +17,4 @@
 		"@anthropic-ai/sandbox-runtime": "^0.0.26"
 	}
 }
+

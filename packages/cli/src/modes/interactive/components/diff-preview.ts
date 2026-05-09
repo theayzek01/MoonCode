@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Text } from "mooncli-tui";
+import { Text } from "hodeus-tui";
 import { theme } from "../theme/theme.js";
 
 export function colorizeUnifiedDiff(diff: string): string {

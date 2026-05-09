@@ -1,8 +1,8 @@
 // @ts-nocheck
 
 import { exec } from "child_process";
-import { getOAuthProviders } from "mooncli-core/oauth";
-import { Container, type Focusable, getKeybindings, Input, Spacer, Text, type TUI } from "mooncli-tui";
+import { getOAuthProviders } from "hodeus-core/oauth";
+import { Container, type Focusable, getKeybindings, Input, Spacer, Text, type TUI } from "hodeus-tui";
 import { theme } from "../theme/theme.js";
 import { DynamicBorder } from "./dynamic-border.js";
 import { keyHint } from "./keybinding-hints.js";

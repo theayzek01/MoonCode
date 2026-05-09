@@ -10,15 +10,15 @@
  * which can be cheaper/faster than the main conversation model.
  *
  * Usage:
- *   Mooncli --extension examples/extensions/custom-compaction.ts
+ *   Hodeus --extension examples/extensions/custom-compaction.ts
  */
 
-import type { ExtensionAPI } from "Mooncli";
-import { convertToLlm, serializeConversation } from "Mooncli";
-import { complete } from "mooncli-core";
+import type { ExtensionAPI } from "Hodeus";
+import { convertToLlm, serializeConversation } from "Hodeus";
+import { complete } from "hodeus-core";
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.on("session_before_compact", async (event, ctx) => {
+export default function (Hodeus: ExtensionAPI) {
+	Hodeus.on("session_before_compact", async (event, ctx) => {
 		ctx.ui.notify("Custom compaction extension triggered", "info");
 
 		const { preparation, branchEntries: _, signal } = event;

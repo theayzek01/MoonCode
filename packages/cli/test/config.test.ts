@@ -42,11 +42,11 @@ afterEach(() => {
 	}
 });
 
-function createNpmPrefixInstall(template = "Mooncli-prefix-"): { prefix: string; packageDir: string } {
+function createNpmPrefixInstall(template = "Hodeus-prefix-"): { prefix: string; packageDir: string } {
 	const prefix = mkdtempSync(join(tmpdir(), template));
 	const root = join(prefix, "lib", "node_modules");
 	const scopeDir = join(root, "@mariozechner");
-	const packageDir = join(scopeDir, "Mooncli-cli");
+	const packageDir = join(scopeDir, "Hodeus-cli");
 	mkdirSync(packageDir, { recursive: true });
 	tempDir = prefix;
 	process.env.PI_PACKAGE_DIR = packageDir;
@@ -55,12 +55,12 @@ function createNpmPrefixInstall(template = "Mooncli-prefix-"): { prefix: string;
 }
 
 function createBunGlobalInstall(): { packageDir: string } {
-	const temp = mkdtempSync(join(tmpdir(), "Mooncli-bun-"));
+	const temp = mkdtempSync(join(tmpdir(), "Hodeus-bun-"));
 	const prefix = join(temp, ".bun");
 	const bunBin = join(prefix, "bin");
 	const root = join(prefix, "install", "global", "node_modules");
 	const scopeDir = join(root, "@mariozechner");
-	const packageDir = join(scopeDir, "Mooncli-cli");
+	const packageDir = join(scopeDir, "Hodeus-cli");
 	mkdirSync(packageDir, { recursive: true });
 	mkdirSync(bunBin, { recursive: true });
 	writeFileSync(join(bunBin, process.platform === "win32" ? "bun.cmd" : "bun"), createFakeBunScript(bunBin));
@@ -83,83 +83,83 @@ function createFakeBunScript(bunBin: string): string {
 describe("detectInstallMethod", () => {
 	test("detects pnpm from Windows .pnpm install paths", () => {
 		setExecPath(
-			"C:\\Users\\Admin\\Documents\\pnpm-repository\\global\\5\\.pnpm\\@mariozechner+Mooncli-cli@0.67.68\\node_modules\\@mariozechner\\Mooncli-cli\\dist\\cli.js",
+			"C:\\Users\\Admin\\Documents\\pnpm-repository\\global\\5\\.pnpm\\@mariozechner+Hodeus-cli@0.67.68\\node_modules\\@mariozechner\\Hodeus-cli\\dist\\cli.js",
 		);
 
 		expect(detectInstallMethod()).toBe("pnpm");
-		expect(getUpdateInstruction("Mooncli")).toBe("Run: pnpm install -g Mooncli");
+		expect(getUpdateInstruction("Hodeus")).toBe("Run: pnpm install -g Hodeus");
 	});
 
 	test("does not self-update unknown wrapper installs", () => {
 		setExecPath("/usr/local/bin/node");
 
 		expect(detectInstallMethod()).toBe("unknown");
-		expect(getSelfUpdateCommand("Mooncli")).toBeUndefined();
-		expect(getUpdateInstruction("Mooncli")).toBe(
-			"Update Mooncli using the package manager, wrapper, or source checkout that provides this installation.",
+		expect(getSelfUpdateCommand("Hodeus")).toBeUndefined();
+		expect(getUpdateInstruction("Hodeus")).toBe(
+			"Update Hodeus using the package manager, wrapper, or source checkout that provides this installation.",
 		);
 	});
 
 	test("self-updates npm installs from custom prefixes", () => {
 		const { prefix } = createNpmPrefixInstall();
 
-		const command = getSelfUpdateCommand("Mooncli");
+		const command = getSelfUpdateCommand("Hodeus");
 
 		expect(detectInstallMethod()).toBe("npm");
 		expect(command).toEqual({
 			command: "npm",
-			args: ["--prefix", prefix, "install", "-g", "Mooncli"],
-			display: `npm --prefix ${prefix} install -g Mooncli`,
+			args: ["--prefix", prefix, "install", "-g", "Hodeus"],
+			display: `npm --prefix ${prefix} install -g Hodeus`,
 		});
 	});
 
 	test("self-update respects configured npmCommand", () => {
 		const { prefix } = createNpmPrefixInstall();
 
-		const command = getSelfUpdateCommand("Mooncli", ["npm", "--prefix", prefix]);
+		const command = getSelfUpdateCommand("Hodeus", ["npm", "--prefix", prefix]);
 
 		expect(command).toEqual({
 			command: "npm",
-			args: ["--prefix", prefix, "install", "-g", "Mooncli"],
-			display: `npm --prefix ${prefix} install -g Mooncli`,
+			args: ["--prefix", prefix, "install", "-g", "Hodeus"],
+			display: `npm --prefix ${prefix} install -g Hodeus`,
 		});
 	});
 
 	test("self-update treats empty npmCommand as unset", () => {
 		const { prefix } = createNpmPrefixInstall();
 
-		const command = getSelfUpdateCommand("Mooncli", []);
+		const command = getSelfUpdateCommand("Hodeus", []);
 
-		expect(command?.args).toEqual(["--prefix", prefix, "install", "-g", "Mooncli"]);
+		expect(command?.args).toEqual(["--prefix", prefix, "install", "-g", "Hodeus"]);
 	});
 
 	test("quotes npm self-update display paths", () => {
-		const { prefix } = createNpmPrefixInstall("Mooncli prefix ");
+		const { prefix } = createNpmPrefixInstall("Hodeus prefix ");
 
-		const command = getSelfUpdateCommand("Mooncli");
+		const command = getSelfUpdateCommand("Hodeus");
 
-		expect(command?.display).toBe(`npm --prefix "${prefix}" install -g Mooncli`);
+		expect(command?.display).toBe(`npm --prefix "${prefix}" install -g Hodeus`);
 	});
 
 	test("does not infer Windows npm custom prefixes from package paths", () => {
-		const packageDir = "C:\\Users\\Admin\\npm prefix\\node_modules\\@mariozechner\\Mooncli-cli";
+		const packageDir = "C:\\Users\\Admin\\npm prefix\\node_modules\\@mariozechner\\Hodeus-cli";
 		process.env.PI_PACKAGE_DIR = packageDir;
 		setExecPath(`${packageDir}\\dist\\cli.js`);
 
 		expect(detectInstallMethod()).toBe("npm");
-		expect(getUpdateInstruction("Mooncli")).toBe("Run: npm install -g Mooncli");
+		expect(getUpdateInstruction("Hodeus")).toBe("Run: npm install -g Hodeus");
 	});
 
 	test("self-updates bun global installs from bun pm bin", () => {
 		createBunGlobalInstall();
 
-		const command = getSelfUpdateCommand("Mooncli");
+		const command = getSelfUpdateCommand("Hodeus");
 
 		expect(detectInstallMethod()).toBe("bun");
 		expect(command).toEqual({
 			command: "bun",
-			args: ["install", "-g", "Mooncli"],
-			display: "bun install -g Mooncli",
+			args: ["install", "-g", "Hodeus"],
+			display: "bun install -g Hodeus",
 		});
 	});
 
@@ -167,7 +167,7 @@ describe("detectInstallMethod", () => {
 		const { packageDir } = createNpmPrefixInstall();
 		chmodSync(packageDir, 0o500);
 
-		expect(getSelfUpdateCommand("Mooncli")).toBeUndefined();
-		expect(getSelfUpdateUnavailableInstruction("Mooncli")).toContain("the install path is not writable");
+		expect(getSelfUpdateCommand("Hodeus")).toBeUndefined();
+		expect(getSelfUpdateUnavailableInstruction("Hodeus")).toContain("the install path is not writable");
 	});
 });

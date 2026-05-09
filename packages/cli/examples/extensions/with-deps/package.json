@@ -1,5 +1,5 @@
 {
-  "name": "mooncli-extension-with-deps",
+  "name": "Hodeus-extension-with-deps",
   "private": true,
   "version": "5.05.2026-01:25",
   "type": "module",
@@ -8,7 +8,7 @@
     "build": "echo 'nothing to build'",
     "check": "echo 'nothing to check'"
   },
-  "mooncli": {
+  "Hodeus": {
     "extensions": [
       "./index.ts"
     ]
@@ -20,3 +20,4 @@
     "@types/ms": "^2.1.0"
   }
 }
+

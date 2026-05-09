@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-	checkForNewMooncliVersion,
+	checkForNewHodeusVersion,
 	comparePackageVersions,
-	getLatestMooncliVersion,
+	getLatestHodeusVersion,
 	isNewerPackageVersion,
 } from "../src/utils/version-check.js";
 
@@ -36,20 +36,20 @@ describe("version checks", () => {
 		const fetchMock = vi.fn(async () => Response.json({ version: "1.2.3" }));
 		vi.stubGlobal("fetch", fetchMock);
 
-		await expect(checkForNewMooncliVersion("1.2.3")).resolves.toBeUndefined();
-		await expect(checkForNewMooncliVersion("1.2.2")).resolves.toBe("1.2.3");
+		await expect(checkForNewHodeusVersion("1.2.3")).resolves.toBeUndefined();
+		await expect(checkForNewHodeusVersion("1.2.2")).resolves.toBe("1.2.3");
 	});
 
-	it("uses the Mooncli.dev version check api with a Mooncli user engine", async () => {
+	it("uses the Hodeus.dev version check api with a Hodeus user engine", async () => {
 		const fetchMock = vi.fn(async () => Response.json({ version: "1.2.4" }));
 		vi.stubGlobal("fetch", fetchMock);
 
-		await expect(getLatestMooncliVersion("1.2.3")).resolves.toBe("1.2.4");
+		await expect(getLatestHodeusVersion("1.2.3")).resolves.toBe("1.2.4");
 		expect(fetchMock).toHaveBeenCalledWith(
-			"https://Mooncli.dev/api/latest-version",
+			"https://Hodeus.dev/api/latest-version",
 			expect.objectContaining({
 				headers: expect.objectContaining({
-					"User-Engine": expect.stringMatching(/^Mooncli\/1\.2\.3 /),
+					"User-Engine": expect.stringMatching(/^Hodeus\/1\.2\.3 /),
 					accept: "application/json",
 				}),
 			}),
@@ -61,7 +61,7 @@ describe("version checks", () => {
 		const fetchMock = vi.fn();
 		vi.stubGlobal("fetch", fetchMock);
 
-		await expect(getLatestMooncliVersion("1.2.3")).resolves.toBeUndefined();
+		await expect(getLatestHodeusVersion("1.2.3")).resolves.toBeUndefined();
 		expect(fetchMock).not.toHaveBeenCalled();
 	});
 });

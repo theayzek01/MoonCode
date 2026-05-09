@@ -134,10 +134,10 @@ export async function suggestModels(): Promise<OllamaModelTag[]> {
 
 function printUsage(): void {
 	console.log(`${chalk.bold("Kullanım:")}
-  mooncli ollama doctor
-  mooncli ollama models
-  mooncli ollama pull <model>
-  mooncli ollama profile <turbo|balanced|quality>
+  Hodeus ollama doctor
+  Hodeus ollama models
+  Hodeus ollama pull <model>
+  Hodeus ollama profile <turbo|balanced|quality>
 
 ${chalk.bold("Profil etkisi:")}
   turbo     Düşük RAM, hızlı, ${chalk.cyan("8K")} context  — günlük kullanım, küçük dosyalar
@@ -156,12 +156,12 @@ function printProfile(profile: Profile): void {
 	console.log(psSetCommand(values));
 	console.log(chalk.dim("Bash:"));
 	console.log(bashSetCommand(values));
-	console.log(chalk.green("Bu oturumda Mooncli Ollama istekleri bu profile göre optimize edilir."));
+	console.log(chalk.green("Bu oturumda Hodeus Ollama istekleri bu profile göre optimize edilir."));
 	console.log(chalk.dim("Çalıştır: Ctrl + E"));
 }
 
 async function printDoctor(): Promise<void> {
-	console.log(chalk.bold("Mooncli Ollama Doctor"));
+	console.log(chalk.bold("Hodeus Ollama Doctor"));
 	console.log(`${chalk.dim("Endpoint:")} ${baseUrl()}`);
 
 	try {
@@ -209,7 +209,7 @@ export async function handleOllamaCommand(args: string[]): Promise<boolean> {
 	if (subcommand === "pull") {
 		const model = args[2];
 		if (!model) {
-			console.log(chalk.yellow("Kullanım: mooncli ollama pull <model>"));
+			console.log(chalk.yellow("Kullanım: Hodeus ollama pull <model>"));
 			return true;
 		}
 		await pullModel(model, (event) => {

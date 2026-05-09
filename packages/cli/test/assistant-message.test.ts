@@ -1,4 +1,4 @@
-import type { AssistantMessage } from "mooncli-core";
+import type { AssistantMessage } from "hodeus-core";
 import { describe, expect, test } from "vitest";
 import { AssistantMessageComponent } from "../src/modes/interactive/components/assistant-message.js";
 import { initTheme } from "../src/modes/interactive/theme/theme.js";

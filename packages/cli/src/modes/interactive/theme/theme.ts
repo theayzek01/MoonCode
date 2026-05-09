@@ -3,7 +3,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import chalk from "chalk";
 import { highlight, supportsLanguage } from "cli-highlight";
-import type { EditorTheme, MarkdownTheme, SelectListTheme } from "mooncli-tui";
+import type { EditorTheme, MarkdownTheme, SelectListTheme } from "hodeus-tui";
 import { type Static, Type } from "typebox";
 import { Compile } from "typebox/compile";
 import { getCustomThemesDir, getThemesDir } from "../../../config.js";
@@ -671,7 +671,7 @@ function normalizeThemeName(name: string | undefined): string {
 // ============================================================================
 
 // Use globalThis to share theme across module loaders (tsx + jiti in dev mode)
-const THEME_KEY = Symbol.for("Mooncli:theme");
+const THEME_KEY = Symbol.for("Hodeus:theme");
 
 // Export theme as a getter that reads from globalThis
 // This ensures all module instances (tsx, jiti) see the same theme
@@ -1150,7 +1150,7 @@ export function getEditorTheme(): EditorTheme {
 	};
 }
 
-export function getSettingsListTheme(): import("mooncli-tui").SettingsListTheme {
+export function getSettingsListTheme(): import("hodeus-tui").SettingsListTheme {
 	return {
 		label: (text: string, selected: boolean) => (selected ? theme.fg("accent", text) : text),
 		value: (text: string, selected: boolean) => (selected ? theme.fg("accent", text) : theme.fg("muted", text)),

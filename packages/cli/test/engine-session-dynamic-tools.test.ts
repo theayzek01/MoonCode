@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { getModel } from "mooncli-core";
+import { getModel } from "hodeus-core";
 import { Type } from "typebox";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { DefaultResourceLoader } from "../src/core/resource-loader.js";
@@ -14,7 +14,7 @@ describe("EngineSession dynamic tool registration", () => {
 	let engineDir: string;
 
 	beforeEach(() => {
-		tempDir = join(tmpdir(), `Mooncli-dynamic-tool-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+		tempDir = join(tmpdir(), `Hodeus-dynamic-tool-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 		engineDir = join(tempDir, "engine");
 		mkdirSync(engineDir, { recursive: true });
 	});
@@ -34,9 +34,9 @@ describe("EngineSession dynamic tool registration", () => {
 			engineDir,
 			settingsManager,
 			extensionFactories: [
-				(Mooncli) => {
-					Mooncli.on("session_start", () => {
-						Mooncli.registerTool({
+				(Hodeus) => {
+					Hodeus.on("session_start", () => {
+						Hodeus.registerTool({
 							name: "dynamic_tool",
 							label: "Dynamic Tool",
 							description: "Tool registered from session_start",
@@ -179,9 +179,9 @@ describe("EngineSession dynamic tool registration", () => {
 			engineDir,
 			settingsManager,
 			extensionFactories: [
-				(Mooncli) => {
-					Mooncli.on("session_start", () => {
-						Mooncli.registerTool({
+				(Hodeus) => {
+					Hodeus.on("session_start", () => {
+						Hodeus.registerTool({
 							name: "hidden_tool",
 							label: "Hidden Tool",
 							description: "Description should not appear in available tools",

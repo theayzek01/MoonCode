@@ -62,7 +62,7 @@ export async function loginOllama(callbacks: OAuthLoginCallbacks): Promise<OAuth
 				"Bulunan modeller:",
 				...modelNames.map((name) => ` - ${name}`),
 				"",
-				"Bu modeller artik Mooncli icinde kullanilabilir.",
+				"Bu modeller artik Hodeus icinde kullanilabilir.",
 			]);
 		}
 	} catch (_err) {

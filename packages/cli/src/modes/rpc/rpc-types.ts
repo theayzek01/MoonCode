@@ -6,8 +6,8 @@
  * Responses and events are emitted as JSON lines on stdout.
  */
 
-import type { ImageContent, Model } from "mooncli-core";
-import type { EngineMessage, ThinkingLevel } from "mooncli-engine";
+import type { ImageContent, Model } from "hodeus-core";
+import type { EngineMessage, ThinkingLevel } from "hodeus-engine";
 import type { BashResult } from "../../core/bash-executor.js";
 import type { CompactionResult } from "../../core/compaction/index.js";
 import type { SessionStats } from "../../core/engine-session.js";

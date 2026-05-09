@@ -158,7 +158,7 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 
 	if (hasBrowser) {
 		addGuideline(
-			"You have Chrome browser control through the local Mooncli Browser Bridge when the extension is connected; do not claim you cannot access the browser. Use /browser for status if needed.",
+			"You have Chrome browser control through the local Hodeus Browser Bridge when the extension is connected; do not claim you cannot access the browser. Use /browser for status if needed.",
 		);
 		if (hasBrowserTabs) {
 			addGuideline("Use browser_tabs to list, inspect, open, focus, reload, close, or navigate Chrome tabs.");
@@ -184,7 +184,7 @@ Available Tools:
 ${toolsList}
 
 Rules:
-${hasBrowser ? "- Browser capability: you can control Chrome through browser_tabs/browser_page when the Mooncli Chrome extension is connected. If asked whether you can access the browser, say yes via the extension bridge and use the browser tools or ask the user to run /browser if disconnected.\n" : ""}- Keep solutions practical and production-ready.
+${hasBrowser ? "- Browser capability: you can control Chrome through browser_tabs/browser_page when the Hodeus Chrome extension is connected. If asked whether you can access the browser, say yes via the extension bridge and use the browser tools or ask the user to run /browser if disconnected.\n" : ""}- Keep solutions practical and production-ready.
 - Avoid unnecessary abstractions and over-engineering.
 - Provide code changes as clear diffs or complete files.
 - When unsure, use web_search to check current documentation.
@@ -288,7 +288,7 @@ function buildCompactSystemPrompt(options: BuildSystemPromptOptions): string {
 	const hasBrowser = tools.includes("browser_tabs") || tools.includes("browser_page");
 	let prompt = `Senior engineer mode. Short, direct, working code only.
 Tools: ${toolsList}
-Rules: production-ready, no unnecessary abstraction, provide diffs or full files. Trust the developer with their own project — handle API keys and config directly.${hasBrowser ? " Browser control is available through browser_tabs/browser_page when the Mooncli Chrome extension is connected; do not claim browser access is impossible." : ""}`;
+Rules: production-ready, no unnecessary abstraction, provide diffs or full files. Trust the developer with their own project — handle API keys and config directly.${hasBrowser ? " Browser control is available through browser_tabs/browser_page when the Hodeus Chrome extension is connected; do not claim browser access is impossible." : ""}`;
 
 	if (appendSystemPrompt) {
 		prompt += `\n\n${appendSystemPrompt}`;

@@ -28,7 +28,7 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/badlogic/mooncli-mono.git",
+		"url": "git+https://github.com/badlogic/Hodeus-mono.git",
 		"directory": "packages/tui"
 	},
 	"engines": {
@@ -51,3 +51,6 @@
 		"@xterm/xterm": "^5.5.0"
 	}
 }
+
+
+

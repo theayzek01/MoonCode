@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { join } from "node:path";
-import { clampThinkingLevel, type Message, type Model, streamSimple } from "mooncli-core";
-import { Engine, type EngineMessage, type ThinkingLevel } from "mooncli-engine";
+import { clampThinkingLevel, type Message, type Model, streamSimple } from "hodeus-core";
+import { Engine, type EngineMessage, type ThinkingLevel } from "hodeus-engine";
 import { getEngineDir } from "../config.js";
 import { formatNoModelsAvailableMessage } from "./auth-guidance.js";
 import { AuthStorage } from "./auth-storage.js";
@@ -34,7 +34,7 @@ import {
 export interface CreateEngineSessionOptions {
 	/** Working directory for project-local discovery. Default: process.cwd() */
 	cwd?: string;
-	/** Global config directory. Default: ~/.Mooncli/engine */
+	/** Global config directory. Default: ~/.Hodeus/engine */
 	engineDir?: string;
 
 	/** Auth storage for credentials. Default: AuthStorage.create(engineDir/auth.json) */
@@ -60,7 +60,7 @@ export interface CreateEngineSessionOptions {
 	/**
 	 * Optional allowlist of tool names.
 	 *
-	 * When omitted, Mooncli enables the default built-in tools (read, bash, edit, write)
+	 * When omitted, Hodeus enables the default built-in tools (read, bash, edit, write)
 	 * and leaves extension/custom tools enabled unless `noTools` changes that default.
 	 * When provided, only the listed tool names are enabled.
 	 */
@@ -79,7 +79,7 @@ export interface CreateEngineSessionOptions {
 	/** Session start event metadata for extension runtime startup. */
 	sessionStartEvent?: SessionStartEvent;
 	/** MCP manager instance for the session. */
-	mcpManager?: import("mooncli-engine").McpManager;
+	mcpManager?: import("hodeus-engine").McpManager;
 }
 
 /** Result from createEngineSession */
@@ -91,7 +91,7 @@ export interface CreateEngineSessionResult {
 	/** Warning if session was restored with a different model than saved */
 	modelFallbackMessage?: string;
 	/** MCP manager used by the session */
-	mcpManager?: import("mooncli-engine").McpManager;
+	mcpManager?: import("hodeus-engine").McpManager;
 }
 
 // Re-exports
@@ -140,8 +140,8 @@ function getAttributionHeaders(
 
 	if (model.provider === "openrouter" || model.baseUrl.includes("openrouter.ai")) {
 		return {
-			"HTTP-Referer": "https://Mooncli.dev",
-			"X-OpenRouter-Title": "Mooncli",
+			"HTTP-Referer": "https://Hodeus.dev",
+			"X-OpenRouter-Title": "Hodeus",
 			"X-OpenRouter-Categories": "cli-engine",
 		};
 	}
@@ -153,7 +153,7 @@ function getAttributionHeaders(
 		model.baseUrl.includes("gateway.ai.cloudflare.com")
 	) {
 		return {
-			"User-Engine": "Mooncli-cli",
+			"User-Engine": "Hodeus-cli",
 		};
 	}
 
@@ -194,7 +194,7 @@ export async function createEngineSession(
 	}));
 
 	if (!mcpManager && mcpServerConfigs.length > 0) {
-		const { McpManager } = await import("mooncli-engine");
+		const { McpManager } = await import("hodeus-engine");
 		mcpManager = new McpManager(mcpServerConfigs);
 		await mcpManager.initialize();
 	}

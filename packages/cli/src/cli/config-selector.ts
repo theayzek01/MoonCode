@@ -1,9 +1,9 @@
 // @ts-nocheck
 /**
- * TUI config selector for `Mooncli config` command
+ * TUI config selector for `Hodeus config` command
  */
 
-import { ProcessTerminal, TUI } from "mooncli-tui";
+import { ProcessTerminal, TUI } from "hodeus-tui";
 import type { ResolvedPaths } from "../core/package-manager.js";
 import type { SettingsManager } from "../core/settings-manager.js";
 import { ConfigSelectorComponent } from "../modes/interactive/components/config-selector.js";

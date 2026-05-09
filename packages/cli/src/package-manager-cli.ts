@@ -14,7 +14,7 @@ import {
 import { DefaultPackageManager } from "./core/package-manager.js";
 import { SettingsManager } from "./core/settings-manager.js";
 import { shouldUseWindowsShell } from "./utils/child-process.js";
-import { getLatestMooncliVersion, isNewerPackageVersion } from "./utils/version-check.js";
+import { getLatestHodeusVersion, isNewerPackageVersion } from "./utils/version-check.js";
 
 export type PackageCommand = "install" | "remove" | "update" | "list";
 
@@ -50,7 +50,7 @@ function getPackageCommandUsage(command: PackageCommand): string {
 		case "remove":
 			return `${APP_NAME} remove <source> [-l]`;
 		case "update":
-			return `${APP_NAME} update [source|self|Mooncli] [--self] [--extensions] [--extension <source>] [--force]`;
+			return `${APP_NAME} update [source|self|Hodeus] [--self] [--extensions] [--extension <source>] [--force]`;
 		case "list":
 			return `${APP_NAME} list`;
 	}
@@ -65,7 +65,7 @@ function printPackageCommandHelp(command: PackageCommand): void {
 Bir paket yükle ve ayarlara ekle.
 
 Seçenekler:
-  -l, --local    Projeye özel yükle (.mooncli/settings.json)
+  -l, --local    Projeye özel yükle (.Hodeus/settings.json)
 
 Örnekler:
   ${APP_NAME} install npm:@foo/bar
@@ -85,7 +85,7 @@ Bir paketi ve kaynağını ayarlardan kaldır.
 Alternatif: ${APP_NAME} uninstall <kaynak> [-l]
 
 Seçenekler:
-  -l, --local    Proje ayarlarından kaldır (.mooncli/settings.json)
+  -l, --local    Proje ayarlarından kaldır (.Hodeus/settings.json)
 
 Örnekler:
   ${APP_NAME} remove npm:@foo/bar
@@ -97,18 +97,18 @@ Seçenekler:
 			console.log(`${chalk.bold("Kullanım:")}
   ${getPackageCommandUsage("update")}
 
-Mooncli'yi ve yüklü paketleri güncelle.
+Hodeus'yi ve yüklü paketleri güncelle.
 
 Seçenekler:
-  --self                  Sadece Mooncli'yi güncelle
+  --self                  Sadece Hodeus'yi güncelle
   --extensions            Sadece yüklü paketleri güncelle
   --extension <kaynak>    Sadece bir paketi güncelle
-  --force                 Mevcut sürüm güncel olsa bile Mooncli'yi yeniden yükle
+  --force                 Mevcut sürüm güncel olsa bile Hodeus'yi yeniden yükle
 
 Kısa formlar:
-  ${APP_NAME} update                Mooncli'yi ve tüm eklentileri güncelle
+  ${APP_NAME} update                Hodeus'yi ve tüm eklentileri güncelle
   ${APP_NAME} update <kaynak>       Bir paketi güncelle
-  ${APP_NAME} update Mooncli             Sadece Mooncli'yi güncelle (self de alternatif olarak çalışır)
+  ${APP_NAME} update Hodeus             Sadece Hodeus'yi güncelle (self de alternatif olarak çalışır)
 `);
 			return;
 
@@ -233,7 +233,7 @@ function parsePackageCommand(args: string[]): PackageCommandOptions | undefined 
 			}
 			updateTarget = { type: "extensions", source: extensionFlagSource };
 		} else if (source) {
-			const sourceIsSelf = source === "self" || source === "Mooncli";
+			const sourceIsSelf = source === "self" || source === "Hodeus";
 			if (sourceIsSelf) {
 				updateTarget = extensionsFlag ? { type: "all" } : { type: "self" };
 			} else {
@@ -278,13 +278,13 @@ function updateTargetIncludesExtensions(target: UpdateTarget): boolean {
 }
 
 function printSelfUpdateUnavailable(npmCommand?: string[]): void {
-	console.error("hata: Mooncli bu kurulumu otomatik güncelleyemiyor.");
+	console.error("hata: Hodeus bu kurulumu otomatik güncelleyemiyor.");
 	console.error(getSelfUpdateUnavailableInstruction(PACKAGE_NAME, npmCommand));
 
 	const entrypoint = process.argv[1];
 	if (entrypoint) {
 		console.error("");
-		console.error(`Mooncli yürütülebilir dosyasının konumu: ${entrypoint}`);
+		console.error(`Hodeus yürütülebilir dosyasının konumu: ${entrypoint}`);
 	}
 }
 
@@ -299,7 +299,7 @@ async function shouldRunSelfUpdate(force: boolean): Promise<boolean> {
 
 	let latestVersion: string | undefined;
 	try {
-		latestVersion = await getLatestMooncliVersion(VERSION);
+		latestVersion = await getLatestHodeusVersion(VERSION);
 	} catch {
 		return true;
 	}

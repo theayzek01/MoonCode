@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createFindToolDefinition } from "../../../src/core/tools/find.js";
 
 /**
- * Regression test for https://github.com/badlogic/Mooncli-mono/issues/3302
+ * Regression test for https://github.com/badlogic/Hodeus-mono/issues/3302
  *
  * The `find` tool advertises glob patterns like `src/**\/*.spec.ts`, but the
  * default fd-backed implementation used `fd --glob <pattern>` without
@@ -22,7 +22,7 @@ describe.skipIf(process.platform === "win32")(
 		let tempRoot: string;
 
 		beforeEach(() => {
-			tempRoot = mkdtempSync(join(tmpdir(), "Mooncli-3302-"));
+			tempRoot = mkdtempSync(join(tmpdir(), "Hodeus-3302-"));
 			mkdirSync(join(tempRoot, "some", "parent", "child"), { recursive: true });
 			mkdirSync(join(tempRoot, "src", "foo", "bar"), { recursive: true });
 			writeFileSync(join(tempRoot, "some", "parent", "child", "file.ext"), "");

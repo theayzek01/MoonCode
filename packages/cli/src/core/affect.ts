@@ -1,5 +1,5 @@
 // @ts-nocheck
-import type { AssistantMessage } from "mooncli-core";
+import type { AssistantMessage } from "hodeus-core";
 
 export type AffectiveMode = "subtle" | "active";
 export type AffectiveSignalSource = "user" | "assistant";

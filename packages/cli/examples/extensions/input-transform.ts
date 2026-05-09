@@ -1,18 +1,18 @@
 /**
  * Input Transform Example - demonstrates the `input` event for intercepting user input.
  *
- * Start Mooncli with this extension:
- *   Mooncli -e ./examples/extensions/input-transform.ts
+ * Start Hodeus with this extension:
+ *   Hodeus -e ./examples/extensions/input-transform.ts
  *
- * Then type these inside Mooncli:
+ * Then type these inside Hodeus:
  *   ?quick What is TypeScript?  → "Respond briefly: What is TypeScript?"
  *   ping                        → "pong" (instant, no Provider)
  *   time                        → current time (instant, no Provider)
  */
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "Hodeus";
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.on("input", async (event, ctx) => {
+export default function (Hodeus: ExtensionAPI) {
+	Hodeus.on("input", async (event, ctx) => {
 		// Source-based logic: skip processing for extension-injected messages
 		if (event.source === "extension") {
 			return { action: "continue" };

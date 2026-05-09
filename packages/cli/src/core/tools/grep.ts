@@ -2,8 +2,8 @@
 import { createInterface } from "node:readline";
 import { spawn } from "child_process";
 import { readFileSync, statSync } from "fs";
-import type { EngineTool } from "mooncli-engine";
-import { Text } from "mooncli-tui";
+import type { EngineTool } from "hodeus-engine";
+import { Text } from "hodeus-tui";
 import path from "path";
 import { type Static, Type } from "typebox";
 import { keyHint } from "../../modes/interactive/components/keybinding-hints.js";

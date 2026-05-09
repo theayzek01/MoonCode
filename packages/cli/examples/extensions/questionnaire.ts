@@ -5,8 +5,8 @@
  * Multiple questions: tab bar navigation between questions
  */
 
-import type { ExtensionAPI } from "Mooncli";
-import { Editor, type EditorTheme, Key, matchesKey, Text, truncateToWidth } from "mooncli-tui";
+import type { ExtensionAPI } from "Hodeus";
+import { Editor, type EditorTheme, Key, matchesKey, Text, truncateToWidth } from "hodeus-tui";
 import { Type } from "typebox";
 
 // Types
@@ -73,8 +73,8 @@ function errorResult(
 	};
 }
 
-export default function questionnaire(Mooncli: ExtensionAPI) {
-	Mooncli.registerTool({
+export default function questionnaire(Hodeus: ExtensionAPI) {
+	Hodeus.registerTool({
 		name: "questionnaire",
 		label: "Questionnaire",
 		description:

@@ -2,9 +2,9 @@
 import { basename, dirname, isAbsolute, relative, resolve as resolvePath, sep } from "node:path";
 import { constants } from "fs";
 import { access as fsAccess, readFile as fsReadFile } from "fs/promises";
-import type { Api, ImageContent, Model, TextContent } from "mooncli-core";
-import type { EngineTool } from "mooncli-engine";
-import { Text } from "mooncli-tui";
+import type { Api, ImageContent, Model, TextContent } from "hodeus-core";
+import type { EngineTool } from "hodeus-engine";
+import { Text } from "hodeus-tui";
 import { type Static, Type } from "typebox";
 import { getReadmePath } from "../../config.js";
 import { keyHint, keyText } from "../../modes/interactive/components/keybinding-hints.js";
