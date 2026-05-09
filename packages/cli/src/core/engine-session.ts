@@ -2638,17 +2638,19 @@ export class EngineSession {
 		resetApiProviders();
 		await this._resourceLoader.reload();
 		const activeToolNames = this.getActiveToolNames();
+		const browserToolNames = ["browser_tabs", "browser_page"];
 		const discordToken = this.settingsManager.getDiscordToken();
 		const nextActiveToolNames = discordToken
 			? [
 					...activeToolNames,
+					...browserToolNames,
 					"discord_list_guilds",
 					"discord_get_channels",
 					"discord_send_message",
 					"discord_manage_channel",
 					"web_search",
 				]
-			: [...activeToolNames, "web_search"];
+			: [...activeToolNames, ...browserToolNames, "web_search"];
 		this._buildRuntime({
 			activeToolNames: nextActiveToolNames,
 			flagValues: previousFlagValues,

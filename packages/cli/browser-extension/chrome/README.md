@@ -7,7 +7,7 @@ Development install:
 3. Enable **Developer mode**.
 4. Click **Load unpacked**.
 5. Select this folder: `packages/cli/browser-extension/chrome`.
-6. In Mooncli, run `/browser` to confirm the extension is connected. If it is disconnected, click the extension icon once to wake the service worker.
+6. In Mooncli, run `/browser` to confirm the extension is connected. The extension badge shows `ON` when connected and `OFF` when disconnected. If it is disconnected, click the extension icon once to wake the service worker.
 
 Tools exposed to Mooncli:
 

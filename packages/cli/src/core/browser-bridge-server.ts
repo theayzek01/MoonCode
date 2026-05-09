@@ -210,6 +210,10 @@ function handleClientMessage(client: BrowserBridgeClient, raw: string): void {
 		return;
 	}
 
+	if (message.type === "ping") {
+		return;
+	}
+
 	if (message.type !== "result" || typeof message.id !== "string") return;
 	const pending = pendingCommands.get(message.id);
 	if (!pending) return;

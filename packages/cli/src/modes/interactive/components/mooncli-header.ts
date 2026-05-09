@@ -51,8 +51,8 @@ export class MooncliHeaderComponent extends Text {
 		const quick = [
 			hint("/model", "model seç"),
 			hint("/index", "projeyi tara"),
+			hint("/browser", "Chrome bridge"),
 			hint("/diff", "değişiklikleri gör"),
-			hint("/web", "dashboard"),
 			hint("/ship", "yayınla"),
 		].join(theme.fg("dim", "  ·  "));
 
@@ -71,8 +71,9 @@ export class MooncliHeaderComponent extends Text {
 			theme.bold("Başlangıç akışı"),
 			`${theme.fg("dim", "1.")} ${hint("/index", "kod tabanını hazırla")}`,
 			`${theme.fg("dim", "2.")} Normal yaz: ${theme.fg("muted", "ne yapmak istediğini anlat")}`,
-			`${theme.fg("dim", "3.")} ${hint("/diff", "son değişiklikleri kontrol et")}`,
-			`${theme.fg("dim", "4.")} ${hint("/ship", "branch/commit/push/PR akışı")}`,
+			`${theme.fg("dim", "3.")} ${hint("/browser", "Chrome eklenti bağlantısını kontrol et")}`,
+			`${theme.fg("dim", "4.")} ${hint("/diff", "son değişiklikleri kontrol et")}`,
+			`${theme.fg("dim", "5.")} ${hint("/ship", "branch/commit/push/PR akışı")}`,
 			"",
 			theme.bold("Kısayollar"),
 			this.options.expandedInstructions,

@@ -1,26 +1,40 @@
 const BRIDGE_URL = "ws://127.0.0.1:3132/ws";
 const VERSION = "0.1.0";
+const HEARTBEAT_INTERVAL_MS = 20000;
 
 let socket;
 let reconnectTimer;
+let heartbeatTimer;
 
+setBadge(false, "starting");
 connect();
 chrome.runtime.onStartup.addListener(connect);
-chrome.runtime.onInstalled.addListener(connect);
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.alarms.create("mooncli-bridge-reconnect", { periodInMinutes: 0.5 });
+  connect();
+});
 chrome.action.onClicked.addListener(connect);
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === "mooncli-bridge-reconnect") connect();
+});
+chrome.alarms.create("mooncli-bridge-reconnect", { periodInMinutes: 0.5 });
 
 function connect() {
-  if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) return;
+  if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
+    updateBadgeFromSocket();
+    return;
+  }
   clearTimeout(reconnectTimer);
+  clearInterval(heartbeatTimer);
+  setBadge(false, "connecting");
   socket = new WebSocket(BRIDGE_URL);
 
   socket.onopen = () => {
-    send({
-      type: "hello",
-      extensionId: chrome.runtime.id,
-      version: VERSION,
-      capabilities: ["tabs", "page", "debugger", "screenshot"]
-    });
+    setBadge(true, "connected");
+    sendHello();
+    heartbeatTimer = setInterval(() => {
+      send({ type: "ping", time: Date.now() });
+    }, HEARTBEAT_INTERVAL_MS);
   };
 
   socket.onmessage = async (event) => {
@@ -46,13 +60,34 @@ function connect() {
 
 function scheduleReconnect() {
   clearTimeout(reconnectTimer);
+  clearInterval(heartbeatTimer);
+  setBadge(false, "disconnected");
   reconnectTimer = setTimeout(connect, 1000);
+}
+
+function sendHello() {
+  send({
+    type: "hello",
+    extensionId: chrome.runtime.id,
+    version: VERSION,
+    capabilities: ["tabs", "page", "debugger", "screenshot"]
+  });
 }
 
 function send(message) {
   if (socket?.readyState === WebSocket.OPEN) {
     socket.send(JSON.stringify(message));
   }
+}
+
+function updateBadgeFromSocket() {
+  setBadge(socket?.readyState === WebSocket.OPEN, socket?.readyState === WebSocket.OPEN ? "connected" : "connecting");
+}
+
+function setBadge(connected, title) {
+  chrome.action.setBadgeText({ text: connected ? "ON" : "OFF" });
+  chrome.action.setBadgeBackgroundColor({ color: connected ? "#16a34a" : "#dc2626" });
+  chrome.action.setTitle({ title: `Mooncli Browser Bridge: ${title}` });
 }
 
 async function executeCommand(action, args) {
