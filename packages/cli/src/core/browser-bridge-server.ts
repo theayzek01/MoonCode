@@ -71,8 +71,14 @@ export function startBrowserBridgeServer(options: { port?: number; keepAlive?: b
 	server.on("upgrade", (req, socket) => handleUpgrade(req, socket));
 	server.on("error", (error: NodeJS.ErrnoException) => {
 		startupError = error.code === "EADDRINUSE" ? `Port ${port} is already in use` : error.message;
+		console.error(`[Moon Bridge Error] ${startupError}`);
 	});
-	server.listen(port, "127.0.0.1");
+
+	// Listening on all interfaces or defaulting to help with Windows localhost issues
+	server.listen(port, "0.0.0.0", () => {
+		// console.log(`Moon Browser Bridge started on port ${port}`);
+	});
+
 	if (!options.keepAlive) {
 		server.unref();
 	}
