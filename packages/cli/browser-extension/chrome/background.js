@@ -429,8 +429,8 @@ async function injectOverlay(tabId, message = "Moon Controlling") {
           let cursor = document.getElementById(cursorId);
           if (cursor) {
             cursor.src = type === "hand" ? handUrl : type === "type" ? typeUrl : arrowUrl;
-            cursor.style.top = `${y}px`;
-            cursor.style.left = `${x}px`;
+            cursor.style.top = y + "px";
+            cursor.style.left = x + "px";
             setTimeout(resolve, 500); // wait for animation
           } else {
             resolve();

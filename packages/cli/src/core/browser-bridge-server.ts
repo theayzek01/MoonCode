@@ -76,7 +76,7 @@ export function startBrowserBridgeServer(options: { port?: number; keepAlive?: b
 
 	// Listening on all interfaces or defaulting to help with Windows localhost issues
 	server.listen(port, "0.0.0.0", () => {
-		// console.log(`Moon Browser Bridge started on port ${port}`);
+		console.log(`\n\x1b[32m[Moon] Browser Bridge is active on ws://127.0.0.1:${port}\x1b[0m\n`);
 	});
 
 	if (!options.keepAlive) {
