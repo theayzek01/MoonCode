@@ -167,7 +167,8 @@ function handleUpgrade(req: IncomingMessage, socket: Duplex): void {
 		].join("\r\n"),
 	);
 
-	(socket as Duplex & { unref?: () => void }).unref?.();
+	// Keep the socket active in the event loop
+	// (socket as Duplex & { unref?: () => void }).unref?.();
 
 	const id = randomUUID();
 	const client: BrowserBridgeClient = {

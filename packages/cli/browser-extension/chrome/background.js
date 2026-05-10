@@ -1,6 +1,6 @@
 const BRIDGE_URL = "ws://127.0.0.1:3133/ws";
 const VERSION = "10.5.2026";
-const HEARTBEAT_INTERVAL_MS = 20000;
+const HEARTBEAT_INTERVAL_MS = 10000;
 
 let socket;
 let reconnectTimer;
@@ -54,15 +54,18 @@ function connect() {
     }
   };
 
-  socket.onclose = scheduleReconnect;
-  socket.onerror = scheduleReconnect;
+  socket.onclose = (event) => scheduleReconnect(event.code);
+  socket.onerror = () => scheduleReconnect();
 }
 
-function scheduleReconnect() {
+function scheduleReconnect(code) {
   clearTimeout(reconnectTimer);
   clearInterval(heartbeatTimer);
   setBadge(false, "disconnected");
-  reconnectTimer = setTimeout(connect, 2000);
+  
+  // If it's a normal closure (1000) or no code, reconnect faster
+  const delay = (code === 1000) ? 500 : 2000;
+  reconnectTimer = setTimeout(connect, delay);
 }
 
 function sendHello() {
