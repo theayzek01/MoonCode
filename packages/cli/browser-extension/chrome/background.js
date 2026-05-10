@@ -210,13 +210,15 @@ async function executePage(args) {
 
   if (action === "click") {
     if (!args.selector) throw new Error("click requires selector");
-    injectOverlay(tabId, `Clicking ${args.selector}`);
+    await injectOverlay(tabId, `Clicking ${args.selector}`);
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
-      func: (selector) => {
+      func: async (selector) => {
         const element = document.querySelector(selector);
         if (!element) return { clicked: false, reason: "selector not found" };
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const rect = element.getBoundingClientRect();
+        if (window.__moon_move_cursor) await window.__moon_move_cursor(rect.left + rect.width / 2 + window.scrollX, rect.top + rect.height / 2 + window.scrollY, "hand");
         element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
         return { clicked: true, selector, text: element.textContent?.trim().slice(0, 200) || "" };
       },
@@ -227,11 +229,15 @@ async function executePage(args) {
 
   if (action === "hover") {
     if (!args.selector) throw new Error("hover requires selector");
+    await injectOverlay(tabId, `Hovering ${args.selector}`);
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
-      func: (selector) => {
+      func: async (selector) => {
         const element = document.querySelector(selector);
         if (!element) return { hovered: false, reason: "selector not found" };
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const rect = element.getBoundingClientRect();
+        if (window.__moon_move_cursor) await window.__moon_move_cursor(rect.left + rect.width / 2 + window.scrollX, rect.top + rect.height / 2 + window.scrollY, "arrow");
         element.dispatchEvent(new MouseEvent("mouseover", { bubbles: true, cancelable: true, view: window }));
         return { hovered: true, selector };
       },
@@ -242,12 +248,15 @@ async function executePage(args) {
 
   if (action === "type") {
     if (!args.selector) throw new Error("type requires selector");
-    injectOverlay(tabId, `Typing into ${args.selector}`);
+    await injectOverlay(tabId, `Typing into ${args.selector}`);
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
-      func: (selector, text) => {
+      func: async (selector, text) => {
         const element = document.querySelector(selector);
         if (!element) return { typed: false, reason: "selector not found" };
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const rect = element.getBoundingClientRect();
+        if (window.__moon_move_cursor) await window.__moon_move_cursor(rect.left + rect.width / 2 + window.scrollX, rect.top + rect.height / 2 + window.scrollY, "type");
         element.focus?.();
         if ("value" in element) element.value = text;
         else element.textContent = text;
@@ -371,14 +380,18 @@ async function getConsoleLogs(tabId) {
 }
 
 async function injectOverlay(tabId, message = "Moon Controlling") {
-  chrome.scripting.executeScript({
+  const arrowUrl = chrome.runtime.getURL("cursors/arrow.cur");
+  const handUrl = chrome.runtime.getURL("cursors/hand.cur");
+  const typeUrl = chrome.runtime.getURL("cursors/ibeam.cur");
+
+  await chrome.scripting.executeScript({
     target: { tabId },
-    func: (msg) => {
-      const id = "hodeus-overlay";
-      let overlay = document.getElementById(id);
+    func: (msg, arrowUrl, handUrl, typeUrl) => {
+      const overlayId = "hodeus-overlay";
+      let overlay = document.getElementById(overlayId);
       if (!overlay) {
         overlay = document.createElement("div");
-        overlay.id = id;
+        overlay.id = overlayId;
         document.body.appendChild(overlay);
       }
       overlay.innerHTML = `
@@ -392,7 +405,39 @@ async function injectOverlay(tabId, message = "Moon Controlling") {
         </style>
       `;
       setTimeout(() => { if (overlay) overlay.remove(); }, 10000);
+
+      // Setup custom cursor
+      const cursorId = "moon-visual-cursor";
+      let cursor = document.getElementById(cursorId);
+      if (!cursor) {
+        cursor = document.createElement("img");
+        cursor.id = cursorId;
+        cursor.src = arrowUrl;
+        cursor.style.position = "absolute";
+        cursor.style.top = `${window.innerHeight / 2}px`;
+        cursor.style.left = `${window.innerWidth / 2}px`;
+        cursor.style.width = "32px";
+        cursor.style.height = "32px";
+        cursor.style.pointerEvents = "none";
+        cursor.style.zIndex = "1000000";
+        cursor.style.transition = "top 0.5s ease-out, left 0.5s ease-out";
+        document.body.appendChild(cursor);
+      }
+
+      window.__moon_move_cursor = function(x, y, type = "arrow") {
+        return new Promise((resolve) => {
+          let cursor = document.getElementById(cursorId);
+          if (cursor) {
+            cursor.src = type === "hand" ? handUrl : type === "type" ? typeUrl : arrowUrl;
+            cursor.style.top = \`\${y}px\`;
+            cursor.style.left = \`\${x}px\`;
+            setTimeout(resolve, 500); // wait for animation
+          } else {
+            resolve();
+          }
+        });
+      };
     },
-    args: [message]
+    args: [message, arrowUrl, handUrl, typeUrl]
   });
 }

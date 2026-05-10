@@ -1,10 +1,16 @@
 {
   "manifest_version": 3,
   "name": "Moon Browser Bridge",
-  "version": "9.0.5",
+  "version": "10.5.2026",
   "description": "Connects Chrome tabs to the local Moon terminal session.",
   "permissions": ["tabs", "scripting", "debugger", "activeTab", "storage", "alarms"],
   "host_permissions": ["<all_urls>"],
+  "web_accessible_resources": [
+    {
+      "resources": ["cursors/*"],
+      "matches": ["<all_urls>"]
+    }
+  ],
   "background": {
     "service_worker": "background.js"
   },
