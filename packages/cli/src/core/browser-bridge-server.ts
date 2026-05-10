@@ -53,7 +53,7 @@ const clients = new Map<string, BrowserBridgeClient>();
 const pendingCommands = new Map<string, PendingCommand>();
 
 export function startBrowserBridgeServer(options: { port?: number; keepAlive?: boolean } = {}): BrowserBridgeStatus {
-	port = options.port ?? Number(process.env.HODEUS_BROWSER_BRIDGE_PORT || DEFAULT_PORT);
+	port = options.port ?? Number(process.env.MOON_BROWSER_BRIDGE_PORT || DEFAULT_PORT);
 	if (server) return getBrowserBridgeStatus();
 
 	startupError = undefined;
@@ -104,7 +104,7 @@ export async function sendBrowserCommand(
 	const client = getLatestClient();
 	if (!client) {
 		throw new Error(
-			`No Chrome extension connected. Load packages/cli/browser-extension/chrome in Chrome and keep Hodeus running. Bridge: ws://127.0.0.1:${port}/ws`,
+			`No Chrome extension connected. Load packages/cli/browser-extension/chrome in Chrome and keep Moon running. Bridge: ws://127.0.0.1:${port}/ws`,
 		);
 	}
 

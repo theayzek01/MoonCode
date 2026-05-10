@@ -1,14 +1,14 @@
 {
-	"name": "hodeus",
-	"version": "9.5.4",
+	"name": "mooncli",
+	"version": "10.05.2026",
 	"description": "Modern Terminal Assistant",
 	"type": "module",
 	"moonConfig": {
-		"name": "Hodeus",
-		"configDir": ".hodeus"
+		"name": "Moon",
+		"configDir": ".mooncli"
 	},
 	"bin": {
-		"hodeus": "dist/cli.js"
+		"moon": "dist/cli.js"
 	},
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",

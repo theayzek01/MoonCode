@@ -50,7 +50,7 @@ function getPackageCommandUsage(command: PackageCommand): string {
 		case "remove":
 			return `${APP_NAME} remove <source> [-l]`;
 		case "update":
-			return `${APP_NAME} update [source|self|Hodeus] [--self] [--extensions] [--extension <source>] [--force]`;
+			return `${APP_NAME} update [source|self|Moon] [--self] [--extensions] [--extension <source>] [--force]`;
 		case "list":
 			return `${APP_NAME} list`;
 	}
@@ -65,7 +65,7 @@ function printPackageCommandHelp(command: PackageCommand): void {
 Bir paket yükle ve ayarlara ekle.
 
 Seçenekler:
-  -l, --local    Projeye özel yükle (.Hodeus/settings.json)
+  -l, --local    Projeye özel yükle (.mooncli/settings.json)
 
 Örnekler:
   ${APP_NAME} install npm:@foo/bar
@@ -85,7 +85,7 @@ Bir paketi ve kaynağını ayarlardan kaldır.
 Alternatif: ${APP_NAME} uninstall <kaynak> [-l]
 
 Seçenekler:
-  -l, --local    Proje ayarlarından kaldır (.Hodeus/settings.json)
+  -l, --local    Proje ayarlarından kaldır (.mooncli/settings.json)
 
 Örnekler:
   ${APP_NAME} remove npm:@foo/bar
@@ -97,18 +97,18 @@ Seçenekler:
 			console.log(`${chalk.bold("Kullanım:")}
   ${getPackageCommandUsage("update")}
 
-Hodeus'yi ve yüklü paketleri güncelle.
+Moon'u ve yüklü paketleri güncelle.
 
 Seçenekler:
-  --self                  Sadece Hodeus'yi güncelle
+  --self                  Sadece Moon'u güncelle
   --extensions            Sadece yüklü paketleri güncelle
   --extension <kaynak>    Sadece bir paketi güncelle
-  --force                 Mevcut sürüm güncel olsa bile Hodeus'yi yeniden yükle
+  --force                 Mevcut sürüm güncel olsa bile Moon'u yeniden yükle
 
 Kısa formlar:
-  ${APP_NAME} update                Hodeus'yi ve tüm eklentileri güncelle
+  ${APP_NAME} update                Moon'u ve tüm eklentileri güncelle
   ${APP_NAME} update <kaynak>       Bir paketi güncelle
-  ${APP_NAME} update Hodeus             Sadece Hodeus'yi güncelle (self de alternatif olarak çalışır)
+  ${APP_NAME} update Moon             Sadece Moon'u güncelle (self de alternatif olarak çalışır)
 `);
 			return;
 
@@ -233,7 +233,7 @@ function parsePackageCommand(args: string[]): PackageCommandOptions | undefined 
 			}
 			updateTarget = { type: "extensions", source: extensionFlagSource };
 		} else if (source) {
-			const sourceIsSelf = source === "self" || source === "Hodeus";
+			const sourceIsSelf = source === "self" || source === "Moon";
 			if (sourceIsSelf) {
 				updateTarget = extensionsFlag ? { type: "all" } : { type: "self" };
 			} else {
@@ -278,13 +278,13 @@ function updateTargetIncludesExtensions(target: UpdateTarget): boolean {
 }
 
 function printSelfUpdateUnavailable(npmCommand?: string[]): void {
-	console.error("hata: Hodeus bu kurulumu otomatik güncelleyemiyor.");
+	console.error("hata: Moon bu kurulumu otomatik güncelleyemiyor.");
 	console.error(getSelfUpdateUnavailableInstruction(PACKAGE_NAME, npmCommand));
 
 	const entrypoint = process.argv[1];
 	if (entrypoint) {
 		console.error("");
-		console.error(`Hodeus yürütülebilir dosyasının konumu: ${entrypoint}`);
+		console.error(`Moon yürütülebilir dosyasının konumu: ${entrypoint}`);
 	}
 }
 

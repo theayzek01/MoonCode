@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Hodeus Browser Bridge",
+  "name": "Moon Browser Bridge",
   "version": "9.0.5",
-  "description": "Connects Chrome tabs to the local Hodeus terminal session.",
+  "description": "Connects Chrome tabs to the local Moon terminal session.",
   "permissions": ["tabs", "scripting", "debugger", "activeTab", "storage", "alarms"],
   "host_permissions": ["<all_urls>"],
   "background": {
@@ -16,6 +16,6 @@
   },
   "action": {
     "default_icon": "icon.png",
-    "default_title": "Hodeus Browser Bridge"
+    "default_title": "Moon Browser Bridge"
   }
 }

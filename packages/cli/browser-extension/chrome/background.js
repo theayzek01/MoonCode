@@ -87,7 +87,7 @@ function updateBadgeFromSocket() {
 function setBadge(connected, title) {
   chrome.action.setBadgeText({ text: connected ? "ON" : "OFF" });
   chrome.action.setBadgeBackgroundColor({ color: connected ? "#22c55e" : "#ef4444" });
-  chrome.action.setTitle({ title: `Hodeus Browser Bridge: ${title}` });
+  chrome.action.setTitle({ title: `Moon Browser Bridge: ${title}` });
 }
 
 async function executeCommand(action, args) {
@@ -370,7 +370,7 @@ async function getConsoleLogs(tabId) {
   }
 }
 
-async function injectOverlay(tabId, message = "Hodeus Controlling") {
+async function injectOverlay(tabId, message = "Moon Controlling") {
   chrome.scripting.executeScript({
     target: { tabId },
     func: (msg) => {

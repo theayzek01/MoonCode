@@ -24,8 +24,6 @@ export const BUILT_IN_PROVIDER_DISPLAY_NAMES: Record<string, string> = {
 	openrouter: "OpenRouter",
 	"vercel-ai-gateway": "Vercel Core Gateway",
 	xai: "xCore",
-	antigravity: "Antigravity (Google ile)",
-	"google-gemini-cli": "Google Gemini CLI",
 	"openai-codex": "Codex (Google ile)",
 	zai: "ZCore",
 	xiaomi: "Xiaomi MiMo",

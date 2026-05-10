@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { Text, visibleWidth } from "hodeus-tui";
+import { APP_TITLE } from "../../../config.js";
 import type { AppKeybinding } from "../../../core/keybindings.js";
 import { theme } from "../theme/theme.js";
 import { keyText } from "./keybinding-hints.js";
@@ -46,7 +47,7 @@ export class HodeusHeaderComponent extends Text {
 
 	private build(width = 88): string {
 		const inner = Math.max(46, Math.min(96, width - 2));
-		const title = `${theme.bold("Hodeus")} ${theme.fg("dim", `v${this.options.version}`)}`;
+		const title = `${theme.bold(APP_TITLE)} ${theme.fg("dim", `v${this.options.version}`)}`;
 		const subtitle = theme.fg("muted", "minimal agentic workspace");
 		const quick = [
 			hint("/models", "model seç"),

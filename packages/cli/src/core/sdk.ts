@@ -34,7 +34,7 @@ import {
 export interface CreateEngineSessionOptions {
 	/** Working directory for project-local discovery. Default: process.cwd() */
 	cwd?: string;
-	/** Global config directory. Default: ~/.Hodeus/engine */
+	/** Global config directory. Default: ~/.mooncli/engine */
 	engineDir?: string;
 
 	/** Auth storage for credentials. Default: AuthStorage.create(engineDir/auth.json) */
@@ -60,7 +60,7 @@ export interface CreateEngineSessionOptions {
 	/**
 	 * Optional allowlist of tool names.
 	 *
-	 * When omitted, Hodeus enables the default built-in tools (read, bash, edit, write)
+	 * When omitted, Moon enables the default built-in tools (read, bash, edit, write)
 	 * and leaves extension/custom tools enabled unless `noTools` changes that default.
 	 * When provided, only the listed tool names are enabled.
 	 */
@@ -140,8 +140,8 @@ function getAttributionHeaders(
 
 	if (model.provider === "openrouter" || model.baseUrl.includes("openrouter.ai")) {
 		return {
-			"HTTP-Referer": "https://Hodeus.dev",
-			"X-OpenRouter-Title": "Hodeus",
+			"HTTP-Referer": "https://mooncli.dev",
+			"X-OpenRouter-Title": "Moon",
 			"X-OpenRouter-Categories": "cli-engine",
 		};
 	}
@@ -153,7 +153,7 @@ function getAttributionHeaders(
 		model.baseUrl.includes("gateway.ai.cloudflare.com")
 	) {
 		return {
-			"User-Engine": "Hodeus-cli",
+			"User-Engine": "moon-cli",
 		};
 	}
 

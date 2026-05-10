@@ -1,6 +1,6 @@
 {
 	"name": "hodeus-core",
-	"version": "9.5.4",
+	"version": "10.05.2026",
 	"description": "Unified Core Engine for Modern Apps",
 	"type": "module",
 	"main": "./dist/index.js",

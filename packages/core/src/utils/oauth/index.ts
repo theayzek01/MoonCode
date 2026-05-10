@@ -5,14 +5,12 @@
  * for OAuth-based providers:
  * - Anthropic (Claude Pro/Max)
  * - GitHub Copilot
- * - Google Cloud Code Assist (Gemini CLI)
- * - Antigravity (Gemini 3, Claude, GPT-OSS via Google Cloud)
+ * - OpenAI Codex
+ * - Ollama
  */
 
 // Anthropic
 export { anthropicOAuthProvider, loginAnthropic, refreshAnthropicToken } from "./anthropic.js";
-// Google Antigravity
-export { antigravityOAuthProvider, loginAntigravity, refreshAntigravityToken } from "./antigravity.js";
 // GitHub Copilot
 export {
 	getGitHubCopilotBaseUrl,
@@ -21,8 +19,6 @@ export {
 	normalizeDomain,
 	refreshGitHubCopilotToken,
 } from "./github-copilot.js";
-// Google Gemini CLI
-export { geminiCliOAuthProvider, loginGeminiCli, refreshGoogleCloudToken } from "./google-gemini-cli.js";
 // Ollama
 export { loginOllama, ollamaOAuthProvider } from "./ollama.js";
 // OpenAI Codex (ChatGPT OAuth)
@@ -35,9 +31,7 @@ export * from "./types.js";
 // ============================================================================
 
 import { anthropicOAuthProvider } from "./anthropic.js";
-import { antigravityOAuthProvider } from "./antigravity.js";
 import { githubCopilotOAuthProvider } from "./github-copilot.js";
-import { geminiCliOAuthProvider } from "./google-gemini-cli.js";
 import { ollamaOAuthProvider } from "./ollama.js";
 import { openaiCodexOAuthProvider } from "./openai-codex.js";
 import type { OAuthCredentials, OAuthProviderId, OAuthProviderInfo, OAuthProviderInterface } from "./types.js";
@@ -45,8 +39,6 @@ import type { OAuthCredentials, OAuthProviderId, OAuthProviderInfo, OAuthProvide
 const BUILT_IN_OAUTH_PROVIDERS: OAuthProviderInterface[] = [
 	anthropicOAuthProvider,
 	githubCopilotOAuthProvider,
-	geminiCliOAuthProvider,
-	antigravityOAuthProvider,
 	openaiCodexOAuthProvider,
 	ollamaOAuthProvider,
 ];

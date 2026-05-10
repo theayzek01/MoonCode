@@ -1,6 +1,6 @@
 {
 	"name": "hodeus-engine",
-	"version": "9.5.4",
+	"version": "10.05.2026",
 	"description": "General-purpose state management engine",
 	"type": "module",
 	"main": "./dist/index.js",

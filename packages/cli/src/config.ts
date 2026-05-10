@@ -223,7 +223,7 @@ export function getSelfUpdateCommand(packageName: string, npmCommand?: string[])
 export function getSelfUpdateUnavailableInstruction(packageName: string, npmCommand?: string[]): string {
 	const method = detectInstallMethod();
 	if (method === "bun-binary") {
-		return `Download from: https://hodeus.dev/releases/latest`;
+		return `Download from: https://mooncli.dev/releases/latest`;
 	}
 	const command = getSelfUpdateCommandForMethod(method, packageName, npmCommand);
 	if (command) {
@@ -354,10 +354,10 @@ interface PackageJson {
 const pkg = JSON.parse(readFileSync(getPackageJsonPath(), "utf-8")) as PackageJson;
 
 const moonConfigName: string | undefined = pkg.moonConfig?.name;
-export const PACKAGE_NAME: string = pkg.name || "hodeus";
-export const APP_NAME: string = moonConfigName || "hodeus";
-export const APP_TITLE: string = "Hodeus";
-export const CONFIG_DIR_NAME: string = pkg.moonConfig?.configDir || ".hodeus";
+export const PACKAGE_NAME: string = pkg.name || "mooncli";
+export const APP_NAME: string = moonConfigName || "Moon";
+export const APP_TITLE: string = moonConfigName || "Moon";
+export const CONFIG_DIR_NAME: string = pkg.moonConfig?.configDir || ".mooncli";
 export const VERSION: string = pkg.version || "0.0.0";
 
 export const ENV_AGENT_DIR = `${APP_NAME.toUpperCase()}_CODING_AGENT_DIR`;
@@ -369,11 +369,11 @@ export function expandTildePath(path: string): string {
 	return path;
 }
 
-const DEFAULT_SHARE_VIEWER_URL = "https://hodeus.dev/session/";
+const DEFAULT_SHARE_VIEWER_URL = "https://mooncli.dev/session/";
 
 /** Get the share viewer URL for a gist ID */
 export function getShareViewerUrl(gistId: string): string {
-	const baseUrl = process.env.HODEUS_SHARE_VIEWER_URL || DEFAULT_SHARE_VIEWER_URL;
+	const baseUrl = process.env.MOON_SHARE_VIEWER_URL || DEFAULT_SHARE_VIEWER_URL;
 	return `${baseUrl}#${gistId}`;
 }
 
@@ -381,7 +381,7 @@ export function getShareViewerUrl(gistId: string): string {
 // User Config Paths (~/.Hodeus/engine/*)
 // =============================================================================
 
-/** Get the engine config directory (e.g., ~/.Hodeus/engine/) */
+/** Get the engine config directory (e.g., ~/.mooncli/engine/) */
 export function getEngineDir(): string {
 	const envDir = process.env[ENV_AGENT_DIR];
 	if (envDir) {
@@ -432,5 +432,5 @@ export function getSessionsDir(): string {
 
 /** Get path to debug log file */
 export function getDebugLogPath(): string {
-	return join(getEngineDir(), `${APP_NAME}-debug.log`);
+	return join(getEngineDir(), `${APP_NAME.toLowerCase()}-debug.log`);
 }

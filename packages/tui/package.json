@@ -1,6 +1,6 @@
 {
 	"name": "hodeus-tui",
-	"version": "9.5.4",
+	"version": "10.05.2026",
 	"description": "Terminal User Interface library with differential rendering for efficient text-based applications",
 	"type": "module",
 	"main": "dist/index.js",

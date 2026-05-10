@@ -820,7 +820,7 @@ export class InteractiveMode {
 		}
 
 		if (extendedKeysFormat === "xterm") {
-			return "tmux extended-keys-format is xterm. Hodeus works best with csi-u. Add `set -g extended-keys-format csi-u` to ~/.tmux.conf and restart tmux.";
+			return "tmux extended-keys-format is xterm. Moon works best with csi-u. Add `set -g extended-keys-format csi-u` to ~/.tmux.conf and restart tmux.";
 		}
 
 		return undefined;
@@ -6120,7 +6120,7 @@ export class InteractiveMode {
 			const msg =
 				`${theme.bold(theme.fg("success", `${fileName} olusturuldu`))}\n\n` +
 				`${theme.fg("dim", targetPath)}\n\n` +
-				`${theme.fg("muted", "Proje kurallarin ve stack bilgini dosyaya ekle. Hodeus her oturumda okuyacak.")}\n`;
+				`${theme.fg("muted", "Proje kurallarin ve stack bilgini dosyaya ekle. Moon her oturumda okuyacak.")}\n`;
 			this.chatContainer.addChild(new Spacer(1));
 			this.chatContainer.addChild(new Text(msg, 1, 0));
 			this.ui.requestRender();

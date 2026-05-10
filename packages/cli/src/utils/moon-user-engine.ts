@@ -1,5 +1,10 @@
 // @ts-nocheck
-export function getHodeusUserEngine(version: string): string {
+export function getMoonUserEngine(version: string): string {
 	const runtime = process.versions.bun ? `bun/${process.versions.bun}` : `node/${process.version}`;
-	return `Hodeus/${version} (${process.platform}; ${runtime}; ${process.arch})`;
+	return `Moon/${version} (${process.platform}; ${runtime}; ${process.arch})`;
+}
+
+/** @deprecated Use getMoonUserEngine */
+export function getHodeusUserEngine(version: string): string {
+	return getMoonUserEngine(version);
 }

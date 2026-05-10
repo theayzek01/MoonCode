@@ -62,7 +62,7 @@ function getGroupLabel(metadata: PathMetadata): string {
 	}
 	// Top-level resources
 	if (metadata.source === "auto") {
-		return metadata.scope === "user" ? "Kullanıcı (~/.Hodeus/engine/)" : "Proje (.Hodeus/)";
+		return metadata.scope === "user" ? `Kullanıcı (~/${CONFIG_DIR_NAME}/engine/)` : `Proje (.${CONFIG_DIR_NAME}/)`;
 	}
 	return metadata.scope === "user" ? "Kullanıcı ayarları" : "Proje ayarları";
 }

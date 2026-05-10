@@ -11,8 +11,7 @@ export type KnownApi =
 	| "anthropic-messages"
 	| "bedrock-converse-stream"
 	| "google-generative-ai"
-	| "google-vertex"
-	| "google-antigravity";
+	| "google-vertex";
 
 export type Api = KnownApi | (string & {});
 

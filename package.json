@@ -1,5 +1,5 @@
 {
-	"name": "hodeus-monorepo",
+	"name": "moon-monorepo",
 	"private": true,
 	"type": "module",
 	"workspaces": [
@@ -45,12 +45,12 @@
 	"engines": {
 		"node": ">=20.0.0"
 	},
-	"version": "9.5.4",
+	"version": "10.05.2026",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/theayzek01/hodeuscli"
 	},
-	"homepage": "https://hodeus.dev",
+	"homepage": "https://mooncli.dev",
 	"dependencies": {
 		"@mariozechner/jiti": "^2.6.5",
 		"get-east-asian-width": "^1.4.0",
