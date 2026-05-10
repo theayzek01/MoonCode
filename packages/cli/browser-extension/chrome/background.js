@@ -140,6 +140,22 @@ async function executePage(args) {
   const tabId = tab.id;
   if (tabId === undefined) throw new Error("No target tab id");
 
+  const resolveSelector = async (selector) => {
+    if (selector.startsWith("#") && !isNaN(selector.slice(1))) {
+      const id = selector.slice(1);
+      const [res] = await chrome.scripting.executeScript({
+        target: { tabId },
+        func: (id) => {
+          const el = document.querySelector(`[data-moon-id="${id}"]`);
+          return el ? `[data-moon-id="${id}"]` : null;
+        },
+        args: [id]
+      });
+      return res.result || selector;
+    }
+    return selector;
+  };
+
   if (action === "scroll") {
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
@@ -236,7 +252,8 @@ async function executePage(args) {
 
   if (action === "click") {
     if (!args.selector) throw new Error("click requires selector");
-    await injectOverlay(tabId, `Clicking ${args.selector}`);
+    const selector = await resolveSelector(args.selector);
+    await injectOverlay(tabId, `Clicking ${selector}`);
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
       func: async (selector) => {
@@ -255,7 +272,8 @@ async function executePage(args) {
 
   if (action === "hover") {
     if (!args.selector) throw new Error("hover requires selector");
-    await injectOverlay(tabId, `Hovering ${args.selector}`);
+    const selector = await resolveSelector(args.selector);
+    await injectOverlay(tabId, `Hovering ${selector}`);
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
       func: async (selector) => {
@@ -274,7 +292,8 @@ async function executePage(args) {
 
   if (action === "type") {
     if (!args.selector) throw new Error("type requires selector");
-    await injectOverlay(tabId, `Typing into ${args.selector}`);
+    const selector = await resolveSelector(args.selector);
+    await injectOverlay(tabId, `Typing into ${selector}`);
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
       func: async (selector, text) => {
@@ -315,24 +334,52 @@ async function executePage(args) {
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
       func: () => {
+        // Cleanup old labels
+        document.querySelectorAll(".moon-label").forEach(el => el.remove());
+        
         const interactive = Array.from(document.querySelectorAll('a, button, input, select, textarea, [role="button"], [onclick]'));
-        return interactive.map(el => {
+        let idCounter = 1;
+        const map = [];
+
+        interactive.forEach(el => {
           const rect = el.getBoundingClientRect();
           const isVisible = rect.width > 0 && rect.height > 0 && 
-                           window.getComputedStyle(el).visibility !== 'hidden' &&
-                           window.getComputedStyle(el).display !== 'none';
-          if (!isVisible) return null;
+                           rect.top >= 0 && rect.left >= 0 &&
+                           rect.bottom <= window.innerHeight && rect.right <= window.innerWidth &&
+                           window.getComputedStyle(el).visibility !== 'hidden';
+          
+          if (!isVisible) return;
 
-          return {
+          const id = idCounter++;
+          el.setAttribute("data-moon-id", id);
+          
+          // Draw label
+          const label = document.createElement("div");
+          label.className = "moon-label";
+          label.textContent = id;
+          label.style.position = "absolute";
+          label.style.top = (rect.top + window.scrollY) + "px";
+          label.style.left = (rect.left + window.scrollX) + "px";
+          label.style.background = "#fbbf24";
+          label.style.color = "#000";
+          label.style.fontSize = "10px";
+          label.style.fontWeight = "bold";
+          label.style.padding = "1px 3px";
+          label.style.borderRadius = "3px";
+          label.style.zIndex = "2147483647";
+          label.style.pointerEvents = "none";
+          label.style.border = "1px solid #000";
+          document.body.appendChild(label);
+
+          map.push({
+            id,
             tag: el.tagName.toLowerCase(),
             text: el.textContent?.trim().slice(0, 30),
-            id: el.id || undefined,
             placeholder: el.placeholder || undefined,
-            type: el.type || undefined,
-            role: el.getAttribute('role') || undefined,
-            aria: el.getAttribute('aria-label') || undefined
-          };
-        }).filter(Boolean).slice(0, 100); // Limit to top 100 to avoid token overflow
+            type: el.type || undefined
+          });
+        });
+        return map.slice(0, 80); // Strict limit for speed
       }
     });
     return result?.result;
