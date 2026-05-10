@@ -164,23 +164,49 @@ async function executePage(args) {
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
       func: () => {
-        const walk = (node) => {
-          if (node.nodeType === 3) return node.textContent.trim();
+        const isInteractive = (el) => {
+          const role = el.getAttribute("role");
+          return ["a", "button", "input", "select", "textarea"].includes(el.tagName.toLowerCase()) || 
+                 el.hasAttribute("onclick") || 
+                 ["button", "link", "checkbox", "menuitem"].includes(role);
+        };
+
+        const walk = (node, depth = 0) => {
+          if (depth > 10) return ""; // Limit depth to save tokens
+          if (node.nodeType === 3) {
+            const text = node.textContent.trim();
+            return text.length > 2 ? text : "";
+          }
           if (node.nodeType !== 1) return "";
-          const tag = node.tagName.toLowerCase();
-          if (["script", "style", "noscript"].includes(tag)) return "";
           
-          let children = Array.from(node.childNodes).map(walk).filter(x => x).join(" ");
+          const tag = node.tagName.toLowerCase();
+          if (["script", "style", "noscript", "svg", "path"].includes(tag)) return "";
+          
+          // Check if visible
+          const style = window.getComputedStyle(node);
+          if (style.display === "none" || style.visibility === "hidden") return "";
+
+          let children = Array.from(node.childNodes)
+            .map(c => walk(c, depth + 1))
+            .filter(x => x)
+            .join(" ");
+
+          if (isInteractive(node)) {
+            const label = node.getAttribute("aria-label") || node.title || children || node.placeholder || "";
+            return `\n[${tag.toUpperCase()}: ${label.slice(0, 50)}]\n`;
+          }
+
           if (["h1", "h2", "h3"].includes(tag)) return `\n# ${children}\n`;
-          if (tag === "a") return `[${children}](${node.href})`;
-          if (tag === "button") return `[BUTTON: ${children}]`;
-          if (tag === "input") return `[INPUT: ${node.type} ${node.placeholder || ""}]`;
+          
+          // If a div/section has no interactive children and small text, maybe collapse it?
+          // For now, just return children to keep structure flat and token-efficient
           return children;
         };
+
         return {
           url: location.href,
           title: document.title,
-          content: walk(document.body).replace(/\s+/g, " ").slice(0, 15000)
+          content: walk(document.body).replace(/\s+/g, " ").replace(/\n\s*\n/g, "\n").slice(0, 8000)
         };
       }
     });
@@ -289,17 +315,24 @@ async function executePage(args) {
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
       func: () => {
-        const elements = Array.from(document.querySelectorAll('a, button, input, select, textarea, [role="button"], [onclick]'));
-        return elements.map(el => ({
-          tag: el.tagName.toLowerCase(),
-          text: el.textContent?.trim().slice(0, 50),
-          id: el.id,
-          class: el.className,
-          placeholder: el.placeholder,
-          type: el.type,
-          role: el.getAttribute('role'),
-          isVisible: el.offsetWidth > 0 && el.offsetHeight > 0
-        })).filter(el => el.isVisible);
+        const interactive = Array.from(document.querySelectorAll('a, button, input, select, textarea, [role="button"], [onclick]'));
+        return interactive.map(el => {
+          const rect = el.getBoundingClientRect();
+          const isVisible = rect.width > 0 && rect.height > 0 && 
+                           window.getComputedStyle(el).visibility !== 'hidden' &&
+                           window.getComputedStyle(el).display !== 'none';
+          if (!isVisible) return null;
+
+          return {
+            tag: el.tagName.toLowerCase(),
+            text: el.textContent?.trim().slice(0, 30),
+            id: el.id || undefined,
+            placeholder: el.placeholder || undefined,
+            type: el.type || undefined,
+            role: el.getAttribute('role') || undefined,
+            aria: el.getAttribute('aria-label') || undefined
+          };
+        }).filter(Boolean).slice(0, 100); // Limit to top 100 to avoid token overflow
       }
     });
     return result?.result;
