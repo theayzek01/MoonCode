@@ -5718,8 +5718,13 @@ export class InteractiveMode {
 			return undefined;
 		}
 
-		// Take the rest of the string as the path, allowing spaces without mandatory quotes
-		return argsString;
+		// Take the rest of the string as the path, allowing spaces.
+		// If the user provided quotes, strip them so path.resolve works correctly.
+		let path = argsString;
+		if ((path.startsWith('"') && path.endsWith('"')) || (path.startsWith("'") && path.endsWith("'"))) {
+			path = path.slice(1, -1);
+		}
+		return path;
 	}
 
 	private async handleImportCommand(text: string): Promise<void> {
