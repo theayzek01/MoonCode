@@ -5718,20 +5718,8 @@ export class InteractiveMode {
 			return undefined;
 		}
 
-		const firstChar = argsString[0];
-		if (firstChar === '"' || firstChar === "'") {
-			const closingQuoteIndex = argsString.indexOf(firstChar, 1);
-			if (closingQuoteIndex < 0) {
-				return undefined;
-			}
-			return argsString.slice(1, closingQuoteIndex);
-		}
-
-		const firstWhitespaceIndex = argsString.search(/\s/);
-		if (firstWhitespaceIndex < 0) {
-			return argsString;
-		}
-		return argsString.slice(0, firstWhitespaceIndex);
+		// Take the rest of the string as the path, allowing spaces without mandatory quotes
+		return argsString;
 	}
 
 	private async handleImportCommand(text: string): Promise<void> {
