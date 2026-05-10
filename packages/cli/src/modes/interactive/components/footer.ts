@@ -93,7 +93,11 @@ export class FooterComponent implements Component {
 				? `${state.model.provider}/${modelName}`
 				: modelName;
 		const thinking = state.model?.reasoning ? `think:${state.thinkingLevel || "off"}` : undefined;
+		const browserStatus = this.session.getBrowserBridgeStatus();
+		const browserIndicator = browserStatus.clients > 0 ? theme.fg("success", "🌐 browser") : undefined;
+
 		const usage = joinMuted([
+			browserIndicator,
 			totalInput ? `↑${formatTokens(totalInput)}` : undefined,
 			totalOutput ? `↓${formatTokens(totalOutput)}` : undefined,
 			totalCost
