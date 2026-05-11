@@ -17,7 +17,7 @@ describe("package commands", () => {
 	let originalExecPath: string;
 
 	beforeEach(() => {
-		tempDir = join(tmpdir(), `Hodeus-package-commands-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+		tempDir = join(tmpdir(), `Mooncli-package-commands-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 		engineDir = join(tempDir, "engine");
 		projectDir = join(tempDir, "project");
 		packageDir = join(tempDir, "local-package");
@@ -131,11 +131,11 @@ describe("package commands", () => {
 	it("uses global npmCommand for self updates", async () => {
 		const globalPrefix = join(tempDir, "global-prefix");
 		const projectPrefix = join(tempDir, "project-prefix");
-		const selfPackageDir = join(globalPrefix, "lib", "node_modules", "@mariozechner", "Hodeus-cli");
+		const selfPackageDir = join(globalPrefix, "lib", "node_modules", "@mariozechner", "Mooncli-cli");
 		const fakeNpmPath = join(tempDir, "fake-npm.cjs");
 		const recordPath = join(tempDir, "self-update.json");
 		mkdirSync(selfPackageDir, { recursive: true });
-		mkdirSync(join(projectDir, ".Hodeus"), { recursive: true });
+		mkdirSync(join(projectDir, ".Mooncli"), { recursive: true });
 		writeFileSync(
 			fakeNpmPath,
 			`const fs=require("node:fs"),path=require("node:path"),args=process.argv.slice(2),prefix=args[args.indexOf("--prefix")+1];
@@ -148,10 +148,10 @@ else fs.writeFileSync(${JSON.stringify(recordPath)},JSON.stringify(args));
 			JSON.stringify({ npmCommand: [originalExecPath, fakeNpmPath, "--prefix", globalPrefix] }, null, 2),
 		);
 		writeFileSync(
-			join(projectDir, ".Hodeus", "settings.json"),
+			join(projectDir, ".Mooncli", "settings.json"),
 			JSON.stringify({ npmCommand: [originalExecPath, fakeNpmPath, "--prefix", projectPrefix] }, null, 2),
 		);
-		process.env.HODEUS_PACKAGE_DIR = selfPackageDir;
+		process.env.MOON_PACKAGE_DIR = selfPackageDir;
 		Object.defineProperty(process, "execPath", {
 			value: join(selfPackageDir, "dist", "cli.js"),
 			configurable: true,
@@ -176,22 +176,22 @@ else fs.writeFileSync(${JSON.stringify(recordPath)},JSON.stringify(args));
 
 	it("suggests the configured source when update input omits the npm prefix", async () => {
 		const settingsPath = join(engineDir, "settings.json");
-		writeFileSync(settingsPath, JSON.stringify({ packages: ["npm:Hodeus-formatter"] }, null, 2));
+		writeFileSync(settingsPath, JSON.stringify({ packages: ["npm:Mooncli-formatter"] }, null, 2));
 
 		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 		const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
 		try {
-			await expect(main(["update", "Hodeus-formatter"])).resolves.toBeUndefined();
+			await expect(main(["update", "Mooncli-formatter"])).resolves.toBeUndefined();
 
 			const stderr = errorSpy.mock.calls.map(([message]) => String(message)).join("\n");
 			const stdout = logSpy.mock.calls.map(([message]) => String(message)).join("\n");
-			expect(stderr).toContain("Did you mean npm:Hodeus-formatter?");
-			expect(stdout).not.toContain("Updated Hodeus-formatter");
+			expect(stderr).toContain("Did you mean npm:Mooncli-formatter?");
+			expect(stdout).not.toContain("Updated Mooncli-formatter");
 			expect(process.exitCode).toBe(1);
 
 			const settings = JSON.parse(readFileSync(settingsPath, "utf-8")) as { packages?: string[] };
-			expect(settings.packages).toContain("npm:Hodeus-formatter");
+			expect(settings.packages).toContain("npm:Mooncli-formatter");
 		} finally {
 			errorSpy.mockRestore();
 			logSpy.mockRestore();

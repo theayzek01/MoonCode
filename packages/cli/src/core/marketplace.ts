@@ -14,8 +14,8 @@ export interface RegistryEntry {
 }
 
 const DEFAULT_REGISTRY_URL =
-	process.env.HODEUS_MARKETPLACE_REGISTRY ||
-	"https://raw.githubusercontent.com/theayzek01/Hodeus-registry/main/registry.json";
+	process.env.MOON_MARKETPLACE_REGISTRY ||
+	"https://raw.githubusercontent.com/theayzek01/Mooncli-registry/main/registry.json";
 const CACHE_TTL_MS = 60 * 60 * 1000;
 
 function cachePath(): string {

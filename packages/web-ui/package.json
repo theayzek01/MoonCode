@@ -1,15 +1,14 @@
 {
-	"name": "Hodeus-web-ui",
-	"version": "9.5.4",
-	"type": "module",
-	"private": true,
-	"main": "src/server.ts",
-	"scripts": {
-		"dev": "tsx src/server.ts",
-		"start": "tsx src/server.ts",
-		"build": "tsc -p tsconfig.json --noEmit"
-	},
-	"dependencies": {},
-	"devDependencies": {}
+  "name": "Mooncli-web-ui",
+  "version": "11.5.2026-2",
+  "type": "module",
+  "private": true,
+  "main": "src/server.ts",
+  "scripts": {
+    "dev": "tsx src/server.ts",
+    "start": "tsx src/server.ts",
+    "build": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {},
+  "devDependencies": {}
 }
-

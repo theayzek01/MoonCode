@@ -10,9 +10,9 @@
  * correct for that point in history.
  */
 
-import type { ExtensionAPI, ExtensionContext, Theme } from "Hodeus";
-import { StringEnum } from "hodeus-core";
-import { matchesKey, Text, truncateToWidth } from "hodeus-tui";
+import type { ExtensionAPI, ExtensionContext, Theme } from "Mooncli";
+import { StringEnum } from "moon-core";
+import { matchesKey, Text, truncateToWidth } from "moon-tui";
 import { Type } from "typebox";
 
 interface Todo {
@@ -102,7 +102,7 @@ class TodoListComponent {
 	}
 }
 
-export default function (Hodeus: ExtensionAPI) {
+export default function (Mooncli: ExtensionAPI) {
 	// In-memory state (reconstructed from session on load)
 	let todos: Todo[] = [];
 	let nextId = 1;
@@ -129,11 +129,11 @@ export default function (Hodeus: ExtensionAPI) {
 	};
 
 	// Reconstruct state on session events
-	Hodeus.on("session_start", async (_event, ctx) => reconstructState(ctx));
-	Hodeus.on("session_tree", async (_event, ctx) => reconstructState(ctx));
+	Mooncli.on("session_start", async (_event, ctx) => reconstructState(ctx));
+	Mooncli.on("session_tree", async (_event, ctx) => reconstructState(ctx));
 
 	// Register the todo tool for the Provider
-	Hodeus.registerTool({
+	Mooncli.registerTool({
 		name: "todo",
 		label: "Todo",
 		description: "Manage a todo list. Actions: list, add (text), toggle (id), clear",
@@ -281,7 +281,7 @@ export default function (Hodeus: ExtensionAPI) {
 	});
 
 	// Register the /todos command for users
-	Hodeus.registerCommand("todos", {
+	Mooncli.registerCommand("todos", {
 		description: "Show all todos on the current branch",
 		handler: async (_args, ctx) => {
 			if (!ctx.hasUI) {

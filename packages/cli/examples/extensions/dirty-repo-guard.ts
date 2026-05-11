@@ -5,15 +5,15 @@
  * Useful to ensure work is committed before switching context.
  */
 
-import type { ExtensionAPI, ExtensionContext } from "Hodeus";
+import type { ExtensionAPI, ExtensionContext } from "Mooncli";
 
 async function checkDirtyRepo(
-	Hodeus: ExtensionAPI,
+	Mooncli: ExtensionAPI,
 	ctx: ExtensionContext,
 	action: string,
 ): Promise<{ cancel: boolean } | undefined> {
 	// Check for uncommitted changes
-	const { stdout, code } = await Hodeus.exec("git", ["status", "--porcelain"]);
+	const { stdout, code } = await Mooncli.exec("git", ["status", "--porcelain"]);
 
 	if (code !== 0) {
 		// Not a git repo, allow the action
@@ -44,13 +44,13 @@ async function checkDirtyRepo(
 	}
 }
 
-export default function (Hodeus: ExtensionAPI) {
-	Hodeus.on("session_before_switch", async (event, ctx) => {
+export default function (Mooncli: ExtensionAPI) {
+	Mooncli.on("session_before_switch", async (event, ctx) => {
 		const action = event.reason === "new" ? "new session" : "switch session";
-		return checkDirtyRepo(Hodeus, ctx, action);
+		return checkDirtyRepo(Mooncli, ctx, action);
 	});
 
-	Hodeus.on("session_before_fork", async (_event, ctx) => {
-		return checkDirtyRepo(Hodeus, ctx, "fork");
+	Mooncli.on("session_before_fork", async (_event, ctx) => {
+		return checkDirtyRepo(Mooncli, ctx, "fork");
 	});
 }

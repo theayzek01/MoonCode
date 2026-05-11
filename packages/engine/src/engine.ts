@@ -8,7 +8,7 @@ import {
 	type TextContent,
 	type ThinkingBudgets,
 	type Transport,
-} from "hodeus-core";
+} from "moon-core";
 import { runEngineLoop, runEngineLoopContinue } from "./engine-loop.js";
 import type {
 	AfterToolCallContext,

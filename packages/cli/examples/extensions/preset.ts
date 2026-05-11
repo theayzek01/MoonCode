@@ -6,8 +6,8 @@
  * and can be activated via CLI flag, /preset command, or Ctrl+Shift+U to cycle.
  *
  * Config files (merged, project takes precedence):
- * - ~/.Hodeus/engine/presets.json (global)
- * - <cwd>/.Hodeus/presets.json (project-local)
+ * - ~/.Mooncli/engine/presets.json (global)
+ * - <cwd>/.Mooncli/presets.json (project-local)
  *
  * Example presets.json:
  * ```json
@@ -30,7 +30,7 @@
  * ```
  *
  * Usage:
- * - `Hodeus --preset plan` - start with plan preset
+ * - `Mooncli --preset plan` - start with plan preset
  * - `/preset` - show selector to switch presets mid-session
  * - `/preset implement` - switch to implement preset directly
  * - `Ctrl+Shift+U` - cycle through presets
@@ -38,12 +38,12 @@
  * CLI flags always override preset values.
  */
 
-import type { ExtensionAPI, ExtensionContext } from "Hodeus";
-import { DynamicBorder, getEngineDir } from "Hodeus";
+import type { ExtensionAPI, ExtensionContext } from "Mooncli";
+import { DynamicBorder, getEngineDir } from "Mooncli";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { Api, Model } from "hodeus-core";
-import { Container, Key, type SelectItem, SelectList, Text } from "hodeus-tui";
+import type { Api, Model } from "moon-core";
+import { Container, Key, type SelectItem, SelectList, Text } from "moon-tui";
 
 // Preset configuration
 interface Preset {
@@ -69,7 +69,7 @@ interface PresetsConfig {
  */
 function loadPresets(cwd: string): PresetsConfig {
 	const globalPath = join(getEngineDir(), "presets.json");
-	const projectPath = join(cwd, ".Hodeus", "presets.json");
+	const projectPath = join(cwd, ".Mooncli", "presets.json");
 
 	let globalPresets: PresetsConfig = {};
 	let projectPresets: PresetsConfig = {};
@@ -104,14 +104,14 @@ interface OriginalState {
 	tools: string[];
 }
 
-export default function presetExtension(Hodeus: ExtensionAPI) {
+export default function presetExtension(Mooncli: ExtensionAPI) {
 	let presets: PresetsConfig = {};
 	let activePresetName: string | undefined;
 	let activePreset: Preset | undefined;
 	let originalState: OriginalState | undefined;
 
 	// Register --preset CLI flag
-	Hodeus.registerFlag("preset", {
+	Mooncli.registerFlag("preset", {
 		description: "Preset configuration to use",
 		type: "string",
 	});
@@ -124,8 +124,8 @@ export default function presetExtension(Hodeus: ExtensionAPI) {
 		if (activePresetName === undefined) {
 			originalState = {
 				model: ctx.model,
-				thinkingLevel: Hodeus.getThinkingLevel(),
-				tools: Hodeus.getActiveTools(),
+				thinkingLevel: Mooncli.getThinkingLevel(),
+				tools: Mooncli.getActiveTools(),
 			};
 		}
 
@@ -133,7 +133,7 @@ export default function presetExtension(Hodeus: ExtensionAPI) {
 		if (preset.provider && preset.model) {
 			const model = ctx.modelRegistry.find(preset.provider, preset.model);
 			if (model) {
-				const success = await Hodeus.setModel(model);
+				const success = await Mooncli.setModel(model);
 				if (!success) {
 					ctx.ui.notify(`Preset "${name}": No API key for ${preset.provider}/${preset.model}`, "warning");
 				}
@@ -144,12 +144,12 @@ export default function presetExtension(Hodeus: ExtensionAPI) {
 
 		// Apply thinking level if specified
 		if (preset.thinkingLevel) {
-			Hodeus.setThinkingLevel(preset.thinkingLevel);
+			Mooncli.setThinkingLevel(preset.thinkingLevel);
 		}
 
 		// Apply tools if specified
 		if (preset.tools && preset.tools.length > 0) {
-			const allToolNames = Hodeus.getAllTools().map((t) => t.name);
+			const allToolNames = Mooncli.getAllTools().map((t) => t.name);
 			const validTools = preset.tools.filter((t) => allToolNames.includes(t));
 			const invalidTools = preset.tools.filter((t) => !allToolNames.includes(t));
 
@@ -158,7 +158,7 @@ export default function presetExtension(Hodeus: ExtensionAPI) {
 			}
 
 			if (validTools.length > 0) {
-				Hodeus.setActiveTools(validTools);
+				Mooncli.setActiveTools(validTools);
 			}
 		}
 
@@ -201,7 +201,7 @@ export default function presetExtension(Hodeus: ExtensionAPI) {
 
 		if (presetNames.length === 0) {
 			ctx.ui.notify(
-				"No presets defined. Add presets to ~/.Hodeus/engine/presets.json or .Hodeus/presets.json",
+				"No presets defined. Add presets to ~/.Mooncli/engine/presets.json or .Mooncli/presets.json",
 				"warning",
 			);
 			return;
@@ -273,12 +273,12 @@ export default function presetExtension(Hodeus: ExtensionAPI) {
 			activePreset = undefined;
 			if (originalState) {
 				if (originalState.model) {
-					await Hodeus.setModel(originalState.model);
+					await Mooncli.setModel(originalState.model);
 				}
-				Hodeus.setThinkingLevel(originalState.thinkingLevel);
-				Hodeus.setActiveTools(originalState.tools);
+				Mooncli.setThinkingLevel(originalState.thinkingLevel);
+				Mooncli.setActiveTools(originalState.tools);
 			} else {
-				Hodeus.setActiveTools(["read", "bash", "edit", "write"]);
+				Mooncli.setActiveTools(["read", "bash", "edit", "write"]);
 			}
 			ctx.ui.notify("Preset cleared, defaults restored", "info");
 			updateStatus(ctx);
@@ -312,7 +312,7 @@ export default function presetExtension(Hodeus: ExtensionAPI) {
 		const presetNames = getPresetOrder();
 		if (presetNames.length === 0) {
 			ctx.ui.notify(
-				"No presets defined. Add presets to ~/.Hodeus/engine/presets.json or .Hodeus/presets.json",
+				"No presets defined. Add presets to ~/.Mooncli/engine/presets.json or .Mooncli/presets.json",
 				"warning",
 			);
 			return;
@@ -329,12 +329,12 @@ export default function presetExtension(Hodeus: ExtensionAPI) {
 			activePreset = undefined;
 			if (originalState) {
 				if (originalState.model) {
-					await Hodeus.setModel(originalState.model);
+					await Mooncli.setModel(originalState.model);
 				}
-				Hodeus.setThinkingLevel(originalState.thinkingLevel);
-				Hodeus.setActiveTools(originalState.tools);
+				Mooncli.setThinkingLevel(originalState.thinkingLevel);
+				Mooncli.setActiveTools(originalState.tools);
 			} else {
-				Hodeus.setActiveTools(["read", "bash", "edit", "write"]);
+				Mooncli.setActiveTools(["read", "bash", "edit", "write"]);
 			}
 			ctx.ui.notify("Preset cleared, defaults restored", "info");
 			updateStatus(ctx);
@@ -349,7 +349,7 @@ export default function presetExtension(Hodeus: ExtensionAPI) {
 		updateStatus(ctx);
 	}
 
-	Hodeus.registerShortcut(Key.ctrlShift("u"), {
+	Mooncli.registerShortcut(Key.ctrlShift("u"), {
 		description: "Cycle presets",
 		handler: async (ctx) => {
 			await cyclePreset(ctx);
@@ -357,7 +357,7 @@ export default function presetExtension(Hodeus: ExtensionAPI) {
 	});
 
 	// Register /preset command
-	Hodeus.registerCommand("preset", {
+	Mooncli.registerCommand("preset", {
 		description: "Switch preset configuration",
 		handler: async (args, ctx) => {
 			// If preset name provided, apply directly
@@ -383,7 +383,7 @@ export default function presetExtension(Hodeus: ExtensionAPI) {
 	});
 
 	// Inject preset instructions into system prompt
-	Hodeus.on("before_engine_start", async (event) => {
+	Mooncli.on("before_engine_start", async (event) => {
 		if (activePreset?.instructions) {
 			return {
 				systemPrompt: `${event.systemPrompt}\n\n${activePreset.instructions}`,
@@ -392,12 +392,12 @@ export default function presetExtension(Hodeus: ExtensionAPI) {
 	});
 
 	// Initialize on session start
-	Hodeus.on("session_start", async (_event, ctx) => {
+	Mooncli.on("session_start", async (_event, ctx) => {
 		// Load presets from config files
 		presets = loadPresets(ctx.cwd);
 
 		// Check for --preset flag
-		const presetFlag = Hodeus.getFlag("preset");
+		const presetFlag = Mooncli.getFlag("preset");
 		if (typeof presetFlag === "string" && presetFlag) {
 			const preset = presets[presetFlag];
 			if (preset) {
@@ -428,9 +428,9 @@ export default function presetExtension(Hodeus: ExtensionAPI) {
 	});
 
 	// Persist preset state
-	Hodeus.on("turn_start", async () => {
+	Mooncli.on("turn_start", async () => {
 		if (activePresetName) {
-			Hodeus.appendEntry("preset-state", { name: activePresetName });
+			Mooncli.appendEntry("preset-state", { name: activePresetName });
 		}
 	});
 }

@@ -158,7 +158,7 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 
 	if (hasBrowser) {
 		addGuideline(
-			"You have Chrome browser control through the local Hodeus Browser Bridge when the extension is connected; do not claim you cannot access the browser. Use /browser for status if needed.",
+			"You have Chrome browser control through the local Mooncli Browser Bridge when the extension is connected; do not claim you cannot access the browser. Use /browser for status if needed.",
 		);
 		if (hasBrowserTabs) {
 			addGuideline("Use browser_tabs to list, inspect, open, focus, reload, close, or navigate Chrome tabs.");

@@ -7,10 +7,10 @@
  * createEngineSession() applies that cwd when it builds the actual built-in tools.
  *
  * For custom tools, see 06-extensions.ts - custom tools are registered via the
- * extensions system using Hodeus.registerTool().
+ * extensions system using Mooncli.registerTool().
  */
 
-import { createEngineSession, SessionManager } from "Hodeus";
+import { createEngineSession, SessionManager } from "Mooncli";
 
 // Read-only mode (no edit/write)
 await createEngineSession({

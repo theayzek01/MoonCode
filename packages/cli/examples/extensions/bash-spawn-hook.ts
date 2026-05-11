@@ -4,13 +4,13 @@
  * Adjusts command, cwd, and env before execution.
  *
  * Usage:
- *   Hodeus -e ./bash-spawn-hook.ts
+ *   Mooncli -e ./bash-spawn-hook.ts
  */
 
-import type { ExtensionAPI } from "Hodeus";
-import { createBashTool } from "Hodeus";
+import type { ExtensionAPI } from "Mooncli";
+import { createBashTool } from "Mooncli";
 
-export default function (Hodeus: ExtensionAPI) {
+export default function (Mooncli: ExtensionAPI) {
 	const cwd = process.cwd();
 
 	const bashTool = createBashTool(cwd, {
@@ -21,7 +21,7 @@ export default function (Hodeus: ExtensionAPI) {
 		}),
 	});
 
-	Hodeus.registerTool({
+	Mooncli.registerTool({
 		...bashTool,
 		execute: async (id, params, signal, onUpdate, _ctx) => {
 			return bashTool.execute(id, params, signal, onUpdate);

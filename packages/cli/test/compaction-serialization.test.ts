@@ -1,4 +1,4 @@
-import type { Message } from "hodeus-core";
+import type { Message } from "moon-core";
 import { describe, expect, it } from "vitest";
 import { serializeConversation } from "../src/core/compaction/utils.js";
 

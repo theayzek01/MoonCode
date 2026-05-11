@@ -19,8 +19,8 @@ import {
 	registerApiProvider,
 	resetApiProviders,
 	type SimpleStreamOptions,
-} from "hodeus-core";
-import { registerOAuthProvider, resetOAuthProviders } from "hodeus-core/oauth";
+} from "moon-core";
+import { registerOAuthProvider, resetOAuthProviders } from "moon-core/oauth";
 import { join } from "path";
 import { type Static, Type } from "typebox";
 import { Compile } from "typebox/compile";

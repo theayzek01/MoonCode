@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { getModel } from "hodeus-core";
+import { getModel } from "moon-core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { AuthStorage } from "../src/core/auth-storage.js";
 import { DefaultResourceLoader } from "../src/core/resource-loader.js";
@@ -15,7 +15,7 @@ describe("EngineSession dynamic provider registration", () => {
 	let engineDir: string;
 
 	beforeEach(() => {
-		tempDir = join(tmpdir(), `Hodeus-dynamic-provider-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+		tempDir = join(tmpdir(), `Mooncli-dynamic-provider-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 		engineDir = join(tempDir, "engine");
 		mkdirSync(engineDir, { recursive: true });
 	});
@@ -66,8 +66,8 @@ describe("EngineSession dynamic provider registration", () => {
 
 	it("applies top-level registerProvider overrides to the active model", async () => {
 		const session = await createSession([
-			(Hodeus) => {
-				Hodeus.registerProvider("anthropic", { baseUrl: "http://localhost:8080/top-level" });
+			(Mooncli) => {
+				Mooncli.registerProvider("anthropic", { baseUrl: "http://localhost:8080/top-level" });
 			},
 		]);
 
@@ -79,9 +79,9 @@ describe("EngineSession dynamic provider registration", () => {
 
 	it("applies session_start registerProvider overrides to the active model", async () => {
 		const session = await createSession([
-			(Hodeus) => {
-				Hodeus.on("session_start", () => {
-					Hodeus.registerProvider("anthropic", { baseUrl: "http://localhost:8080/session-start" });
+			(Mooncli) => {
+				Mooncli.on("session_start", () => {
+					Mooncli.registerProvider("anthropic", { baseUrl: "http://localhost:8080/session-start" });
 				});
 			},
 		]);
@@ -96,11 +96,11 @@ describe("EngineSession dynamic provider registration", () => {
 
 	it("applies command-time registerProvider overrides without reload", async () => {
 		const session = await createSession([
-			(Hodeus) => {
-				Hodeus.registerCommand("use-proxy", {
+			(Mooncli) => {
+				Mooncli.registerCommand("use-proxy", {
 					description: "Use proxy",
 					handler: async () => {
-						Hodeus.registerProvider("anthropic", { baseUrl: "http://localhost:8080/command" });
+						Mooncli.registerProvider("anthropic", { baseUrl: "http://localhost:8080/command" });
 					},
 				});
 			},

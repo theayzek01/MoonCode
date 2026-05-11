@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { CancellableLoader, Container, Loader, Spacer, Text, type TUI } from "hodeus-tui";
+import { CancellableLoader, Container, Loader, Spacer, Text, type TUI } from "moon-tui";
 import type { Theme } from "../theme/theme.js";
 import { DynamicBorder } from "./dynamic-border.js";
 import { keyHint } from "./keybinding-hints.js";

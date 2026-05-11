@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { fuzzyMatch } from "hodeus-tui";
+import { fuzzyMatch } from "moon-tui";
 import type { SessionInfo } from "../../../core/session-manager.js";
 
 export type SortMode = "threaded" | "recent" | "relevance";

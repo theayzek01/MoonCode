@@ -6,8 +6,8 @@
  * and converting the ANSI output to HTML.
  */
 
-import type { ImageContent, TextContent } from "hodeus-core";
-import type { Component } from "hodeus-tui";
+import type { ImageContent, TextContent } from "moon-core";
+import type { Component } from "moon-tui";
 import type { Theme } from "../../modes/interactive/theme/theme.js";
 import type { ToolDefinition, ToolRenderContext } from "../extensions/types.js";
 import { ansiLinesToHtml } from "./ansi-to-html.js";

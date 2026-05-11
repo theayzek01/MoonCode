@@ -1,6 +1,6 @@
-import type { ExtensionAPI } from "Hodeus";
-import { fauxAssistantMessage, fauxToolCall } from "hodeus-core";
-import type { EngineTool } from "hodeus-engine";
+import type { ExtensionAPI } from "Mooncli";
+import { fauxAssistantMessage, fauxToolCall } from "moon-core";
+import type { EngineTool } from "moon-engine";
 import { Type } from "typebox";
 import { afterEach, describe, expect, it } from "vitest";
 import { createHarness, getAssistantTexts, getUserTexts, type Harness } from "../harness.js";
@@ -37,9 +37,9 @@ describe("issue #2023 queued slash-command follow-up", () => {
 		const harness = await createHarness({
 			tools: [waitTool],
 			extensionFactories: [
-				(Hodeus) => {
-					extensionApi = Hodeus;
-					Hodeus.registerCommand("testcmd", {
+				(Mooncli) => {
+					extensionApi = Mooncli;
+					Mooncli.registerCommand("testcmd", {
 						description: "Test command",
 						handler: async (args) => {
 							commandRuns.push(args);

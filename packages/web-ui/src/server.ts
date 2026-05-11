@@ -11,5 +11,5 @@ export function startWebUiServer(options: { port?: number } = {}) {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
 	const { url } = startWebUiServer();
-	console.log(`Hodeus Web-UI: ${url}`);
+	console.log(`Mooncli Web-UI: ${url}`);
 }

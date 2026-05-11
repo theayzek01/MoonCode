@@ -18,9 +18,9 @@ export default defineConfig({
 	},
 	resolve: {
 		alias: [
-			{ find: /^@mariozechner\/Hodeus-ai$/, replacement: aiSrcIndex },
-			{ find: /^@mariozechner\/Hodeus-ai\/oauth$/, replacement: aiSrcOAuth },
-			{ find: /^@mariozechner\/hodeus-engine-core$/, replacement: engineSrcIndex },
+			{ find: /^@mariozechner\/Mooncli-ai$/, replacement: aiSrcIndex },
+			{ find: /^@mariozechner\/Mooncli-ai\/oauth$/, replacement: aiSrcOAuth },
+			{ find: /^@mariozechner\/moon-engine-core$/, replacement: engineSrcIndex },
 		],
 	},
 });

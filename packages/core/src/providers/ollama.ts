@@ -38,7 +38,7 @@ function envBoolean(name: string): boolean | undefined {
 }
 
 function resolveMode(): OllamaMode {
-	const mode = env("HODEUS_OLLAMA_MODE")?.toLowerCase();
+	const mode = env("MOON_OLLAMA_MODE")?.toLowerCase();
 	return mode === "turbo" || mode === "quality" || mode === "balanced" ? mode : "balanced";
 }
 
@@ -66,7 +66,7 @@ function buildOllamaOptions(maxTokens?: number): Record<string, unknown> {
 			num_ctx: 4096,
 			num_predict: maxTokens ?? 2048,
 			num_batch: 512,
-			num_thread: Math.max(1, Math.floor((envNumber("HODEUS_OLLAMA_THREADS") ?? 8) * 0.75)),
+			num_thread: Math.max(1, Math.floor((envNumber("MOON_OLLAMA_THREADS") ?? 8) * 0.75)),
 			low_vram: true,
 			top_k: 30,
 			top_p: 0.9,
@@ -76,7 +76,7 @@ function buildOllamaOptions(maxTokens?: number): Record<string, unknown> {
 			num_ctx: 8192,
 			num_predict: maxTokens ?? 4096,
 			num_batch: 512,
-			num_thread: envNumber("HODEUS_OLLAMA_THREADS") ?? 8,
+			num_thread: envNumber("MOON_OLLAMA_THREADS") ?? 8,
 			low_vram: true,
 			top_k: 40,
 			top_p: 0.92,
@@ -86,7 +86,7 @@ function buildOllamaOptions(maxTokens?: number): Record<string, unknown> {
 			num_ctx: 12288,
 			num_predict: maxTokens ?? 8192,
 			num_batch: 256,
-			num_thread: envNumber("HODEUS_OLLAMA_THREADS") ?? 8,
+			num_thread: envNumber("MOON_OLLAMA_THREADS") ?? 8,
 			low_vram: false,
 			top_k: 50,
 			top_p: 0.95,
@@ -96,12 +96,12 @@ function buildOllamaOptions(maxTokens?: number): Record<string, unknown> {
 
 	return {
 		...profile[mode],
-		...(envNumber("HODEUS_OLLAMA_NUM_CTX") ? { num_ctx: envNumber("HODEUS_OLLAMA_NUM_CTX") } : {}),
-		...(envNumber("HODEUS_OLLAMA_NUM_PREDICT") ? { num_predict: envNumber("HODEUS_OLLAMA_NUM_PREDICT") } : {}),
-		...(envNumber("HODEUS_OLLAMA_NUM_BATCH") ? { num_batch: envNumber("HODEUS_OLLAMA_NUM_BATCH") } : {}),
-		...(envNumber("HODEUS_OLLAMA_NUM_THREAD") ? { num_thread: envNumber("HODEUS_OLLAMA_NUM_THREAD") } : {}),
-		...(envNumber("HODEUS_OLLAMA_NUM_GPU") ? { num_gpu: envNumber("HODEUS_OLLAMA_NUM_GPU") } : {}),
-		...(envBoolean("HODEUS_OLLAMA_LOW_VRAM") !== undefined ? { low_vram: envBoolean("HODEUS_OLLAMA_LOW_VRAM") } : {}),
+		...(envNumber("MOON_OLLAMA_NUM_CTX") ? { num_ctx: envNumber("MOON_OLLAMA_NUM_CTX") } : {}),
+		...(envNumber("MOON_OLLAMA_NUM_PREDICT") ? { num_predict: envNumber("MOON_OLLAMA_NUM_PREDICT") } : {}),
+		...(envNumber("MOON_OLLAMA_NUM_BATCH") ? { num_batch: envNumber("MOON_OLLAMA_NUM_BATCH") } : {}),
+		...(envNumber("MOON_OLLAMA_NUM_THREAD") ? { num_thread: envNumber("MOON_OLLAMA_NUM_THREAD") } : {}),
+		...(envNumber("MOON_OLLAMA_NUM_GPU") ? { num_gpu: envNumber("MOON_OLLAMA_NUM_GPU") } : {}),
+		...(envBoolean("MOON_OLLAMA_LOW_VRAM") !== undefined ? { low_vram: envBoolean("MOON_OLLAMA_LOW_VRAM") } : {}),
 	};
 }
 
@@ -111,7 +111,7 @@ function optimizePayload(payload: unknown, maxTokens?: number): OllamaPayload {
 	delete next.stream_options;
 
 	const desiredMaxTokens =
-		envNumber("HODEUS_OLLAMA_NUM_PREDICT") ?? maxTokens ?? next.max_tokens ?? next.max_completion_tokens;
+		envNumber("MOON_OLLAMA_NUM_PREDICT") ?? maxTokens ?? next.max_tokens ?? next.max_completion_tokens;
 	if (typeof desiredMaxTokens === "number") {
 		next.max_tokens = desiredMaxTokens;
 		delete next.max_completion_tokens;
@@ -121,7 +121,7 @@ function optimizePayload(payload: unknown, maxTokens?: number): OllamaPayload {
 		...buildOllamaOptions(typeof desiredMaxTokens === "number" ? desiredMaxTokens : undefined),
 		...(next.options ?? {}),
 	};
-	next.keep_alive = env("HODEUS_OLLAMA_KEEP_ALIVE") ?? next.keep_alive ?? DEFAULT_KEEP_ALIVE;
+	next.keep_alive = env("MOON_OLLAMA_KEEP_ALIVE") ?? next.keep_alive ?? DEFAULT_KEEP_ALIVE;
 	return next;
 }
 

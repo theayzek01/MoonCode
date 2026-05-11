@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 /**
- * Regression test for https://github.com/badlogic/Hodeus-mono/issues/2791
+ * Regression test for https://github.com/badlogic/Mooncli-mono/issues/2791
  *
  * fs.watch() returns an FSWatcher (EventEmitter). If the watcher emits an
  * 'error' event after creation and no error handler is attached, Node.js
@@ -22,7 +22,7 @@ describe("issue #2791 fs.watch error event crashes process", () => {
 	let tempRoot: string;
 
 	beforeEach(() => {
-		tempRoot = mkdtempSync(join(tmpdir(), "Hodeus-2791-"));
+		tempRoot = mkdtempSync(join(tmpdir(), "Mooncli-2791-"));
 		const engineDir = join(tempRoot, "engine");
 		const themesDir = join(engineDir, "themes");
 		mkdirSync(themesDir, { recursive: true });

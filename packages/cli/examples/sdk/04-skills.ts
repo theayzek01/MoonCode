@@ -12,7 +12,7 @@ import {
 	getEngineDir,
 	SessionManager,
 	type Skill,
-} from "Hodeus";
+} from "Mooncli";
 
 // Or define custom skills inline
 const customSkill: Skill = {
@@ -37,7 +37,7 @@ const loader = new DefaultResourceLoader({
 });
 await loader.reload();
 
-// Discover all skills from cwd/.Hodeus/skills, ~/.Hodeus/engine/skills, etc.
+// Discover all skills from cwd/.Mooncli/skills, ~/.Mooncli/engine/skills, etc.
 const { skills: allSkills, diagnostics } = loader.getSkills();
 console.log(
 	"Discovered skills:",

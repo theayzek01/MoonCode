@@ -1,4 +1,4 @@
-import { complete, getModel } from "hodeus-core";
+import { complete, getModel } from "moon-core";
 
 const model = getModel("google", "gemini-2.5-flash");
 console.log(model.id, typeof complete);

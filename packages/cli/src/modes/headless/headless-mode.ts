@@ -1,5 +1,5 @@
 // @ts-nocheck
-import type { AssistantMessage } from "hodeus-core";
+import type { AssistantMessage } from "moon-core";
 import type { EngineSessionRuntime } from "../../core/engine-session-runtime.js";
 import { writeRawStdout } from "../../core/output-guard.js";
 import { killTrackedDetachedChildren } from "../../utils/shell.js";

@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { getModel } from "hodeus-core";
+import { getModel } from "moon-core";
 import { Type } from "typebox";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
@@ -18,7 +18,7 @@ describe("regression #3592: no-builtin-tools keeps extension tools enabled", () 
 	let engineDir: string;
 
 	beforeEach(() => {
-		tempDir = join(tmpdir(), `Hodeus-no-builtin-tools-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+		tempDir = join(tmpdir(), `Mooncli-no-builtin-tools-${Date.now()}-${Math.random().toString(36).slice(2)}`);
 		engineDir = join(tempDir, "engine");
 		mkdirSync(engineDir, { recursive: true });
 	});
@@ -37,9 +37,9 @@ describe("regression #3592: no-builtin-tools keeps extension tools enabled", () 
 			engineDir,
 			settingsManager,
 			extensionFactories: [
-				(Hodeus) => {
-					Hodeus.on("session_start", () => {
-						Hodeus.registerTool({
+				(Mooncli) => {
+					Mooncli.on("session_start", () => {
+						Mooncli.registerTool({
 							name: "dynamic_tool",
 							label: "Dynamic Tool",
 							description: "Tool registered from session_start",

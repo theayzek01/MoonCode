@@ -67,29 +67,29 @@ When closing issues via commit:
 - If the user approves: create a feature branch, pull PR, rebase on main, apply adjustments, commit, merge into main, push, close PR, and leave a comment in the user's tone
 - You never open PRs yourself. We work in feature branches until everything is according to the user's requirements, then merge into main, and push.
 
-## Testing Hodeus Interactive Mode with tmux
+## Testing Mooncli Interactive Mode with tmux
 
-To test Hodeus's TUI in a controlled terminal environment:
+To test Mooncli's TUI in a controlled terminal environment:
 
 ```bash
 # Create tmux session with specific dimensions
-tmux new-session -d -s Hodeus-test -x 80 -y 24
+tmux new-session -d -s Mooncli-test -x 80 -y 24
 
-# Start Hodeus from source
-tmux send-keys -t Hodeus-test "npm run build && node packages/cli/dist/cli.js" Enter
+# Start Mooncli from source
+tmux send-keys -t Mooncli-test "npm run build && node packages/cli/dist/cli.js" Enter
 
 # Wait for startup, then capture output
-sleep 3 && tmux capture-pane -t Hodeus-test -p
+sleep 3 && tmux capture-pane -t Mooncli-test -p
 
 # Send input
-tmux send-keys -t Hodeus-test "your prompt here" Enter
+tmux send-keys -t Mooncli-test "your prompt here" Enter
 
 # Send special keys
-tmux send-keys -t Hodeus-test Escape
-tmux send-keys -t Hodeus-test C-o  # ctrl+o
+tmux send-keys -t Mooncli-test Escape
+tmux send-keys -t Mooncli-test C-o  # ctrl+o
 
 # Cleanup
-tmux kill-session -t Hodeus-test
+tmux kill-session -t Mooncli-test
 ```
 
 ## Changelog
@@ -116,8 +116,8 @@ Use these sections under `## [Unreleased]`:
 
 ### Attribution
 
-- **Internal changes (from issues)**: `Fixed foo bar ([#123](https://github.com/theayzek01/hodeuscli/issues/123))`
-- **External contributions**: `Added feature X ([#456](https://github.com/theayzek01/hodeuscli/pull/456) by [@username](https://github.com/username))`
+- **Internal changes (from issues)**: `Fixed foo bar ([#123](https://github.com/theayzek01/mooncli/issues/123))`
+- **External contributions**: `Added feature X ([#456](https://github.com/theayzek01/mooncli/pull/456) by [@username](https://github.com/username))`
 
 ## Adding a New Provider (packages/core)
 

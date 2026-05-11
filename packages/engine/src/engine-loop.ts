@@ -11,7 +11,7 @@ import {
 	streamSimple,
 	type ToolResultMessage,
 	validateToolArguments,
-} from "hodeus-core";
+} from "moon-core";
 import type {
 	EngineContext,
 	EngineEvent,

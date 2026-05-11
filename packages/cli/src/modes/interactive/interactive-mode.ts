@@ -16,8 +16,8 @@ import {
 	type Message,
 	type Model,
 	type OAuthProviderId,
-} from "hodeus-core";
-import type { EngineMessage } from "hodeus-engine";
+} from "moon-core";
+import type { EngineMessage } from "moon-engine";
 import type {
 	AutocompleteItem,
 	AutocompleteProvider,
@@ -28,7 +28,7 @@ import type {
 	OverlayHandle,
 	OverlayOptions,
 	SlashCommand,
-} from "hodeus-tui";
+} from "moon-tui";
 import {
 	CombinedAutocompleteProvider,
 	type Component,
@@ -45,7 +45,7 @@ import {
 	TruncatedText,
 	TUI,
 	visibleWidth,
-} from "hodeus-tui";
+} from "moon-tui";
 import {
 	APP_NAME,
 	APP_TITLE,
@@ -89,10 +89,10 @@ import { getChangelogPath, getNewEntries, parseChangelog } from "../../utils/cha
 import { copyToClipboard } from "../../utils/clipboard.js";
 import { extensionForImageMimeType, readClipboardImage } from "../../utils/clipboard-image.js";
 import { parseGitUrl } from "../../utils/git.js";
-import { getHodeusUserEngine } from "../../utils/moon-user-engine.js";
+import { getMooncliUserEngine } from "../../utils/moon-user-engine.js";
 import { killTrackedDetachedChildren } from "../../utils/shell.js";
 import { ensureTool } from "../../utils/tools-manager.js";
-import { checkForNewHodeusVersion } from "../../utils/version-check.js";
+import { checkForNewMooncliVersion } from "../../utils/version-check.js";
 import { ArminComponent } from "./components/armin.js";
 import { AssistantMessageComponent } from "./components/assistant-message.js";
 import { BashExecutionComponent } from "./components/bash-execution.js";
@@ -109,7 +109,7 @@ import { ExtensionEditorComponent } from "./components/extension-editor.js";
 import { ExtensionInputComponent } from "./components/extension-input.js";
 import { ExtensionSelectorComponent } from "./components/extension-selector.js";
 import { FooterComponent } from "./components/footer.js";
-import { HodeusHeaderComponent } from "./components/hodeus-header.js";
+import { MooncliHeaderComponent } from "./components/mooncli-header.js";
 import { keyHint, keyText, rawKeyHint } from "./components/keybinding-hints.js";
 import { LoginDialogComponent } from "./components/login-dialog.js";
 import { McpSelectorComponent } from "./components/mcp-selector.js";
@@ -186,7 +186,7 @@ function hasDefaultModelProvider(providerId: string): providerId is keyof typeof
 }
 
 const BEDROCK_PROVIDER_ID = "amazon-bedrock";
-const HODEUS_WORKING_FRAMES = ["·", "•", "●", "•"];
+const MOON_WORKING_FRAMES = ["·", "•", "●", "•"];
 
 const BUILT_IN_MODEL_PROVIDERS = new Set<string>(getProviders());
 
@@ -611,7 +611,7 @@ export class InteractiveMode {
 				hint("app.tools.expand", "yardim"),
 			].join(theme.fg("dim", " • "));
 
-			this.builtInHeader = new HodeusHeaderComponent(this.ui, {
+			this.builtInHeader = new MooncliHeaderComponent(this.ui, {
 				version: this.version,
 				compactInstructions,
 				expandedInstructions,
@@ -690,7 +690,7 @@ export class InteractiveMode {
 		await this.init();
 
 		// Start version check asynchronously
-		checkForNewHodeusVersion(this.version).then((newVersion) => {
+		checkForNewMooncliVersion(this.version).then((newVersion) => {
 			if (newVersion) {
 				this.showNewVersionNotification(newVersion);
 			}
@@ -762,7 +762,7 @@ export class InteractiveMode {
 	}
 
 	private async checkForPackageUpdates(): Promise<string[]> {
-		if (process.env.HODEUS_OFFLINE) {
+		if (process.env.MOON_OFFLINE) {
 			return [];
 		}
 
@@ -858,7 +858,7 @@ export class InteractiveMode {
 	}
 
 	private reportInstallTelemetry(version: string): void {
-		if (process.env.HODEUS_OFFLINE) {
+		if (process.env.MOON_OFFLINE) {
 			return;
 		}
 
@@ -869,7 +869,7 @@ export class InteractiveMode {
 		void fetch(`https://hodeus.dev/api/report-install?version=${encodeURIComponent(version)}`, {
 			method: "POST",
 			headers: {
-				"User-Engine": getHodeusUserEngine(version),
+				"User-Engine": getMooncliUserEngine(version),
 			},
 			signal: AbortSignal.timeout(5000),
 		})
@@ -1671,7 +1671,7 @@ export class InteractiveMode {
 			(spinner) => theme.fg("accent", spinner),
 			(text) => theme.fg("muted", text),
 			this.getWorkingLoaderMessage(),
-			this.workingIndicatorOptions ?? { frames: HODEUS_WORKING_FRAMES, intervalMs: 180 },
+			this.workingIndicatorOptions ?? { frames: MOON_WORKING_FRAMES, intervalMs: 180 },
 		);
 	}
 
@@ -3673,7 +3673,7 @@ export class InteractiveMode {
 			theme.fg("muted", `Yeni sürüm ${newVersion} mevcut. Güncellemek için şunu çalıştırın: `) + action;
 		const changelogUrl = theme.fg(
 			"accent",
-			"https://github.com/theayzek01/hodeuscli/blob/main/packages/cli/CHANGELOG.md",
+			"https://github.com/theayzek01/mooncli/blob/main/packages/cli/CHANGELOG.md",
 		);
 		const changelogLine = theme.fg("muted", "Değişiklik Günlüğü: ") + changelogUrl;
 
@@ -5101,7 +5101,7 @@ export class InteractiveMode {
 	private renderAgentsHelp(): string {
 		return [
 			"Agent Sistemi",
-			"Hodeus kod islerini kucuk bir yazilim sirketi gibi organize eder.",
+			"Mooncli kod islerini kucuk bir yazilim sirketi gibi organize eder.",
 			"Patron kapsami belirler; Mimar, Backend, Frontend, QA, Security ve Integrator kendi alanindan kontrol eder.",
 			"",
 			"Komutlar:",

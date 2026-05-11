@@ -6,8 +6,8 @@ import { getSessionsDir } from "../config.js";
 
 const INDEX_HTML = `<!doctype html>
 <html lang="tr">
-<head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>Hodeus Dashboard</title><link rel="stylesheet" href="/style.css" /></head>
-<body><div id="app"><header class="topbar"><div><b>Hodeus</b><span>workspace dashboard</span></div><nav><span>sessions</span><span>chat</span><span>stats</span></nav></header><aside><h1>Sessions</h1><p class="hint">Geçmiş oturumlardan birini seç.</p><div id="sessions"></div></aside><main><div id="chat" class="panel empty">Oturum seç</div></main><section><h2>Stats</h2><pre id="stats">-</pre></section></div><script src="/app.js"></script></body>
+<head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>Mooncli Dashboard</title><link rel="stylesheet" href="/style.css" /></head>
+<body><div id="app"><header class="topbar"><div><b>Mooncli</b><span>workspace dashboard</span></div><nav><span>sessions</span><span>chat</span><span>stats</span></nav></header><aside><h1>Sessions</h1><p class="hint">Geçmiş oturumlardan birini seç.</p><div id="sessions"></div></aside><main><div id="chat" class="panel empty">Oturum seç</div></main><section><h2>Stats</h2><pre id="stats">-</pre></section></div><script src="/app.js"></script></body>
 </html>`;
 
 const STYLE_CSS = `:root{color-scheme:dark;--bg:#0b0f17;--panel:#111827;--panel2:#0f1520;--line:#243044;--fg:#e5edf7;--muted:#8b9bb0;--accent:#8fd6bd}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}#app{display:grid;grid-template-columns:300px 1fr 280px;grid-template-rows:auto 1fr;gap:12px;height:100vh;padding:12px}.topbar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}.topbar b{font-size:16px}.topbar span{margin-left:10px;color:var(--muted)}nav{display:flex;gap:14px}nav span{margin:0;color:var(--muted)}aside,main,section{border:1px solid var(--line);border-radius:10px;background:var(--panel);overflow:auto}h1,h2{font-size:14px;margin:14px 14px 4px}.hint{margin:0 14px 12px;color:var(--muted)}.session{padding:10px 14px;border-top:1px solid var(--line);cursor:pointer}.session:hover,.session.active{background:#172033}.session b{font-weight:600}.muted{color:var(--muted)}.panel{padding:16px}.empty{color:var(--muted)}.msg{margin:0 0 10px;padding:12px;border:1px solid var(--line);border-radius:8px;background:#0c121d}.role{color:var(--accent);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.06em}pre{white-space:pre-wrap;margin:12px;color:var(--fg)}#stats{color:var(--muted)}@media(max-width:1000px){#app{grid-template-columns:1fr;height:auto}.topbar{display:block}nav{margin-top:8px}aside,main,section{min-height:220px}}`;
@@ -83,7 +83,7 @@ function serveStaticFile(res: ServerResponse, root: string, pathname: string): v
 }
 
 export function startWebUiServer(options: { port?: number; staticRoot?: string } = {}) {
-	const port = options.port || Number(process.env.HODEUS_WEB_PORT || 3131);
+	const port = options.port || Number(process.env.MOON_WEB_PORT || 3131);
 	const server = createServer((req, res) => {
 		const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
 		if (url.pathname === "/api/sessions") {

@@ -1,4 +1,4 @@
-import { type AssistantMessage, type AssistantMessageEvent, EventStream, getModel } from "hodeus-core";
+import { type AssistantMessage, type AssistantMessageEvent, EventStream, getModel } from "moon-core";
 import { describe, expect, it } from "vitest";
 import { Engine } from "../src/index.js";
 

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import type { ImageContent } from "hodeus-core";
+import type { ImageContent } from "moon-core";
 import { applyExifOrientation } from "./exif-orientation.js";
 import { loadPhoton } from "./photon.js";
 

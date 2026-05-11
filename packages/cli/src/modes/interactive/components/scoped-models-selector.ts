@@ -1,5 +1,5 @@
 // @ts-nocheck
-import type { Model } from "hodeus-core";
+import type { Model } from "moon-core";
 import {
 	Container,
 	type Focusable,
@@ -10,7 +10,7 @@ import {
 	matchesKey,
 	Spacer,
 	Text,
-} from "hodeus-tui";
+} from "moon-tui";
 import { theme } from "../theme/theme.js";
 import { DynamicBorder } from "./dynamic-border.js";
 import { keyText } from "./keybinding-hints.js";

@@ -5,15 +5,15 @@
  * When --ssh is provided, read/write/edit/bash run on the remote.
  *
  * Usage:
- *   Hodeus -e ./ssh.ts --ssh user@host
- *   Hodeus -e ./ssh.ts --ssh user@host:/remote/path
+ *   Mooncli -e ./ssh.ts --ssh user@host
+ *   Mooncli -e ./ssh.ts --ssh user@host:/remote/path
  *
  * Requirements:
  *   - SSH key-based auth (no password prompts)
  *   - bash on remote
  */
 
-import type { ExtensionAPI } from "Hodeus";
+import type { ExtensionAPI } from "Mooncli";
 import {
 	type BashOperations,
 	createBashTool,
@@ -23,7 +23,7 @@ import {
 	type EditOperations,
 	type ReadOperations,
 	type WriteOperations,
-} from "Hodeus";
+} from "Mooncli";
 import { spawn } from "node:child_process";
 
 function sshExec(remote: string, command: string): Promise<Buffer> {
@@ -111,8 +111,8 @@ function createRemoteBashOps(remote: string, remoteCwd: string, localCwd: string
 	};
 }
 
-export default function (Hodeus: ExtensionAPI) {
-	Hodeus.registerFlag("ssh", { description: "SSH remote: user@host or user@host:/path", type: "string" });
+export default function (Mooncli: ExtensionAPI) {
+	Mooncli.registerFlag("ssh", { description: "SSH remote: user@host or user@host:/path", type: "string" });
 
 	const localCwd = process.cwd();
 	const localRead = createReadTool(localCwd);
@@ -125,7 +125,7 @@ export default function (Hodeus: ExtensionAPI) {
 
 	const getSsh = () => resolvedSsh;
 
-	Hodeus.registerTool({
+	Mooncli.registerTool({
 		...localRead,
 		async execute(id, params, signal, onUpdate, _ctx) {
 			const ssh = getSsh();
@@ -139,7 +139,7 @@ export default function (Hodeus: ExtensionAPI) {
 		},
 	});
 
-	Hodeus.registerTool({
+	Mooncli.registerTool({
 		...localWrite,
 		async execute(id, params, signal, onUpdate, _ctx) {
 			const ssh = getSsh();
@@ -153,7 +153,7 @@ export default function (Hodeus: ExtensionAPI) {
 		},
 	});
 
-	Hodeus.registerTool({
+	Mooncli.registerTool({
 		...localEdit,
 		async execute(id, params, signal, onUpdate, _ctx) {
 			const ssh = getSsh();
@@ -167,7 +167,7 @@ export default function (Hodeus: ExtensionAPI) {
 		},
 	});
 
-	Hodeus.registerTool({
+	Mooncli.registerTool({
 		...localBash,
 		async execute(id, params, signal, onUpdate, _ctx) {
 			const ssh = getSsh();
@@ -181,9 +181,9 @@ export default function (Hodeus: ExtensionAPI) {
 		},
 	});
 
-	Hodeus.on("session_start", async (_event, ctx) => {
+	Mooncli.on("session_start", async (_event, ctx) => {
 		// Resolve SSH config now that CLI flags are available
-		const arg = Hodeus.getFlag("ssh") as string | undefined;
+		const arg = Mooncli.getFlag("ssh") as string | undefined;
 		if (arg) {
 			if (arg.includes(":")) {
 				const [remote, path] = arg.split(":");
@@ -200,14 +200,14 @@ export default function (Hodeus: ExtensionAPI) {
 	});
 
 	// Handle user ! commands via SSH
-	Hodeus.on("user_bash", (_event) => {
+	Mooncli.on("user_bash", (_event) => {
 		const ssh = getSsh();
 		if (!ssh) return; // No SSH, use local execution
 		return { operations: createRemoteBashOps(ssh.remote, ssh.remoteCwd, localCwd) };
 	});
 
 	// Replace local cwd with remote cwd in system prompt
-	Hodeus.on("before_engine_start", async (event) => {
+	Mooncli.on("before_engine_start", async (event) => {
 		const ssh = getSsh();
 		if (ssh) {
 			const modified = event.systemPrompt.replace(

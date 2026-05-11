@@ -1,11 +1,11 @@
 // @ts-nocheck
-import { Text, visibleWidth } from "hodeus-tui";
+import { Text, visibleWidth } from "moon-tui";
 import { APP_TITLE } from "../../../config.js";
 import type { AppKeybinding } from "../../../core/keybindings.js";
 import { theme } from "../theme/theme.js";
 import { keyText } from "./keybinding-hints.js";
 
-export interface HodeusHeaderOptions {
+export interface MooncliHeaderOptions {
 	version: string;
 	compactInstructions: string;
 	expandedInstructions: string;
@@ -26,12 +26,12 @@ function hint(command: string, description: string): string {
 	return `${theme.fg("accent", command)} ${theme.fg("muted", description)}`;
 }
 
-export class HodeusHeaderComponent extends Text {
+export class MooncliHeaderComponent extends Text {
 	private expanded: boolean;
 
 	constructor(
 		_tui: unknown,
-		private options: HodeusHeaderOptions,
+		private options: MooncliHeaderOptions,
 	) {
 		super("", options.paddingX ?? 1, options.paddingY ?? 0);
 		this.expanded = options.expanded ?? false;

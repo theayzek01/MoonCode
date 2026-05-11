@@ -1,11 +1,11 @@
 # DOOM Overlay Demo
 
-Play DOOM as an overlay in Hodeus. Demonstrates that the overlay system can handle real-time game rendering at 35 FPS.
+Play DOOM as an overlay in Mooncli. Demonstrates that the overlay system can handle real-time game rendering at 35 FPS.
 
 ## Usage
 
 ```bash
-Hodeus --extension ./examples/extensions/doom-overlay
+Mooncli --extension ./examples/extensions/doom-overlay
 ```
 
 Then run:
@@ -43,5 +43,5 @@ Height is calculated from width to maintain DOOM's 3.2:1 aspect ratio (accountin
 
 - [id Software](https://github.com/id-Software/DOOM) for the original DOOM
 - [doomgeneric](https://github.com/ozkl/doomgeneric) for the portable DOOM implementation
-- [Hodeus-doom](https://github.com/badlogic/Hodeus-doom) for the original Hodeus integration
+- [Mooncli-doom](https://github.com/badlogic/Mooncli-doom) for the original Mooncli integration
 

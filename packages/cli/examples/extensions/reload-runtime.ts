@@ -5,13 +5,13 @@
  * tool that queues a follow-up command to trigger reload.
  */
 
-import type { ExtensionAPI } from "Hodeus";
+import type { ExtensionAPI } from "Mooncli";
 import { Type } from "typebox";
 
-export default function (Hodeus: ExtensionAPI) {
+export default function (Mooncli: ExtensionAPI) {
 	// Command entrypoint for reload.
 	// Treat reload as terminal for this handler.
-	Hodeus.registerCommand("reload-runtime", {
+	Mooncli.registerCommand("reload-runtime", {
 		description: "Reload extensions, skills, prompts, and themes",
 		handler: async (_args, ctx) => {
 			await ctx.reload();
@@ -21,13 +21,13 @@ export default function (Hodeus: ExtensionAPI) {
 
 	// Provider-callable tool. Tools get ExtensionContext, so they cannot call ctx.reload() directly.
 	// Instead, queue a follow-up user command that executes the command above.
-	Hodeus.registerTool({
+	Mooncli.registerTool({
 		name: "reload_runtime",
 		label: "Reload Runtime",
 		description: "Reload extensions, skills, prompts, and themes",
 		parameters: Type.Object({}),
 		async execute() {
-			Hodeus.sendUserMessage("/reload-runtime", { deliverAs: "followUp" });
+			Mooncli.sendUserMessage("/reload-runtime", { deliverAs: "followUp" });
 			return {
 				content: [{ type: "text", text: "Queued /reload-runtime as a follow-up command." }],
 				details: {},

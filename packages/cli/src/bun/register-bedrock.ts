@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { setBedrockProviderModule } from "hodeus-core";
-import { bedrockProviderModule } from "hodeus-core/bedrock-provider";
+import { setBedrockProviderModule } from "moon-core";
+import { bedrockProviderModule } from "moon-core/bedrock-provider";
 
 setBedrockProviderModule(bedrockProviderModule);

@@ -119,7 +119,7 @@ Content`,
 			expect(result.skills.some((r) => r.path === skillFile && r.enabled)).toBe(true);
 		});
 
-		it("should auto-discover root markdown skills from .Hodeus skill dirs", async () => {
+		it("should auto-discover root markdown skills from .Mooncli skill dirs", async () => {
 			const skillFile = join(engineDir, "skills", "single-file.md");
 			mkdirSync(join(engineDir, "skills"), { recursive: true });
 			writeFileSync(
@@ -135,8 +135,8 @@ Content`,
 			expect(result.skills.some((r) => r.path === skillFile && r.enabled)).toBe(true);
 		});
 
-		it("should resolve project paths relative to .Hodeus", async () => {
-			const extDir = join(tempDir, ".Hodeus", "extensions");
+		it("should resolve project paths relative to .Mooncli", async () => {
+			const extDir = join(tempDir, ".Mooncli", "extensions");
 			mkdirSync(extDir, { recursive: true });
 			const extPath = join(extDir, "project-ext.ts");
 			writeFileSync(extPath, "export default function() {}");
@@ -188,16 +188,16 @@ Content`,
 				writeFileSync(join(sharedThemesDir, "shared.json"), JSON.stringify({ name: "shared-theme" }));
 
 				mkdirSync(join(engineDir), { recursive: true });
-				mkdirSync(join(tempDir, ".Hodeus"), { recursive: true });
+				mkdirSync(join(tempDir, ".Mooncli"), { recursive: true });
 				const directoryLinkType = process.platform === "win32" ? "junction" : "dir";
 				symlinkSync(sharedExtensionsDir, join(engineDir, "extensions"), directoryLinkType);
 				symlinkSync(sharedSkillsDir, join(engineDir, "skills"), directoryLinkType);
 				symlinkSync(sharedPromptsDir, join(engineDir, "prompts"), directoryLinkType);
 				symlinkSync(sharedThemesDir, join(engineDir, "themes"), directoryLinkType);
-				symlinkSync(sharedExtensionsDir, join(tempDir, ".Hodeus", "extensions"), directoryLinkType);
-				symlinkSync(sharedSkillsDir, join(tempDir, ".Hodeus", "skills"), directoryLinkType);
-				symlinkSync(sharedPromptsDir, join(tempDir, ".Hodeus", "prompts"), directoryLinkType);
-				symlinkSync(sharedThemesDir, join(tempDir, ".Hodeus", "themes"), directoryLinkType);
+				symlinkSync(sharedExtensionsDir, join(tempDir, ".Mooncli", "extensions"), directoryLinkType);
+				symlinkSync(sharedSkillsDir, join(tempDir, ".Mooncli", "skills"), directoryLinkType);
+				symlinkSync(sharedPromptsDir, join(tempDir, ".Mooncli", "prompts"), directoryLinkType);
+				symlinkSync(sharedThemesDir, join(tempDir, ".Mooncli", "themes"), directoryLinkType);
 
 				const result = await packageManager.resolve();
 
@@ -229,7 +229,7 @@ Content`,
 		});
 
 		it("should auto-discover project prompts with overrides", async () => {
-			const promptsDir = join(tempDir, ".Hodeus", "prompts");
+			const promptsDir = join(tempDir, ".Mooncli", "prompts");
 			mkdirSync(promptsDir, { recursive: true });
 			const promptPath = join(promptsDir, "is.md");
 			writeFileSync(promptPath, "Is prompt");
@@ -240,15 +240,15 @@ Content`,
 			expect(result.prompts.some((r) => r.path === promptPath && !r.enabled)).toBe(true);
 		});
 
-		it("should resolve directory with package.json Hodeus.extensions in extensions setting", async () => {
-			// Create a package with Hodeus.extensions in package.json
+		it("should resolve directory with package.json Mooncli.extensions in extensions setting", async () => {
+			// Create a package with Mooncli.extensions in package.json
 			const pkgDir = join(tempDir, "my-extensions-pkg");
 			mkdirSync(join(pkgDir, "extensions"), { recursive: true });
 			writeFileSync(
 				join(pkgDir, "package.json"),
 				JSON.stringify({
 					name: "my-extensions-pkg",
-					Hodeus: {
+					Mooncli: {
 						extensions: ["./extensions/clip.ts", "./extensions/cost.ts"],
 					},
 				}),
@@ -262,7 +262,7 @@ Content`,
 
 			const result = await packageManager.resolve();
 
-			// Should find the extensions declared in package.json Hodeus.extensions
+			// Should find the extensions declared in package.json Mooncli.extensions
 			expect(result.extensions.some((r) => r.path === join(pkgDir, "extensions", "clip.ts") && r.enabled)).toBe(
 				true,
 			);
@@ -356,7 +356,7 @@ Content`,
 
 			try {
 				const cwd = join(tempDir, "scratch", "nested");
-				const localEngineDir = join(tempDir, ".Hodeus", "engine");
+				const localEngineDir = join(tempDir, ".Mooncli", "engine");
 				const localSettingsManager = SettingsManager.inMemory();
 				mkdirSync(cwd, { recursive: true });
 				mkdirSync(localEngineDir, { recursive: true });
@@ -386,7 +386,7 @@ Content`,
 			}
 		});
 
-		it("should dedupe user skill entries when ~/.Hodeus/engine/skills is a symlink to ~/.engines/skills", async () => {
+		it("should dedupe user skill entries when ~/.Mooncli/engine/skills is a symlink to ~/.engines/skills", async () => {
 			const previousHome = process.env.HOME;
 			process.env.HOME = tempDir;
 
@@ -437,10 +437,10 @@ Content`,
 			expect(result.skills.some((r) => r.path.includes("venv") && r.enabled)).toBe(false);
 		});
 
-		it("should not apply parent .gitignore to .Hodeus auto-discovery", async () => {
-			writeFileSync(join(tempDir, ".gitignore"), ".Hodeus\n");
+		it("should not apply parent .gitignore to .Mooncli auto-discovery", async () => {
+			writeFileSync(join(tempDir, ".gitignore"), ".Mooncli\n");
 
-			const skillDir = join(tempDir, ".Hodeus", "skills", "auto-skill");
+			const skillDir = join(tempDir, ".Mooncli", "skills", "auto-skill");
 			mkdirSync(skillDir, { recursive: true });
 			const skillPath = join(skillDir, "SKILL.md");
 			writeFileSync(skillPath, "---\nname: auto-skill\ndescription: Auto\n---\nContent");
@@ -459,14 +459,14 @@ Content`,
 			expect(result.extensions.some((r) => r.path === extPath && r.enabled)).toBe(true);
 		});
 
-		it("should handle directories with Hodeus manifest", async () => {
+		it("should handle directories with Mooncli manifest", async () => {
 			const pkgDir = join(tempDir, "my-package");
 			mkdirSync(pkgDir, { recursive: true });
 			writeFileSync(
 				join(pkgDir, "package.json"),
 				JSON.stringify({
 					name: "my-package",
-					Hodeus: {
+					Mooncli: {
 						extensions: ["./src/index.ts"],
 						skills: ["./skills"],
 					},
@@ -610,7 +610,7 @@ Content`,
 
 		it("should update git package dependencies with --omit=dev", async () => {
 			const source = "git:github.com/user/repo";
-			const targetDir = join(tempDir, ".Hodeus", "git", "github.com", "user", "repo");
+			const targetDir = join(tempDir, ".Mooncli", "git", "github.com", "user", "repo");
 			mkdirSync(targetDir, { recursive: true });
 			writeFileSync(join(targetDir, "package.json"), JSON.stringify({ name: "repo", version: "1.0.0" }));
 			settingsManager.setProjectPackages([source]);
@@ -646,7 +646,7 @@ Content`,
 			});
 
 			const source = "git:github.com/user/repo";
-			const targetDir = join(tempDir, ".Hodeus", "git", "github.com", "user", "repo");
+			const targetDir = join(tempDir, ".Mooncli", "git", "github.com", "user", "repo");
 			mkdirSync(targetDir, { recursive: true });
 			writeFileSync(join(targetDir, "package.json"), JSON.stringify({ name: "repo", version: "1.0.0" }));
 			settingsManager.setProjectPackages([source]);
@@ -796,7 +796,7 @@ Content`,
 			expect(settings.packages?.[0]).toBe(expected);
 		});
 
-		it("should store project local packages relative to .Hodeus settings base", () => {
+		it("should store project local packages relative to .Mooncli settings base", () => {
 			const projectPkgDir = join(tempDir, "project-local-pkg");
 			mkdirSync(join(projectPkgDir, "extensions"), { recursive: true });
 			writeFileSync(join(projectPkgDir, "extensions", "index.ts"), "export default function() {}");
@@ -805,7 +805,7 @@ Content`,
 			expect(added).toBe(true);
 
 			const settings = settingsManager.getProjectSettings();
-			const rel = relative(join(tempDir, ".Hodeus"), projectPkgDir);
+			const rel = relative(join(tempDir, ".Mooncli"), projectPkgDir);
 			const expected = rel.startsWith(".") ? rel : `./${rel}`;
 			expect(settings.packages?.[0]).toBe(expected);
 		});
@@ -1009,7 +1009,7 @@ Content`,
 		});
 	});
 
-	describe("pattern filtering in Hodeus manifest", () => {
+	describe("pattern filtering in Mooncli manifest", () => {
 		it("should support glob patterns in manifest extensions", async () => {
 			const pkgDir = join(tempDir, "manifest-pkg");
 			mkdirSync(join(pkgDir, "extensions"), { recursive: true });
@@ -1021,7 +1021,7 @@ Content`,
 				join(pkgDir, "package.json"),
 				JSON.stringify({
 					name: "manifest-pkg",
-					Hodeus: {
+					Mooncli: {
 						extensions: ["extensions", "node_modules/dep/extensions", "!**/skip.ts"],
 					},
 				}),
@@ -1049,7 +1049,7 @@ Content`,
 				join(pkgDir, "package.json"),
 				JSON.stringify({
 					name: "skill-manifest-pkg",
-					Hodeus: {
+					Mooncli: {
 						skills: ["skills", "!**/bad-skill"],
 					},
 				}),
@@ -1076,7 +1076,7 @@ Content`,
 				join(pkgDir, "package.json"),
 				JSON.stringify({
 					name: "skill-manifest-glob-pkg",
-					Hodeus: {
+					Mooncli: {
 						skills: ["./plugins/*/skills"],
 					},
 				}),
@@ -1101,7 +1101,7 @@ Content`,
 				join(pkgDir, "package.json"),
 				JSON.stringify({
 					name: "layered-pkg",
-					Hodeus: {
+					Mooncli: {
 						extensions: ["extensions", "!**/baz.ts"],
 					},
 				}),
@@ -1305,7 +1305,7 @@ Content`,
 				join(pkgDir, "package.json"),
 				JSON.stringify({
 					name: "manifest-force-pkg",
-					Hodeus: {
+					Mooncli: {
 						extensions: ["extensions", "!**/two.ts", "+extensions/two.ts"],
 					},
 				}),
@@ -1527,7 +1527,7 @@ export default function(api) { api.registerTool({ name: "test", description: "te
 			expect(result.extensions.some((r) => pathEndsWith(r.path, "engines.ts"))).toBe(false);
 		});
 
-		it("should respect package.json Hodeus.extensions manifest in subdirectories", async () => {
+		it("should respect package.json Mooncli.extensions manifest in subdirectories", async () => {
 			const pkgDir = join(tempDir, "manifest-subdir-pkg");
 			mkdirSync(join(pkgDir, "extensions", "custom"), { recursive: true });
 
@@ -1535,7 +1535,7 @@ export default function(api) { api.registerTool({ name: "test", description: "te
 			writeFileSync(
 				join(pkgDir, "extensions", "custom", "package.json"),
 				JSON.stringify({
-					Hodeus: {
+					Mooncli: {
 						extensions: ["./main.ts"],
 					},
 				}),
@@ -1602,7 +1602,7 @@ export default function(api) { api.registerTool({ name: "test", description: "te
 
 	describe("offline mode and network timeouts", () => {
 		it("should update project npm packages using @latest when newer version is available", async () => {
-			const installedPath = join(tempDir, ".Hodeus", "npm", "node_modules", "example");
+			const installedPath = join(tempDir, ".Mooncli", "npm", "node_modules", "example");
 			mkdirSync(installedPath, { recursive: true });
 			writeFileSync(join(installedPath, "package.json"), JSON.stringify({ name: "example", version: "1.0.0" }));
 			settingsManager.setProjectPackages(["npm:example"]);
@@ -1619,13 +1619,13 @@ export default function(api) { api.registerTool({ name: "test", description: "te
 			);
 			expect(runCommandSpy).toHaveBeenCalledWith(
 				"npm",
-				["install", "example@latest", "--prefix", join(tempDir, ".Hodeus", "npm")],
+				["install", "example@latest", "--prefix", join(tempDir, ".Mooncli", "npm")],
 				undefined,
 			);
 		});
 
 		it("should skip project npm update when installed version matches latest", async () => {
-			const installedPath = join(tempDir, ".Hodeus", "npm", "node_modules", "example");
+			const installedPath = join(tempDir, ".Mooncli", "npm", "node_modules", "example");
 			mkdirSync(installedPath, { recursive: true });
 			writeFileSync(join(installedPath, "package.json"), JSON.stringify({ name: "example", version: "1.2.3" }));
 			settingsManager.setProjectPackages(["npm:example"]);
@@ -1649,8 +1649,8 @@ export default function(api) { api.registerTool({ name: "test", description: "te
 			const userOldPath = join(engineDir, "node_modules", "user-old");
 			const userCurrentPath = join(engineDir, "node_modules", "user-current");
 			const userUnknownPath = join(engineDir, "node_modules", "user-unknown");
-			const projectOldPath = join(tempDir, ".Hodeus", "npm", "node_modules", "project-old");
-			const projectCurrentPath = join(tempDir, ".Hodeus", "npm", "node_modules", "project-current");
+			const projectOldPath = join(tempDir, ".Mooncli", "npm", "node_modules", "project-old");
+			const projectCurrentPath = join(tempDir, ".Mooncli", "npm", "node_modules", "project-current");
 			const installPaths = [userOldPath, userCurrentPath, userUnknownPath, projectOldPath, projectCurrentPath];
 			for (const installPath of installPaths) {
 				mkdirSync(installPath, { recursive: true });
@@ -1744,7 +1744,7 @@ export default function(api) { api.registerTool({ name: "test", description: "te
 			expect(runCommandSpy).toHaveBeenNthCalledWith(
 				2,
 				"npm",
-				["install", "project-old@latest", "project-missing@latest", "--prefix", join(tempDir, ".Hodeus", "npm")],
+				["install", "project-old@latest", "project-missing@latest", "--prefix", join(tempDir, ".Mooncli", "npm")],
 				undefined,
 			);
 			expect(updateGitSpy).toHaveBeenCalledTimes(3);
@@ -1797,7 +1797,7 @@ export default function(api) { api.registerTool({ name: "test", description: "te
 		});
 
 		it("should not run npm view during resolve for installed unpinned packages", async () => {
-			const installedPath = join(tempDir, ".Hodeus", "npm", "node_modules", "example");
+			const installedPath = join(tempDir, ".Mooncli", "npm", "node_modules", "example");
 			mkdirSync(join(installedPath, "extensions"), { recursive: true });
 			writeFileSync(join(installedPath, "package.json"), JSON.stringify({ name: "example", version: "1.0.0" }));
 			writeFileSync(join(installedPath, "extensions", "index.ts"), "export default function() {};");
@@ -1811,7 +1811,7 @@ export default function(api) { api.registerTool({ name: "test", description: "te
 		});
 
 		it("should reinstall pinned npm packages when installed version does not match", async () => {
-			const installedPath = join(tempDir, ".Hodeus", "npm", "node_modules", "example");
+			const installedPath = join(tempDir, ".Mooncli", "npm", "node_modules", "example");
 			mkdirSync(installedPath, { recursive: true });
 			writeFileSync(join(installedPath, "package.json"), JSON.stringify({ name: "example", version: "1.0.0" }));
 			settingsManager.setProjectPackages(["npm:example@2.0.0"]);
@@ -1834,7 +1834,7 @@ export default function(api) { api.registerTool({ name: "test", description: "te
 		});
 
 		it("should report updates for installed unpinned npm packages", async () => {
-			const installedPath = join(tempDir, ".Hodeus", "npm", "node_modules", "example");
+			const installedPath = join(tempDir, ".Mooncli", "npm", "node_modules", "example");
 			mkdirSync(installedPath, { recursive: true });
 			writeFileSync(join(installedPath, "package.json"), JSON.stringify({ name: "example", version: "1.0.0" }));
 			settingsManager.setProjectPackages(["npm:example"]);
@@ -1853,7 +1853,7 @@ export default function(api) { api.registerTool({ name: "test", description: "te
 		});
 
 		it("should skip pinned packages when checking for updates", async () => {
-			const installedNpmPath = join(tempDir, ".Hodeus", "npm", "node_modules", "example");
+			const installedNpmPath = join(tempDir, ".Mooncli", "npm", "node_modules", "example");
 			mkdirSync(installedNpmPath, { recursive: true });
 			writeFileSync(join(installedNpmPath, "package.json"), JSON.stringify({ name: "example", version: "1.0.0" }));
 			const parsedGitSource = (packageManager as any).parseSource("git:github.com/example/repo@v1");

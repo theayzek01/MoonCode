@@ -1,6 +1,6 @@
 import { homedir } from "node:os";
 import * as path from "node:path";
-import { type AutocompleteProvider, CombinedAutocompleteProvider, Container } from "hodeus-tui";
+import { type AutocompleteProvider, CombinedAutocompleteProvider, Container } from "moon-tui";
 import { beforeAll, describe, expect, test, vi } from "vitest";
 import type { AutocompleteProviderFactory } from "../src/core/extensions/types.js";
 import type { SourceInfo } from "../src/core/source-info.js";
@@ -324,21 +324,21 @@ describe("InteractiveMode.showLoadedResources", () => {
 	function createExtensionFixtures(): ExtensionFixture[] {
 		return [
 			{
-				path: "/tmp/project/.Hodeus/extensions/answer.ts",
-				sourceInfo: createSourceInfo("/tmp/project/.Hodeus/extensions/answer.ts", {
+				path: "/tmp/project/.Mooncli/extensions/answer.ts",
+				sourceInfo: createSourceInfo("/tmp/project/.Mooncli/extensions/answer.ts", {
 					source: "local",
 					scope: "project",
 					origin: "top-level",
-					baseDir: "/tmp/project/.Hodeus/extensions",
+					baseDir: "/tmp/project/.Mooncli/extensions",
 				}),
 			},
 			{
-				path: "/tmp/project/.Hodeus/extensions/local-index/index.ts",
-				sourceInfo: createSourceInfo("/tmp/project/.Hodeus/extensions/local-index/index.ts", {
+				path: "/tmp/project/.Mooncli/extensions/local-index/index.ts",
+				sourceInfo: createSourceInfo("/tmp/project/.Mooncli/extensions/local-index/index.ts", {
 					source: "local",
 					scope: "project",
 					origin: "top-level",
-					baseDir: "/tmp/project/.Hodeus/extensions",
+					baseDir: "/tmp/project/.Mooncli/extensions",
 				}),
 			},
 			{
@@ -351,50 +351,50 @@ describe("InteractiveMode.showLoadedResources", () => {
 				}),
 			},
 			{
-				path: "/tmp/project/.Hodeus/npm/node_modules/Hodeus-markdown-preview/extensions/index.ts",
+				path: "/tmp/project/.Mooncli/npm/node_modules/Mooncli-markdown-preview/extensions/index.ts",
 				sourceInfo: createSourceInfo(
-					"/tmp/project/.Hodeus/npm/node_modules/Hodeus-markdown-preview/extensions/index.ts",
+					"/tmp/project/.Mooncli/npm/node_modules/Mooncli-markdown-preview/extensions/index.ts",
 					{
-						source: "npm:Hodeus-markdown-preview",
+						source: "npm:Mooncli-markdown-preview",
 						scope: "project",
 						origin: "package",
-						baseDir: "/tmp/project/.Hodeus/npm/node_modules/Hodeus-markdown-preview",
+						baseDir: "/tmp/project/.Mooncli/npm/node_modules/Mooncli-markdown-preview",
 					},
 				),
 			},
 			{
-				path: "/tmp/project/.Hodeus/npm/node_modules/@scope/Hodeus-scoped/extensions/index.ts",
+				path: "/tmp/project/.Mooncli/npm/node_modules/@scope/Mooncli-scoped/extensions/index.ts",
 				sourceInfo: createSourceInfo(
-					"/tmp/project/.Hodeus/npm/node_modules/@scope/Hodeus-scoped/extensions/index.ts",
+					"/tmp/project/.Mooncli/npm/node_modules/@scope/Mooncli-scoped/extensions/index.ts",
 					{
-						source: "npm:@scope/Hodeus-scoped",
+						source: "npm:@scope/Mooncli-scoped",
 						scope: "project",
 						origin: "package",
-						baseDir: "/tmp/project/.Hodeus/npm/node_modules/@scope/Hodeus-scoped",
+						baseDir: "/tmp/project/.Mooncli/npm/node_modules/@scope/Mooncli-scoped",
 					},
 				),
 			},
 			{
-				path: "/tmp/project/.Hodeus/git/github.com/HazAT/Hodeus-interactive-subengines/extensions/index.ts",
+				path: "/tmp/project/.Mooncli/git/github.com/HazAT/Mooncli-interactive-subengines/extensions/index.ts",
 				sourceInfo: createSourceInfo(
-					"/tmp/project/.Hodeus/git/github.com/HazAT/Hodeus-interactive-subengines/extensions/index.ts",
+					"/tmp/project/.Mooncli/git/github.com/HazAT/Mooncli-interactive-subengines/extensions/index.ts",
 					{
-						source: "git:github.com/HazAT/Hodeus-interactive-subengines",
+						source: "git:github.com/HazAT/Mooncli-interactive-subengines",
 						scope: "project",
 						origin: "package",
-						baseDir: "/tmp/project/.Hodeus/git/github.com/HazAT/Hodeus-interactive-subengines",
+						baseDir: "/tmp/project/.Mooncli/git/github.com/HazAT/Mooncli-interactive-subengines",
 					},
 				),
 			},
 			{
-				path: "/tmp/project/.Hodeus/git/github.com/HazAT/Hodeus-interactive-subengines/extensions/subengines/index.ts",
+				path: "/tmp/project/.Mooncli/git/github.com/HazAT/Mooncli-interactive-subengines/extensions/subengines/index.ts",
 				sourceInfo: createSourceInfo(
-					"/tmp/project/.Hodeus/git/github.com/HazAT/Hodeus-interactive-subengines/extensions/subengines/index.ts",
+					"/tmp/project/.Mooncli/git/github.com/HazAT/Mooncli-interactive-subengines/extensions/subengines/index.ts",
 					{
-						source: "git:github.com/HazAT/Hodeus-interactive-subengines",
+						source: "git:github.com/HazAT/Mooncli-interactive-subengines",
 						scope: "project",
 						origin: "package",
-						baseDir: "/tmp/project/.Hodeus/git/github.com/HazAT/Hodeus-interactive-subengines",
+						baseDir: "/tmp/project/.Mooncli/git/github.com/HazAT/Mooncli-interactive-subengines",
 					},
 				),
 			},
@@ -490,7 +490,7 @@ describe("InteractiveMode.showLoadedResources", () => {
 
 		expect(normalizeRenderedOutput(fakeThis.chatContainer)).toMatchInlineSnapshot(`
 "[Extensions]
-  @scope/Hodeus-scoped, answer.ts, cli-extension.ts, HazAT/Hodeus-interactive-subengines, HazAT/Hodeus-interactive-subengines:subengines, local-index, Hodeus-markdown-preview, user-index"`);
+  @scope/Mooncli-scoped, answer.ts, cli-extension.ts, HazAT/Mooncli-interactive-subengines, HazAT/Mooncli-interactive-subengines:subengines, local-index, Mooncli-markdown-preview, user-index"`);
 	});
 
 	test("adds more parent folders until local extension labels are unique", () => {
@@ -737,14 +737,14 @@ describe("InteractiveMode.showLoadedResources", () => {
 	test("package extensions still strip index.ts correctly (regression guard)", () => {
 		const extensions: ExtensionFixture[] = [
 			{
-				path: "/tmp/project/.Hodeus/npm/node_modules/Hodeus-markdown-preview/extensions/index.ts",
+				path: "/tmp/project/.Mooncli/npm/node_modules/Mooncli-markdown-preview/extensions/index.ts",
 				sourceInfo: createSourceInfo(
-					"/tmp/project/.Hodeus/npm/node_modules/Hodeus-markdown-preview/extensions/index.ts",
+					"/tmp/project/.Mooncli/npm/node_modules/Mooncli-markdown-preview/extensions/index.ts",
 					{
-						source: "npm:Hodeus-markdown-preview",
+						source: "npm:Mooncli-markdown-preview",
 						scope: "project",
 						origin: "package",
-						baseDir: "/tmp/project/.Hodeus/npm/node_modules/Hodeus-markdown-preview",
+						baseDir: "/tmp/project/.Mooncli/npm/node_modules/Mooncli-markdown-preview",
 					},
 				),
 			},
@@ -762,7 +762,7 @@ describe("InteractiveMode.showLoadedResources", () => {
 
 		expect(normalizeRenderedOutput(fakeThis.chatContainer)).toMatchInlineSnapshot(`
 "[Extensions]
-  Hodeus-markdown-preview"`);
+  Mooncli-markdown-preview"`);
 	});
 	test("captures mixed extension layouts in expanded output", () => {
 		const fakeThis = createShowLoadedResourcesThis({
@@ -779,14 +779,14 @@ describe("InteractiveMode.showLoadedResources", () => {
 		expect(normalizeRenderedOutput(fakeThis.chatContainer)).toMatchInlineSnapshot(`
 "[Extensions]
   project
-    /tmp/project/.Hodeus/extensions/answer.ts
-    /tmp/project/.Hodeus/extensions/local-index
-    git:github.com/HazAT/Hodeus-interactive-subengines
+    /tmp/project/.Mooncli/extensions/answer.ts
+    /tmp/project/.Mooncli/extensions/local-index
+    git:github.com/HazAT/Mooncli-interactive-subengines
       extensions
       extensions/subengines
-    npm:@scope/Hodeus-scoped
+    npm:@scope/Mooncli-scoped
       extensions
-    npm:Hodeus-markdown-preview
+    npm:Mooncli-markdown-preview
       extensions
   user
     /tmp/engine/extensions/user-index
@@ -796,12 +796,12 @@ describe("InteractiveMode.showLoadedResources", () => {
 
 	test("shows context paths relative to cwd while preserving full external paths", () => {
 		const home = homedir();
-		const cwd = path.join(home, "Development", "Hodeus-mono");
+		const cwd = path.join(home, "Development", "Mooncli-mono");
 		const fakeThis = createShowLoadedResourcesThis({
 			quietStartup: false,
 			cwd,
 			contextFiles: [
-				{ path: path.join(home, ".Hodeus", "engine", "AGENTS.md") },
+				{ path: path.join(home, ".Mooncli", "engine", "AGENTS.md") },
 				{ path: path.join(cwd, "AGENTS.md") },
 			],
 		});
@@ -812,19 +812,19 @@ describe("InteractiveMode.showLoadedResources", () => {
 
 		const output = renderAll(fakeThis.chatContainer).replace(/\\/g, "/");
 		expect(output).toContain("[Context]");
-		expect(output).toContain("~/.Hodeus/engine/AGENTS.md, AGENTS.md");
+		expect(output).toContain("~/.Mooncli/engine/AGENTS.md, AGENTS.md");
 		expect(output).not.toContain(`${cwd.replace(/\\/g, "/")}/AGENTS.md`);
 	});
 
 	test("shows full context paths when expanded", () => {
 		const home = homedir();
-		const cwd = path.join(home, "Development", "Hodeus-mono");
+		const cwd = path.join(home, "Development", "Mooncli-mono");
 		const fakeThis = createShowLoadedResourcesThis({
 			quietStartup: false,
 			toolOutputExpanded: true,
 			cwd,
 			contextFiles: [
-				{ path: path.join(home, ".Hodeus", "engine", "AGENTS.md") },
+				{ path: path.join(home, ".Mooncli", "engine", "AGENTS.md") },
 				{ path: path.join(cwd, "AGENTS.md") },
 			],
 		});
@@ -835,9 +835,9 @@ describe("InteractiveMode.showLoadedResources", () => {
 
 		const output = renderAll(fakeThis.chatContainer).replace(/\\/g, "/");
 		expect(output).toContain("[Context]");
-		expect(output).toContain("~/.Hodeus/engine/AGENTS.md");
-		expect(output).toContain("~/Development/Hodeus-mono/AGENTS.md");
-		expect(output).not.toContain("~/.Hodeus/engine/AGENTS.md, AGENTS.md");
+		expect(output).toContain("~/.Mooncli/engine/AGENTS.md");
+		expect(output).toContain("~/Development/Mooncli-mono/AGENTS.md");
+		expect(output).not.toContain("~/.Mooncli/engine/AGENTS.md, AGENTS.md");
 	});
 
 	test("does not show verbose listing on quiet startup during reload", () => {

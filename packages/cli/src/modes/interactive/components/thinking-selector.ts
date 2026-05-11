@@ -1,6 +1,6 @@
 // @ts-nocheck
-import type { ThinkingLevel } from "hodeus-engine";
-import { Container, type SelectItem, SelectList, type SelectListLayoutOptions } from "hodeus-tui";
+import type { ThinkingLevel } from "moon-engine";
+import { Container, type SelectItem, SelectList, type SelectListLayoutOptions } from "moon-tui";
 import { getSelectListTheme } from "../theme/theme.js";
 import { DynamicBorder } from "./dynamic-border.js";
 

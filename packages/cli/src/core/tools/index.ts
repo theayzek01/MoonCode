@@ -97,7 +97,7 @@ export {
 	type WriteToolOptions,
 } from "./write.js";
 
-import type { EngineTool } from "hodeus-engine";
+import type { EngineTool } from "moon-engine";
 import type { ToolDefinition } from "../extensions/types.js";
 import { type BashToolOptions, createBashTool, createBashToolDefinition } from "./bash.js";
 import {

@@ -6,8 +6,8 @@
  * and provides a transformer to convert them to Provider-compatible messages.
  */
 
-import type { ImageContent, Message, TextContent } from "hodeus-core";
-import type { EngineMessage } from "hodeus-engine";
+import type { ImageContent, Message, TextContent } from "moon-core";
+import type { EngineMessage } from "moon-engine";
 
 export const COMPACTION_SUMMARY_PREFIX = `Bu noktadan onceki konusma gecmisi su ozete sikistirildi:
 
@@ -68,7 +68,7 @@ export interface CompactionSummaryMessage {
 }
 
 // Extend CustomEngineMessages via declaration merging
-declare module "hodeus-engine" {
+declare module "moon-engine" {
 	interface CustomEngineMessages {
 		bashExecution: BashExecutionMessage;
 		custom: CustomMessage;

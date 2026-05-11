@@ -2,7 +2,7 @@ const BRIDGE_URL = "ws://127.0.0.1:3133/ws";
 const VERSION = "11.05.2026";
 const HEARTBEAT_INTERVAL_MS = 15000;
 const RECONNECT_DELAY_MS = 3000;
-const ALARM_NAME = "hodeus-bridge-reconnect";
+const ALARM_NAME = "mooncli-bridge-reconnect";
 
 let socket = null;
 let reconnectTimer = null;
@@ -639,9 +639,9 @@ async function injectOverlay(tabId, message = "Moon Controlling") {
   await chrome.scripting.executeScript({
     target: { tabId },
     func: (msg, arrowUrl, handUrl, typeUrl) => {
-      const OVERLAY_ID = "hodeus-overlay";
+      const OVERLAY_ID = "mooncli-overlay";
       const CURSOR_ID  = "moon-visual-cursor";
-      const BANNER_ID  = "hodeus-banner";
+      const BANNER_ID  = "mooncli-banner";
 
       // ── Banner ────────────────────────────────────────────────────────────
       let banner = document.getElementById(BANNER_ID);
@@ -671,33 +671,33 @@ async function injectOverlay(tabId, message = "Moon Controlling") {
         ].join(";");
 
         const dot = document.createElement("span");
-        dot.id = "hodeus-dot";
+        dot.id = "mooncli-dot";
         dot.style.cssText = "display:inline-block;width:8px;height:8px;background:#0ea5e9;border-radius:50%;box-shadow:0 0 8px #0ea5e9;flex-shrink:0;";
         banner.appendChild(dot);
 
         const txt = document.createElement("span");
-        txt.id = "hodeus-txt";
+        txt.id = "mooncli-txt";
         banner.appendChild(txt);
 
         document.body.appendChild(banner);
       }
 
       // Add pulse bar (once)
-      if (!document.getElementById("hodeus-bar")) {
+      if (!document.getElementById("mooncli-bar")) {
         const bar = document.createElement("div");
-        bar.id = "hodeus-bar";
+        bar.id = "mooncli-bar";
         bar.style.cssText = "position:fixed;top:0;left:0;right:0;height:3px;background:#0ea5e9;z-index:2147483646;pointer-events:none;";
         document.body.appendChild(bar);
-        if (!document.getElementById("hodeus-style")) {
+        if (!document.getElementById("mooncli-style")) {
           const s = document.createElement("style");
-          s.id = "hodeus-style";
-          s.textContent = "@keyframes hodeus-pulse{0%,100%{opacity:1}50%{opacity:0.3}}#hodeus-bar{animation:hodeus-pulse 1.8s ease-in-out infinite;}";
+          s.id = "mooncli-style";
+          s.textContent = "@keyframes mooncli-pulse{0%,100%{opacity:1}50%{opacity:0.3}}#mooncli-bar{animation:mooncli-pulse 1.8s ease-in-out infinite;}";
           document.head.appendChild(s);
         }
       }
 
       // Update message
-      const txtEl = document.getElementById("hodeus-txt");
+      const txtEl = document.getElementById("mooncli-txt");
       if (txtEl) txtEl.textContent = msg;
 
       // Clear previous auto-hide timer
@@ -706,12 +706,12 @@ async function injectOverlay(tabId, message = "Moon Controlling") {
 
       window.__hodeus_hide = setTimeout(() => {
         const b = document.getElementById(BANNER_ID);
-        const bar = document.getElementById("hodeus-bar");
+        const bar = document.getElementById("mooncli-bar");
         if (b) b.style.opacity = "0";
         setTimeout(() => {
           b?.remove();
           bar?.remove();
-          document.getElementById("hodeus-style")?.remove();
+          document.getElementById("mooncli-style")?.remove();
         }, 300);
       }, 6000);
 

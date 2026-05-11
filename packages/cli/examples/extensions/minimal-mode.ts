@@ -11,12 +11,12 @@
  * - Minimal: Shows only tool call, no output (this extension's collapsed mode)
  *
  * Usage:
- *   Hodeus -e ./minimal-mode.ts
+ *   Mooncli -e ./minimal-mode.ts
  *
  * Then use ctrl+o to toggle between minimal (collapsed) and full (expanded) views.
  */
 
-import type { ExtensionAPI } from "Hodeus";
+import type { ExtensionAPI } from "Mooncli";
 import {
 	createBashTool,
 	createEditTool,
@@ -25,8 +25,8 @@ import {
 	createLsTool,
 	createReadTool,
 	createWriteTool,
-} from "Hodeus";
-import { Text } from "hodeus-tui";
+} from "Mooncli";
+import { Text } from "moon-tui";
 import { homedir } from "os";
 
 /**
@@ -64,11 +64,11 @@ function getBuiltInTools(cwd: string) {
 	return tools;
 }
 
-export default function (Hodeus: ExtensionAPI) {
+export default function (Mooncli: ExtensionAPI) {
 	// =========================================================================
 	// Read Tool
 	// =========================================================================
-	Hodeus.registerTool({
+	Mooncli.registerTool({
 		name: "read",
 		label: "read",
 		description:
@@ -115,7 +115,7 @@ export default function (Hodeus: ExtensionAPI) {
 	// =========================================================================
 	// Bash Tool
 	// =========================================================================
-	Hodeus.registerTool({
+	Mooncli.registerTool({
 		name: "bash",
 		label: "bash",
 		description:
@@ -164,7 +164,7 @@ export default function (Hodeus: ExtensionAPI) {
 	// =========================================================================
 	// Write Tool
 	// =========================================================================
-	Hodeus.registerTool({
+	Mooncli.registerTool({
 		name: "write",
 		label: "write",
 		description:
@@ -206,7 +206,7 @@ export default function (Hodeus: ExtensionAPI) {
 	// =========================================================================
 	// Edit Tool
 	// =========================================================================
-	Hodeus.registerTool({
+	Mooncli.registerTool({
 		name: "edit",
 		label: "edit",
 		description:
@@ -251,7 +251,7 @@ export default function (Hodeus: ExtensionAPI) {
 	// =========================================================================
 	// Find Tool
 	// =========================================================================
-	Hodeus.registerTool({
+	Mooncli.registerTool({
 		name: "find",
 		label: "find",
 		description:
@@ -309,7 +309,7 @@ export default function (Hodeus: ExtensionAPI) {
 	// =========================================================================
 	// Grep Tool
 	// =========================================================================
-	Hodeus.registerTool({
+	Mooncli.registerTool({
 		name: "grep",
 		label: "grep",
 		description:
@@ -371,7 +371,7 @@ export default function (Hodeus: ExtensionAPI) {
 	// =========================================================================
 	// Ls Tool
 	// =========================================================================
-	Hodeus.registerTool({
+	Mooncli.registerTool({
 		name: "ls",
 		label: "ls",
 		description:

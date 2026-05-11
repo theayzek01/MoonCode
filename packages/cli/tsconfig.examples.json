@@ -3,10 +3,10 @@
 	"compilerOptions": {
 		"noEmit": true,
 		"paths": {
-			"@Hodeus/cli": ["./src/index.ts"],
-			"@Hodeus/cli/hooks": ["./src/core/hooks/index.ts"],
-			"@Hodeus/tui": ["../tui/src/index.ts"],
-			"@Hodeus/core": ["../ai/src/index.ts"],
+			"@Mooncli/cli": ["./src/index.ts"],
+			"@Mooncli/cli/hooks": ["./src/core/hooks/index.ts"],
+			"@Mooncli/tui": ["../tui/src/index.ts"],
+			"@Mooncli/core": ["../ai/src/index.ts"],
 			"typebox": ["../../node_modules/typebox"]
 		},
 		"skipLibCheck": true

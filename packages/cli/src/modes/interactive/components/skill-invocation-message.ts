@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Box, Markdown, type MarkdownTheme, Text } from "hodeus-tui";
+import { Box, Markdown, type MarkdownTheme, Text } from "moon-tui";
 import type { ParsedSkillBlock } from "../../../core/engine-session.js";
 import { getMarkdownTheme, theme } from "../theme/theme.js";
 import { keyText } from "./keybinding-hints.js";

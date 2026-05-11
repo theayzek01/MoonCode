@@ -1,11 +1,11 @@
-import type { ExtensionAPI } from "Hodeus";
+import type { ExtensionAPI } from "Mooncli";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const baseDir = dirname(fileURLToPath(import.meta.url));
 
-export default function (Hodeus: ExtensionAPI) {
-	Hodeus.on("resources_discover", () => {
+export default function (Mooncli: ExtensionAPI) {
+	Mooncli.on("resources_discover", () => {
 		return {
 			skillPaths: [join(baseDir, "SKILL.md")],
 			promptPaths: [join(baseDir, "dynamic.md")],

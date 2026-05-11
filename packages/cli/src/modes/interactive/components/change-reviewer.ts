@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Container, Text } from "hodeus-tui";
+import { Container, Text } from "moon-tui";
 import { theme } from "../theme/theme.js";
 import { DiffPreviewComponent } from "./diff-preview.js";
 

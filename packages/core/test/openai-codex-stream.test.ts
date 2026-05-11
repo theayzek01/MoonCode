@@ -83,7 +83,7 @@ function buildSSEPayload({
 
 describe("openai-codex streaming", () => {
 	it("streams SSE responses into AssistantMessageEventStream", async () => {
-		const tempDir = mkdtempSync(join(tmpdir(), "Hodeus-codex-stream-"));
+		const tempDir = mkdtempSync(join(tmpdir(), "Mooncli-codex-stream-"));
 		process.env.PI_CODING_AGENT_DIR = tempDir;
 
 		const payload = Buffer.from(
@@ -144,7 +144,7 @@ describe("openai-codex streaming", () => {
 				expect(headers?.get("Authorization")).toBe(`Bearer ${token}`);
 				expect(headers?.get("chatgpt-account-id")).toBe("acc_test");
 				expect(headers?.get("OpenAI-Beta")).toBe("responses=experimental");
-				expect(headers?.get("originator")).toBe("Hodeus");
+				expect(headers?.get("originator")).toBe("Mooncli");
 				expect(headers?.get("accept")).toBe("text/event-stream");
 				expect(headers?.has("x-api-key")).toBe(false);
 				return new Response(stream, {
@@ -194,7 +194,7 @@ describe("openai-codex streaming", () => {
 	});
 
 	it("completes after response.completed even when the SSE body stays open", async () => {
-		const tempDir = mkdtempSync(join(tmpdir(), "Hodeus-codex-stream-"));
+		const tempDir = mkdtempSync(join(tmpdir(), "Mooncli-codex-stream-"));
 		process.env.PI_CODING_AGENT_DIR = tempDir;
 		const token = mockToken();
 		const encoder = new TextEncoder();
@@ -253,7 +253,7 @@ describe("openai-codex streaming", () => {
 	});
 
 	it("maps response.incomplete to stopReason length even when the SSE body stays open", async () => {
-		const tempDir = mkdtempSync(join(tmpdir(), "Hodeus-codex-stream-"));
+		const tempDir = mkdtempSync(join(tmpdir(), "Mooncli-codex-stream-"));
 		process.env.PI_CODING_AGENT_DIR = tempDir;
 		const token = mockToken();
 		const encoder = new TextEncoder();
@@ -312,7 +312,7 @@ describe("openai-codex streaming", () => {
 	});
 
 	it("sets session_id/x-client-request-id headers and prompt_cache_key when sessionId is provided", async () => {
-		const tempDir = mkdtempSync(join(tmpdir(), "Hodeus-codex-stream-"));
+		const tempDir = mkdtempSync(join(tmpdir(), "Mooncli-codex-stream-"));
 		process.env.PI_CODING_AGENT_DIR = tempDir;
 
 		const payload = Buffer.from(
@@ -412,7 +412,7 @@ describe("openai-codex streaming", () => {
 	});
 
 	it("preserves gpt-5.5 xhigh reasoning effort from simple options", async () => {
-		const tempDir = mkdtempSync(join(tmpdir(), "Hodeus-codex-stream-"));
+		const tempDir = mkdtempSync(join(tmpdir(), "Mooncli-codex-stream-"));
 		process.env.PI_CODING_AGENT_DIR = tempDir;
 		const token = mockToken();
 		const sse = buildSSEPayload({ status: "completed" });
@@ -468,7 +468,7 @@ describe("openai-codex streaming", () => {
 	});
 
 	it.each(["gpt-5.3-codex", "gpt-5.4", "gpt-5.5"])("clamps %s minimal reasoning effort to low", async (modelId) => {
-		const tempDir = mkdtempSync(join(tmpdir(), "Hodeus-codex-stream-"));
+		const tempDir = mkdtempSync(join(tmpdir(), "Mooncli-codex-stream-"));
 		process.env.PI_CODING_AGENT_DIR = tempDir;
 
 		const payload = Buffer.from(
@@ -571,7 +571,7 @@ describe("openai-codex streaming", () => {
 	] as const)(
 		"uses the client-sent %s service tier for %s when Codex echoes default",
 		async (modelId, serviceTier, multiplier) => {
-			const tempDir = mkdtempSync(join(tmpdir(), "Hodeus-codex-stream-"));
+			const tempDir = mkdtempSync(join(tmpdir(), "Mooncli-codex-stream-"));
 			process.env.PI_CODING_AGENT_DIR = tempDir;
 			const token = mockToken();
 			const sse = `${[
@@ -658,7 +658,7 @@ describe("openai-codex streaming", () => {
 	);
 
 	it("does not set session_id/x-client-request-id headers when sessionId is not provided", async () => {
-		const tempDir = mkdtempSync(join(tmpdir(), "Hodeus-codex-stream-"));
+		const tempDir = mkdtempSync(join(tmpdir(), "Mooncli-codex-stream-"));
 		process.env.PI_CODING_AGENT_DIR = tempDir;
 
 		const payload = Buffer.from(

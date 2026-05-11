@@ -5,12 +5,12 @@
  * Useful for preventing accidental modifications to sensitive files.
  */
 
-import type { ExtensionAPI } from "Hodeus";
+import type { ExtensionAPI } from "Mooncli";
 
-export default function (Hodeus: ExtensionAPI) {
+export default function (Mooncli: ExtensionAPI) {
 	const protectedPaths = [".env", ".git/", "node_modules/"];
 
-	Hodeus.on("tool_call", async (event, ctx) => {
+	Mooncli.on("tool_call", async (event, ctx) => {
 		if (event.toolName !== "write" && event.toolName !== "edit") {
 			return undefined;
 		}

@@ -12,8 +12,8 @@ import {
 	type ResourceLoader,
 	SessionManager,
 	SettingsManager,
-} from "Hodeus";
-import { getModel } from "hodeus-core";
+} from "Mooncli";
+import { getModel } from "moon-core";
 
 // Custom auth storage location
 const authStorage = AuthStorage.create("/tmp/my-engine/auth.json");

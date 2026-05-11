@@ -5,7 +5,7 @@
 
 import { access, readFile, stat } from "node:fs/promises";
 import chalk from "chalk";
-import type { ImageContent } from "hodeus-core";
+import type { ImageContent } from "moon-core";
 import { resolve } from "path";
 import { resolveReadPath } from "../core/tools/path-utils.js";
 import { formatDimensionNote, resizeImage } from "../utils/image-resize.js";

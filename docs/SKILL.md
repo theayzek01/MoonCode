@@ -1,4 +1,4 @@
-# Hodeus UI Design Skill
+# Mooncli UI Design Skill
 
 > AI coding agents (Cursor, Gemini CLI, Claude, Copilot): Read this file before generating any UI, web, or frontend code for this project. Apply the design system defined here. Do NOT default to generic Bootstrap-style or plain Tailwind layouts.
 
@@ -182,5 +182,5 @@ Dark bg:   #111827 / #1F2937
 
 ---
 
-*Source: TypeUI Design Skills (https://www.typeui.sh/design-skills) — Glassmorphism, Neobrutalism, Premium — adapted for Hodeus project.*
+*Source: TypeUI Design Skills (https://www.typeui.sh/design-skills) — Glassmorphism, Neobrutalism, Premium — adapted for Mooncli project.*
 

@@ -155,7 +155,7 @@ async function discoverProject(accessToken: string, onProgress?: (message: strin
 		Authorization: `Bearer ${accessToken}`,
 		"Content-Type": "application/json",
 		"User-Engine": "google-api-nodejs-client/9.15.1",
-		"X-Goog-Ahodeuscli-Client": "google-cloud-sdk vscode_cloudshelleditor/0.1",
+		"X-Goog-Amooncli-Client": "google-cloud-sdk vscode_cloudshelleditor/0.1",
 		"Client-Metadata": JSON.stringify({
 			ideType: "IDE_UNSPECIFIED",
 			platform: "PLATFORM_UNSPECIFIED",

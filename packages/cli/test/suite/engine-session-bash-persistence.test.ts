@@ -1,6 +1,6 @@
 import { Buffer } from "node:buffer";
-import { fauxAssistantMessage, fauxToolCall } from "hodeus-core";
-import type { EngineTool } from "hodeus-engine";
+import { fauxAssistantMessage, fauxToolCall } from "moon-core";
+import type { EngineTool } from "moon-engine";
 import { Type } from "typebox";
 import { afterEach, describe, expect, it } from "vitest";
 import type { BashOperations } from "../../src/core/tools/bash.js";

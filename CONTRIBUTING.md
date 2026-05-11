@@ -1,4 +1,4 @@
-# Contributing to Hodeus
+# Contributing to Mooncli
 
 This guide exists to save both sides time.
 
@@ -64,7 +64,7 @@ If you are adding a new provider, see `docs/AGENTS.md` for required tests.
 
 ## Philosophy
 
-Hodeus's core is minimal. If your feature does not belong in the core, it should be an extension. PRs that bloat the core will likely be rejected.
+Mooncli's core is minimal. If your feature does not belong in the core, it should be an extension. PRs that bloat the core will likely be rejected.
 
 ## Questions?
 
@@ -74,7 +74,7 @@ Ask on [Discord](https://discord.com/invite/nKXTsAcmbT).
 
 ### Why are new issues and PRs auto-closed?
 
-Hodeus receives more issues than the maintainers can responsibly review in real time. Many reports do not meet the quality bar in this guide or do not follow CONTRIBUTING.md. Some are slung at the repository mindlessly via an engine instead of being reviewed and shaped by the person submitting them. Auto-closing creates a buffer so maintainers can review the tracker on their own schedule and reopen the issues that meet the quality bar.
+Mooncli receives more issues than the maintainers can responsibly review in real time. Many reports do not meet the quality bar in this guide or do not follow CONTRIBUTING.md. Some are slung at the repository mindlessly via an engine instead of being reviewed and shaped by the person submitting them. Auto-closing creates a buffer so maintainers can review the tracker on their own schedule and reopen the issues that meet the quality bar.
 
 ### Why are weekend issues not reviewed?
 

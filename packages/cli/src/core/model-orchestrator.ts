@@ -1,6 +1,6 @@
 // @ts-nocheck
-import type { Model } from "hodeus-core";
-import { modelsAreEqual } from "hodeus-core";
+import type { Model } from "moon-core";
+import { modelsAreEqual } from "moon-core";
 import type { ModelRegistry } from "./model-registry.js";
 
 function scoreModel(candidate: Model<any>, current: Model<any>): number {

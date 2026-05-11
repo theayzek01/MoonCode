@@ -1,6 +1,6 @@
 // @ts-nocheck
-import type { Transport } from "hodeus-core";
-import type { ThinkingLevel } from "hodeus-engine";
+import type { Transport } from "moon-core";
+import type { ThinkingLevel } from "moon-engine";
 import {
 	Container,
 	getCapabilities,
@@ -11,7 +11,7 @@ import {
 	SettingsList,
 	Spacer,
 	Text,
-} from "hodeus-tui";
+} from "moon-tui";
 import type { WarningSettings } from "../../../core/settings-manager.js";
 import { getSelectListTheme, getSettingsListTheme, theme } from "../theme/theme.js";
 import { DynamicBorder } from "./dynamic-border.js";

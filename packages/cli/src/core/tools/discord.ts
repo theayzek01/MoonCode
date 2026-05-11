@@ -1,7 +1,7 @@
 // @ts-nocheck
 
 import { ChannelType, Client, GatewayIntentBits, type TextChannel } from "discord.js";
-import type { EngineTool } from "hodeus-engine";
+import type { EngineTool } from "moon-engine";
 import type { ToolDefinition } from "../extensions/index.js";
 
 let discordClient: Client | null = null;

@@ -4,7 +4,7 @@
  */
 
 import chalk from "chalk";
-import type { ThinkingLevel } from "hodeus-engine";
+import type { ThinkingLevel } from "moon-engine";
 import { APP_NAME, CONFIG_DIR_NAME, ENV_AGENT_DIR, ENV_SESSION_DIR } from "../config.js";
 import type { ExtensionFlag } from "../core/extensions/types.js";
 
@@ -214,7 +214,7 @@ ${chalk.bold("Komutlar:")}
   ${APP_NAME} install <kaynak> [-l]     Eklenti kaynağını yükle ve ayarlara ekle
   ${APP_NAME} remove <kaynak> [-l]      Eklenti kaynağını ayarlardan kaldır
   ${APP_NAME} uninstall <kaynak> [-l]   Kaldırmak için alternatif komut
-  ${APP_NAME} update [kaynak|self|Moon] Hodeus'yi ve yüklü eklentileri güncelle
+  ${APP_NAME} update [kaynak|self|Moon] Mooncli'yi ve yüklü eklentileri güncelle
   ${APP_NAME} list                      Ayarlarda yüklü eklentileri listele
   ${APP_NAME} config                    Paket kaynaklarını etkinleştirmek/devre dışı bırakmak için TUI'yi aç
   ${APP_NAME} ollama doctor             Yerel Ollama bağlantısını ve modelleri kontrol et
@@ -355,10 +355,10 @@ ${chalk.bold("Ortam Değişkenleri:")}
   AWS_REGION                       - Amazon Bedrock için AWS bölgesi (örn. us-east-1)
   ${ENV_AGENT_DIR.padEnd(32)} - Yapılandırma dizini (varsayılan: ~/${CONFIG_DIR_NAME}/engine)
   ${ENV_SESSION_DIR.padEnd(32)} - Oturum depolama dizini (--session-dir ile geçersiz kılınır)
-  HODEUS_PACKAGE_DIR                 - Paket dizini geçersiz kılma
-  HODEUS_OFFLINE                     - Ayarlandığında başlangıç ağ işlemlerini devre dışı bırakır
-  HODEUS_TELEMETRY                   - Kurulum telemetrisini geçersiz kıl
-  HODEUS_SHARE_VIEWER_URL            - /share komutu için taban URL (varsayılan: https://Hodeus.dev/session/)
+  MOON_PACKAGE_DIR                 - Paket dizini geçersiz kılma
+  MOON_OFFLINE                     - Ayarlandığında başlangıç ağ işlemlerini devre dışı bırakır
+  MOON_TELEMETRY                   - Kurulum telemetrisini geçersiz kıl
+  MOON_SHARE_VIEWER_URL            - /share komutu için taban URL (varsayılan: https://Mooncli.dev/session/)
 
 ${chalk.bold("Yerleşik Araç İsimleri:")}
   read   - Dosya içeriğini oku

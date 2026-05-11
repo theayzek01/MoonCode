@@ -4,8 +4,8 @@
  */
 
 import chalk from "chalk";
-import type { Api, Model } from "hodeus-core";
-import { fuzzyFilter } from "hodeus-tui";
+import type { Api, Model } from "moon-core";
+import { fuzzyFilter } from "moon-tui";
 import { formatNoModelsAvailableMessage } from "../core/auth-guidance.js";
 import type { ModelRegistry } from "../core/model-registry.js";
 

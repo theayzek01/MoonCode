@@ -9,7 +9,7 @@ import {
 	registerFauxProvider,
 	type ToolResultMessage,
 	type UserMessage,
-} from "hodeus-core";
+} from "moon-core";
 import { afterEach, describe, expect, it } from "vitest";
 import { Engine, type EngineEvent } from "../src/index.js";
 import { calculateTool } from "./utils/calculate.js";

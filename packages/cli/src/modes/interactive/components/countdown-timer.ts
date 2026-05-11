@@ -3,7 +3,7 @@
  * Reusable countdown timer for dialog components.
  */
 
-import type { TUI } from "hodeus-tui";
+import type { TUI } from "moon-tui";
 
 export class CountdownTimer {
 	private intervalId: ReturnType<typeof setInterval> | undefined;

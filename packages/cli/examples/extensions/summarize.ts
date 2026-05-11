@@ -1,7 +1,7 @@
-import type { ExtensionAPI, ExtensionCommandContext } from "Hodeus";
-import { DynamicBorder, getMarkdownTheme } from "Hodeus";
-import { complete, getModel } from "hodeus-core";
-import { Container, Markdown, matchesKey, Text } from "hodeus-tui";
+import type { ExtensionAPI, ExtensionCommandContext } from "Mooncli";
+import { DynamicBorder, getMarkdownTheme } from "Mooncli";
+import { complete, getModel } from "moon-core";
+import { Container, Markdown, matchesKey, Text } from "moon-tui";
 
 type ContentBlock = {
 	type?: string;
@@ -142,8 +142,8 @@ const showSummaryUi = async (summary: string, ctx: ExtensionCommandContext) => {
 	});
 };
 
-export default function (Hodeus: ExtensionAPI) {
-	Hodeus.registerCommand("summarize", {
+export default function (Mooncli: ExtensionAPI) {
+	Mooncli.registerCommand("summarize", {
 		description: "Summarize the current conversation in a custom UI",
 		handler: async (_args, ctx) => {
 			const branch = ctx.sessionManager.getBranch();

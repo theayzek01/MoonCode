@@ -4,7 +4,7 @@
  * Override settings using SettingsManager.
  */
 
-import { createEngineSession, SessionManager, SettingsManager } from "Hodeus";
+import { createEngineSession, SessionManager, SettingsManager } from "Mooncli";
 
 const cwd = process.cwd();
 

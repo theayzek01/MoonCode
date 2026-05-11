@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Editor, type EditorOptions, type EditorTheme, type TUI } from "hodeus-tui";
+import { Editor, type EditorOptions, type EditorTheme, type TUI } from "moon-tui";
 import type { AppKeybinding, KeybindingsManager } from "../../../core/keybindings.js";
 
 /**

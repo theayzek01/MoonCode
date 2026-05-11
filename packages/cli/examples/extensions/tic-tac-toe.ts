@@ -17,9 +17,9 @@
  * separate variables. Only the engine cursor is ever exposed to the engine.
  */
 
-import type { ExtensionAPI, ExtensionContext, Theme, ToolExecutionMode } from "Hodeus";
-import { StringEnum } from "hodeus-core";
-import { type Component, matchesKey, Text, truncateToWidth, visibleWidth } from "hodeus-tui";
+import type { ExtensionAPI, ExtensionContext, Theme, ToolExecutionMode } from "Mooncli";
+import { StringEnum } from "moon-core";
+import { type Component, matchesKey, Text, truncateToWidth, visibleWidth } from "moon-tui";
 import { Type } from "typebox";
 
 // Thrown from the tool on illegal actions. The engine runtime surfaces thrown
@@ -655,9 +655,9 @@ function getBoardDetails(): BoardDetails {
 	};
 }
 
-export default function (Hodeus: ExtensionAPI) {
-	Hodeus.on("session_start", async (_event, ctx) => reconstructState(ctx));
-	Hodeus.on("session_tree", async (_event, ctx) => reconstructState(ctx));
+export default function (Mooncli: ExtensionAPI) {
+	Mooncli.on("session_start", async (_event, ctx) => reconstructState(ctx));
+	Mooncli.on("session_tree", async (_event, ctx) => reconstructState(ctx));
 
 	// Sent once per game at end-of-game. The custom renderer paints the banner;
 	// `content` is a plain-text fallback for any non-TUI consumer and for the
@@ -671,7 +671,7 @@ export default function (Hodeus: ExtensionAPI) {
 					: gameState.status === "draw"
 						? "Draw"
 						: "Game over";
-		Hodeus.sendMessage({
+		Mooncli.sendMessage({
 			customType: GAME_OVER_MESSAGE_TYPE,
 			content: `Game over: ${label}.`,
 			display: true,
@@ -682,7 +682,7 @@ export default function (Hodeus: ExtensionAPI) {
 	// -----------------------------------------------------------------------
 	// Custom message renderer for user move messages
 	// -----------------------------------------------------------------------
-	Hodeus.registerMessageRenderer(MOVE_MESSAGE_TYPE, (message, { expanded }, theme) => {
+	Mooncli.registerMessageRenderer(MOVE_MESSAGE_TYPE, (message, { expanded }, theme) => {
 		const details = message.details as BoardDetails | undefined;
 		const turnLabel =
 			details?.currentTurn === "O"
@@ -695,7 +695,7 @@ export default function (Hodeus: ExtensionAPI) {
 	// -----------------------------------------------------------------------
 	// Custom message renderer for game-over messages
 	// -----------------------------------------------------------------------
-	Hodeus.registerMessageRenderer(GAME_OVER_MESSAGE_TYPE, (message, _options, theme) => {
+	Mooncli.registerMessageRenderer(GAME_OVER_MESSAGE_TYPE, (message, _options, theme) => {
 		const details = message.details as BoardDetails | undefined;
 		const status = (details?.status ?? "draw") as GameStatus;
 		return new GameOverMessageComponent(status, details, theme);
@@ -704,7 +704,7 @@ export default function (Hodeus: ExtensionAPI) {
 	// -----------------------------------------------------------------------
 	// before_engine_start - inject game instructions each turn
 	// -----------------------------------------------------------------------
-	Hodeus.on("before_engine_start", async (event) => {
+	Mooncli.on("before_engine_start", async (event) => {
 		if (!gameActive) return undefined;
 
 		const instructions = `
@@ -775,7 +775,7 @@ Decide the target cell first, then dump every action for the turn in one go.
 	// -----------------------------------------------------------------------
 	// /tic-tac-toe command
 	// -----------------------------------------------------------------------
-	Hodeus.registerCommand("tic-tac-toe", {
+	Mooncli.registerCommand("tic-tac-toe", {
 		description: "Play tic-tac-toe against the engine",
 
 		handler: async (_args, ctx) => {
@@ -789,7 +789,7 @@ Decide the target cell first, then dump every action for the turn in one go.
 				gameState = createInitialState();
 			}
 			gameActive = true;
-			Hodeus.setSessionName("Tic-Tac-Toe");
+			Mooncli.setSessionName("Tic-Tac-Toe");
 
 			await ctx.ui.custom<void>((tui, _theme, _kb, done) => {
 				component = new TicTacToeComponent(
@@ -806,7 +806,7 @@ Decide the target cell first, then dump every action for the turn in one go.
 							gameState.currentTurn = gameState.engineMark;
 						}
 						component?.updateState(gameState);
-						Hodeus.appendEntry(SAVE_TYPE, getBoardDetails());
+						Mooncli.appendEntry(SAVE_TYPE, getBoardDetails());
 
 						if (gameState.status === "playing") {
 							// IMPORTANT: user play does NOT touch the engine cursor.
@@ -816,7 +816,7 @@ Decide the target cell first, then dump every action for the turn in one go.
 								gameState.engineCursorRow,
 								gameState.engineCursorCol,
 							);
-							Hodeus.sendMessage(
+							Mooncli.sendMessage(
 								{
 									customType: MOVE_MESSAGE_TYPE,
 									content:
@@ -856,7 +856,7 @@ Decide the target cell first, then dump every action for the turn in one go.
 		play: 0,
 	};
 
-	Hodeus.registerTool({
+	Mooncli.registerTool({
 		name: "tic_tac_toe",
 		label: "Tic-Tac-Toe",
 		description:
@@ -910,7 +910,7 @@ Decide the target cell first, then dump every action for the turn in one go.
 						// Do NOT reset the cursor on failure. The engine can retry
 						// from the cursor's current position.
 						component?.updateState(gameState);
-						Hodeus.appendEntry(SAVE_TYPE, getBoardDetails());
+						Mooncli.appendEntry(SAVE_TYPE, getBoardDetails());
 						throw new TicTacToeError(
 							`Cell (${r},${c}) is already ${gameState.board[r][c]}. Your cursor is still at (${r},${c}). Move to an empty cell and retry play.`,
 						);
@@ -939,7 +939,7 @@ Decide the target cell first, then dump every action for the turn in one go.
 			}
 
 			component?.updateState(gameState);
-			Hodeus.appendEntry(SAVE_TYPE, getBoardDetails());
+			Mooncli.appendEntry(SAVE_TYPE, getBoardDetails());
 
 			return {
 				content: [{ type: "text", text: result }],
@@ -969,7 +969,7 @@ Decide the target cell first, then dump every action for the turn in one go.
 	// -----------------------------------------------------------------------
 	// tic_tac_toe_see_board tool - inspect board + engine cursor.
 	// -----------------------------------------------------------------------
-	Hodeus.registerTool({
+	Mooncli.registerTool({
 		name: "tic_tac_toe_see_board",
 		label: "See Board",
 		description:

@@ -4,10 +4,10 @@
  * Configure API key resolution via AuthStorage and ModelRegistry.
  */
 
-import { AuthStorage, createEngineSession, ModelRegistry, SessionManager } from "Hodeus";
+import { AuthStorage, createEngineSession, ModelRegistry, SessionManager } from "Mooncli";
 
-// Default: AuthStorage uses ~/.Hodeus/engine/auth.json
-// ModelRegistry loads built-in + custom models from ~/.Hodeus/engine/models.json
+// Default: AuthStorage uses ~/.Mooncli/engine/auth.json
+// ModelRegistry loads built-in + custom models from ~/.Mooncli/engine/models.json
 const authStorage = AuthStorage.create();
 const modelRegistry = ModelRegistry.create(authStorage);
 

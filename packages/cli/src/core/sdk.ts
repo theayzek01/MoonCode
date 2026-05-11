@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { join } from "node:path";
-import { clampThinkingLevel, type Message, type Model, streamSimple } from "hodeus-core";
-import { Engine, type EngineMessage, type ThinkingLevel } from "hodeus-engine";
+import { clampThinkingLevel, type Message, type Model, streamSimple } from "moon-core";
+import { Engine, type EngineMessage, type ThinkingLevel } from "moon-engine";
 import { getEngineDir } from "../config.js";
 import { formatNoModelsAvailableMessage } from "./auth-guidance.js";
 import { AuthStorage } from "./auth-storage.js";
@@ -79,7 +79,7 @@ export interface CreateEngineSessionOptions {
 	/** Session start event metadata for extension runtime startup. */
 	sessionStartEvent?: SessionStartEvent;
 	/** MCP manager instance for the session. */
-	mcpManager?: import("hodeus-engine").McpManager;
+	mcpManager?: import("moon-engine").McpManager;
 }
 
 /** Result from createEngineSession */
@@ -91,7 +91,7 @@ export interface CreateEngineSessionResult {
 	/** Warning if session was restored with a different model than saved */
 	modelFallbackMessage?: string;
 	/** MCP manager used by the session */
-	mcpManager?: import("hodeus-engine").McpManager;
+	mcpManager?: import("moon-engine").McpManager;
 }
 
 // Re-exports
@@ -194,7 +194,7 @@ export async function createEngineSession(
 	}));
 
 	if (!mcpManager && mcpServerConfigs.length > 0) {
-		const { McpManager } = await import("hodeus-engine");
+		const { McpManager } = await import("moon-engine");
 		mcpManager = new McpManager(mcpServerConfigs);
 		await mcpManager.initialize();
 	}

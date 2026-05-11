@@ -1,5 +1,5 @@
-import { type AssistantMessage, getModel, type Usage } from "hodeus-core";
-import { Engine } from "hodeus-engine";
+import { type AssistantMessage, getModel, type Usage } from "moon-core";
+import { Engine } from "moon-engine";
 import { describe, expect, it } from "vitest";
 import { AuthStorage } from "../src/core/auth-storage.js";
 import { EngineSession } from "../src/core/engine-session.js";

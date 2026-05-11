@@ -16,7 +16,7 @@ describe("keybindings migration", () => {
 	});
 
 	function createEngineDir(config: Record<string, unknown>): string {
-		const engineDir = fs.mkdtempSync(path.join(os.tmpdir(), "Hodeus-keybindings-test-"));
+		const engineDir = fs.mkdtempSync(path.join(os.tmpdir(), "Mooncli-keybindings-test-"));
 		tempDirs.push(engineDir);
 		fs.writeFileSync(path.join(engineDir, "keybindings.json"), `${JSON.stringify(config, null, 2)}\n`, "utf-8");
 		return engineDir;

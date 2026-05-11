@@ -14,7 +14,7 @@ afterEach(() => {
 });
 
 function createTempDir(): string {
-	tempDir = mkdtempSync(join(tmpdir(), "Hodeus-paths-"));
+	tempDir = mkdtempSync(join(tmpdir(), "Mooncli-paths-"));
 	return tempDir;
 }
 

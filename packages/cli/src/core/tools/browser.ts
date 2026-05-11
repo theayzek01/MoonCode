@@ -1,5 +1,5 @@
-import type { EngineTool } from "hodeus-engine";
-import { Text } from "hodeus-tui";
+import type { EngineTool } from "moon-engine";
+import { Text } from "moon-tui";
 import { type Static, Type } from "typebox";
 import type { Theme } from "../../modes/interactive/theme/theme.js";
 import { sendBrowserCommand } from "../browser-bridge-server.js";
@@ -79,7 +79,7 @@ export function createBrowserTabsToolDefinition(): ToolDefinition<typeof browser
 		name: "browser_tabs",
 		label: "browser_tabs",
 		description:
-			"Control Chrome tabs through the Hodeus Chrome extension. Actions: list, active, open, close, focus, reload, navigate.",
+			"Control Chrome tabs through the Mooncli Chrome extension. Actions: list, active, open, close, focus, reload, navigate.",
 		promptSnippet: "Control connected Chrome tabs",
 		promptGuidelines: [
 			"Use browser_tabs to inspect or change Chrome tabs when the user asks for browser control.",
@@ -114,7 +114,7 @@ export function createBrowserPageToolDefinition(): ToolDefinition<typeof browser
 		name: "browser_page",
 		label: "browser_page",
 		description:
-			"Read or operate the current Chrome page through the Hodeus Chrome extension. Actions: read, read_dom, click, type, hover, press_key, get_elements, screenshot, evaluate, scroll, console_logs, wait.",
+			"Read or operate the current Chrome page through the Mooncli Chrome extension. Actions: read, read_dom, click, type, hover, press_key, get_elements, screenshot, evaluate, scroll, console_logs, wait.",
 		promptSnippet: "Read or operate the connected Chrome page",
 		promptGuidelines: [
 			"Use browser_page read to get page title, URL, selection, and visible text.",

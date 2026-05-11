@@ -4,8 +4,8 @@
  */
 
 import chalk from "chalk";
-import { type Api, type KnownProvider, type Model, modelsAreEqual } from "hodeus-core";
-import type { ThinkingLevel } from "hodeus-engine";
+import { type Api, type KnownProvider, type Model, modelsAreEqual } from "moon-core";
+import type { ThinkingLevel } from "moon-engine";
 import { minimatch } from "minimatch";
 import { isValidThinkingLevel } from "../cli/args.js";
 import { DEFAULT_THINKING_LEVEL } from "./defaults.js";

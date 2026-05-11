@@ -326,7 +326,7 @@ function collectFiles(
 	return files;
 }
 
-type SkillDiscoveryMode = "Hodeus" | "engines";
+type SkillDiscoveryMode = "Mooncli" | "engines";
 
 function collectSkillEntries(
 	dir: string,
@@ -385,7 +385,7 @@ function collectSkillEntries(
 			}
 
 			const relPath = toPosixPath(relative(root, fullPath));
-			if (mode === "Hodeus" && dir === root && isFile && entry.name.endsWith(".md") && !ig.ignores(relPath)) {
+			if (mode === "Mooncli" && dir === root && isFile && entry.name.endsWith(".md") && !ig.ignores(relPath)) {
 				entries.push(fullPath);
 				continue;
 			}
@@ -518,8 +518,8 @@ function collectAutoThemeEntries(dir: string): string[] {
 function readPiManifestFile(packageJsonPath: string): PiManifest | null {
 	try {
 		const content = readFileSync(packageJsonPath, "utf-8");
-		const pkg = JSON.parse(content) as { Hodeus?: PiManifest };
-		return pkg.Hodeus ?? null;
+		const pkg = JSON.parse(content) as { Mooncli?: PiManifest };
+		return pkg.Mooncli ?? null;
 	} catch {
 		return null;
 	}
@@ -615,7 +615,7 @@ function collectAutoExtensionEntries(dir: string): string[] {
  */
 function collectResourceFiles(dir: string, resourceType: ResourceType): string[] {
 	if (resourceType === "skills") {
-		return collectSkillEntries(dir, "Hodeus");
+		return collectSkillEntries(dir, "Mooncli");
 	}
 	if (resourceType === "extensions") {
 		return collectAutoExtensionEntries(dir);
@@ -1814,7 +1814,7 @@ export class DefaultPackageManager implements PackageManager {
 		this.ensureGitIgnore(installRoot);
 		const packageJsonPath = join(installRoot, "package.json");
 		if (!existsSync(packageJsonPath)) {
-			const pkgJson = { name: "Hodeus-extensions", private: true };
+			const pkgJson = { name: "Mooncli-extensions", private: true };
 			writeFileSync(packageJsonPath, JSON.stringify(pkgJson, null, 2), "utf-8");
 		}
 	}
@@ -1891,7 +1891,7 @@ export class DefaultPackageManager implements PackageManager {
 			.update(`${prefix}-${suffix ?? ""}`)
 			.digest("hex")
 			.slice(0, 8);
-		return join(tmpdir(), "Hodeus-extensions", prefix, hash, suffix ?? "");
+		return join(tmpdir(), "Mooncli-extensions", prefix, hash, suffix ?? "");
 	}
 
 	private getBaseDirForScope(scope: SourceScope): string {
@@ -2052,8 +2052,8 @@ export class DefaultPackageManager implements PackageManager {
 
 		try {
 			const content = readFileSync(packageJsonPath, "utf-8");
-			const pkg = JSON.parse(content) as { Hodeus?: PiManifest };
-			return pkg.Hodeus ?? null;
+			const pkg = JSON.parse(content) as { Mooncli?: PiManifest };
+			return pkg.Mooncli ?? null;
 		} catch {
 			return null;
 		}
@@ -2193,7 +2193,7 @@ export class DefaultPackageManager implements PackageManager {
 		addResources(
 			"skills",
 			[
-				...collectAutoSkillEntries(projectDirs.skills, "Hodeus"),
+				...collectAutoSkillEntries(projectDirs.skills, "Mooncli"),
 				...projectEnginesSkillDirs.flatMap((dir) => collectAutoSkillEntries(dir, "engines")),
 			],
 			projectMetadata,
@@ -2225,7 +2225,7 @@ export class DefaultPackageManager implements PackageManager {
 		addResources(
 			"skills",
 			[
-				...collectAutoSkillEntries(userDirs.skills, "Hodeus"),
+				...collectAutoSkillEntries(userDirs.skills, "Mooncli"),
 				...collectAutoSkillEntries(userEnginesSkillsDir, "engines"),
 			],
 			userMetadata,

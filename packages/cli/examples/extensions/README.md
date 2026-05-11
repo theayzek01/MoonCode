@@ -1,15 +1,15 @@
 # Extension Examples
 
-Example extensions for Hodeus-cli.
+Example extensions for Mooncli-cli.
 
 ## Usage
 
 ```bash
 # Load an extension with --extension flag
-Hodeus --extension examples/extensions/permission-gate.ts
+Mooncli --extension examples/extensions/permission-gate.ts
 
 # Or copy to extensions directory for auto-discovery
-cp permission-gate.ts ~/.Hodeus/engine/extensions/
+cp permission-gate.ts ~/.Mooncli/engine/extensions/
 ```
 
 ## Examples
@@ -58,7 +58,7 @@ cp permission-gate.ts ~/.Hodeus/engine/extensions/
 | `model-status.ts` | Shows model changes in status bar via `model_select` hook |
 | `snake.ts` | Snake game with custom UI, keyboard handling, and session persistence |
 | `tic-tac-toe.ts` | Tic-tac-toe vs the engine with `executionMode: "sequential"` tools to prevent race conditions on shared cursor state |
-| `send-user-message.ts` | Demonstrates `Hodeus.sendUserMessage()` for sending user messages from extensions |
+| `send-user-message.ts` | Demonstrates `Mooncli.sendUserMessage()` for sending user messages from extensions |
 | `timed-confirm.ts` | Demonstrates AbortSignal for auto-dismissing `ctx.ui.confirm()` and `ctx.ui.select()` dialogs |
 | `rpc-demo.ts` | Exercises all RPC-supported extension UI methods; pair with [`examples/rpc-extension-ui.ts`](../rpc-extension-ui.ts) |
 | `modal-editor.ts` | Custom vim-like modal editor via `ctx.ui.setEditorComponent()` |
@@ -96,7 +96,7 @@ cp permission-gate.ts ~/.Hodeus/engine/extensions/
 
 | Extension | Description |
 |-----------|-------------|
-| `mac-system-theme.ts` | Syncs Hodeus theme with macOS dark/light mode |
+| `mac-system-theme.ts` | Syncs Mooncli theme with macOS dark/light mode |
 
 ### Resources
 
@@ -109,7 +109,7 @@ cp permission-gate.ts ~/.Hodeus/engine/extensions/
 | Extension | Description |
 |-----------|-------------|
 | `message-renderer.ts` | Custom message rendering with colors and expandable details via `registerMessageRenderer` |
-| `event-bus.ts` | Inter-extension communication via `Hodeus.events` |
+| `event-bus.ts` | Inter-extension communication via `Mooncli.events` |
 
 ### Session Metadata
 
@@ -123,7 +123,7 @@ cp permission-gate.ts ~/.Hodeus/engine/extensions/
 | Extension | Description |
 |-----------|-------------|
 | `custom-provider-anthropic/` | Custom Anthropic provider with OAuth support and custom streaming implementation |
-| `custom-provider-gitlab-duo/` | GitLab Duo provider using Hodeus-ai's built-in Anthropic/OpenCore streaming via proxy |
+| `custom-provider-gitlab-duo/` | GitLab Duo provider using Mooncli-ai's built-in Anthropic/OpenCore streaming via proxy |
 
 ### External Dependencies
 
@@ -137,12 +137,12 @@ cp permission-gate.ts ~/.Hodeus/engine/extensions/
 See [docs/extensions.md](../../docs/extensions.md) for full documentation.
 
 ```typescript
-import type { ExtensionAPI } from "@Hodeus/cli";
+import type { ExtensionAPI } from "@Mooncli/cli";
 import { Type } from "typebox";
 
-export default function (Hodeus: ExtensionAPI) {
+export default function (Mooncli: ExtensionAPI) {
   // Subscribe to lifecycle events
-  Hodeus.on("tool_call", async (event, ctx) => {
+  Mooncli.on("tool_call", async (event, ctx) => {
     if (event.toolName === "bash" && event.input.command?.includes("rm -rf")) {
       const ok = await ctx.ui.confirm("Dangerous!", "Allow rm -rf?");
       if (!ok) return { block: true, reason: "Blocked by user" };
@@ -150,7 +150,7 @@ export default function (Hodeus: ExtensionAPI) {
   });
 
   // Register custom tools
-  Hodeus.registerTool({
+  Mooncli.registerTool({
     name: "greet",
     label: "Greeting",
     description: "Generate a greeting",
@@ -166,7 +166,7 @@ export default function (Hodeus: ExtensionAPI) {
   });
 
   // Register commands
-  Hodeus.registerCommand("hello", {
+  Mooncli.registerCommand("hello", {
     description: "Say hello",
     handler: async (args, ctx) => {
       ctx.ui.notify("Hello!", "info");
@@ -179,7 +179,7 @@ export default function (Hodeus: ExtensionAPI) {
 
 **Use StringEnum for string parameters** (required for Google API compatibility):
 ```typescript
-import { StringEnum } from "@Hodeus/core";
+import { StringEnum } from "@Mooncli/core";
 
 // Good
 action: StringEnum(["list", "add"] as const)
@@ -197,7 +197,7 @@ return {
 };
 
 // Reconstruct on session events
-Hodeus.on("session_start", async (_event, ctx) => {
+Mooncli.on("session_start", async (_event, ctx) => {
   for (const entry of ctx.sessionManager.getBranch()) {
     if (entry.type === "message" && entry.message.toolName === "my_tool") {
       const details = entry.message.details;

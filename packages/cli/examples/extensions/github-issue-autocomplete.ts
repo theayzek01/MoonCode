@@ -1,13 +1,13 @@
 // Requires GitHub CLI (`gh`) and a GitHub repository checkout.
 // Preloads the latest open issues once per session, then filters them locally for fast `#...` completion.
 
-import type { ExtensionAPI } from "Hodeus";
+import type { ExtensionAPI } from "Mooncli";
 import {
 	type AutocompleteItem,
 	type AutocompleteProvider,
 	type AutocompleteSuggestions,
 	fuzzyFilter,
-} from "hodeus-tui";
+} from "moon-tui";
 
 type GitHubIssue = {
 	number: number;
@@ -39,8 +39,8 @@ function parseGitHubRepo(remoteUrl: string): string | undefined {
 	return undefined;
 }
 
-async function resolveGitHubRepo(Hodeus: ExtensionAPI, cwd: string): Promise<RepoResolution> {
-	const result = await Hodeus.exec("git", ["remote", "-v"], { cwd, timeout: 5_000 });
+async function resolveGitHubRepo(Mooncli: ExtensionAPI, cwd: string): Promise<RepoResolution> {
+	const result = await Mooncli.exec("git", ["remote", "-v"], { cwd, timeout: 5_000 });
 	if (result.code !== 0) {
 		return { ok: false, error: "github-issue-autocomplete: cwd is not a git repository" };
 	}
@@ -127,9 +127,9 @@ function createIssueAutocompleteProvider(
 	};
 }
 
-export default function (Hodeus: ExtensionAPI): void {
-	Hodeus.on("session_start", async (_event, ctx) => {
-		const resolvedRepo = await resolveGitHubRepo(Hodeus, ctx.cwd);
+export default function (Mooncli: ExtensionAPI): void {
+	Mooncli.on("session_start", async (_event, ctx) => {
+		const resolvedRepo = await resolveGitHubRepo(Mooncli, ctx.cwd);
 		if (!resolvedRepo.ok) {
 			ctx.ui.notify(resolvedRepo.error, "error");
 			return;
@@ -141,7 +141,7 @@ export default function (Hodeus: ExtensionAPI): void {
 
 		const getIssues = async (): Promise<GitHubIssue[] | undefined> => {
 			issuesPromise ||= (async () => {
-				const result = await Hodeus.exec(
+				const result = await Mooncli.exec(
 					"gh",
 					[
 						"issue",

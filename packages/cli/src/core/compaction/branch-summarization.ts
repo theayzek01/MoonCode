@@ -6,9 +6,9 @@
  * a summary of the branch being left so context isn't lost.
  */
 
-import type { Model } from "hodeus-core";
-import { completeSimple } from "hodeus-core";
-import type { EngineMessage } from "hodeus-engine";
+import type { Model } from "moon-core";
+import { completeSimple } from "moon-core";
+import type { EngineMessage } from "moon-engine";
 import {
 	convertToLlm,
 	createBranchSummaryMessage,
@@ -190,7 +190,7 @@ export function prepareBranchEntries(entries: SessionEntry[], tokenBudget: numbe
 
 	// First pass: collect file ops from ALL entries (even if they don't fit in token budget)
 	// This ensures we capture cumulative file tracking from nested branch summaries
-	// Only extract from Hodeus-generated summaries (fromHook !== true), not extension-generated ones
+	// Only extract from Mooncli-generated summaries (fromHook !== true), not extension-generated ones
 	for (const entry of entries) {
 		if (entry.type === "branch_summary" && !entry.fromHook && entry.details) {
 			const details = entry.details as BranchSummaryDetails;

@@ -7,12 +7,12 @@
  * Usage: /status [message] - sends a status message with custom rendering
  */
 
-import type { ExtensionAPI } from "Hodeus";
-import { Box, Text } from "hodeus-tui";
+import type { ExtensionAPI } from "Mooncli";
+import { Box, Text } from "moon-tui";
 
-export default function (Hodeus: ExtensionAPI) {
+export default function (Mooncli: ExtensionAPI) {
 	// Register custom renderer for "status-update" messages
-	Hodeus.registerMessageRenderer("status-update", (message, { expanded }, theme) => {
+	Mooncli.registerMessageRenderer("status-update", (message, { expanded }, theme) => {
 		const details = message.details as { level: string; timestamp: number } | undefined;
 		const level = details?.level ?? "info";
 
@@ -35,7 +35,7 @@ export default function (Hodeus: ExtensionAPI) {
 	});
 
 	// Command to send status messages
-	Hodeus.registerCommand("status", {
+	Mooncli.registerCommand("status", {
 		description: "Send a status message (usage: /status [warn|error] message)",
 		handler: async (args, _ctx) => {
 			const parts = args.trim().split(/\s+/);
@@ -48,7 +48,7 @@ export default function (Hodeus: ExtensionAPI) {
 				content = parts.slice(1).join(" ") || "Status update";
 			}
 
-			Hodeus.sendMessage({
+			Mooncli.sendMessage({
 				customType: "status-update",
 				content,
 				display: true,

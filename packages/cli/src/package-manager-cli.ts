@@ -14,7 +14,7 @@ import {
 import { DefaultPackageManager } from "./core/package-manager.js";
 import { SettingsManager } from "./core/settings-manager.js";
 import { shouldUseWindowsShell } from "./utils/child-process.js";
-import { getLatestHodeusVersion, isNewerPackageVersion } from "./utils/version-check.js";
+import { getLatestMooncliVersion, isNewerPackageVersion } from "./utils/version-check.js";
 
 export type PackageCommand = "install" | "remove" | "update" | "list";
 
@@ -299,7 +299,7 @@ async function shouldRunSelfUpdate(force: boolean): Promise<boolean> {
 
 	let latestVersion: string | undefined;
 	try {
-		latestVersion = await getLatestHodeusVersion(VERSION);
+		latestVersion = await getLatestMooncliVersion(VERSION);
 	} catch {
 		return true;
 	}

@@ -12,8 +12,8 @@ import {
 	getModel,
 	type ImageContent,
 	type TextContent,
-} from "hodeus-core";
-import { Engine } from "hodeus-engine";
+} from "moon-core";
+import { Engine } from "moon-engine";
 import { Type } from "typebox";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { AuthStorage } from "../src/core/auth-storage.js";
@@ -63,7 +63,7 @@ describe("EngineSession concurrent prompt guard", () => {
 	let tempDir: string;
 
 	beforeEach(() => {
-		tempDir = join(tmpdir(), `Hodeus-concurrent-test-${Date.now()}`);
+		tempDir = join(tmpdir(), `Mooncli-concurrent-test-${Date.now()}`);
 		mkdirSync(tempDir, { recursive: true });
 	});
 
@@ -240,11 +240,11 @@ describe("EngineSession concurrent prompt guard", () => {
 		authStorage.setRuntimeApiKey("anthropic", "test-key");
 
 		const extensionsResult = await createTestExtensionsResult([
-			(Hodeus) => {
-				(globalThis as typeof globalThis & { testExtensionApi?: unknown }).testExtensionApi = Hodeus;
+			(Mooncli) => {
+				(globalThis as typeof globalThis & { testExtensionApi?: unknown }).testExtensionApi = Mooncli;
 			},
-			(Hodeus) => {
-				Hodeus.on("input", async (event) => {
+			(Mooncli) => {
+				Mooncli.on("input", async (event) => {
 					lastInputSource = event.source;
 				});
 			},
@@ -268,16 +268,16 @@ describe("EngineSession concurrent prompt guard", () => {
 		await new Promise((resolve) => setTimeout(resolve, 10));
 		expect(session.isStreaming).toBe(true);
 
-		const Hodeus = (
+		const Mooncli = (
 			globalThis as typeof globalThis & {
 				testExtensionApi?: {
 					sendUserMessage: (content: string, options?: { deliverAs?: "steer" | "followUp" }) => void;
 				};
 			}
 		).testExtensionApi;
-		expect(Hodeus).toBeDefined();
+		expect(Mooncli).toBeDefined();
 
-		Hodeus!.sendUserMessage("Steer from extension", { deliverAs: "steer" });
+		Mooncli!.sendUserMessage("Steer from extension", { deliverAs: "steer" });
 		await new Promise((resolve) => setTimeout(resolve, 25));
 
 		expect(session.pendingMessageCount).toBe(1);

@@ -3,8 +3,8 @@
  * Shared utilities for compaction and branch summarization.
  */
 
-import type { Message } from "hodeus-core";
-import type { EngineMessage } from "hodeus-engine";
+import type { Message } from "moon-core";
+import type { EngineMessage } from "moon-engine";
 
 // ============================================================================
 // File Operation Tracking

@@ -5,7 +5,7 @@
  * when thinking blocks are hidden.
  *
  * Usage:
- *   Hodeus --extension examples/extensions/hidden-thinking-label.ts
+ *   Mooncli --extension examples/extensions/hidden-thinking-label.ts
  *
  * Test:
  *   1. Load this extension
@@ -18,22 +18,22 @@
  *   /thinking-label          Reset to the default label
  */
 
-import type { ExtensionAPI, ExtensionContext } from "Hodeus";
+import type { ExtensionAPI, ExtensionContext } from "Mooncli";
 
 const DEFAULT_LABEL = "Pondering...";
 
-export default function (Hodeus: ExtensionAPI) {
+export default function (Mooncli: ExtensionAPI) {
 	let label = DEFAULT_LABEL;
 
 	const applyLabel = (ctx: ExtensionContext) => {
 		ctx.ui.setHiddenThinkingLabel(label);
 	};
 
-	Hodeus.on("session_start", async (_event, ctx) => {
+	Mooncli.on("session_start", async (_event, ctx) => {
 		applyLabel(ctx);
 	});
 
-	Hodeus.registerCommand("thinking-label", {
+	Mooncli.registerCommand("thinking-label", {
 		description: "Set the hidden thinking label. Use without args to reset.",
 		handler: async (args, ctx) => {
 			const nextLabel = args.trim();

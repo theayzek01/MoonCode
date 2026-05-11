@@ -1,7 +1,7 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
-	"title": "Hodeus Coding Engine Theme",
-	"description": "Theme schema for Hodeus coding engine",
+	"title": "Mooncli Coding Engine Theme",
+	"description": "Theme schema for Mooncli coding engine",
 	"type": "object",
 	"required": ["name", "colors"],
 	"properties": {

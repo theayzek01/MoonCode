@@ -1,7 +1,7 @@
 // @ts-nocheck
 import * as os from "node:os";
-import type { ImageContent, TextContent } from "hodeus-core";
-import { getCapabilities, getImageDimensions, imageFallback } from "hodeus-tui";
+import type { ImageContent, TextContent } from "moon-core";
+import { getCapabilities, getImageDimensions, imageFallback } from "moon-tui";
 import stripAnsi from "strip-ansi";
 import { sanitizeBinaryOutput } from "../../utils/shell.js";
 

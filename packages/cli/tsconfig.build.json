@@ -2,11 +2,6 @@
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
 		"outDir": "./dist",
-		"paths": {
-			"hodeus-core": ["../core/dist/index.js"],
-			"hodeus-engine": ["../engine/dist/index.js"],
-			"hodeus-tui": ["../tui/dist/index.js"]
-		}
 	},
 	"include": ["src/**/*.ts"],
 	"exclude": ["node_modules", "dist", "**/*.d.ts", "src/**/*.d.ts"]

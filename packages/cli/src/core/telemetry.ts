@@ -8,7 +8,7 @@ function isTruthyEnvFlag(value: string | undefined): boolean {
 
 export function isInstallTelemetryEnabled(
 	settingsManager: SettingsManager,
-	telemetryEnv: string | undefined = process.env.HODEUS_TELEMETRY,
+	telemetryEnv: string | undefined = process.env.MOON_TELEMETRY,
 ): boolean {
 	return telemetryEnv !== undefined ? isTruthyEnvFlag(telemetryEnv) : settingsManager.getEnableInstallTelemetry();
 }

@@ -58,7 +58,7 @@ Skill content here.`,
 		});
 
 		it("should ignore extra markdown files in auto-discovered skill dirs", async () => {
-			const skillDir = join(engineDir, "skills", "Hodeus-skills", "browser-tools");
+			const skillDir = join(engineDir, "skills", "Mooncli-skills", "browser-tools");
 			mkdirSync(skillDir, { recursive: true });
 			writeFileSync(
 				join(skillDir, "SKILL.md"),
@@ -98,7 +98,7 @@ Prompt content.`,
 
 		it("should prefer project resources over user on name collisions", async () => {
 			const userPromptsDir = join(engineDir, "prompts");
-			const projectPromptsDir = join(cwd, ".Hodeus", "prompts");
+			const projectPromptsDir = join(cwd, ".Mooncli", "prompts");
 			mkdirSync(userPromptsDir, { recursive: true });
 			mkdirSync(projectPromptsDir, { recursive: true });
 			const userPromptPath = join(userPromptsDir, "commit.md");
@@ -107,7 +107,7 @@ Prompt content.`,
 			writeFileSync(projectPromptPath, "Project prompt");
 
 			const userSkillDir = join(engineDir, "skills", "collision-skill");
-			const projectSkillDir = join(cwd, ".Hodeus", "skills", "collision-skill");
+			const projectSkillDir = join(cwd, ".Mooncli", "skills", "collision-skill");
 			mkdirSync(userSkillDir, { recursive: true });
 			mkdirSync(projectSkillDir, { recursive: true });
 			const userSkillPath = join(userSkillDir, "SKILL.md");
@@ -134,9 +134,9 @@ Project skill`,
 			) as { name: string; vars?: Record<string, string> };
 			baseTheme.name = "collision-theme";
 			const userThemePath = join(engineDir, "themes", "collision.json");
-			const projectThemePath = join(cwd, ".Hodeus", "themes", "collision.json");
+			const projectThemePath = join(cwd, ".Mooncli", "themes", "collision.json");
 			mkdirSync(join(engineDir, "themes"), { recursive: true });
-			mkdirSync(join(cwd, ".Hodeus", "themes"), { recursive: true });
+			mkdirSync(join(cwd, ".Mooncli", "themes"), { recursive: true });
 			writeFileSync(userThemePath, JSON.stringify(baseTheme, null, 2));
 			if (baseTheme.vars) {
 				baseTheme.vars.accent = "#ff00ff";
@@ -161,8 +161,8 @@ Project skill`,
 			mkdirSync(sharedExtDir, { recursive: true });
 			writeFileSync(
 				join(sharedExtDir, "shared.ts"),
-				`export default function(Hodeus) {
-	Hodeus.registerCommand("shared", {
+				`export default function(Mooncli) {
+	Mooncli.registerCommand("shared", {
 		description: "shared command",
 		handler: async () => {},
 	});
@@ -170,9 +170,9 @@ Project skill`,
 			);
 
 			mkdirSync(engineDir, { recursive: true });
-			mkdirSync(join(cwd, ".Hodeus"), { recursive: true });
+			mkdirSync(join(cwd, ".Mooncli"), { recursive: true });
 			symlinkSync(sharedExtDir, join(engineDir, "extensions"), "dir");
-			symlinkSync(sharedExtDir, join(cwd, ".Hodeus", "extensions"), "dir");
+			symlinkSync(sharedExtDir, join(cwd, ".Mooncli", "extensions"), "dir");
 
 			const loader = new DefaultResourceLoader({ cwd, engineDir });
 			await loader.reload();
@@ -183,23 +183,23 @@ Project skill`,
 
 			// mergePaths processes project paths before user paths, so the project
 			// alias is the canonical survivor.
-			expect(extensionsResult.extensions[0].path).toBe(join(cwd, ".Hodeus", "extensions", "shared.ts"));
+			expect(extensionsResult.extensions[0].path).toBe(join(cwd, ".Mooncli", "extensions", "shared.ts"));
 		});
 
 		it("should keep both extensions loaded when command names collide", async () => {
 			const userExtDir = join(engineDir, "extensions");
-			const projectExtDir = join(cwd, ".Hodeus", "extensions");
+			const projectExtDir = join(cwd, ".Mooncli", "extensions");
 			mkdirSync(userExtDir, { recursive: true });
 			mkdirSync(projectExtDir, { recursive: true });
 
 			writeFileSync(
 				join(projectExtDir, "project.ts"),
-				`export default function(Hodeus) {
-	Hodeus.registerCommand("deploy", {
+				`export default function(Mooncli) {
+	Mooncli.registerCommand("deploy", {
 		description: "project deploy",
 		handler: async () => {},
 	});
-	Hodeus.registerCommand("project-only", {
+	Mooncli.registerCommand("project-only", {
 		description: "project only",
 		handler: async () => {},
 	});
@@ -208,12 +208,12 @@ Project skill`,
 
 			writeFileSync(
 				join(userExtDir, "user.ts"),
-				`export default function(Hodeus) {
-	Hodeus.registerCommand("deploy", {
+				`export default function(Mooncli) {
+	Mooncli.registerCommand("deploy", {
 		description: "user deploy",
 		handler: async () => {},
 	});
-	Hodeus.registerCommand("user-only", {
+	Mooncli.registerCommand("user-only", {
 		description: "user only",
 		handler: async () => {},
 	});
@@ -317,8 +317,8 @@ Content`,
 			expect(enginesFiles).toEqual([]);
 		});
 
-		it("should discover SYSTEM.md from cwd/.Hodeus", async () => {
-			const piDir = join(cwd, ".Hodeus");
+		it("should discover SYSTEM.md from cwd/.Mooncli", async () => {
+			const piDir = join(cwd, ".Mooncli");
 			mkdirSync(piDir, { recursive: true });
 			writeFileSync(join(piDir, "SYSTEM.md"), "You are a helpful assistant.");
 
@@ -329,7 +329,7 @@ Content`,
 		});
 
 		it("should discover APPEND_SYSTEM.md", async () => {
-			const piDir = join(cwd, ".Hodeus");
+			const piDir = join(cwd, ".Mooncli");
 			mkdirSync(piDir, { recursive: true });
 			writeFileSync(join(piDir, "APPEND_SYSTEM.md"), "Additional instructions.");
 
@@ -500,10 +500,10 @@ Content`,
 			writeFileSync(
 				join(ext1Dir, "index.ts"),
 				`
-import type { ExtensionAPI } from "Hodeus";
+import type { ExtensionAPI } from "Mooncli";
 import { Type } from "typebox";
-export default function(Hodeus: ExtensionAPI) {
-  Hodeus.registerTool({
+export default function(Mooncli: ExtensionAPI) {
+  Mooncli.registerTool({
     name: "duplicate-tool",
     description: "First",
     parameters: Type.Object({}),
@@ -515,10 +515,10 @@ export default function(Hodeus: ExtensionAPI) {
 			writeFileSync(
 				join(ext2Dir, "index.ts"),
 				`
-import type { ExtensionAPI } from "Hodeus";
+import type { ExtensionAPI } from "Mooncli";
 import { Type } from "typebox";
-export default function(Hodeus: ExtensionAPI) {
-  Hodeus.registerTool({
+export default function(Mooncli: ExtensionAPI) {
+  Mooncli.registerTool({
     name: "duplicate-tool",
     description: "Second",
     parameters: Type.Object({}),
@@ -542,16 +542,16 @@ export default function(Hodeus: ExtensionAPI) {
 			writeFileSync(
 				join(globalExtDir, "global.ts"),
 				`
-import type { ExtensionAPI } from "Hodeus";
+import type { ExtensionAPI } from "Mooncli";
 import { Type } from "typebox";
-export default function(Hodeus: ExtensionAPI) {
-  Hodeus.registerTool({
+export default function(Mooncli: ExtensionAPI) {
+  Mooncli.registerTool({
     name: "duplicate-tool",
     description: "global tool",
     parameters: Type.Object({}),
     execute: async () => ({ result: "global" }),
   });
-  Hodeus.registerCommand("deploy", {
+  Mooncli.registerCommand("deploy", {
     description: "global command",
     handler: async () => {},
   });
@@ -561,16 +561,16 @@ export default function(Hodeus: ExtensionAPI) {
 			writeFileSync(
 				explicitExtPath,
 				`
-import type { ExtensionAPI } from "Hodeus";
+import type { ExtensionAPI } from "Mooncli";
 import { Type } from "typebox";
-export default function(Hodeus: ExtensionAPI) {
-  Hodeus.registerTool({
+export default function(Mooncli: ExtensionAPI) {
+  Mooncli.registerTool({
     name: "duplicate-tool",
     description: "explicit tool",
     parameters: Type.Object({}),
     execute: async () => ({ result: "explicit" }),
   });
-  Hodeus.registerCommand("deploy", {
+  Mooncli.registerCommand("deploy", {
     description: "explicit command",
     handler: async () => {},
   });

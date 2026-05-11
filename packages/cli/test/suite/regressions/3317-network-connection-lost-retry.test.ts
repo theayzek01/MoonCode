@@ -1,4 +1,4 @@
-import { fauxAssistantMessage } from "hodeus-core";
+import { fauxAssistantMessage } from "moon-core";
 import { afterEach, describe, expect, it } from "vitest";
 import { createHarness, getAssistantTexts, type Harness } from "../harness.js";
 

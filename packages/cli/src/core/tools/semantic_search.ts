@@ -1,7 +1,7 @@
 // @ts-nocheck
 
 import { spawn } from "child_process";
-import type { EngineTool } from "hodeus-engine";
+import type { EngineTool } from "moon-engine";
 import { Type } from "typebox";
 import { getShellEnv } from "../../utils/shell.js";
 import { formatSearchResults, searchProject } from "../codebase-index/index.js";

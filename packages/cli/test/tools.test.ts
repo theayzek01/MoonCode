@@ -739,12 +739,12 @@ describe("edit tool fuzzy matching", () => {
 
 		const result = await editTool.execute("test-fuzzy-chinese", {
 			path: testFile,
-			edits: [{ oldText: "你好,世界\n你好(世界)\n", newText: "你好，Hodeus\n你好(Hodeus)\n" }],
+			edits: [{ oldText: "你好,世界\n你好(世界)\n", newText: "你好，Mooncli\n你好(Mooncli)\n" }],
 		});
 
 		expect(getTextOutput(result)).toContain("Successfully replaced");
 		const content = readFileSync(testFile, "utf-8");
-		expect(content).toBe("你好，Hodeus\n你好(Hodeus)\n");
+		expect(content).toBe("你好，Mooncli\n你好(Mooncli)\n");
 	});
 
 	it("should match compatibility-equivalent Unicode forms", async () => {

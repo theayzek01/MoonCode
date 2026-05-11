@@ -15,7 +15,7 @@ describe("SettingsManager", () => {
 			rmSync(testDir, { recursive: true });
 		}
 		mkdirSync(engineDir, { recursive: true });
-		mkdirSync(join(projectDir, ".Hodeus"), { recursive: true });
+		mkdirSync(join(projectDir, ".Mooncli"), { recursive: true });
 	});
 
 	afterEach(() => {
@@ -36,7 +36,7 @@ describe("SettingsManager", () => {
 				}),
 			);
 
-			// Create SettingsManager (simulates Hodeus starting up)
+			// Create SettingsManager (simulates Mooncli starting up)
 			const manager = SettingsManager.create(projectDir, engineDir);
 
 			// Simulate user editing settings.json externally to add enabledModels
@@ -200,7 +200,7 @@ describe("SettingsManager", () => {
 	describe("error tracking", () => {
 		it("should collect and clear load errors via drainErrors", () => {
 			const globalSettingsPath = join(engineDir, "settings.json");
-			const projectSettingsPath = join(projectDir, ".Hodeus", "settings.json");
+			const projectSettingsPath = join(projectDir, ".Mooncli", "settings.json");
 			writeFileSync(globalSettingsPath, "{ invalid global json");
 			writeFileSync(projectSettingsPath, "{ invalid project json");
 
@@ -214,46 +214,46 @@ describe("SettingsManager", () => {
 	});
 
 	describe("project settings directory creation", () => {
-		it("should not create .Hodeus folder when only reading project settings", () => {
-			// Create engine dir with global settings, but NO .Hodeus folder in project
+		it("should not create .Mooncli folder when only reading project settings", () => {
+			// Create engine dir with global settings, but NO .Mooncli folder in project
 			const settingsPath = join(engineDir, "settings.json");
 			writeFileSync(settingsPath, JSON.stringify({ theme: "dark" }));
 
-			// Delete the .Hodeus folder that beforeEach created
-			rmSync(join(projectDir, ".Hodeus"), { recursive: true });
+			// Delete the .Mooncli folder that beforeEach created
+			rmSync(join(projectDir, ".Mooncli"), { recursive: true });
 
 			// Create SettingsManager (reads both global and project settings)
 			const manager = SettingsManager.create(projectDir, engineDir);
 
-			// .Hodeus folder should NOT have been created just from reading
-			expect(existsSync(join(projectDir, ".Hodeus"))).toBe(false);
+			// .Mooncli folder should NOT have been created just from reading
+			expect(existsSync(join(projectDir, ".Mooncli"))).toBe(false);
 
 			// Settings should still be loaded from global
 			expect(manager.getTheme()).toBe("dark");
 		});
 
-		it("should create .Hodeus folder when writing project settings", async () => {
-			// Create engine dir with global settings, but NO .Hodeus folder in project
+		it("should create .Mooncli folder when writing project settings", async () => {
+			// Create engine dir with global settings, but NO .Mooncli folder in project
 			const settingsPath = join(engineDir, "settings.json");
 			writeFileSync(settingsPath, JSON.stringify({ theme: "dark" }));
 
-			// Delete the .Hodeus folder that beforeEach created
-			rmSync(join(projectDir, ".Hodeus"), { recursive: true });
+			// Delete the .Mooncli folder that beforeEach created
+			rmSync(join(projectDir, ".Mooncli"), { recursive: true });
 
 			const manager = SettingsManager.create(projectDir, engineDir);
 
-			// .Hodeus folder should NOT exist yet
-			expect(existsSync(join(projectDir, ".Hodeus"))).toBe(false);
+			// .Mooncli folder should NOT exist yet
+			expect(existsSync(join(projectDir, ".Mooncli"))).toBe(false);
 
 			// Write a project-specific setting
 			manager.setProjectPackages([{ source: "npm:test-pkg" }]);
 			await manager.flush();
 
-			// Now .Hodeus folder should exist
-			expect(existsSync(join(projectDir, ".Hodeus"))).toBe(true);
+			// Now .Mooncli folder should exist
+			expect(existsSync(join(projectDir, ".Mooncli"))).toBe(true);
 
 			// And settings file should be created
-			expect(existsSync(join(projectDir, ".Hodeus", "settings.json"))).toBe(true);
+			expect(existsSync(join(projectDir, ".Mooncli", "settings.json"))).toBe(true);
 		});
 	});
 
@@ -305,7 +305,7 @@ describe("SettingsManager", () => {
 
 		it("should return project sessionDir, overriding global", () => {
 			writeFileSync(join(engineDir, "settings.json"), JSON.stringify({ sessionDir: "/global/sessions" }));
-			writeFileSync(join(projectDir, ".Hodeus", "settings.json"), JSON.stringify({ sessionDir: "./sessions" }));
+			writeFileSync(join(projectDir, ".Mooncli", "settings.json"), JSON.stringify({ sessionDir: "./sessions" }));
 			const manager = SettingsManager.create(projectDir, engineDir);
 			expect(manager.getSessionDir()).toBe("./sessions");
 		});

@@ -1,18 +1,18 @@
 /**
  * Overlay Test - validates overlay compositing with inline text inputs
  *
- * Usage: Hodeus --extension ./examples/extensions/overlay-test.ts
+ * Usage: Mooncli --extension ./examples/extensions/overlay-test.ts
  *
  * Run /overlay-test to show a floating overlay with:
  * - Inline text inputs within menu items
  * - Edge case tests (wide chars, styled text, emoji)
  */
 
-import type { ExtensionAPI, ExtensionCommandContext, Theme } from "Hodeus";
-import { CURSOR_MARKER, type Focusable, matchesKey, visibleWidth } from "hodeus-tui";
+import type { ExtensionAPI, ExtensionCommandContext, Theme } from "Mooncli";
+import { CURSOR_MARKER, type Focusable, matchesKey, visibleWidth } from "moon-tui";
 
-export default function (Hodeus: ExtensionAPI) {
-	Hodeus.registerCommand("overlay-test", {
+export default function (Mooncli: ExtensionAPI) {
+	Mooncli.registerCommand("overlay-test", {
 		description: "Test overlay rendering with edge cases",
 		handler: async (_args: string, ctx: ExtensionCommandContext) => {
 			const result = await ctx.ui.custom<{ action: string; query?: string } | undefined>(

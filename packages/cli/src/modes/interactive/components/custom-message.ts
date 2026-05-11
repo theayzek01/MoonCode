@@ -1,7 +1,7 @@
 // @ts-nocheck
-import type { TextContent } from "hodeus-core";
-import type { Component } from "hodeus-tui";
-import { Box, Container, Markdown, type MarkdownTheme, Spacer, Text } from "hodeus-tui";
+import type { TextContent } from "moon-core";
+import type { Component } from "moon-tui";
+import { Box, Container, Markdown, type MarkdownTheme, Spacer, Text } from "moon-tui";
 import type { MessageRenderer } from "../../../core/extensions/types.js";
 import type { CustomMessage } from "../../../core/messages.js";
 import { getMarkdownTheme, theme } from "../theme/theme.js";

@@ -6,9 +6,9 @@
  * and after compaction the session is reloaded.
  */
 
-import type { AssistantMessage, Model, Usage } from "hodeus-core";
-import { completeSimple } from "hodeus-core";
-import type { EngineMessage, ThinkingLevel } from "hodeus-engine";
+import type { AssistantMessage, Model, Usage } from "moon-core";
+import { completeSimple } from "moon-core";
+import type { EngineMessage, ThinkingLevel } from "moon-engine";
 import {
 	convertToLlm,
 	createBranchSummaryMessage,
@@ -46,7 +46,7 @@ function extractFileOperations(
 ): FileOperations {
 	const fileOps = createFileOps();
 
-	// Collect from previous compaction's details (if Hodeus-generated)
+	// Collect from previous compaction's details (if Mooncli-generated)
 	if (prevCompactionIndex >= 0) {
 		const prevCompaction = entries[prevCompactionIndex] as CompactionEntry;
 		if (!prevCompaction.fromHook && prevCompaction.details) {

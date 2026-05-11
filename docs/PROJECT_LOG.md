@@ -1,4 +1,4 @@
-# Hodeus Project Log
+# Mooncli Project Log
 
 ## [2026-05-03]
 ### Added

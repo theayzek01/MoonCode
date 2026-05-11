@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { type Component, truncateToWidth, visibleWidth } from "hodeus-tui";
+import { type Component, truncateToWidth, visibleWidth } from "moon-tui";
 import type { EngineSession } from "../../../core/engine-session.js";
 import type { ReadonlyFooterDataProvider } from "../../../core/footer-data-provider.js";
 import { theme } from "../theme/theme.js";

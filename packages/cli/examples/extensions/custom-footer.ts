@@ -8,14 +8,14 @@
  * Token stats come from ctx.sessionManager/ctx.model (already accessible).
  */
 
-import type { ExtensionAPI } from "Hodeus";
-import type { AssistantMessage } from "hodeus-core";
-import { truncateToWidth, visibleWidth } from "hodeus-tui";
+import type { ExtensionAPI } from "Mooncli";
+import type { AssistantMessage } from "moon-core";
+import { truncateToWidth, visibleWidth } from "moon-tui";
 
-export default function (Hodeus: ExtensionAPI) {
+export default function (Mooncli: ExtensionAPI) {
 	let enabled = false;
 
-	Hodeus.registerCommand("footer", {
+	Mooncli.registerCommand("footer", {
 		description: "Toggle custom footer",
 		handler: async (_args, ctx) => {
 			enabled = !enabled;

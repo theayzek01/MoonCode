@@ -1,5 +1,5 @@
-import { fauxAssistantMessage, fauxThinking, fauxToolCall } from "hodeus-core";
-import type { EngineTool } from "hodeus-engine";
+import { fauxAssistantMessage, fauxThinking, fauxToolCall } from "moon-core";
+import type { EngineTool } from "moon-engine";
 import { Type } from "typebox";
 import { afterEach, describe, expect, it } from "vitest";
 import { createHarness, type Harness } from "./harness.js";
@@ -98,8 +98,8 @@ describe("EngineSession retry and event characterization", () => {
 		const harness = await createHarness({
 			settings: { retry: { enabled: true, maxRetries: 3, baseDelayMs: 1 } },
 			extensionFactories: [
-				(Hodeus) => {
-					Hodeus.on("message_end", async (event) => {
+				(Mooncli) => {
+					Mooncli.on("message_end", async (event) => {
 						if (event.message.role === "assistant") {
 							await new Promise((resolve) => setTimeout(resolve, 40));
 						}
@@ -202,11 +202,11 @@ describe("EngineSession retry and event characterization", () => {
 		const order: string[] = [];
 		const harness = await createHarness({
 			extensionFactories: [
-				(Hodeus) => {
-					Hodeus.on("message_start", async (event) => {
+				(Mooncli) => {
+					Mooncli.on("message_start", async (event) => {
 						order.push(`extension:${event.type}:${event.message.role}`);
 					});
-					Hodeus.on("message_end", async (event) => {
+					Mooncli.on("message_end", async (event) => {
 						order.push(`extension:${event.type}:${event.message.role}`);
 					});
 				},

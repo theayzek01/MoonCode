@@ -64,7 +64,7 @@ const ANTIGRAVITY_ENDPOINT_FALLBACKS = [
 // Headers for Gemini CLI (prod endpoint)
 const GEMINI_CLI_HEADERS = {
 	"User-Engine": "google-cloud-sdk vscode_cloudshelleditor/0.1",
-	"X-Goog-Ahodeuscli-Client": "gl-node/22.17.0",
+	"X-Goog-Amooncli-Client": "gl-node/22.17.0",
 	"Client-Metadata": JSON.stringify({
 		ideType: "IDE_UNSPECIFIED",
 		platform: "PLATFORM_UNSPECIFIED",
@@ -216,7 +216,7 @@ function isGemini3Model(modelId: string): boolean {
 }
 
 /**
- * Maps custom Hodeus model IDs back to the real IDs expected by the Cloud Code Assist API.
+ * Maps custom Mooncli model IDs back to the real IDs expected by the Cloud Code Assist API.
  */
 function getApiModelId(modelId: string): string {
 	const id = modelId.toLowerCase();
@@ -938,7 +938,7 @@ export function buildRequest(
 		model: getApiModelId(model.id),
 		request,
 		...(isAntigravity ? { requestType: "engine" } : {}),
-		userEngine: isAntigravity ? "antigravity" : "hodeuscli-cli",
+		userEngine: isAntigravity ? "antigravity" : "mooncli-cli",
 		requestId: `${isAntigravity ? "engine" : "moodcli"}-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
 	};
 }
@@ -948,7 +948,7 @@ type ClampedThinkingLevel = Exclude<ThinkingLevel, "xhigh">;
 function getDisabledThinkingConfig(modelId: string): ThinkingConfig {
 	// Google docs: Gemini 3.1 Pro cannot disable thinking, and Gemini 3 Flash / Flash-Lite
 	// do not support full thinking-off either. For Gemini 3 models, use the lowest supported
-	// thinkingLevel without includeThoughts so hidden thinking remains invisible to Hodeus.
+	// thinkingLevel without includeThoughts so hidden thinking remains invisible to Mooncli.
 	if (isGemini3ProModel(modelId)) {
 		return { thinkingLevel: "LOW" as any };
 	}

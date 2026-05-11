@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { join } from "node:path";
-import type { Model } from "hodeus-core";
-import type { ThinkingLevel } from "hodeus-engine";
+import type { Model } from "moon-core";
+import type { ThinkingLevel } from "moon-engine";
 import { getEngineDir } from "../config.js";
 import { AuthStorage } from "./auth-storage.js";
 import type { SessionStartEvent, ToolDefinition } from "./extensions/index.js";

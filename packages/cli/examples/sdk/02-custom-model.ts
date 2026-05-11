@@ -4,8 +4,8 @@
  * Shows how to select a specific model and thinking level.
  */
 
-import { AuthStorage, createEngineSession, ModelRegistry } from "Hodeus";
-import { getModel } from "hodeus-core";
+import { AuthStorage, createEngineSession, ModelRegistry } from "Mooncli";
+import { getModel } from "moon-core";
 
 // Set up auth storage and model registry
 const authStorage = AuthStorage.create();

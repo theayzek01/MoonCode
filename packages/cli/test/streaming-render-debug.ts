@@ -5,8 +5,8 @@
  */
 
 import { readFileSync } from "fs";
-import type { AssistantMessage } from "hodeus-core";
-import { ProcessTerminal, TUI } from "hodeus-tui";
+import type { AssistantMessage } from "moon-core";
+import { ProcessTerminal, TUI } from "moon-tui";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { AssistantMessageComponent } from "../src/modes/interactive/components/assistant-message.js";

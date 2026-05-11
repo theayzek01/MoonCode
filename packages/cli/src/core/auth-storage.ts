@@ -3,7 +3,7 @@
  * Credential storage for API keys and OAuth tokens.
  * Handles loading, saving, and refreshing credentials from auth.json.
  *
- * Uses file locking to prevent race conditions when multiple Hodeus instances
+ * Uses file locking to prevent race conditions when multiple Mooncli instances
  * try to refresh tokens simultaneously.
  */
 
@@ -14,8 +14,8 @@ import {
 	type OAuthCredentials,
 	type OAuthLoginCallbacks,
 	type OAuthProviderId,
-} from "hodeus-core";
-import { getOAuthApiKey, getOAuthProvider, getOAuthProviders } from "hodeus-core/oauth";
+} from "moon-core";
+import { getOAuthApiKey, getOAuthProvider, getOAuthProviders } from "moon-core/oauth";
 import { dirname, join } from "path";
 import lockfile from "proper-lockfile";
 import { getEngineDir } from "../config.js";
@@ -396,7 +396,7 @@ export class AuthStorage {
 
 	/**
 	 * Refresh OAuth token with backend locking to prevent race conditions.
-	 * Multiple Hodeus instances may try to refresh simultaneously when tokens expire.
+	 * Multiple Mooncli instances may try to refresh simultaneously when tokens expire.
 	 */
 	private async refreshOAuthTokenWithLock(
 		providerId: OAuthProviderId,

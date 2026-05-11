@@ -383,7 +383,7 @@ function isGemini3FlashModel(model) {
 function getDisabledThinkingConfig(model) {
     // Google docs: Gemini 3.1 Pro cannot disable thinking, and Gemini 3 Flash / Flash-Lite
     // do not support full thinking-off either. For Gemini 3 models, use the lowest supported
-    // thinkingLevel without includeThoughts so hidden thinking remains invisible to Hodeus.
+    // thinkingLevel without includeThoughts so hidden thinking remains invisible to Mooncli.
     const geminiModel = model;
     if (isGemini3ProModel(geminiModel)) {
         return { thinkingLevel: ThinkingLevel.LOW };

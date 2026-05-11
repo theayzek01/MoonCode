@@ -1,10 +1,10 @@
 /**
  * Rainbow Editor - highlights "ultrathink" with animated shine effect
  *
- * Usage: Hodeus --extension ./examples/extensions/rainbow-editor.ts
+ * Usage: Mooncli --extension ./examples/extensions/rainbow-editor.ts
  */
 
-import { CustomEditor, type ExtensionAPI } from "Hodeus";
+import { CustomEditor, type ExtensionAPI } from "Mooncli";
 
 // Base colors (coral → yellow → green → teal → blue → purple → pink)
 const COLORS: [number, number, number][] = [
@@ -81,8 +81,8 @@ class RainbowEditor extends CustomEditor {
 	}
 }
 
-export default function (Hodeus: ExtensionAPI) {
-	Hodeus.on("session_start", (_event, ctx) => {
+export default function (Mooncli: ExtensionAPI) {
+	Mooncli.on("session_start", (_event, ctx) => {
 		ctx.ui.setEditorComponent((tui, theme, kb) => new RainbowEditor(tui, theme, kb));
 	});
 }

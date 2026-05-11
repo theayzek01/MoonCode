@@ -252,7 +252,7 @@ export function getUpdateInstruction(packageName: string): string {
  * Get the base directory for resolving package assets (themes, package.json, README.md, CHANGELOG.md).
  */
 export function getPackageDir(): string {
-	const envDir = process.env.HODEUS_PACKAGE_DIR;
+	const envDir = process.env.MOON_PACKAGE_DIR;
 	if (envDir) {
 		if (envDir === "~") return homedir();
 		if (envDir.startsWith("~/")) return homedir() + envDir.slice(1);
@@ -378,7 +378,7 @@ export function getShareViewerUrl(gistId: string): string {
 }
 
 // =============================================================================
-// User Config Paths (~/.Hodeus/engine/*)
+// User Config Paths (~/.Mooncli/engine/*)
 // =============================================================================
 
 /** Get the engine config directory (e.g., ~/.mooncli/engine/) */

@@ -5,6 +5,6 @@ export function getMoonUserEngine(version: string): string {
 }
 
 /** @deprecated Use getMoonUserEngine */
-export function getHodeusUserEngine(version: string): string {
+export function getMooncliUserEngine(version: string): string {
 	return getMoonUserEngine(version);
 }
