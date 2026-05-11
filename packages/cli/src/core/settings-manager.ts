@@ -18,8 +18,9 @@ import type { CodingAgentMode, CodingAgentsSettings, CodingAgentVerbosity } from
 
 export interface CompactionSettings {
 	enabled?: boolean; // default: true
-	reserveTokens?: number; // default: 16384
-	keepRecentTokens?: number; // default: 20000
+	profile?: "aggressive" | "balanced" | "off"; // default: balanced
+	reserveTokens?: number; // profile default override
+	keepRecentTokens?: number; // profile default override
 }
 
 export interface BranchSummarySettings {
@@ -706,7 +707,12 @@ export class SettingsManager {
 		this.save();
 	}
 
+	getCompactionProfile(): "aggressive" | "balanced" | "off" {
+		return this.settings.compaction?.profile ?? "balanced";
+	}
+
 	getCompactionEnabled(): boolean {
+		if (this.getCompactionProfile() === "off") return false;
 		return this.settings.compaction?.enabled ?? true;
 	}
 
@@ -720,11 +726,15 @@ export class SettingsManager {
 	}
 
 	getCompactionReserveTokens(): number {
-		return this.settings.compaction?.reserveTokens ?? 32768;
+		const explicit = this.settings.compaction?.reserveTokens;
+		if (typeof explicit === "number") return explicit;
+		return this.getCompactionProfile() === "aggressive" ? 32768 : 16384;
 	}
 
 	getCompactionKeepRecentTokens(): number {
-		return this.settings.compaction?.keepRecentTokens ?? 12000;
+		const explicit = this.settings.compaction?.keepRecentTokens;
+		if (typeof explicit === "number") return explicit;
+		return this.getCompactionProfile() === "aggressive" ? 12000 : 20000;
 	}
 
 	getCompactionSettings(): { enabled: boolean; reserveTokens: number; keepRecentTokens: number } {
