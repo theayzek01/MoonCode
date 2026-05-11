@@ -30,7 +30,8 @@
     "release:minor": "node scripts/release.mjs minor",
     "release:major": "node scripts/release.mjs major",
     "prepare": "npm run build && husky",
-    "start": "node packages/cli/dist/cli.js"
+    "start": "node packages/cli/dist/cli.js",
+    "reset:data": "node scripts/reset-engine-data.mjs"
   },
   "devDependencies": {
     "@anthropic-ai/sandbox-runtime": "^0.0.26",
@@ -45,7 +46,7 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "version": "11.5.2026-3",
+  "version": "12.5.2026",
   "repository": {
     "type": "git",
     "url": "https://github.com/theayzek01/mooncli"
