@@ -1,44 +1,44 @@
 {
-  "name": "moon-engine",
-  "version": "12.05.2026-v2",
-  "description": "General-purpose state management engine",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "files": [
-    "dist",
-    "README.md"
-  ],
-  "scripts": {
-    "clean": "shx rm -rf dist",
-    "build": "tsc -p tsconfig.build.json",
-    "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
-    "test": "vitest --run",
-    "prepublishOnly": "npm run clean && npm run build"
-  },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
-    "typebox": "^1.1.24",
-    "moon-core": "12.05.2026-v2"
-  },
-  "keywords": [
-    "engine",
-    "state-management",
-    "core"
-  ],
-  "author": "Ozen",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/theayzek01/mooncli",
-    "directory": "packages/engine"
-  },
-  "engines": {
-    "node": ">=20.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "^24.3.0",
-    "typescript": "^5.7.3",
-    "vitest": "^3.2.4"
-  }
+	"name": "moon-engine",
+	"version": "12.05.2026-v2",
+	"description": "General-purpose state management engine",
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist",
+		"README.md"
+	],
+	"scripts": {
+		"clean": "shx rm -rf dist",
+		"build": "tsc -p tsconfig.build.json",
+		"dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+		"test": "vitest --run",
+		"prepublishOnly": "npm run clean && npm run build"
+	},
+	"dependencies": {
+		"@modelcontextprotocol/sdk": "^1.29.0",
+		"typebox": "^1.1.24",
+		"moon-core": "^12.05.2026-v2"
+	},
+	"keywords": [
+		"engine",
+		"state-management",
+		"core"
+	],
+	"author": "Ozen",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/theayzek01/mooncli",
+		"directory": "packages/engine"
+	},
+	"engines": {
+		"node": ">=20.0.0"
+	},
+	"devDependencies": {
+		"@types/node": "^24.3.0",
+		"typescript": "^5.7.3",
+		"vitest": "^3.2.4"
+	}
 }

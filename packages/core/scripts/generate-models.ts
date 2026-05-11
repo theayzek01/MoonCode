@@ -1706,6 +1706,96 @@ async function generateModels() {
 		},
 	];
 	allModels.push(...vertexModels);
+	// Antigravity models (Gemini 3, Claude, GPT-OSS via Google Cloud)
+	const ANTIGRAVITY_ENDPOINT = "https://daily-cloudcode-pa.sandbox.googleapis.com";
+	const antigravityModels: Model<"google-generative-ai">[] = [
+		{
+			id: "gemini-3.1-pro-high",
+			name: "Gemini 3.1 Pro High (Antigravity)",
+			api: "google-generative-ai",
+			provider: "antigravity",
+			baseUrl: ANTIGRAVITY_ENDPOINT,
+			reasoning: true,
+			input: ["text", "image"],
+			cost: { input: 2, output: 12, cacheRead: 0.2, cacheWrite: 2.375 },
+			contextWindow: 1048576,
+			maxTokens: 65535,
+		},
+		{
+			id: "gemini-3.1-pro-low",
+			name: "Gemini 3.1 Pro Low (Antigravity)",
+			api: "google-generative-ai",
+			provider: "antigravity",
+			baseUrl: ANTIGRAVITY_ENDPOINT,
+			reasoning: true,
+			input: ["text", "image"],
+			cost: { input: 2, output: 12, cacheRead: 0.2, cacheWrite: 2.375 },
+			contextWindow: 1048576,
+			maxTokens: 65535,
+		},
+		{
+			id: "gemini-3-flash",
+			name: "Gemini 3 Flash (Antigravity)",
+			api: "google-generative-ai",
+			provider: "antigravity",
+			baseUrl: ANTIGRAVITY_ENDPOINT,
+			reasoning: true,
+			input: ["text", "image"],
+			cost: { input: 0.5, output: 3, cacheRead: 0.5, cacheWrite: 0 },
+			contextWindow: 1048576,
+			maxTokens: 65535,
+		},
+		{
+			id: "claude-sonnet-4-6",
+			name: "Claude Sonnet 4.6 (Antigravity)",
+			api: "google-generative-ai",
+			provider: "antigravity",
+			baseUrl: ANTIGRAVITY_ENDPOINT,
+			reasoning: true,
+			input: ["text", "image"],
+			cost: { input: 3, output: 15, cacheRead: 0.3, cacheWrite: 3.75 },
+			contextWindow: 200000,
+			maxTokens: 64000,
+		},
+		{
+			id: "claude-sonnet-4-6-thinking",
+			name: "Claude Sonnet 4.6 Thinking (Antigravity)",
+			api: "google-generative-ai",
+			provider: "antigravity",
+			baseUrl: ANTIGRAVITY_ENDPOINT,
+			reasoning: true,
+			input: ["text", "image"],
+			cost: { input: 3, output: 15, cacheRead: 0.3, cacheWrite: 3.75 },
+			contextWindow: 200000,
+			maxTokens: 64000,
+		},
+		{
+			id: "claude-opus-4-6-thinking",
+			name: "Claude Opus 4.6 Thinking (Antigravity)",
+			api: "google-generative-ai",
+			provider: "antigravity",
+			baseUrl: ANTIGRAVITY_ENDPOINT,
+			reasoning: true,
+			input: ["text", "image"],
+			cost: { input: 5, output: 25, cacheRead: 0.5, cacheWrite: 6.25 },
+			contextWindow: 200000,
+			maxTokens: 128000,
+		},
+		{
+			id: "gpt-oss-120b-medium",
+			name: "GPT-OSS 120B Medium (Antigravity)",
+			api: "google-generative-ai",
+			provider: "antigravity",
+			baseUrl: ANTIGRAVITY_ENDPOINT,
+			reasoning: false,
+			input: ["text"],
+			cost: { input: 0.09, output: 0.36, cacheRead: 0, cacheWrite: 0 },
+			contextWindow: 131072,
+			maxTokens: 32768,
+		},
+	];
+	allModels.push(...antigravityModels);
+
 
 	const azureOpenAiModels: Model<Api>[] = allModels
 		.filter((model) => model.provider === "openai" && model.api === "openai-responses")

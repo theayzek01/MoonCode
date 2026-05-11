@@ -23,6 +23,8 @@ export {
 export { loginOllama, ollamaOAuthProvider } from "./ollama.js";
 // OpenAI Codex (ChatGPT OAuth)
 export { loginOpenAICodex, openaiCodexOAuthProvider, refreshOpenAICodexToken } from "./openai-codex.js";
+// Antigravity (Google DeepMind)
+export { loginAntigravity, antigravityOAuthProvider } from "./antigravity.js";
 
 export * from "./types.js";
 
@@ -34,6 +36,7 @@ import { anthropicOAuthProvider } from "./anthropic.js";
 import { githubCopilotOAuthProvider } from "./github-copilot.js";
 import { ollamaOAuthProvider } from "./ollama.js";
 import { openaiCodexOAuthProvider } from "./openai-codex.js";
+import { antigravityOAuthProvider } from "./antigravity.js";
 import type { OAuthCredentials, OAuthProviderId, OAuthProviderInfo, OAuthProviderInterface } from "./types.js";
 
 const BUILT_IN_OAUTH_PROVIDERS: OAuthProviderInterface[] = [
@@ -41,6 +44,7 @@ const BUILT_IN_OAUTH_PROVIDERS: OAuthProviderInterface[] = [
 	githubCopilotOAuthProvider,
 	openaiCodexOAuthProvider,
 	ollamaOAuthProvider,
+	antigravityOAuthProvider,
 ];
 
 const oauthProviderRegistry = new Map<string, OAuthProviderInterface>(

@@ -1268,6 +1268,7 @@ export class EngineSession {
 			if (lastAssistant) {
 				await this._checkCompaction(lastAssistant, false);
 			}
+			await this._checkPrePromptCompaction(expandedText, currentImages);
 
 			this._recordAffectiveUserInput(expandedText);
 
@@ -2076,6 +2077,27 @@ export class EngineSession {
 			contextTokens = calculateContextTokens(assistantMessage.usage);
 		}
 		if (shouldCompact(contextTokens, contextWindow, settings)) {
+			await this._runAutoCompaction("threshold", false);
+		}
+	}
+
+	/**
+	 * Pre-prompt guard: estimates the next request before sending it.
+	 * This catches long sessions with no reliable fresh usage yet and prevents
+	 * the model from degrading or hard-failing on the next user message.
+	 */
+	private async _checkPrePromptCompaction(text: string, images?: ImageContent[]): Promise<void> {
+		const settings = this.settingsManager.getCompactionSettings();
+		if (!settings.enabled || this.isCompacting) return;
+
+		const provisionalUserMessage: EngineMessage = {
+			role: "user",
+			content: [{ type: "text", text }, ...(images ?? [])],
+			timestamp: Date.now(),
+		};
+		const estimate = estimateContextTokens([...this.engine.state.messages, provisionalUserMessage]);
+		const contextWindow = this.model?.contextWindow ?? 0;
+		if (shouldCompact(estimate.tokens, contextWindow, settings)) {
 			await this._runAutoCompaction("threshold", false);
 		}
 	}

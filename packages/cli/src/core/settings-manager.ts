@@ -708,7 +708,7 @@ export class SettingsManager {
 	}
 
 	getCompactionProfile(): "aggressive" | "balanced" | "off" {
-		return this.settings.compaction?.profile ?? "balanced";
+		return this.settings.compaction?.profile ?? "aggressive";
 	}
 
 	getCompactionEnabled(): boolean {

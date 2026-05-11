@@ -121,8 +121,8 @@ export interface CompactionSettings {
 
 export const DEFAULT_COMPACTION_SETTINGS: CompactionSettings = {
 	enabled: true,
-	reserveTokens: 16384,
-	keepRecentTokens: 20000,
+	reserveTokens: 32768,
+	keepRecentTokens: 12000,
 };
 
 // ============================================================================
@@ -219,7 +219,17 @@ export function estimateContextTokens(messages: EngineMessage[]): ContextUsageEs
  */
 export function shouldCompact(contextTokens: number, contextWindow: number, settings: CompactionSettings): boolean {
 	if (!settings.enabled) return false;
-	return contextTokens > contextWindow - settings.reserveTokens;
+	if (!Number.isFinite(contextTokens) || contextTokens <= 0) return false;
+
+	// Some provider definitions do not expose a context window. Use a conservative
+	// default instead of either never compacting or compacting every turn.
+	const effectiveWindow = Number.isFinite(contextWindow) && contextWindow > 0 ? contextWindow : 128_000;
+	const reserve = Math.max(4_096, Math.min(settings.reserveTokens, Math.floor(effectiveWindow * 0.5)));
+
+	// Trigger at the safer of: reserved-output boundary or ~78% of window.
+	// This mirrors modern agent CLIs: compact before quality collapses, not after.
+	const boundary = Math.min(effectiveWindow - reserve, Math.floor(effectiveWindow * 0.78));
+	return contextTokens >= boundary;
 }
 
 // ============================================================================

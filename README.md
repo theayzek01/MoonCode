@@ -1,33 +1,52 @@
-# Mooncli
+<div align="center">
+  <img src="assets/Moon-cli-banner.png" alt="Mooncli Banner" width="100%" />
 
-Minimal, hızlı ve kurumsal odaklı terminal kod asistanı.
+  <h1>Mooncli</h1>
+  <p>Minimalist, blazing fast, and enterprise-ready terminal coding assistant.</p>
 
-## Sürüm
-- **12.05.2026-v2**
+  [![Version](https://img.shields.io/badge/version-Beta_1.5-blue.svg?style=for-the-badge)](#)
+  [![License](https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge)](#)
+  [![Platform](https://img.shields.io/badge/platform-Windows_|_macOS_|_Linux-lightgray.svg?style=for-the-badge)](#)
+</div>
 
-## Kurulum
+---
+
+## 🚀 Features
+
+- **Antigravity Engine**: Direct access to Google DeepMind's Gemini 3.1 Pro, Claude 4.6 (Thinking), and GPT-OSS 120B through an enterprise OAuth bridge.
+- **Minimalist TUI**: A terminal interface designed for maximum focus and zero distractions.
+- **Enterprise Stability**: Automatic context compaction (`aggressive`, `balanced`, `off`) ensures long chat sessions never crash or lose context.
+- **Browser Bridge**: Seamless Chrome extension integration for interacting with your browser directly from the terminal.
+
+## 📦 Installation
+
+Install globally via npm:
+
 ```bash
 npm install -g mooncli
 mooncli --version
 ```
 
-## Hızlı Başlangıç
+## 💻 Quick Start
+
+Start your coding session instantly:
+
 ```bash
 mooncli
 ```
 
-## Temel Komutlar
-```bash
-mooncli --help
-mooncli --version
-mooncli --continue
-mooncli browser-bridge
-```
+### Common Commands
 
-## Uzun Sohbet Stabilitesi
-Mooncli otomatik compaction destekler.
+| Command | Description |
+|---|---|
+| `mooncli --help` | View all available commands and flags |
+| `mooncli --continue` | Resume your previous coding session seamlessly |
+| `mooncli browser-bridge` | Initialize the Chrome extension bridge |
 
-`~/.Mooncli/engine/settings.json` içinde:
+## ⚙️ Configuration
+
+Mooncli supports automatic compaction for long-running stability. Configure it in `~/.Mooncli/engine/settings.json`:
+
 ```json
 {
   "compaction": {
@@ -37,19 +56,13 @@ Mooncli otomatik compaction destekler.
 }
 ```
 
-Profil seçenekleri:
-- `aggressive`: erken toparlama, uzun oturum için önerilir
-- `balanced`: varsayılan dengeli mod
-- `off`: kapalı
+## 🔗 Browser Bridge (Chrome Extension)
 
-## Tarayıcı Köprüsü (Chrome Extension)
-Dizin:
-- `packages/cli/browser-extension/chrome`
+To install the browser bridge:
+1. Open `chrome://extensions` in your browser.
+2. Enable **Developer mode**.
+3. Click **Load unpacked** and select the `packages/cli/browser-extension/chrome` directory.
 
-Yükleme:
-1. `chrome://extensions`
-2. Developer mode aç
-3. **Load unpacked** ile klasörü seç
+## 📄 License
 
-## Lisans
-MIT
+This project is licensed under the MIT License.

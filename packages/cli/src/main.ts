@@ -48,6 +48,7 @@ import { InteractiveMode, runHeadlessMode, runPrintMode, runRpcMode } from "./mo
 import { ExtensionSelectorComponent } from "./modes/interactive/components/extension-selector.js";
 import { initTheme, stopThemeWatcher } from "./modes/interactive/theme/theme.js";
 import { handleConfigCommand, handlePackageCommand } from "./package-manager-cli.js";
+import { printDoctor } from "./utils/doctor.js";
 import { isLocalPath } from "./utils/paths.js";
 
 /**
@@ -444,6 +445,11 @@ export async function main(args: string[], options?: MainOptions) {
 		return;
 	}
 
+	if (args[0] === "doctor") {
+		printDoctor();
+		return;
+	}
+
 	startBrowserBridgeServer();
 
 	const offlineMode = args.includes("--offline") || isTruthyEnvFlag(process.env.PI_OFFLINE);
@@ -487,7 +493,11 @@ export async function main(args: string[], options?: MainOptions) {
 	}
 
 	if (parsed.version) {
-		console.log(VERSION);
+		if (parsed.verbose) {
+			console.log(`${VERSION} (${process.argv[1]})`);
+		} else {
+			console.log(VERSION);
+		}
 		process.exit(0);
 	}
 

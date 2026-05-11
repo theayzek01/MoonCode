@@ -217,6 +217,7 @@ ${chalk.bold("Komutlar:")}
   ${APP_NAME} update [kaynak|self|Moon] Mooncli'yi ve yüklü eklentileri güncelle
   ${APP_NAME} list                      Ayarlarda yüklü eklentileri listele
   ${APP_NAME} config                    Paket kaynaklarını etkinleştirmek/devre dışı bırakmak için TUI'yi aç
+  ${APP_NAME} doctor                    Kurulum, PATH, sürüm ve güncelleme teşhisi
   ${APP_NAME} ollama doctor             Yerel Ollama bağlantısını ve modelleri kontrol et
   ${APP_NAME} ollama profile <profil>   Ollama hız/RAM profil komutlarını yazdır
   ${APP_NAME} browser-bridge            Sadece Chrome extension bridge server'ını çalıştır

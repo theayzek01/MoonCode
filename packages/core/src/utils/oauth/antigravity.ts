@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Antigravity OAuth flow (Gemini 3, Claude, GPT-OSS via Google Cloud)
  * Uses different OAuth credentials than google-gemini-cli for access to additional models.
  *
@@ -14,6 +14,8 @@ import type { OAuthCredentials, OAuthLoginCallbacks, OAuthProviderInterface } fr
 type AntigravityCredentials = OAuthCredentials & {
 	projectId: string;
 };
+
+const CALLBACK_HOST = process.env.PI_OAUTH_CALLBACK_HOST || "127.0.0.1";
 
 let _createServer: typeof import("node:http").createServer | null = null;
 let _httpImportPromise: Promise<void> | null = null;
@@ -110,7 +112,7 @@ async function startCallbackServer(): Promise<CallbackServerInfo> {
 			reject(err);
 		});
 
-		server.listen(51121, "127.0.0.1", () => {
+		server.listen(51121, CALLBACK_HOST, () => {
 			resolve({
 				server,
 				cancelWait: () => {
@@ -154,8 +156,8 @@ async function discoverProject(accessToken: string, onProgress?: (message: strin
 	const headers = {
 		Authorization: `Bearer ${accessToken}`,
 		"Content-Type": "application/json",
-		"User-Engine": "google-api-nodejs-client/9.15.1",
-		"X-Goog-Amooncli-Client": "google-cloud-sdk vscode_cloudshelleditor/0.1",
+		"User-Agent": "google-api-nodejs-client/9.15.1",
+		"X-Goog-Api-Client": "google-cloud-sdk vscode_cloudshelleditor/0.1",
 		"Client-Metadata": JSON.stringify({
 			ideType: "IDE_UNSPECIFIED",
 			platform: "PLATFORM_UNSPECIFIED",
@@ -430,8 +432,8 @@ export async function loginAntigravity(
 }
 
 export const antigravityOAuthProvider: OAuthProviderInterface = {
-	id: "antigravity",
-	name: "Antigravity (Google ile)",
+	id: "google-antigravity",
+	name: "Antigravity (Gemini 3, Claude, GPT-OSS)",
 	usesCallbackServer: true,
 
 	async login(callbacks: OAuthLoginCallbacks): Promise<OAuthCredentials> {
@@ -449,107 +451,5 @@ export const antigravityOAuthProvider: OAuthProviderInterface = {
 	getApiKey(credentials: OAuthCredentials): string {
 		const creds = credentials as AntigravityCredentials;
 		return JSON.stringify({ token: creds.access, projectId: creds.projectId });
-	},
-
-	modifyModels(models: any[], _credentials: OAuthCredentials): any[] {
-		const antigravityModels: any[] = [
-			{
-				id: "gemini-3.1-pro",
-				name: "Gemini 3.1 Pro (Preview)",
-				api: "google-antigravity",
-				provider: "antigravity",
-				reasoning: true,
-				baseUrl: "",
-				input: ["text", "image"],
-				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-				contextWindow: 1048576,
-				maxTokens: 128000,
-			},
-			{
-				id: "gemini-3-flash",
-				name: "Gemini 3 Flash",
-				api: "google-antigravity",
-				provider: "antigravity",
-				reasoning: true,
-				baseUrl: "",
-				input: ["text", "image"],
-				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-				contextWindow: 1048576,
-				maxTokens: 65535,
-			},
-			{
-				id: "claude-4.6-sonnet",
-				name: "Claude 4.6 Sonnet (Sandbox)",
-				api: "google-antigravity",
-				provider: "antigravity",
-				reasoning: true,
-				baseUrl: "",
-				input: ["text", "image"],
-				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-				contextWindow: 1000000,
-				maxTokens: 128000,
-			},
-			{
-				id: "claude-3.7-sonnet",
-				name: "Claude 3.7 Sonnet",
-				api: "google-antigravity",
-				provider: "antigravity",
-				reasoning: true,
-				baseUrl: "",
-				input: ["text", "image"],
-				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-				contextWindow: 200000,
-				maxTokens: 64000,
-			},
-			{
-				id: "gpt-5.5-pro",
-				name: "GPT-5.5 Pro (Sandbox)",
-				api: "google-antigravity",
-				provider: "antigravity",
-				reasoning: true,
-				baseUrl: "",
-				input: ["text", "image"],
-				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-				contextWindow: 2000000,
-				maxTokens: 128000,
-			},
-			{
-				id: "gpt-5.4-pro",
-				name: "GPT-5.4 Pro (Sandbox)",
-				api: "google-antigravity",
-				provider: "antigravity",
-				reasoning: true,
-				baseUrl: "",
-				input: ["text", "image"],
-				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-				contextWindow: 2000000,
-				maxTokens: 128000,
-			},
-			{
-				id: "gpt-5.3-ultra",
-				name: "GPT-5.3 Ultra (Sandbox)",
-				api: "google-antigravity",
-				provider: "antigravity",
-				reasoning: true,
-				baseUrl: "",
-				input: ["text", "image"],
-				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-				contextWindow: 1000000,
-				maxTokens: 128000,
-			},
-			{
-				id: "gpt-oss:120b-cloud",
-				name: "GPT OSS 120B Cloud",
-				api: "google-antigravity",
-				provider: "antigravity",
-				reasoning: true,
-				baseUrl: "",
-				input: ["text"],
-				cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-				contextWindow: 128000,
-				maxTokens: 64000,
-			},
-		];
-		return [...models, ...antigravityModels];
 	},
 };
