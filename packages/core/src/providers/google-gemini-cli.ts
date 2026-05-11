@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Google Gemini CLI / Antigravity provider.
  * Shared implementation for both google-gemini-cli and google-antigravity providers.
  * Uses the Cloud Code Assist API endpoint to access Gemini and Claude models.
@@ -78,7 +78,7 @@ const GEMINI_CLI_HEADERS = {
 };
 
 // Headers for Antigravity (sandbox endpoint) - requires specific User-Agent
-const DEFAULT_ANTIGRAVITY_VERSION = "1.21.9";
+const DEFAULT_ANTIGRAVITY_VERSION = "1.107.0";
 
 function getAntigravityHeaders() {
 	const version = process.env.PI_AI_ANTIGRAVITY_VERSION || DEFAULT_ANTIGRAVITY_VERSION;
