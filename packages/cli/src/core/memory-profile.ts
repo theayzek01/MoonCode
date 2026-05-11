@@ -72,19 +72,25 @@ export class MemoryProfile {
 
 		if (this.profile.forbiddenPatterns.length > 0) {
 			injection += `NEVER USE THESE PATTERNS:\n`;
-			this.profile.forbiddenPatterns.forEach((p) => (injection += `- ${p}\n`));
+			for (const p of this.profile.forbiddenPatterns) {
+				injection += `- ${p}\n`;
+			}
 			injection += `\n`;
 		}
 
 		if (this.profile.syntaxPreferences.length > 0) {
 			injection += `SYNTAX PREFERENCES:\n`;
-			this.profile.syntaxPreferences.forEach((p) => (injection += `- ${p}\n`));
+			for (const p of this.profile.syntaxPreferences) {
+				injection += `- ${p}\n`;
+			}
 			injection += `\n`;
 		}
 
 		if (this.profile.customRules.length > 0) {
 			injection += `CUSTOM RULES:\n`;
-			this.profile.customRules.forEach((p) => (injection += `- ${p}\n`));
+			for (const p of this.profile.customRules) {
+				injection += `- ${p}\n`;
+			}
 			injection += `\n`;
 		}
 

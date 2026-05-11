@@ -1,6 +1,6 @@
 {
   "name": "moon-tui",
-  "version": "12.5.2026",
+  "version": "12.05.2026-v2",
   "description": "Terminal User Interface library with differential rendering for efficient text-based applications",
   "type": "module",
   "main": "dist/index.js",

@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const terminalBody = document.getElementById('terminal-body');
     const session = [
         { type: 'input', text: 'moon' },
-        { type: 'output', text: 'Moon v11.5.2026-3 (Lunar Zen)' },
+        { type: 'output', text: 'Moon v12.05.2026-v2 (Lunar Zen)' },
         { type: 'input', text: 'create a high-end react login...' },
         { type: 'output', text: '🔍 Scanning workspace...' },
         { type: 'output', text: '🦋 Generating Login.tsx...' },

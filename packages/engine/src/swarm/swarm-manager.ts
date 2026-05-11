@@ -22,8 +22,6 @@ export interface SwarmAgent {
  */
 export class SwarmManager extends EventEmitter {
 	private agents: Map<string, SwarmAgent> = new Map();
-	private taskQueue: SwarmTask[] = [];
-	private activeTaskResults: Map<string, any> = new Map();
 
 	constructor(private defaultModel: Model<Api>) {
 		super();
@@ -83,7 +81,7 @@ export class SwarmManager extends EventEmitter {
 		return `${codeResult}\n\n// Swarm Review:\n// ${reviewResult}`;
 	}
 
-	private async delegateToRole(role: SwarmAgent["role"], prompt: string, context: string[]): Promise<string> {
+	private async delegateToRole(role: SwarmAgent["role"], prompt: string, _context: string[]): Promise<string> {
 		const agent = Array.from(this.agents.values()).find((a) => a.role === role);
 		if (!agent) throw new Error(`No agent available for role: ${role}`);
 

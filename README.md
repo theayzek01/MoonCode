@@ -1,42 +1,55 @@
-<div align="center">
-  <img src="assets/Moon-cli-banner.png" alt="Moon" width="100%" />
+# Mooncli
 
-  <br />
+Minimal, hızlı ve kurumsal odaklı terminal kod asistanı.
 
-  ### **Moon**
-  *The telepathic, zero-friction engineering intelligence.*
+## Sürüm
+- **12.05.2026-v2**
 
-  [npm package](https://www.npmjs.com/package/mooncli) · [License: MIT](LICENSE)
-</div>
-
----
-
-## 🌑 The Paradigm Shift
-
-Moon is not a chat bot. It is a sovereign, self-healing developer swarm that lives in your terminal.
-It reads your mind, clones your style, and silently executes your will without asking annoying questions.
-
-- **Telepathic Context**: It knows your cursor position and terminal errors. You never explain.
-- **Zero Setup**: Finds your API keys automatically. No onboarding, no billing traps.
-- **Shadow Execution**: It tests its own code in hidden containers and patches its own mistakes.
-- **Lunar Zen Interface**: No red error text, no cluttered chat. A floating, pastel timeline of pure execution.
-
-## 🚀 Ignition
-
+## Kurulum
 ```bash
 npm install -g mooncli
-moon
+mooncli --version
 ```
 
-## ⚔️ The Arsenal
+## Hızlı Başlangıç
+```bash
+mooncli
+```
 
-| Core | Function |
-| :--- | :--- |
-| **AST Scalpel** | Extracts only exact symbols. Brutally minimizes token usage. |
-| **Visual Bridge** | Steals live CSS/DOM from your active Chrome tab via extension. |
-| **Ghost Env** | Spins up invisible Docker containers for missing dependencies. |
-| **Swarm** | Spawns 5 threads to read, grep, and code simultaneously. 5x speed. |
+## Temel Komutlar
+```bash
+mooncli --help
+mooncli --version
+mooncli --continue
+mooncli browser-bridge
+```
 
-<div align="center">
-  <p><i>Built for the bold.</i></p>
-</div>
+## Uzun Sohbet Stabilitesi
+Mooncli otomatik compaction destekler.
+
+`~/.Mooncli/engine/settings.json` içinde:
+```json
+{
+  "compaction": {
+    "profile": "aggressive",
+    "enabled": true
+  }
+}
+```
+
+Profil seçenekleri:
+- `aggressive`: erken toparlama, uzun oturum için önerilir
+- `balanced`: varsayılan dengeli mod
+- `off`: kapalı
+
+## Tarayıcı Köprüsü (Chrome Extension)
+Dizin:
+- `packages/cli/browser-extension/chrome`
+
+Yükleme:
+1. `chrome://extensions`
+2. Developer mode aç
+3. **Load unpacked** ile klasörü seç
+
+## Lisans
+MIT

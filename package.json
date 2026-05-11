@@ -46,7 +46,7 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "version": "12.5.2026",
+  "version": "12.05.2026-v2",
   "repository": {
     "type": "git",
     "url": "https://github.com/theayzek01/mooncli"

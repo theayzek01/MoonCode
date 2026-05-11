@@ -38,7 +38,9 @@ export function createVisualBridgeToolDefinition(extensionPort: number = 3133) {
 					},
 					(res) => {
 						let data = "";
-						res.on("data", (chunk) => (data += chunk));
+						res.on("data", (chunk) => {
+							data += chunk;
+						});
 						res.on("end", () => {
 							if (res.statusCode === 200) {
 								resolve({ content: [{ type: "text", text: data }], details: undefined });
