@@ -1,4 +1,3 @@
-// @ts-nocheck
 import chalk from "chalk";
 import { spawnSync } from "child_process";
 import extractZip from "extract-zip";
@@ -14,7 +13,7 @@ const NETWORK_TIMEOUT_MS = 10_000;
 const DOWNLOAD_TIMEOUT_MS = 120_000;
 
 function isOfflineModeEnabled(): boolean {
-	const value = process.env.PI_OFFLINE;
+	const value = process.env.HODEUS_OFFLINE ?? process.env.PI_OFFLINE;
 	if (!value) return false;
 	return value === "1" || value.toLowerCase() === "true" || value.toLowerCase() === "yes";
 }

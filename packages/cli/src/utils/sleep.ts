@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Sleep helper that respects abort signal.
  */
@@ -11,9 +10,13 @@ export function sleep(ms: number, signal?: AbortSignal): Promise<void> {
 
 		const timeout = setTimeout(resolve, ms);
 
-		signal?.addEventListener("abort", () => {
-			clearTimeout(timeout);
-			reject(new Error("Aborted"));
-		});
+		signal?.addEventListener(
+			"abort",
+			() => {
+				clearTimeout(timeout);
+				reject(new DOMException("The operation was aborted", "AbortError"));
+			},
+			{ once: true },
+		);
 	});
 }

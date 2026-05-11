@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Bash command execution with streaming support and cancellation.
  *
@@ -117,7 +116,7 @@ export async function executeBashWithOperations(
 			ensureTempFile();
 		}
 		if (tempFileStream) {
-			tempFileStream.end();
+			await new Promise<void>((r) => tempFileStream!.end(r));
 		}
 		const cancelled = options?.signal?.aborted ?? false;
 
@@ -137,7 +136,7 @@ export async function executeBashWithOperations(
 				ensureTempFile();
 			}
 			if (tempFileStream) {
-				tempFileStream.end();
+				await new Promise<void>((r) => tempFileStream!.end(r));
 			}
 			return {
 				output: truncationResult.truncated ? truncationResult.content : fullOutput,
@@ -149,7 +148,7 @@ export async function executeBashWithOperations(
 		}
 
 		if (tempFileStream) {
-			tempFileStream.end();
+			await new Promise<void>((r) => tempFileStream!.end(r));
 		}
 
 		throw err;

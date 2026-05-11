@@ -45,6 +45,8 @@ interface BrowserBridgeClient {
 
 const DEFAULT_PORT = 3133;
 const MAX_FRAME_BYTES = 10 * 1024 * 1024;
+// Maximum per-client buffer size before we disconnect (prevents memory exhaustion)
+const MAX_BUFFER_BYTES = 20 * 1024 * 1024;
 
 let server: Server | undefined;
 let port = DEFAULT_PORT;
@@ -74,8 +76,7 @@ export function startBrowserBridgeServer(options: { port?: number; keepAlive?: b
 		console.error(`[Moon Bridge Error] ${startupError}`);
 	});
 
-	// Listening on all interfaces or defaulting to help with Windows localhost issues
-	server.listen(port, "0.0.0.0", () => {
+	server.listen(port, "127.0.0.1", () => {
 		console.log(`\n\x1b[32m[Moon] Browser Bridge is active on ws://127.0.0.1:${port}\x1b[0m\n`);
 	});
 
@@ -106,7 +107,11 @@ export async function sendBrowserCommand(
 	args: Record<string, unknown> = {},
 	options: { timeoutMs?: number } = {},
 ): Promise<unknown> {
-	startBrowserBridgeServer();
+	// Only start server if not already running
+	if (!server) {
+		startBrowserBridgeServer();
+	}
+
 	const client = getLatestClient();
 	if (!client) {
 		throw new Error(
@@ -121,9 +126,11 @@ export async function sendBrowserCommand(
 	return new Promise((resolve, reject) => {
 		const timer = setTimeout(() => {
 			pendingCommands.delete(id);
-			reject(new Error(`Browser command timed out: ${action}`));
+			reject(new Error(`Browser command timed out after ${timeoutMs}ms: ${action}`));
 		}, timeoutMs);
+
 		pendingCommands.set(id, { resolve, reject, timer });
+
 		try {
 			client.send(message);
 		} catch (error) {
@@ -134,8 +141,31 @@ export async function sendBrowserCommand(
 	});
 }
 
+/**
+ * Cancel all pending commands for a specific client (called on disconnect).
+ */
+function cancelPendingCommandsForClient(clientId: string): void {
+	// We tag commands by client so we can clean up on disconnect.
+	// Since we don't store clientId on PendingCommand, we reject all stale commands
+	// only if there are no other connected clients. Otherwise keep them alive in case
+	// the client reconnects quickly (extension service worker restart).
+	if (clients.size === 0) {
+		for (const [id, pending] of pendingCommands) {
+			clearTimeout(pending.timer);
+			pending.reject(new Error(`Client disconnected (id=${clientId})`));
+			pendingCommands.delete(id);
+		}
+	}
+}
+
 function getLatestClient(): BrowserBridgeClient | undefined {
-	return Array.from(clients.values()).sort((a, b) => b.lastSeen - a.lastSeen)[0];
+	let latest: BrowserBridgeClient | undefined;
+	for (const client of clients.values()) {
+		if (!latest || client.lastSeen > latest.lastSeen) {
+			latest = client;
+		}
+	}
+	return latest;
 }
 
 function handleUpgrade(req: IncomingMessage, socket: Duplex): void {
@@ -167,41 +197,93 @@ function handleUpgrade(req: IncomingMessage, socket: Duplex): void {
 		].join("\r\n"),
 	);
 
-	// Keep the socket active in the event loop
-	// (socket as Duplex & { unref?: () => void }).unref?.();
-
 	const id = randomUUID();
 	const client: BrowserBridgeClient = {
 		id,
 		socket,
 		lastSeen: Date.now(),
 		send(message) {
-			socket.write(encodeServerFrame(JSON.stringify(message)));
+			try {
+				socket.write(encodeServerFrame(JSON.stringify(message)));
+			} catch {
+				// Socket may have closed between sends; remove client
+				clients.delete(id);
+				cancelPendingCommandsForClient(id);
+			}
 		},
 	};
 	clients.set(id, client);
 
-	let buffer = Buffer.alloc(0);
-	socket.on("data", (chunk) => {
-		buffer = Buffer.concat([buffer, chunk]);
-		while (true) {
-			const parsed = decodeClientFrame(buffer);
-			if (!parsed) return;
-			buffer = buffer.subarray(parsed.bytes);
-			if (parsed.opcode === 8) {
-				socket.end();
+	// Use a pre-allocated buffer with a tracked length to avoid O(n²) Buffer.concat growth
+	let buffer = Buffer.allocUnsafe(4096);
+	let bufferLen = 0;
+
+	socket.on("data", (chunk: Buffer) => {
+		// Grow buffer if needed
+		if (bufferLen + chunk.length > buffer.length) {
+			const newSize = Math.max(buffer.length * 2, bufferLen + chunk.length);
+			if (newSize > MAX_BUFFER_BYTES) {
+				// Client is sending too much data; disconnect
+				socket.destroy(new Error("WebSocket buffer limit exceeded"));
 				return;
 			}
-			if (parsed.opcode === 9) {
-				socket.write(encodeServerFrame(parsed.payload, 10));
-				continue;
+			const next = Buffer.allocUnsafe(newSize);
+			buffer.copy(next, 0, 0, bufferLen);
+			buffer = next;
+		}
+		chunk.copy(buffer, bufferLen);
+		bufferLen += chunk.length;
+
+		// Parse all complete frames from the buffer
+		while (bufferLen >= 2) {
+			let parsed: { opcode: number; payload: Buffer; bytes: number } | undefined;
+			try {
+				parsed = decodeClientFrame(buffer, bufferLen);
+			} catch (err) {
+				// Malformed frame — disconnect client cleanly
+				socket.destroy(err instanceof Error ? err : new Error(String(err)));
+				return;
 			}
-			if (parsed.opcode !== 1) continue;
-			handleClientMessage(client, parsed.payload.toString("utf8"));
+
+			if (!parsed) break; // Need more data
+
+			// Consume the frame bytes by shifting the buffer
+			bufferLen -= parsed.bytes;
+			if (bufferLen > 0) {
+				buffer.copyWithin(0, parsed.bytes, parsed.bytes + bufferLen);
+			}
+
+			switch (parsed.opcode) {
+				case 8: // Close frame
+					socket.end();
+					return;
+				case 9: // Ping → Pong
+					try {
+						socket.write(encodeServerFrame(parsed.payload, 10));
+					} catch {
+						/* ignore write errors */
+					}
+					break;
+				case 10: // Pong (extension heartbeat reply) — just update lastSeen
+					client.lastSeen = Date.now();
+					break;
+				case 1: // Text frame
+					handleClientMessage(client, parsed.payload.toString("utf8"));
+					break;
+				case 2: // Binary frame — ignore
+					break;
+				// Continuation frames (0) not supported at this layer; ignore
+			}
 		}
 	});
-	socket.on("close", () => clients.delete(id));
-	socket.on("error", () => clients.delete(id));
+
+	const onDisconnect = () => {
+		clients.delete(id);
+		cancelPendingCommandsForClient(id);
+	};
+
+	socket.on("close", onDisconnect);
+	socket.on("error", onDisconnect);
 }
 
 function handleClientMessage(client: BrowserBridgeClient, raw: string): void {
@@ -219,7 +301,8 @@ function handleClientMessage(client: BrowserBridgeClient, raw: string): void {
 		return;
 	}
 
-	if (message.type === "ping") {
+	// Extension heartbeat — already handled in data handler via lastSeen; nothing else to do
+	if (message.type === "ping" || message.type === "pong") {
 		return;
 	}
 
@@ -236,40 +319,63 @@ function handleClientMessage(client: BrowserBridgeClient, raw: string): void {
 }
 
 function isAllowedExtensionOrigin(origin: string | undefined): boolean {
-	return origin === undefined || origin.startsWith("chrome-extension://") || origin.startsWith("moz-extension://");
+	return (
+		origin === undefined ||
+		origin.startsWith("chrome-extension://") ||
+		origin.startsWith("moz-extension://") ||
+		origin.startsWith("ms-browser-extension://")
+	);
 }
 
-function decodeClientFrame(buffer: Buffer): { opcode: number; payload: Buffer; bytes: number } | undefined {
-	if (buffer.length < 2) return undefined;
+/**
+ * Decode a single WebSocket client frame from the buffer.
+ * Returns undefined if there isn't enough data yet.
+ * Throws on protocol errors.
+ *
+ * @param buffer  The raw data buffer
+ * @param length  Number of valid bytes in buffer (may be < buffer.length)
+ */
+function decodeClientFrame(
+	buffer: Buffer,
+	length: number,
+): { opcode: number; payload: Buffer; bytes: number } | undefined {
+	if (length < 2) return undefined;
+
 	const first = buffer[0];
 	const second = buffer[1];
 	const opcode = first & 0x0f;
 	const masked = (second & 0x80) !== 0;
-	let length = second & 0x7f;
+	let payloadLen = second & 0x7f;
 	let offset = 2;
 
-	if (length === 126) {
-		if (buffer.length < offset + 2) return undefined;
-		length = buffer.readUInt16BE(offset);
+	if (payloadLen === 126) {
+		if (length < offset + 2) return undefined;
+		payloadLen = buffer.readUInt16BE(offset);
 		offset += 2;
-	} else if (length === 127) {
-		if (buffer.length < offset + 8) return undefined;
-		const longLength = buffer.readBigUInt64BE(offset);
-		if (longLength > BigInt(MAX_FRAME_BYTES)) throw new Error("WebSocket frame too large");
-		length = Number(longLength);
+	} else if (payloadLen === 127) {
+		if (length < offset + 8) return undefined;
+		const hi = buffer.readUInt32BE(offset);
+		const lo = buffer.readUInt32BE(offset + 4);
+		// Reject frames > MAX_FRAME_BYTES without BigInt allocation
+		if (hi > 0 || lo > MAX_FRAME_BYTES) throw new Error("WebSocket frame too large");
+		payloadLen = lo;
 		offset += 8;
 	}
-	if (length > MAX_FRAME_BYTES) throw new Error("WebSocket frame too large");
-	if (!masked) throw new Error("Client WebSocket frame is not masked");
-	if (buffer.length < offset + 4 + length) return undefined;
+
+	if (payloadLen > MAX_FRAME_BYTES) throw new Error("WebSocket frame too large");
+	if (!masked) throw new Error("Client WebSocket frame must be masked (RFC 6455)");
+
+	if (length < offset + 4 + payloadLen) return undefined; // Incomplete
 
 	const mask = buffer.subarray(offset, offset + 4);
 	offset += 4;
-	const payload = Buffer.from(buffer.subarray(offset, offset + length));
-	for (let i = 0; i < payload.length; i++) {
-		payload[i] ^= mask[i % 4];
+
+	const payload = Buffer.allocUnsafe(payloadLen);
+	for (let i = 0; i < payloadLen; i++) {
+		payload[i] = buffer[offset + i] ^ mask[i % 4];
 	}
-	return { opcode, payload, bytes: offset + length };
+
+	return { opcode, payload, bytes: offset + payloadLen };
 }
 
 function encodeServerFrame(payload: string | Buffer, opcode = 1): Buffer {

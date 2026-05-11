@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { getHodeusUserEngine } from "./moon-user-engine.js";
 
 const LATEST_VERSION_URL = "https://hodeus.dev/api/latest-version";

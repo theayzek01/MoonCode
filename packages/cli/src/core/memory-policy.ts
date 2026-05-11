@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { getEngineDir } from "../config.js";
 
@@ -6,20 +6,20 @@ export interface MemorySignal {
 	timestamp: string;
 	text: string;
 	tag: "preference" | "workflow";
-	weight?: number; // 1-10 arası önem skoru, yoksa 5 varsayılan
+	weight?: number; // 1-10 önem skoru, varsayılan 5
 }
 
 const MEMORY_FILE = join(getEngineDir(), "memory-signals.json");
-const MAX_SIGNALS = 80; // 200'den 80'e: context window için çok daha verimli
-const MIN_TEXT_LEN = 20; // 24'ten 20'ye: kısa ama anlamlı sinyaller de yakalansın
-const MAX_TEXT_LEN = 400; // Yeni: aşırı uzun sinyalleri kırp
+const MAX_SIGNALS = 80;
+const MIN_TEXT_LEN = 20;
+const MAX_TEXT_LEN = 400;
 
 const SIGNAL_PATTERNS = /tercih|preference|always|her zaman|workflow|akis|daima|istiyorum|yapma|kullan|tercih et/i;
 
 export function shouldPersistMemorySignal(text: string): boolean {
 	const normalized = text.toLowerCase().trim();
 	if (normalized.length < MIN_TEXT_LEN) return false;
-	if (normalized.length > 2000) return false; // Devasa text'leri sinyal olarak kaydetme
+	if (normalized.length > 2000) return false;
 	return SIGNAL_PATTERNS.test(normalized);
 }
 
@@ -28,7 +28,6 @@ export function persistMemorySignal(text: string): void {
 		? "preference"
 		: "workflow";
 
-	// Metni makul uzunlukta tut
 	const trimmedText = text.length > MAX_TEXT_LEN ? `${text.slice(0, MAX_TEXT_LEN)}…` : text;
 
 	const next: MemorySignal = {
@@ -41,14 +40,26 @@ export function persistMemorySignal(text: string): void {
 	const all = loadMemorySignals();
 	all.push(next);
 
-	// Dedupe ve limit uygula - eski duplicate'ları at, yenileri tut
 	const deduped = dedupeSignals(all);
-	// Ağırlığa göre sırala, en önemlileri tut
 	const sorted = deduped.sort((a, b) => (b.weight ?? 5) - (a.weight ?? 5));
 	const final = sorted.slice(0, MAX_SIGNALS);
 
-	if (!existsSync(dirname(MEMORY_FILE))) mkdirSync(dirname(MEMORY_FILE), { recursive: true });
-	writeFileSync(MEMORY_FILE, `${JSON.stringify(final, null, 2)}\n`, "utf-8");
+	// Atomic write: write to temp file then rename to avoid corrupt reads
+	const dir = dirname(MEMORY_FILE);
+	if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+
+	const tmp = `${MEMORY_FILE}.tmp`;
+	try {
+		writeFileSync(tmp, `${JSON.stringify(final, null, 2)}\n`, "utf-8");
+		renameSync(tmp, MEMORY_FILE);
+	} catch (_err) {
+		// If rename failed, still try direct write as fallback
+		try {
+			writeFileSync(MEMORY_FILE, `${JSON.stringify(final, null, 2)}\n`, "utf-8");
+		} catch {
+			// Silent: memory signals are non-critical
+		}
+	}
 }
 
 export function loadMemorySignals(): MemorySignal[] {
@@ -65,13 +76,11 @@ export function loadMemorySignals(): MemorySignal[] {
 function dedupeSignals(signals: MemorySignal[]): MemorySignal[] {
 	const seen = new Map<string, MemorySignal>();
 	for (const s of signals) {
-		// Benzerlik key'i: tag + ilk 80 karakter (tam metin değil)
 		const key = `${s.tag}:${s.text.slice(0, 80).trim().toLowerCase()}`;
 		const existing = seen.get(key);
 		if (!existing) {
 			seen.set(key, s);
 		} else {
-			// Aynı key için daha yeni olanı tut, weight'i yükselt (sık tekrar = önemli)
 			const existingWeight = existing.weight ?? 5;
 			seen.set(key, {
 				...s,
@@ -94,7 +103,6 @@ export function getMemoryPreface(limit = 8, compact = false): string {
 	if (items.length === 0) return "";
 
 	if (compact) {
-		// Ultra-short format for local models
 		const lines = items.map((s) => `[${s.tag[0].toUpperCase()}] ${s.text}`);
 		return `User preferences:\n${lines.join("\n")}\n`;
 	}

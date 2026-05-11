@@ -111,9 +111,16 @@ export async function pullModel(modelName: string, onProgress?: (event: any) => 
 		buffer = lines.pop() ?? "";
 		for (const line of lines) {
 			if (!line.trim()) continue;
-			const event = JSON.parse(line);
-			onProgress?.(event);
-			if (event.error) throw new Error(event.error);
+			try {
+				const event = JSON.parse(line);
+				onProgress?.(event);
+				if (event.error) throw new Error(event.error);
+			} catch (parseErr) {
+				// Skip malformed NDJSON lines; re-throw only real Ollama errors
+				if ((parseErr as Error).message && !(parseErr instanceof SyntaxError)) {
+					throw parseErr;
+				}
+			}
 		}
 	}
 }

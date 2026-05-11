@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Shared command execution utilities for extensions and custom tools.
  */
@@ -49,18 +48,29 @@ export async function execCommand(
 		let stderr = "";
 		let killed = false;
 		let timeoutId: NodeJS.Timeout | undefined;
+		// Track the force-kill timer so we can clear it if the process exits cleanly
+		let forceKillId: NodeJS.Timeout | undefined;
 
 		const killProcess = () => {
-			if (!killed) {
-				killed = true;
+			if (killed) return;
+			killed = true;
+			try {
 				proc.kill("SIGTERM");
-				// Force kill after 5 seconds if SIGTERM doesn't work
-				setTimeout(() => {
-					if (!proc.killed) {
-						proc.kill("SIGKILL");
-					}
-				}, 5000);
+			} catch {
+				/* process may already be gone */
 			}
+
+			// Force kill after 5 seconds if SIGTERM doesn't work
+			forceKillId = setTimeout(() => {
+				forceKillId = undefined;
+				if (!proc.killed) {
+					try {
+						proc.kill("SIGKILL");
+					} catch {
+						/* ignore */
+					}
+				}
+			}, 5000);
 		};
 
 		// Handle abort signal
@@ -74,31 +84,30 @@ export async function execCommand(
 
 		// Handle timeout
 		if (options?.timeout && options.timeout > 0) {
-			timeoutId = setTimeout(() => {
-				killProcess();
-			}, options.timeout);
+			timeoutId = setTimeout(killProcess, options.timeout);
 		}
 
-		proc.stdout?.on("data", (data) => {
+		proc.stdout?.on("data", (data: Buffer) => {
 			stdout += data.toString();
 		});
 
-		proc.stderr?.on("data", (data) => {
+		proc.stderr?.on("data", (data: Buffer) => {
 			stderr += data.toString();
 		});
 
-		// Wait for process termination without hanging on inherited stdio handles
-		// held open by detached descendants.
 		waitForChildProcess(proc)
 			.then((code) => {
-				if (timeoutId) clearTimeout(timeoutId);
+				// Clear all pending timers to avoid post-exit side-effects
+				if (timeoutId !== undefined) clearTimeout(timeoutId);
+				if (forceKillId !== undefined) clearTimeout(forceKillId);
 				if (options?.signal) {
 					options.signal.removeEventListener("abort", killProcess);
 				}
 				resolve({ stdout, stderr, code: code ?? 0, killed });
 			})
-			.catch((_err) => {
-				if (timeoutId) clearTimeout(timeoutId);
+			.catch(() => {
+				if (timeoutId !== undefined) clearTimeout(timeoutId);
+				if (forceKillId !== undefined) clearTimeout(forceKillId);
 				if (options?.signal) {
 					options.signal.removeEventListener("abort", killProcess);
 				}

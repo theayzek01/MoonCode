@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type { EngineTool } from "hodeus-engine";
 import { Text } from "hodeus-tui";
 import { type Static, Type } from "typebox";
@@ -25,25 +24,33 @@ const browserTabsSchema = Type.Object({
 const browserPageSchema = Type.Object({
 	action: Type.Union([
 		Type.Literal("read"),
+		Type.Literal("read_dom"),
 		Type.Literal("click"),
 		Type.Literal("type"),
+		Type.Literal("hover"),
+		Type.Literal("press_key"),
+		Type.Literal("get_elements"),
 		Type.Literal("screenshot"),
 		Type.Literal("evaluate"),
 		Type.Literal("scroll"),
 		Type.Literal("console_logs"),
-		Type.Literal("read_dom"),
+		Type.Literal("wait"),
 	]),
 	tabId: Type.Optional(Type.Number({ description: "Chrome tab id. Defaults to active tab." })),
-	selector: Type.Optional(Type.String({ description: "CSS selector for click/type actions" })),
-	text: Type.Optional(Type.String({ description: "Text for type action" })),
-	script: Type.Optional(Type.String({ description: "JavaScript expression for evaluate action via Chrome debugger" })),
-	maxChars: Type.Optional(Type.Number({ description: "Maximum text characters for read action" })),
+	selector: Type.Optional(Type.String({ description: "CSS selector for click/type/hover actions" })),
+	text: Type.Optional(Type.String({ description: "Text to type" })),
+	append: Type.Optional(Type.Boolean({ description: "Append to existing value instead of replacing (type action)" })),
+	key: Type.Optional(Type.String({ description: "Key name for press_key action (e.g. Enter, Tab, Escape)" })),
+	modifiers: Type.Optional(Type.Array(Type.String(), { description: "Modifier keys: ctrl, shift, alt, meta" })),
+	script: Type.Optional(Type.String({ description: "JavaScript expression for evaluate action" })),
+	maxChars: Type.Optional(Type.Number({ description: "Maximum characters for read action" })),
 	direction: Type.Optional(
 		Type.Union([Type.Literal("up"), Type.Literal("down"), Type.Literal("top"), Type.Literal("bottom")], {
 			description: "Direction for scroll action",
 		}),
 	),
-	amount: Type.Optional(Type.Number({ description: "Pixels to scroll for up/down actions" })),
+	amount: Type.Optional(Type.Number({ description: "Pixels to scroll" })),
+	ms: Type.Optional(Type.Number({ description: "Milliseconds to wait (max 15000)" })),
 });
 
 export type BrowserTabsToolInput = Static<typeof browserTabsSchema>;
@@ -107,12 +114,15 @@ export function createBrowserPageToolDefinition(): ToolDefinition<typeof browser
 		name: "browser_page",
 		label: "browser_page",
 		description:
-			"Read or operate the current Chrome page through the Hodeus Chrome extension. Actions: read, click, type, screenshot, evaluate, scroll, console_logs, read_dom.",
+			"Read or operate the current Chrome page through the Hodeus Chrome extension. Actions: read, read_dom, click, type, hover, press_key, get_elements, screenshot, evaluate, scroll, console_logs, wait.",
 		promptSnippet: "Read or operate the connected Chrome page",
 		promptGuidelines: [
 			"Use browser_page read to get page title, URL, selection, and visible text.",
-			"Use browser_page read_dom for a structured text representation of the page elements.",
+			"Use browser_page read_dom for a structured view of interactive page elements.",
+			"Use browser_page get_elements to see numbered interactive elements; then reference them by #id.",
 			"Use browser_page scroll to navigate through long pages.",
+			"Use browser_page press_key with key=Enter/Tab/Escape and optional modifiers=[ctrl,shift].",
+			"Use browser_page wait to pause between actions (ms, max 15000).",
 			"Use browser_page console_logs to debug JavaScript errors or see page logs.",
 			"For browser_page evaluate, prefer short JavaScript expressions and return serializable data.",
 		],
@@ -158,11 +168,15 @@ function validateTabsParams(params: BrowserTabsToolInput): void {
 }
 
 function validatePageParams(params: BrowserPageToolInput): void {
-	if ((params.action === "click" || params.action === "type") && !params.selector) {
+	const requiresSelector = ["click", "type", "hover"] as const;
+	if (requiresSelector.includes(params.action as (typeof requiresSelector)[number]) && !params.selector) {
 		throw new Error(`browser_page ${params.action} requires selector`);
 	}
 	if (params.action === "type" && params.text === undefined) {
 		throw new Error("browser_page type requires text");
+	}
+	if (params.action === "press_key" && !params.key) {
+		throw new Error("browser_page press_key requires key");
 	}
 	if (params.action === "evaluate" && !params.script) {
 		throw new Error("browser_page evaluate requires script");
@@ -171,5 +185,6 @@ function validatePageParams(params: BrowserPageToolInput): void {
 
 function stringifyResult(value: unknown): string {
 	const json = JSON.stringify(value, null, 2) ?? "null";
-	return json.length > 20_000 ? `${json.slice(0, 20_000)}\n... truncated ...` : json;
+	const MAX = 24_000;
+	return json.length > MAX ? `${json.slice(0, MAX)}\n... [${json.length - MAX} chars truncated] ...` : json;
 }

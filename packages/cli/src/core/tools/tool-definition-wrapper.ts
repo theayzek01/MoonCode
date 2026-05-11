@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type { EngineTool } from "hodeus-engine";
 import type { ExtensionContext, ToolDefinition } from "../extensions/types.js";
 
