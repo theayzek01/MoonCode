@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Antigravity OAuth flow (Gemini 3, Claude, GPT-OSS via Google Cloud)
  * Uses different OAuth credentials than google-gemini-cli for access to additional models.
  *
@@ -432,7 +432,7 @@ export async function loginAntigravity(
 }
 
 export const antigravityOAuthProvider: OAuthProviderInterface = {
-	id: "google-antigravity",
+	id: "antigravity",
 	name: "Antigravity (Gemini 3, Claude, GPT-OSS)",
 	usesCallbackServer: true,
 

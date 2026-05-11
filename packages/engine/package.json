@@ -19,7 +19,7 @@
 	"dependencies": {
 		"@modelcontextprotocol/sdk": "^1.29.0",
 		"typebox": "^1.1.24",
-		"moon-core": "^12.05.2026-v2"
+		"moon-core": "1.5.1-beta"
 	},
 	"keywords": [
 		"engine",

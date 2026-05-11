@@ -56,10 +56,10 @@ export class GhostEnvironment {
 	 * Cleans up all ghost containers that were spun up during the session.
 	 */
 	public async cleanup(): Promise<void> {
-		for (const [image, containerId] of this.activeContainers.entries()) {
+		for (const [_image, containerId] of this.activeContainers.entries()) {
 			try {
 				await execAsync(`docker stop ${containerId}`);
-			} catch (e) {
+			} catch (_e) {
 				// Ignore cleanup errors
 			}
 		}

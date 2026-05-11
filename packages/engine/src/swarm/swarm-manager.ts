@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { EventEmitter } from "events";
-import type { Api, Model, TextContent } from "moon-core";
+import type { Api, Model } from "moon-core";
 
 export interface SwarmTask {
 	id: string;

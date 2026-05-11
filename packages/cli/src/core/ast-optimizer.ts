@@ -14,13 +14,13 @@ export class AstOptimizer {
 		const sourceFile = ts.createSourceFile(this.filePath, sourceCode, ts.ScriptTarget.Latest, true);
 
 		const extractedNodes: string[] = [];
-		let hasImports = false;
+		let _hasImports = false;
 
 		function visit(node: ts.Node) {
 			// Keep all imports for context
 			if (ts.isImportDeclaration(node)) {
 				extractedNodes.push(node.getText(sourceFile));
-				hasImports = true;
+				_hasImports = true;
 				return;
 			}
 
@@ -66,7 +66,7 @@ export class AstOptimizer {
 			return `// AST Optimizer: Target symbols [${targetSymbols.join(", ")}] not found in ${this.filePath}`;
 		}
 
-		return `// [AST Optimized Context: ${this.filePath}]\n` + extractedNodes.join("\n\n");
+		return `// [AST Optimized Context: ${this.filePath}]\n${extractedNodes.join("\n\n")}`;
 	}
 
 	public getFileOutline(): string {
@@ -87,6 +87,6 @@ export class AstOptimizer {
 		}
 
 		visit(sourceFile);
-		return `// File Outline: ${this.filePath}\n` + outline.join("\n");
+		return `// File Outline: ${this.filePath}\n${outline.join("\n")}`;
 	}
 }

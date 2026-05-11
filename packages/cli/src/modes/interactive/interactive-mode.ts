@@ -195,13 +195,16 @@ export function isApiKeyLoginProvider(
 	oauthProviderIds: ReadonlySet<string>,
 	builtInProviderIds: ReadonlySet<string> = BUILT_IN_MODEL_PROVIDERS,
 ): boolean {
+	if (oauthProviderIds.has(providerId)) {
+		return false;
+	}
 	if (BUILT_IN_PROVIDER_DISPLAY_NAMES[providerId]) {
 		return true;
 	}
 	if (builtInProviderIds.has(providerId)) {
 		return false;
 	}
-	return !oauthProviderIds.has(providerId);
+	return true;
 }
 
 /**

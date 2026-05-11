@@ -4,7 +4,7 @@
   <h1>Mooncli</h1>
   <p>Minimalist, blazing fast, and enterprise-ready terminal coding assistant.</p>
 
-  [![Version](https://img.shields.io/badge/version-Beta_1.5-blue.svg?style=for-the-badge)](#)
+  [![Version](https://img.shields.io/badge/version-Beta_1.5.1-blue.svg?style=for-the-badge)](#)
   [![License](https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge)](#)
   [![Platform](https://img.shields.io/badge/platform-Windows_|_macOS_|_Linux-lightgray.svg?style=for-the-badge)](#)
 </div>

@@ -633,6 +633,11 @@ export class ModelRegistry {
 	 */
 	hasConfiguredAuth(model: Model<Api>): boolean {
 		if (model.provider === "ollama") return true;
+
+		// If provider has OAuth support, it's "available" for login/selection
+		const isOAuthProvider = this.authStorage.getOAuthProviders().some((p) => p.id === model.provider);
+		if (isOAuthProvider) return true;
+
 		return (
 			this.authStorage.hasAuth(model.provider) ||
 			this.providerRequestConfigs.get(model.provider)?.apiKey !== undefined
