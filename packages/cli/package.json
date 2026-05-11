@@ -60,9 +60,9 @@
     "undici": "^7.25.0",
     "uuid": "^14.0.0",
     "yaml": "^2.8.2",
-    "moon-core": "11.5.2026-3",
-    "moon-engine": "11.5.2026-3",
-    "moon-tui": "11.5.2026-3"
+    "moon-core": "12.5.2026",
+    "moon-engine": "12.5.2026",
+    "moon-tui": "12.5.2026"
   },
   "overrides": {
     "rimraf": "6.1.2",
