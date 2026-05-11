@@ -701,10 +701,10 @@ async function injectOverlay(tabId, message = "Moon Controlling") {
       if (txtEl) txtEl.textContent = msg;
 
       // Clear previous auto-hide timer
-      if (window.__hodeus_hide) clearTimeout(window.__hodeus_hide);
+      if (window.__mooncli_hide) clearTimeout(window.__mooncli_hide);
       banner.style.opacity = "1";
 
-      window.__hodeus_hide = setTimeout(() => {
+      window.__mooncli_hide = setTimeout(() => {
         const b = document.getElementById(BANNER_ID);
         const bar = document.getElementById("mooncli-bar");
         if (b) b.style.opacity = "0";

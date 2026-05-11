@@ -1,6 +1,6 @@
 import { getMooncliUserEngine } from "./moon-user-engine.js";
 
-const LATEST_VERSION_URL = "https://hodeus.dev/api/latest-version";
+const LATEST_VERSION_URL = "https://mooncli.dev/api/latest-version";
 const DEFAULT_VERSION_CHECK_TIMEOUT_MS = 10000;
 
 interface ParsedVersion {

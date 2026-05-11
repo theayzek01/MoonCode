@@ -2,12 +2,7 @@
 // Preloads the latest open issues once per session, then filters them locally for fast `#...` completion.
 
 import type { ExtensionAPI } from "Mooncli";
-import {
-	type AutocompleteItem,
-	type AutocompleteProvider,
-	type AutocompleteSuggestions,
-	fuzzyFilter,
-} from "moon-tui";
+import { type AutocompleteItem, type AutocompleteProvider, type AutocompleteSuggestions, fuzzyFilter } from "moon-tui";
 
 type GitHubIssue = {
 	number: number;

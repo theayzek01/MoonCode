@@ -41,7 +41,8 @@ export function createGitShipToolDefinition(cwd: string): ToolDefinition<typeof 
 			const action = input.action || "status";
 			let text = "";
 			if (action === "status") text = await getGitStatus(cwd);
-			else if (action === "branch") text = `Branch: ${await createBranch(cwd, input.branchName || "Mooncli/update")}`;
+			else if (action === "branch")
+				text = `Branch: ${await createBranch(cwd, input.branchName || "Mooncli/update")}`;
 			else if (action === "commit") text = await commitAll(cwd, input.message || "chore: update via Mooncli");
 			else if (action === "push") text = await pushBranch(cwd, input.branchName);
 			else if (action === "pr")

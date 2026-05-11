@@ -10,9 +10,9 @@
 			"moon-core/dist/*": ["./packages/core/src/*"],
 			"moon-engine": ["./packages/engine/src/index.ts"],
 			"moon-engine/*": ["./packages/engine/src/*"],
-			"hodeus": ["./packages/cli/src/index.ts"],
-			"hodeus/hooks": ["./packages/cli/src/core/hooks/index.ts"],
-			"hodeus/*": ["./packages/cli/src/*"],
+			"mooncli": ["./packages/cli/src/index.ts"],
+			"mooncli/hooks": ["./packages/cli/src/core/hooks/index.ts"],
+			"mooncli/*": ["./packages/cli/src/*"],
 			"typebox": ["./node_modules/typebox"],
 			"moon-tui": ["./packages/tui/src/index.ts"],
 			"moon-tui/*": ["./packages/tui/src/*"]

@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 
-const version = "11.5.2026-2";
+const version = "11.5.2026-3";
 const packages = [
     "package.json",
     "packages/cli/package.json",

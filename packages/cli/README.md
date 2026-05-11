@@ -3,7 +3,7 @@
 
   <br />
 
-  [![npm](https://img.shields.io/npm/v/hodeus?style=for-the-badge&color=0ea5e9&labelColor=1e293b)](https://www.npmjs.com/package/hodeus)
+  [![npm](https://img.shields.io/npm/v/mooncli?style=for-the-badge&color=0ea5e9&labelColor=1e293b)](https://www.npmjs.com/package/mooncli)
 
   ### **Mooncli CLI**
   *The core terminal interface for the Mooncli agentic engine.*
@@ -26,15 +26,15 @@ This package contains the command-line interface (CLI) for Mooncli. It provides 
 ## 📦 Installation
 
 ```bash
-npm install -g hodeus
+npm install -g mooncli
 ```
 
 ## 📖 Usage
 
-Simply run `hodeus` in any directory to start a session.
+Simply run `mooncli` in any directory to start a session.
 
 ```bash
-hodeus
+mooncli
 ```
 
 For full documentation on available commands and flags, please refer to the [root README](../../README.md).

@@ -109,11 +109,11 @@ import { ExtensionEditorComponent } from "./components/extension-editor.js";
 import { ExtensionInputComponent } from "./components/extension-input.js";
 import { ExtensionSelectorComponent } from "./components/extension-selector.js";
 import { FooterComponent } from "./components/footer.js";
-import { MooncliHeaderComponent } from "./components/mooncli-header.js";
 import { keyHint, keyText, rawKeyHint } from "./components/keybinding-hints.js";
 import { LoginDialogComponent } from "./components/login-dialog.js";
 import { McpSelectorComponent } from "./components/mcp-selector.js";
 import { ModelSelectorComponent } from "./components/model-selector.js";
+import { MooncliHeaderComponent } from "./components/mooncli-header.js";
 import { type AuthSelectorProvider, OAuthSelectorComponent } from "./components/oauth-selector.js";
 import { ScopedModelsSelectorComponent } from "./components/scoped-models-selector.js";
 import { SessionSelectorComponent } from "./components/session-selector.js";
@@ -866,7 +866,7 @@ export class InteractiveMode {
 			return;
 		}
 
-		void fetch(`https://hodeus.dev/api/report-install?version=${encodeURIComponent(version)}`, {
+		void fetch(`https://mooncli.dev/api/report-install?version=${encodeURIComponent(version)}`, {
 			method: "POST",
 			headers: {
 				"User-Engine": getMooncliUserEngine(version),
@@ -5513,9 +5513,9 @@ export class InteractiveMode {
 		try {
 			if (!cmd || cmd === "status") this.showStatus(await git.getGitStatus(cwd));
 			else if (cmd === "commit")
-				this.showStatus(await git.commitAll(cwd, rest.join(" ") || "chore: update via hodeus"));
+				this.showStatus(await git.commitAll(cwd, rest.join(" ") || "chore: update via mooncli"));
 			else if (cmd === "branch")
-				this.showStatus(`Branch: ${await git.createBranch(cwd, rest.join("-") || "hodeus/update")}`);
+				this.showStatus(`Branch: ${await git.createBranch(cwd, rest.join("-") || "mooncli/update")}`);
 			else if (cmd === "push") this.showStatus(await git.pushBranch(cwd));
 			else this.showStatus("Kullanım: /git status | /git commit <mesaj> | /git branch <ad> | /git push");
 		} catch (err: any) {
