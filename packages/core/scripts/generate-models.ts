@@ -1734,8 +1734,8 @@ async function generateModels() {
 			maxTokens: 65535,
 		},
 		{
-			id: "gemini-3-flash",
-			name: "Gemini 3 Flash (Antigravity)",
+			id: "gemini-3.1-flash",
+			name: "Gemini 3.1 Flash (Antigravity)",
 			api: "google-antigravity",
 			provider: "antigravity",
 			baseUrl: ANTIGRAVITY_ENDPOINT,

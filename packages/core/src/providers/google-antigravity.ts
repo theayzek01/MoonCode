@@ -63,8 +63,8 @@ const ANTIGRAVITY_ENDPOINT_FALLBACKS = [
 ] as const;
 // Headers for Gemini CLI (prod endpoint)
 const GEMINI_CLI_HEADERS = {
-	"User-Engine": "google-cloud-sdk vscode_cloudshelleditor/0.1",
-	"X-Goog-Amooncli-Client": "gl-node/22.17.0",
+	"User-Agent": "google-cloud-sdk vscode_cloudshelleditor/0.1",
+	"X-Goog-Api-Client": "gl-node/22.17.0",
 	"Client-Metadata": JSON.stringify({
 		ideType: "IDE_UNSPECIFIED",
 		platform: "PLATFORM_UNSPECIFIED",
@@ -72,13 +72,14 @@ const GEMINI_CLI_HEADERS = {
 	}),
 };
 
-// Headers for Antigravity (sandbox endpoint) - requires specific User-Engine
+// Headers for Antigravity (sandbox endpoint) - requires specific User-Agent
 const DEFAULT_ANTIGRAVITY_VERSION = "1.18.4";
 
-function getAntigravityHeaders() {
-	const version = process.env.PI_Core_ANTIGRAVITY_VERSION || DEFAULT_ANTIGRAVITY_VERSION;
+function getAntigravityHeaders(requestId?: string) {
+	const version = process.env.PI_AI_ANTIGRAVITY_VERSION || DEFAULT_ANTIGRAVITY_VERSION;
 	return {
-		"User-Engine": `antigravity/${version} darwin/arm64`,
+		"User-Agent": `antigravity/${version} darwin/arm64`,
+		...(requestId ? { "X-Request-Id": requestId } : {}),
 	};
 }
 
@@ -220,11 +221,12 @@ function isGemini3Model(modelId: string): boolean {
  */
 function getApiModelId(modelId: string): string {
 	const id = modelId.toLowerCase();
-	if (id.includes("gemini-3.1-pro")) return "gemini-3.1-pro";
-	if (id.includes("gemini-3-flash")) return "gemini-3-flash";
+	// Sandbox/Daily endpointleri genellikle 3.1 isimlerini bekler
+	if (id.includes("gemini-3-flash") || id.includes("gemini-3.1-flash")) return "gemini-3.1-flash";
+	if (id.includes("gemini-3-pro") || id.includes("gemini-3.1-pro")) return "gemini-3.1-pro";
 	if (id.includes("claude-sonnet-4.6")) return "claude-4.6-sonnet";
 	if (id.includes("claude-opus-4.6")) return "claude-4.6-opus";
-	if (id.includes("gpt-oss:120b-cloud")) return "gpt-oss:120b-cloud";
+	if (id.includes("gpt-oss-120b")) return "gpt-oss-120b-cloud";
 	return modelId;
 }
 
@@ -291,8 +293,6 @@ interface CloudCodeAssistRequest {
 		};
 	};
 	requestType?: string;
-	userEngine?: string;
-	requestId?: string;
 }
 
 interface CloudCodeAssistResponseChunk {
@@ -383,7 +383,8 @@ export const streamGoogleGeminiCli: StreamFunction<"google-antigravity", GoogleG
 			if (nextRequestBody !== undefined) {
 				requestBody = nextRequestBody as CloudCodeAssistRequest;
 			}
-			const headers = isAntigravity ? getAntigravityHeaders() : GEMINI_CLI_HEADERS;
+			const requestId = `${isAntigravity ? "agent" : "pi"}-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+			const headers = isAntigravity ? getAntigravityHeaders(requestId) : GEMINI_CLI_HEADERS;
 
 			const requestHeaders = {
 				Authorization: `Bearer ${accessToken}`,
@@ -410,7 +411,15 @@ export const streamGoogleGeminiCli: StreamFunction<"google-antigravity", GoogleG
 
 				try {
 					const endpoint = endpoints[endpointIndex];
-					requestUrl = `${endpoint}/v1internal:streamGenerateContent?alt=sse`;
+					if (isAntigravity) {
+						// Antigravity (sandbox) requires the project and model in the URL path
+						const apiModelId = getApiModelId(model.id);
+						requestUrl = `${endpoint}/v1/projects/${projectId}/locations/global/models/${apiModelId}:streamGenerateContent?alt=sse`;
+					} else {
+						// Prod Gemini CLI uses the internal endpoint with model in body
+						requestUrl = `${endpoint}/v1internal:streamGenerateContent?alt=sse`;
+					}
+
 					response = await fetch(requestUrl, {
 						method: "POST",
 						headers: requestHeaders,
@@ -937,9 +946,7 @@ export function buildRequest(
 		project: projectId,
 		model: getApiModelId(model.id),
 		request,
-		...(isAntigravity ? { requestType: "engine" } : {}),
-		userEngine: isAntigravity ? "antigravity" : "mooncli-cli",
-		requestId: `${isAntigravity ? "engine" : "moodcli"}-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+		...(isAntigravity ? { requestType: "agent" } : {}),
 	};
 }
 

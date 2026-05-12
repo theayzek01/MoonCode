@@ -233,7 +233,7 @@ describe("shouldCompact", () => {
 		};
 
 		expect(shouldCompact(95000, 100000, settings)).toBe(true);
-		expect(shouldCompact(89000, 100000, settings)).toBe(false);
+		expect(shouldCompact(77000, 100000, settings)).toBe(false);
 	});
 
 	it("should return false when disabled", () => {

@@ -1,7 +1,9 @@
-import { exec } from "child_process";
+import { exec, execFile } from "child_process";
 import { promisify } from "util";
 
 const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
+const LOCAL_FALLBACK_PREFIX = "local:";
 
 /**
  * Ghost Environment (Container Wizard)
@@ -10,6 +12,7 @@ const execAsync = promisify(exec);
  */
 export class GhostEnvironment {
 	private activeContainers: Map<string, string> = new Map();
+	private localFallbacks: Set<string> = new Set();
 
 	/**
 	 * Checks if a dependency is installed locally. If not, spins up a Docker container.
@@ -18,23 +21,29 @@ export class GhostEnvironment {
 		if (this.activeContainers.has(imageName)) {
 			return this.activeContainers.get(imageName)!;
 		}
+		if (this.localFallbacks.has(imageName)) {
+			return `${LOCAL_FALLBACK_PREFIX}${imageName}`;
+		}
 
 		try {
 			// Check if docker is available
-			await execAsync("docker --version");
+			await execFileAsync("docker", ["--version"]);
 
-			const portMappings = ports.map((p) => `-p ${p}`).join(" ");
 			const containerName = `mooncli-ghost-${imageName.replace(/[^a-zA-Z0-9]/g, "")}-${Date.now()}`;
-
-			const cmd = `docker run -d --rm --name ${containerName} ${portMappings} ${imageName}`;
-			const { stdout } = await execAsync(cmd);
+			const args = ["run", "-d", "--rm", "--name", containerName];
+			for (const port of ports) {
+				args.push("-p", port);
+			}
+			args.push(imageName);
+			const { stdout } = await execFileAsync("docker", args);
 			const containerId = stdout.trim();
 
 			this.activeContainers.set(imageName, containerId);
 			return containerId;
 		} catch (error: any) {
-			if (error.message.includes("docker --version")) {
-				throw new Error("Ghost Environment failed: Docker is not installed or not running on the host system.");
+			if (error.code === "ENOENT" || /docker/i.test(error.message)) {
+				this.localFallbacks.add(imageName);
+				return `${LOCAL_FALLBACK_PREFIX}${imageName}`;
 			}
 			throw new Error(`Ghost Environment failed to start ${imageName}: ${error.message}`);
 		}
@@ -45,7 +54,11 @@ export class GhostEnvironment {
 	 */
 	public async executeInContainer(containerId: string, command: string): Promise<string> {
 		try {
-			const { stdout } = await execAsync(`docker exec ${containerId} sh -c "${command}"`);
+			if (containerId.startsWith(LOCAL_FALLBACK_PREFIX)) {
+				const { stdout } = await execAsync(command);
+				return stdout.trim();
+			}
+			const { stdout } = await execFileAsync("docker", ["exec", containerId, "sh", "-c", command]);
 			return stdout.trim();
 		} catch (error: any) {
 			throw new Error(`Execution in Ghost Environment failed: ${error.message}`);
@@ -58,11 +71,12 @@ export class GhostEnvironment {
 	public async cleanup(): Promise<void> {
 		for (const [_image, containerId] of this.activeContainers.entries()) {
 			try {
-				await execAsync(`docker stop ${containerId}`);
+				await execFileAsync("docker", ["stop", containerId]);
 			} catch (_e) {
 				// Ignore cleanup errors
 			}
 		}
 		this.activeContainers.clear();
+		this.localFallbacks.clear();
 	}
 }

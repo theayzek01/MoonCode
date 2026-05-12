@@ -174,10 +174,25 @@ export interface OverlayHandle {
 }
 
 /**
+ * Container style options
+ */
+export interface ContainerStyle {
+	flexDirection?: "column" | "row";
+	width?: number | string;
+	minWidth?: number;
+	border?: "left" | "right" | "none";
+}
+
+/**
  * Container - a component that contains other components
  */
 export class Container implements Component {
 	children: Component[] = [];
+	style: ContainerStyle = { flexDirection: "column" };
+
+	setStyle(style: ContainerStyle): void {
+		this.style = { ...this.style, ...style };
+	}
 
 	addChild(component: Component): void {
 		this.children.push(component);
@@ -201,9 +216,75 @@ export class Container implements Component {
 	}
 
 	render(width: number): string[] {
+		// Handle width override
+		let targetWidth = width;
+		if (typeof this.style.width === "number") {
+			targetWidth = this.style.width;
+		} else if (typeof this.style.width === "string" && this.style.width.endsWith("%")) {
+			const percent = parseFloat(this.style.width) / 100;
+			targetWidth = Math.floor(width * percent);
+		}
+		if (this.style.minWidth) {
+			targetWidth = Math.max(targetWidth, this.style.minWidth);
+		}
+
+		if (this.style.flexDirection === "row") {
+			// Horizontal layout
+			const childWidths: number[] = [];
+			let remainingWidth = targetWidth;
+			let flexibleChildren = 0;
+
+			// First pass: resolve fixed widths
+			this.children.forEach((child) => {
+				const style = (child as Container).style;
+				if (style && typeof style.width === "number") {
+					childWidths.push(style.width);
+					remainingWidth -= style.width;
+				} else if (style && typeof style.width === "string" && style.width.endsWith("%")) {
+					const w = Math.floor(targetWidth * (parseFloat(style.width) / 100));
+					childWidths.push(w);
+					remainingWidth -= w;
+				} else {
+					childWidths.push(-1); // Mark as flexible
+					flexibleChildren++;
+				}
+			});
+
+			// Second pass: distribute remaining width to flexible children
+			const flexWidth = flexibleChildren > 0 ? Math.floor(remainingWidth / flexibleChildren) : 0;
+			childWidths.forEach((w, i) => {
+				if (w === -1) childWidths[i] = flexWidth;
+			});
+
+			const allChildLines: string[][] = childWidths.map((w, i) => this.children[i].render(w));
+			const maxLines = Math.max(0, ...allChildLines.map((l) => l.length));
+			const lines: string[] = [];
+
+			for (let i = 0; i < maxLines; i++) {
+				let combinedLine = "";
+				allChildLines.forEach((childLines, childIdx) => {
+					let line = childLines[i] || "";
+					const w = childWidths[childIdx];
+
+					// Pad or slice line to match child width
+					const vw = visibleWidth(line);
+					if (vw < w) {
+						line += " ".repeat(w - vw);
+					} else if (vw > w) {
+						line = sliceByColumn(line, 0, w);
+					}
+
+					combinedLine += line;
+				});
+				lines.push(combinedLine);
+			}
+			return lines;
+		}
+
+		// Vertical layout (Default)
 		const lines: string[] = [];
 		for (const child of this.children) {
-			const childLines = child.render(width);
+			const childLines = child.render(targetWidth);
 			for (const line of childLines) {
 				lines.push(line);
 			}

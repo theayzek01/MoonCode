@@ -1,5 +1,4 @@
 // @ts-nocheck
-import { Mistral } from "@mistralai/mistralai";
 import { getEnvApiKey } from "../env-api-keys.js";
 import { calculateCost, clampThinkingLevel } from "../models.js";
 import { AssistantMessageEventStream } from "../utils/event-stream.js";
@@ -22,11 +21,6 @@ export const streamMistral = (model, context, options) => {
             if (!apiKey) {
                 throw new Error(`No API key for provider: ${model.provider}`);
             }
-            // Intentionally per-request: avoids shared SDK mutable state across concurrent consumers.
-            const mistral = new Mistral({
-                apiKey,
-                serverURL: model.baseUrl,
-            });
             const normalizeMistralToolCallId = createMistralToolCallIdNormalizer();
             const transformedMessages = transformMessages(context.messages, model, (id) => normalizeMistralToolCallId(id));
             let payload = buildChatPayload(model, context, transformedMessages, options);
@@ -34,7 +28,7 @@ export const streamMistral = (model, context, options) => {
             if (nextPayload !== undefined) {
                 payload = nextPayload;
             }
-            const mistralStream = await mistral.chat.stream(payload, buildRequestOptions(model, options));
+            const mistralStream = await streamMistralChat(apiKey, model, payload, options);
             stream.push({ type: "start", partial: output });
             await consumeChatStream(model, output, stream, mistralStream);
             if (options?.signal?.aborted) {
@@ -154,12 +148,7 @@ function safeJsonStringify(value) {
         return String(value);
     }
 }
-function buildRequestOptions(model, options) {
-    const requestOptions = {
-        retries: { strategy: "none" },
-    };
-    if (options?.signal)
-        requestOptions.signal = options.signal;
+function buildRequestHeaders(apiKey, model, options) {
     const headers = {};
     if (model.headers)
         Object.assign(headers, model.headers);
@@ -170,10 +159,78 @@ function buildRequestOptions(model, options) {
     if (options?.sessionId && !headers["x-affinity"]) {
         headers["x-affinity"] = options.sessionId;
     }
-    if (Object.keys(headers).length > 0) {
-        requestOptions.headers = headers;
+    return {
+        ...headers,
+        authorization: headers.authorization || `Bearer ${apiKey}`,
+        "content-type": headers["content-type"] || "application/json",
+        accept: headers.accept || "text/event-stream",
+    };
+}
+async function streamMistralChat(apiKey, model, payload, options) {
+    const baseUrl = (model.baseUrl || "https://api.mistral.ai/v1").replace(/\/+$/, "");
+    const response = await fetch(`${baseUrl}/chat/completions`, {
+        method: "POST",
+        headers: buildRequestHeaders(apiKey, model, options),
+        body: JSON.stringify(payload),
+        signal: options?.signal,
+    });
+    if (!response.ok || !response.body) {
+        const body = await response.text().catch(() => "");
+        const error = new Error(`Mistral API error (${response.status}): ${truncateErrorText(body || response.statusText, MAX_MISTRAL_ERROR_BODY_CHARS)}`);
+        error.statusCode = response.status;
+        error.body = body;
+        throw error;
     }
-    return requestOptions;
+    return parseSseCompletionEvents(response.body);
+}
+async function* parseSseCompletionEvents(body) {
+    const reader = body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    try {
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done)
+                break;
+            buffer += decoder.decode(value, { stream: true });
+            let boundary = findSseBoundary(buffer);
+            while (boundary >= 0) {
+                const frame = buffer.slice(0, boundary);
+                buffer = buffer.slice(buffer[boundary] === "\r" && buffer[boundary + 1] === "\n" ? boundary + 4 : boundary + 2);
+                const event = parseSseFrame(frame);
+                if (event)
+                    yield event;
+                boundary = findSseBoundary(buffer);
+            }
+        }
+        buffer += decoder.decode();
+        const event = parseSseFrame(buffer);
+        if (event)
+            yield event;
+    }
+    finally {
+        reader.releaseLock();
+    }
+}
+function findSseBoundary(text) {
+    const crlf = text.indexOf("\r\n\r\n");
+    const lf = text.indexOf("\n\n");
+    if (crlf === -1)
+        return lf;
+    if (lf === -1)
+        return crlf;
+    return Math.min(crlf, lf);
+}
+function parseSseFrame(frame) {
+    const data = frame
+        .split(/\r?\n/)
+        .filter((line) => line.startsWith("data:"))
+        .map((line) => line.slice(5).trimStart())
+        .join("\n")
+        .trim();
+    if (!data || data === "[DONE]")
+        return undefined;
+    return { data: JSON.parse(data) };
 }
 function buildChatPayload(model, context, messages, options) {
     const payload = {

@@ -121,8 +121,8 @@ export interface CompactionSettings {
 
 export const DEFAULT_COMPACTION_SETTINGS: CompactionSettings = {
 	enabled: true,
-	reserveTokens: 32768,
-	keepRecentTokens: 12000,
+	reserveTokens: 16384, // Reduced from 32k for faster context processing
+	keepRecentTokens: 8192, // Reduced from 12k to focus on higher density recent work
 };
 
 // ============================================================================
@@ -255,7 +255,7 @@ export function estimateTokens(message: EngineMessage): number {
 					}
 				}
 			}
-			return Math.ceil(chars / 4);
+			return Math.ceil(chars / 3.5);
 		}
 		case "assistant": {
 			const assistant = message as AssistantMessage;
@@ -268,7 +268,7 @@ export function estimateTokens(message: EngineMessage): number {
 					chars += block.name.length + JSON.stringify(block.arguments).length;
 				}
 			}
-			return Math.ceil(chars / 4);
+			return Math.ceil(chars / 3.5);
 		}
 		case "custom":
 		case "toolResult": {
@@ -284,16 +284,16 @@ export function estimateTokens(message: EngineMessage): number {
 					}
 				}
 			}
-			return Math.ceil(chars / 4);
+			return Math.ceil(chars / 3.5);
 		}
 		case "bashExecution": {
 			chars = message.command.length + message.output.length;
-			return Math.ceil(chars / 4);
+			return Math.ceil(chars / 3.5);
 		}
 		case "branchSummary":
 		case "compactionSummary": {
 			chars = message.summary.length;
-			return Math.ceil(chars / 4);
+			return Math.ceil(chars / 3.5);
 		}
 	}
 

@@ -8,6 +8,7 @@
 
 import type { ImageContent, Message, TextContent } from "moon-core";
 import type { EngineMessage } from "moon-engine";
+import { optimizePromptText } from "./token-optimizer.js";
 
 export const COMPACTION_SUMMARY_PREFIX = `Bu noktadan onceki konusma gecmisi su ozete sikistirildi:
 
@@ -83,7 +84,8 @@ declare module "moon-engine" {
 export function bashExecutionToText(msg: BashExecutionMessage): string {
 	let text = `\`${msg.command}\` calistirildi\n`;
 	if (msg.output) {
-		text += `\`\`\`\n${msg.output}\n\`\`\``;
+		const optimizedOutput = optimizePromptText(msg.output).optimizedText;
+		text += `\`\`\`\n${optimizedOutput}\n\`\`\``;
 	} else {
 		text += "(cikti yok)";
 	}
@@ -161,7 +163,12 @@ export function convertToLlm(messages: EngineMessage[]): Message[] {
 						timestamp: m.timestamp,
 					};
 				case "custom": {
-					const content = typeof m.content === "string" ? [{ type: "text" as const, text: m.content }] : m.content;
+					const content =
+						typeof m.content === "string"
+							? [{ type: "text" as const, text: optimizePromptText(m.content).optimizedText }]
+							: m.content.map((part) =>
+									part.type === "text" ? { ...part, text: optimizePromptText(part.text).optimizedText } : part,
+								);
 					return {
 						role: "user",
 						content,

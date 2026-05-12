@@ -85,14 +85,16 @@ describe("EngineSession compaction characterization", () => {
 		harnesses.push(harness);
 		harness.session.engine.state.model = undefined as unknown as Model<any>;
 
-		await expect(harness.session.compact()).rejects.toThrow("No model selected");
+		await expect(harness.session.compact()).rejects.toThrow("Model secilmedi");
 	});
 
 	it("throws when compacting without configured auth", async () => {
 		const harness = await createHarness({ withConfiguredAuth: false });
 		harnesses.push(harness);
 
-		await expect(harness.session.compact()).rejects.toThrow(`No API key found for ${harness.getModel().provider}.`);
+		await expect(harness.session.compact()).rejects.toThrow(
+			`${harness.getModel().provider} icin API anahtari bulunamadi`,
+		);
 	});
 
 	it("cancels in-progress manual compaction when abortCompaction is called", async () => {

@@ -1,6 +1,6 @@
 {
   "name": "moon-core",
-  "version": "1.5.1-beta",
+  "version": "11.40.0",
   "description": "Unified Core Engine for Modern Apps",
   "type": "module",
   "main": "./dist/index.js",
@@ -71,7 +71,6 @@
     "@anthropic-ai/sdk": "^0.91.1",
     "@aws-sdk/client-bedrock-runtime": "^3.1030.0",
     "@google/genai": "^1.40.0",
-    "@mistralai/mistralai": "^2.2.0",
     "typebox": "^1.1.24",
     "chalk": "^5.6.2",
     "openai": "^4.82.0",

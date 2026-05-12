@@ -115,6 +115,7 @@ import { McpSelectorComponent } from "./components/mcp-selector.js";
 import { ModelSelectorComponent } from "./components/model-selector.js";
 import { MooncliHeaderComponent } from "./components/mooncli-header.js";
 import { type AuthSelectorProvider, OAuthSelectorComponent } from "./components/oauth-selector.js";
+import { RoadmapComponent, type RoadmapStep } from "./components/roadmap.js";
 import { ScopedModelsSelectorComponent } from "./components/scoped-models-selector.js";
 import { SessionSelectorComponent } from "./components/session-selector.js";
 import { SettingsSelectorComponent } from "./components/settings-selector.js";
@@ -231,6 +232,7 @@ export class InteractiveMode {
 	private chatContainer: Container;
 	private pendingMessagesContainer: Container;
 	private statusContainer: Container;
+	private roadmap: RoadmapComponent;
 	private defaultEditor: CustomEditor;
 	private editor: EditorComponent;
 	private editorComponentFactory: EditorFactory | undefined;
@@ -298,6 +300,9 @@ export class InteractiveMode {
 	// Auto-compaction state
 	private autoCompactionLoader: Loader | undefined = undefined;
 	private autoCompactionEscapeHandler?: () => void;
+
+	// Roadmap state
+	private currentSteps: RoadmapStep[] = [];
 
 	// Auto-retry state
 	private retryLoader: Loader | undefined = undefined;
@@ -633,8 +638,25 @@ export class InteractiveMode {
 			this.headerContainer.addChild(this.builtInHeader);
 		}
 
-		this.ui.addChild(this.chatContainer);
-		this.ui.addChild(this.pendingMessagesContainer);
+		this.roadmap = new RoadmapComponent();
+
+		// Create a side-by-side layout for chat and roadmap
+		const mainLayout = new Container();
+		mainLayout.setStyle({ flexDirection: "row" });
+
+		const chatWrapper = new Container();
+		chatWrapper.setStyle({ flexGrow: 1 }); // Chat takes most space
+		chatWrapper.addChild(this.chatContainer);
+		chatWrapper.addChild(this.pendingMessagesContainer);
+
+		const roadmapWrapper = new Container();
+		roadmapWrapper.setStyle({ width: 35, minWidth: 30, border: "left" }); // Fixed width for Roadmap
+		roadmapWrapper.addChild(this.roadmap);
+
+		mainLayout.addChild(chatWrapper);
+		mainLayout.addChild(roadmapWrapper);
+
+		this.ui.addChild(mainLayout);
 		this.ui.addChild(this.statusContainer);
 		this.renderWidgets(); // Initialize with default spacer
 		this.ui.addChild(this.widgetContainerAbove);
@@ -2680,6 +2702,12 @@ export class InteractiveMode {
 				this.handlePlanCommand(arg);
 				return;
 			}
+			if (text === "/autothink" || text.startsWith("/autothink ")) {
+				const arg = text.startsWith("/autothink ") ? text.slice(11).trim() : "";
+				this.editor.setText("");
+				this.handleAutoThinkCommand(arg);
+				return;
+			}
 			if (text === "/init") {
 				this.editor.setText("");
 				await this.handleInitCommand();
@@ -2749,7 +2777,7 @@ export class InteractiveMode {
 			await this.init();
 		}
 
-		this.updateWorkingMessageContextually(event);
+		this.updateWorkingMessageContextually?.(event);
 		this.footer.invalidate();
 
 		switch (event.type) {
@@ -2821,6 +2849,25 @@ export class InteractiveMode {
 				if (this.streamingComponent && event.message.role === "assistant") {
 					this.streamingMessage = event.message;
 					this.streamingComponent.updateContent(this.streamingMessage);
+
+					// Parse roadmap steps from thinking content if not already set
+					const thinkingContent = this.streamingMessage.content.find((c) => c.type === "thinking")?.thinking;
+					if (thinkingContent && this.currentSteps.length === 0) {
+						const stepsMatch = thinkingContent.match(/\[roadmap\]([\s\S]*?)\[\/roadmap\]/i);
+						if (stepsMatch) {
+							const stepLines = stepsMatch[1]
+								.split("\n")
+								.map((s) => s.trim())
+								.filter((s) => s.length > 0);
+							this.currentSteps = stepLines.map((label, i) => ({
+								id: `step-${i}`,
+								label: label.replace(/^[-*]\s*/, ""),
+								status: i === 0 ? "active" : "pending",
+							}));
+							this.roadmap.setSteps(this.currentSteps);
+							this.roadmap.setEta(Math.ceil(this.currentSteps.length * 0.5)); // ~30 sec per step
+						}
+					}
 
 					for (const content of this.streamingMessage.content) {
 						if (content.type === "toolCall") {
@@ -2911,6 +2958,13 @@ export class InteractiveMode {
 					this.pendingTools.set(event.toolCallId, component);
 				}
 				component.markExecutionStarted();
+
+				// Update roadmap step based on tool name
+				const activeStepIndex = this.currentSteps.findIndex((s) => s.status === "active");
+				if (activeStepIndex !== -1 && this.currentSteps[activeStepIndex]) {
+					this.roadmap.updateStepStatus(this.currentSteps[activeStepIndex].id, "active");
+				}
+
 				this.ui.requestRender();
 				break;
 			}
@@ -2929,6 +2983,22 @@ export class InteractiveMode {
 				if (component) {
 					component.updateResult({ ...event.result, isError: event.isError });
 					this.pendingTools.delete(event.toolCallId);
+
+					// Move to next roadmap step
+					const activeIndex = this.currentSteps.findIndex((s) => s.status === "active");
+					if (activeIndex !== -1) {
+						this.currentSteps[activeIndex].status = "completed";
+						this.roadmap.updateStepStatus(this.currentSteps[activeIndex].id, "completed");
+
+						if (this.currentSteps[activeIndex + 1]) {
+							this.currentSteps[activeIndex + 1].status = "active";
+							this.roadmap.updateStepStatus(this.currentSteps[activeIndex + 1].id, "active");
+						}
+
+						const remaining = this.currentSteps.filter((s) => s.status !== "completed").length;
+						this.roadmap.setEta(Math.ceil(remaining * 0.5));
+					}
+
 					this.ui.requestRender();
 				}
 				break;
@@ -2949,6 +3019,11 @@ export class InteractiveMode {
 					this.streamingMessage = undefined;
 				}
 				this.pendingTools.clear();
+
+				// Clear roadmap for next task
+				this.currentSteps = [];
+				this.roadmap.setSteps([]);
+				this.roadmap.setEta(0);
 
 				await this.checkShutdownRequested();
 
@@ -6062,6 +6137,20 @@ export class InteractiveMode {
 	// -------------------------------------------------------------------------
 	// /init — MOON.md workspace belgesi olustur
 	// -------------------------------------------------------------------------
+	private handleAutoThinkCommand(arg: string): void {
+		const normalized = arg.trim().toLowerCase();
+		if (normalized === "on" || normalized === "true" || normalized === "1") {
+			this.session.setAutoThinkEnabled(true);
+			this.showStatus("AutoThink acildi. Detayli islerde xhigh, uygulama adimlarinda minimal/low kullanilacak.");
+			return;
+		}
+		if (normalized === "off" || normalized === "false" || normalized === "0") {
+			this.session.setAutoThinkEnabled(false);
+			this.showStatus("AutoThink kapatildi. Dusunme seviyesi elle sectigin ayarda kalacak.");
+			return;
+		}
+		this.showStatus(`Kullanim: /autothink on|off (su an: ${this.session.getAutoThinkEnabled() ? "on" : "off"})`);
+	}
 	private async handleInitCommand(): Promise<void> {
 		const cwd = this.sessionManager.getCwd();
 		const moonPath = path.join(cwd, "MOON.md");

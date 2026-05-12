@@ -28,6 +28,7 @@ export const BUILTIN_SLASH_COMMANDS: ReadonlyArray<BuiltinSlashCommand> = [
 	{ name: "session", description: "Oturum bilgilerini ve istatistiklerini göster" },
 	{ name: "context", description: "Bağlam kullanımı ve token dağılımını göster" },
 	{ name: "plan", description: "Plan modunu aç/kapat (analiz modu)" },
+	{ name: "autothink", description: "Otomatik dusunme seviyesini ac/kapat" },
 	{ name: "init", description: "Proje yapılandırma dosyalarını oluştur" },
 	{ name: "changelog", description: "Değişim günlüğünü göster" },
 	{ name: "hotkeys", description: "Klavye kısayollarını listele" },

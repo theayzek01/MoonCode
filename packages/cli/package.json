@@ -1,6 +1,6 @@
 {
 	"name": "mooncli",
-	"version": "1.5.1-beta",
+	"version": "11.40.0",
 	"description": "Modern Terminal Assistant",
 	"type": "module",
 	"moonConfig": {
@@ -60,9 +60,9 @@
 		"undici": "^7.25.0",
 		"uuid": "^14.0.0",
 		"yaml": "^2.8.2",
-		"moon-core": "1.5.1-beta",
-		"moon-engine": "1.5.1-beta",
-		"moon-tui": "1.5.1-beta"
+		"moon-core": "^11.40.0",
+		"moon-engine": "^11.40.0",
+		"moon-tui": "^11.40.0"
 	},
 	"overrides": {
 		"rimraf": "6.1.2",

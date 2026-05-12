@@ -1226,6 +1226,8 @@ export class EngineSession {
 				expandedText = this._expandSkillCommand(expandedText);
 				expandedText = expandPromptTemplate(expandedText, [...this.promptTemplates]);
 			}
+			expandedText = optimizePromptText(expandedText).optimizedText;
+			this._applyAutoThinkingLevel(expandedText);
 
 			// If streaming, queue via steer() or followUp() based on option
 			if (this.isStreaming) {
@@ -1312,7 +1314,7 @@ export class EngineSession {
 					});
 				}
 			}
-			const memoryPreface = getMemoryPreface(5);
+			const memoryPreface = getMemoryPreface(3, true);
 			// Apply extension-modified system prompt, or reset to base
 			if (result?.systemPrompt) {
 				this.engine.state.systemPrompt = memoryPreface
@@ -1744,9 +1746,10 @@ export class EngineSession {
 	 * Clamps to model capabilities based on available thinking levels.
 	 * Saves to session and settings only if the level actually changes.
 	 */
-	setThinkingLevel(level: ThinkingLevel): void {
+	setThinkingLevel(level: ThinkingLevel, options: { persistDefault?: boolean } = {}): void {
 		const availableLevels = this.getAvailableThinkingLevels();
 		const effectiveLevel = availableLevels.includes(level) ? level : this._clampThinkingLevel(level, availableLevels);
+		const persistDefault = options.persistDefault ?? true;
 
 		// Only persist if actually changing
 		const previousLevel = this.engine.state.thinkingLevel;
@@ -1756,7 +1759,7 @@ export class EngineSession {
 
 		if (isChanging) {
 			this.sessionManager.appendThinkingLevelChange(effectiveLevel);
-			if (this.supportsThinking() || effectiveLevel !== "off") {
+			if (persistDefault && (this.supportsThinking() || effectiveLevel !== "off")) {
 				this.settingsManager.setDefaultThinkingLevel(effectiveLevel);
 			}
 			this._emit({ type: "thinking_level_changed", level: effectiveLevel });
@@ -1791,6 +1794,42 @@ export class EngineSession {
 	getAvailableThinkingLevels(): ThinkingLevel[] {
 		if (!this.model) return THINKING_LEVELS;
 		return getSupportedThinkingLevels(this.model) as ThinkingLevel[];
+	}
+
+	getAutoThinkEnabled(): boolean {
+		return this.settingsManager.getAutoThinkEnabled();
+	}
+
+	setAutoThinkEnabled(enabled: boolean): void {
+		this.settingsManager.setAutoThinkEnabled(enabled);
+	}
+
+	private _resolveAutoThinkingLevel(text: string): ThinkingLevel | undefined {
+		if (!this.settingsManager.getAutoThinkEnabled() || !this.supportsThinking()) {
+			return undefined;
+		}
+
+		const normalized = text.toLowerCase();
+		const detailedPattern =
+			/\b(xhigh|detayl[ıi]|kapsaml[ıi]|mimari|analiz|debug|hata ay[ıi]kla|security|g[üu]venlik|refactor|tasarla|plan|neden|t[üu]m proje|performans|optimi[sz]e)\b/i;
+		const executionPattern =
+			/\b(build|test|lint|format|commit|push|publish|s[üu]r[üu]m|version|yaz|ekle|de[ğg]i[şs]tir|d[üu]zelt|sil|rename)\b/i;
+
+		if (detailedPattern.test(normalized)) {
+			return "xhigh";
+		}
+		if (executionPattern.test(normalized)) {
+			return "minimal";
+		}
+		return "low";
+	}
+
+	private _applyAutoThinkingLevel(text: string): void {
+		const level = this._resolveAutoThinkingLevel(text);
+		if (!level || level === this.thinkingLevel) {
+			return;
+		}
+		this.setThinkingLevel(level, { persistDefault: false });
 	}
 
 	/**

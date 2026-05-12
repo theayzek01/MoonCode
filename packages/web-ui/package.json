@@ -1,6 +1,6 @@
 {
   "name": "Mooncli-web-ui",
-  "version": "1.5.1-beta",
+  "version": "11.40.0",
   "type": "module",
   "private": true,
   "main": "src/server.ts",

@@ -109,6 +109,7 @@ export interface Settings {
 	defaultProvider?: string;
 	defaultModel?: string;
 	defaultThinkingLevel?: "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
+	autoThink?: boolean;
 	transport?: TransportSetting; // default: "auto"
 	steeringMode?: "all" | "one-at-a-time";
 	followUpMode?: "all" | "one-at-a-time";
@@ -694,6 +695,16 @@ export class SettingsManager {
 	setDefaultThinkingLevel(level: "off" | "minimal" | "low" | "medium" | "high" | "xhigh"): void {
 		this.globalSettings.defaultThinkingLevel = level;
 		this.markModified("defaultThinkingLevel");
+		this.save();
+	}
+
+	getAutoThinkEnabled(): boolean {
+		return this.settings.autoThink ?? false;
+	}
+
+	setAutoThinkEnabled(enabled: boolean): void {
+		this.globalSettings.autoThink = enabled;
+		this.markModified("autoThink");
 		this.save();
 	}
 
