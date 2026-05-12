@@ -1,41 +1,46 @@
 # MoonCode Competitive Roadmap
 
-Browser araştırması özeti: Claude Code, Cursor, Windsurf ve Codex CLI tarafında öne çıkan beklenti artık sadece chat değil; agentic planlama, terminal/FS güvenliği, MCP, paralel görevler, PR akışı, büyük context, hızlı autocomplete/preview ve kontrollü izin modelleri.
+MoonCode hedefi: terminalde çalışan, düşük token tüketen, browser automation yapabilen ve kurumsal kalite kapısından geçen en ciddi coding agent deneyimi.
 
 ## Rakiplerden öğrenilenler
 
-- **Claude Code**: terminal-native agent, repo okuma, test çalıştırma, git/PR, MCP ve uzun context.
-- **Cursor**: IDE içinde hızlı composer, custom rules, multi-file refactor, paralel agent/worktree yaklaşımı.
+- **Claude Code**: terminal-native workflow, repo okuma, test, git/PR, MCP, uzun context.
+- **Cursor**: composer, custom rules, hızlı multi-file edit, paralel agent/worktree.
 - **Windsurf**: Cascade agent, insan-AI akışı, preview/deploy, agent komuta merkezi.
-- **Codex CLI**: local-first CLI, izin modları, multimodal/screenshot, kontrollü full-access.
+- **Codex CLI**: local-first agent, izin modları, multimodal input, kontrollü full-access.
 
-## MoonCode hedefleri
+## MoonCode farkı
 
-1. **Terminalde kendine has UI**
-   - Tek kolon, sakin renk, az gürültü.
-   - Header: inspect → act → verify akışı.
-   - Footer: sadece kritik model/context/browser/git bilgisi.
+1. **Terminal-first premium TUI**
+   - Tek kolon, yumuşak bordo/amber palet.
+   - Header: inspect → act → verify.
+   - Footer: sadece kritik bilgiler.
 
-2. **Browser Bridge üstünlüğü**
-   - Varsayılan düşük token okuma.
-   - Etiket/overlay sadece istenirse.
-   - Upload file, drag/drop, clear_ui.
-   - Tarayıcı kapalıysa otomatik açma denemesi.
+2. **Token ekonomisi**
+   - Varsayılan kısa browser output.
+   - Base64/screenshot dump koruması.
+   - Index/search öncelikli büyük repo akışı.
+   - Aggressive compaction desteği.
 
-3. **Ciddi agent davranışı**
-   - En basit değil, en basit + en akıllı + en mantıklı + doğrulanabilir yol.
-   - Kör tıklama/guess yok.
-   - Her riskli aksiyondan sonra state kontrolü.
+3. **Browser Bridge**
+   - Tabs/page/read_dom/get_elements.
+   - click/type/hover/press_key.
+   - drag/drop ve upload_file.
+   - Internal browser sayfalarını reddeden güvenlik katmanı.
+   - Overlay/label opt-in.
 
-4. **Kurumsal yayın kalitesi**
-   - Audit temiz.
-   - Build/typecheck temiz.
-   - Backward compatibility: eski `mooncli` alias ve eski extension manifest keyleri kırılmadan devam.
+4. **Automation Mode**
+   - Kapalı gelir.
+   - Açıkken model yanında görünür.
+   - Çok adımlı app/browser/terminal görevleri için özel system prompt.
 
-## Kısa vadeli backlog
+5. **Release ergonomisi**
+   - `mooncode update` / `mooncli update` GitHub’dan son sürümü çekip global kurulumu yenileyebilir.
 
-- Browser Bridge için Playwright benzeri daha güvenilir selector heuristics.
-- Terminal UI içinde görev timeline bileşeni ama sağ panel gibi boş yer kaplamadan.
+## Sonraki kurumsal backlog
+
+- Permission profiles: read-only, safe-edit, automation, full-access.
 - MCP presetleri: GitHub, Jira, Slack, docs.
-- Permission profiles: read-only, safe-edit, full-access.
-- Session intelligence: otomatik checkpoint, branch summary, aggressive compaction.
+- Browser selector heuristics için Playwright-benzeri skorlayıcı.
+- Session checkpoints ve otomatik rollback.
+- TUI içinde kompakt task timeline; boş panel yok.

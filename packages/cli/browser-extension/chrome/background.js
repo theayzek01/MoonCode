@@ -1,5 +1,5 @@
 const BRIDGE_URL = "ws://127.0.0.1:3133/ws";
-const VERSION = "12.05.2026-v4";
+const VERSION = "12.05.2026-v5";
 const HEARTBEAT_INTERVAL_MS = 15000;
 const RECONNECT_DELAY_MS = 3000;
 const ALARM_NAME = "mooncode-bridge-reconnect";
@@ -178,6 +178,7 @@ async function executePage(args) {
     : await chrome.tabs.get(Number(args.tabId));
   const tabId = tab.id;
   if (tabId === undefined) throw new Error("No target tab id");
+  assertScriptableTab(tab);
 
   // Wait for tab to be ready before injecting scripts
   await waitForTabReady(tabId);
@@ -362,10 +363,13 @@ async function executePage(args) {
           map.push({
             id,
             tag: el.tagName.toLowerCase(),
-            text: (el.textContent?.trim() || el.value || "").slice(0, 40),
+            text: (el.textContent?.trim() || el.value || "").replace(/\s+/g, " ").slice(0, 60),
             placeholder: el.placeholder || undefined,
             type: el.type || undefined,
-            ariaLabel: el.getAttribute("aria-label") || undefined
+            ariaLabel: el.getAttribute("aria-label") || undefined,
+            title: el.title || undefined,
+            disabled: !!el.disabled || el.getAttribute("aria-disabled") === "true",
+            rect: { x: Math.round(rect.left), y: Math.round(rect.top), w: Math.round(rect.width), h: Math.round(rect.height) }
           });
 
           if (map.length >= maxElements) break;
@@ -395,8 +399,13 @@ async function executePage(args) {
         await new Promise(r => setTimeout(r, 20));
         const rect = el.getBoundingClientRect();
         if (visual && window.__moon_move_cursor) await window.__moon_move_cursor(rect.left + rect.width / 2, rect.top + rect.height / 2, "hand");
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        for (const type of ["pointerdown", "mousedown", "pointerup", "mouseup"]) {
+          el.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, view: window, clientX: cx, clientY: cy }));
+        }
         if (typeof el.click === "function") el.click();
-        else el.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
+        else el.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window, clientX: cx, clientY: cy }));
         return { clicked: true, selector, text: el.textContent?.trim().slice(0, 120) || "" };
       },
       args: [selector, args.visual === true]
@@ -511,8 +520,7 @@ async function executePage(args) {
       args: [selector]
     });
     if (!result?.result?.ready) return { uploaded: false, selector, reason: result?.result?.reason || "input not ready" };
-    await chrome.debugger.attach({ tabId }, "1.3");
-    debuggerAttachedTabs.add(tabId);
+    const didAttach = await attachDebugger(tabId);
     try {
       await chrome.debugger.sendCommand({ tabId }, "DOM.enable", {});
       const doc = await chrome.debugger.sendCommand({ tabId }, "DOM.getDocument", { depth: -1, pierce: true });
@@ -520,8 +528,7 @@ async function executePage(args) {
       if (!found.nodeId) throw new Error("file input not found by debugger");
       await chrome.debugger.sendCommand({ tabId }, "DOM.setFileInputFiles", { nodeId: found.nodeId, files });
     } finally {
-      try { await chrome.debugger.detach({ tabId }); } catch {}
-      debuggerAttachedTabs.delete(tabId);
+      if (didAttach) await detachDebugger(tabId);
     }
     const [after] = await chrome.scripting.executeScript({
       target: { tabId },
@@ -635,15 +642,10 @@ async function waitForTabReady(tabId, timeoutMs = 5000) {
 
 async function evaluateWithDebugger(tabId, expression) {
   const target = { tabId };
-  const alreadyAttached = debuggerAttachedTabs.has(tabId);
   let attached = false;
 
   try {
-    if (!alreadyAttached) {
-      await chrome.debugger.attach(target, "1.3");
-      debuggerAttachedTabs.add(tabId);
-      attached = true;
-    }
+    attached = await attachDebugger(tabId);
     const response = await chrome.debugger.sendCommand(target, "Runtime.evaluate", {
       expression,
       awaitPromise: true,
@@ -655,27 +657,17 @@ async function evaluateWithDebugger(tabId, expression) {
     }
     return response.result?.value ?? response.result ?? null;
   } finally {
-    if (attached) {
-      try {
-        await chrome.debugger.detach(target);
-        debuggerAttachedTabs.delete(tabId);
-      } catch { /* already detached */ }
-    }
+    if (attached) await detachDebugger(tabId);
   }
 }
 
 async function getConsoleLogs(tabId) {
   const target = { tabId };
-  const alreadyAttached = debuggerAttachedTabs.has(tabId);
   let attached = false;
   const logs = [];
 
   try {
-    if (!alreadyAttached) {
-      await chrome.debugger.attach(target, "1.3");
-      debuggerAttachedTabs.add(tabId);
-      attached = true;
-    }
+    attached = await attachDebugger(tabId);
 
     // Collect via Runtime instead of deprecated Log domain
     const response = await chrome.debugger.sendCommand(target, "Runtime.evaluate", {
@@ -698,13 +690,31 @@ async function getConsoleLogs(tabId) {
   } catch (e) {
     return { logs: [], error: e.message };
   } finally {
-    if (attached) {
-      try {
-        await chrome.debugger.detach(target);
-        debuggerAttachedTabs.delete(tabId);
-      } catch { /* already detached */ }
-    }
+    if (attached) await detachDebugger(tabId);
   }
+}
+
+function assertScriptableTab(tab) {
+  const url = tab?.url || "";
+  if (!url) return;
+  if (/^(chrome|edge|brave|opera|vivaldi|about|devtools):/i.test(url)) {
+    throw new Error(`This browser page cannot be automated by extensions: ${url}`);
+  }
+  if (/^chrome-extension:/i.test(url) && !url.startsWith(chrome.runtime.getURL(""))) {
+    throw new Error("Cannot automate another extension page");
+  }
+}
+
+async function attachDebugger(tabId) {
+  if (debuggerAttachedTabs.has(tabId)) return false;
+  await chrome.debugger.attach({ tabId }, "1.3");
+  debuggerAttachedTabs.add(tabId);
+  return true;
+}
+
+async function detachDebugger(tabId) {
+  try { await chrome.debugger.detach({ tabId }); } catch { /* already detached */ }
+  debuggerAttachedTabs.delete(tabId);
 }
 
 async function getActiveTab() {
@@ -736,7 +746,7 @@ function tabSummary(tab) {
 // Overlay is injected once and reused; message updates in-place
 const overlayInjectedTabs = new Set();
 
-async function injectOverlay(tabId, message = "Moon Controlling") {
+async function injectOverlay(tabId, message = "MoonCode controlling") {
   const arrowUrl = chrome.runtime.getURL("cursors/arrow.cur");
   const handUrl  = chrome.runtime.getURL("cursors/hand.cur");
   const typeUrl  = chrome.runtime.getURL("cursors/ibeam.cur");
@@ -757,16 +767,16 @@ async function injectOverlay(tabId, message = "Moon Controlling") {
           "position:fixed",
           "top:10px",
           "right:10px",
-          "background:rgba(2,6,23,0.82)",
-          "color:#fff",
+          "background:linear-gradient(135deg,rgba(42,29,32,0.90),rgba(27,21,23,0.86))",
+          "color:#eadbd5",
           "padding:6px 10px",
           "border-radius:999px",
           "font-family:'Inter',system-ui,sans-serif",
           "font-size:12px",
           "font-weight:600",
           "z-index:2147483647",
-          "border:1px solid rgba(255,255,255,0.18)",
-          "box-shadow:0 6px 18px rgba(0,0,0,0.22)",
+          "border:1px solid rgba(208,138,122,0.35)",
+          "box-shadow:0 10px 26px rgba(0,0,0,0.26),0 0 28px rgba(208,138,122,0.10)",
           "backdrop-filter:blur(8px)",
           "display:flex",
           "align-items:center",
@@ -777,7 +787,7 @@ async function injectOverlay(tabId, message = "Moon Controlling") {
 
         const dot = document.createElement("span");
         dot.id = "mooncode-dot";
-        dot.style.cssText = "display:inline-block;width:8px;height:8px;background:#0ea5e9;border-radius:50%;box-shadow:0 0 8px #0ea5e9;flex-shrink:0;";
+        dot.style.cssText = "display:inline-block;width:8px;height:8px;background:#d08a7a;border-radius:50%;box-shadow:0 0 10px #d08a7a;flex-shrink:0;";
         banner.appendChild(dot);
 
         const txt = document.createElement("span");
@@ -791,7 +801,7 @@ async function injectOverlay(tabId, message = "Moon Controlling") {
       if (!document.getElementById("mooncode-bar")) {
         const bar = document.createElement("div");
         bar.id = "mooncode-bar";
-        bar.style.cssText = "position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#38bdf8,#a78bfa);z-index:2147483646;pointer-events:none;";
+        bar.style.cssText = "position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#3a2628,#d08a7a,#d6b08a);z-index:2147483646;pointer-events:none;";
         (document.documentElement || document.body).appendChild(bar);
         if (!document.getElementById("mooncode-style")) {
           const s = document.createElement("style");

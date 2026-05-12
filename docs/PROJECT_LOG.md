@@ -1,18 +1,34 @@
-# Mooncli Project Log
+# MoonCode Project Log
 
-## [2026-05-03]
+## Final hardening pass
+
 ### Added
-- **Discord Integration**: Added `/discord` command and tools to manage Discord servers via `discord.js`.
-- **Dynamic UI Feedback**: Loading spinner now shows contextual messages like "Thinking...", "Writing code...", etc.
-- **Settings Update**: Added `discordToken` to global settings.
-- **Version Bump**: Bumping to `0.72.2` for release.
 
-### Fixed
-- TypeScript build errors in `discord.ts`.
-- Security: Discord token is now stored in settings instead of being hardcoded.
+- MoonCode branding and GitHub repository publication.
+- `mooncode` primary CLI command with `mooncli` backward-compatible alias.
+- `/automation on|off|confirm on|confirm off` mode.
+- Browser Bridge `drag`, `upload_file`, `clear_ui`, low-token `read/read_dom`, optional labels/overlay.
+- Browser auto-launch attempt when bridge has no connected extension.
+- Competitive roadmap based on Claude Code, Cursor, Windsurf and Codex CLI feature expectations.
+- GitHub self-update fallback: `mooncode update` / `mooncli update` can clone MoonCode from GitHub and reinstall globally when package-manager self-update is unavailable.
 
-### Operations
-- Installed `discord.js`.
-- Built the project successfully.
-- Ran `npm audit fix` to secure dependencies.
+### Changed
 
+- TUI layout moved to focused single-column flow.
+- Footer simplified and now shows `automation` when active.
+- Default Smoot theme replaced with MoonCode's soft red/amber premium palette.
+- README and docs updated for production use.
+
+### Fixed / Hardened
+
+- Browser extension rejects browser-internal pages and unrelated extension pages.
+- Debugger attach/detach is centralized to reduce leaked debugger sessions.
+- Browser output truncation avoids huge base64/token payloads.
+- TUI symlink tests skip cleanly on Windows without symlink privilege.
+
+### Validation
+
+- `npm run check`
+- `npm test --workspace=packages/tui`
+- `npm run build`
+- `npm audit --omit=dev --audit-level=high`

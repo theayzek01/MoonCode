@@ -1,4 +1,7 @@
 // @ts-nocheck
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import chalk from "chalk";
 import { spawn } from "child_process";
 import { selectConfig } from "./cli/config-selector.js";
@@ -278,13 +281,13 @@ function updateTargetIncludesExtensions(target: UpdateTarget): boolean {
 }
 
 function printSelfUpdateUnavailable(npmCommand?: string[]): void {
-	console.error("hata: Moon bu kurulumu otomatik güncelleyemiyor.");
+	console.error("hata: MoonCode bu kurulumu paket yöneticisiyle otomatik güncelleyemiyor.");
 	console.error(getSelfUpdateUnavailableInstruction(PACKAGE_NAME, npmCommand));
 
 	const entrypoint = process.argv[1];
 	if (entrypoint) {
 		console.error("");
-		console.error(`Moon yürütülebilir dosyasının konumu: ${entrypoint}`);
+		console.error(`MoonCode yürütülebilir dosyasının konumu: ${entrypoint}`);
 	}
 }
 
@@ -312,27 +315,54 @@ async function shouldRunSelfUpdate(force: boolean): Promise<boolean> {
 	return false;
 }
 
-async function runSelfUpdate(command: SelfUpdateCommand): Promise<void> {
-	console.log(chalk.dim(`${APP_NAME}, ${command.display} ile güncelleniyor...`));
+async function runCommand(command: string, args: string[], display: string, cwd?: string): Promise<void> {
 	await new Promise<void>((resolve, reject) => {
-		// Windows package managers are commonly .cmd shims. Use the shell so Node can execute them.
-		const child = spawn(command.command, command.args, {
+		const child = spawn(command, args, {
+			cwd,
 			stdio: "inherit",
-			shell: shouldUseWindowsShell(command.command),
+			shell: shouldUseWindowsShell(command),
 		});
-		child.on("error", (error) => {
-			reject(error);
-		});
+		child.on("error", reject);
 		child.on("close", (code, signal) => {
-			if (code === 0) {
-				resolve();
-			} else if (signal) {
-				reject(new Error(`${command.display} ${signal} sinyaliyle sonlandırıldı`));
-			} else {
-				reject(new Error(`${command.display} ${code ?? "bilinmeyen"} koduyla çıktı`));
-			}
+			if (code === 0) resolve();
+			else if (signal) reject(new Error(`${display} ${signal} sinyaliyle sonlandırıldı`));
+			else reject(new Error(`${display} ${code ?? "bilinmeyen"} koduyla çıktı`));
 		});
 	});
+}
+
+async function runSelfUpdate(command: SelfUpdateCommand): Promise<void> {
+	console.log(chalk.dim(`${APP_NAME}, ${command.display} ile güncelleniyor...`));
+	await runCommand(command.command, command.args, command.display);
+}
+
+async function runGitHubSelfUpdate(npmCommand?: string[]): Promise<void> {
+	const [npmBin = "npm", ...npmArgs] = npmCommand ?? [];
+	const dir = await mkdtemp(join(tmpdir(), "mooncode-update-"));
+	try {
+		console.log(chalk.dim("MoonCode GitHub'dan indiriliyor..."));
+		await runCommand(
+			"git",
+			["clone", "--depth", "1", "https://github.com/theayzek01/MoonCode.git", dir],
+			"git clone",
+		);
+		await runCommand(npmBin, [...npmArgs, "install"], `${npmBin} install`, dir);
+		await runCommand(npmBin, [...npmArgs, "run", "build"], `${npmBin} run build`, dir);
+		// Eski global paketleri temizle; hata verirse devam et.
+		try {
+			await runCommand(npmBin, [...npmArgs, "uninstall", "-g", "mooncli"], `${npmBin} uninstall -g mooncli`);
+		} catch {}
+		try {
+			await runCommand(npmBin, [...npmArgs, "uninstall", "-g", "mooncode"], `${npmBin} uninstall -g mooncode`);
+		} catch {}
+		await runCommand(
+			npmBin,
+			[...npmArgs, "install", "-g", join(dir, "packages", "cli")],
+			`${npmBin} install -g packages/cli`,
+		);
+	} finally {
+		await rm(dir, { recursive: true, force: true });
+	}
 }
 
 export async function handleConfigCommand(args: string[]): Promise<boolean> {
@@ -486,25 +516,24 @@ export async function handlePackageCommand(args: string[]): Promise<boolean> {
 					}
 				}
 				if (updateTargetIncludesSelf(target)) {
-					const selfUpdateCommand = getSelfUpdateCommand(PACKAGE_NAME, selfUpdateNpmCommand);
-					if (!selfUpdateCommand) {
-						printSelfUpdateUnavailable(selfUpdateNpmCommand);
-						process.exitCode = 1;
-						return true;
-					}
 					if (!(await shouldRunSelfUpdate(options.force))) {
 						return true;
 					}
+					const selfUpdateCommand = getSelfUpdateCommand(PACKAGE_NAME, selfUpdateNpmCommand);
 					try {
-						await runSelfUpdate(selfUpdateCommand);
+						if (selfUpdateCommand) await runSelfUpdate(selfUpdateCommand);
+						else await runGitHubSelfUpdate(selfUpdateNpmCommand);
 					} catch (error: unknown) {
 						const message = error instanceof Error ? error.message : "Bilinmeyen paket komutu hatası";
 						console.error(chalk.red(`Hata: ${message}`));
-						printSelfUpdateFallback(selfUpdateCommand);
+						if (selfUpdateCommand) printSelfUpdateFallback(selfUpdateCommand);
+						else printSelfUpdateUnavailable(selfUpdateNpmCommand);
 						process.exitCode = 1;
 						return true;
 					}
-					console.log(chalk.green(`${APP_NAME} güncellendi`));
+					console.log(
+						chalk.green(`${APP_NAME} güncellendi. Yeni terminalde 'mooncode' veya 'mooncli' çalıştırın.`),
+					);
 				}
 				return true;
 			}

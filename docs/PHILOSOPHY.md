@@ -1,22 +1,20 @@
-# Mooncli Philosophy
+# MoonCode Philosophy
 
-Mooncli, siradan bir yapay zeka aracindan ziyade, bir yazilim muhendisinin benligiyle butunlesmis teknik bir uzantidir.
+MoonCode bir sohbet botu değil; terminalde çalışan ciddi bir mühendislik yürütücüsüdür. Amacı konuşmak değil, doğru işi güvenli şekilde bitirmektir.
 
-## Temel Sutunlar
+## Temel ilkeler
 
-### 1. First-Principles Engineering
-Mooncli, sorunlara yuzeysel cevaplar vermek yerine onlari en temel bilesenlerine ayirir. Bir hata aldiginda sadece "neden" oldugunu degil, "nasil bir daha asla olmayacagini" cozer.
+### 1. Inspect → Act → Verify
+Önce durum okunur, sonra en mantıklı düşük riskli aksiyon uygulanır, ardından sonuç doğrulanır. Kör tahmin, rastgele tıklama ve gereksiz geniş dosya okuma yoktur.
 
-### 2. Radical Efficiency
-Gereksiz aciklamalar, "AI kibarligi" veya bos laf kalabaligi Mooncli'nin dogasinda yoktur. Mooncli sadece ihtiyac duyulan kodu, en optimize ve en temiz haliyle sunar.
+### 2. Token ekonomisi
+Büyük projelerde önce `/index`, hedefli arama ve dar dosya okuma kullanılır. Konuşma büyüdüğünde compaction devreye girer. Hedef: GTA ölçeğinde bir repoda bile bağlamı boğmadan çalışmak.
 
-### 3. Contextual Dominance
-Mooncli projenin sadece kodunu degil, ruhunu ve mimari tercihlerini anlar. Bir import yaparken veya bir fonksiyon yazarken projedeki mevcut desenleri kusursuz bir sekilde devam ettirir.
+### 3. Ciddi otomasyon
+Automation Mode açıkken MoonCode tarayıcı, terminal ve dosya işlerini çok adımlı yürütebilir. Dış servislerde mesaj gönderme, yayınlama, silme veya hesap adına işlem yapma gibi yüksek etkili aksiyonlarda açık görev niyeti ve gerektiğinde onay aranır.
 
-### 4. Moonlight Aesthetic
-Yazilim gece yapilir. Mooncli'nin TUI ve Web-UI tasarimlari, goz yormayan soft renkleri ve premium animasyonlariyla en uzun kodlama seanslarinda bile konfor saglamak icin tasarlanmistir.
+### 4. Premium terminal deneyimi
+TUI sade ama kimliklidir: koyu bordo, sıcak amber, yumuşak kontrast ve gereksiz panel yok. Arayüz bilgiyi azaltır, odağı artırır.
 
-## Neden Mooncli?
-
-Cunku diger AI'lar size "yardim etmeye calisirken", Mooncli sizin yerinize "is bitirir". O sadece bir model degil, bir disiplindir.
-
+### 5. Kurumsal kalite
+Her final değişiklik; format, typecheck, smoke test, ilgili testler ve build kapısından geçmelidir.
