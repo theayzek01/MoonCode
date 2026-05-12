@@ -1,5 +1,5 @@
 const BRIDGE_URL = "ws://127.0.0.1:3133/ws";
-const VERSION = "12.05.2026-v5";
+const VERSION = "12.05.2026-v6";
 const HEARTBEAT_INTERVAL_MS = 15000;
 const RECONNECT_DELAY_MS = 3000;
 const ALARM_NAME = "mooncode-bridge-reconnect";
