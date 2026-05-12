@@ -1,12 +1,12 @@
 <div align="center">
-  <img src="../../assets/Moon-cli-banner.png" alt="Mooncli Banner" width="100%" />
+  <img src="https://raw.githubusercontent.com/theayzek01/MoonCode/main/assets/Moon-cli-banner.png?v=20260512" alt="MoonCode Banner" width="100%" />
 
   <br />
 
-  [![npm](https://img.shields.io/npm/v/mooncli?style=for-the-badge&color=0ea5e9&labelColor=1e293b)](https://www.npmjs.com/package/mooncli)
+  [![GitHub](https://img.shields.io/badge/GitHub-MoonCode-d08a7a?style=for-the-badge&labelColor=1b1517)](https://github.com/theayzek01/MoonCode)
 
-  ### **Mooncli CLI**
-  *The core terminal interface for the Mooncli agentic engine.*
+  ### **MoonCode CLI**
+  *Serious terminal coding agent: inspect → act → verify.*
 
 </div>
 
@@ -14,7 +14,7 @@
 
 ## 🚀 Overview
 
-This package contains the command-line interface (CLI) for Mooncli. It provides the interactive TUI (Terminal User Interface) where you can chat with the agent, manage context, and execute complex coding tasks.
+This package contains the command-line interface (CLI) for MoonCode. It provides the interactive TUI where you can manage code, context, automation, browser actions, and release workflows.
 
 ## 🛠️ Features
 
@@ -26,14 +26,20 @@ This package contains the command-line interface (CLI) for Mooncli. It provides 
 ## 📦 Installation
 
 ```bash
-npm install -g mooncli
+git clone https://github.com/theayzek01/MoonCode.git
+cd MoonCode
+npm install
+npm run build
+npm install -g ./packages/cli
 ```
 
 ## 📖 Usage
 
-Simply run `mooncli` in any directory to start a session.
+Run `mooncode` in any directory to start a session. The legacy `mooncli` alias also works.
 
 ```bash
+mooncode
+# or
 mooncli
 ```
 

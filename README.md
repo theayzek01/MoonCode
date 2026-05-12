@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/Moon-cli-banner.png" alt="MoonCode Banner" width="100%" />
+  <img src="https://raw.githubusercontent.com/theayzek01/MoonCode/main/assets/Moon-cli-banner.png?v=20260512" alt="MoonCode Banner" width="100%" />
 
   <h1>MoonCode</h1>
   <p>Serious terminal coding agent: inspect → act → verify.</p>
@@ -24,21 +24,27 @@ MoonCode; terminalden çalışan, repo bağlamını anlayan, dosya düzenleyen, 
 
 ## Kurulum
 
+GitHub'dan direkt kurulum:
+
 ```bash
-npm install -g mooncode
+git clone https://github.com/theayzek01/MoonCode.git
+cd MoonCode
+npm install
+npm run build
+npm install -g ./packages/cli
 mooncode --version
 mooncode
 
-# eski kurulumlar için alias hâlâ çalışır
+# eski komut alias'ı da çalışır
 mooncli
 ```
 
-Geliştirme modunda:
+Güncelleme:
 
 ```bash
-npm install
-npm run build
-npm start
+mooncode update
+# veya
+mooncli update
 ```
 
 ## Temel komutlar
