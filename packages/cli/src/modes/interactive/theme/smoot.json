@@ -2,21 +2,21 @@
 	"$schema": "https://raw.githubusercontent.com/badlogic/MoonCode-mono/main/packages/cli/src/modes/interactive/theme/theme-schema.json",
 	"name": "Smoot",
 	"vars": {
-		"bg": "#181a1f",
-		"fg": "#d6d3c8",
-		"accent": "#9aa7b2",
-		"secondary": "#a6b0b8",
-		"tertiary": "#b8ad9a",
-		"border": "#2a2f36",
-		"muted": "#7b827f",
-		"dim": "#4a504f",
-		"success": "#9aac97",
-		"error": "#b79a9a",
-		"warning": "#b7a98d",
-		"thinking": "#343a40",
-		"selectedBg": "#22262c",
-		"userMsgBg": "#202329",
-		"toolBg": "#1d2026"
+		"bg": "#1b1517",
+		"fg": "#eadbd5",
+		"accent": "#d08a7a",
+		"secondary": "#c99a8d",
+		"tertiary": "#d6b08a",
+		"border": "#3a2628",
+		"muted": "#9a7774",
+		"dim": "#5a3f40",
+		"success": "#a8b58f",
+		"error": "#d17b83",
+		"warning": "#d0a36f",
+		"thinking": "#4a3032",
+		"selectedBg": "#2a1d20",
+		"userMsgBg": "#241a1d",
+		"toolBg": "#21181b"
 	},
 	"colors": {
 		"accent": "accent",
@@ -59,28 +59,28 @@
 		"toolDiffContext": "muted",
 
 		"syntaxComment": "muted",
-		"syntaxKeyword": "#b5aca0",
-		"syntaxFunction": "#a6b0b8",
-		"syntaxVariable": "#b7a98d",
-		"syntaxString": "#9aac97",
-		"syntaxNumber": "#b8ad9a",
-		"syntaxType": "#9aa7b2",
-		"syntaxOperator": "#d6d3c8",
-		"syntaxPunctuation": "#9aa0a6",
+		"syntaxKeyword": "#d08a7a",
+		"syntaxFunction": "#c99a8d",
+		"syntaxVariable": "#d6b08a",
+		"syntaxString": "#a8b58f",
+		"syntaxNumber": "#c99876",
+		"syntaxType": "#c58f8f",
+		"syntaxOperator": "#eadbd5",
+		"syntaxPunctuation": "#b58b85",
 
 		"thinkingOff": "dim",
-		"thinkingMinimal": "#343a40",
-		"thinkingLow": "#3d444b",
-		"thinkingMedium": "#4a504f",
-		"thinkingHigh": "#6f7775",
-		"thinkingXhigh": "#8b8580",
+		"thinkingMinimal": "#3a2628",
+		"thinkingLow": "#4a3032",
+		"thinkingMedium": "#6a4645",
+		"thinkingHigh": "#9a635d",
+		"thinkingXhigh": "#d08a7a",
 
 		"bashMode": "warning"
 	},
 	"export": {
-		"pageBg": "#181a1f",
-		"cardBg": "#202329",
-		"infoBg": "#1d2026"
+		"pageBg": "#1b1517",
+		"cardBg": "#241a1d",
+		"infoBg": "#21181b"
 	}
 }
 

@@ -2697,6 +2697,12 @@ export class InteractiveMode {
 				this.handleAutoThinkCommand(arg);
 				return;
 			}
+			if (text === "/automation" || text.startsWith("/automation ")) {
+				const arg = text.startsWith("/automation ") ? text.slice(12).trim() : "";
+				this.editor.setText("");
+				this.handleAutomationCommand(arg);
+				return;
+			}
 			if (text === "/init") {
 				this.editor.setText("");
 				await this.handleInitCommand();
@@ -6140,6 +6146,29 @@ export class InteractiveMode {
 		}
 		this.showStatus(`Kullanim: /autothink on|off (su an: ${this.session.getAutoThinkEnabled() ? "on" : "off"})`);
 	}
+	private handleAutomationCommand(arg: string): void {
+		const normalized = arg.trim().toLowerCase();
+		if (normalized === "on" || normalized === "true" || normalized === "1") {
+			this.session.setAutomationEnabled(true);
+			this.showStatus("Automation acildi. Gorevini yaz: app/browser/terminal akisini mantikli sekilde yurutur.");
+		} else if (normalized === "off" || normalized === "false" || normalized === "0") {
+			this.session.setAutomationEnabled(false);
+			this.showStatus("Automation kapatildi.");
+		} else if (normalized === "confirm off") {
+			this.session.setAutomationRequireConfirmation(false);
+			this.showStatus("Automation onay modu kapali. Kritik islerde yine acik niyet aranir.");
+		} else if (normalized === "confirm on") {
+			this.session.setAutomationRequireConfirmation(true);
+			this.showStatus("Automation onay modu acik.");
+		} else {
+			const enabled = this.session.getAutomationEnabled() ? "acik" : "kapali";
+			const confirm = this.session.getAutomationRequireConfirmation() ? "acik" : "kapali";
+			this.showStatus(`Automation: ${enabled} | onay: ${confirm} | /automation on|off|confirm on|confirm off`);
+		}
+		this.footer.invalidate();
+		this.ui.requestRender();
+	}
+
 	private async handleInitCommand(): Promise<void> {
 		const cwd = this.sessionManager.getCwd();
 		const moonPath = path.join(cwd, "MOON.md");

@@ -47,6 +47,7 @@ npm start
 | `mooncode --continue` | Son oturumu devam ettirir |
 | `mooncode browser-bridge` | Chrome Browser Bridge sunucusunu başlatır |
 | `/browser` | Bridge durumunu gösterir |
+| `/automation on\|off` | Kapsamlı otomasyon modunu aç/kapat |
 
 ## Uzun sohbetlerde otomatik compaction
 
@@ -96,6 +97,16 @@ MoonCode kendini **MoonCode / Moon** olarak tanır.
 - Kod işinde önce inceler, sonra değiştirir, sonra doğrular.
 - Dosya yollarını açık yazar.
 - Gereksiz uzun rapor üretmez.
+
+## Automation Mode
+
+Varsayılan kapalıdır. Açmak için:
+
+```bash
+/automation on
+```
+
+Açıkken footer’da model yanında `automation` görünür. MoonCode; tarayıcı, terminal ve dosya işlemlerini çok adımlı şekilde yürütebilir. Büyük projelerde önce index/search kullanır, dar okuma yapar ve context büyürse compaction ile token tüketimini düşürür.
 
 ## Lisans
 

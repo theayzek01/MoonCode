@@ -110,6 +110,7 @@ export interface Settings {
 	defaultModel?: string;
 	defaultThinkingLevel?: "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
 	autoThink?: boolean;
+	automation?: { enabled?: boolean; requireConfirmation?: boolean };
 	transport?: TransportSetting; // default: "auto"
 	steeringMode?: "all" | "one-at-a-time";
 	followUpMode?: "all" | "one-at-a-time";
@@ -705,6 +706,28 @@ export class SettingsManager {
 	setAutoThinkEnabled(enabled: boolean): void {
 		this.globalSettings.autoThink = enabled;
 		this.markModified("autoThink");
+		this.save();
+	}
+
+	getAutomationEnabled(): boolean {
+		return this.settings.automation?.enabled ?? false;
+	}
+
+	setAutomationEnabled(enabled: boolean): void {
+		if (!this.globalSettings.automation) this.globalSettings.automation = {};
+		this.globalSettings.automation.enabled = enabled;
+		this.markModified("automation", "enabled");
+		this.save();
+	}
+
+	getAutomationRequireConfirmation(): boolean {
+		return this.settings.automation?.requireConfirmation ?? true;
+	}
+
+	setAutomationRequireConfirmation(enabled: boolean): void {
+		if (!this.globalSettings.automation) this.globalSettings.automation = {};
+		this.globalSettings.automation.requireConfirmation = enabled;
+		this.markModified("automation", "requireConfirmation");
 		this.save();
 	}
 

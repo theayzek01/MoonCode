@@ -106,6 +106,16 @@ import {
 } from "./tools/robotics-vision.js";
 import { createToolDefinitionFromEngineTool } from "./tools/tool-definition-wrapper.js";
 
+function buildAutomationSystemPrompt(requireConfirmation: boolean): string {
+	return `## Automation Mode Active
+- You may coordinate multi-step app/browser/terminal workflows on behalf of the user.
+- Be serious and logical: inspect current state, choose the smartest low-risk path, act, then verify.
+- For browser work, prefer browser_tabs/browser_page and dedicated upload_file/drag tools over random clicks.
+- For huge projects, use index/search first, read narrow files only, and compact before context becomes expensive.
+- Do not send messages, make purchases, delete data, publish, or impersonate the user in external services without explicit task intent${requireConfirmation ? " and confirmation for high-impact actions" : ""}.
+- Keep a concise action log in final output.`;
+}
+
 // ============================================================================
 // Skill Block Parsing
 // ============================================================================
@@ -971,6 +981,9 @@ export class EngineSession {
 
 		const agents = this.settingsManager.getAgentsSettings();
 		const affectivePrompt = buildAffectiveSystemPrompt(this.settingsManager.getAffectiveSettings());
+		const automationPrompt = this.settingsManager.getAutomationEnabled()
+			? buildAutomationSystemPrompt(this.settingsManager.getAutomationRequireConfirmation())
+			: undefined;
 
 		// Robotics settings inject
 		const roboticsEnabled = this.settingsManager.getRoboticsEnabled();
@@ -1002,7 +1015,7 @@ export class EngineSession {
 			toolSnippets,
 			promptGuidelines,
 			agents,
-			affectivePrompt,
+			affectivePrompt: [affectivePrompt, automationPrompt].filter(Boolean).join("\n\n") || undefined,
 			roboticsEnabled,
 			roboticsFunctions,
 			compactMode: isLocalModel,
@@ -1802,6 +1815,24 @@ export class EngineSession {
 
 	setAutoThinkEnabled(enabled: boolean): void {
 		this.settingsManager.setAutoThinkEnabled(enabled);
+	}
+
+	getAutomationEnabled(): boolean {
+		return this.settingsManager.getAutomationEnabled();
+	}
+
+	setAutomationEnabled(enabled: boolean): void {
+		this.settingsManager.setAutomationEnabled(enabled);
+		this._refreshBaseSystemPrompt();
+	}
+
+	getAutomationRequireConfirmation(): boolean {
+		return this.settingsManager.getAutomationRequireConfirmation();
+	}
+
+	setAutomationRequireConfirmation(enabled: boolean): void {
+		this.settingsManager.setAutomationRequireConfirmation(enabled);
+		this._refreshBaseSystemPrompt();
 	}
 
 	private _resolveAutoThinkingLevel(text: string): ThinkingLevel | undefined {

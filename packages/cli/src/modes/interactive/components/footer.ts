@@ -93,6 +93,7 @@ export class FooterComponent implements Component {
 				? `${state.model.provider}/${modelName}`
 				: modelName;
 		const thinking = state.model?.reasoning ? `think:${state.thinkingLevel || "off"}` : undefined;
+		const automation = this.session.getAutomationEnabled?.() ? theme.fg("warning", "automation") : undefined;
 		const browserStatus = this.session.getBrowserBridgeStatus();
 		const browserIndicator = browserStatus.clients > 0 ? theme.fg("success", "🌐 browser") : undefined;
 
@@ -108,7 +109,7 @@ export class FooterComponent implements Component {
 		]);
 
 		const left = theme.fg("muted", location || "workspace");
-		const right = joinMuted([theme.fg("muted", model), thinking, coloredContext]);
+		const right = joinMuted([theme.fg("muted", model), automation, thinking, coloredContext]);
 		const divider = theme.fg("borderMuted", "─".repeat(Math.max(1, width)));
 		const lines = [divider, fitPair(left, right, width)];
 		if (usage) lines.push(theme.fg("dim", usage));
