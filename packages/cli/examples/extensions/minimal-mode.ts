@@ -11,12 +11,12 @@
  * - Minimal: Shows only tool call, no output (this extension's collapsed mode)
  *
  * Usage:
- *   Mooncli -e ./minimal-mode.ts
+ *   MoonCode -e ./minimal-mode.ts
  *
  * Then use ctrl+o to toggle between minimal (collapsed) and full (expanded) views.
  */
 
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "MoonCode";
 import {
 	createBashTool,
 	createEditTool,
@@ -25,7 +25,7 @@ import {
 	createLsTool,
 	createReadTool,
 	createWriteTool,
-} from "Mooncli";
+} from "MoonCode";
 import { Text } from "moon-tui";
 import { homedir } from "os";
 
@@ -64,11 +64,11 @@ function getBuiltInTools(cwd: string) {
 	return tools;
 }
 
-export default function (Mooncli: ExtensionAPI) {
+export default function (MoonCode: ExtensionAPI) {
 	// =========================================================================
 	// Read Tool
 	// =========================================================================
-	Mooncli.registerTool({
+	MoonCode.registerTool({
 		name: "read",
 		label: "read",
 		description:
@@ -115,7 +115,7 @@ export default function (Mooncli: ExtensionAPI) {
 	// =========================================================================
 	// Bash Tool
 	// =========================================================================
-	Mooncli.registerTool({
+	MoonCode.registerTool({
 		name: "bash",
 		label: "bash",
 		description:
@@ -164,7 +164,7 @@ export default function (Mooncli: ExtensionAPI) {
 	// =========================================================================
 	// Write Tool
 	// =========================================================================
-	Mooncli.registerTool({
+	MoonCode.registerTool({
 		name: "write",
 		label: "write",
 		description:
@@ -206,7 +206,7 @@ export default function (Mooncli: ExtensionAPI) {
 	// =========================================================================
 	// Edit Tool
 	// =========================================================================
-	Mooncli.registerTool({
+	MoonCode.registerTool({
 		name: "edit",
 		label: "edit",
 		description:
@@ -251,7 +251,7 @@ export default function (Mooncli: ExtensionAPI) {
 	// =========================================================================
 	// Find Tool
 	// =========================================================================
-	Mooncli.registerTool({
+	MoonCode.registerTool({
 		name: "find",
 		label: "find",
 		description:
@@ -309,7 +309,7 @@ export default function (Mooncli: ExtensionAPI) {
 	// =========================================================================
 	// Grep Tool
 	// =========================================================================
-	Mooncli.registerTool({
+	MoonCode.registerTool({
 		name: "grep",
 		label: "grep",
 		description:
@@ -371,7 +371,7 @@ export default function (Mooncli: ExtensionAPI) {
 	// =========================================================================
 	// Ls Tool
 	// =========================================================================
-	Mooncli.registerTool({
+	MoonCode.registerTool({
 		name: "ls",
 		label: "ls",
 		description:

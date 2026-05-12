@@ -214,7 +214,7 @@ ${chalk.bold("Komutlar:")}
   ${APP_NAME} install <kaynak> [-l]     Eklenti kaynağını yükle ve ayarlara ekle
   ${APP_NAME} remove <kaynak> [-l]      Eklenti kaynağını ayarlardan kaldır
   ${APP_NAME} uninstall <kaynak> [-l]   Kaldırmak için alternatif komut
-  ${APP_NAME} update [kaynak|self|Moon] Mooncli'yi ve yüklü eklentileri güncelle
+  ${APP_NAME} update [kaynak|self|Moon] MoonCode'yi ve yüklü eklentileri güncelle
   ${APP_NAME} list                      Ayarlarda yüklü eklentileri listele
   ${APP_NAME} config                    Paket kaynaklarını etkinleştirmek/devre dışı bırakmak için TUI'yi aç
   ${APP_NAME} doctor                    Kurulum, PATH, sürüm ve güncelleme teşhisi
@@ -359,7 +359,7 @@ ${chalk.bold("Ortam Değişkenleri:")}
   MOON_PACKAGE_DIR                 - Paket dizini geçersiz kılma
   MOON_OFFLINE                     - Ayarlandığında başlangıç ağ işlemlerini devre dışı bırakır
   MOON_TELEMETRY                   - Kurulum telemetrisini geçersiz kıl
-  MOON_SHARE_VIEWER_URL            - /share komutu için taban URL (varsayılan: https://Mooncli.dev/session/)
+  MOON_SHARE_VIEWER_URL            - /share komutu için taban URL (varsayılan: https://MoonCode.dev/session/)
 
 ${chalk.bold("Yerleşik Araç İsimleri:")}
   read   - Dosya içeriğini oku

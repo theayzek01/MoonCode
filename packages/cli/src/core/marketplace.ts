@@ -15,7 +15,7 @@ export interface RegistryEntry {
 
 const DEFAULT_REGISTRY_URL =
 	process.env.MOON_MARKETPLACE_REGISTRY ||
-	"https://raw.githubusercontent.com/theayzek01/Mooncli-registry/main/registry.json";
+	"https://raw.githubusercontent.com/theayzek01/MoonCode-registry/main/registry.json";
 const CACHE_TTL_MS = 60 * 60 * 1000;
 
 function cachePath(): string {

@@ -10,7 +10,7 @@
  * correct for that point in history.
  */
 
-import type { ExtensionAPI, ExtensionContext, Theme } from "Mooncli";
+import type { ExtensionAPI, ExtensionContext, Theme } from "MoonCode";
 import { StringEnum } from "moon-core";
 import { matchesKey, Text, truncateToWidth } from "moon-tui";
 import { Type } from "typebox";
@@ -102,7 +102,7 @@ class TodoListComponent {
 	}
 }
 
-export default function (Mooncli: ExtensionAPI) {
+export default function (MoonCode: ExtensionAPI) {
 	// In-memory state (reconstructed from session on load)
 	let todos: Todo[] = [];
 	let nextId = 1;
@@ -129,11 +129,11 @@ export default function (Mooncli: ExtensionAPI) {
 	};
 
 	// Reconstruct state on session events
-	Mooncli.on("session_start", async (_event, ctx) => reconstructState(ctx));
-	Mooncli.on("session_tree", async (_event, ctx) => reconstructState(ctx));
+	MoonCode.on("session_start", async (_event, ctx) => reconstructState(ctx));
+	MoonCode.on("session_tree", async (_event, ctx) => reconstructState(ctx));
 
 	// Register the todo tool for the Provider
-	Mooncli.registerTool({
+	MoonCode.registerTool({
 		name: "todo",
 		label: "Todo",
 		description: "Manage a todo list. Actions: list, add (text), toggle (id), clear",
@@ -281,7 +281,7 @@ export default function (Mooncli: ExtensionAPI) {
 	});
 
 	// Register the /todos command for users
-	Mooncli.registerCommand("todos", {
+	MoonCode.registerCommand("todos", {
 		description: "Show all todos on the current branch",
 		handler: async (_args, ctx) => {
 			if (!ctx.hasUI) {

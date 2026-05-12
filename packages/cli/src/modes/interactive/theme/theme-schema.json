@@ -1,7 +1,7 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
-	"title": "Mooncli Coding Engine Theme",
-	"description": "Theme schema for Mooncli coding engine",
+	"title": "MoonCode Coding Engine Theme",
+	"description": "Theme schema for MoonCode coding engine",
 	"type": "object",
 	"required": ["name", "colors"],
 	"properties": {

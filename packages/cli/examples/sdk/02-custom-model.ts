@@ -4,7 +4,7 @@
  * Shows how to select a specific model and thinking level.
  */
 
-import { AuthStorage, createEngineSession, ModelRegistry } from "Mooncli";
+import { AuthStorage, createEngineSession, ModelRegistry } from "MoonCode";
 import { getModel } from "moon-core";
 
 // Set up auth storage and model registry

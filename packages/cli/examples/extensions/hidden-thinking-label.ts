@@ -5,7 +5,7 @@
  * when thinking blocks are hidden.
  *
  * Usage:
- *   Mooncli --extension examples/extensions/hidden-thinking-label.ts
+ *   MoonCode --extension examples/extensions/hidden-thinking-label.ts
  *
  * Test:
  *   1. Load this extension
@@ -18,22 +18,22 @@
  *   /thinking-label          Reset to the default label
  */
 
-import type { ExtensionAPI, ExtensionContext } from "Mooncli";
+import type { ExtensionAPI, ExtensionContext } from "MoonCode";
 
 const DEFAULT_LABEL = "Pondering...";
 
-export default function (Mooncli: ExtensionAPI) {
+export default function (MoonCode: ExtensionAPI) {
 	let label = DEFAULT_LABEL;
 
 	const applyLabel = (ctx: ExtensionContext) => {
 		ctx.ui.setHiddenThinkingLabel(label);
 	};
 
-	Mooncli.on("session_start", async (_event, ctx) => {
+	MoonCode.on("session_start", async (_event, ctx) => {
 		applyLabel(ctx);
 	});
 
-	Mooncli.registerCommand("thinking-label", {
+	MoonCode.registerCommand("thinking-label", {
 		description: "Set the hidden thinking label. Use without args to reset.",
 		handler: async (args, ctx) => {
 			const nextLabel = args.trim();

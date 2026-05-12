@@ -98,19 +98,20 @@ export class FooterComponent implements Component {
 
 		const usage = joinMuted([
 			browserIndicator,
-			totalInput ? `↑${formatTokens(totalInput)}` : undefined,
-			totalOutput ? `↓${formatTokens(totalOutput)}` : undefined,
+			totalInput || totalOutput ? `tok ${formatTokens(totalInput)}/${formatTokens(totalOutput)}` : undefined,
 			totalCost
 				? `$${totalCost.toFixed(3)}`
 				: this.session.modelRegistry.isUsingOAuth(state.model)
-					? "$0.000 sub"
+					? "sub"
 					: undefined,
-			`tools:${activeToolNames.length}`,
+			`tools ${activeToolNames.length}`,
 		]);
 
-		const left = theme.fg("muted", location);
+		const left = theme.fg("muted", location || "workspace");
 		const right = joinMuted([theme.fg("muted", model), thinking, coloredContext]);
-		const lines = [fitPair(left, right, width), theme.fg("dim", usage)];
+		const divider = theme.fg("borderMuted", "─".repeat(Math.max(1, width)));
+		const lines = [divider, fitPair(left, right, width)];
+		if (usage) lines.push(theme.fg("dim", usage));
 
 		const extensionStatuses = this.footerData.getExtensionStatuses();
 		if (extensionStatuses.size > 0) {

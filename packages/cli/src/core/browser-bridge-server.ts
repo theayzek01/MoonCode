@@ -1,5 +1,7 @@
+import { spawn } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
 import { createServer, type IncomingMessage, type Server } from "node:http";
+import { platform } from "node:os";
 import type { Duplex } from "node:stream";
 
 export interface BrowserBridgeStatus {
@@ -112,10 +114,14 @@ export async function sendBrowserCommand(
 		startBrowserBridgeServer();
 	}
 
-	const client = getLatestClient();
+	let client = getLatestClient();
+	if (!client) {
+		launchBrowserForBridge();
+		client = await waitForLatestClient(8000);
+	}
 	if (!client) {
 		throw new Error(
-			`No Chrome extension connected. Load packages/cli/browser-extension/chrome in Chrome and keep Moon running. Bridge: ws://127.0.0.1:${port}/ws`,
+			`No browser extension connected. I tried opening the browser. Load packages/cli/browser-extension/chrome once, then retry. Bridge: ws://127.0.0.1:${port}/ws`,
 		);
 	}
 
@@ -166,6 +172,63 @@ function getLatestClient(): BrowserBridgeClient | undefined {
 		}
 	}
 	return latest;
+}
+
+async function waitForLatestClient(timeoutMs: number): Promise<BrowserBridgeClient | undefined> {
+	const start = Date.now();
+	while (Date.now() - start < timeoutMs) {
+		const client = getLatestClient();
+		if (client) return client;
+		await new Promise((resolve) => setTimeout(resolve, 250));
+	}
+	return getLatestClient();
+}
+
+let lastBrowserLaunchAt = 0;
+function launchBrowserForBridge(): void {
+	const now = Date.now();
+	if (now - lastBrowserLaunchAt < 10_000) return;
+	lastBrowserLaunchAt = now;
+	const url = "about:blank";
+	const candidates = getBrowserLaunchCandidates(url);
+	for (const candidate of candidates) {
+		try {
+			const child = spawn(candidate.command, candidate.args, {
+				detached: true,
+				stdio: "ignore",
+				shell: candidate.shell ?? false,
+			});
+			child.unref();
+			return;
+		} catch {
+			// Try next browser/open command.
+		}
+	}
+}
+
+function getBrowserLaunchCandidates(url: string): Array<{ command: string; args: string[]; shell?: boolean }> {
+	const custom = process.env.MOON_BROWSER_COMMAND;
+	if (custom) return [{ command: custom, args: [url], shell: true }];
+	if (platform() === "win32") {
+		return [
+			{ command: "cmd", args: ["/c", "start", "", url], shell: false },
+			{ command: "chrome", args: [url], shell: true },
+			{ command: "msedge", args: [url], shell: true },
+		];
+	}
+	if (platform() === "darwin") {
+		return [
+			{ command: "open", args: ["-a", "Google Chrome", url] },
+			{ command: "open", args: [url] },
+		];
+	}
+	return [
+		{ command: "google-chrome", args: [url] },
+		{ command: "chromium", args: [url] },
+		{ command: "chromium-browser", args: [url] },
+		{ command: "microsoft-edge", args: [url] },
+		{ command: "xdg-open", args: [url] },
+	];
 }
 
 function handleUpgrade(req: IncomingMessage, socket: Duplex): void {

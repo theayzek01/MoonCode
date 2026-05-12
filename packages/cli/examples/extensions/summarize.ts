@@ -1,5 +1,5 @@
-import type { ExtensionAPI, ExtensionCommandContext } from "Mooncli";
-import { DynamicBorder, getMarkdownTheme } from "Mooncli";
+import type { ExtensionAPI, ExtensionCommandContext } from "MoonCode";
+import { DynamicBorder, getMarkdownTheme } from "MoonCode";
 import { complete, getModel } from "moon-core";
 import { Container, Markdown, matchesKey, Text } from "moon-tui";
 
@@ -142,8 +142,8 @@ const showSummaryUi = async (summary: string, ctx: ExtensionCommandContext) => {
 	});
 };
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.registerCommand("summarize", {
+export default function (MoonCode: ExtensionAPI) {
+	MoonCode.registerCommand("summarize", {
 		description: "Summarize the current conversation in a custom UI",
 		handler: async (_args, ctx) => {
 			const branch = ctx.sessionManager.getBranch();

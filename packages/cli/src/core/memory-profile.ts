@@ -11,7 +11,7 @@ export interface DeveloperProfile {
 /**
  * God-Mode Memory (Style Cloning)
  * Local vector-like persistent storage for the user's coding habits.
- * Remembers exact preferences across sessions so Mooncli perfectly mimics the user's style.
+ * Remembers exact preferences across sessions so MoonCode perfectly mimics the user's style.
  */
 export class MemoryProfile {
 	private profilePath: string;
@@ -67,7 +67,7 @@ export class MemoryProfile {
 	 * This guarantees the LLM writes code the exact way the user wants it.
 	 */
 	public getPromptInjection(): string {
-		let injection = `// Mooncli Developer Profile Injection\n`;
+		let injection = `// MoonCode Developer Profile Injection\n`;
 		injection += `// Follow these EXACT rules when generating code:\n\n`;
 
 		if (this.profile.forbiddenPatterns.length > 0) {

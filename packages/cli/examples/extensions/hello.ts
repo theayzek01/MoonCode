@@ -2,7 +2,7 @@
  * Hello Tool - Minimal custom tool example
  */
 
-import { defineTool, type ExtensionAPI } from "Mooncli";
+import { defineTool, type ExtensionAPI } from "MoonCode";
 import { Type } from "moon-core";
 
 const helloTool = defineTool({
@@ -21,6 +21,6 @@ const helloTool = defineTool({
 	},
 });
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.registerTool(helloTool);
+export default function (MoonCode: ExtensionAPI) {
+	MoonCode.registerTool(helloTool);
 }

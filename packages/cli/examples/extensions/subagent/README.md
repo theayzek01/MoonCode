@@ -4,7 +4,7 @@ Delegate tasks to specialized subengines with isolated context windows.
 
 ## Features
 
-- **Isolated context**: Each subengine runs in a separate `Mooncli` process
+- **Isolated context**: Each subengine runs in a separate `MoonCode` process
 - **Streaming output**: See tool calls and progress as they happen
 - **Parallel streaming**: All parallel tasks stream updates simultaneously
 - **Markdown rendering**: Final output rendered with proper formatting (expanded view)
@@ -35,30 +35,30 @@ From the repository root, symlink the files:
 
 ```bash
 # Symlink the extension (must be in a subdirectory with index.ts)
-mkdir -p ~/.Mooncli/engine/extensions/subengine
-ln -sf "$(pwd)/packages/cli/examples/extensions/subengine/index.ts" ~/.Mooncli/engine/extensions/subengine/index.ts
-ln -sf "$(pwd)/packages/cli/examples/extensions/subengine/engines.ts" ~/.Mooncli/engine/extensions/subengine/engines.ts
+mkdir -p ~/.MoonCode/engine/extensions/subengine
+ln -sf "$(pwd)/packages/cli/examples/extensions/subengine/index.ts" ~/.MoonCode/engine/extensions/subengine/index.ts
+ln -sf "$(pwd)/packages/cli/examples/extensions/subengine/engines.ts" ~/.MoonCode/engine/extensions/subengine/engines.ts
 
 # Symlink engines
-mkdir -p ~/.Mooncli/engine/engines
+mkdir -p ~/.MoonCode/engine/engines
 for f in packages/cli/examples/extensions/subengine/engines/*.md; do
-  ln -sf "$(pwd)/$f" ~/.Mooncli/engine/engines/$(basename "$f")
+  ln -sf "$(pwd)/$f" ~/.MoonCode/engine/engines/$(basename "$f")
 done
 
 # Symlink workflow prompts
-mkdir -p ~/.Mooncli/engine/prompts
+mkdir -p ~/.MoonCode/engine/prompts
 for f in packages/cli/examples/extensions/subengine/prompts/*.md; do
-  ln -sf "$(pwd)/$f" ~/.Mooncli/engine/prompts/$(basename "$f")
+  ln -sf "$(pwd)/$f" ~/.MoonCode/engine/prompts/$(basename "$f")
 done
 ```
 
 ## Security Model
 
-This tool executes a separate `Mooncli` subprocess with a delegated system prompt and tool/model configuration.
+This tool executes a separate `MoonCode` subprocess with a delegated system prompt and tool/model configuration.
 
-**Project-local engines** (`.Mooncli/engines/*.md`) are repo-controlled prompts that can instruct the model to read files, run bash commands, etc.
+**Project-local engines** (`.MoonCode/engines/*.md`) are repo-controlled prompts that can instruct the model to read files, run bash commands, etc.
 
-**Default behavior:** Only loads **user-level engines** from `~/.Mooncli/engine/engines`.
+**Default behavior:** Only loads **user-level engines** from `~/.MoonCode/engine/engines`.
 
 To enable project-local engines, pass `engineScope: "both"` (or `"project"`). Only do this for repositories you trust.
 
@@ -136,8 +136,8 @@ System prompt for the engine goes here.
 ```
 
 **Locations:**
-- `~/.Mooncli/engine/engines/*.md` - User-level (always loaded)
-- `.Mooncli/engines/*.md` - Project-level (only with `engineScope: "project"` or `"both"`)
+- `~/.MoonCode/engine/engines/*.md` - User-level (always loaded)
+- `.MoonCode/engines/*.md` - Project-level (only with `engineScope: "project"` or `"both"`)
 
 Project engines override user engines with the same name when `engineScope: "both"`.
 

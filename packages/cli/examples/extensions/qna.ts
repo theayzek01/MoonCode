@@ -7,8 +7,8 @@
  * 3. Loads the result into the editor for user to fill in answers
  */
 
-import type { ExtensionAPI } from "Mooncli";
-import { BorderedLoader } from "Mooncli";
+import type { ExtensionAPI } from "MoonCode";
+import { BorderedLoader } from "MoonCode";
 import { complete, type UserMessage } from "moon-core";
 
 const SYSTEM_PROMPT = `You are a question extractor. Given text from a conversation, extract any questions that need answering and format them for the user to fill in.
@@ -27,8 +27,8 @@ A:
 
 Keep questions in the order they appeared. Be concise.`;
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.registerCommand("qna", {
+export default function (MoonCode: ExtensionAPI) {
+	MoonCode.registerCommand("qna", {
 		description: "Extract questions from last assistant message into editor",
 		handler: async (_args, ctx) => {
 			if (!ctx.hasUI) {

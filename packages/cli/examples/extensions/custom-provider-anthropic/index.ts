@@ -13,15 +13,15 @@
  *   cd packages/cli/examples/extensions/custom-provider && npm install
  *
  *   # With OAuth (run /login custom-anthropic first)
- *   Mooncli -e ./packages/cli/examples/extensions/custom-provider
+ *   MoonCode -e ./packages/cli/examples/extensions/custom-provider
  *
  *   # With API key
- *   CUSTOM_ANTHROPIC_API_KEY=sk-ant-... Mooncli -e ./packages/cli/examples/extensions/custom-provider
+ *   CUSTOM_ANTHROPIC_API_KEY=sk-ant-... MoonCode -e ./packages/cli/examples/extensions/custom-provider
  *
  * Then use /model to select custom-anthropic/claude-sonnet-4-5
  */
 
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "MoonCode";
 import Anthropic from "@anthropic-ai/sdk";
 import type { ContentBlockParam, MessageCreateParamsStreaming } from "@anthropic-ai/sdk/resources/messages.js";
 import {
@@ -565,8 +565,8 @@ function streamCustomAnthropic(
 // Extension Entry Point
 // =============================================================================
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.registerProvider("custom-anthropic", {
+export default function (MoonCode: ExtensionAPI) {
+	MoonCode.registerProvider("custom-anthropic", {
 		baseUrl: "https://api.anthropic.com",
 		apiKey: "CUSTOM_ANTHROPIC_API_KEY",
 		api: "custom-anthropic-api",

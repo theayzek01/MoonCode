@@ -7,12 +7,12 @@
  * Usage: /status [message] - sends a status message with custom rendering
  */
 
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "MoonCode";
 import { Box, Text } from "moon-tui";
 
-export default function (Mooncli: ExtensionAPI) {
+export default function (MoonCode: ExtensionAPI) {
 	// Register custom renderer for "status-update" messages
-	Mooncli.registerMessageRenderer("status-update", (message, { expanded }, theme) => {
+	MoonCode.registerMessageRenderer("status-update", (message, { expanded }, theme) => {
 		const details = message.details as { level: string; timestamp: number } | undefined;
 		const level = details?.level ?? "info";
 
@@ -35,7 +35,7 @@ export default function (Mooncli: ExtensionAPI) {
 	});
 
 	// Command to send status messages
-	Mooncli.registerCommand("status", {
+	MoonCode.registerCommand("status", {
 		description: "Send a status message (usage: /status [warn|error] message)",
 		handler: async (args, _ctx) => {
 			const parts = args.trim().split(/\s+/);
@@ -48,7 +48,7 @@ export default function (Mooncli: ExtensionAPI) {
 				content = parts.slice(1).join(" ") || "Status update";
 			}
 
-			Mooncli.sendMessage({
+			MoonCode.sendMessage({
 				customType: "status-update",
 				content,
 				display: true,

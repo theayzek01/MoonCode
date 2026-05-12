@@ -1,7 +1,7 @@
 /**
  * DOOM Overlay Demo - Play DOOM as an overlay
  *
- * Usage: Mooncli --extension ./examples/extensions/doom-overlay
+ * Usage: MoonCode --extension ./examples/extensions/doom-overlay
  *
  * Commands:
  *   /doom-overlay - Play DOOM in an overlay (Q to pause/exit)
@@ -9,7 +9,7 @@
  * This demonstrates that overlays can handle real-time game rendering at 35 FPS.
  */
 
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "MoonCode";
 import { DoomOverlayComponent } from "./doom-component.js";
 import { DoomEngine } from "./doom-engine.js";
 import { ensureWadFile } from "./wad-finder.js";
@@ -18,8 +18,8 @@ import { ensureWadFile } from "./wad-finder.js";
 let activeEngine: DoomEngine | null = null;
 let activeWadPath: string | null = null;
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.registerCommand("doom-overlay", {
+export default function (MoonCode: ExtensionAPI) {
+	MoonCode.registerCommand("doom-overlay", {
 		description: "Play DOOM as an overlay. Q to pause and exit.",
 
 		handler: async (args, ctx) => {

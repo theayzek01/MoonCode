@@ -8,14 +8,14 @@
  * Token stats come from ctx.sessionManager/ctx.model (already accessible).
  */
 
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "MoonCode";
 import type { AssistantMessage } from "moon-core";
 import { truncateToWidth, visibleWidth } from "moon-tui";
 
-export default function (Mooncli: ExtensionAPI) {
+export default function (MoonCode: ExtensionAPI) {
 	let enabled = false;
 
-	Mooncli.registerCommand("footer", {
+	MoonCode.registerCommand("footer", {
 		description: "Toggle custom footer",
 		handler: async (_args, ctx) => {
 			enabled = !enabled;

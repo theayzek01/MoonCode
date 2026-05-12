@@ -4,13 +4,13 @@
  * Adjusts command, cwd, and env before execution.
  *
  * Usage:
- *   Mooncli -e ./bash-spawn-hook.ts
+ *   MoonCode -e ./bash-spawn-hook.ts
  */
 
-import type { ExtensionAPI } from "Mooncli";
-import { createBashTool } from "Mooncli";
+import type { ExtensionAPI } from "MoonCode";
+import { createBashTool } from "MoonCode";
 
-export default function (Mooncli: ExtensionAPI) {
+export default function (MoonCode: ExtensionAPI) {
 	const cwd = process.cwd();
 
 	const bashTool = createBashTool(cwd, {
@@ -21,7 +21,7 @@ export default function (Mooncli: ExtensionAPI) {
 		}),
 	});
 
-	Mooncli.registerTool({
+	MoonCode.registerTool({
 		...bashTool,
 		execute: async (id, params, signal, onUpdate, _ctx) => {
 			return bashTool.execute(id, params, signal, onUpdate);

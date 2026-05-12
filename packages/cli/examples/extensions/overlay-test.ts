@@ -1,18 +1,18 @@
 /**
  * Overlay Test - validates overlay compositing with inline text inputs
  *
- * Usage: Mooncli --extension ./examples/extensions/overlay-test.ts
+ * Usage: MoonCode --extension ./examples/extensions/overlay-test.ts
  *
  * Run /overlay-test to show a floating overlay with:
  * - Inline text inputs within menu items
  * - Edge case tests (wide chars, styled text, emoji)
  */
 
-import type { ExtensionAPI, ExtensionCommandContext, Theme } from "Mooncli";
+import type { ExtensionAPI, ExtensionCommandContext, Theme } from "MoonCode";
 import { CURSOR_MARKER, type Focusable, matchesKey, visibleWidth } from "moon-tui";
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.registerCommand("overlay-test", {
+export default function (MoonCode: ExtensionAPI) {
+	MoonCode.registerCommand("overlay-test", {
 		description: "Test overlay rendering with edge cases",
 		handler: async (_args: string, ctx: ExtensionCommandContext) => {
 			const result = await ctx.ui.custom<{ action: string; query?: string } | undefined>(

@@ -28,7 +28,7 @@ import { DEFAULT_MAX_BYTES, DEFAULT_MAX_LINES, formatSize, type TruncationResult
  */
 function getTempFilePath(): string {
 	const id = randomBytes(8).toString("hex");
-	return join(tmpdir(), `Mooncli-bash-${id}.log`);
+	return join(tmpdir(), `MoonCode-bash-${id}.log`);
 }
 
 const bashSchema = Type.Object({
@@ -68,9 +68,9 @@ export interface BashOperations {
 }
 
 /**
- * Create bash operations using Mooncli's built-in local shell execution backend.
+ * Create bash operations using MoonCode's built-in local shell execution backend.
  *
- * This is useful for extensions that intercept user_bash and still want Mooncli's
+ * This is useful for extensions that intercept user_bash and still want MoonCode's
  * standard local shell behavior while wrapping or rewriting commands.
  */
 export function createLocalBashOperations(options?: { shellPath?: string }): BashOperations {

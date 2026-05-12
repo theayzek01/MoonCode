@@ -1,5 +1,5 @@
 {
-  "name": "moon-monorepo",
+  "name": "mooncode-monorepo",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -49,9 +49,9 @@
   "version": "11.40.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/theayzek01/mooncli"
+    "url": "https://github.com/theayzek01/MoonCode"
   },
-  "homepage": "https://mooncli.dev",
+  "homepage": "https://github.com/theayzek01/MoonCode",
   "dependencies": {
     "@mariozechner/jiti": "^2.6.5",
     "get-east-asian-width": "^1.4.0",

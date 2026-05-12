@@ -34,7 +34,7 @@ import {
 export interface CreateEngineSessionOptions {
 	/** Working directory for project-local discovery. Default: process.cwd() */
 	cwd?: string;
-	/** Global config directory. Default: ~/.mooncli/engine */
+	/** Global config directory. Default: ~/.mooncode/engine */
 	engineDir?: string;
 
 	/** Auth storage for credentials. Default: AuthStorage.create(engineDir/auth.json) */
@@ -140,7 +140,7 @@ function getAttributionHeaders(
 
 	if (model.provider === "openrouter" || model.baseUrl.includes("openrouter.ai")) {
 		return {
-			"HTTP-Referer": "https://mooncli.dev",
+			"HTTP-Referer": "https://github.com/theayzek01/MoonCode",
 			"X-OpenRouter-Title": "Moon",
 			"X-OpenRouter-Categories": "cli-engine",
 		};

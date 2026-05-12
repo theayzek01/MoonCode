@@ -3,7 +3,7 @@
  * Uses Kitty keyboard protocol for smooth movement (press/release detection)
  */
 
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "MoonCode";
 import { isKeyRelease, Key, matchesKey, visibleWidth } from "moon-tui";
 
 const GAME_WIDTH = 60;
@@ -524,8 +524,8 @@ class SpaceInvadersComponent {
 
 const INVADERS_SAVE_TYPE = "space-invaders-save";
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.registerCommand("invaders", {
+export default function (MoonCode: ExtensionAPI) {
+	MoonCode.registerCommand("invaders", {
 		description: "Play Space Invaders!",
 
 		handler: async (_args, ctx) => {
@@ -550,7 +550,7 @@ export default function (Mooncli: ExtensionAPI) {
 					tui,
 					() => done(undefined),
 					(state) => {
-						Mooncli.appendEntry(INVADERS_SAVE_TYPE, state);
+						MoonCode.appendEntry(INVADERS_SAVE_TYPE, state);
 					},
 					savedState,
 				);

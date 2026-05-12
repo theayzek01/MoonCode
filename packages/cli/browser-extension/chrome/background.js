@@ -1,8 +1,8 @@
 const BRIDGE_URL = "ws://127.0.0.1:3133/ws";
-const VERSION = "12.05.2026-v2";
+const VERSION = "12.05.2026-v4";
 const HEARTBEAT_INTERVAL_MS = 15000;
 const RECONNECT_DELAY_MS = 3000;
-const ALARM_NAME = "mooncli-bridge-reconnect";
+const ALARM_NAME = "mooncode-bridge-reconnect";
 
 let socket = null;
 let reconnectTimer = null;
@@ -100,7 +100,7 @@ function sendHello() {
     extensionId: chrome.runtime.id,
     version: VERSION,
     capabilities: ["tabs", "page", "debugger", "screenshot", "scroll",
-      "console_logs", "read_dom", "hover", "press_key", "get_elements", "evaluate"]
+      "console_logs", "read_dom", "hover", "drag", "upload_file", "press_key", "get_elements", "evaluate", "clear_ui"]
   });
 }
 
@@ -118,7 +118,7 @@ function updateBadgeFromSocket() {
 function setBadge(connected, title) {
   chrome.action.setBadgeText({ text: connected ? "ON" : "OFF" });
   chrome.action.setBadgeBackgroundColor({ color: connected ? "#22c55e" : "#ef4444" });
-  chrome.action.setTitle({ title: `Moon Browser Bridge: ${title}` });
+  chrome.action.setTitle({ title: `MoonCode Browser Bridge: ${title}` });
 }
 
 // ── Command dispatcher ────────────────────────────────────────────────────────
@@ -203,9 +203,10 @@ async function executePage(args) {
   }
 
   if (action === "read_dom") {
+    const maxChars = Math.max(500, Math.min(Number.isFinite(Number(args.maxChars)) ? Number(args.maxChars) : 5000, 16000));
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
-      func: () => {
+      func: (limit) => {
         const isInteractive = (el) => {
           const tag = el.tagName.toLowerCase();
           const role = el.getAttribute("role") || "";
@@ -255,20 +256,39 @@ async function executePage(args) {
             .replace(/\s{3,}/g, " ")
             .replace(/\n{3,}/g, "\n\n")
             .trim()
-            .slice(0, 12000)
+            .slice(0, limit)
         };
-      }
+      },
+      args: [maxChars]
     });
     return result?.result;
   }
 
   if (action === "read") {
-    const maxChars = Number.isFinite(Number(args.maxChars)) ? Number(args.maxChars) : 12000;
+    const maxChars = Math.max(500, Math.min(Number.isFinite(Number(args.maxChars)) ? Number(args.maxChars) : 4000, 16000));
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
       func: (limit) => {
-        const selection = String(window.getSelection?.() || "");
-        const text = document.body?.innerText || "";
+        const selection = String(window.getSelection?.() || "").trim();
+        const visibleText = [];
+        const walker = document.createTreeWalker(document.body || document.documentElement, NodeFilter.SHOW_TEXT, {
+          acceptNode(node) {
+            const value = node.nodeValue?.replace(/\s+/g, " ").trim();
+            if (!value || value.length < 2) return NodeFilter.FILTER_REJECT;
+            const parent = node.parentElement;
+            if (!parent || ["SCRIPT", "STYLE", "NOSCRIPT", "SVG"].includes(parent.tagName)) return NodeFilter.FILTER_REJECT;
+            const style = getComputedStyle(parent);
+            if (style.display === "none" || style.visibility === "hidden" || Number(style.opacity) === 0) return NodeFilter.FILTER_REJECT;
+            return NodeFilter.FILTER_ACCEPT;
+          }
+        });
+        let total = 0;
+        while (walker.nextNode() && total < limit + 1000) {
+          const value = walker.currentNode.nodeValue.replace(/\s+/g, " ").trim();
+          visibleText.push(value);
+          total += value.length + 1;
+        }
+        const text = visibleText.join("\n");
         return {
           title: document.title,
           url: location.href,
@@ -283,10 +303,13 @@ async function executePage(args) {
   }
 
   if (action === "get_elements") {
+    const maxElements = Math.max(1, Math.min(Number.isFinite(Number(args.maxElements)) ? Number(args.maxElements) : 60, 120));
+    const showLabels = args.showLabels === true;
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
-      func: () => {
+      func: (maxElements, showLabels) => {
         document.querySelectorAll(".moon-label").forEach(el => el.remove());
+        if (window.__moon_labels_cleanup) clearTimeout(window.__moon_labels_cleanup);
 
         const selectors = 'a, button, input, select, textarea, [role="button"], [role="link"], [role="checkbox"], [role="menuitem"], [onclick], [tabindex]:not([tabindex="-1"])';
         const interactive = Array.from(document.querySelectorAll(selectors));
@@ -297,11 +320,11 @@ async function executePage(args) {
           const rect = el.getBoundingClientRect();
           const style = window.getComputedStyle(el);
 
-          // Strict visibility: must be in viewport, visible, and have size
+          // Visibility: include partially visible controls so edge UI is not missed.
           const inViewport = rect.width > 4 && rect.height > 4
-            && rect.top >= -2 && rect.left >= -2
-            && rect.bottom <= (window.innerHeight + 2)
-            && rect.right <= (window.innerWidth + 2);
+            && rect.bottom >= 0 && rect.right >= 0
+            && rect.top <= window.innerHeight
+            && rect.left <= window.innerWidth;
 
           if (!inViewport) continue;
           if (style.display === "none" || style.visibility === "hidden") continue;
@@ -311,26 +334,30 @@ async function executePage(args) {
           const id = idCounter++;
           el.setAttribute("data-moon-id", String(id));
 
-          const label = document.createElement("div");
-          label.className = "moon-label";
-          label.textContent = String(id);
-          label.style.cssText = [
-            "position:fixed",
-            `top:${rect.top}px`,
-            `left:${rect.left}px`,
-            "background:#fbbf24",
-            "color:#000",
-            "font-size:10px",
-            "font-weight:bold",
-            "padding:1px 4px",
-            "border-radius:3px",
-            "z-index:2147483647",
-            "pointer-events:none",
-            "border:1px solid rgba(0,0,0,0.6)",
-            "line-height:1.4",
-            "font-family:monospace"
-          ].join(";");
-          document.body.appendChild(label);
+          if (showLabels) {
+            const label = document.createElement("div");
+            label.className = "moon-label";
+            label.textContent = String(id);
+            label.style.cssText = [
+              "position:fixed",
+              `top:${Math.max(0, Math.min(rect.top, window.innerHeight - 18))}px`,
+              `left:${Math.max(0, Math.min(rect.left, window.innerWidth - 28))}px`,
+              "transform:translate(-2px,-2px)",
+              "background:rgba(31,41,55,0.86)",
+              "color:#f8fafc",
+              "font-size:10px",
+              "font-weight:700",
+              "padding:1px 5px",
+              "border-radius:999px",
+              "z-index:2147483647",
+              "pointer-events:none",
+              "border:1px solid rgba(255,255,255,0.22)",
+              "box-shadow:0 3px 10px rgba(0,0,0,0.18)",
+              "line-height:1.25",
+              "font-family:ui-monospace,SFMono-Regular,Menlo,monospace"
+            ].join(";");
+            (document.body || document.documentElement).appendChild(label);
+          }
 
           map.push({
             id,
@@ -341,10 +368,16 @@ async function executePage(args) {
             ariaLabel: el.getAttribute("aria-label") || undefined
           });
 
-          if (map.length >= 100) break;
+          if (map.length >= maxElements) break;
+        }
+        if (showLabels) {
+          window.__moon_labels_cleanup = setTimeout(() => {
+            document.querySelectorAll(".moon-label").forEach(el => el.remove());
+          }, 10000);
         }
         return map;
-      }
+      },
+      args: [maxElements, showLabels]
     });
     return result?.result;
   }
@@ -352,28 +385,21 @@ async function executePage(args) {
   if (action === "click") {
     if (!args.selector) throw new Error("click requires selector");
     const selector = await resolveSelector(tabId, args.selector);
-    await injectOverlay(tabId, `Clicking ${selector}`);
+    if (args.visual === true) await injectOverlay(tabId, `Clicking ${selector}`);
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
-      func: async (selector) => {
+      func: async (selector, visual) => {
         const el = document.querySelector(selector);
         if (!el) return { clicked: false, reason: "selector not found" };
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
-        await new Promise(r => setTimeout(r, 120));
+        el.scrollIntoView({ behavior: "instant", block: "center", inline: "center" });
+        await new Promise(r => setTimeout(r, 20));
         const rect = el.getBoundingClientRect();
-        if (window.__moon_move_cursor) {
-          await window.__moon_move_cursor(
-            rect.left + rect.width / 2,
-            rect.top + rect.height / 2,
-            "hand"
-          );
-        }
-        el.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true, view: window }));
-        el.dispatchEvent(new MouseEvent("mouseup",   { bubbles: true, cancelable: true, view: window }));
-        el.dispatchEvent(new MouseEvent("click",     { bubbles: true, cancelable: true, view: window }));
-        return { clicked: true, selector, text: el.textContent?.trim().slice(0, 200) || "" };
+        if (visual && window.__moon_move_cursor) await window.__moon_move_cursor(rect.left + rect.width / 2, rect.top + rect.height / 2, "hand");
+        if (typeof el.click === "function") el.click();
+        else el.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
+        return { clicked: true, selector, text: el.textContent?.trim().slice(0, 120) || "" };
       },
-      args: [selector]
+      args: [selector, args.visual === true]
     });
     return result?.result;
   }
@@ -381,27 +407,22 @@ async function executePage(args) {
   if (action === "hover") {
     if (!args.selector) throw new Error("hover requires selector");
     const selector = await resolveSelector(tabId, args.selector);
-    await injectOverlay(tabId, `Hovering ${selector}`);
+    if (args.visual === true) await injectOverlay(tabId, `Hovering ${selector}`);
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
-      func: async (selector) => {
+      func: async (selector, visual) => {
         const el = document.querySelector(selector);
         if (!el) return { hovered: false, reason: "selector not found" };
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
-        await new Promise(r => setTimeout(r, 80));
+        el.scrollIntoView({ behavior: "instant", block: "center", inline: "center" });
+        await new Promise(r => setTimeout(r, 20));
         const rect = el.getBoundingClientRect();
-        if (window.__moon_move_cursor) {
-          await window.__moon_move_cursor(
-            rect.left + rect.width / 2,
-            rect.top + rect.height / 2,
-            "arrow"
-          );
+        if (visual && window.__moon_move_cursor) await window.__moon_move_cursor(rect.left + rect.width / 2, rect.top + rect.height / 2, "arrow");
+        for (const type of ["pointerover", "pointerenter", "mouseover", "mouseenter"]) {
+          el.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, view: window }));
         }
-        el.dispatchEvent(new MouseEvent("mouseover",  { bubbles: true, cancelable: true, view: window }));
-        el.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true, cancelable: true, view: window }));
         return { hovered: true, selector };
       },
-      args: [selector]
+      args: [selector, args.visual === true]
     });
     return result?.result;
   }
@@ -409,38 +430,122 @@ async function executePage(args) {
   if (action === "type") {
     if (!args.selector) throw new Error("type requires selector");
     const selector = await resolveSelector(tabId, args.selector);
-    await injectOverlay(tabId, `Typing into ${selector}`);
+    if (args.visual === true) await injectOverlay(tabId, `Typing into ${selector}`);
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
-      func: async (selector, text, append) => {
+      func: async (selector, text, append, visual) => {
         const el = document.querySelector(selector);
         if (!el) return { typed: false, reason: "selector not found" };
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
-        await new Promise(r => setTimeout(r, 80));
+        el.scrollIntoView({ behavior: "instant", block: "center", inline: "center" });
+        await new Promise(r => setTimeout(r, 20));
         const rect = el.getBoundingClientRect();
-        if (window.__moon_move_cursor) {
-          await window.__moon_move_cursor(
-            rect.left + rect.width / 2,
-            rect.top + rect.height / 2,
-            "type"
-          );
-        }
+        if (visual && window.__moon_move_cursor) await window.__moon_move_cursor(rect.left + rect.width / 2, rect.top + rect.height / 2, "type");
         el.focus?.();
-
-        // Support both native inputs and contenteditable
+        const nextValue = append ? (("value" in el ? el.value : el.textContent) || "") + text : text;
         if ("value" in el) {
-          el.value = append ? (el.value + text) : text;
+          const proto = el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+          const setter = Object.getOwnPropertyDescriptor(proto, "value")?.set;
+          setter ? setter.call(el, nextValue) : (el.value = nextValue);
         } else if (el.isContentEditable) {
-          el.textContent = append ? (el.textContent + text) : text;
+          el.textContent = nextValue;
         } else {
-          el.textContent = text;
+          el.textContent = nextValue;
         }
-
-        el.dispatchEvent(new InputEvent("input",  { bubbles: true, inputType: "insertText", data: text }));
+        el.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: text }));
         el.dispatchEvent(new Event("change", { bubbles: true }));
         return { typed: true, selector, length: text.length };
       },
-      args: [selector, args.text ?? "", args.append === true]
+      args: [selector, args.text ?? "", args.append === true, args.visual === true]
+    });
+    return result?.result;
+  }
+
+  if (action === "drag") {
+    if (!args.selector || !args.targetSelector) throw new Error("drag requires selector and targetSelector");
+    const selector = await resolveSelector(tabId, args.selector);
+    const targetSelector = await resolveSelector(tabId, args.targetSelector);
+    if (args.visual === true) await injectOverlay(tabId, `Dragging ${selector}`);
+    const [result] = await chrome.scripting.executeScript({
+      target: { tabId },
+      func: async (selector, targetSelector, visual) => {
+        const source = document.querySelector(selector);
+        const target = document.querySelector(targetSelector);
+        if (!source) return { dragged: false, reason: "source not found" };
+        if (!target) return { dragged: false, reason: "target not found" };
+        source.scrollIntoView({ behavior: "instant", block: "center", inline: "center" });
+        target.scrollIntoView({ behavior: "instant", block: "center", inline: "center" });
+        await new Promise(r => setTimeout(r, 30));
+        const dataTransfer = new DataTransfer();
+        const s = source.getBoundingClientRect();
+        const t = target.getBoundingClientRect();
+        if (visual && window.__moon_move_cursor) {
+          await window.__moon_move_cursor(s.left + s.width / 2, s.top + s.height / 2, "hand");
+          await window.__moon_move_cursor(t.left + t.width / 2, t.top + t.height / 2, "hand");
+        }
+        source.dispatchEvent(new DragEvent("dragstart", { bubbles: true, cancelable: true, dataTransfer }));
+        target.dispatchEvent(new DragEvent("dragenter", { bubbles: true, cancelable: true, dataTransfer }));
+        target.dispatchEvent(new DragEvent("dragover", { bubbles: true, cancelable: true, dataTransfer }));
+        target.dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer }));
+        source.dispatchEvent(new DragEvent("dragend", { bubbles: true, cancelable: true, dataTransfer }));
+        return { dragged: true, selector, targetSelector };
+      },
+      args: [selector, targetSelector, args.visual === true]
+    });
+    return result?.result;
+  }
+
+  if (action === "upload_file") {
+    if (!args.selector) throw new Error("upload_file requires selector");
+    const selector = await resolveSelector(tabId, args.selector);
+    const files = Array.isArray(args.filePaths) ? args.filePaths.map(String) : args.filePath ? [String(args.filePath)] : [];
+    if (files.length === 0) throw new Error("upload_file requires filePath or filePaths");
+    const [result] = await chrome.scripting.executeScript({
+      target: { tabId },
+      func: (selector) => {
+        const el = document.querySelector(selector);
+        if (!el) return { ready: false, reason: "selector not found" };
+        if (el.tagName !== "INPUT" || el.type !== "file") return { ready: false, reason: "selector is not input[type=file]" };
+        el.scrollIntoView({ behavior: "instant", block: "center", inline: "center" });
+        return { ready: true, multiple: !!el.multiple };
+      },
+      args: [selector]
+    });
+    if (!result?.result?.ready) return { uploaded: false, selector, reason: result?.result?.reason || "input not ready" };
+    await chrome.debugger.attach({ tabId }, "1.3");
+    debuggerAttachedTabs.add(tabId);
+    try {
+      await chrome.debugger.sendCommand({ tabId }, "DOM.enable", {});
+      const doc = await chrome.debugger.sendCommand({ tabId }, "DOM.getDocument", { depth: -1, pierce: true });
+      const found = await chrome.debugger.sendCommand({ tabId }, "DOM.querySelector", { nodeId: doc.root.nodeId, selector });
+      if (!found.nodeId) throw new Error("file input not found by debugger");
+      await chrome.debugger.sendCommand({ tabId }, "DOM.setFileInputFiles", { nodeId: found.nodeId, files });
+    } finally {
+      try { await chrome.debugger.detach({ tabId }); } catch {}
+      debuggerAttachedTabs.delete(tabId);
+    }
+    const [after] = await chrome.scripting.executeScript({
+      target: { tabId },
+      func: (selector) => {
+        const el = document.querySelector(selector);
+        if (!el) return { changed: false };
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+        el.dispatchEvent(new Event("change", { bubbles: true }));
+        return { changed: true, files: el.files?.length || 0 };
+      },
+      args: [selector]
+    });
+    return { uploaded: true, selector, files: files.length, page: after?.result };
+  }
+
+  if (action === "clear_ui") {
+    const [result] = await chrome.scripting.executeScript({
+      target: { tabId },
+      func: () => {
+        document.querySelectorAll(".moon-label,#mooncode-overlay,#moon-visual-cursor,#mooncode-banner,#mooncode-bar,#mooncode-style").forEach(el => el.remove());
+        if (window.__mooncode_hide) clearTimeout(window.__mooncode_hide);
+        if (window.__moon_labels_cleanup) clearTimeout(window.__moon_labels_cleanup);
+        return { cleared: true };
+      }
     });
     return result?.result;
   }
@@ -639,9 +744,9 @@ async function injectOverlay(tabId, message = "Moon Controlling") {
   await chrome.scripting.executeScript({
     target: { tabId },
     func: (msg, arrowUrl, handUrl, typeUrl) => {
-      const OVERLAY_ID = "mooncli-overlay";
+      const OVERLAY_ID = "mooncode-overlay";
       const CURSOR_ID  = "moon-visual-cursor";
-      const BANNER_ID  = "mooncli-banner";
+      const BANNER_ID  = "mooncode-banner";
 
       // ── Banner ────────────────────────────────────────────────────────────
       let banner = document.getElementById(BANNER_ID);
@@ -650,18 +755,18 @@ async function injectOverlay(tabId, message = "Moon Controlling") {
         banner.id = BANNER_ID;
         banner.style.cssText = [
           "position:fixed",
-          "top:12px",
-          "right:12px",
-          "background:rgba(15,23,42,0.92)",
+          "top:10px",
+          "right:10px",
+          "background:rgba(2,6,23,0.82)",
           "color:#fff",
-          "padding:7px 14px",
-          "border-radius:10px",
+          "padding:6px 10px",
+          "border-radius:999px",
           "font-family:'Inter',system-ui,sans-serif",
-          "font-size:13px",
-          "font-weight:500",
+          "font-size:12px",
+          "font-weight:600",
           "z-index:2147483647",
-          "border:1px solid #0ea5e9",
-          "box-shadow:0 8px 20px rgba(0,0,0,0.35)",
+          "border:1px solid rgba(255,255,255,0.18)",
+          "box-shadow:0 6px 18px rgba(0,0,0,0.22)",
           "backdrop-filter:blur(8px)",
           "display:flex",
           "align-items:center",
@@ -671,47 +776,47 @@ async function injectOverlay(tabId, message = "Moon Controlling") {
         ].join(";");
 
         const dot = document.createElement("span");
-        dot.id = "mooncli-dot";
+        dot.id = "mooncode-dot";
         dot.style.cssText = "display:inline-block;width:8px;height:8px;background:#0ea5e9;border-radius:50%;box-shadow:0 0 8px #0ea5e9;flex-shrink:0;";
         banner.appendChild(dot);
 
         const txt = document.createElement("span");
-        txt.id = "mooncli-txt";
+        txt.id = "mooncode-txt";
         banner.appendChild(txt);
 
-        document.body.appendChild(banner);
+        (document.body || document.documentElement).appendChild(banner);
       }
 
       // Add pulse bar (once)
-      if (!document.getElementById("mooncli-bar")) {
+      if (!document.getElementById("mooncode-bar")) {
         const bar = document.createElement("div");
-        bar.id = "mooncli-bar";
-        bar.style.cssText = "position:fixed;top:0;left:0;right:0;height:3px;background:#0ea5e9;z-index:2147483646;pointer-events:none;";
-        document.body.appendChild(bar);
-        if (!document.getElementById("mooncli-style")) {
+        bar.id = "mooncode-bar";
+        bar.style.cssText = "position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#38bdf8,#a78bfa);z-index:2147483646;pointer-events:none;";
+        (document.documentElement || document.body).appendChild(bar);
+        if (!document.getElementById("mooncode-style")) {
           const s = document.createElement("style");
-          s.id = "mooncli-style";
-          s.textContent = "@keyframes mooncli-pulse{0%,100%{opacity:1}50%{opacity:0.3}}#mooncli-bar{animation:mooncli-pulse 1.8s ease-in-out infinite;}";
+          s.id = "mooncode-style";
+          s.textContent = "@keyframes mooncode-pulse{0%,100%{opacity:1}50%{opacity:0.3}}#mooncode-bar{animation:mooncode-pulse 1.8s ease-in-out infinite;}";
           document.head.appendChild(s);
         }
       }
 
       // Update message
-      const txtEl = document.getElementById("mooncli-txt");
+      const txtEl = document.getElementById("mooncode-txt");
       if (txtEl) txtEl.textContent = msg;
 
       // Clear previous auto-hide timer
-      if (window.__mooncli_hide) clearTimeout(window.__mooncli_hide);
+      if (window.__mooncode_hide) clearTimeout(window.__mooncode_hide);
       banner.style.opacity = "1";
 
-      window.__mooncli_hide = setTimeout(() => {
+      window.__mooncode_hide = setTimeout(() => {
         const b = document.getElementById(BANNER_ID);
-        const bar = document.getElementById("mooncli-bar");
+        const bar = document.getElementById("mooncode-bar");
         if (b) b.style.opacity = "0";
         setTimeout(() => {
           b?.remove();
           bar?.remove();
-          document.getElementById("mooncli-style")?.remove();
+          document.getElementById("mooncode-style")?.remove();
         }, 300);
       }, 6000);
 
@@ -732,7 +837,7 @@ async function injectOverlay(tabId, message = "Moon Controlling") {
           "transition:top 0.35s cubic-bezier(.4,0,.2,1),left 0.35s cubic-bezier(.4,0,.2,1)",
           "will-change:top,left"
         ].join(";");
-        document.body.appendChild(cursor);
+        (document.body || document.documentElement).appendChild(cursor);
       }
 
       window.__moon_move_cursor = (x, y, type = "arrow") => new Promise((resolve) => {

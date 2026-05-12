@@ -1,7 +1,7 @@
 /**
  * Overlay QA Tests - comprehensive overlay positioning and edge case tests
  *
- * Usage: Mooncli --extension ./examples/extensions/overlay-qa-tests.ts
+ * Usage: MoonCode --extension ./examples/extensions/overlay-qa-tests.ts
  *
  * Commands:
  *   /overlay-animation  - Real-time animation demo (~30 FPS, proves DOOM-like rendering works)
@@ -19,7 +19,7 @@
  *   /overlay-streaming  - Multiple input panels with simulated streaming (Tab to cycle focus)
  */
 
-import type { ExtensionAPI, ExtensionCommandContext, Theme } from "Mooncli";
+import type { ExtensionAPI, ExtensionCommandContext, Theme } from "MoonCode";
 import { spawn } from "child_process";
 import type { Component, OverlayAnchor, OverlayHandle, OverlayOptions, TUI } from "moon-tui";
 import { matchesKey, truncateToWidth, visibleWidth } from "moon-tui";
@@ -27,9 +27,9 @@ import { matchesKey, truncateToWidth, visibleWidth } from "moon-tui";
 // Global handle for toggle demo (in real code, use a more elegant pattern)
 let globalToggleHandle: OverlayHandle | null = null;
 
-export default function (Mooncli: ExtensionAPI) {
-	// Animation demo - proves overlays can handle real-time updates (like Mooncli-doom would need)
-	Mooncli.registerCommand("overlay-animation", {
+export default function (MoonCode: ExtensionAPI) {
+	// Animation demo - proves overlays can handle real-time updates (like MoonCode-doom would need)
+	MoonCode.registerCommand("overlay-animation", {
 		description: "Test real-time animation in overlay (~30 FPS)",
 		handler: async (_args: string, ctx: ExtensionCommandContext) => {
 			await ctx.ui.custom<void>((tui, theme, _kb, done) => new AnimationDemoComponent(tui, theme, done), {
@@ -40,7 +40,7 @@ export default function (Mooncli: ExtensionAPI) {
 	});
 
 	// Test all 9 anchor positions
-	Mooncli.registerCommand("overlay-anchors", {
+	MoonCode.registerCommand("overlay-anchors", {
 		description: "Cycle through all anchor positions",
 		handler: async (_args: string, ctx: ExtensionCommandContext) => {
 			const anchors: OverlayAnchor[] = [
@@ -78,7 +78,7 @@ export default function (Mooncli: ExtensionAPI) {
 	});
 
 	// Test margins and offsets
-	Mooncli.registerCommand("overlay-margins", {
+	MoonCode.registerCommand("overlay-margins", {
 		description: "Test margin and offset options",
 		handler: async (_args: string, ctx: ExtensionCommandContext) => {
 			const configs: { name: string; options: OverlayOptions }[] = [
@@ -112,7 +112,7 @@ export default function (Mooncli: ExtensionAPI) {
 	});
 
 	// Test stacked overlays
-	Mooncli.registerCommand("overlay-stack", {
+	MoonCode.registerCommand("overlay-stack", {
 		description: "Test stacked overlays",
 		handler: async (_args: string, ctx: ExtensionCommandContext) => {
 			// Three large overlays that overlap in the center area
@@ -156,7 +156,7 @@ export default function (Mooncli: ExtensionAPI) {
 	});
 
 	// Test width overflow scenarios (original crash case) - streams real process output
-	Mooncli.registerCommand("overlay-overflow", {
+	MoonCode.registerCommand("overlay-overflow", {
 		description: "Test width overflow with streaming process output",
 		handler: async (_args: string, ctx: ExtensionCommandContext) => {
 			await ctx.ui.custom<void>((tui, theme, _kb, done) => new StreamingOverflowComponent(tui, theme, done), {
@@ -167,7 +167,7 @@ export default function (Mooncli: ExtensionAPI) {
 	});
 
 	// Test overlay at terminal edge
-	Mooncli.registerCommand("overlay-edge", {
+	MoonCode.registerCommand("overlay-edge", {
 		description: "Test overlay positioned at terminal edge",
 		handler: async (_args: string, ctx: ExtensionCommandContext) => {
 			await ctx.ui.custom<void>((_tui, theme, _kb, done) => new EdgeTestComponent(theme, done), {
@@ -178,7 +178,7 @@ export default function (Mooncli: ExtensionAPI) {
 	});
 
 	// Test percentage-based positioning
-	Mooncli.registerCommand("overlay-percent", {
+	MoonCode.registerCommand("overlay-percent", {
 		description: "Test percentage-based positioning",
 		handler: async (_args: string, ctx: ExtensionCommandContext) => {
 			const configs = [
@@ -214,7 +214,7 @@ export default function (Mooncli: ExtensionAPI) {
 	});
 
 	// Test maxHeight
-	Mooncli.registerCommand("overlay-maxheight", {
+	MoonCode.registerCommand("overlay-maxheight", {
 		description: "Test maxHeight truncation",
 		handler: async (_args: string, ctx: ExtensionCommandContext) => {
 			await ctx.ui.custom<void>((_tui, theme, _kb, done) => new MaxHeightTestComponent(theme, done), {
@@ -225,7 +225,7 @@ export default function (Mooncli: ExtensionAPI) {
 	});
 
 	// Test responsive sidepanel - only shows when terminal is wide enough
-	Mooncli.registerCommand("overlay-sidepanel", {
+	MoonCode.registerCommand("overlay-sidepanel", {
 		description: "Test responsive sidepanel (hides when terminal < 100 cols)",
 		handler: async (_args: string, ctx: ExtensionCommandContext) => {
 			await ctx.ui.custom<void>((tui, theme, _kb, done) => new SidepanelComponent(tui, theme, done), {
@@ -243,7 +243,7 @@ export default function (Mooncli: ExtensionAPI) {
 	});
 
 	// Test toggle overlay - demonstrates OverlayHandle.setHidden() via onHandle callback
-	Mooncli.registerCommand("overlay-toggle", {
+	MoonCode.registerCommand("overlay-toggle", {
 		description: "Test overlay toggle (press 't' to toggle visibility)",
 		handler: async (_args: string, ctx: ExtensionCommandContext) => {
 			await ctx.ui.custom<void>((tui, theme, _kb, done) => new ToggleDemoComponent(tui, theme, done), {
@@ -261,7 +261,7 @@ export default function (Mooncli: ExtensionAPI) {
 	});
 
 	// Non-capturing overlay demo - passive info panel that doesn't steal focus
-	Mooncli.registerCommand("overlay-passive", {
+	MoonCode.registerCommand("overlay-passive", {
 		description: "Test non-capturing overlay (passive info panel alongside active overlay)",
 		handler: async (_args: string, ctx: ExtensionCommandContext) => {
 			ctx.ui.setEditorText("");
@@ -273,7 +273,7 @@ export default function (Mooncli: ExtensionAPI) {
 	});
 
 	// Focus cycling demo - demonstrates focus(), unfocus(), isFocused() and rendering order
-	Mooncli.registerCommand("overlay-focus", {
+	MoonCode.registerCommand("overlay-focus", {
 		description: "Test focus cycling and rendering order with non-capturing overlays",
 		handler: async (_args: string, ctx: ExtensionCommandContext) => {
 			ctx.ui.setEditorText("");
@@ -285,7 +285,7 @@ export default function (Mooncli: ExtensionAPI) {
 	});
 
 	// Test multiple input panels with simulated streaming
-	Mooncli.registerCommand("overlay-streaming", {
+	MoonCode.registerCommand("overlay-streaming", {
 		description: "Multiple input panels with simulated streaming (Tab to cycle focus)",
 		handler: async (_args: string, ctx: ExtensionCommandContext) => {
 			ctx.ui.setEditorText("");
@@ -473,13 +473,13 @@ class StreamingOverflowComponent extends BaseOverlay {
 			echo ""
 			for i in $(seq 1 100); do
 				# Simulate long file paths with OSC 8 hyperlinks (clickable) - tests width overflow
-				DIR="/Users/nicobailon/Documents/development/Mooncli-mono/packages/cli/src/modes/interactive"
+				DIR="/Users/nicobailon/Documents/development/MoonCode-mono/packages/cli/src/modes/interactive"
 				FILE="\${DIR}/components/very-long-component-name-that-exceeds-width-\${i}.ts"
 				echo -e "\\033]8;;file://\${FILE}\\007▶ read: \${FILE}\\033]8;;\\007"
 
 				# Add some colored status messages with long text
 				if [ $((i % 5)) -eq 0 ]; then
-					echo -e "  \\033[32m✓ Successfully processed \${i} files in /Users/nicobailon/Documents/development/Mooncli-mono\\033[0m"
+					echo -e "  \\033[32m✓ Successfully processed \${i} files in /Users/nicobailon/Documents/development/MoonCode-mono\\033[0m"
 				fi
 				if [ $((i % 7)) -eq 0 ]; then
 					echo -e "  \\033[33m⚠ Warning: potential issue detected at line \${i} in very-long-component-name-that-exceeds-width.ts\\033[0m"
@@ -743,7 +743,7 @@ class SidepanelComponent extends BaseOverlay {
 	}
 }
 
-// Animation demo - proves overlays can handle real-time updates like Mooncli-doom
+// Animation demo - proves overlays can handle real-time updates like MoonCode-doom
 class AnimationDemoComponent extends BaseOverlay {
 	private frame = 0;
 	private interval: ReturnType<typeof setInterval> | null = null;
@@ -819,7 +819,7 @@ class AnimationDemoComponent extends BaseOverlay {
 		lines.push(border("│") + padLine(``) + border("│"));
 		lines.push(border("│") + padLine(th.fg("dim", " This proves overlays can handle")) + border("│"));
 		lines.push(border("│") + padLine(th.fg("dim", " real-time game-like rendering.")) + border("│"));
-		lines.push(border("│") + padLine(th.fg("dim", " (Mooncli-doom uses same approach)")) + border("│"));
+		lines.push(border("│") + padLine(th.fg("dim", " (MoonCode-doom uses same approach)")) + border("│"));
 		lines.push(border("│") + padLine(``) + border("│"));
 		lines.push(border("│") + padLine(th.fg("dim", " Press Esc to close")) + border("│"));
 		lines.push(border(`╰${"─".repeat(innerW)}╯`));

@@ -11,7 +11,7 @@ import {
 	getEngineDir,
 	type PromptTemplate,
 	SessionManager,
-} from "Mooncli";
+} from "MoonCode";
 
 // Define custom templates
 const deployTemplate: PromptTemplate = {
@@ -36,7 +36,7 @@ const loader = new DefaultResourceLoader({
 });
 await loader.reload();
 
-// Discover templates from cwd/.Mooncli/prompts/ and ~/.Mooncli/engine/prompts/
+// Discover templates from cwd/.MoonCode/prompts/ and ~/.MoonCode/engine/prompts/
 const discovered = loader.getPrompts().prompts;
 console.log("Discovered prompt templates:");
 for (const template of discovered) {

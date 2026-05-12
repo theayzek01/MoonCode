@@ -5,7 +5,7 @@
  * This is useful for:
  * - Adding logging or auditing to tool calls
  * - Implementing access control or sandboxing
- * - Routing tool calls to remote systems (e.g., Mooncli-ssh-remote)
+ * - Routing tool calls to remote systems (e.g., MoonCode-ssh-remote)
  * - Modifying tool behavior for specific workflows
  *
  * This example overrides the `read` tool to:
@@ -17,10 +17,10 @@
  * is used automatically (syntax highlighting, line numbers, truncation warnings).
  *
  * Usage:
- *   Mooncli -e ./tool-override.ts
+ *   MoonCode -e ./tool-override.ts
  */
 
-import { type ExtensionAPI, getEngineDir, withFileMutationQueue } from "Mooncli";
+import { type ExtensionAPI, getEngineDir, withFileMutationQueue } from "MoonCode";
 import { constants, readFileSync } from "fs";
 import { access, appendFile, readFile } from "fs/promises";
 import type { TextContent } from "moon-core";
@@ -65,8 +65,8 @@ const readSchema = Type.Object({
 	limit: Type.Optional(Type.Number({ description: "Maximum number of lines to read" })),
 });
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.registerTool({
+export default function (MoonCode: ExtensionAPI) {
+	MoonCode.registerTool({
 		name: "read", // Same name as built-in - this will override it
 		label: "read (audited)",
 		description:
@@ -129,7 +129,7 @@ export default function (Mooncli: ExtensionAPI) {
 	});
 
 	// Also register a command to view the access log
-	Mooncli.registerCommand("read-log", {
+	MoonCode.registerCommand("read-log", {
 		description: "View the file access log",
 		handler: async (_args, ctx) => {
 			try {

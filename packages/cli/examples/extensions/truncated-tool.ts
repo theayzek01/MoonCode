@@ -14,7 +14,7 @@
  * built-in `grep` tool in src/core/tools/grep.ts for a more complete implementation.
  */
 
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "MoonCode";
 import {
 	DEFAULT_MAX_BYTES,
 	DEFAULT_MAX_LINES,
@@ -22,7 +22,7 @@ import {
 	type TruncationResult,
 	truncateHead,
 	withFileMutationQueue,
-} from "Mooncli";
+} from "MoonCode";
 import { mkdtemp, writeFile } from "node:fs/promises";
 import { execSync } from "child_process";
 import { Text } from "moon-tui";
@@ -45,8 +45,8 @@ interface RgDetails {
 	fullOutputPath?: string;
 }
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.registerTool({
+export default function (MoonCode: ExtensionAPI) {
+	MoonCode.registerTool({
 		name: "rg",
 		label: "ripgrep",
 		// Document the truncation limits in the tool description so the Provider knows
@@ -109,7 +109,7 @@ export default function (Mooncli: ExtensionAPI) {
 
 			if (truncation.truncated) {
 				// Save full output to a temp file so Provider can access it if needed
-				const tempDir = await mkdtemp(join(tmpdir(), "Mooncli-rg-"));
+				const tempDir = await mkdtemp(join(tmpdir(), "MoonCode-rg-"));
 				const tempFile = join(tempDir, "output.txt");
 				await withFileMutationQueue(tempFile, async () => {
 					await writeFile(tempFile, output, "utf8");

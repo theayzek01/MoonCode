@@ -1,5 +1,5 @@
 {
-  "name": "Mooncli-extension-custom-provider-gitlab-duo",
+  "name": "MoonCode-extension-custom-provider-gitlab-duo",
   "private": true,
   "version": "11.40.0",
   "type": "module",
@@ -8,7 +8,7 @@
     "build": "echo 'nothing to build'",
     "check": "echo 'nothing to check'"
   },
-  "Mooncli": {
+  "MoonCode": {
     "extensions": [
       "./index.ts"
     ]

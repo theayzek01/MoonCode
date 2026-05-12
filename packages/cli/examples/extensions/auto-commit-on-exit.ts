@@ -5,12 +5,12 @@
  * Uses the last assistant message to generate a commit message.
  */
 
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "MoonCode";
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.on("session_shutdown", async (_event, ctx) => {
+export default function (MoonCode: ExtensionAPI) {
+	MoonCode.on("session_shutdown", async (_event, ctx) => {
 		// Check for uncommitted changes
-		const { stdout: status, code } = await Mooncli.exec("git", ["status", "--porcelain"]);
+		const { stdout: status, code } = await MoonCode.exec("git", ["status", "--porcelain"]);
 
 		if (code !== 0 || status.trim().length === 0) {
 			// Not a git repo or no changes
@@ -36,11 +36,11 @@ export default function (Mooncli: ExtensionAPI) {
 
 		// Generate a simple commit message
 		const firstLine = lastAssistantText.split("\n")[0] || "Work in progress";
-		const commitMessage = `[Mooncli] ${firstLine.slice(0, 50)}${firstLine.length > 50 ? "..." : ""}`;
+		const commitMessage = `[MoonCode] ${firstLine.slice(0, 50)}${firstLine.length > 50 ? "..." : ""}`;
 
 		// Stage and commit
-		await Mooncli.exec("git", ["add", "-A"]);
-		const { code: commitCode } = await Mooncli.exec("git", ["commit", "-m", commitMessage]);
+		await MoonCode.exec("git", ["add", "-A"]);
+		const { code: commitCode } = await MoonCode.exec("git", ["commit", "-m", commitMessage]);
 
 		if (commitCode === 0 && ctx.hasUI) {
 			ctx.ui.notify(`Auto-committed: ${commitMessage}`, "info");

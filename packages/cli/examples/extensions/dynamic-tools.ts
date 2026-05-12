@@ -7,7 +7,7 @@
  * - Registers additional tools at runtime via /add-echo-tool <name>
  */
 
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "MoonCode";
 import { Type } from "typebox";
 
 const ECHO_PARAMS = Type.Object({
@@ -21,7 +21,7 @@ function normalizeToolName(input: string): string | undefined {
 	return trimmed;
 }
 
-export default function dynamicToolsExtension(Mooncli: ExtensionAPI) {
+export default function dynamicToolsExtension(MoonCode: ExtensionAPI) {
 	const registeredToolNames = new Set<string>();
 
 	const registerEchoTool = (name: string, label: string, prefix: string): boolean => {
@@ -30,7 +30,7 @@ export default function dynamicToolsExtension(Mooncli: ExtensionAPI) {
 		}
 
 		registeredToolNames.add(name);
-		Mooncli.registerTool({
+		MoonCode.registerTool({
 			name,
 			label,
 			description: `Echo a message with prefix: ${prefix}`,
@@ -48,12 +48,12 @@ export default function dynamicToolsExtension(Mooncli: ExtensionAPI) {
 		return true;
 	};
 
-	Mooncli.on("session_start", (_event, ctx) => {
+	MoonCode.on("session_start", (_event, ctx) => {
 		registerEchoTool("echo_session", "Echo Session", "[session] ");
 		ctx.ui.notify("Registered dynamic tool: echo_session", "info");
 	});
 
-	Mooncli.registerCommand("add-echo-tool", {
+	MoonCode.registerCommand("add-echo-tool", {
 		description: "Register a new echo tool dynamically: /add-echo-tool <tool_name>",
 		handler: async (args, ctx) => {
 			const toolName = normalizeToolName(args);

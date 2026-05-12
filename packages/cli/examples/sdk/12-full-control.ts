@@ -12,7 +12,7 @@ import {
 	type ResourceLoader,
 	SessionManager,
 	SettingsManager,
-} from "Mooncli";
+} from "MoonCode";
 import { getModel } from "moon-core";
 
 // Custom auth storage location

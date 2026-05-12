@@ -1,11 +1,11 @@
 /**
- * Syncs Mooncli theme with macOS system appearance (dark/light mode).
+ * Syncs MoonCode theme with macOS system appearance (dark/light mode).
  *
  * Usage:
- *   Mooncli -e examples/extensions/mac-system-theme.ts
+ *   MoonCode -e examples/extensions/mac-system-theme.ts
  */
 
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "MoonCode";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
 
@@ -22,10 +22,10 @@ async function isDarkMode(): Promise<boolean> {
 	}
 }
 
-export default function (Mooncli: ExtensionAPI) {
+export default function (MoonCode: ExtensionAPI) {
 	let intervalId: ReturnType<typeof setInterval> | null = null;
 
-	Mooncli.on("session_start", async (_event, ctx) => {
+	MoonCode.on("session_start", async (_event, ctx) => {
 		let currentTheme = (await isDarkMode()) ? "dark" : "light";
 		ctx.ui.setTheme(currentTheme);
 
@@ -38,7 +38,7 @@ export default function (Mooncli: ExtensionAPI) {
 		}, 2000);
 	});
 
-	Mooncli.on("session_shutdown", () => {
+	MoonCode.on("session_shutdown", () => {
 		if (intervalId) {
 			clearInterval(intervalId);
 			intervalId = null;

@@ -2,26 +2,26 @@
  * Shutdown Command Extension
  *
  * Adds a /quit command that allows extensions to trigger clean shutdown.
- * Demonstrates how extensions can use ctx.shutdown() to exit Mooncli cleanly.
+ * Demonstrates how extensions can use ctx.shutdown() to exit MoonCode cleanly.
  */
 
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "MoonCode";
 import { Type } from "typebox";
 
-export default function (Mooncli: ExtensionAPI) {
-	// Register a /quit command that cleanly exits Mooncli
-	Mooncli.registerCommand("quit", {
-		description: "Exit Mooncli cleanly",
+export default function (MoonCode: ExtensionAPI) {
+	// Register a /quit command that cleanly exits MoonCode
+	MoonCode.registerCommand("quit", {
+		description: "Exit MoonCode cleanly",
 		handler: async (_args, ctx) => {
 			ctx.shutdown();
 		},
 	});
 
 	// You can also create a tool that shuts down after completing work
-	Mooncli.registerTool({
+	MoonCode.registerTool({
 		name: "finish_and_exit",
 		label: "Finish and Exit",
-		description: "Complete a task and exit Mooncli",
+		description: "Complete a task and exit MoonCode",
 		parameters: Type.Object({}),
 		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
 			// Do any final work here...
@@ -37,10 +37,10 @@ export default function (Mooncli: ExtensionAPI) {
 	});
 
 	// You could also create a more complex tool with parameters
-	Mooncli.registerTool({
+	MoonCode.registerTool({
 		name: "deploy_and_exit",
 		label: "Deploy and Exit",
-		description: "Deploy the application and exit Mooncli",
+		description: "Deploy the application and exit MoonCode",
 		parameters: Type.Object({
 			environment: Type.String({ description: "Target environment (e.g., production, staging)" }),
 		}),
@@ -48,7 +48,7 @@ export default function (Mooncli: ExtensionAPI) {
 			onUpdate?.({ content: [{ type: "text", text: `Deploying to ${params.environment}...` }], details: {} });
 
 			// Example deployment logic
-			// const result = await Mooncli.exec("npm", ["run", "deploy", params.environment], { signal });
+			// const result = await MoonCode.exec("npm", ["run", "deploy", params.environment], { signal });
 
 			// On success, request graceful shutdown
 			onUpdate?.({ content: [{ type: "text", text: "Deployment complete, exiting..." }], details: {} });

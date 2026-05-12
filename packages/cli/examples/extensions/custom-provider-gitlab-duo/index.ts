@@ -2,14 +2,14 @@
  * GitLab Duo Provider Extension
  *
  * Provides access to GitLab Duo Core models (Claude and GPT) through GitLab's Core Gateway.
- * Delegates to Mooncli-ai's built-in Anthropic and OpenAI streaming implementations.
+ * Delegates to MoonCode-ai's built-in Anthropic and OpenAI streaming implementations.
  *
  * Usage:
- *   Mooncli -e ./packages/cli/examples/extensions/custom-provider-gitlab-duo
+ *   MoonCode -e ./packages/cli/examples/extensions/custom-provider-gitlab-duo
  *   # Then /login gitlab-duo, or set GITLAB_TOKEN=glpat-...
  */
 
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "MoonCode";
 import {
 	type Api,
 	type AssistantMessageEventStream,
@@ -324,8 +324,8 @@ export function streamGitLabDuo(
 // Extension Entry Point
 // =============================================================================
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.registerProvider("gitlab-duo", {
+export default function (MoonCode: ExtensionAPI) {
+	MoonCode.registerProvider("gitlab-duo", {
 		baseUrl: Core_GATEWAY_URL,
 		apiKey: "GITLAB_TOKEN",
 		api: "gitlab-duo-api",

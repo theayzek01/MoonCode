@@ -5,17 +5,17 @@
  * Shows turn progress with themed colors.
  */
 
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "MoonCode";
 
-export default function (Mooncli: ExtensionAPI) {
+export default function (MoonCode: ExtensionAPI) {
 	let turnCount = 0;
 
-	Mooncli.on("session_start", async (_event, ctx) => {
+	MoonCode.on("session_start", async (_event, ctx) => {
 		const theme = ctx.ui.theme;
 		ctx.ui.setStatus("status-demo", theme.fg("dim", "Ready"));
 	});
 
-	Mooncli.on("turn_start", async (_event, ctx) => {
+	MoonCode.on("turn_start", async (_event, ctx) => {
 		turnCount++;
 		const theme = ctx.ui.theme;
 		const spinner = theme.fg("accent", "●");
@@ -23,7 +23,7 @@ export default function (Mooncli: ExtensionAPI) {
 		ctx.ui.setStatus("status-demo", spinner + text);
 	});
 
-	Mooncli.on("turn_end", async (_event, ctx) => {
+	MoonCode.on("turn_end", async (_event, ctx) => {
 		const theme = ctx.ui.theme;
 		const check = theme.fg("success", "✓");
 		const text = theme.fg("dim", ` Turn ${turnCount} complete`);

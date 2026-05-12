@@ -4,7 +4,7 @@
  * Override settings using SettingsManager.
  */
 
-import { createEngineSession, SessionManager, SettingsManager } from "Mooncli";
+import { createEngineSession, SessionManager, SettingsManager } from "MoonCode";
 
 const cwd = process.cwd();
 

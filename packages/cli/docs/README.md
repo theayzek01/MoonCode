@@ -1,4 +1,4 @@
-# Mooncli CLI Docs
+# MoonCode CLI Docs
 
 Runtime documentation assets for packaged and binary releases.
 

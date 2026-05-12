@@ -58,8 +58,8 @@ function resolvePromptInput(input: string | undefined, description: string): str
 
 function loadContextFileFromDir(dir: string): { path: string; content: string } | null {
 	const candidates = [
-		"MoonCLI.md",
-		"MoonCLI.MD",
+		"MOONCODE.md",
+		"MOONCODE.MD",
 		"Moon.md",
 		"Moon.MD",
 		"AGENTS.md",

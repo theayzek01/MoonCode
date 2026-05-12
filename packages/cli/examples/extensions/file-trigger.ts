@@ -8,18 +8,18 @@
  *   echo "Run the tests" > /tmp/engine-trigger.txt
  */
 
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "MoonCode";
 import * as fs from "node:fs";
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.on("session_start", async (_event, ctx) => {
+export default function (MoonCode: ExtensionAPI) {
+	MoonCode.on("session_start", async (_event, ctx) => {
 		const triggerFile = "/tmp/engine-trigger.txt";
 
 		fs.watch(triggerFile, () => {
 			try {
 				const content = fs.readFileSync(triggerFile, "utf-8").trim();
 				if (content) {
-					Mooncli.sendMessage(
+					MoonCode.sendMessage(
 						{
 							customType: "file-trigger",
 							content: `External trigger: ${content}`,

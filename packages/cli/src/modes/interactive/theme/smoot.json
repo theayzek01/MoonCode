@@ -1,22 +1,22 @@
 {
-	"$schema": "https://raw.githubusercontent.com/badlogic/Mooncli-mono/main/packages/cli/src/modes/interactive/theme/theme-schema.json",
+	"$schema": "https://raw.githubusercontent.com/badlogic/MoonCode-mono/main/packages/cli/src/modes/interactive/theme/theme-schema.json",
 	"name": "Smoot",
 	"vars": {
-		"bg": "#1a1b26",
-		"fg": "#c0caf5",
-		"accent": "#7aa2f7",
-		"secondary": "#7dcfff",
-		"tertiary": "#bb9af7",
-		"border": "#292e42",
-		"muted": "#565f89",
-		"dim": "#414868",
-		"success": "#9ece6a",
-		"error": "#f7768e",
-		"warning": "#e0af68",
-		"thinking": "#3b4261",
-		"selectedBg": "#283457",
-		"userMsgBg": "#24283b",
-		"toolBg": "#1f2335"
+		"bg": "#181a1f",
+		"fg": "#d6d3c8",
+		"accent": "#9aa7b2",
+		"secondary": "#a6b0b8",
+		"tertiary": "#b8ad9a",
+		"border": "#2a2f36",
+		"muted": "#7b827f",
+		"dim": "#4a504f",
+		"success": "#9aac97",
+		"error": "#b79a9a",
+		"warning": "#b7a98d",
+		"thinking": "#343a40",
+		"selectedBg": "#22262c",
+		"userMsgBg": "#202329",
+		"toolBg": "#1d2026"
 	},
 	"colors": {
 		"accent": "accent",
@@ -59,28 +59,28 @@
 		"toolDiffContext": "muted",
 
 		"syntaxComment": "muted",
-		"syntaxKeyword": "#bb9af7",
-		"syntaxFunction": "#7aa2f7",
-		"syntaxVariable": "#e0af68",
-		"syntaxString": "#9ece6a",
-		"syntaxNumber": "#ff9e64",
-		"syntaxType": "#0db9d7",
-		"syntaxOperator": "#89ddff",
-		"syntaxPunctuation": "#c0caf5",
+		"syntaxKeyword": "#b5aca0",
+		"syntaxFunction": "#a6b0b8",
+		"syntaxVariable": "#b7a98d",
+		"syntaxString": "#9aac97",
+		"syntaxNumber": "#b8ad9a",
+		"syntaxType": "#9aa7b2",
+		"syntaxOperator": "#d6d3c8",
+		"syntaxPunctuation": "#9aa0a6",
 
 		"thinkingOff": "dim",
-		"thinkingMinimal": "#3b4261",
-		"thinkingLow": "#414868",
-		"thinkingMedium": "#565f89",
-		"thinkingHigh": "#7aa2f7",
-		"thinkingXhigh": "#bb9af7",
+		"thinkingMinimal": "#343a40",
+		"thinkingLow": "#3d444b",
+		"thinkingMedium": "#4a504f",
+		"thinkingHigh": "#6f7775",
+		"thinkingXhigh": "#8b8580",
 
 		"bashMode": "warning"
 	},
 	"export": {
-		"pageBg": "#1a1b26",
-		"cardBg": "#24283b",
-		"infoBg": "#1f2335"
+		"pageBg": "#181a1f",
+		"cardBg": "#202329",
+		"infoBg": "#1d2026"
 	}
 }
 

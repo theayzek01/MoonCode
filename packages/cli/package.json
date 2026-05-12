@@ -1,13 +1,14 @@
 {
-	"name": "mooncli",
+	"name": "mooncode",
 	"version": "11.40.0",
-	"description": "Modern Terminal Assistant",
+	"description": "MoonCode terminal coding agent",
 	"type": "module",
 	"moonConfig": {
-		"name": "Moon",
-		"configDir": ".mooncli"
+		"name": "MoonCode",
+		"configDir": ".mooncode"
 	},
 	"bin": {
+		"mooncode": "dist/cli.js",
 		"moon": "dist/cli.js",
 		"mooncli": "dist/cli.js"
 	},
@@ -93,7 +94,7 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/theayzek01/mooncli",
+		"url": "https://github.com/theayzek01/MoonCode",
 		"directory": "packages/cli"
 	},
 	"engines": {

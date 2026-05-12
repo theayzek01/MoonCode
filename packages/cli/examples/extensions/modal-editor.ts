@@ -1,7 +1,7 @@
 /**
  * Modal Editor - vim-like modal editing example
  *
- * Usage: Mooncli --extension ./examples/extensions/modal-editor.ts
+ * Usage: MoonCode --extension ./examples/extensions/modal-editor.ts
  *
  * - Escape: insert → normal mode (in normal mode, aborts engine)
  * - i: normal → insert mode
@@ -9,7 +9,7 @@
  * - ctrl+c, ctrl+d, etc. work in both modes
  */
 
-import { CustomEditor, type ExtensionAPI } from "Mooncli";
+import { CustomEditor, type ExtensionAPI } from "MoonCode";
 import { matchesKey, truncateToWidth, visibleWidth } from "moon-tui";
 
 // Normal mode key mappings: key -> escape sequence (or null for mode switch)
@@ -78,8 +78,8 @@ class ModalEditor extends CustomEditor {
 	}
 }
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.on("session_start", (_event, ctx) => {
+export default function (MoonCode: ExtensionAPI) {
+	MoonCode.on("session_start", (_event, ctx) => {
 		ctx.ui.setEditorComponent((tui, theme, kb) => new ModalEditor(tui, theme, kb));
 	});
 }

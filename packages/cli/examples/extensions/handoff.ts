@@ -12,8 +12,8 @@
  * The generated prompt appears as a draft in the editor for review/editing.
  */
 
-import type { ExtensionAPI, SessionEntry } from "Mooncli";
-import { BorderedLoader, convertToLlm, serializeConversation } from "Mooncli";
+import type { ExtensionAPI, SessionEntry } from "MoonCode";
+import { BorderedLoader, convertToLlm, serializeConversation } from "MoonCode";
 import { complete, type Message } from "moon-core";
 import type { EngineMessage } from "moon-engine";
 
@@ -77,8 +77,8 @@ function getHandoffMessages(branch: SessionEntry[]): EngineMessage[] {
 	return compactedBranch.map(entryToMessage).filter((message) => message !== undefined);
 }
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.registerCommand("handoff", {
+export default function (MoonCode: ExtensionAPI) {
+	MoonCode.registerCommand("handoff", {
 		description: "Transfer context to a new focused session",
 		handler: async (args, ctx) => {
 			if (!ctx.hasUI) {

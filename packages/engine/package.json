@@ -30,7 +30,7 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/theayzek01/mooncli",
+		"url": "https://github.com/theayzek01/MoonCode",
 		"directory": "packages/engine"
 	},
 	"engines": {

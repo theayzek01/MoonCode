@@ -1,19 +1,19 @@
 /**
  * Commands Extension
  *
- * Demonstrates the Mooncli.getCommands() API by providing a /commands command
+ * Demonstrates the MoonCode.getCommands() API by providing a /commands command
  * that lists all available slash commands in the current session.
  *
  * Usage:
- * 1. Copy this file to ~/.Mooncli/engine/extensions/ or your project's .Mooncli/extensions/
+ * 1. Copy this file to ~/.MoonCode/engine/extensions/ or your project's .MoonCode/extensions/
  * 2. Use /commands to see available commands
  * 3. Use /commands extensions to filter by source
  */
 
-import type { ExtensionAPI, SlashCommandInfo } from "Mooncli";
+import type { ExtensionAPI, SlashCommandInfo } from "MoonCode";
 
-export default function commandsExtension(Mooncli: ExtensionAPI) {
-	Mooncli.registerCommand("commands", {
+export default function commandsExtension(MoonCode: ExtensionAPI) {
+	MoonCode.registerCommand("commands", {
 		description: "List available slash commands",
 		getArgumentCompletions: (prefix) => {
 			const sources = ["extension", "prompt", "skill"];
@@ -21,7 +21,7 @@ export default function commandsExtension(Mooncli: ExtensionAPI) {
 			return filtered.length > 0 ? filtered.map((s) => ({ value: s, label: s })) : null;
 		},
 		handler: async (args, ctx) => {
-			const commands = Mooncli.getCommands();
+			const commands = MoonCode.getCommands();
 			const sourceFilter = args.trim() as "extension" | "prompt" | "skill" | "";
 
 			// Filter by source if specified

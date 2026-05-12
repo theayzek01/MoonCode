@@ -5,7 +5,7 @@ import type { AppKeybinding } from "../../../core/keybindings.js";
 import { theme } from "../theme/theme.js";
 import { keyText } from "./keybinding-hints.js";
 
-export interface MooncliHeaderOptions {
+export interface MoonCodeHeaderOptions {
 	version: string;
 	compactInstructions: string;
 	expandedInstructions: string;
@@ -26,12 +26,12 @@ function hint(command: string, description: string): string {
 	return `${theme.fg("accent", command)} ${theme.fg("muted", description)}`;
 }
 
-export class MooncliHeaderComponent extends Text {
+export class MoonCodeHeaderComponent extends Text {
 	private expanded: boolean;
 
 	constructor(
 		_tui: unknown,
-		private options: MooncliHeaderOptions,
+		private options: MoonCodeHeaderOptions,
 	) {
 		super("", options.paddingX ?? 1, options.paddingY ?? 0);
 		this.expanded = options.expanded ?? false;
@@ -46,20 +46,24 @@ export class MooncliHeaderComponent extends Text {
 	dispose(): void {}
 
 	private build(width = 88): string {
-		const inner = Math.max(46, Math.min(96, width - 2));
-		const title = `${theme.bold(APP_TITLE)} ${theme.fg("dim", `v${this.options.version}`)}`;
-		const subtitle = theme.fg("muted", "minimal agentic workspace");
+		const inner = Math.max(46, Math.min(104, width - 2));
+		const frames = ["◐", "◓", "◑", "◒"];
+		const frame = frames[Math.floor(Date.now() / 900) % frames.length];
+		const title = `${theme.fg("accent", frame)} ${theme.bold(APP_TITLE)} ${theme.fg("dim", `v${this.options.version}`)}`;
+		const subtitle = theme.fg("muted", "serious terminal coding workspace");
 		const quick = [
-			hint("/models", "model seç"),
-			hint("/index", "projeyi tara"),
-			hint("/browser", "Chrome bridge"),
-			hint("/diff", "değişiklikleri gör"),
+			hint("/index", "haritala"),
+			hint("/browser", "tarayıcı"),
+			hint("/compact", "bağlamı küçült"),
+			hint("/diff", "kontrol"),
 			hint("/ship", "yayınla"),
 		].join(theme.fg("dim", "  ·  "));
+		const statusLine = `${theme.fg("dim", "logic")}${theme.fg("borderMuted", " ─ ")}${theme.fg("muted", "inspect → act → verify")}${theme.fg("borderMuted", " ─ ")}${theme.fg("dim", "minimal")}`;
 
 		const compact = [
 			`${title}  ${subtitle}`,
 			rule(inner),
+			statusLine,
 			quick,
 			theme.fg("muted", `Yardım: /  ·  detay: ${keyText("app.tools.expand" as AppKeybinding)}`),
 		];
@@ -69,7 +73,7 @@ export class MooncliHeaderComponent extends Text {
 		const expanded = [
 			...compact,
 			"",
-			theme.bold("Başlangıç akışı"),
+			theme.bold("Ciddi çalışma akışı"),
 			`${theme.fg("dim", "1.")} ${hint("/index", "kod tabanını hazırla")}`,
 			`${theme.fg("dim", "2.")} Normal yaz: ${theme.fg("muted", "ne yapmak istediğini anlat")}`,
 			`${theme.fg("dim", "3.")} ${hint("/browser", "Chrome eklenti bağlantısını kontrol et")}`,

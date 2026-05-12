@@ -57,7 +57,11 @@ export function printDoctor(): void {
 	const packageVersion = readPackageVersion(packageDir);
 	const method = detectInstallMethod();
 	const selfUpdate = getSelfUpdateCommand(PACKAGE_NAME);
-	const candidates = unique([...resolveCommandCandidates("mooncli"), ...resolveCommandCandidates("moon")]);
+	const candidates = unique([
+		...resolveCommandCandidates("mooncode"),
+		...resolveCommandCandidates("moon"),
+		...resolveCommandCandidates("mooncli"),
+	]);
 
 	console.log(chalk.bold(`${APP_NAME} Doctor`));
 	console.log(
@@ -71,7 +75,7 @@ export function printDoctor(): void {
 	console.log(`Node           : ${process.version}`);
 	console.log(`Platform       : ${process.platform} ${process.arch}`);
 
-	console.log(chalk.bold("\nPATH üzerindeki moon/mooncli adayları:"));
+	console.log(chalk.bold("\nPATH üzerindeki mooncode/moon/mooncli adayları:"));
 	if (candidates.length === 0) {
 		console.log(chalk.yellow("  Bulunamadı. Terminal PATH ayarını kontrol et."));
 	} else {

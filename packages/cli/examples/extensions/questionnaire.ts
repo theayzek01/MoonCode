@@ -5,7 +5,7 @@
  * Multiple questions: tab bar navigation between questions
  */
 
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "MoonCode";
 import { Editor, type EditorTheme, Key, matchesKey, Text, truncateToWidth } from "moon-tui";
 import { Type } from "typebox";
 
@@ -73,8 +73,8 @@ function errorResult(
 	};
 }
 
-export default function questionnaire(Mooncli: ExtensionAPI) {
-	Mooncli.registerTool({
+export default function questionnaire(MoonCode: ExtensionAPI) {
+	MoonCode.registerTool({
 		name: "questionnaire",
 		label: "Questionnaire",
 		description:

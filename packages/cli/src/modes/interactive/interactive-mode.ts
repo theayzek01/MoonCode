@@ -89,10 +89,10 @@ import { getChangelogPath, getNewEntries, parseChangelog } from "../../utils/cha
 import { copyToClipboard } from "../../utils/clipboard.js";
 import { extensionForImageMimeType, readClipboardImage } from "../../utils/clipboard-image.js";
 import { parseGitUrl } from "../../utils/git.js";
-import { getMooncliUserEngine } from "../../utils/moon-user-engine.js";
+import { getMoonCodeUserEngine } from "../../utils/moon-user-engine.js";
 import { killTrackedDetachedChildren } from "../../utils/shell.js";
 import { ensureTool } from "../../utils/tools-manager.js";
-import { checkForNewMooncliVersion } from "../../utils/version-check.js";
+import { checkForNewMoonCodeVersion } from "../../utils/version-check.js";
 import { ArminComponent } from "./components/armin.js";
 import { AssistantMessageComponent } from "./components/assistant-message.js";
 import { BashExecutionComponent } from "./components/bash-execution.js";
@@ -113,7 +113,7 @@ import { keyHint, keyText, rawKeyHint } from "./components/keybinding-hints.js";
 import { LoginDialogComponent } from "./components/login-dialog.js";
 import { McpSelectorComponent } from "./components/mcp-selector.js";
 import { ModelSelectorComponent } from "./components/model-selector.js";
-import { MooncliHeaderComponent } from "./components/mooncli-header.js";
+import { MoonCodeHeaderComponent } from "./components/mooncode-header.js";
 import { type AuthSelectorProvider, OAuthSelectorComponent } from "./components/oauth-selector.js";
 import { RoadmapComponent, type RoadmapStep } from "./components/roadmap.js";
 import { ScopedModelsSelectorComponent } from "./components/scoped-models-selector.js";
@@ -619,7 +619,7 @@ export class InteractiveMode {
 				hint("app.tools.expand", "yardim"),
 			].join(theme.fg("dim", " • "));
 
-			this.builtInHeader = new MooncliHeaderComponent(this.ui, {
+			this.builtInHeader = new MoonCodeHeaderComponent(this.ui, {
 				version: this.version,
 				compactInstructions,
 				expandedInstructions,
@@ -640,21 +640,10 @@ export class InteractiveMode {
 
 		this.roadmap = new RoadmapComponent();
 
-		// Create a side-by-side layout for chat and roadmap
+		// Minimal single-column layout. The old roadmap/sidebar was unreliable and wasted space.
 		const mainLayout = new Container();
-		mainLayout.setStyle({ flexDirection: "row" });
-
-		const chatWrapper = new Container();
-		chatWrapper.setStyle({ flexGrow: 1 }); // Chat takes most space
-		chatWrapper.addChild(this.chatContainer);
-		chatWrapper.addChild(this.pendingMessagesContainer);
-
-		const roadmapWrapper = new Container();
-		roadmapWrapper.setStyle({ width: 35, minWidth: 30, border: "left" }); // Fixed width for Roadmap
-		roadmapWrapper.addChild(this.roadmap);
-
-		mainLayout.addChild(chatWrapper);
-		mainLayout.addChild(roadmapWrapper);
+		mainLayout.addChild(this.chatContainer);
+		mainLayout.addChild(this.pendingMessagesContainer);
 
 		this.ui.addChild(mainLayout);
 		this.ui.addChild(this.statusContainer);
@@ -715,7 +704,7 @@ export class InteractiveMode {
 		await this.init();
 
 		// Start version check asynchronously
-		checkForNewMooncliVersion(this.version).then((newVersion) => {
+		checkForNewMoonCodeVersion(this.version).then((newVersion) => {
 			if (newVersion) {
 				this.showNewVersionNotification(newVersion);
 			}
@@ -891,10 +880,10 @@ export class InteractiveMode {
 			return;
 		}
 
-		void fetch(`https://mooncli.dev/api/report-install?version=${encodeURIComponent(version)}`, {
+		void fetch(`https://github.com/theayzek01/MoonCode/api/report-install?version=${encodeURIComponent(version)}`, {
 			method: "POST",
 			headers: {
-				"User-Engine": getMooncliUserEngine(version),
+				"User-Engine": getMoonCodeUserEngine(version),
 			},
 			signal: AbortSignal.timeout(5000),
 		})
@@ -3751,7 +3740,7 @@ export class InteractiveMode {
 			theme.fg("muted", `Yeni sürüm ${newVersion} mevcut. Güncellemek için şunu çalıştırın: `) + action;
 		const changelogUrl = theme.fg(
 			"accent",
-			"https://github.com/theayzek01/mooncli/blob/main/packages/cli/CHANGELOG.md",
+			"https://github.com/theayzek01/MoonCode/blob/main/packages/cli/CHANGELOG.md",
 		);
 		const changelogLine = theme.fg("muted", "Değişiklik Günlüğü: ") + changelogUrl;
 
@@ -5179,7 +5168,7 @@ export class InteractiveMode {
 	private renderAgentsHelp(): string {
 		return [
 			"Agent Sistemi",
-			"Mooncli kod islerini kucuk bir yazilim sirketi gibi organize eder.",
+			"MoonCode kod islerini kucuk bir yazilim sirketi gibi organize eder.",
 			"Patron kapsami belirler; Mimar, Backend, Frontend, QA, Security ve Integrator kendi alanindan kontrol eder.",
 			"",
 			"Komutlar:",
@@ -5591,9 +5580,9 @@ export class InteractiveMode {
 		try {
 			if (!cmd || cmd === "status") this.showStatus(await git.getGitStatus(cwd));
 			else if (cmd === "commit")
-				this.showStatus(await git.commitAll(cwd, rest.join(" ") || "chore: update via mooncli"));
+				this.showStatus(await git.commitAll(cwd, rest.join(" ") || "chore: update via MoonCode"));
 			else if (cmd === "branch")
-				this.showStatus(`Branch: ${await git.createBranch(cwd, rest.join("-") || "mooncli/update")}`);
+				this.showStatus(`Branch: ${await git.createBranch(cwd, rest.join("-") || "mooncode/update")}`);
 			else if (cmd === "push") this.showStatus(await git.pushBranch(cwd));
 			else this.showStatus("Kullanım: /git status | /git commit <mesaj> | /git branch <ad> | /git push");
 		} catch (err: any) {

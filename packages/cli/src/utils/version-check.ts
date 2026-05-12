@@ -1,6 +1,6 @@
-import { getMooncliUserEngine } from "./moon-user-engine.js";
+import { getMoonCodeUserEngine } from "./moon-user-engine.js";
 
-const LATEST_VERSION_URL = "https://mooncli.dev/api/latest-version";
+const LATEST_VERSION_URL = "https://github.com/theayzek01/MoonCode/api/latest-version";
 const DEFAULT_VERSION_CHECK_TIMEOUT_MS = 10000;
 
 interface ParsedVersion {
@@ -47,7 +47,7 @@ export function isNewerPackageVersion(candidateVersion: string, currentVersion: 
 	return candidateVersion.trim() !== currentVersion.trim();
 }
 
-export async function getLatestMooncliVersion(
+export async function getLatestMoonCodeVersion(
 	currentVersion: string,
 	options: { timeoutMs?: number } = {},
 ): Promise<string | undefined> {
@@ -55,7 +55,7 @@ export async function getLatestMooncliVersion(
 
 	const response = await fetch(LATEST_VERSION_URL, {
 		headers: {
-			"User-Engine": getMooncliUserEngine(currentVersion),
+			"User-Engine": getMoonCodeUserEngine(currentVersion),
 			accept: "application/json",
 		},
 		signal: AbortSignal.timeout(options.timeoutMs ?? DEFAULT_VERSION_CHECK_TIMEOUT_MS),
@@ -66,9 +66,9 @@ export async function getLatestMooncliVersion(
 	return typeof data.version === "string" && data.version.trim() ? data.version.trim() : undefined;
 }
 
-export async function checkForNewMooncliVersion(currentVersion: string): Promise<string | undefined> {
+export async function checkForNewMoonCodeVersion(currentVersion: string): Promise<string | undefined> {
 	try {
-		const latestVersion = await getLatestMooncliVersion(currentVersion);
+		const latestVersion = await getLatestMoonCodeVersion(currentVersion);
 		if (latestVersion && isNewerPackageVersion(latestVersion, currentVersion)) {
 			return latestVersion;
 		}

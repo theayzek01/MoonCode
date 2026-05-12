@@ -2,7 +2,7 @@
  * Snake game extension - play snake with /snake command
  */
 
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "MoonCode";
 import { matchesKey, visibleWidth } from "moon-tui";
 
 const GAME_WIDTH = 40;
@@ -306,8 +306,8 @@ class SnakeComponent {
 
 const SNAKE_SAVE_TYPE = "snake-save";
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.registerCommand("snake", {
+export default function (MoonCode: ExtensionAPI) {
+	MoonCode.registerCommand("snake", {
 		description: "Play Snake!",
 
 		handler: async (_args, ctx) => {
@@ -333,7 +333,7 @@ export default function (Mooncli: ExtensionAPI) {
 					() => done(undefined),
 					(state) => {
 						// Save or clear state
-						Mooncli.appendEntry(SNAKE_SAVE_TYPE, state);
+						MoonCode.appendEntry(SNAKE_SAVE_TYPE, state);
 					},
 					savedState,
 				);

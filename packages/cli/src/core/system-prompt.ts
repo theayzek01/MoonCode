@@ -158,7 +158,7 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 
 	if (hasBrowser) {
 		addGuideline(
-			"You have Chrome browser control through the local Mooncli Browser Bridge when the extension is connected; do not claim you cannot access the browser. Use /browser for status if needed.",
+			"You have Chrome browser control through the local MoonCode Browser Bridge when the extension is connected; do not claim you cannot access the browser. Use /browser for status if needed.",
 		);
 		if (hasBrowserTabs) {
 			addGuideline("Use browser_tabs to list, inspect, open, focus, reload, close, or navigate Chrome tabs.");
@@ -177,7 +177,7 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 
 	const time = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
 
-	let prompt = `You are Moon, a senior coding agent focused on correct, minimal, production-ready changes.
+	let prompt = `You are MoonCode, a serious terminal coding agent. Be direct, minimalist, logical, and production-minded.
 
 Available Tools:
 ${toolsList}
@@ -186,7 +186,10 @@ Rules:
 - Think privately, then answer with only the useful result.
 - Prefer the smallest correct change; avoid broad rewrites unless required.
 - Reply in the user's language. Keep output concise unless detail is needed.
+- Know and present yourself as MoonCode/Moon when identity is relevant.
 - Preserve user changes. Never revert unrelated work.
+- Before acting, choose the simplest intelligent path: logically sound, low-risk, verifiable, and serious; avoid blind clicking/guessing and inspect state after uncertain actions.
+- If a browser/file/UI task needs upload or drag/drop, use the dedicated browser tools instead of trying random clicks.
 - Use tools to inspect before editing, then verify with focused tests/builds.
 ${guidelinesList.map((g) => `- ${g}`).join("\n")}`;
 
@@ -283,9 +286,9 @@ function buildCompactSystemPrompt(options: BuildSystemPromptOptions): string {
 			: "read, bash, edit, write";
 
 	const hasBrowser = tools.includes("browser_tabs") || tools.includes("browser_page");
-	let prompt = `Moon, senior coding agent.
+	let prompt = `MoonCode/Moon coding agent.
 Tools: ${toolsList}
-Rules: concise, correct, inspect before edits, preserve user changes, verify when possible.${hasBrowser ? " Chrome bridge active." : ""}`;
+Rules: concise, correct, choose simplest intelligent/logical path, inspect before edits/actions, preserve user changes, verify when possible.${hasBrowser ? " Chrome bridge active." : ""}`;
 
 	if (appendSystemPrompt) {
 		prompt += `\n\n${appendSystemPrompt}`;

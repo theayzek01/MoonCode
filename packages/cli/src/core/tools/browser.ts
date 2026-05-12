@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 import type { EngineTool } from "moon-engine";
 import { Text } from "moon-tui";
 import { type Static, Type } from "typebox";
@@ -28,6 +30,8 @@ const browserPageSchema = Type.Object({
 		Type.Literal("click"),
 		Type.Literal("type"),
 		Type.Literal("hover"),
+		Type.Literal("drag"),
+		Type.Literal("upload_file"),
 		Type.Literal("press_key"),
 		Type.Literal("get_elements"),
 		Type.Literal("screenshot"),
@@ -35,10 +39,21 @@ const browserPageSchema = Type.Object({
 		Type.Literal("scroll"),
 		Type.Literal("console_logs"),
 		Type.Literal("wait"),
+		Type.Literal("clear_ui"),
 	]),
 	tabId: Type.Optional(Type.Number({ description: "Chrome tab id. Defaults to active tab." })),
-	selector: Type.Optional(Type.String({ description: "CSS selector for click/type/hover actions" })),
+	selector: Type.Optional(
+		Type.String({ description: "CSS selector for click/type/hover/upload_file/drag source actions" }),
+	),
+	targetSelector: Type.Optional(Type.String({ description: "CSS selector for drag target" })),
 	text: Type.Optional(Type.String({ description: "Text to type" })),
+	filePath: Type.Optional(Type.String({ description: "Local file path for upload_file" })),
+	filePaths: Type.Optional(Type.Array(Type.String(), { description: "Local file paths for upload_file" })),
+	visual: Type.Optional(Type.Boolean({ description: "Show temporary visual overlay/cursor for actions" })),
+	showLabels: Type.Optional(
+		Type.Boolean({ description: "Show visual labels for get_elements (default false; IDs still work)" }),
+	),
+	maxElements: Type.Optional(Type.Number({ description: "Maximum elements returned by get_elements" })),
 	append: Type.Optional(Type.Boolean({ description: "Append to existing value instead of replacing (type action)" })),
 	key: Type.Optional(Type.String({ description: "Key name for press_key action (e.g. Enter, Tab, Escape)" })),
 	modifiers: Type.Optional(Type.Array(Type.String(), { description: "Modifier keys: ctrl, shift, alt, meta" })),
@@ -79,7 +94,7 @@ export function createBrowserTabsToolDefinition(): ToolDefinition<typeof browser
 		name: "browser_tabs",
 		label: "browser_tabs",
 		description:
-			"Control Chrome tabs through the Mooncli Chrome extension. Actions: list, active, open, close, focus, reload, navigate.",
+			"Control Chrome tabs through the MoonCode Chrome extension. Actions: list, active, open, close, focus, reload, navigate.",
 		promptSnippet: "Control connected Chrome tabs",
 		promptGuidelines: [
 			"Use browser_tabs to inspect or change Chrome tabs when the user asks for browser control.",
@@ -114,12 +129,15 @@ export function createBrowserPageToolDefinition(): ToolDefinition<typeof browser
 		name: "browser_page",
 		label: "browser_page",
 		description:
-			"Read or operate the current Chrome page through the Mooncli Chrome extension. Actions: read, read_dom, click, type, hover, press_key, get_elements, screenshot, evaluate, scroll, console_logs, wait.",
+			"Read or operate the current Chrome page through the MoonCode Chrome extension. Actions: read, read_dom, click, type, hover, drag, upload_file, press_key, get_elements, screenshot, evaluate, scroll, console_logs, wait, clear_ui.",
 		promptSnippet: "Read or operate the connected Chrome page",
 		promptGuidelines: [
 			"Use browser_page read to get page title, URL, selection, and visible text.",
 			"Use browser_page read_dom for a structured view of interactive page elements.",
-			"Use browser_page get_elements to see numbered interactive elements; then reference them by #id.",
+			"Use browser_page get_elements to get numbered interactive elements; labels are hidden by default to keep pages clean, but #id still works.",
+			"Use browser_page upload_file with a local absolute filePath when a site needs a file picker/input.",
+			"Use browser_page drag with selector and targetSelector for drag/drop interactions.",
+			"Prefer small maxChars/maxElements values to reduce token usage; only request more when needed.",
 			"Use browser_page scroll to navigate through long pages.",
 			"Use browser_page press_key with key=Enter/Tab/Escape and optional modifiers=[ctrl,shift].",
 			"Use browser_page wait to pause between actions (ms, max 15000).",
@@ -131,7 +149,8 @@ export function createBrowserPageToolDefinition(): ToolDefinition<typeof browser
 		async execute(_toolCallId, params, signal) {
 			if (signal?.aborted) throw new Error("Operation aborted");
 			validatePageParams(params);
-			const result = await sendBrowserCommand("page", params as Record<string, unknown>, { timeoutMs: 45_000 });
+			const commandParams = normalizeBrowserPageParams(params);
+			const result = await sendBrowserCommand("page", commandParams, { timeoutMs: 45_000 });
 			return {
 				content: [{ type: "text", text: stringifyResult(result) }],
 				details: { action: params.action, connected: true },
@@ -168,7 +187,7 @@ function validateTabsParams(params: BrowserTabsToolInput): void {
 }
 
 function validatePageParams(params: BrowserPageToolInput): void {
-	const requiresSelector = ["click", "type", "hover"] as const;
+	const requiresSelector = ["click", "type", "hover", "upload_file"] as const;
 	if (requiresSelector.includes(params.action as (typeof requiresSelector)[number]) && !params.selector) {
 		throw new Error(`browser_page ${params.action} requires selector`);
 	}
@@ -181,10 +200,44 @@ function validatePageParams(params: BrowserPageToolInput): void {
 	if (params.action === "evaluate" && !params.script) {
 		throw new Error("browser_page evaluate requires script");
 	}
+	if (params.action === "drag" && (!params.selector || !params.targetSelector)) {
+		throw new Error("browser_page drag requires selector and targetSelector");
+	}
+	if (params.action === "upload_file" && !params.filePath && (!params.filePaths || params.filePaths.length === 0)) {
+		throw new Error("browser_page upload_file requires filePath or filePaths");
+	}
+}
+
+function normalizeBrowserPageParams(params: BrowserPageToolInput): Record<string, unknown> {
+	if (params.action !== "upload_file") {
+		return params as Record<string, unknown>;
+	}
+	const rawPaths = params.filePaths?.length ? params.filePaths : params.filePath ? [params.filePath] : [];
+	const filePaths = rawPaths.map((filePath) => resolve(filePath));
+	const missing = filePaths.filter((filePath) => !existsSync(filePath));
+	if (missing.length > 0) {
+		throw new Error(`browser_page upload_file file not found: ${missing.join(", ")}`);
+	}
+	return { ...(params as Record<string, unknown>), filePaths, filePath: filePaths[0] };
 }
 
 function stringifyResult(value: unknown): string {
-	const json = JSON.stringify(value, null, 2) ?? "null";
-	const MAX = 24_000;
+	const json =
+		JSON.stringify(
+			value,
+			(_key, nestedValue) => {
+				if (typeof nestedValue === "string") {
+					if (nestedValue.startsWith("data:image/")) {
+						return `[image data omitted: ${nestedValue.length} chars]`;
+					}
+					if (nestedValue.length > 4000) {
+						return `${nestedValue.slice(0, 4000)}\n... [${nestedValue.length - 4000} chars truncated] ...`;
+					}
+				}
+				return nestedValue;
+			},
+			2,
+		) ?? "null";
+	const MAX = 8_000;
 	return json.length > MAX ? `${json.slice(0, MAX)}\n... [${json.length - MAX} chars truncated] ...` : json;
 }

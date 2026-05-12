@@ -14,7 +14,7 @@ import {
 import { DefaultPackageManager } from "./core/package-manager.js";
 import { SettingsManager } from "./core/settings-manager.js";
 import { shouldUseWindowsShell } from "./utils/child-process.js";
-import { getLatestMooncliVersion, isNewerPackageVersion } from "./utils/version-check.js";
+import { getLatestMoonCodeVersion, isNewerPackageVersion } from "./utils/version-check.js";
 
 export type PackageCommand = "install" | "remove" | "update" | "list";
 
@@ -65,7 +65,7 @@ function printPackageCommandHelp(command: PackageCommand): void {
 Bir paket yükle ve ayarlara ekle.
 
 Seçenekler:
-  -l, --local    Projeye özel yükle (.mooncli/settings.json)
+  -l, --local    Projeye özel yükle (.mooncode/settings.json)
 
 Örnekler:
   ${APP_NAME} install npm:@foo/bar
@@ -85,7 +85,7 @@ Bir paketi ve kaynağını ayarlardan kaldır.
 Alternatif: ${APP_NAME} uninstall <kaynak> [-l]
 
 Seçenekler:
-  -l, --local    Proje ayarlarından kaldır (.mooncli/settings.json)
+  -l, --local    Proje ayarlarından kaldır (.mooncode/settings.json)
 
 Örnekler:
   ${APP_NAME} remove npm:@foo/bar
@@ -299,7 +299,7 @@ async function shouldRunSelfUpdate(force: boolean): Promise<boolean> {
 
 	let latestVersion: string | undefined;
 	try {
-		latestVersion = await getLatestMooncliVersion(VERSION);
+		latestVersion = await getLatestMoonCodeVersion(VERSION);
 	} catch {
 		return true;
 	}

@@ -100,7 +100,7 @@ export class ArminComponent implements Component {
 		});
 
 		// Add "ARMIN SAYS HI" at the end
-		const message = "MoonCLI SELAM DER";
+		const message = "MoonCode hazır";
 		const msgPadRight = Math.max(0, width - padding - message.length);
 		this.cachedLines.push(` ${theme.fg("accent", message)}${" ".repeat(msgPadRight)}`);
 

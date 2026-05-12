@@ -10,10 +10,10 @@
  * via `tool_call` input mutation without replacing the tool.
  *
  * Config files (merged, project takes precedence):
- * - ~/.Mooncli/engine/extensions/sandbox.json (global)
- * - <cwd>/.Mooncli/sandbox.json (project-local)
+ * - ~/.MoonCode/engine/extensions/sandbox.json (global)
+ * - <cwd>/.MoonCode/sandbox.json (project-local)
  *
- * Example .Mooncli/sandbox.json:
+ * Example .MoonCode/sandbox.json:
  * ```json
  * {
  *   "enabled": true,
@@ -30,19 +30,19 @@
  * ```
  *
  * Usage:
- * - `Mooncli -e ./sandbox` - sandbox enabled with default/config settings
- * - `Mooncli -e ./sandbox --no-sandbox` - disable sandboxing
+ * - `MoonCode -e ./sandbox` - sandbox enabled with default/config settings
+ * - `MoonCode -e ./sandbox --no-sandbox` - disable sandboxing
  * - `/sandbox` - show current sandbox configuration
  *
  * Setup:
- * 1. Copy sandbox/ directory to ~/.Mooncli/engine/extensions/
- * 2. Run `npm install` in ~/.Mooncli/engine/extensions/sandbox/
+ * 1. Copy sandbox/ directory to ~/.MoonCode/engine/extensions/
+ * 2. Run `npm install` in ~/.MoonCode/engine/extensions/sandbox/
  *
  * Linux also requires: bubblewrap, socat, ripgrep
  */
 
-import type { ExtensionAPI } from "Mooncli";
-import { type BashOperations, createBashTool, getEngineDir } from "Mooncli";
+import type { ExtensionAPI } from "MoonCode";
+import { type BashOperations, createBashTool, getEngineDir } from "MoonCode";
 import { spawn } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -77,7 +77,7 @@ const DEFAULT_CONFIG: SandboxConfig = {
 };
 
 function loadConfig(cwd: string): SandboxConfig {
-	const projectConfigPath = join(cwd, ".Mooncli", "sandbox.json");
+	const projectConfigPath = join(cwd, ".MoonCode", "sandbox.json");
 	const globalConfigPath = join(getEngineDir(), "extensions", "sandbox.json");
 
 	let globalConfig: Partial<SandboxConfig> = {};
@@ -198,8 +198,8 @@ function createSandboxedBashOps(): BashOperations {
 	};
 }
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.registerFlag("no-sandbox", {
+export default function (MoonCode: ExtensionAPI) {
+	MoonCode.registerFlag("no-sandbox", {
 		description: "Disable OS-level sandboxing for bash commands",
 		type: "boolean",
 		default: false,
@@ -211,7 +211,7 @@ export default function (Mooncli: ExtensionAPI) {
 	let sandboxEnabled = false;
 	let sandboxInitialized = false;
 
-	Mooncli.registerTool({
+	MoonCode.registerTool({
 		...localBash,
 		label: "bash (sandboxed)",
 		async execute(id, params, signal, onUpdate, _ctx) {
@@ -226,13 +226,13 @@ export default function (Mooncli: ExtensionAPI) {
 		},
 	});
 
-	Mooncli.on("user_bash", () => {
+	MoonCode.on("user_bash", () => {
 		if (!sandboxEnabled || !sandboxInitialized) return;
 		return { operations: createSandboxedBashOps() };
 	});
 
-	Mooncli.on("session_start", async (_event, ctx) => {
-		const noSandbox = Mooncli.getFlag("no-sandbox") as boolean;
+	MoonCode.on("session_start", async (_event, ctx) => {
+		const noSandbox = MoonCode.getFlag("no-sandbox") as boolean;
 
 		if (noSandbox) {
 			sandboxEnabled = false;
@@ -284,7 +284,7 @@ export default function (Mooncli: ExtensionAPI) {
 		}
 	});
 
-	Mooncli.on("session_shutdown", async () => {
+	MoonCode.on("session_shutdown", async () => {
 		if (sandboxInitialized) {
 			try {
 				await SandboxManager.reset();
@@ -294,7 +294,7 @@ export default function (Mooncli: ExtensionAPI) {
 		}
 	});
 
-	Mooncli.registerCommand("sandbox", {
+	MoonCode.registerCommand("sandbox", {
 		description: "Show sandbox configuration",
 		handler: async (_args, ctx) => {
 			if (!sandboxEnabled) {

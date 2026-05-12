@@ -46,6 +46,16 @@ const requireFdPath = (): string => {
 	return fdPath;
 };
 
+const trySymlink = (target: string, path: string): boolean => {
+	try {
+		symlinkSync(target, path);
+		return true;
+	} catch (error) {
+		if ((error as NodeJS.ErrnoException).code === "EPERM") return false;
+		throw error;
+	}
+};
+
 const getSuggestions = (
 	provider: CombinedAutocompleteProvider,
 	lines: string[],
@@ -311,7 +321,7 @@ describe("CombinedAutocompleteProvider", () => {
 					"some_file.txt": "symlinked",
 				},
 			});
-			symlinkSync("../outside", join(baseDir, "symlinked_dir"));
+			if (!trySymlink("../outside", join(baseDir, "symlinked_dir"))) return;
 
 			const provider = new CombinedAutocompleteProvider([], baseDir, requireFdPath());
 			const line = "@some";
@@ -328,7 +338,7 @@ describe("CombinedAutocompleteProvider", () => {
 					"nested/file.txt": "symlinked",
 				},
 			});
-			symlinkSync("../outside", join(baseDir, "symlinked_dir"));
+			if (!trySymlink("../outside", join(baseDir, "symlinked_dir"))) return;
 
 			const provider = new CombinedAutocompleteProvider([], baseDir, requireFdPath());
 			const line = "@symlinked";
@@ -345,7 +355,7 @@ describe("CombinedAutocompleteProvider", () => {
 				},
 			});
 			const linkPath = join(baseDir, "link.txt");
-			symlinkSync("original.txt", linkPath);
+			if (!trySymlink("original.txt", linkPath)) return;
 
 			const provider = new CombinedAutocompleteProvider([], baseDir, requireFdPath());
 			const line = "@link";

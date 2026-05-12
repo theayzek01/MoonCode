@@ -15,7 +15,7 @@ import {
 	createEngineSessionServices,
 	getEngineDir,
 	SessionManager,
-} from "Mooncli";
+} from "MoonCode";
 
 const createRuntime: CreateEngineSessionRuntimeFactory = async ({ cwd, sessionManager, sessionStartEvent }) => {
 	const services = await createEngineSessionServices({ cwd });

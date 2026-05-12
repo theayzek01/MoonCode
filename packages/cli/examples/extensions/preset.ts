@@ -6,8 +6,8 @@
  * and can be activated via CLI flag, /preset command, or Ctrl+Shift+U to cycle.
  *
  * Config files (merged, project takes precedence):
- * - ~/.Mooncli/engine/presets.json (global)
- * - <cwd>/.Mooncli/presets.json (project-local)
+ * - ~/.MoonCode/engine/presets.json (global)
+ * - <cwd>/.MoonCode/presets.json (project-local)
  *
  * Example presets.json:
  * ```json
@@ -30,7 +30,7 @@
  * ```
  *
  * Usage:
- * - `Mooncli --preset plan` - start with plan preset
+ * - `MoonCode --preset plan` - start with plan preset
  * - `/preset` - show selector to switch presets mid-session
  * - `/preset implement` - switch to implement preset directly
  * - `Ctrl+Shift+U` - cycle through presets
@@ -38,8 +38,8 @@
  * CLI flags always override preset values.
  */
 
-import type { ExtensionAPI, ExtensionContext } from "Mooncli";
-import { DynamicBorder, getEngineDir } from "Mooncli";
+import type { ExtensionAPI, ExtensionContext } from "MoonCode";
+import { DynamicBorder, getEngineDir } from "MoonCode";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Api, Model } from "moon-core";
@@ -69,7 +69,7 @@ interface PresetsConfig {
  */
 function loadPresets(cwd: string): PresetsConfig {
 	const globalPath = join(getEngineDir(), "presets.json");
-	const projectPath = join(cwd, ".Mooncli", "presets.json");
+	const projectPath = join(cwd, ".MoonCode", "presets.json");
 
 	let globalPresets: PresetsConfig = {};
 	let projectPresets: PresetsConfig = {};
@@ -104,14 +104,14 @@ interface OriginalState {
 	tools: string[];
 }
 
-export default function presetExtension(Mooncli: ExtensionAPI) {
+export default function presetExtension(MoonCode: ExtensionAPI) {
 	let presets: PresetsConfig = {};
 	let activePresetName: string | undefined;
 	let activePreset: Preset | undefined;
 	let originalState: OriginalState | undefined;
 
 	// Register --preset CLI flag
-	Mooncli.registerFlag("preset", {
+	MoonCode.registerFlag("preset", {
 		description: "Preset configuration to use",
 		type: "string",
 	});
@@ -124,8 +124,8 @@ export default function presetExtension(Mooncli: ExtensionAPI) {
 		if (activePresetName === undefined) {
 			originalState = {
 				model: ctx.model,
-				thinkingLevel: Mooncli.getThinkingLevel(),
-				tools: Mooncli.getActiveTools(),
+				thinkingLevel: MoonCode.getThinkingLevel(),
+				tools: MoonCode.getActiveTools(),
 			};
 		}
 
@@ -133,7 +133,7 @@ export default function presetExtension(Mooncli: ExtensionAPI) {
 		if (preset.provider && preset.model) {
 			const model = ctx.modelRegistry.find(preset.provider, preset.model);
 			if (model) {
-				const success = await Mooncli.setModel(model);
+				const success = await MoonCode.setModel(model);
 				if (!success) {
 					ctx.ui.notify(`Preset "${name}": No API key for ${preset.provider}/${preset.model}`, "warning");
 				}
@@ -144,12 +144,12 @@ export default function presetExtension(Mooncli: ExtensionAPI) {
 
 		// Apply thinking level if specified
 		if (preset.thinkingLevel) {
-			Mooncli.setThinkingLevel(preset.thinkingLevel);
+			MoonCode.setThinkingLevel(preset.thinkingLevel);
 		}
 
 		// Apply tools if specified
 		if (preset.tools && preset.tools.length > 0) {
-			const allToolNames = Mooncli.getAllTools().map((t) => t.name);
+			const allToolNames = MoonCode.getAllTools().map((t) => t.name);
 			const validTools = preset.tools.filter((t) => allToolNames.includes(t));
 			const invalidTools = preset.tools.filter((t) => !allToolNames.includes(t));
 
@@ -158,7 +158,7 @@ export default function presetExtension(Mooncli: ExtensionAPI) {
 			}
 
 			if (validTools.length > 0) {
-				Mooncli.setActiveTools(validTools);
+				MoonCode.setActiveTools(validTools);
 			}
 		}
 
@@ -201,7 +201,7 @@ export default function presetExtension(Mooncli: ExtensionAPI) {
 
 		if (presetNames.length === 0) {
 			ctx.ui.notify(
-				"No presets defined. Add presets to ~/.Mooncli/engine/presets.json or .Mooncli/presets.json",
+				"No presets defined. Add presets to ~/.MoonCode/engine/presets.json or .MoonCode/presets.json",
 				"warning",
 			);
 			return;
@@ -273,12 +273,12 @@ export default function presetExtension(Mooncli: ExtensionAPI) {
 			activePreset = undefined;
 			if (originalState) {
 				if (originalState.model) {
-					await Mooncli.setModel(originalState.model);
+					await MoonCode.setModel(originalState.model);
 				}
-				Mooncli.setThinkingLevel(originalState.thinkingLevel);
-				Mooncli.setActiveTools(originalState.tools);
+				MoonCode.setThinkingLevel(originalState.thinkingLevel);
+				MoonCode.setActiveTools(originalState.tools);
 			} else {
-				Mooncli.setActiveTools(["read", "bash", "edit", "write"]);
+				MoonCode.setActiveTools(["read", "bash", "edit", "write"]);
 			}
 			ctx.ui.notify("Preset cleared, defaults restored", "info");
 			updateStatus(ctx);
@@ -312,7 +312,7 @@ export default function presetExtension(Mooncli: ExtensionAPI) {
 		const presetNames = getPresetOrder();
 		if (presetNames.length === 0) {
 			ctx.ui.notify(
-				"No presets defined. Add presets to ~/.Mooncli/engine/presets.json or .Mooncli/presets.json",
+				"No presets defined. Add presets to ~/.MoonCode/engine/presets.json or .MoonCode/presets.json",
 				"warning",
 			);
 			return;
@@ -329,12 +329,12 @@ export default function presetExtension(Mooncli: ExtensionAPI) {
 			activePreset = undefined;
 			if (originalState) {
 				if (originalState.model) {
-					await Mooncli.setModel(originalState.model);
+					await MoonCode.setModel(originalState.model);
 				}
-				Mooncli.setThinkingLevel(originalState.thinkingLevel);
-				Mooncli.setActiveTools(originalState.tools);
+				MoonCode.setThinkingLevel(originalState.thinkingLevel);
+				MoonCode.setActiveTools(originalState.tools);
 			} else {
-				Mooncli.setActiveTools(["read", "bash", "edit", "write"]);
+				MoonCode.setActiveTools(["read", "bash", "edit", "write"]);
 			}
 			ctx.ui.notify("Preset cleared, defaults restored", "info");
 			updateStatus(ctx);
@@ -349,7 +349,7 @@ export default function presetExtension(Mooncli: ExtensionAPI) {
 		updateStatus(ctx);
 	}
 
-	Mooncli.registerShortcut(Key.ctrlShift("u"), {
+	MoonCode.registerShortcut(Key.ctrlShift("u"), {
 		description: "Cycle presets",
 		handler: async (ctx) => {
 			await cyclePreset(ctx);
@@ -357,7 +357,7 @@ export default function presetExtension(Mooncli: ExtensionAPI) {
 	});
 
 	// Register /preset command
-	Mooncli.registerCommand("preset", {
+	MoonCode.registerCommand("preset", {
 		description: "Switch preset configuration",
 		handler: async (args, ctx) => {
 			// If preset name provided, apply directly
@@ -383,7 +383,7 @@ export default function presetExtension(Mooncli: ExtensionAPI) {
 	});
 
 	// Inject preset instructions into system prompt
-	Mooncli.on("before_engine_start", async (event) => {
+	MoonCode.on("before_engine_start", async (event) => {
 		if (activePreset?.instructions) {
 			return {
 				systemPrompt: `${event.systemPrompt}\n\n${activePreset.instructions}`,
@@ -392,12 +392,12 @@ export default function presetExtension(Mooncli: ExtensionAPI) {
 	});
 
 	// Initialize on session start
-	Mooncli.on("session_start", async (_event, ctx) => {
+	MoonCode.on("session_start", async (_event, ctx) => {
 		// Load presets from config files
 		presets = loadPresets(ctx.cwd);
 
 		// Check for --preset flag
-		const presetFlag = Mooncli.getFlag("preset");
+		const presetFlag = MoonCode.getFlag("preset");
 		if (typeof presetFlag === "string" && presetFlag) {
 			const preset = presets[presetFlag];
 			if (preset) {
@@ -428,9 +428,9 @@ export default function presetExtension(Mooncli: ExtensionAPI) {
 	});
 
 	// Persist preset state
-	Mooncli.on("turn_start", async () => {
+	MoonCode.on("turn_start", async () => {
 		if (activePresetName) {
-			Mooncli.appendEntry("preset-state", { name: activePresetName });
+			MoonCode.appendEntry("preset-state", { name: activePresetName });
 		}
 	});
 }

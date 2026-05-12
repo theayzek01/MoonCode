@@ -4,13 +4,13 @@
  * Demonstrates the `model_select` hook which fires when the model changes
  * via /model command, Ctrl+P cycling, or session restore.
  *
- * Usage: Mooncli -e ./model-status.ts
+ * Usage: MoonCode -e ./model-status.ts
  */
 
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "MoonCode";
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.on("model_select", async (event, ctx) => {
+export default function (MoonCode: ExtensionAPI) {
+	MoonCode.on("model_select", async (event, ctx) => {
 		const { model, previousModel, source } = event;
 
 		// Format model identifiers

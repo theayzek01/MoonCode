@@ -1,6 +1,6 @@
 // @ts-nocheck
 /**
- * Robotics Vision Tools - Mooncli tool sistemiyle entegre robotik görüntü araçları.
+ * Robotics Vision Tools - MoonCode tool sistemiyle entegre robotik görüntü araçları.
  * Bot, bu tool'ları otomatik olarak çağırarak vision pipeline'ı kullanır.
  */
 

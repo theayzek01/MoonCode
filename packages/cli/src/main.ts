@@ -438,7 +438,7 @@ export async function main(args: string[], options?: MainOptions) {
 
 	if (args[0] === "browser-bridge") {
 		const status = startBrowserBridgeServer({ keepAlive: true });
-		console.log(`Moon Browser Bridge listening on ws://127.0.0.1:${status.port}/ws`);
+		console.log(`MoonCode Browser Bridge listening on ws://127.0.0.1:${status.port}/ws`);
 		console.log(`Health: http://127.0.0.1:${status.port}/health`);
 		process.on("SIGINT", () => process.exit(0));
 		await new Promise(() => {});

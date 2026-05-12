@@ -1,4 +1,4 @@
-import { CustomEditor, type ExtensionAPI, type ExtensionContext, type KeybindingsManager } from "Mooncli";
+import { CustomEditor, type ExtensionAPI, type ExtensionContext, type KeybindingsManager } from "MoonCode";
 import type { Component, EditorTheme, TUI } from "moon-tui";
 import { truncateToWidth, visibleWidth } from "moon-tui";
 
@@ -63,7 +63,7 @@ class EmptyFooter implements Component {
 	invalidate(): void {}
 }
 
-export default function (Mooncli: ExtensionAPI) {
+export default function (MoonCode: ExtensionAPI) {
 	let isWorking = false;
 	let spinnerIndex = 0;
 	let spinnerTimer: ReturnType<typeof setInterval> | undefined;
@@ -77,7 +77,7 @@ export default function (Mooncli: ExtensionAPI) {
 		}
 	};
 
-	Mooncli.on("engine_start", () => {
+	MoonCode.on("engine_start", () => {
 		isWorking = true;
 		stopSpinner();
 		spinnerTimer = setInterval(() => {
@@ -87,25 +87,25 @@ export default function (Mooncli: ExtensionAPI) {
 		activeTui?.requestRender();
 	});
 
-	Mooncli.on("engine_end", () => {
+	MoonCode.on("engine_end", () => {
 		isWorking = false;
 		stopSpinner();
 		activeTui?.requestRender();
 	});
 
-	Mooncli.on("session_shutdown", () => {
+	MoonCode.on("session_shutdown", () => {
 		stopSpinner();
 		activeTui = undefined;
 	});
 
-	Mooncli.on("session_start", (_event, ctx) => {
+	MoonCode.on("session_start", (_event, ctx) => {
 		ctx.ui.setWorkingVisible(false);
 		ctx.ui.setFooter(() => new EmptyFooter());
 
 		let branch: string | undefined;
 
 		const refreshBranch = async () => {
-			const result = await Mooncli.exec("git", ["branch", "--show-current"], { cwd: ctx.cwd }).catch(
+			const result = await MoonCode.exec("git", ["branch", "--show-current"], { cwd: ctx.cwd }).catch(
 				() => undefined,
 			);
 			const stdout = result?.stdout.trim();
@@ -126,7 +126,7 @@ export default function (Mooncli: ExtensionAPI) {
 
 				const thm = ctx.ui.theme;
 				const model = ctx.model ? `${ctx.model.provider}/${ctx.model.id}` : "no model";
-				const thinking = Mooncli.getThinkingLevel();
+				const thinking = MoonCode.getThinkingLevel();
 				const topLeft = isWorking ? thm.fg("accent", ` ${spinnerFrames[spinnerIndex]} `) : "";
 				const topRight = "";
 				const bottomLeft = thm.fg("muted", ` ${model} · ${formatThinking(thinking)} `);

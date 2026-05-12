@@ -1,10 +1,10 @@
 /**
  * Rainbow Editor - highlights "ultrathink" with animated shine effect
  *
- * Usage: Mooncli --extension ./examples/extensions/rainbow-editor.ts
+ * Usage: MoonCode --extension ./examples/extensions/rainbow-editor.ts
  */
 
-import { CustomEditor, type ExtensionAPI } from "Mooncli";
+import { CustomEditor, type ExtensionAPI } from "MoonCode";
 
 // Base colors (coral → yellow → green → teal → blue → purple → pink)
 const COLORS: [number, number, number][] = [
@@ -81,8 +81,8 @@ class RainbowEditor extends CustomEditor {
 	}
 }
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.on("session_start", (_event, ctx) => {
+export default function (MoonCode: ExtensionAPI) {
+	MoonCode.on("session_start", (_event, ctx) => {
 		ctx.ui.setEditorComponent((tui, theme, kb) => new RainbowEditor(tui, theme, kb));
 	});
 }

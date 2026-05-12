@@ -1,8 +1,8 @@
 /**
  * Send User Message Example
  *
- * Demonstrates Mooncli.sendUserMessage() for sending user messages from extensions.
- * Unlike Mooncli.sendMessage() which sends custom messages, sendUserMessage() sends
+ * Demonstrates MoonCode.sendUserMessage() for sending user messages from extensions.
+ * Unlike MoonCode.sendMessage() which sends custom messages, sendUserMessage() sends
  * actual user messages that appear in the conversation as if typed by the user.
  *
  * Usage:
@@ -11,11 +11,11 @@
  *   /followup And then?   - Sends while streaming with followUp delivery
  */
 
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "MoonCode";
 
-export default function (Mooncli: ExtensionAPI) {
+export default function (MoonCode: ExtensionAPI) {
 	// Simple command that sends a user message
-	Mooncli.registerCommand("ask", {
+	MoonCode.registerCommand("ask", {
 		description: "Send a user message to the engine",
 		handler: async (args, ctx) => {
 			if (!args.trim()) {
@@ -30,12 +30,12 @@ export default function (Mooncli: ExtensionAPI) {
 				return;
 			}
 
-			Mooncli.sendUserMessage(args);
+			MoonCode.sendUserMessage(args);
 		},
 	});
 
 	// Command that steers the engine mid-conversation
-	Mooncli.registerCommand("steer", {
+	MoonCode.registerCommand("steer", {
 		description: "Send a steering message (interrupts current processing)",
 		handler: async (args, ctx) => {
 			if (!args.trim()) {
@@ -45,16 +45,16 @@ export default function (Mooncli: ExtensionAPI) {
 
 			if (ctx.isIdle()) {
 				// Not streaming, just send normally
-				Mooncli.sendUserMessage(args);
+				MoonCode.sendUserMessage(args);
 			} else {
 				// Streaming - use steer to interrupt
-				Mooncli.sendUserMessage(args, { deliverAs: "steer" });
+				MoonCode.sendUserMessage(args, { deliverAs: "steer" });
 			}
 		},
 	});
 
 	// Command that queues a follow-up message
-	Mooncli.registerCommand("followup", {
+	MoonCode.registerCommand("followup", {
 		description: "Queue a follow-up message (waits for current processing)",
 		handler: async (args, ctx) => {
 			if (!args.trim()) {
@@ -64,17 +64,17 @@ export default function (Mooncli: ExtensionAPI) {
 
 			if (ctx.isIdle()) {
 				// Not streaming, just send normally
-				Mooncli.sendUserMessage(args);
+				MoonCode.sendUserMessage(args);
 			} else {
 				// Streaming - queue as follow-up
-				Mooncli.sendUserMessage(args, { deliverAs: "followUp" });
+				MoonCode.sendUserMessage(args, { deliverAs: "followUp" });
 				ctx.ui.notify("Follow-up queued", "info");
 			}
 		},
 	});
 
 	// Example with content array (text + images would go here)
-	Mooncli.registerCommand("askwith", {
+	MoonCode.registerCommand("askwith", {
 		description: "Send a user message with structured content",
 		handler: async (args, ctx) => {
 			if (!args.trim()) {
@@ -88,7 +88,7 @@ export default function (Mooncli: ExtensionAPI) {
 			}
 
 			// sendUserMessage accepts string or (TextContent | ImageContent)[]
-			Mooncli.sendUserMessage([
+			MoonCode.sendUserMessage([
 				{ type: "text", text: `User request: ${args}` },
 				{ type: "text", text: "Please respond concisely." },
 			]);

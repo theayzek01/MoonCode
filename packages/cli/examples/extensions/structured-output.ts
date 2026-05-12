@@ -5,7 +5,7 @@
  * without paying for an extra follow-up Provider turn.
  */
 
-import { defineTool, type ExtensionAPI } from "Mooncli";
+import { defineTool, type ExtensionAPI } from "MoonCode";
 import { Text } from "moon-tui";
 import { Type } from "typebox";
 
@@ -60,6 +60,6 @@ const structuredOutputTool = defineTool({
 	},
 });
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.registerTool(structuredOutputTool);
+export default function (MoonCode: ExtensionAPI) {
+	MoonCode.registerTool(structuredOutputTool);
 }

@@ -1,5 +1,5 @@
 {
-  "name": "Mooncli-extension-with-deps",
+  "name": "MoonCode-extension-with-deps",
   "private": true,
   "version": "11.40.0",
   "type": "module",
@@ -8,7 +8,7 @@
     "build": "echo 'nothing to build'",
     "check": "echo 'nothing to check'"
   },
-  "Mooncli": {
+  "MoonCode": {
     "extensions": [
       "./index.ts"
     ]

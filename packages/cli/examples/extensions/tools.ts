@@ -5,12 +5,12 @@
  * Tool selection persists across session reloads and respects branch navigation.
  *
  * Usage:
- * 1. Copy this file to ~/.Mooncli/engine/extensions/ or your project's .Mooncli/extensions/
+ * 1. Copy this file to ~/.MoonCode/engine/extensions/ or your project's .MoonCode/extensions/
  * 2. Use /tools to open the tool selector
  */
 
-import type { ExtensionAPI, ExtensionContext, ToolInfo } from "Mooncli";
-import { getSettingsListTheme } from "Mooncli";
+import type { ExtensionAPI, ExtensionContext, ToolInfo } from "MoonCode";
+import { getSettingsListTheme } from "MoonCode";
 import { Container, type SettingItem, SettingsList } from "moon-tui";
 
 // State persisted to session
@@ -18,26 +18,26 @@ interface ToolsState {
 	enabledTools: string[];
 }
 
-export default function toolsExtension(Mooncli: ExtensionAPI) {
+export default function toolsExtension(MoonCode: ExtensionAPI) {
 	// Track enabled tools
 	let enabledTools: Set<string> = new Set();
 	let allTools: ToolInfo[] = [];
 
 	// Persist current state
 	function persistState() {
-		Mooncli.appendEntry<ToolsState>("tools-config", {
+		MoonCode.appendEntry<ToolsState>("tools-config", {
 			enabledTools: Array.from(enabledTools),
 		});
 	}
 
 	// Apply current tool selection
 	function applyTools() {
-		Mooncli.setActiveTools(Array.from(enabledTools));
+		MoonCode.setActiveTools(Array.from(enabledTools));
 	}
 
 	// Find the last tools-config entry in the current branch
 	function restoreFromBranch(ctx: ExtensionContext) {
-		allTools = Mooncli.getAllTools();
+		allTools = MoonCode.getAllTools();
 
 		// Get entries in current branch only
 		const branchEntries = ctx.sessionManager.getBranch();
@@ -59,16 +59,16 @@ export default function toolsExtension(Mooncli: ExtensionAPI) {
 			applyTools();
 		} else {
 			// No saved state - sync with currently active tools
-			enabledTools = new Set(Mooncli.getActiveTools());
+			enabledTools = new Set(MoonCode.getActiveTools());
 		}
 	}
 
 	// Register /tools command
-	Mooncli.registerCommand("tools", {
+	MoonCode.registerCommand("tools", {
 		description: "Enable/disable tools",
 		handler: async (_args, ctx) => {
 			// Refresh tool list
-			allTools = Mooncli.getAllTools();
+			allTools = MoonCode.getAllTools();
 
 			await ctx.ui.custom((tui, theme, _kb, done) => {
 				// Build settings items for each tool
@@ -130,12 +130,12 @@ export default function toolsExtension(Mooncli: ExtensionAPI) {
 	});
 
 	// Restore state on session start
-	Mooncli.on("session_start", async (_event, ctx) => {
+	MoonCode.on("session_start", async (_event, ctx) => {
 		restoreFromBranch(ctx);
 	});
 
 	// Restore state when navigating the session tree
-	Mooncli.on("session_tree", async (_event, ctx) => {
+	MoonCode.on("session_tree", async (_event, ctx) => {
 		restoreFromBranch(ctx);
 	});
 }

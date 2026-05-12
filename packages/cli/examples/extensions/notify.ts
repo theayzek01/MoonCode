@@ -1,14 +1,14 @@
 /**
- * Mooncli Notify Extension
+ * MoonCode Notify Extension
  *
- * Sends a native terminal notification when Mooncli engine is done and waiting for input.
+ * Sends a native terminal notification when MoonCode engine is done and waiting for input.
  * Supports multiple terminal protocols:
  * - OSC 777: Ghostty, iTerm2, WezTerm, rxvt-unicode
  * - OSC 99: Kitty
  * - Windows toast: Windows Terminal (WSL)
  */
 
-import type { ExtensionAPI } from "Mooncli";
+import type { ExtensionAPI } from "MoonCode";
 
 function windowsToastScript(title: string, body: string): string {
 	const type = "Windows.UI.Notifications";
@@ -48,8 +48,8 @@ function notify(title: string, body: string): void {
 	}
 }
 
-export default function (Mooncli: ExtensionAPI) {
-	Mooncli.on("engine_end", async () => {
-		notify("Mooncli", "Ready for input");
+export default function (MoonCode: ExtensionAPI) {
+	MoonCode.on("engine_end", async () => {
+		notify("MoonCode", "Ready for input");
 	});
 }
