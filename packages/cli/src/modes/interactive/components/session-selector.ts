@@ -129,7 +129,7 @@ class SessionSelectorHeader implements Component {
 	invalidate(): void {}
 
 	render(width: number): string[] {
-		const title = this.scope === "current" ? "Oturuma Devam Et (Mevcut Klasör)" : "Oturuma Devam Et (Tümü)";
+		const title = this.scope === "current" ? "Oturuma Continue (Mevcut Klasör)" : "Oturuma Continue (Tümü)";
 		const leftText = theme.bold(title);
 
 		const sortLabel = this.sortMode === "threaded" ? "Ağaç" : this.sortMode === "recent" ? "Son" : "Bulanık";

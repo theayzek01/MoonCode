@@ -1,7 +1,9 @@
 const BRIDGE_URL = "ws://127.0.0.1:3133/ws";
-const VERSION = "12.05.2026-v6";
-const HEARTBEAT_INTERVAL_MS = 15000;
+const VERSION = "1.26-5-browser-hardening";
+const HEARTBEAT_INTERVAL_MS = 30000;
 const RECONNECT_DELAY_MS = 3000;
+const COMMAND_TIMEOUT_MS = 12000;
+const MAX_TABS_RETURNED = 80;
 const ALARM_NAME = "mooncode-bridge-reconnect";
 
 let socket = null;
@@ -67,7 +69,7 @@ function connect() {
     if (message.type !== "command" || !message.id) return;
 
     try {
-      const result = await executeCommand(message.action, message.args || {});
+      const result = await withTimeout(executeCommand(message.action, message.args || {}), COMMAND_TIMEOUT_MS, message.action);
       send({ type: "result", id: message.id, ok: true, result });
     } catch (error) {
       send({ type: "result", id: message.id, ok: false, error: error?.message || String(error) });
@@ -134,14 +136,15 @@ async function executeTabs(args) {
 
   if (action === "list") {
     const tabs = await chrome.tabs.query({});
-    return tabs.map(tabSummary);
+    return tabs.slice(0, MAX_TABS_RETURNED).map(tabSummary);
   }
   if (action === "active") {
     return tabSummary(await getActiveTab());
   }
   if (action === "open") {
     if (!args.url) throw new Error("open requires url");
-    return tabSummary(await chrome.tabs.create({ url: args.url, active: args.active !== false }));
+    const tab = await chrome.tabs.create({ url: args.url, active: args.active !== false });
+    return tabSummary(tab);
   }
   if (action === "close") {
     const tabId = requireTabId(args);
@@ -163,8 +166,7 @@ async function executeTabs(args) {
   if (action === "navigate") {
     const tabId = args.tabId === undefined ? (await getActiveTab()).id : requireTabId(args);
     if (!args.url) throw new Error("navigate requires url");
-    await chrome.tabs.update(tabId, { url: args.url });
-    if (args.active !== false) await chrome.tabs.update(tabId, { active: true });
+    await chrome.tabs.update(tabId, { url: args.url, active: args.active !== false });
     return tabSummary(await chrome.tabs.get(tabId));
   }
   throw new Error(`Unknown tabs action: ${action}`);
@@ -180,8 +182,8 @@ async function executePage(args) {
   if (tabId === undefined) throw new Error("No target tab id");
   assertScriptableTab(tab);
 
-  // Wait for tab to be ready before injecting scripts
-  await waitForTabReady(tabId);
+  // Only script actions need the document to be ready. Avoid blocking lightweight actions.
+  if (!["screenshot", "wait"].includes(action)) await waitForTabReady(tabId, 2500);
 
   if (action === "scroll") {
     const [result] = await chrome.scripting.executeScript({
@@ -204,7 +206,7 @@ async function executePage(args) {
   }
 
   if (action === "read_dom") {
-    const maxChars = Math.max(500, Math.min(Number.isFinite(Number(args.maxChars)) ? Number(args.maxChars) : 5000, 16000));
+    const maxChars = Math.max(300, Math.min(Number.isFinite(Number(args.maxChars)) ? Number(args.maxChars) : 3500, 9000));
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
       func: (limit) => {
@@ -223,8 +225,9 @@ async function executePage(args) {
             && parseFloat(st.opacity) > 0;
         };
 
+        let visited = 0;
         const walk = (node, depth = 0) => {
-          if (depth > 15) return "";
+          if (++visited > 900 || depth > 10) return "";
           if (node.nodeType === 3) {
             const text = node.textContent.trim();
             return text.length > 2 ? text : "";
@@ -235,7 +238,7 @@ async function executePage(args) {
           if (["script", "style", "noscript", "svg", "path", "head", "meta", "link"].includes(tag)) return "";
           if (!isVisible(node)) return "";
 
-          const children = Array.from(node.childNodes)
+          const children = Array.from(node.childNodes).slice(0, 80)
             .map(c => walk(c, depth + 1))
             .filter(Boolean)
             .join(" ");
@@ -266,7 +269,7 @@ async function executePage(args) {
   }
 
   if (action === "read") {
-    const maxChars = Math.max(500, Math.min(Number.isFinite(Number(args.maxChars)) ? Number(args.maxChars) : 4000, 16000));
+    const maxChars = Math.max(300, Math.min(Number.isFinite(Number(args.maxChars)) ? Number(args.maxChars) : 3000, 9000));
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
       func: (limit) => {
@@ -284,7 +287,7 @@ async function executePage(args) {
           }
         });
         let total = 0;
-        while (walker.nextNode() && total < limit + 1000) {
+        while (walker.nextNode() && total < limit + 400) {
           const value = walker.currentNode.nodeValue.replace(/\s+/g, " ").trim();
           visibleText.push(value);
           total += value.length + 1;
@@ -304,7 +307,7 @@ async function executePage(args) {
   }
 
   if (action === "get_elements") {
-    const maxElements = Math.max(1, Math.min(Number.isFinite(Number(args.maxElements)) ? Number(args.maxElements) : 60, 120));
+    const maxElements = Math.max(1, Math.min(Number.isFinite(Number(args.maxElements)) ? Number(args.maxElements) : 40, 80));
     const showLabels = args.showLabels === true;
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
@@ -593,13 +596,13 @@ async function executePage(args) {
   }
 
   if (action === "screenshot") {
-    const dataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" });
-    return { tabId, dataUrl };
+    const dataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, { format: "jpeg", quality: 70 });
+    return { tabId, dataUrl, format: "jpeg", quality: 70 };
   }
 
   if (action === "evaluate") {
     if (!args.script) throw new Error("evaluate requires script");
-    return evaluateWithDebugger(tabId, String(args.script));
+    return evaluateInPage(tabId, String(args.script));
   }
 
   if (action === "wait") {
@@ -640,58 +643,53 @@ async function waitForTabReady(tabId, timeoutMs = 5000) {
   }
 }
 
-async function evaluateWithDebugger(tabId, expression) {
-  const target = { tabId };
-  let attached = false;
-
-  try {
-    attached = await attachDebugger(tabId);
-    const response = await chrome.debugger.sendCommand(target, "Runtime.evaluate", {
-      expression,
-      awaitPromise: true,
-      returnByValue: true,
-      userGesture: true
-    });
-    if (response.exceptionDetails) {
-      throw new Error(response.exceptionDetails.exception?.description || response.exceptionDetails.text || "Evaluation error");
-    }
-    return response.result?.value ?? response.result ?? null;
-  } finally {
-    if (attached) await detachDebugger(tabId);
-  }
+async function evaluateInPage(tabId, expression) {
+  const [result] = await chrome.scripting.executeScript({
+    target: { tabId },
+    func: async (source) => {
+      try {
+        const value = await (0, eval)(source);
+        return { ok: true, value: makeSerializable(value) };
+      } catch (error) {
+        return { ok: false, error: error?.message || String(error) };
+      }
+    },
+    args: [expression]
+  });
+  const payload = result?.result;
+  if (!payload?.ok) throw new Error(payload?.error || "Evaluation error");
+  return payload.value;
 }
 
 async function getConsoleLogs(tabId) {
-  const target = { tabId };
-  let attached = false;
-  const logs = [];
-
-  try {
-    attached = await attachDebugger(tabId);
-
-    // Collect via Runtime instead of deprecated Log domain
-    const response = await chrome.debugger.sendCommand(target, "Runtime.evaluate", {
-      expression: `(function(){
-        const logs = window.__moon_logs || [];
-        return JSON.stringify(logs.slice(-100));
-      })()`,
-      returnByValue: true,
-      userGesture: false
-    });
-
-    if (response.result?.value) {
-      try {
-        const parsed = JSON.parse(response.result.value);
-        logs.push(...parsed);
-      } catch { /* ignore parse errors */ }
+  const [result] = await chrome.scripting.executeScript({
+    target: { tabId },
+    func: () => {
+      if (!window.__moon_console_hooked) {
+        window.__moon_console_hooked = true;
+        window.__moon_logs = window.__moon_logs || [];
+        for (const level of ["log", "info", "warn", "error", "debug"]) {
+          const original = console[level]?.bind(console);
+          if (!original) continue;
+          console[level] = (...items) => {
+            try {
+              window.__moon_logs.push({ level, time: new Date().toISOString(), text: items.map(String).join(" ").slice(0, 1000) });
+              window.__moon_logs = window.__moon_logs.slice(-100);
+            } catch { /* ignore */ }
+            original(...items);
+          };
+        }
+      }
+      return { logs: (window.__moon_logs || []).slice(-100), count: (window.__moon_logs || []).length };
     }
+  });
+  return result?.result || { logs: [], count: 0 };
+}
 
-    return { logs, count: logs.length };
-  } catch (e) {
-    return { logs: [], error: e.message };
-  } finally {
-    if (attached) await detachDebugger(tabId);
-  }
+function makeSerializable(value) {
+  if (value === undefined) return null;
+  if (value === null || ["string", "number", "boolean"].includes(typeof value)) return value;
+  try { return JSON.parse(JSON.stringify(value)); } catch { return String(value); }
 }
 
 function assertScriptableTab(tab) {
@@ -703,6 +701,16 @@ function assertScriptableTab(tab) {
   if (/^chrome-extension:/i.test(url) && !url.startsWith(chrome.runtime.getURL(""))) {
     throw new Error("Cannot automate another extension page");
   }
+}
+
+function withTimeout(promise, ms, label) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+    promise.then(
+      (value) => { clearTimeout(timer); resolve(value); },
+      (error) => { clearTimeout(timer); reject(error); }
+    );
+  });
 }
 
 async function attachDebugger(tabId) {

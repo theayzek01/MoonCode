@@ -370,7 +370,7 @@ export function renderAffectiveStatus(settings: NormalizedAffectiveSettings): st
 	const posture = deriveAffectivePosture(state);
 	return [
 		"Affective State Layer",
-		`Durum: ${settings.enabled ? "acik" : "kapali"}`,
+		`Status: ${settings.enabled ? "on" : "off"}`,
 		`Mode: ${settings.mode}`,
 		`Posture: ${posture}`,
 		`Etkilesim: ${state.interactionCount}`,
@@ -383,7 +383,7 @@ export function renderAffectiveStatus(settings: NormalizedAffectiveSettings): st
 		"",
 		`Needs: ${deriveAffectiveNeeds(state).join("; ")}`,
 		"",
-		"Komutlar:",
+		"Commands:",
 		"  /mood on",
 		"  /mood off",
 		"  /mood status",

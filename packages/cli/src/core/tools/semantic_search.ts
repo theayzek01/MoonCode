@@ -10,7 +10,7 @@ import { wrapToolDefinition } from "./tool-definition-wrapper.js";
 import { truncateTail } from "./truncate.js";
 
 const semanticSearchSchema = Type.Object({
-	query: Type.String({ description: "Arama yapılacak semantik kelime, fonksiyon adı veya mantık özeti" }),
+	query: Type.String({ description: "Semantic keyword, function name, or logic summary to search for" }),
 });
 
 // git grep fallback - index hazır değilse veya hata olursa
@@ -53,8 +53,8 @@ export function createSemanticSearchToolDefinition(cwd: string): ToolDefinition<
 		name: "semantic_search",
 		label: "semantic_search",
 		description:
-			"Proje genelinde akıllı semantik arama. Fonksiyonları, sınıfları, değişkenleri ve mantığı bulmak için TF-IDF tabanlı codebase indexing kullanır. git grep'ten çok daha akıllı.",
-		promptSnippet: "Projede akıllı semantik bağlam ara (codebase RAG)",
+			"Smart semantic project-wide search. Uses TF-IDF codebase indexing to find functions, classes, variables, and logic.",
+		promptSnippet: "Search smart semantic project context (codebase RAG)",
 		parameters: semanticSearchSchema,
 		async execute(_id, { query }, signal) {
 			if (signal?.aborted) throw new Error("aborted");
@@ -75,7 +75,7 @@ export function createSemanticSearchToolDefinition(cwd: string): ToolDefinition<
 				const grepOutput = await gitGrepFallback(cwd, query, signal);
 				if (!grepOutput.trim()) {
 					return {
-						content: [{ type: "text", text: `"${query}" ile eşleşen sonuç bulunamadı.` }],
+						content: [{ type: "text", text: `"${query}" matched no results.` }],
 					};
 				}
 				const truncation = truncateTail(grepOutput, { maxLines: 500 });
@@ -90,7 +90,7 @@ export function createSemanticSearchToolDefinition(cwd: string): ToolDefinition<
 					const grepOutput = await gitGrepFallback(cwd, query, signal);
 					if (!grepOutput.trim()) {
 						return {
-							content: [{ type: "text", text: `"${query}" ile eşleşen sonuç bulunamadı.` }],
+							content: [{ type: "text", text: `"${query}" matched no results.` }],
 						};
 					}
 					const truncation = truncateTail(grepOutput, { maxLines: 500 });
@@ -100,7 +100,7 @@ export function createSemanticSearchToolDefinition(cwd: string): ToolDefinition<
 				} catch {
 					return {
 						content: [
-							{ type: "text", text: `Arama hatası: ${err instanceof Error ? err.message : String(err)}` },
+							{ type: "text", text: `Search error: ${err instanceof Error ? err.message : String(err)}` },
 						],
 					};
 				}

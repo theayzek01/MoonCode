@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { spawn } from "node:child_process";
 
 export interface GitRunResult {
@@ -17,7 +16,7 @@ export interface ShipResult {
 
 function runGit(cwd: string, args: string[]): Promise<GitRunResult> {
 	return new Promise((resolve) => {
-		const child = spawn("git", args, { cwd, shell: process.platform === "win32" });
+		const child = spawn("git", args, { cwd, shell: false });
 		let stdout = "";
 		let stderr = "";
 		child.stdout?.on("data", (c) => {
@@ -52,17 +51,17 @@ export async function getDefaultBranch(cwd: string): Promise<string> {
 
 export async function getGitStatus(cwd: string): Promise<string> {
 	const status = await git(cwd, ["status", "--short", "--branch"]);
-	return status || "Çalışma ağacı temiz.";
+	return status || "Working tree clean.";
 }
 
 export async function getDiffSummary(cwd: string): Promise<string> {
 	const stat = await git(cwd, ["diff", "--stat", "HEAD"]);
-	return stat || "Diff yok.";
+	return stat || "No diff.";
 }
 
 export async function getFullDiff(cwd: string): Promise<string> {
 	const diff = await git(cwd, ["diff", "--", "."]);
-	return diff || "Diff yok.";
+	return diff || "No diff.";
 }
 
 export async function createBranch(cwd: string, branchName: string): Promise<string> {
@@ -73,7 +72,7 @@ export async function createBranch(cwd: string, branchName: string): Promise<str
 export async function commitAll(cwd: string, message: string): Promise<string> {
 	await git(cwd, ["add", "-A"]);
 	const status = await git(cwd, ["status", "--porcelain"]);
-	if (!status.trim()) return "Commit atılmadı: değişiklik yok.";
+	if (!status.trim()) return "No commit created: no changes.";
 	return git(cwd, ["commit", "-m", message || "chore: update"]);
 }
 
@@ -85,7 +84,7 @@ export async function pushBranch(cwd: string, branchName?: string): Promise<stri
 async function getGithubRepo(cwd: string): Promise<{ owner: string; repo: string }> {
 	const url = await git(cwd, ["remote", "get-url", "origin"]);
 	const match = url.match(/github\.com[:/]([^/]+)\/([^/.]+)(?:\.git)?$/i);
-	if (!match) throw new Error(`GitHub origin çözülemedi: ${url}`);
+	if (!match || !match[1] || !match[2]) throw new Error(`Could not resolve GitHub origin: ${url}`);
 	return { owner: match[1], repo: match[2] };
 }
 
@@ -107,7 +106,7 @@ export async function createPR(
 			["pr", "create", "--title", title, "--body", body, "--head", branch, "--base", defaultBase],
 			{
 				cwd,
-				shell: process.platform === "win32",
+				shell: false,
 			},
 		);
 		let stdout = "";
@@ -124,7 +123,7 @@ export async function createPR(
 	if (ghPr.code === 0 && ghPr.stdout.trim()) return ghPr.stdout.trim();
 
 	const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
-	if (!token) throw new Error("PR için GITHUB_TOKEN/GH_TOKEN yok ve gh CLI ile PR açılamadı.");
+	if (!token) throw new Error("GITHUB_TOKEN/GH_TOKEN is missing and gh CLI could not create a PR.");
 	const { owner, repo } = await getGithubRepo(cwd);
 	const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/pulls`, {
 		method: "POST",
@@ -135,20 +134,29 @@ export async function createPR(
 		},
 		body: JSON.stringify({ title, body, head: branch, base: defaultBase }),
 	});
-	const json = await response.json().catch(() => ({}));
-	if (!response.ok) throw new Error(json?.message || `${response.status} ${response.statusText}`);
+	const json: unknown = await response.json().catch(() => ({}));
+	const message = typeof json === "object" && json && "message" in json ? String(json.message) : undefined;
+	if (!response.ok) throw new Error(message || `${response.status} ${response.statusText}`);
+	if (typeof json !== "object" || !json || !("html_url" in json) || typeof json.html_url !== "string") {
+		throw new Error("Invalid GitHub PR response: missing html_url.");
+	}
 	return json.html_url;
 }
 
 export function safeBranchName(input?: string): string {
 	const raw = input?.trim() || `MoonCode/${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}`;
-	return (
-		raw
-			.toLowerCase()
-			.replace(/[^a-z0-9._/-]+/g, "-")
-			.replace(/^-+|-+$/g, "")
-			.slice(0, 80) || "MoonCode/update"
-	);
+	const normalized = raw
+		.toLowerCase()
+		.replace(/[^a-z0-9._/-]+/g, "-")
+		.replace(/^-+|-+$/g, "")
+		.replace(/\.{2,}/g, ".")
+		.replace(/\/+/g, "/")
+		.replace(/(?:^|\/)\.+(?=\/|$)/g, "")
+		.replace(/\.lock$/i, "")
+		.replace(/\.$/, "")
+		.slice(0, 80)
+		.replace(/^[./-]+|[./-]+$/g, "");
+	return normalized || "mooncode/update";
 }
 
 export async function shipChanges(
@@ -164,7 +172,7 @@ export async function shipChanges(
 	let prUrl: string | undefined;
 	if (options.pr !== false) {
 		const body = [`Automated MoonCode ship.`, "", "```", diffStat || commit, "```"].join("\n");
-		prUrl = await createPR(cwd, message, body, branch).catch((err) => `PR açılamadı: ${err.message}`);
+		prUrl = await createPR(cwd, message, body, branch).catch((err) => `Could not create PR: ${err.message}`);
 	}
-	return { ok: true, message: commit || "Ship tamam.", branch, prUrl, diffStat };
+	return { ok: true, message: commit || "Ship complete.", branch, prUrl, diffStat };
 }

@@ -610,5 +610,12 @@ describe("parseKey", () => {
 		it("should parse double bracket pageUp", () => {
 			assert.strictEqual(parseKey("\x1b[[5~"), "pageUp");
 		});
+
+		it("should parse mouse wheel as scroll keys", () => {
+			assert.strictEqual(parseKey("\x1b[<64;20;5M"), "wheelUp");
+			assert.strictEqual(parseKey("\x1b[<65;20;5M"), "wheelDown");
+			assert.strictEqual(parseKey(`\x1b[M${String.fromCharCode(96)}!!`), "wheelUp");
+			assert.strictEqual(parseKey(`\x1b[M${String.fromCharCode(97)}!!`), "wheelDown");
+		});
 	});
 });

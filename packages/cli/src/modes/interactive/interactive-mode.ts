@@ -8,7 +8,7 @@ import * as crypto from "node:crypto";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { spawnSync } from "child_process";
+import { spawn, spawnSync } from "child_process";
 import {
 	type AssistantMessage,
 	getProviders,
@@ -2604,6 +2604,12 @@ export class InteractiveMode {
 				await this.handleDiscordCommand(args);
 				return;
 			}
+			if (text === "/telegram" || text.startsWith("/telegram ")) {
+				const args = text.startsWith("/telegram ") ? text.slice(10).trim() : "";
+				this.editor.setText("");
+				await this.handleTelegramCommand(args);
+				return;
+			}
 			if (text === "/update" || text.startsWith("/update ") || text === "/upgrade" || text.startsWith("/upgrade ")) {
 				const args = text.startsWith("/upgrade ")
 					? text.slice(9).trim()
@@ -2715,7 +2721,7 @@ export class InteractiveMode {
 				const command = isExcluded ? text.slice(2).trim() : text.slice(1).trim();
 				if (command) {
 					if (this.session.isBashRunning) {
-						this.showWarning("Bir bash komutu zaten çalışıyor. İptal etmek için önce Esc tuşuna basın.");
+						this.showWarning("Bir bash komutu zaten çalışıyor. Cancel etmek için önce Esc tuşuna basın.");
 						this.editor.setText(text);
 						return;
 					}
@@ -2911,7 +2917,7 @@ export class InteractiveMode {
 
 					if (this.streamingMessage.stopReason === "aborted" || this.streamingMessage.stopReason === "error") {
 						if (!errorMessage) {
-							errorMessage = this.streamingMessage.errorMessage || "Hata";
+							errorMessage = this.streamingMessage.errorMessage || "Error";
 						}
 						for (const [, component] of this.pendingTools.entries()) {
 							component.updateResult({
@@ -3104,7 +3110,7 @@ export class InteractiveMode {
 				this.statusContainer.clear();
 				this.retryCountdown?.dispose();
 				const retryMessage = (seconds: number) =>
-					`Yeniden deneniyor (${event.attempt}/${event.maxAttempts}), ${seconds}s içinde... (iptal için ${keyText("app.interrupt")})`;
+					`Yeniden deneniyor (${event.attempt}/${event.maxAttempts}), ${seconds}s içinde... (cancel: ${keyText("app.interrupt")})`;
 				this.retryLoader = new Loader(
 					this.ui,
 					(spinner) => theme.fg("warning", spinner),
@@ -3375,9 +3381,9 @@ export class InteractiveMode {
 							if (message.stopReason === "aborted") {
 								const retryAttempt = this.session.retryAttempt;
 								errorMessage =
-									retryAttempt > 0 ? `${retryAttempt} denemeden sonra iptal edildi` : "İşlem iptal edildi";
+									retryAttempt > 0 ? `${retryAttempt} denemeden sonra iptal edildi` : "Operation cancelled";
 							} else {
-								errorMessage = message.errorMessage || "Hata";
+								errorMessage = message.errorMessage || "Error";
 							}
 							component.updateResult({ content: [{ type: "text", text: errorMessage }], isError: true });
 						} else {
@@ -3454,7 +3460,7 @@ export class InteractiveMode {
 			try {
 				const { getFullDiff } = await import("../../core/git-utils.js");
 				const diff = await getFullDiff(this.sessionManager.getCwd());
-				if (diff && diff !== "Diff yok.") {
+				if (diff && diff !== "No diff.") {
 					await this.handleDiffCommand();
 					return;
 				}
@@ -3730,13 +3736,13 @@ export class InteractiveMode {
 
 	showError(errorMessage: string): void {
 		this.chatContainer.addChild(new Spacer(1));
-		this.chatContainer.addChild(new Text(theme.fg("error", `Hata: ${errorMessage}`), 1, 0));
+		this.chatContainer.addChild(new Text(theme.fg("error", `Error: ${errorMessage}`), 1, 0));
 		this.ui.requestRender();
 	}
 
 	showWarning(warningMessage: string): void {
 		this.chatContainer.addChild(new Spacer(1));
-		this.chatContainer.addChild(new Text(theme.fg("warning", `Uyarı: ${warningMessage}`), 1, 0));
+		this.chatContainer.addChild(new Text(theme.fg("warning", `Warning: ${warningMessage}`), 1, 0));
 		this.ui.requestRender();
 	}
 
@@ -5002,7 +5008,7 @@ export class InteractiveMode {
 			`Port: ${status.port}`,
 			`Bagli eklenti: ${status.clients}`,
 			...(status.lastClientSeen ? [`Son baglanti: ${new Date(status.lastClientSeen).toLocaleString()}`] : []),
-			...(status.error ? [`Hata: ${status.error}`] : []),
+			...(status.error ? [`Error: ${status.error}`] : []),
 			"",
 			"Kurulum:",
 			"  1. Chrome > chrome://extensions",
@@ -5443,7 +5449,7 @@ export class InteractiveMode {
 				this.chatContainer.addChild(new Text(lines.join("\n"), 1, 0));
 				this.ui.requestRender();
 			} catch (err: any) {
-				this.showStatus(`Hata: Bot bilgileri alinamadi (${err.message})`);
+				this.showStatus(`Error: Bot bilgileri alinamadi (${err.message})`);
 			}
 			return;
 		}
@@ -5462,7 +5468,7 @@ export class InteractiveMode {
 				this.showStatus("Oturum yenileniyor...");
 				await this.handleReloadCommand();
 			} catch (err: any) {
-				this.showStatus(`Hata: Gecersiz token veya baglanti sorunu (${err.message})`);
+				this.showStatus(`Error: Gecersiz token veya baglanti sorunu (${err.message})`);
 			}
 			return;
 		}
@@ -5476,6 +5482,95 @@ export class InteractiveMode {
 			this.showStatus("Discord tokeni ayarlanmamis.");
 			this.showStatus("Kullanim: /discord <bot_token>");
 		}
+	}
+
+	private async handleTelegramCommand(args: string): Promise<void> {
+		const [subcommand, ...rest] = args.trim().split(/\s+/).filter(Boolean);
+		const rootDir = process.cwd();
+		const envPath = path.join(rootDir, ".env");
+
+		if (!subcommand || subcommand === "help") {
+			this.showStatus("Kullanım: /telegram login <bot_token> [chat_id]");
+			this.showStatus("Chat id yoksa: bota /start yaz, sonra /telegram login <bot_token> tekrar çalıştır.");
+			this.showStatus("Başlatmak için: /telegram start");
+			return;
+		}
+
+		if (subcommand === "login") {
+			const token = rest[0];
+			let chatId = rest[1];
+			if (!token) {
+				this.showStatus("Kullanım: /telegram login <bot_token> [chat_id]");
+				return;
+			}
+
+			this.showStatus("Telegram token kontrol ediliyor...");
+			try {
+				const meResponse = await fetch(`https://api.telegram.org/bot${token}/getMe`);
+				const me = await meResponse.json();
+				if (!me.ok) throw new Error(me.description ?? "token geçersiz");
+
+				if (!chatId) {
+					const updatesResponse = await fetch(`https://api.telegram.org/bot${token}/getUpdates`);
+					const updates = await updatesResponse.json();
+					chatId = String(updates.result?.find((u: any) => u.message?.chat?.id)?.message?.chat?.id ?? "");
+				}
+
+				if (!chatId) {
+					this.showStatus(`Bot doğrulandı: @${me.result.username}`);
+					this.showStatus("Şimdi Telegram'da botuna /start yaz, sonra aynı komutu tekrar çalıştır.");
+					return;
+				}
+
+				this.upsertEnvFile(envPath, {
+					TELEGRAM_BOT_TOKEN: token,
+					TELEGRAM_ALLOWED_CHAT_IDS: chatId,
+					MOON_REMOTE_ROOT: path.dirname(rootDir),
+				});
+				this.showStatus(`Telegram kaydedildi: @${me.result.username}, chat id ${chatId}`);
+				this.showStatus("Remote'u açmak için: /telegram start");
+			} catch (err: any) {
+				this.showStatus(`Telegram login hatası: ${err.message}`);
+			}
+			return;
+		}
+
+		if (subcommand === "start") {
+			if (!fs.existsSync(envPath)) {
+				this.showStatus("Önce /telegram login <bot_token> çalıştır.");
+				return;
+			}
+			const child = spawn(process.execPath, [path.join(rootDir, "scripts", "telegram-remote.mjs")], {
+				cwd: rootDir,
+				detached: true,
+				stdio: "ignore",
+				windowsHide: true,
+			});
+			child.unref();
+			this.showStatus("Telegram remote arka planda başlatıldı. Telefondan /status yaz.");
+			return;
+		}
+
+		if (subcommand === "status") {
+			this.showStatus(
+				fs.existsSync(envPath) ? "Telegram ayarı var. /telegram start ile açabilirsin." : "Telegram ayarı yok.",
+			);
+			return;
+		}
+
+		this.showStatus(`Bilinmeyen telegram komutu: ${subcommand}`);
+	}
+
+	private upsertEnvFile(filePath: string, values: Record<string, string>): void {
+		const existing = fs.existsSync(filePath) ? fs.readFileSync(filePath, "utf8") : "";
+		const lines = existing.split(/\r?\n/).filter((line) => line.trim() !== "");
+		for (const [key, value] of Object.entries(values)) {
+			const line = `${key}=${value}`;
+			const index = lines.findIndex((item) => item.startsWith(`${key}=`));
+			if (index >= 0) lines[index] = line;
+			else lines.push(line);
+		}
+		fs.writeFileSync(filePath, `${lines.join("\n")}\n`);
 	}
 
 	private async handleReloadCommand(): Promise<void> {
@@ -5752,7 +5847,7 @@ export class InteractiveMode {
 			await this.ui.terminal.readKey();
 		} catch (err: any) {
 			const message = err instanceof Error ? err.message : String(err);
-			console.error(`\nHata: Guncelleme basarisiz (${message})`);
+			console.error(`\nError: Guncelleme basarisiz (${message})`);
 			console.log("Devam etmek icin bir tusa basin...");
 			await this.ui.terminal.readKey();
 		} finally {
@@ -5774,7 +5869,7 @@ export class InteractiveMode {
 				this.showStatus(`Oturum suraya aktarildi: ${filePath}`);
 			}
 		} catch (error: unknown) {
-			this.showError(`Oturum dışa aktarılamadı: ${error instanceof Error ? error.message : "Bilinmeyen hata"}`);
+			this.showError(`Session export failed: ${error instanceof Error ? error.message : "Bilinmeyen hata"}`);
 		}
 	}
 
@@ -5871,7 +5966,7 @@ export class InteractiveMode {
 		try {
 			await this.session.exportToHtml(tmpFile);
 		} catch (error: unknown) {
-			this.showError(`Oturum dışa aktarılamadı: ${error instanceof Error ? error.message : "Bilinmeyen hata"}`);
+			this.showError(`Session export failed: ${error instanceof Error ? error.message : "Bilinmeyen hata"}`);
 			return;
 		}
 
@@ -6424,7 +6519,7 @@ export class InteractiveMode {
 
 		const debugLogPath = getDebugLogPath();
 		const debugData = [
-			`Hata ayıklama çıktısı: ${new Date().toISOString()}`,
+			`Error ayıklama çıktısı: ${new Date().toISOString()}`,
 			`Terminal: ${width}x${height}`,
 			`Toplam satır: ${allLines.length}`,
 			"",
@@ -6445,7 +6540,11 @@ export class InteractiveMode {
 
 		this.chatContainer.addChild(new Spacer(1));
 		this.chatContainer.addChild(
-			new Text(`${theme.fg("accent", "✓ Hata ayıklama günlüğü yazıldı")}\n${theme.fg("muted", debugLogPath)}`, 1, 1),
+			new Text(
+				`${theme.fg("accent", "✓ Error ayıklama günlüğü yazıldı")}\n${theme.fg("muted", debugLogPath)}`,
+				1,
+				1,
+			),
 		);
 		this.ui.requestRender();
 	}

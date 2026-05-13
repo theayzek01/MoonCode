@@ -112,7 +112,7 @@ export class RoboticsView {
 	}
 
 	/**
-	 * Görev planını adım adım göster.
+	 * Görev planını steps steps göster.
 	 */
 	static renderTaskPlan(actions: PlannedAction[], durationMs?: number): string {
 		if (actions.length === 0) {
@@ -121,7 +121,7 @@ export class RoboticsView {
 
 		const lines: string[] = [
 			"",
-			`${C.yellow}${C.bold}${PLAN_ICON} Görev Planı${durationMs ? ` (${durationMs}ms)` : ""}${C.reset}`,
+			`${C.yellow}${C.bold}${PLAN_ICON} Task Plan${durationMs ? ` (${durationMs}ms)` : ""}${C.reset}`,
 			`${C.dim}${"─".repeat(60)}${C.reset}`,
 		];
 
@@ -138,7 +138,7 @@ export class RoboticsView {
 		}
 
 		lines.push(`${C.dim}${"─".repeat(60)}${C.reset}`);
-		lines.push(`  ${C.dim}Toplam: ${actions.length} adım${C.reset}`);
+		lines.push(`  ${C.dim}Toplam: ${actions.length} steps${C.reset}`);
 		lines.push("");
 
 		return lines.join("\n");
@@ -215,10 +215,10 @@ export class RoboticsView {
 	}
 
 	/**
-	 * Hata mesajı formatla.
+	 * Error mesajı formatla.
 	 */
 	static renderError(message: string): string {
-		return `${C.red}${ROBOT_ICON} Robotics Hatası: ${message}${C.reset}`;
+		return `${C.red}${ROBOT_ICON} Robotics Errorsı: ${message}${C.reset}`;
 	}
 
 	/**

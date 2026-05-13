@@ -87,7 +87,7 @@ function collectSettingsDiagnostics(
 function reportDiagnostics(diagnostics: readonly EngineSessionRuntimeDiagnostic[]): void {
 	for (const diagnostic of diagnostics) {
 		const color = diagnostic.type === "error" ? chalk.red : diagnostic.type === "warning" ? chalk.yellow : chalk.dim;
-		const prefix = diagnostic.type === "error" ? "Hata: " : diagnostic.type === "warning" ? "Uyarı: " : "";
+		const prefix = diagnostic.type === "error" ? "Error: " : diagnostic.type === "warning" ? "Warning: " : "";
 		console.error(color(`${prefix}${diagnostic.message}`));
 	}
 }
@@ -218,7 +218,7 @@ function forkSessionOrExit(sourcePath: string, cwd: string, sessionDir?: string)
 		return SessionManager.forkFrom(sourcePath, cwd, sessionDir);
 	} catch (error: unknown) {
 		const message = error instanceof Error ? error.message : String(error);
-		console.error(chalk.red(`Hata: ${message}`));
+		console.error(chalk.red(`Error: ${message}`));
 		process.exit(1);
 	}
 }
@@ -243,7 +243,7 @@ async function createSessionManager(
 				return forkSessionOrExit(resolved.path, cwd, sessionDir);
 
 			case "not_found":
-				console.error(chalk.red(`'${resolved.arg}' ile eşleşen oturum bulunamadı`));
+				console.error(chalk.red(`'${resolved.arg}' matched no session`));
 				process.exit(1);
 		}
 	}
@@ -257,17 +257,17 @@ async function createSessionManager(
 				return SessionManager.open(resolved.path, sessionDir);
 
 			case "global": {
-				console.log(chalk.yellow(`Oturum farklı bir projede bulundu: ${resolved.cwd}`));
-				const shouldFork = await promptConfirm("Bu oturumu mevcut dizine çatallamak ister misiniz?");
+				console.log(chalk.yellow(`Session found in another project: ${resolved.cwd}`));
+				const shouldFork = await promptConfirm("Fork this session into the current directory?");
 				if (!shouldFork) {
-					console.log(chalk.dim("İptal edildi."));
+					console.log(chalk.dim("Cancelled."));
 					process.exit(0);
 				}
 				return forkSessionOrExit(resolved.path, cwd, sessionDir);
 			}
 
 			case "not_found":
-				console.error(chalk.red(`'${resolved.arg}' ile eşleşen oturum bulunamadı`));
+				console.error(chalk.red(`'${resolved.arg}' matched no session`));
 				process.exit(1);
 		}
 	}
@@ -280,7 +280,7 @@ async function createSessionManager(
 				SessionManager.listAll,
 			);
 			if (!selectedPath) {
-				console.log(chalk.dim("Hiçbir oturum seçilmedi"));
+				console.log(chalk.dim("No session selected"));
 				process.exit(0);
 			}
 			return SessionManager.open(selectedPath, sessionDir);
@@ -418,8 +418,8 @@ async function promptForMissingSessionCwd(
 
 		const selector = new ExtensionSelectorComponent(
 			formatMissingSessionCwdPrompt(issue),
-			["Devam Et", "İptal"],
-			(option) => finish(option === "Devam Et" ? issue.fallbackCwd : undefined),
+			["Continue", "Cancel"],
+			(option) => finish(option === "Continue" ? issue.fallbackCwd : undefined),
 			() => finish(undefined),
 			{ tui: ui },
 		);
@@ -479,7 +479,7 @@ export async function main(args: string[], options?: MainOptions) {
 	if (parsed.diagnostics.length > 0) {
 		for (const d of parsed.diagnostics) {
 			const color = d.type === "error" ? chalk.red : chalk.yellow;
-			console.error(color(`${d.type === "error" ? "Hata" : "Uyarı"}: ${d.message}`));
+			console.error(color(`${d.type === "error" ? "Error" : "Warning"}: ${d.message}`));
 		}
 		if (parsed.diagnostics.some((d) => d.type === "error")) {
 			process.exit(1);
@@ -509,7 +509,7 @@ export async function main(args: string[], options?: MainOptions) {
 	if (parsed.provider === "ollama" && parsed.model && !parsed.headless) {
 		try {
 			const available = await checkModelAvailability(parsed.model);
-			if (!available && (await promptConfirm(`Ollama model yok: ${parsed.model}. Çekeyim mi?`))) {
+			if (!available && (await promptConfirm(`Ollama model missing: ${parsed.model}. Pull it?`))) {
 				await pullModel(parsed.model, (event) => {
 					const pct = event.total ? ` ${Math.round((event.completed / event.total) * 100)}%` : "";
 					if (event.status) process.stderr.write(`\r${event.status}${pct}     `);
@@ -527,16 +527,16 @@ export async function main(args: string[], options?: MainOptions) {
 			const outputPath = parsed.messages.length > 0 ? parsed.messages[0] : undefined;
 			result = await exportFromFile(parsed.export, outputPath);
 		} catch (error: unknown) {
-			const message = error instanceof Error ? error.message : "Oturum dışa aktarılamadı";
-			console.error(chalk.red(`Hata: ${message}`));
+			const message = error instanceof Error ? error.message : "Session export failed";
+			console.error(chalk.red(`Error: ${message}`));
 			process.exit(1);
 		}
-		console.log(`Şuraya aktarıldı: ${result}`);
+		console.log(`Exported to: ${result}`);
 		process.exit(0);
 	}
 
 	if (parsed.mode === "rpc" && parsed.fileArgs.length > 0) {
-		console.error(chalk.red("Hata: @dosya argümanları RPC modunda desteklenmez"));
+		console.error(chalk.red("Error: @file arguments are not supported in RPC mode"));
 		process.exit(1);
 	}
 
@@ -611,10 +611,10 @@ export async function main(args: string[], options?: MainOptions) {
 		const { settingsManager, modelRegistry, resourceLoader } = services;
 		const diagnostics: EngineSessionRuntimeDiagnostic[] = [
 			...services.diagnostics,
-			...collectSettingsDiagnostics(settingsManager, "runtime oluşturma"),
+			...collectSettingsDiagnostics(settingsManager, "runtime creation"),
 			...resourceLoader.getExtensions().errors.map(({ path, error }) => ({
 				type: "error" as const,
-				message: `"${path}" eklentisi yüklenemedi: ${error}`,
+				message: `"${path}" extension failed to load: ${error}`,
 			})),
 		];
 
@@ -638,8 +638,7 @@ export async function main(args: string[], options?: MainOptions) {
 			if (!sessionOptions.model) {
 				diagnostics.push({
 					type: "error",
-					message:
-						"--api-key için --model, --provider/--model veya --models aracılığıyla bir model belirtilmelidir",
+					message: "--api-key requires a model via --model, --provider/--model, or --models",
 				});
 			} else {
 				authStorage.setRuntimeApiKey(sessionOptions.model.provider, parsed.apiKey);
@@ -730,7 +729,7 @@ export async function main(args: string[], options?: MainOptions) {
 
 	const startupBenchmark = isTruthyEnvFlag(process.env.PI_STARTUP_BENCHMARK);
 	if (startupBenchmark && appMode !== "interactive") {
-		console.error(chalk.red("Hata: PI_STARTUP_BENCHMARK sadece etkileşimli modu destekler"));
+		console.error(chalk.red("Error: PI_STARTUP_BENCHMARK only supports interactive mode"));
 		process.exit(1);
 	}
 
@@ -754,7 +753,7 @@ export async function main(args: string[], options?: MainOptions) {
 					return `${sm.model.id}${thinkingStr}`;
 				})
 				.join(", ");
-			console.log(chalk.dim(`Model kapsamı: ${modelList} ${chalk.gray("(Döngü için Ctrl+P)")}`));
+			console.log(chalk.dim(`Model scope: ${modelList} ${chalk.gray("(Ctrl+P to cycle)")}`));
 		}
 
 		const interactiveMode = new InteractiveMode(runtime, {

@@ -13,7 +13,7 @@ export function getProviderLoginHelp(): string {
 }
 
 export function formatNoModelsAvailableMessage(): string {
-	return `Kullanilabilir model yok. ${getProviderLoginHelp()}`;
+	return `No available models. ${getProviderLoginHelp()}`;
 }
 
 export function formatNoModelSelectedMessage(): string {

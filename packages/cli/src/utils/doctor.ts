@@ -96,14 +96,14 @@ export function printDoctor(): void {
 	if (candidates.length > 1) {
 		console.log(
 			chalk.yellow(
-				"\nUyarı: PATH üzerinde birden fazla Moon bulundu. Eski sürüm görünüyorsa ilk sıradaki wrapper'ı kaldır veya PATH sırasını düzelt.",
+				"\nWarning: PATH üzerinde birden fazla Moon bulundu. Eski sürüm görünüyorsa ilk sıradaki wrapper'ı kaldır veya PATH sırasını düzelt.",
 			),
 		);
 	}
 	if (packageVersion && packageVersion !== VERSION) {
 		console.log(
 			chalk.red(
-				"\nUyarı: Derlenmiş VERSION ile package.json sürümü farklı. `npm run build --workspace=packages/cli` çalıştır.",
+				"\nWarning: Derlenmiş VERSION ile package.json sürümü farklı. `npm run build --workspace=packages/cli` çalıştır.",
 			),
 		);
 	}

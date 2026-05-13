@@ -87,8 +87,8 @@ export const TUI_KEYBINDINGS = {
 		defaultKeys: "ctrl+alt+]",
 		description: "Jump backward to character",
 	},
-	"tui.editor.pageUp": { defaultKeys: "pageUp", description: "Page up" },
-	"tui.editor.pageDown": { defaultKeys: "pageDown", description: "Page down" },
+	"tui.editor.pageUp": { defaultKeys: ["pageUp", "wheelUp"], description: "Page up" },
+	"tui.editor.pageDown": { defaultKeys: ["pageDown", "wheelDown"], description: "Page down" },
 	"tui.editor.deleteCharBackward": {
 		defaultKeys: "backspace",
 		description: "Delete character backward",
@@ -122,9 +122,9 @@ export const TUI_KEYBINDINGS = {
 	"tui.input.copy": { defaultKeys: "ctrl+c", description: "Copy selection" },
 	"tui.select.up": { defaultKeys: "up", description: "Move selection up" },
 	"tui.select.down": { defaultKeys: "down", description: "Move selection down" },
-	"tui.select.pageUp": { defaultKeys: "pageUp", description: "Selection page up" },
+	"tui.select.pageUp": { defaultKeys: ["pageUp", "wheelUp"], description: "Selection page up" },
 	"tui.select.pageDown": {
-		defaultKeys: "pageDown",
+		defaultKeys: ["pageDown", "wheelDown"],
 		description: "Selection page down",
 	},
 	"tui.select.confirm": { defaultKeys: "enter", description: "Confirm selection" },

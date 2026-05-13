@@ -137,7 +137,7 @@ export function searchProject(cwd: string, query: string, limit = 10): SearchRes
 // Sonuçları agent-friendly formata çevir
 export function formatSearchResults(results: SearchResult[]): string {
 	if (results.length === 0) {
-		return "Eşleşen sonuç bulunamadı.";
+		return "No matching results.";
 	}
 
 	const lines: string[] = [];
