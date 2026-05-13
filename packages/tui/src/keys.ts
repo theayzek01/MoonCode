@@ -122,6 +122,8 @@ type SpecialKey =
 	| "end"
 	| "pageUp"
 	| "pageDown"
+	| "wheelUp"
+	| "wheelDown"
 	| "up"
 	| "down"
 	| "left"
@@ -177,6 +179,8 @@ export const Key = {
 	end: "end" as const,
 	pageUp: "pageUp" as const,
 	pageDown: "pageDown" as const,
+	wheelUp: "wheelUp" as const,
+	wheelDown: "wheelDown" as const,
 	up: "up" as const,
 	down: "down" as const,
 	left: "left" as const,
@@ -1250,6 +1254,9 @@ function formatParsedKey(codepoint: number, modifier: number, baseLayoutKey?: nu
 }
 
 export function parseKey(data: string): string | undefined {
+	const mouseWheel = parseMouseWheelSequence(data);
+	if (mouseWheel) return mouseWheel;
+
 	const kitty = parseKittySequence(data);
 	if (kitty) {
 		return formatParsedKey(kitty.codepoint, kitty.modifier, kitty.baseLayoutKey);
@@ -1321,6 +1328,25 @@ export function parseKey(data: string): string | undefined {
 		if (code >= 32 && code <= 126) {
 			return data;
 		}
+	}
+
+	return undefined;
+}
+
+function parseMouseWheelSequence(data: string): "wheelUp" | "wheelDown" | undefined {
+	// SGR mouse mode: ESC [ < button ; x ; y M/m. Wheel up/down are 64/65.
+	const sgr = data.match(/^\x1b\[<(\d+);\d+;\d+[Mm]$/);
+	if (sgr) {
+		const button = Number(sgr[1]);
+		if (button === 64) return "wheelUp";
+		if (button === 65) return "wheelDown";
+	}
+
+	// X10/normal mouse mode: ESC [ M Cb Cx Cy. Cb is button + 32.
+	if (data.length === 6 && data.startsWith("\x1b[M")) {
+		const button = data.charCodeAt(3) - 32;
+		if (button === 64) return "wheelUp";
+		if (button === 65) return "wheelDown";
 	}
 
 	return undefined;

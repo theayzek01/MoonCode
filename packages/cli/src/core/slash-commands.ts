@@ -54,6 +54,7 @@ export const BUILTIN_SLASH_COMMANDS: ReadonlyArray<BuiltinSlashCommand> = [
 	{ name: "browser", description: "Chrome eklenti durumu ve kontrolü" },
 	{ name: "robotics", description: "Robotik kontrol modu (Vision/Planning)" },
 	{ name: "discord", description: "Discord entegrasyonu" },
+	{ name: "telegram", description: "Telegram remote kontrol" },
 	{ name: "update", description: "MoonCode ve paketleri güncelle" },
 	{ name: "upgrade", description: "Sistemi en son sürüme yükselt" },
 	{ name: "impmodel", description: "Ollama'ya yeni model ekle" },

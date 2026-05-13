@@ -31,7 +31,8 @@
     "release:major": "node scripts/release.mjs major",
     "prepare": "npm run build && husky",
     "start": "node packages/cli/dist/cli.js",
-    "reset:data": "node scripts/reset-engine-data.mjs"
+    "reset:data": "node scripts/reset-engine-data.mjs",
+    "remote:telegram": "node scripts/telegram-remote.mjs"
   },
   "devDependencies": {
     "@anthropic-ai/sandbox-runtime": "^0.0.26",
@@ -46,7 +47,7 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "version": "11.40.0",
+  "version": "1.26.5",
   "repository": {
     "type": "git",
     "url": "https://github.com/theayzek01/MoonCode"

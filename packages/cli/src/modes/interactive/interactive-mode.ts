@@ -8,7 +8,7 @@ import * as crypto from "node:crypto";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { spawnSync } from "child_process";
+import { spawn, spawnSync } from "child_process";
 import {
 	type AssistantMessage,
 	getProviders,
@@ -2602,6 +2602,12 @@ export class InteractiveMode {
 				const args = text.startsWith("/discord ") ? text.slice(9).trim() : "";
 				this.editor.setText("");
 				await this.handleDiscordCommand(args);
+				return;
+			}
+			if (text === "/telegram" || text.startsWith("/telegram ")) {
+				const args = text.startsWith("/telegram ") ? text.slice(10).trim() : "";
+				this.editor.setText("");
+				await this.handleTelegramCommand(args);
 				return;
 			}
 			if (text === "/update" || text.startsWith("/update ") || text === "/upgrade" || text.startsWith("/upgrade ")) {
@@ -5476,6 +5482,95 @@ export class InteractiveMode {
 			this.showStatus("Discord tokeni ayarlanmamis.");
 			this.showStatus("Kullanim: /discord <bot_token>");
 		}
+	}
+
+	private async handleTelegramCommand(args: string): Promise<void> {
+		const [subcommand, ...rest] = args.trim().split(/\s+/).filter(Boolean);
+		const rootDir = process.cwd();
+		const envPath = path.join(rootDir, ".env");
+
+		if (!subcommand || subcommand === "help") {
+			this.showStatus("Kullanım: /telegram login <bot_token> [chat_id]");
+			this.showStatus("Chat id yoksa: bota /start yaz, sonra /telegram login <bot_token> tekrar çalıştır.");
+			this.showStatus("Başlatmak için: /telegram start");
+			return;
+		}
+
+		if (subcommand === "login") {
+			const token = rest[0];
+			let chatId = rest[1];
+			if (!token) {
+				this.showStatus("Kullanım: /telegram login <bot_token> [chat_id]");
+				return;
+			}
+
+			this.showStatus("Telegram token kontrol ediliyor...");
+			try {
+				const meResponse = await fetch(`https://api.telegram.org/bot${token}/getMe`);
+				const me = await meResponse.json();
+				if (!me.ok) throw new Error(me.description ?? "token geçersiz");
+
+				if (!chatId) {
+					const updatesResponse = await fetch(`https://api.telegram.org/bot${token}/getUpdates`);
+					const updates = await updatesResponse.json();
+					chatId = String(updates.result?.find((u: any) => u.message?.chat?.id)?.message?.chat?.id ?? "");
+				}
+
+				if (!chatId) {
+					this.showStatus(`Bot doğrulandı: @${me.result.username}`);
+					this.showStatus("Şimdi Telegram'da botuna /start yaz, sonra aynı komutu tekrar çalıştır.");
+					return;
+				}
+
+				this.upsertEnvFile(envPath, {
+					TELEGRAM_BOT_TOKEN: token,
+					TELEGRAM_ALLOWED_CHAT_IDS: chatId,
+					MOON_REMOTE_ROOT: path.dirname(rootDir),
+				});
+				this.showStatus(`Telegram kaydedildi: @${me.result.username}, chat id ${chatId}`);
+				this.showStatus("Remote'u açmak için: /telegram start");
+			} catch (err: any) {
+				this.showStatus(`Telegram login hatası: ${err.message}`);
+			}
+			return;
+		}
+
+		if (subcommand === "start") {
+			if (!fs.existsSync(envPath)) {
+				this.showStatus("Önce /telegram login <bot_token> çalıştır.");
+				return;
+			}
+			const child = spawn(process.execPath, [path.join(rootDir, "scripts", "telegram-remote.mjs")], {
+				cwd: rootDir,
+				detached: true,
+				stdio: "ignore",
+				windowsHide: true,
+			});
+			child.unref();
+			this.showStatus("Telegram remote arka planda başlatıldı. Telefondan /status yaz.");
+			return;
+		}
+
+		if (subcommand === "status") {
+			this.showStatus(
+				fs.existsSync(envPath) ? "Telegram ayarı var. /telegram start ile açabilirsin." : "Telegram ayarı yok.",
+			);
+			return;
+		}
+
+		this.showStatus(`Bilinmeyen telegram komutu: ${subcommand}`);
+	}
+
+	private upsertEnvFile(filePath: string, values: Record<string, string>): void {
+		const existing = fs.existsSync(filePath) ? fs.readFileSync(filePath, "utf8") : "";
+		const lines = existing.split(/\r?\n/).filter((line) => line.trim() !== "");
+		for (const [key, value] of Object.entries(values)) {
+			const line = `${key}=${value}`;
+			const index = lines.findIndex((item) => item.startsWith(`${key}=`));
+			if (index >= 0) lines[index] = line;
+			else lines.push(line);
+		}
+		fs.writeFileSync(filePath, `${lines.join("\n")}\n`);
 	}
 
 	private async handleReloadCommand(): Promise<void> {
