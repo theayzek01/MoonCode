@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Build Hodeus binaries for all platforms locally.
+# Build MoonCode binaries for all platforms locally.
 # Mirrors .github/workflows/build-binaries.yml
 #
 # Usage:
@@ -12,11 +12,11 @@
 #
 # Output:
 #   packages/cli/binaries/
-#     Hodeus-darwin-arm64.tar.gz
-#     Hodeus-darwin-x64.tar.gz
-#     Hodeus-linux-x64.tar.gz
-#     Hodeus-linux-arm64.tar.gz
-#     Hodeus-windows-x64.zip
+#     MoonCode-darwin-arm64.tar.gz
+#     MoonCode-darwin-x64.tar.gz
+#     MoonCode-linux-x64.tar.gz
+#     MoonCode-linux-arm64.tar.gz
+#     MoonCode-windows-x64.zip
 
 set -euo pipefail
 
@@ -107,9 +107,9 @@ for platform in "${PLATFORMS[@]}"; do
     # call site has a try/catch fallback. For Windows builds, we copy the
     # appropriate .node file alongside the binary below.
     if [[ "$platform" == "windows-x64" ]]; then
-        bun build --compile --external koffi --target=bun-$platform ./dist/bun/cli.js --outfile binaries/$platform/Hodeus.exe
+        bun build --compile --external koffi --target=bun-$platform ./dist/bun/cli.js --outfile binaries/$platform/MoonCode.exe
     else
-        bun build --compile --external koffi --target=bun-$platform ./dist/bun/cli.js --outfile binaries/$platform/Hodeus
+        bun build --compile --external koffi --target=bun-$platform ./dist/bun/cli.js --outfile binaries/$platform/MoonCode
     fi
 done
 
@@ -155,12 +155,12 @@ cd binaries
 for platform in "${PLATFORMS[@]}"; do
     if [[ "$platform" == "windows-x64" ]]; then
         # Windows (zip)
-        echo "Creating Hodeus-$platform.zip..."
-        (cd $platform && zip -r ../Hodeus-$platform.zip .)
+        echo "Creating MoonCode-$platform.zip..."
+        (cd $platform && zip -r ../MoonCode-$platform.zip .)
     else
         # Unix platforms (tar.gz) - use wrapper directory for mise compatibility
-        echo "Creating Hodeus-$platform.tar.gz..."
-        mv $platform Hodeus && tar -czf Hodeus-$platform.tar.gz Hodeus && mv Hodeus $platform
+        echo "Creating MoonCode-$platform.tar.gz..."
+        mv $platform MoonCode && tar -czf MoonCode-$platform.tar.gz MoonCode && mv MoonCode $platform
     fi
 done
 
@@ -169,9 +169,9 @@ echo "==> Extracting archives for testing..."
 for platform in "${PLATFORMS[@]}"; do
     rm -rf $platform
     if [[ "$platform" == "windows-x64" ]]; then
-        mkdir -p $platform && (cd $platform && unzip -q ../Hodeus-$platform.zip)
+        mkdir -p $platform && (cd $platform && unzip -q ../MoonCode-$platform.zip)
     else
-        tar -xzf Hodeus-$platform.tar.gz && mv Hodeus $platform
+        tar -xzf MoonCode-$platform.tar.gz && mv MoonCode $platform
     fi
 done
 
@@ -182,6 +182,6 @@ ls -lh *.tar.gz *.zip 2>/dev/null || true
 echo ""
 echo "Extracted directories for testing:"
 for platform in "${PLATFORMS[@]}"; do
-    echo "  binaries/$platform/Hodeus"
+    echo "  binaries/$platform/MoonCode"
 done
 

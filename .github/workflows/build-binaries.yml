@@ -51,7 +51,7 @@ jobs:
             cat > /tmp/release-notes.md <<EOF
           Release ${VERSION}
 
-          Minimal UI refresh + Hodeus v2 workspace features.
+          Minimal UI refresh + MoonCode v2 workspace features.
 
           Binaries:
           - Windows x64
@@ -67,11 +67,11 @@ jobs:
         run: |
           cd packages/cli/binaries
           assets=(
-            Hodeus-darwin-arm64.tar.gz
-            Hodeus-darwin-x64.tar.gz
-            Hodeus-linux-x64.tar.gz
-            Hodeus-linux-arm64.tar.gz
-            Hodeus-windows-x64.zip
+            MoonCode-darwin-arm64.tar.gz
+            MoonCode-darwin-x64.tar.gz
+            MoonCode-linux-x64.tar.gz
+            MoonCode-linux-arm64.tar.gz
+            MoonCode-windows-x64.zip
           )
 
           for asset in "${assets[@]}"; do
