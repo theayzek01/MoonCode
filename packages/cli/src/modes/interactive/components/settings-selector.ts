@@ -282,7 +282,7 @@ export class SettingsSelectorComponent extends Container {
 			},
 			{
 				id: "warnings",
-				label: "Uyarılar",
+				label: "Warninglar",
 				description: "Bireysel uyarıları etkinleştir veya devre dışı bırak",
 				currentValue: "yapılandır",
 				submenu: (_currentValue, done) =>

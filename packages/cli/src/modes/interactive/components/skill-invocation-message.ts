@@ -49,7 +49,7 @@ export class SkillInvocationMessageComponent extends Box {
 			const line =
 				theme.fg("customMessageLabel", `\x1b[1m[yetenek]\x1b[22m `) +
 				theme.fg("customMessageText", this.skillBlock.name) +
-				theme.fg("dim", ` (${keyText("app.tools.expand")} genişletmek için)`);
+				theme.fg("dim", ` (${keyText("app.tools.expand")} expandmek için)`);
 			this.addChild(new Text(line, 0, 0));
 		}
 	}

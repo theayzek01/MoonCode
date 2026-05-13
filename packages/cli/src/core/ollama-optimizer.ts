@@ -140,31 +140,31 @@ export async function suggestModels(): Promise<OllamaModelTag[]> {
 }
 
 function printUsage(): void {
-	console.log(`${chalk.bold("Kullanım:")}
+	console.log(`${chalk.bold("Usage:")}
   moon ollama doctor
   moon ollama models
   moon ollama pull <model>
   moon ollama profile <turbo|balanced|quality>
 
-${chalk.bold("Profil etkisi:")}
-  turbo     Düşük RAM, hızlı, ${chalk.cyan("8K")} context  — günlük kullanım, küçük dosyalar
-  balanced  Denge, ${chalk.cyan("16K")} context — kod tabanı analizi, orta projeler
-  quality   Yüksek RAM, ${chalk.cyan("32K")} context — büyük dosyalar, derin analiz
+${chalk.bold("Profile effect:")}
+  turbo     Low RAM, fast, ${chalk.cyan("8K")} context  — daily use, small files
+  balanced  Balanced, ${chalk.cyan("16K")} context — codebase analysis, medium projects
+  quality   High RAM, ${chalk.cyan("32K")} context — large files, deep analysis
 
-${chalk.dim("İpucu: Eğer modeliniz yavaşsa önce turbo deneyin. RAM yetersizse balanced'a geçin.")}
+${chalk.dim("Tip: If the model is slow, try turbo first. If RAM is not enough, switch to balanced.")}
 
-Çalıştır: Ctrl + E`);
+Run: Ctrl + E`);
 }
 
 function printProfile(profile: Profile): void {
 	const values = PROFILE_VALUES[profile];
-	console.log(chalk.bold(`Ollama profili: ${profile}`));
+	console.log(chalk.bold(`Ollama profile: ${profile}`));
 	console.log(chalk.dim("PowerShell:"));
 	console.log(psSetCommand(values));
 	console.log(chalk.dim("Bash:"));
 	console.log(bashSetCommand(values));
-	console.log(chalk.green("Bu oturumda Moon Ollama istekleri bu profile göre optimize edilir."));
-	console.log(chalk.dim("Çalıştır: Ctrl + E"));
+	console.log(chalk.green("Moon Ollama requests are optimized for this profile in this session."));
+	console.log(chalk.dim("Run: Ctrl + E"));
 }
 
 async function printDoctor(): Promise<void> {
@@ -174,26 +174,26 @@ async function printDoctor(): Promise<void> {
 	try {
 		const tags = await fetchJson<OllamaTagsResponse>("/api/tags");
 		const models = tags.models ?? [];
-		console.log(`${chalk.green("Durum:")} bağlı`);
-		console.log(`${chalk.dim("Model sayısı:")} ${models.length}`);
+		console.log(`${chalk.green("Status:")} online`);
+		console.log(`${chalk.dim("Models:")} ${models.length}`);
 		for (const model of models.slice(0, 12)) {
 			const details = [model.details?.parameter_size, model.details?.quantization_level].filter(Boolean).join(" / ");
 			console.log(
 				`  ${chalk.cyan(model.name)} ${chalk.dim(formatBytes(model.size))}${details ? chalk.dim(` · ${details}`) : ""}`,
 			);
 		}
-		if (models.length > 12) console.log(chalk.dim(`  ... ${models.length - 12} model daha`));
+		if (models.length > 12) console.log(chalk.dim(`  ... ${models.length - 12} more models`));
 	} catch (error) {
-		console.log(`${chalk.red("Durum:")} bağlı değil`);
+		console.log(`${chalk.red("Status:")} offline`);
 		console.log(chalk.dim(error instanceof Error ? error.message : String(error)));
-		console.log(chalk.yellow("Ollama çalışmıyor. Önce `ollama serve` başlat."));
+		console.log(chalk.yellow("Ollama is not running. Start `ollama serve` first."));
 	}
 
 	const activeProfile = process.env.MOON_OLLAMA_MODE || "balanced";
-	console.log(`${chalk.dim("Aktif profil:")} ${activeProfile}`);
-	console.log(chalk.dim("Hız/RAM için öneri:"));
+	console.log(`${chalk.dim("Active profile:")} ${activeProfile}`);
+	console.log(chalk.dim("Speed/RAM recommendation:"));
 	console.log(`  ${psSetCommand(PROFILE_VALUES.turbo)}`);
-	console.log(chalk.dim("Çalıştır: Ctrl + E"));
+	console.log(chalk.dim("Run: Ctrl + E"));
 }
 
 export async function handleOllamaCommand(args: string[]): Promise<boolean> {
@@ -206,7 +206,7 @@ export async function handleOllamaCommand(args: string[]): Promise<boolean> {
 	if (subcommand === "models" || subcommand === "list") {
 		const models = await getLocalModels();
 		const running = new Set(await getRunningModels());
-		if (models.length === 0) console.log(chalk.yellow("Yerel Ollama modeli yok."));
+		if (models.length === 0) console.log(chalk.yellow("No local Ollama models."));
 		for (const model of models) {
 			const mark = running.has(model.name) ? chalk.green("●") : chalk.dim("○");
 			console.log(`${mark} ${chalk.cyan(model.name)} ${chalk.dim(formatBytes(model.size))}`);
@@ -216,7 +216,7 @@ export async function handleOllamaCommand(args: string[]): Promise<boolean> {
 	if (subcommand === "pull") {
 		const model = args[2];
 		if (!model) {
-			console.log(chalk.yellow("Kullanım: moon ollama pull <model>"));
+			console.log(chalk.yellow("Usage: moon ollama pull <model>"));
 			return true;
 		}
 		await pullModel(model, (event) => {
@@ -225,7 +225,7 @@ export async function handleOllamaCommand(args: string[]): Promise<boolean> {
 			const pct = total ? ` ${Math.round((completed / total) * 100)}%` : "";
 			if (event.status) process.stdout.write(`\r${event.status}${pct}     `);
 		});
-		console.log(`\n${chalk.green("Model hazır:")} ${model}`);
+		console.log(`\n${chalk.green("Model ready:")} ${model}`);
 		return true;
 	}
 	if (subcommand === "profile") {

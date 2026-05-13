@@ -38,7 +38,7 @@ export class BranchSummaryMessageComponent extends Box {
 		this.addChild(new Spacer(1));
 
 		if (this.expanded) {
-			const header = "**Dal Özeti**\n\n";
+			const header = "**Branch Summary**\n\n";
 			this.addChild(
 				new Markdown(header + this.message.summary, 0, 0, this.markdownTheme, {
 					color: (text: string) => theme.fg("customMessageText", text),
@@ -47,9 +47,9 @@ export class BranchSummaryMessageComponent extends Box {
 		} else {
 			this.addChild(
 				new Text(
-					theme.fg("customMessageText", "Dal özeti (") +
+					theme.fg("customMessageText", "Branch summary (") +
 						theme.fg("dim", keyText("app.tools.expand")) +
-						theme.fg("customMessageText", " genişletmek için)"),
+						theme.fg("customMessageText", " expandmek için)"),
 					0,
 					0,
 				),

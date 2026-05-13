@@ -57,7 +57,7 @@ export class BashExecutionComponent extends Container {
 			ui,
 			(spinner) => theme.fg(colorKey, spinner),
 			(text) => theme.fg("muted", text),
-			`Çalışıyor... (iptal için ${keyText("tui.select.cancel")})`, // Plain text for loader
+			`Running... (cancel: ${keyText("tui.select.cancel")})`, // Plain text for loader
 		);
 		this.contentContainer.addChild(this.loader);
 
@@ -180,7 +180,7 @@ export class BashExecutionComponent extends Container {
 					statusParts.push(`(${keyHint("app.tools.expand", "daralt")})`);
 				} else {
 					statusParts.push(
-						`${theme.fg("muted", `... ${hiddenLineCount} satır daha`)} (${keyHint("app.tools.expand", "genişlet")})`,
+						`${theme.fg("muted", `... ${hiddenLineCount} more lines`)} (${keyHint("app.tools.expand", "expand")})`,
 					);
 				}
 			}
@@ -188,13 +188,13 @@ export class BashExecutionComponent extends Container {
 			if (this.status === "cancelled") {
 				statusParts.push(theme.fg("warning", "(iptal edildi)"));
 			} else if (this.status === "error") {
-				statusParts.push(theme.fg("error", `(çıkış ${this.exitCode})`));
+				statusParts.push(theme.fg("error", `(exit ${this.exitCode})`));
 			}
 
 			// Add truncation warning (context truncation, not preview truncation)
 			const wasTruncated = this.truncationResult?.truncated || contextTruncation.truncated;
 			if (wasTruncated && this.fullOutputPath) {
-				statusParts.push(theme.fg("warning", `Çıktı kırpıldı. Tam çıktı: ${this.fullOutputPath}`));
+				statusParts.push(theme.fg("warning", `Output truncated. Full output: ${this.fullOutputPath}`));
 			}
 
 			if (statusParts.length > 0) {

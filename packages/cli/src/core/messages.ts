@@ -87,12 +87,12 @@ export function bashExecutionToText(msg: BashExecutionMessage): string {
 		const optimizedOutput = optimizePromptText(msg.output).optimizedText;
 		text += `\`\`\`\n${optimizedOutput}\n\`\`\``;
 	} else {
-		text += "(cikti yok)";
+		text += "(no output)";
 	}
 	if (msg.cancelled) {
 		text += "\n\n(komut iptal edildi)";
 	} else if (msg.exitCode !== null && msg.exitCode !== undefined && msg.exitCode !== 0) {
-		text += `\n\nKomut su kodla cikti: ${msg.exitCode}`;
+		text += `\n\nCommand exited with code: ${msg.exitCode}`;
 	}
 	if (msg.truncated && msg.fullOutputPath) {
 		text += `\n\n[Cikti kisaltildi. Tam cikti: ${msg.fullOutputPath}]`;
