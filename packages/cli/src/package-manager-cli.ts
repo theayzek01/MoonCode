@@ -39,7 +39,7 @@ interface PackageCommandOptions {
 function reportSettingsErrors(settingsManager: SettingsManager, context: string): void {
 	const errors = settingsManager.drainErrors();
 	for (const { scope, error } of errors) {
-		console.error(chalk.yellow(`Uyarı (${context}, ${scope} ayarları): ${error.message}`));
+		console.error(chalk.yellow(`Warning (${context}, ${scope} ayarları): ${error.message}`));
 		if (error.stack) {
 			console.error(chalk.dim(error.stack));
 		}
@@ -525,7 +525,7 @@ export async function handlePackageCommand(args: string[]): Promise<boolean> {
 						else await runGitHubSelfUpdate(selfUpdateNpmCommand);
 					} catch (error: unknown) {
 						const message = error instanceof Error ? error.message : "Bilinmeyen paket komutu hatası";
-						console.error(chalk.red(`Hata: ${message}`));
+						console.error(chalk.red(`Error: ${message}`));
 						if (selfUpdateCommand) printSelfUpdateFallback(selfUpdateCommand);
 						else printSelfUpdateUnavailable(selfUpdateNpmCommand);
 						process.exitCode = 1;
@@ -540,7 +540,7 @@ export async function handlePackageCommand(args: string[]): Promise<boolean> {
 		}
 	} catch (error: unknown) {
 		const message = error instanceof Error ? error.message : "Bilinmeyen paket komutu hatası";
-		console.error(chalk.red(`Hata: ${message}`));
+		console.error(chalk.red(`Error: ${message}`));
 		process.exitCode = 1;
 		return true;
 	}

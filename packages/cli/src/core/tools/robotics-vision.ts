@@ -60,7 +60,7 @@ export function createRoboticsDetectToolDefinition(options?: {
 				content: [
 					{
 						type: "text" as const,
-						text: `Tespit edilen nesneler (${result.objects.length} adet, ${result.durationMs}ms):\n${summary}\n\nHam JSON:\n${JSON.stringify(result.objects, null, 2)}`,
+						text: `Tespit edilen nesneler (${result.objects.length} adet, ${result.durationMs}ms):\n${summary}\n\nRaw JSON:\n${JSON.stringify(result.objects, null, 2)}`,
 					},
 				],
 			};
@@ -113,7 +113,7 @@ export function createRoboticsBboxToolDefinition(options?: {
 				content: [
 					{
 						type: "text" as const,
-						text: `Bounding box'lar (${result.objects.length} adet, ${result.durationMs}ms):\n${summary}\n\nHam JSON:\n${JSON.stringify(result.objects, null, 2)}`,
+						text: `Bounding box'lar (${result.objects.length} adet, ${result.durationMs}ms):\n${summary}\n\nRaw JSON:\n${JSON.stringify(result.objects, null, 2)}`,
 					},
 				],
 			};
@@ -162,7 +162,7 @@ export function createRoboticsTrajectoryToolDefinition(options?: {
 				content: [
 					{
 						type: "text" as const,
-						text: `Yörünge (${result.trajectory.length} nokta, ${result.durationMs}ms):\n${summary}\n\nHam JSON:\n${JSON.stringify(result.trajectory, null, 2)}`,
+						text: `Yörünge (${result.trajectory.length} nokta, ${result.durationMs}ms):\n${summary}\n\nRaw JSON:\n${JSON.stringify(result.trajectory, null, 2)}`,
 					},
 				],
 			};
@@ -232,12 +232,12 @@ export function createRoboticsPlanToolDefinition(options?: {
 	return {
 		name: "robotics_plan",
 		description:
-			"Doğal dil görev talimatını robot API fonksiyon çağrılarına dönüştürür. Önce robot fonksiyonlarını tanımlamanız gerekir.",
+			"Converts a natural-language robot task into robot API function calls. Define robot functions first.",
 		parameters: Type.Object({
-			instruction: Type.String({ description: "Robot görevi (ör: 'mavi bloğu turuncu kaseye koy')" }),
-			image_path: Type.Optional(Type.String({ description: "Sahne görüntüsü (opsiyonel ama önerilir)" })),
+			instruction: Type.String({ description: "Robot task (e.g. 'put the blue block into the orange bowl')" }),
+			image_path: Type.Optional(Type.String({ description: "Scene image (optional but recommended)" })),
 			functions_path: Type.Optional(
-				Type.String({ description: "Robot fonksiyon tanım JSON dosyası yolu (opsiyonel, settings'den alınır)" }),
+				Type.String({ description: "Robot function-definition JSON path (optional; read from settings)" }),
 			),
 		}),
 		execute: async (args: { instruction: string; image_path?: string; functions_path?: string }) => {
@@ -279,7 +279,7 @@ export function createRoboticsPlanToolDefinition(options?: {
 				content: [
 					{
 						type: "text" as const,
-						text: `Görev Planı (${result.actions.length} adım, ${result.durationMs}ms):\n\n${actionSummary}\n\nHam JSON:\n${JSON.stringify(result.actions, null, 2)}`,
+						text: `Task Plan (${result.actions.length} steps, ${result.durationMs}ms):\n\n${actionSummary}\n\nRaw JSON:\n${JSON.stringify(result.actions, null, 2)}`,
 					},
 				],
 			};

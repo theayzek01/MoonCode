@@ -228,7 +228,7 @@ export function parseModelPattern(
 		}
 	}
 
-	// Suffix thinking level değilse, belki ID'nin kendisi : içeriyordur ama biz 1. adımda kaçırmışızdır.
+	// Suffix thinking level değilse, belki ID'nin kendisi : içeriyordur ama biz 1. stepsda kaçırmışızdır.
 	// Ya da zincirleme geçersiz bir suffix ("model:high:random" gibi) olabilir. Recursive bir kez daha deneyelim.
 	const fallbackResult = parseModelPattern(prefix, availableModels, options);
 	if (fallbackResult.model) {

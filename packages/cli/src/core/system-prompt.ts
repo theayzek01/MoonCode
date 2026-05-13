@@ -35,7 +35,7 @@ export interface BuildSystemPromptOptions {
 	agents?: CodingAgentsSettings;
 	/** Robotics mode aktif mi */
 	roboticsEnabled?: boolean;
-	/** Tanımlı robot fonksiyonları */
+	/** Defined robot functions */
 	roboticsFunctions?: RoboticsFunction[];
 	/**
 	 * Local/Ollama model modu: sistem promptu ~%50 kisalt.
@@ -232,28 +232,28 @@ ${guidelinesList.map((g) => `- ${g}`).join("\n")}`;
 	return prompt;
 }
 
-/** Robotics mode system prompt eki */
+/** Robotics mode system prompt addition */
 function buildRoboticsSystemPrompt(functions?: RoboticsFunction[]): string {
 	let section = `
 
-## Robotics Mode (Aktif 🤖)
+## Robotics Mode (Active 🤖)
 
-Sen aynı zamanda bir robotik görüş (computer vision) ve hareket planlama uzmanısın.
-Görüntülerdeki nesneleri tespit edebilir, uzamsal akıl yürütme yapabilir ve robot hareketlerini planlayabilirsin.
+You are also a robotics vision and motion-planning specialist.
+You can detect objects in images, reason spatially, and plan robot movements.
 
-**Koordinat Sistemi:** Tüm koordinatlar [y, x] formatında, 0-1000 normalize.
+**Coordinate System:** All coordinates use [y, x] format, normalized to 0-1000.
 
-**Çıktı Formatları:**
-- Nesne tespiti: [{"point": [y, x], "label": "..."}]
+**Output Formats:**
+- Object detection: [{"point": [y, x], "label": "..."}]
 - Bounding box: [{"box_2d": [ymin, xmin, ymax, xmax], "label": "..."}]
-- Yörünge: [{"point": [y, x], "label": "0"}, ...] (sıralı)
+- Trajectory: [{"point": [y, x], "label": "0"}, ...] (ordered)
 
-**Kullanılabilir Robotics Araçları:**
-- robotics_detect: Görüntüde nesne tespiti
-- robotics_bbox: Bounding box tespiti
-- robotics_trajectory: Yörünge planlama
-- robotics_analyze: Sahne analizi
-- robotics_plan: Fonksiyon çağrısı planla`;
+**Available Robotics Tools:**
+- robotics_detect: Object detection in image
+- robotics_bbox: Bounding-box detection
+- robotics_trajectory: Trajectory planlama
+- robotics_analyze: Scene analysis
+- robotics_plan: Plan function calls`;
 
 	if (functions && functions.length > 0) {
 		const fnList = functions
@@ -262,7 +262,7 @@ Görüntülerdeki nesneleri tespit edebilir, uzamsal akıl yürütme yapabilir v
 				return `  - ${fn.name}(${params}): ${fn.description}`;
 			})
 			.join("\n");
-		section += `\n\n**Mevcut Robot API Fonksiyonları:**\n${fnList}`;
+		section += `\n\n**Current Robot API Functions:**\n${fnList}`;
 	}
 
 	return section;
@@ -301,7 +301,7 @@ Rules: concise, correct, choose simplest intelligent/logical path, inspect befor
 	// Context dosyalarini ekle (varsa, kisa tut)
 	const contextFiles_ = contextFiles ?? [];
 	if (contextFiles_.length > 0) {
-		prompt += "\n\nProje bağlamı:";
+		prompt += "\n\nProject context:";
 		for (const { path: filePath, content } of contextFiles_) {
 			// Compact modda ilk 60 satiri al
 			const trimmed = content.split("\n").slice(0, 60).join("\n");

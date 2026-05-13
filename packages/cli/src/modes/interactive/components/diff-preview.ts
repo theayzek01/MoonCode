@@ -40,7 +40,7 @@ export class DiffPreviewComponent extends Text {
 		const shown = this.expanded ? lines : lines.slice(0, this.maxLines);
 		const more =
 			!this.expanded && lines.length > shown.length
-				? `\n${theme.fg("muted", `... ${lines.length - shown.length} satır daha`)}`
+				? `\n${theme.fg("muted", `... ${lines.length - shown.length} more lines`)}`
 				: "";
 		this.setText(colorizeUnifiedDiff(shown.join("\n")) + more);
 	}

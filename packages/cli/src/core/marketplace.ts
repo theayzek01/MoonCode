@@ -48,7 +48,7 @@ export async function fetchRegistry(options: { force?: boolean } = {}): Promise<
 		} catch {}
 	}
 	const response = await fetch(DEFAULT_REGISTRY_URL, { headers: { Accept: "application/json" } });
-	if (!response.ok) throw new Error(`Registry alınamadı: ${response.status} ${response.statusText}`);
+	if (!response.ok) throw new Error(`Could not fetch registry: ${response.status} ${response.statusText}`);
 	const entries = normalizeRegistry(await response.json());
 	writeFileSync(file, JSON.stringify({ timestamp: Date.now(), entries }, null, 2));
 	return entries;
@@ -67,17 +67,17 @@ export async function installMarketplaceEntry(
 	entry: RegistryEntry,
 	options: { local?: boolean } = {},
 ): Promise<void> {
-	if (!packageManager?.installAndPersist) throw new Error("Package manager hazır değil.");
+	if (!packageManager?.installAndPersist) throw new Error("Package manager is not ready.");
 	await packageManager.installAndPersist(entry.source, { local: options.local });
 }
 
 export function formatRegistryEntries(entries: RegistryEntry[], limit = 20): string {
-	if (entries.length === 0) return "Marketplace sonucu yok.";
+	if (entries.length === 0) return "No marketplace results.";
 	return entries
 		.slice(0, limit)
 		.map(
 			(e) =>
-				`${e.name} [${e.type}]${e.version ? `@${e.version}` : ""}\n  ${e.description || "Açıklama yok"}\n  source: ${e.source}`,
+				`${e.name} [${e.type}]${e.version ? `@${e.version}` : ""}\n  ${e.description || "No description"}\n  source: ${e.source}`,
 		)
 		.join("\n\n");
 }

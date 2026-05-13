@@ -22,71 +22,71 @@ export const DEFAULT_CODING_AGENT_PROFILES: readonly CodingAgentProfile[] = [
 		id: "patron",
 		name: "Patron Agent / Orchestrator",
 		department: "leadership",
-		focus: "hedefi netleştirir, işi parçalara böler",
-		useWhen: "her agent çalışmasında",
+		focus: "clarifies the goal and splits the work",
+		useWhen: "every agent run",
 	},
 	{
 		id: "architect",
 		name: "Architect Agent",
 		department: "engineering",
-		focus: "dosya yapısı, veri akışı, entegrasyon riski",
-		useWhen: "multi-file/refactor/mimari karar",
+		focus: "file structure, data flow, integration risk",
+		useWhen: "multi-file/refactor/architecture decisions",
 	},
 	{
 		id: "backend",
 		name: "Backend Agent",
 		department: "engineering",
-		focus: "API, validasyon, auth, server-side kurallar",
-		useWhen: "server/provider/runtime değişiyorsa",
+		focus: "API, validation, auth, server-side rules",
+		useWhen: "when server/provider/runtime changes",
 	},
 	{
 		id: "frontend",
 		name: "Frontend Agent",
 		department: "product",
-		focus: "TUI/Web akışı, state, boş/yükleniyor/hata halleri",
-		useWhen: "arayüz veya etkileşim değişiyorsa",
+		focus: "TUI/Web flow, state, empty/loading/error states",
+		useWhen: "when UI or interaction changes",
 	},
 	{
 		id: "uiux",
 		name: "UI/UX Agent",
 		department: "product",
-		focus: "okunabilirlik, sadelik, net deneyim",
-		useWhen: "ekranda görünen her şeyde",
+		focus: "readability, simplicity, clear experience",
+		useWhen: "for everything visible on screen",
 	},
 	{
 		id: "test",
 		name: "Test Agent",
 		department: "quality",
-		focus: "regresyon, edge case, manuel doğrulama",
-		useWhen: "kod değiştiğinde",
+		focus: "regression, edge cases, manual verification",
+		useWhen: "when code changes",
 	},
 	{
 		id: "security",
 		name: "Security Agent",
 		department: "quality",
-		focus: "secret, injection, path traversal, izinler",
-		useWhen: "FS/network/auth/user input varsa",
+		focus: "secrets, injection, path traversal, permissions",
+		useWhen: "when FS/network/auth/user input exists",
 	},
 	{
 		id: "devops",
 		name: "DevOps Agent",
 		department: "delivery",
-		focus: "build, release, ortam, operasyon",
-		useWhen: "kurulum/CI/deploy akışında",
+		focus: "build, release, environment, operations",
+		useWhen: "for install/CI/deploy flow",
 	},
 	{
 		id: "code-reviewer",
 		name: "Code Reviewer Agent",
 		department: "quality",
-		focus: "kalite, tutarlılık, eksik edge case",
-		useWhen: "implementasyon sonunda",
+		focus: "quality, consistency, missing edge cases",
+		useWhen: "at the end of implementation",
 	},
 	{
 		id: "integrator",
 		name: "Integrator Agent",
 		department: "delivery",
-		focus: "parçaları tek tutarlı çözümde birleştirir",
-		useWhen: "son teslimde",
+		focus: "integrates parts into one coherent solution",
+		useWhen: "at final delivery",
 	},
 ];
 
@@ -100,9 +100,9 @@ function normalizeVerbosity(verbosity: CodingAgentVerbosity | undefined): Coding
 }
 
 function getVisibilityInstruction(verbosity: CodingAgentVerbosity): string {
-	if (verbosity === "quiet") return "Agent yorumlarını kullanıcıya dökme; ekip çalışmasını içeride tut.";
-	if (verbosity === "verbose") return "Gerekirse kısa Agent Board göster; sahte toplantı transcript'i yazma.";
-	return "Sadece faydalıysa 2-5 satırlık kısa Agent Board göster.";
+	if (verbosity === "quiet") return "Do not expose agent commentary; keep teamwork internal.";
+	if (verbosity === "verbose") return "Show a short Agent Board if useful; do not write fake meeting transcripts.";
+	return "Show a short 2-5 line Agent Board only if useful.";
 }
 
 export function buildCodingAgentsPrompt(settings: CodingAgentsSettings | undefined): string {
@@ -112,36 +112,36 @@ export function buildCodingAgentsPrompt(settings: CodingAgentsSettings | undefin
 	if (!enabled) return "";
 	const verbosity = normalizeVerbosity(settings.verbosity);
 	const agentLines = DEFAULT_CODING_AGENT_PROFILES.map(
-		(agent) => `- ${agent.name}: ${agent.focus}. Kullan: ${agent.useWhen}.`,
+		(agent) => `- ${agent.name}: ${agent.focus}. Use: ${agent.useWhen}.`,
 	).join("\n");
 
 	return `
 
 ## Agent System (Company Mode)
 
-Kodlama işlerini küçük bir yazılım şirketi disipliniyle yönet. Bu roleplay değil; kalite ve organizasyon katmanı.
+Manage coding work with small-software-company discipline. This is not roleplay; it is a quality and organization layer.
 
 Mode: ${mode}
 Visibility: ${verbosity}
 
-Aktivasyon:
-- auto: Kompleks/multi-file/UI+backend/mimari/bugfix/test/güvenlik işlerinde kullan; basit sorularda direkt cevap ver.
-- always: Uygulama/kodlama işlerinde her zaman kullan.
+Activation:
+- auto: Use for complex, multi-file, UI+backend, architecture, bugfix, test, or security work; answer simple requests directly.
+- always: Always use for app/coding work.
 
-Ekip:
+Team:
 ${agentLines}
 
-Çalışma şekli:
-1. İsteği hedef ve kabul kriterine çevir.
-2. İşi doğru uzmanlara böl.
-3. Tek tutarlı diff üret.
-4. Test/güvenlik/review kalite kapısından geçir.
-5. Son cevabı temiz ve kısa ver.
+Workflow:
+1. Convert the request into goals and acceptance criteria.
+2. Split the work across the right specialists.
+3. Produce one coherent diff.
+4. Pass test, security, and review quality gates.
+5. Give a clean, concise final answer.
 
-Kurallar:
-- Ajanları uzun konuşturma.
-- Her role ayrı cevap verme; tek net çözüm üret.
-- Kod işinde önce repo bağlamını oku, sonra uygula, sonra kontrol çalıştır.
+Rules:
+- Do not make agents verbose.
+- Do not answer per role; produce one clear solution.
+- For code work, inspect repo context first, then implement, then run checks.
 - ${getVisibilityInstruction(verbosity)}`;
 }
 

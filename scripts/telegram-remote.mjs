@@ -83,7 +83,7 @@ async function handleMessage(message) {
 	}
 
 	if (message.voice || message.audio) {
-		await send(chatId, "Sesli komut altyapısı hazır: Telegram dosyası algılandı. Transkripsiyon için sonraki adımda local Whisper/Ollama bağlantısı eklenebilir. Şimdilik metin komut gönder.");
+		await send(chatId, "Sesli komut altyapısı hazır: Telegram dosyası algılandı. Transkripsiyon için sonraki stepsda local Whisper/Ollama bağlantısı eklenebilir. Şimdilik metin komut gönder.");
 		return;
 	}
 	if (!text) return;
@@ -253,7 +253,7 @@ async function executeJob(job) {
 		const result = await runCommand(job.command, job.cwd);
 		await send(job.chatId, `Bitti #${job.id}\n${result}`);
 	} catch (error) {
-		await send(job.chatId, `Hata #${job.id}: ${error.message}`);
+		await send(job.chatId, `Error #${job.id}: ${error.message}`);
 	}
 }
 
@@ -264,9 +264,9 @@ function queueText() {
 }
 
 function cancelActiveJob() {
-	if (!activeJob?.child) return "İptal edilecek çalışan işlem yok.";
+	if (!activeJob?.child) return "Cancel edilecek çalışan işlem yok.";
 	activeJob.child.kill("SIGTERM");
-	return `İptal sinyali gönderildi: #${activeJob.id}`;
+	return `Cancel sinyali gönderildi: #${activeJob.id}`;
 }
 
 function ensureProjectMemory() {

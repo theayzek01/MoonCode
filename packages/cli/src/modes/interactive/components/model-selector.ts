@@ -179,7 +179,7 @@ export class ModelSelectorComponent extends Container implements Focusable {
 		this.listContainer.clear();
 
 		if (this.errorMessage) {
-			this.listContainer.addChild(new Text(theme.fg("error", ` ⚠ Hata: ${this.errorMessage}`), 1, 0));
+			this.listContainer.addChild(new Text(theme.fg("error", ` ⚠ Error: ${this.errorMessage}`), 1, 0));
 			return;
 		}
 
