@@ -84,6 +84,18 @@ jobs:
             gh release create "${RELEASE_TAG}" --title "${RELEASE_TAG}" --notes-file /tmp/release-notes.md
           fi
 
+          old_assets=(
+            Hodeus-darwin-arm64.tar.gz
+            Hodeus-darwin-x64.tar.gz
+            Hodeus-linux-x64.tar.gz
+            Hodeus-linux-arm64.tar.gz
+            Hodeus-windows-x64.zip
+          )
+
+          for asset in "${old_assets[@]}"; do
+            gh release delete-asset "${RELEASE_TAG}" "$asset" --yes >/dev/null 2>&1 || true
+          done
+
           for asset in "${assets[@]}"; do
             gh release upload "${RELEASE_TAG}" "$asset" --clobber
           done
