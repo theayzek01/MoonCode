@@ -433,7 +433,7 @@ export async function loginAntigravity(
 
 export const antigravityOAuthProvider: OAuthProviderInterface = {
 	id: "antigravity",
-	name: "Antigravity (Gemini 3, Claude, GPT-OSS)",
+	name: "Antigravity",
 	usesCallbackServer: true,
 
 	async login(callbacks: OAuthLoginCallbacks): Promise<OAuthCredentials> {

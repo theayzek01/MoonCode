@@ -28,7 +28,7 @@ const GEMINI_CLI_HEADERS = {
     }),
 };
 // Headers for Antigravity (sandbox endpoint) - requires specific User-Engine
-const DEFAULT_ANTIGRAVITY_VERSION = "1.18.4";
+const DEFAULT_ANTIGRAVITY_VERSION = "1.28.0";
 function getAntigravityHeaders() {
     const version = process.env.PI_Core_ANTIGRAVITY_VERSION || DEFAULT_ANTIGRAVITY_VERSION;
     return {
@@ -723,7 +723,7 @@ export function buildRequest(model, context, projectId, options = {}, isAntigrav
         project: projectId,
         model: model.id,
         request,
-        ...(isAntigravity ? { requestType: "engine" } : {}),
+        ...(isAntigravity ? { requestType: "engine", userAgent: "antigravity" } : {}),
         userEngine: isAntigravity ? "antigravity" : "mooncli-cli",
         requestId: `${isAntigravity ? "engine" : "Mooncli"}-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
     };

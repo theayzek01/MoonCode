@@ -1734,8 +1734,8 @@ async function generateModels() {
 			maxTokens: 65535,
 		},
 		{
-			id: "gemini-3.1-flash",
-			name: "Gemini 3.1 Flash (Antigravity)",
+			id: "gemini-3-flash",
+			name: "Gemini 3 Flash (Antigravity)",
 			api: "google-antigravity",
 			provider: "antigravity",
 			baseUrl: ANTIGRAVITY_ENDPOINT,
@@ -1758,18 +1758,6 @@ async function generateModels() {
 			maxTokens: 64000,
 		},
 		{
-			id: "claude-sonnet-4-6-thinking",
-			name: "Claude Sonnet 4.6 Thinking (Antigravity)",
-			api: "google-antigravity",
-			provider: "antigravity",
-			baseUrl: ANTIGRAVITY_ENDPOINT,
-			reasoning: true,
-			input: ["text", "image"],
-			cost: { input: 3, output: 15, cacheRead: 0.3, cacheWrite: 3.75 },
-			contextWindow: 200000,
-			maxTokens: 64000,
-		},
-		{
 			id: "claude-opus-4-6-thinking",
 			name: "Claude Opus 4.6 Thinking (Antigravity)",
 			api: "google-antigravity",
@@ -1782,7 +1770,7 @@ async function generateModels() {
 			maxTokens: 128000,
 		},
 		{
-			id: "gpt-oss-120b-medium",
+			id: "gpt-oss-120b",
 			name: "GPT-OSS 120B Medium (Antigravity)",
 			api: "google-antigravity",
 			provider: "antigravity",

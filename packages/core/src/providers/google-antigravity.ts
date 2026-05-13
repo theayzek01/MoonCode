@@ -73,7 +73,7 @@ const GEMINI_CLI_HEADERS = {
 };
 
 // Headers for Antigravity (sandbox endpoint) - requires specific User-Agent
-const DEFAULT_ANTIGRAVITY_VERSION = "1.18.4";
+const DEFAULT_ANTIGRAVITY_VERSION = "1.28.0";
 
 function getAntigravityHeaders(requestId?: string) {
 	const version = process.env.PI_AI_ANTIGRAVITY_VERSION || DEFAULT_ANTIGRAVITY_VERSION;
@@ -221,12 +221,12 @@ function isGemini3Model(modelId: string): boolean {
  */
 function getApiModelId(modelId: string): string {
 	const id = modelId.toLowerCase();
-	// Sandbox/Daily endpointleri genellikle 3.1 isimlerini bekler
-	if (id.includes("gemini-3-flash") || id.includes("gemini-3.1-flash")) return "gemini-3.1-flash";
-	if (id.includes("gemini-3-pro") || id.includes("gemini-3.1-pro")) return "gemini-3.1-pro";
-	if (id.includes("claude-sonnet-4.6")) return "claude-4.6-sonnet";
-	if (id.includes("claude-opus-4.6")) return "claude-4.6-opus";
-	if (id.includes("gpt-oss-120b")) return "gpt-oss-120b-cloud";
+	if (id.includes("gemini-3-flash")) return "gemini-3-flash";
+	if (id.includes("gemini-3.1-pro-high")) return "gemini-3.1-pro-high";
+	if (id.includes("gemini-3.1-pro-low")) return "gemini-3.1-pro-low";
+	if (id.includes("claude-sonnet-4-6")) return "claude-sonnet-4-6";
+	if (id.includes("claude-opus-4-6-thinking")) return "claude-opus-4-6-thinking";
+	if (id.includes("gpt-oss-120b")) return "gpt-oss-120b";
 	return modelId;
 }
 
@@ -293,6 +293,7 @@ interface CloudCodeAssistRequest {
 		};
 	};
 	requestType?: string;
+	userAgent?: string;
 }
 
 interface CloudCodeAssistResponseChunk {
@@ -411,14 +412,10 @@ export const streamGoogleGeminiCli: StreamFunction<"google-antigravity", GoogleG
 
 				try {
 					const endpoint = endpoints[endpointIndex];
-					if (isAntigravity) {
-						// Antigravity (sandbox) requires the project and model in the URL path
-						const apiModelId = getApiModelId(model.id);
-						requestUrl = `${endpoint}/v1/projects/${projectId}/locations/global/models/${apiModelId}:streamGenerateContent?alt=sse`;
-					} else {
-						// Prod Gemini CLI uses the internal endpoint with model in body
-						requestUrl = `${endpoint}/v1internal:streamGenerateContent?alt=sse`;
-					}
+					// Cloud Code Assist and Antigravity both use the internal streaming endpoint.
+					// Antigravity selects subscription-backed models from the request body via
+					// requestType/userAgent; model-in-path URLs return Google 404 pages.
+					requestUrl = `${endpoint}/v1internal:streamGenerateContent?alt=sse`;
 
 					response = await fetch(requestUrl, {
 						method: "POST",
@@ -946,7 +943,7 @@ export function buildRequest(
 		project: projectId,
 		model: getApiModelId(model.id),
 		request,
-		...(isAntigravity ? { requestType: "agent" } : {}),
+		...(isAntigravity ? { requestType: "engine", userAgent: "antigravity" } : {}),
 	};
 }
 
