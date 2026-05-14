@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import { describe, it } from "node:test";
 import type { Terminal as XtermTerminalType } from "@xterm/headless";
-import { type Component, TUI } from "../src/tui.js";
+import { type Component, TUI, visibleWidth } from "../src/tui.js";
 import { VirtualTerminal } from "./virtual-terminal.js";
 
 class TestComponent implements Component {
@@ -62,6 +62,24 @@ function getCellItalic(terminal: VirtualTerminal, row: number, col: number): num
 	assert.ok(cell, `Missing cell at row ${row} col ${col}`);
 	return cell.isItalic();
 }
+
+describe("TUI render safety", () => {
+	it("clamps overwide rendered lines instead of crashing", async () => {
+		const terminal = new VirtualTerminal(45, 5);
+		const tui = new TUI(terminal);
+		const component = new TestComponent();
+		tui.addChild(component);
+
+		component.lines = ["x".repeat(46)];
+		tui.start();
+		await terminal.waitForRender();
+
+		const viewport = terminal.getViewport();
+		assert.ok(visibleWidth(viewport[0] ?? "") <= 45, "Rendered line should be clamped to terminal width");
+
+		tui.stop();
+	});
+});
 
 describe("TUI resize handling", () => {
 	it("triggers full re-render when terminal height changes", async () => {

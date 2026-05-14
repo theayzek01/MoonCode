@@ -15,6 +15,8 @@
     "dev": "concurrently --names \"core,engine,cli,tui\" --prefix-colors \"cyan,yellow,red,magenta\" \"cd packages/core && npm run dev\" \"cd packages/engine && npm run dev\" \"cd packages/cli && npm run dev\" \"cd packages/tui && npm run dev\"",
     "dev:tsc": "cd packages/core && npm run dev:tsc",
     "check": "biome check --write --error-on-warnings . && tsc --noEmit -p tsconfig.release.json && npm run check:browser-smoke",
+    "check:ci": "biome ci . && tsc --noEmit -p tsconfig.release.json && npm run check:browser-smoke",
+    "security:audit": "npm audit --omit=dev",
     "check:browser-smoke": "node scripts/check-browser-smoke.mjs",
     "profile:tui": "node scripts/profile-cli-node.mjs --mode tui",
     "profile:rpc": "node scripts/profile-cli-node.mjs --mode rpc",
@@ -32,7 +34,11 @@
     "prepare": "npm run build && husky",
     "start": "node packages/cli/dist/cli.js",
     "reset:data": "node scripts/reset-engine-data.mjs",
-    "remote:telegram": "node scripts/telegram-remote.mjs"
+    "remote:telegram": "node scripts/telegram-remote.mjs",
+    "maintenance:bump-legacy": "node scripts/maintenance/bump.js",
+    "maintenance:purge-legacy": "node scripts/maintenance/purge.js",
+    "maintenance:rename-legacy": "node scripts/maintenance/rename.js",
+    "themes:sync": "node scripts/maintenance/sync-themes.js"
   },
   "devDependencies": {
     "@anthropic-ai/sandbox-runtime": "^0.0.26",
@@ -47,7 +53,7 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "version": "1.29.0",
+  "version": "1.34.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/theayzek01/MoonCode"

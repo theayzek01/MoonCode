@@ -5,6 +5,7 @@ import {
 	findInitialModel,
 	parseModelPattern,
 	resolveCliModel,
+	selectBestAvailableModel,
 } from "../src/core/model-resolver.js";
 
 // Mock models for testing
@@ -385,8 +386,9 @@ describe("default model selection", () => {
 		expect(defaultModelPerProvider.cerebras).toBe("zai-glm-4.7");
 	});
 
-	test("ai-gateway default tracks current model", () => {
+	test("ai-gateway and antigravity defaults track current models", () => {
 		expect(defaultModelPerProvider["vercel-ai-gateway"]).toBe("zai/glm-5.1");
+		expect(defaultModelPerProvider.antigravity).toBe("antigravity-claude-sonnet-4-6");
 	});
 
 	test("findInitialModel accepts explicit provider custom model ids", async () => {
@@ -404,6 +406,73 @@ describe("default model selection", () => {
 
 		expect(result.model?.provider).toBe("openrouter");
 		expect(result.model?.id).toBe("openai/ghost-model");
+	});
+
+	test("selectBestAvailableModel prefers coding-capable models over weak first entries", () => {
+		const weakModel: Model<"anthropic-messages"> = {
+			id: "text-embedding-3-small",
+			name: "Embedding",
+			api: "anthropic-messages",
+			provider: "openai",
+			baseUrl: "https://api.openai.com",
+			reasoning: false,
+			input: ["text"],
+			cost: { input: 0.1, output: 0.1, cacheRead: 0, cacheWrite: 0 },
+			contextWindow: 8192,
+			maxTokens: 1024,
+		};
+		const codingModel: Model<"anthropic-messages"> = {
+			id: "claude-sonnet-4-5",
+			name: "Claude Sonnet 4.5",
+			api: "anthropic-messages",
+			provider: "anthropic",
+			baseUrl: "https://api.anthropic.com",
+			reasoning: true,
+			input: ["text", "image"],
+			cost: { input: 3, output: 15, cacheRead: 0.3, cacheWrite: 3.75 },
+			contextWindow: 200000,
+			maxTokens: 8192,
+		};
+
+		expect(selectBestAvailableModel([weakModel, codingModel])?.id).toBe("claude-sonnet-4-5");
+	});
+
+	test("findInitialModel selects best available model instead of first weak model", async () => {
+		const weakModel: Model<"anthropic-messages"> = {
+			id: "tts-1",
+			name: "TTS",
+			api: "anthropic-messages",
+			provider: "openai",
+			baseUrl: "https://api.openai.com",
+			reasoning: false,
+			input: ["text"],
+			cost: { input: 1, output: 1, cacheRead: 0, cacheWrite: 0 },
+			contextWindow: 4096,
+			maxTokens: 1024,
+		};
+		const codingModel: Model<"anthropic-messages"> = {
+			id: "custom-coder-pro",
+			name: "Custom Coder Pro",
+			api: "anthropic-messages",
+			provider: "openrouter",
+			baseUrl: "https://openrouter.ai/api/v1",
+			reasoning: true,
+			input: ["text"],
+			cost: { input: 1, output: 2, cacheRead: 0, cacheWrite: 0 },
+			contextWindow: 128000,
+			maxTokens: 8192,
+		};
+		const registry = {
+			getAvailable: async () => [weakModel, codingModel],
+		} as unknown as Parameters<typeof findInitialModel>[0]["modelRegistry"];
+
+		const result = await findInitialModel({
+			scopedModels: [],
+			isContinuing: false,
+			modelRegistry: registry,
+		});
+
+		expect(result.model?.id).toBe("custom-coder-pro");
 	});
 
 	test("findInitialModel selects ai-gateway default when available", async () => {

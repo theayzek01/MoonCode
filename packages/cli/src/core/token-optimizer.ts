@@ -11,6 +11,9 @@ const TRAILING_WHITESPACE = /[ \t]+$/gm;
 const HTML_COMMENTS = /<!--[\s\S]*?-->/g;
 // Satır sonu noktalamasını normalize et
 const REDUNDANT_PUNCTUATION = /([.!?]){3,}/g;
+const ANSI_ESCAPE = /\x1b\[[0-?]*[ -/]*[@-~]/g;
+const STACK_TRACE_LINE = /^\s*at\s+.+(?:\(|file:|[A-Za-z]:\\|\/).*/;
+const JSONISH_BLOCK = /^\s*[[{][\s\S]*[\]}]\s*$/;
 // Note: TOOL_OUTPUT_BLOCK is created fresh per call (global regex with lastIndex would cause bugs across repeated calls)
 
 // Trim long tool output blocks — head/tail strategy
@@ -27,6 +30,30 @@ function trimLongToolBlock(block: string): string {
 }
 
 // Uzun satırları kırp (tek satırlık devasa output'lar için)
+function trimStackTraces(text: string, maxFrames = 8): string {
+	const lines = text.split("\n");
+	let frames = 0;
+	return lines
+		.filter((line) => {
+			if (!STACK_TRACE_LINE.test(line)) {
+				frames = 0;
+				return true;
+			}
+			frames++;
+			return frames <= maxFrames;
+		})
+		.join("\n");
+}
+
+function compactJsonish(text: string): string {
+	if (!JSONISH_BLOCK.test(text) || text.length > 200_000) return text;
+	try {
+		return JSON.stringify(JSON.parse(text));
+	} catch {
+		return text;
+	}
+}
+
 function trimLongLines(text: string, maxLen = 500): string {
 	return text
 		.split("\n")
@@ -43,17 +70,23 @@ export function optimizePromptText(text: string): TokenOptimizeResult {
 	let normalized = text
 		.replace(/\r\n/g, "\n")
 		.replace(HTML_COMMENTS, "")
+		.replace(ANSI_ESCAPE, "")
 		.replace(TRAILING_WHITESPACE, "")
 		.replace(REPEATED_WHITESPACE, " ")
 		.replace(REPEATED_BLANK_LINES, "\n\n")
 		.replace(REDUNDANT_PUNCTUATION, (_, p) => p);
 
+	normalized = trimStackTraces(normalized);
+
 	// Tool output bloklarini kirp (fresh regex per call - global stateful regex'te lastIndex bug'i)
-	const toolBlockRe = /```(?:bash|shell|text|plain|output|log)?\n([\s\S]*?)```/g;
+	const toolBlockRe = /```(?:json|bash|shell|text|plain|output|log)?\n([\s\S]*?)```/g;
 	normalized = normalized.replace(toolBlockRe, (_full, inner: string) => {
-		const trimmedInner = trimLongLines(trimLongToolBlock(inner.trim()));
+		const compacted = compactJsonish(inner.trim());
+		const trimmedInner = trimLongLines(trimLongToolBlock(compacted));
 		return `\`\`\`\n${trimmedInner}\n\`\`\``;
 	});
+
+	normalized = compactJsonish(normalized);
 
 	normalized = normalized.trim();
 

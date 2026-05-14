@@ -105,6 +105,34 @@ describe("buildSystemPrompt", () => {
 		});
 	});
 
+	describe("reasoning discipline", () => {
+		test("includes target discipline and token economy rules", () => {
+			const prompt = buildSystemPrompt({
+				selectedTools: ["read", "bash"],
+				contextFiles: [],
+				skills: [],
+				cwd: process.cwd(),
+			});
+
+			expect(prompt).toContain("Stay on target");
+			expect(prompt).toContain("fewer tokens");
+			expect(prompt).toContain("acceptance criteria");
+		});
+
+		test("compact mode keeps the same discipline in shorter form", () => {
+			const prompt = buildSystemPrompt({
+				selectedTools: ["read", "bash"],
+				contextFiles: [],
+				skills: [],
+				cwd: process.cwd(),
+				compactMode: true,
+			});
+
+			expect(prompt).toContain("stay on target");
+			expect(prompt).toContain("minimize tokens/output");
+		});
+	});
+
 	describe("prompt guidelines", () => {
 		test("appends promptGuidelines to default guidelines", () => {
 			const prompt = buildSystemPrompt({

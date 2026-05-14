@@ -21,6 +21,7 @@ export const defaultModelPerProvider: Record<KnownProvider, string> = {
 	deepseek: "deepseek-v4-pro",
 	google: "gemini-3.1-pro",
 	"google-vertex": "gemini-3.1-pro",
+	antigravity: "antigravity-claude-sonnet-4-6",
 	"github-copilot": "gpt-5.4",
 	openrouter: "moonshotai/kimi-k2.6",
 	"vercel-ai-gateway": "zai/glm-5.1",
@@ -165,6 +166,38 @@ export interface ParsedModelResult {
 	/** Thinking level if explicitly specified in pattern, undefined otherwise */
 	thinkingLevel?: ThinkingLevel;
 	warning: string | undefined;
+}
+
+function modelQualityScore(model: Model<Api>): number {
+	let score = 0;
+	if (model.reasoning) score += 30;
+	if (model.input?.includes("image")) score += 8;
+	score += Math.min(20, Math.floor((model.contextWindow ?? 0) / 10000));
+	score += Math.min(10, Math.floor((model.maxTokens ?? 0) / 2000));
+
+	// Strong defaults for coding reliability when multiple authenticated models exist.
+	if (["anthropic", "openai-codex", "openai", "google", "antigravity", "github-copilot"].includes(model.provider))
+		score += 10;
+	if (["openrouter", "vercel-ai-gateway"].includes(model.provider)) score += 5;
+	if (model.provider === "ollama") score -= 15;
+
+	const id = model.id.toLowerCase();
+	if (/coder|coding|code|codex|sonnet|opus|gpt|gemini|kimi|glm/.test(id)) score += 8;
+	if (/embed|embedding|rerank|audio|tts|whisper|moderation|image|vision-preview/.test(id)) score -= 50;
+	if (/mini|nano|small|lite|flash/.test(id)) score -= 5;
+	return score;
+}
+
+export function selectBestAvailableModel(availableModels: Model<Api>[]): Model<Api> | undefined {
+	if (availableModels.length === 0) return undefined;
+
+	for (const provider of Object.keys(defaultModelPerProvider) as KnownProvider[]) {
+		const defaultId = defaultModelPerProvider[provider];
+		const match = availableModels.find((m) => m.provider === provider && m.id === defaultId);
+		if (match) return match;
+	}
+
+	return [...availableModels].sort((a, b) => modelQualityScore(b) - modelQualityScore(a))[0];
 }
 
 function buildFallbackModel(provider: string, modelId: string, availableModels: Model<Api>[]): Model<Api> | undefined {
@@ -570,21 +603,10 @@ export async function findInitialModel(options: {
 		}
 	}
 
-	// 4. Try first available model with valid API key
-	const availableModels = await modelRegistry.getAvailable();
-
-	if (availableModels.length > 0) {
-		// Try to find a default model from known providers
-		for (const provider of Object.keys(defaultModelPerProvider) as KnownProvider[]) {
-			const defaultId = defaultModelPerProvider[provider];
-			const match = availableModels.find((m) => m.provider === provider && m.id === defaultId);
-			if (match) {
-				return { model: match, thinkingLevel: DEFAULT_THINKING_LEVEL, fallbackMessage: undefined };
-			}
-		}
-
-		// If no default found, use first available
-		return { model: availableModels[0], thinkingLevel: DEFAULT_THINKING_LEVEL, fallbackMessage: undefined };
+	// 4. Try best available model with valid API key
+	const fallbackModel = selectBestAvailableModel(await modelRegistry.getAvailable());
+	if (fallbackModel) {
+		return { model: fallbackModel, thinkingLevel: DEFAULT_THINKING_LEVEL, fallbackMessage: undefined };
 	}
 
 	// 5. No model found
@@ -631,26 +653,9 @@ export async function restoreModelFromSession(
 		};
 	}
 
-	// Try to find any available model
-	const availableModels = await modelRegistry.getAvailable();
-
-	if (availableModels.length > 0) {
-		// Try to find a default model from known providers
-		let fallbackModel: Model<Api> | undefined;
-		for (const provider of Object.keys(defaultModelPerProvider) as KnownProvider[]) {
-			const defaultId = defaultModelPerProvider[provider];
-			const match = availableModels.find((m) => m.provider === provider && m.id === defaultId);
-			if (match) {
-				fallbackModel = match;
-				break;
-			}
-		}
-
-		// If no default found, use first available
-		if (!fallbackModel) {
-			fallbackModel = availableModels[0];
-		}
-
+	// Try to find best available model
+	const fallbackModel = selectBestAvailableModel(await modelRegistry.getAvailable());
+	if (fallbackModel) {
 		if (shouldPrintMessages) {
 			console.log(chalk.dim(`Falling back to: ${fallbackModel.provider}/${fallbackModel.id}`));
 		}

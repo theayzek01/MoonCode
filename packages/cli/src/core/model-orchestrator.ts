@@ -2,6 +2,7 @@
 import type { Model } from "moon-core";
 import { modelsAreEqual } from "moon-core";
 import type { ModelRegistry } from "./model-registry.js";
+import { selectBestAvailableModel } from "./model-resolver.js";
 
 function scoreModel(candidate: Model<any>, current: Model<any>): number {
 	let score = 0;
@@ -18,6 +19,8 @@ export async function pickFallbackModel(
 	if (!current) return undefined;
 	const available = await modelRegistry.getAvailable();
 	const candidates = available.filter((m) => !modelsAreEqual(m, current));
+	const preferred = selectBestAvailableModel(candidates);
+	if (preferred) return preferred;
 	candidates.sort((a, b) => scoreModel(b, current) - scoreModel(a, current));
 	return candidates[0];
 }
