@@ -165,6 +165,10 @@ async function runLoop(
 	// Check for steering messages at start (user may have typed while waiting)
 	let pendingMessages: EngineMessage[] = (await config.getSteeringMessages?.()) || [];
 
+	let consecutiveRedundantTurns = 0;
+	const MAX_REDUNDANT_TURNS = 3;
+	let lastToolCallFingerprint: string | null = null;
+
 	// Outer loop: continues when queued follow-up messages arrive after engine would stop
 	while (true) {
 		let hasMoreToolCalls = true;
@@ -200,6 +204,30 @@ async function runLoop(
 
 			// Check for tool calls
 			const toolCalls = message.content.filter((c): c is EngineToolCall => c.type === "toolCall");
+
+			// Loop protection: detect if we are repeating the same tool calls
+			if (toolCalls.length > 0) {
+				const fingerprint = JSON.stringify(toolCalls.map((tc) => ({ name: tc.name, args: tc.arguments })));
+				if (fingerprint === lastToolCallFingerprint) {
+					consecutiveRedundantTurns++;
+					if (consecutiveRedundantTurns >= MAX_REDUNDANT_TURNS) {
+						const errorMsg =
+							"Loop detected: The agent is repeating the same tool calls without progress. Stopping to save tokens.";
+						const errorResult: ToolResultMessage = {
+							role: "user",
+							content: [{ type: "text", text: errorMsg }],
+						};
+						currentContext.messages.push(errorResult);
+						newMessages.push(errorResult);
+						await emit({ type: "turn_end", message, toolResults: [errorResult] });
+						await emit({ type: "engine_end", messages: newMessages });
+						return;
+					}
+				} else {
+					consecutiveRedundantTurns = 0;
+					lastToolCallFingerprint = fingerprint;
+				}
+			}
 
 			const toolResults: ToolResultMessage[] = [];
 			hasMoreToolCalls = false;

@@ -4,7 +4,7 @@
   <h1>MoonCode</h1>
   <p>Serious terminal coding agent: inspect → act → verify.</p>
 
-  [![Version](https://img.shields.io/badge/version-1.34.0-d08a7a.svg?style=for-the-badge)](#)
+  [![Version](https://img.shields.io/badge/version-1.38.5-d08a7a.svg?style=for-the-badge)](#)
   [![License](https://img.shields.io/badge/license-MIT-a8b58f.svg?style=for-the-badge)](#)
   [![Platform](https://img.shields.io/badge/platform-Windows_|_macOS_|_Linux-d0a36f.svg?style=for-the-badge)](#)
 </div>

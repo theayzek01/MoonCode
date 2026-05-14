@@ -1087,10 +1087,29 @@ export class TUI extends Container {
 			return;
 		}
 
-		// Content shrunk below the working area and no overlays - re-render to clear empty rows
-		// (overlays need the padding, so only do this when no overlays are active)
-		// Configurable via setClearOnShrink() or PI_CLEAR_ON_SHRINK=0 env var
+		// Content shrunk below the working area and no overlays - clear empty rows.
+		// Instead of a full redraw which pollutes scrollback, we just clear the extra lines.
 		if (this.clearOnShrink && newLines.length < this.maxLinesRendered && this.overlayStack.length === 0) {
+			const targetRow = Math.max(0, newLines.length - 1);
+			if (targetRow >= prevViewportTop) {
+				let buffer = "\x1b[?2026h";
+				const lineDiff = computeLineDiff(targetRow);
+				if (lineDiff > 0) buffer += `\x1b[${lineDiff}B`;
+				else if (lineDiff < 0) buffer += `\x1b[${-lineDiff}A`;
+				buffer += "\r\x1b[J"; // Clear from cursor to end of screen
+				buffer += "\x1b[?2026l";
+				this.terminal.write(buffer);
+				this.cursorRow = targetRow;
+				this.hardwareCursorRow = targetRow;
+				this.maxLinesRendered = newLines.length;
+				this.positionHardwareCursor(cursorPos, newLines.length);
+				this.previousLines = newLines;
+				this.previousWidth = width;
+				this.previousHeight = height;
+				this.previousViewportTop = prevViewportTop;
+				return;
+			}
+			// If target is above viewport, fallback to fullRender
 			logRedraw(`clearOnShrink (maxLinesRendered=${this.maxLinesRendered})`);
 			fullRender(true);
 			return;
@@ -1174,11 +1193,30 @@ export class TUI extends Container {
 		}
 
 		// Differential rendering can only touch what was actually visible.
-		// If the first changed line is above the previous viewport, we need a full redraw.
+		// If the first changed line is above the previous viewport, we can either:
+		// 1. Force a full redraw (which might push content to scrollback if clear=true)
+		// 2. Ignore the change if it's not visible and only render visible changes.
+		// We choose to ignore off-screen changes to avoid scrollback pollution from animations (like spinners).
 		if (firstChanged < prevViewportTop) {
-			logRedraw(`firstChanged < viewportTop (${firstChanged} < ${prevViewportTop})`);
-			fullRender(true);
-			return;
+			// Find the first change that IS within the viewport
+			let firstVisibleChange = -1;
+			for (let i = prevViewportTop; i < newLines.length; i++) {
+				if (newLines[i] !== (i < this.previousLines.length ? this.previousLines[i] : "")) {
+					firstVisibleChange = i;
+					break;
+				}
+			}
+
+			if (firstVisibleChange === -1) {
+				// No visible changes, but we might still need to update the hardware cursor
+				this.positionHardwareCursor(cursorPos, newLines.length);
+				this.previousLines = newLines;
+				this.previousWidth = width;
+				this.previousHeight = height;
+				this.previousViewportTop = prevViewportTop;
+				return;
+			}
+			firstChanged = firstVisibleChange;
 		}
 
 		// Render from first changed line to end
