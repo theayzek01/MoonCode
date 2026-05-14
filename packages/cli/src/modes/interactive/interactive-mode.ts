@@ -124,6 +124,7 @@ import { ToolExecutionComponent } from "./components/tool-execution.js";
 import { TreeSelectorComponent } from "./components/tree-selector.js";
 import { UserMessageComponent } from "./components/user-message.js";
 import { UserMessageSelectorComponent } from "./components/user-message-selector.js";
+import { WorkspacePanelComponent } from "./components/workspace-panel.js";
 import {
 	getAvailableThemes,
 	getAvailableThemesWithPaths,
@@ -242,6 +243,7 @@ export class InteractiveMode {
 	private editorContainer: Container;
 	private footer: FooterComponent;
 	private footerDataProvider: FooterDataProvider;
+	private workspacePanel: WorkspacePanelComponent;
 	// Stored so the same manager can be injected into custom editors, selectors, and extension UI.
 	private keybindings: KeybindingsManager;
 	private version: string;
@@ -387,6 +389,7 @@ export class InteractiveMode {
 		this.editorContainer.addChild(this.editor as Component);
 		this.footerDataProvider = new FooterDataProvider(this.sessionManager.getCwd());
 		this.footer = new FooterComponent(this.session, this.footerDataProvider);
+		this.workspacePanel = new WorkspacePanelComponent(this.session);
 		this.footer.setAutoCompactEnabled(this.session.autoCompactionEnabled);
 
 		// Load hide thinking block setting
@@ -578,8 +581,8 @@ export class InteractiveMode {
 		const [fdPath] = await Promise.all([ensureTool("fd"), ensureTool("rg")]);
 		this.fdPath = fdPath;
 
-		// Add header container as first child
-		this.ui.addChild(this.headerContainer);
+		// Add header container
+		// this.ui.addChild(this.headerContainer); // Removed from here, added before mainLayout
 
 		// Add header with keybindings from config (unless silenced)
 		if (this.options.verbose || !this.settingsManager.getQuietStartup()) {
@@ -629,9 +632,7 @@ export class InteractiveMode {
 			});
 
 			// Setup UI layout
-			this.headerContainer.addChild(new Spacer(1));
 			this.headerContainer.addChild(this.builtInHeader);
-			this.headerContainer.addChild(new Spacer(1));
 		} else {
 			// Minimal header when silenced
 			this.builtInHeader = new Text("", 0, 0);
@@ -640,11 +641,19 @@ export class InteractiveMode {
 
 		this.roadmap = new RoadmapComponent();
 
-		// Minimal single-column layout. The old roadmap/sidebar was unreliable and wasted space.
+		// Split workspace: main chat + soft live panel on the right.
 		const mainLayout = new Container();
-		mainLayout.addChild(this.chatContainer);
-		mainLayout.addChild(this.pendingMessagesContainer);
+		mainLayout.setStyle({ flexDirection: "row" });
+		const chatLayout = new Container();
+		chatLayout.addChild(this.chatContainer);
+		chatLayout.addChild(this.pendingMessagesContainer);
+		const sideLayout = new Container();
+		sideLayout.setStyle({ width: 28, minWidth: 24 });
+		sideLayout.addChild(this.workspacePanel);
+		mainLayout.addChild(chatLayout);
+		mainLayout.addChild(sideLayout);
 
+		this.ui.addChild(this.headerContainer);
 		this.ui.addChild(mainLayout);
 		this.ui.addChild(this.statusContainer);
 		this.renderWidgets(); // Initialize with default spacer
@@ -1563,6 +1572,7 @@ export class InteractiveMode {
 
 	private applyRuntimeSettings(): void {
 		this.footer.setSession(this.session);
+		this.workspacePanel.setSession(this.session);
 		this.footer.setAutoCompactEnabled(this.session.autoCompactionEnabled);
 		this.footerDataProvider.setCwd(this.sessionManager.getCwd());
 		this.hideThinkingBlock = this.settingsManager.getHideThinkingBlock();

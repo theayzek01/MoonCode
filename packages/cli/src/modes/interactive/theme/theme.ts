@@ -451,16 +451,13 @@ let BUILTIN_THEMES: Record<string, ThemeJson> | undefined;
 function getBuiltinThemes(): Record<string, ThemeJson> {
 	if (!BUILTIN_THEMES) {
 		const themesDir = getThemesDir();
-		const northLightPath = path.join(themesDir, "north-light.json");
-		const northDarkPath = path.join(themesDir, "north-dark.json");
-		const darkXPath = path.join(themesDir, "darkx.json");
-		const smootPath = path.join(themesDir, "smoot.json");
-		BUILTIN_THEMES = {
-			"North light": JSON.parse(fs.readFileSync(northLightPath, "utf-8")) as ThemeJson,
-			"North Dark": JSON.parse(fs.readFileSync(northDarkPath, "utf-8")) as ThemeJson,
-			DarkX: JSON.parse(fs.readFileSync(darkXPath, "utf-8")) as ThemeJson,
-			Smoot: JSON.parse(fs.readFileSync(smootPath, "utf-8")) as ThemeJson,
-		};
+		const builtinThemeFiles = ["rot-soft.json", "sea-dark.json", "moss-soft.json", "ash-soft.json"];
+		BUILTIN_THEMES = {};
+		for (const file of builtinThemeFiles) {
+			const themePath = path.join(themesDir, file);
+			const themeJson = JSON.parse(fs.readFileSync(themePath, "utf-8")) as ThemeJson;
+			BUILTIN_THEMES[themeJson.name] = themeJson;
+		}
 	}
 	return BUILTIN_THEMES;
 }
@@ -493,8 +490,12 @@ export function getAvailableThemesWithPaths(): ThemeInfo[] {
 	const result: ThemeInfo[] = [];
 
 	// Built-in themes
-	for (const name of Object.keys(getBuiltinThemes())) {
-		result.push({ name, path: path.join(themesDir, `${name}.json`) });
+	for (const [name, themeJson] of Object.entries(getBuiltinThemes())) {
+		const fileName = `${themeJson.name
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, "-")
+			.replace(/^-|-$/g, "")}.json`;
+		result.push({ name, path: path.join(themesDir, fileName) });
 	}
 
 	// Custom themes
@@ -711,10 +712,15 @@ export function initTheme(themeName?: string, enableWatcher: boolean = false): v
 			startThemeWatcher();
 		}
 	} catch (_error) {
-		// Theme is invalid - fall back to dark theme silently
-		currentThemeName = "dark";
-		setGlobalTheme(loadTheme("dark"));
-		// Don't start watcher for fallback theme
+		// Theme is invalid - fall back to first available builtin theme silently
+		const builtinThemes = getBuiltinThemes();
+		const fallbackName = Object.keys(builtinThemes)[0] || "Sea Dark";
+		currentThemeName = fallbackName;
+		try {
+			setGlobalTheme(loadTheme(fallbackName));
+		} catch {
+			// Extreme fallback
+		}
 	}
 }
 
@@ -731,10 +737,15 @@ export function setTheme(name: string, enableWatcher: boolean = false): { succes
 		}
 		return { success: true };
 	} catch (error) {
-		// Theme is invalid - fall back to dark theme
-		currentThemeName = "dark";
-		setGlobalTheme(loadTheme("dark"));
-		// Don't start watcher for fallback theme
+		// Theme is invalid - fall back to first available builtin theme
+		const builtinThemes = getBuiltinThemes();
+		const fallbackName = Object.keys(builtinThemes)[0] || "Sea Dark";
+		currentThemeName = fallbackName;
+		try {
+			setGlobalTheme(loadTheme(fallbackName));
+		} catch {
+			// Extreme fallback
+		}
 		return {
 			success: false,
 			error: error instanceof Error ? error.message : String(error),

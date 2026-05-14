@@ -119,19 +119,18 @@ export class FooterComponent implements Component {
 				: this.session.modelRegistry.isUsingOAuth(state.model)
 					? "sub"
 					: undefined,
-			`tools ${activeToolNames.length}`,
+			activeToolNames.length ? `tools ${activeToolNames.length}` : undefined,
 		]);
 
 		const left = theme.fg("muted", location || "workspace");
 		const right = joinMuted([
-			theme.fg("muted", truncateToWidth(model, Math.max(18, Math.floor(width * 0.32)), "…")),
+			theme.fg("muted", truncateToWidth(model, Math.max(14, Math.floor(width * 0.28)), "…")),
 			automation,
 			thinking,
 			coloredContext,
+			usage && width >= 92 ? usage : undefined,
 		]);
-		const divider = theme.fg("borderMuted", "─".repeat(Math.max(1, width)));
-		const lines = [divider, fitPair(left, right, width)];
-		if (usage && width >= 72) lines.push(theme.fg("dim", truncateToWidth(usage, width, "…")));
+		const lines = [fitPair(left, right, width)];
 
 		const extensionStatuses = this.footerData.getExtensionStatuses();
 		if (extensionStatuses.size > 0) {
@@ -140,6 +139,8 @@ export class FooterComponent implements Component {
 				.map(([, text]) => sanitizeStatusText(text))
 				.join("  ");
 			lines.push(truncateToWidth(theme.fg("dim", statusLine), width, theme.fg("dim", "...")));
+		} else if (usage && width < 92 && width >= 64) {
+			lines.push(theme.fg("dim", truncateToWidth(usage, width, "…")));
 		}
 
 		return lines;

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Box, Container, Markdown, type MarkdownTheme } from "moon-tui";
+import { Box, Container, Markdown, type MarkdownTheme, Text } from "moon-tui";
 import { getMarkdownTheme, theme } from "../theme/theme.js";
 
 const OSC133_ZONE_START = "\x1b]133;A\x07";
@@ -14,7 +14,8 @@ export class UserMessageComponent extends Container {
 
 	constructor(text: string, markdownTheme: MarkdownTheme = getMarkdownTheme()) {
 		super();
-		this.contentBox = new Box(2, 0, (content: string) => theme.bg("userMessageBg", content));
+		this.contentBox = new Box(2, 1, (content: string) => theme.bg("userMessageBg", content));
+		this.contentBox.addChild(new Text(`${theme.fg("accent", "you")} ${theme.fg("dim", "›")}`, 0, 0));
 		this.contentBox.addChild(
 			new Markdown(text, 0, 0, markdownTheme, {
 				color: (content: string) => theme.fg("userMessageText", content),

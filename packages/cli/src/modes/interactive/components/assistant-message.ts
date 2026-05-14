@@ -78,9 +78,9 @@ export class AssistantMessageComponent extends Container {
 			(c) => (c.type === "text" && c.text.trim()) || (c.type === "thinking" && c.thinking.trim()),
 		);
 
-		// Initialize spacer if needed
+		// Initialize label if needed
 		if (hasVisibleContent && this.contentContainer.children.length === 0) {
-			this.contentContainer.addChild(new Spacer(1));
+			this.contentContainer.addChild(new Text(`${theme.fg("accent", "moon")} ${theme.fg("dim", "›")}`, 1, 0));
 		}
 
 		// Keep track of which content blocks we've rendered

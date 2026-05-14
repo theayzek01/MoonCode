@@ -73,7 +73,12 @@ function resolveThoughtSignature(isSameProviderAndModel: boolean, signature: str
  * Models via Google APIs that require explicit tool call IDs in function calls/responses.
  */
 export function requiresToolCallId(modelId: string): boolean {
-	return modelId.startsWith("claude-") || modelId.startsWith("gpt-oss-");
+	return (
+		modelId.startsWith("claude-") ||
+		modelId.startsWith("gpt-oss-") ||
+		modelId.startsWith("antigravity-claude-") ||
+		modelId.startsWith("antigravity-gpt-")
+	);
 }
 
 function getGeminiMajorVersion(modelId: string): number | undefined {
@@ -255,17 +260,58 @@ const JSON_SCHEMA_META_DECLARATIONS = new Set([
 	"definitions", // pre-draft-2019-09 equivalent of $defs
 ]);
 
+const JSON_SCHEMA_UNSUPPORTED_KEYWORDS = new Set([
+	"const",
+	"anyOf",
+	"oneOf",
+	"allOf",
+	"not",
+	"if",
+	"then",
+	"else",
+	"dependentSchemas",
+	"dependentRequired",
+]);
+
 /**
- * Strip meta-declarations from a schema obj
+ * Strip meta-declarations and unsupported keywords from a schema obj for legacy parameters.
+ * Converts const to enum, and anyOf/oneOf to the first option (best effort).
  */
 function sanitizeForOpenApi(schema: unknown): unknown {
-	if (typeof schema !== "object" || schema === null || Array.isArray(schema)) {
+	if (typeof schema !== "object" || schema === null) {
 		return schema;
 	}
 
+	if (Array.isArray(schema)) {
+		return schema.map(sanitizeForOpenApi);
+	}
+
 	const result: Record<string, unknown> = {};
-	for (const [key, value] of Object.entries(schema)) {
+	const obj = schema as Record<string, unknown>;
+
+	// Handle anyOf/oneOf/allOf by taking the first schema (best effort for legacy)
+	if (Array.isArray(obj.anyOf) && obj.anyOf.length > 0) {
+		return sanitizeForOpenApi(obj.anyOf[0]);
+	}
+	if (Array.isArray(obj.oneOf) && obj.oneOf.length > 0) {
+		return sanitizeForOpenApi(obj.oneOf[0]);
+	}
+	if (Array.isArray(obj.allOf) && obj.allOf.length > 0) {
+		// Merge logic would be better but first-one is safer for simple schemas
+		return sanitizeForOpenApi(obj.allOf[0]);
+	}
+
+	for (const [key, value] of Object.entries(obj)) {
 		if (JSON_SCHEMA_META_DECLARATIONS.has(key)) continue;
+
+		// Convert const to enum: [value]
+		if (key === "const") {
+			result.enum = [value];
+			continue;
+		}
+
+		if (JSON_SCHEMA_UNSUPPORTED_KEYWORDS.has(key)) continue;
+
 		result[key] = sanitizeForOpenApi(value);
 	}
 	return result;
@@ -286,13 +332,24 @@ export function convertTools(
 	if (tools.length === 0) return undefined;
 	return [
 		{
-			functionDeclarations: tools.map((tool) => ({
-				name: tool.name,
-				description: tool.description,
-				...(useParameters
-					? { parameters: sanitizeForOpenApi(tool.parameters as unknown) }
-					: { parametersJsonSchema: tool.parameters }),
-			})),
+			functionDeclarations: tools.map((tool) => {
+				const decl: any = {
+					name: tool.name,
+					description: tool.description,
+				};
+				if (useParameters) {
+					// Use the legacy `parameters` field (OpenAPI 3.0.3)
+					decl.parameters = sanitizeForOpenApi(tool.parameters as unknown);
+					// Important: Ensure it has a non-empty `input_schema` equivalent structure.
+					// Cloud Code Assist API for Claude requires tool parameters to be an object.
+					if (decl.parameters && typeof decl.parameters === "object" && !decl.parameters.type) {
+						decl.parameters.type = "object";
+					}
+				} else {
+					decl.parametersJsonSchema = tool.parameters;
+				}
+				return decl;
+			}),
 		},
 	];
 }
