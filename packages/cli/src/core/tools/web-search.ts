@@ -56,7 +56,7 @@ export function createWebSearchToolDefinition(): ToolDefinition<
 			if (signal?.aborted) throw new Error("Operation aborted");
 
 			try {
-				const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+				const url = `https://duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
 				const response = await fetch(url, {
 					headers: {
 						"User-Agent":
@@ -78,9 +78,9 @@ export function createWebSearchToolDefinition(): ToolDefinition<
 
 				while (match !== null && results.length < 8) {
 					const body = match[1];
-					const titleMatch = /<a class="result__a"[\s\S]*?>([\s\S]*?)<\/a>/.exec(body);
-					const snippetMatch = /<a class="result__snippet"[\s\S]*?>([\s\S]*?)<\/a>/.exec(body);
-					const urlMatch = /<a class="result__url"[\s\S]*?>([\s\S]*?)<\/a>/.exec(body);
+					const titleMatch = /<a[^>]*class="result__a"[^>]*>([\s\S]*?)<\/a>/.exec(body);
+					const snippetMatch = /<a[^>]*class="result__snippet"[^>]*>([\s\S]*?)<\/a>/.exec(body);
+					const urlMatch = /<a[^>]*class="result__url"[^>]*>([\s\S]*?)<\/a>/.exec(body);
 
 					if (titleMatch && snippetMatch) {
 						const title = titleMatch[1].replace(/<[^>]*>?/gm, "").trim();
