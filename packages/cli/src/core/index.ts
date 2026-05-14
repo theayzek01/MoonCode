@@ -6,6 +6,15 @@
 export { type BashExecutorOptions, type BashResult, executeBashWithOperations } from "./bash-executor.js";
 export type { CompactionResult } from "./compaction/index.js";
 export {
+	buildDesignPrompt,
+	DESIGN_DIRECTIONS,
+	type DesignDirection,
+	type DesignSystemSummary,
+	listDesignSystems,
+	pickDesignDirection,
+	readDesignSystem,
+} from "./design-system/index.js";
+export {
 	EngineSession,
 	type EngineSessionConfig,
 	type EngineSessionEvent,

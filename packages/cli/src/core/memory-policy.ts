@@ -75,11 +75,19 @@ export function loadMemorySignals(): MemorySignal[] {
 
 function dedupeSignals(signals: MemorySignal[]): MemorySignal[] {
 	const seen = new Map<string, MemorySignal>();
+	const now = Date.now();
+	const DECAY_DAYS = 30; // Signals older than 30 days lose weight
+
 	for (const s of signals) {
+		// Age-based decay: reduce weight by 1 for each DECAY_DAYS period
+		const ageMs = now - new Date(s.timestamp).getTime();
+		const agePeriods = Math.floor(ageMs / (DECAY_DAYS * 24 * 60 * 60 * 1000));
+		const decayedWeight = Math.max(1, (s.weight ?? 5) - agePeriods);
+
 		const key = `${s.tag}:${s.text.slice(0, 80).trim().toLowerCase()}`;
 		const existing = seen.get(key);
 		if (!existing) {
-			seen.set(key, s);
+			seen.set(key, { ...s, weight: decayedWeight });
 		} else {
 			const existingWeight = existing.weight ?? 5;
 			seen.set(key, {
@@ -89,7 +97,8 @@ function dedupeSignals(signals: MemorySignal[]): MemorySignal[] {
 			});
 		}
 	}
-	return Array.from(seen.values());
+	// Remove signals that decayed below threshold
+	return Array.from(seen.values()).filter((s) => (s.weight ?? 5) >= 1);
 }
 
 /**

@@ -12,8 +12,12 @@ const HTML_COMMENTS = /<!--[\s\S]*?-->/g;
 // Satır sonu noktalamasını normalize et
 const REDUNDANT_PUNCTUATION = /([.!?]){3,}/g;
 const ANSI_ESCAPE = /\x1b\[[0-?]*[ -/]*[@-~]/g;
+// Also strip OSC sequences (terminal title, hyperlinks, etc.)
+const OSC_ESCAPE = /\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)/g;
 const STACK_TRACE_LINE = /^\s*at\s+.+(?:\(|file:|[A-Za-z]:\\|\/).*/;
 const JSONISH_BLOCK = /^\s*[[{][\s\S]*[\]}]\s*$/;
+// Repeated log lines (e.g. "[INFO] processing file X" × 100)
+const REPEATED_LOG_LINE_THRESHOLD = 5;
 // Note: TOOL_OUTPUT_BLOCK is created fresh per call (global regex with lastIndex would cause bugs across repeated calls)
 
 // Trim long tool output blocks — head/tail strategy
@@ -71,12 +75,14 @@ export function optimizePromptText(text: string): TokenOptimizeResult {
 		.replace(/\r\n/g, "\n")
 		.replace(HTML_COMMENTS, "")
 		.replace(ANSI_ESCAPE, "")
+		.replace(OSC_ESCAPE, "")
 		.replace(TRAILING_WHITESPACE, "")
 		.replace(REPEATED_WHITESPACE, " ")
 		.replace(REPEATED_BLANK_LINES, "\n\n")
 		.replace(REDUNDANT_PUNCTUATION, (_, p) => p);
 
 	normalized = trimStackTraces(normalized);
+	normalized = deduplicateLogLines(normalized);
 
 	// Tool output bloklarini kirp (fresh regex per call - global stateful regex'te lastIndex bug'i)
 	const toolBlockRe = /```(?:json|bash|shell|text|plain|output|log)?\n([\s\S]*?)```/g;
@@ -122,4 +128,61 @@ export function optimizeForLocalModel(text: string, maxChars = 6000): TokenOptim
 		wasOptimized: true,
 		reductionChars: Math.max(0, text.length - trimmed.length),
 	};
+}
+
+/**
+ * Deduplicate repeated log/output lines.
+ * If the same pattern appears more than THRESHOLD times consecutively,
+ * collapse into first + count + last.
+ */
+function deduplicateLogLines(text: string): string {
+	const lines = text.split("\n");
+	if (lines.length < REPEATED_LOG_LINE_THRESHOLD * 2) return text;
+
+	const result: string[] = [];
+	let prevPattern = "";
+	let repeatCount = 0;
+	let firstLine = "";
+	let lastLine = "";
+
+	for (const line of lines) {
+		// Normalize numbers/hashes/timestamps to detect patterns
+		const pattern = line
+			.replace(/\d{2,}/g, "N")
+			.replace(/[0-9a-f]{8,}/gi, "H")
+			.trim();
+
+		if (pattern === prevPattern && pattern.length > 5) {
+			repeatCount++;
+			lastLine = line;
+		} else {
+			if (repeatCount >= REPEATED_LOG_LINE_THRESHOLD) {
+				result.push(firstLine);
+				result.push(`  ...[${repeatCount - 1} similar lines]...`);
+				if (lastLine !== firstLine) result.push(lastLine);
+			} else {
+				// Flush accumulated lines
+				for (let i = 0; i < repeatCount; i++) {
+					result.push(lastLine || firstLine);
+				}
+			}
+			prevPattern = pattern;
+			repeatCount = 1;
+			firstLine = line;
+			lastLine = line;
+		}
+	}
+
+	// Flush remaining
+	if (repeatCount >= REPEATED_LOG_LINE_THRESHOLD) {
+		result.push(firstLine);
+		result.push(`  ...[${repeatCount - 1} similar lines]...`);
+		if (lastLine !== firstLine) result.push(lastLine);
+	} else {
+		for (let i = 0; i < repeatCount; i++) {
+			result.push(lastLine || firstLine);
+		}
+	}
+
+	return result.join("\n");
 }

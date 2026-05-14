@@ -57,13 +57,25 @@ export function createWebSearchToolDefinition(): ToolDefinition<
 
 			try {
 				const url = `https://duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
-				const response = await fetch(url, {
-					headers: {
-						"User-Agent":
-							"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-					},
-					signal,
-				});
+				// Timeout guard: abort fetch after 15s even if no parent signal
+				const timeoutMs = 15_000;
+				const controller = new AbortController();
+				const timer = setTimeout(() => controller.abort(), timeoutMs);
+				if (signal) {
+					signal.addEventListener("abort", () => controller.abort(), { once: true });
+				}
+				let response: Response;
+				try {
+					response = await fetch(url, {
+						headers: {
+							"User-Agent":
+								"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+						},
+						signal: controller.signal,
+					});
+				} finally {
+					clearTimeout(timer);
+				}
 
 				if (!response.ok) {
 					throw new Error(`Search failed with status ${response.status}`);

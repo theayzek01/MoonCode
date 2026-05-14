@@ -323,7 +323,7 @@ export class TUI extends Container {
 	private cursorRow = 0; // Logical cursor row (end of rendered content)
 	private hardwareCursorRow = 0; // Actual terminal cursor row (may differ due to IME positioning)
 	private showHardwareCursor = process.env.PI_HARDWARE_CURSOR === "1";
-	private clearOnShrink = process.env.PI_CLEAR_ON_SHRINK === "1"; // Clear empty rows when content shrinks (default: off)
+	private clearOnShrink = process.env.PI_CLEAR_ON_SHRINK !== "0"; // Clear empty rows when content shrinks (default: ON to prevent ghost frames)
 	private clearScrollbackOnFullRedraw = process.env.MOON_TUI_CLEAR_SCROLLBACK === "1";
 	private maxLinesRendered = 0; // Track terminal's working area (max lines ever rendered)
 	private previousViewportTop = 0; // Track previous viewport top for resize-aware cursor moves
@@ -1226,7 +1226,8 @@ export class TUI extends Container {
 		// Track where cursor ended up after rendering
 		let finalCursorRow = renderEnd;
 
-		// If we had more lines before, clear them and move cursor back
+		// Clear any remaining lines between renderEnd and previous content end
+		// This prevents ghost/duplicate frames when content shrinks or shifts
 		if (this.previousLines.length > newLines.length) {
 			// Move to end of new content first if we stopped before it
 			if (renderEnd < newLines.length - 1) {
@@ -1239,7 +1240,27 @@ export class TUI extends Container {
 				buffer += "\r\n\x1b[2K";
 			}
 			// Move cursor back to end of new content
-			buffer += `\x1b[${extraLines}A`;
+			if (extraLines > 0) {
+				buffer += `\x1b[${extraLines}A`;
+			}
+		} else if (renderEnd < newLines.length - 1 && lastChanged < newLines.length - 1) {
+			// Content didn't shrink but we only rendered up to lastChanged.
+			// Verify the remaining lines below renderEnd match previous.
+			// If not, extend render to cover them (prevents stale ghost lines)
+			let needsMore = false;
+			for (let i = renderEnd + 1; i < newLines.length; i++) {
+				if (i >= this.previousLines.length || newLines[i] !== this.previousLines[i]) {
+					needsMore = true;
+					break;
+				}
+			}
+			if (needsMore) {
+				for (let i = renderEnd + 1; i < newLines.length; i++) {
+					buffer += "\r\n\x1b[2K";
+					buffer += newLines[i];
+				}
+				finalCursorRow = newLines.length - 1;
+			}
 		}
 
 		buffer += "\x1b[?2026l"; // End synchronized output
@@ -1281,8 +1302,12 @@ export class TUI extends Container {
 		// hardwareCursorRow tracks actual terminal cursor position (for movement)
 		this.cursorRow = Math.max(0, newLines.length - 1);
 		this.hardwareCursorRow = finalCursorRow;
-		// Track terminal's working area (grows but doesn't shrink unless cleared)
-		this.maxLinesRendered = Math.max(this.maxLinesRendered, newLines.length);
+		// Track terminal's working area — reset when content shrinks to prevent ghost accumulation
+		if (newLines.length < this.maxLinesRendered && this.overlayStack.length === 0) {
+			this.maxLinesRendered = newLines.length;
+		} else {
+			this.maxLinesRendered = Math.max(this.maxLinesRendered, newLines.length);
+		}
 		this.previousViewportTop = Math.max(prevViewportTop, finalCursorRow - height + 1);
 
 		// Position hardware cursor for IME

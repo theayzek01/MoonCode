@@ -4,6 +4,7 @@
  */
 
 import { buildCodingAgentsPrompt, type CodingAgentsSettings } from "./agents.js";
+import { buildDesignPrompt } from "./design-system/index.js";
 import { formatSkillsForPrompt, type Skill } from "./skills.js";
 
 export interface RoboticsFunction {
@@ -37,6 +38,8 @@ export interface BuildSystemPromptOptions {
 	roboticsEnabled?: boolean;
 	/** Defined robot functions */
 	roboticsFunctions?: RoboticsFunction[];
+	/** Enable design system context injection */
+	designMode?: boolean;
 	/**
 	 * Local/Ollama model modu: sistem promptu ~%50 kisalt.
 	 * Kucuk context window'lu modeller icin kritik.
@@ -60,6 +63,7 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 		roboticsFunctions,
 		agents,
 		compactMode,
+		designMode,
 	} = options;
 
 	// Local/Ollama model icin ultra kisa prompt - context window tasarrufu
@@ -226,6 +230,11 @@ ${guidelinesList.map((g) => `- ${g}`).join("\n")}`;
 	prompt += `\nCurrent date: ${date}`;
 	prompt += `\nCurrent time: ${time}`;
 	prompt += `\nCurrent working directory: ${promptCwd}`;
+
+	// Design system context inject
+	if (designMode) {
+		prompt += buildDesignPrompt({ projectRoot: resolvedCwd });
+	}
 
 	// Robotics mode inject
 	if (roboticsEnabled) {

@@ -53,7 +53,6 @@ import {
 	getDebugLogPath,
 	getDocsPath,
 	getEngineDir,
-	getModelsPath,
 	getPackageDir,
 	getShareViewerUrl,
 	VERSION,
@@ -2631,9 +2630,10 @@ export class InteractiveMode {
 				return;
 			}
 			if (text === "/impmodel" || text.startsWith("/impmodel ")) {
+				// Redirect to /ollama pull <model>
 				const args = text.startsWith("/impmodel ") ? text.slice(10).trim() : "";
 				this.editor.setText("");
-				await this.handleImpModelCommand(args);
+				await this.handleOllamaSlashCommand(args ? `pull ${args}` : "models");
 				return;
 			}
 			if (text === "/index" || text.startsWith("/index ")) {
@@ -5793,53 +5793,6 @@ export class InteractiveMode {
 			this.showStatus(marketplace.formatRegistryEntries(marketplace.searchRegistry(entries, query), 12));
 		} catch (err: any) {
 			this.showError(`Marketplace hata: ${err.message}`);
-		}
-	}
-
-	private async handleImpModelCommand(args: string): Promise<void> {
-		if (!args) {
-			this.showStatus("Kullanım: /impmodel <model_adı>");
-			return;
-		}
-
-		const modelId = args.trim();
-		const modelsPath = getModelsPath();
-
-		try {
-			let config: any = { providers: {} };
-			if (fs.existsSync(modelsPath)) {
-				config = JSON.parse(fs.readFileSync(modelsPath, "utf8"));
-			}
-
-			if (!config.providers.ollama) {
-				config.providers.ollama = {
-					models: [],
-				};
-			}
-
-			if (!config.providers.ollama.models) {
-				config.providers.ollama.models = [];
-			}
-
-			const exists = config.providers.ollama.models.some((m: any) => m.id === modelId);
-			if (exists) {
-				this.showStatus(`Model "${modelId}" zaten ekli.`);
-				return;
-			}
-
-			config.providers.ollama.models.push({
-				id: modelId,
-				name: modelId,
-				api: "openai-completions",
-				baseUrl: "http://localhost:11434/v1",
-			});
-
-			fs.writeFileSync(modelsPath, JSON.stringify(config, null, 2));
-			this.showStatus(`Model "${modelId}" ollama saglayicisina eklendi.`);
-			this.showStatus("Degisikliklerin uygulanmasi icin oturum yenileniyor...");
-			await this.handleReloadCommand();
-		} catch (err: any) {
-			this.showError(`Model eklenirken hata olustu: ${err.message}`);
 		}
 	}
 

@@ -111,7 +111,11 @@ export class FooterComponent implements Component {
 		const browserStatus = this.session.getBrowserBridgeStatus();
 		const browserIndicator = browserStatus.clients > 0 ? theme.fg("success", "🌐 browser") : undefined;
 
+		// Design mode auto-detect indicator
+		const designIndicator = this.session.isDesignModeActive?.() ? theme.fg("accent", "🎨 design") : undefined;
+
 		const usage = joinMuted([
+			designIndicator,
 			browserIndicator,
 			totalInput || totalOutput ? `tok ${formatTokens(totalInput)}/${formatTokens(totalOutput)}` : undefined,
 			totalCost

@@ -29,8 +29,8 @@ export class GhostEnvironment {
 			// Check if docker is available
 			await execFileAsync("docker", ["--version"]);
 
-			const containerName = `mooncode-ghost-${imageName.replace(/[^a-zA-Z0-9]/g, "")}-${Date.now()}`;
-			const args = ["run", "-d", "--rm", "--name", containerName];
+			const containerName = `mooncode-ghost-${imageName.replace(/[^a-zA-Z0-9-]/g, "")}-${Date.now()}`;
+			const args = ["run", "-d", "--rm", "--name", containerName, "--memory=512m", "--cpus=1"];
 			for (const port of ports) {
 				args.push("-p", port);
 			}
@@ -53,6 +53,10 @@ export class GhostEnvironment {
 	 * Executes a script inside the ghost container to verify it works.
 	 */
 	public async executeInContainer(containerId: string, command: string): Promise<string> {
+		// Validate containerId to prevent injection
+		if (!/^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/.test(containerId) && !containerId.startsWith(LOCAL_FALLBACK_PREFIX)) {
+			throw new Error(`Invalid container ID: ${containerId}`);
+		}
 		try {
 			if (containerId.startsWith(LOCAL_FALLBACK_PREFIX)) {
 				const { stdout } = await execAsync(command);

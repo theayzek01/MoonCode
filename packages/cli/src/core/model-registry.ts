@@ -634,14 +634,18 @@ export class ModelRegistry {
 	hasConfiguredAuth(model: Model<Api>): boolean {
 		if (model.provider === "ollama") return true;
 
-		// If provider has OAuth support, it's "available" for login/selection
-		const isOAuthProvider = this.authStorage.getOAuthProviders().some((p) => p.id === model.provider);
-		if (isOAuthProvider) return true;
+		// Check for actual API key or active auth - don't show models
+		// for providers the user hasn't configured/logged into
+		const hasStoredAuth = this.authStorage.hasAuth(model.provider);
+		const hasApiKey = this.providerRequestConfigs.get(model.provider)?.apiKey !== undefined;
 
-		return (
-			this.authStorage.hasAuth(model.provider) ||
-			this.providerRequestConfigs.get(model.provider)?.apiKey !== undefined
-		);
+		// OAuth provider: only show if user has actually logged in (has stored auth)
+		const isOAuthProvider = this.authStorage.getOAuthProviders().some((p) => p.id === model.provider);
+		if (isOAuthProvider) {
+			return hasStoredAuth;
+		}
+
+		return hasStoredAuth || hasApiKey;
 	}
 
 	private getModelRequestKey(provider: string, modelId: string): string {

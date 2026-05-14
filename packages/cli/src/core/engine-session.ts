@@ -339,6 +339,11 @@ export class EngineSession {
 	private _toolPromptSnippets: Map<string, string> = new Map();
 	private _toolPromptGuidelines: Map<string, string[]> = new Map();
 
+	// Anti-loop: track consecutive identical tool calls
+	private _lastToolSignature: string = "";
+	private _consecutiveIdenticalToolCalls: number = 0;
+	private static readonly MAX_CONSECUTIVE_IDENTICAL_TOOL_CALLS = 5;
+
 	// Base system prompt (without extension appends) - used to apply fresh appends each turn
 	private _baseSystemPrompt = "";
 	private _baseSystemPromptOptions!: BuildSystemPromptOptions;
@@ -537,6 +542,9 @@ export class EngineSession {
 		// This ensures the UI sees the updated queue state
 		if (event.type === "message_start" && event.message.role === "user") {
 			this._overflowRecoveryAttempted = false;
+			// Reset anti-loop counter on new user message
+			this._lastToolSignature = "";
+			this._consecutiveIdenticalToolCalls = 0;
 			const messageText = this._getUserMessageText(event.message);
 			if (messageText) {
 				// Check steering queue first
@@ -714,6 +722,28 @@ export class EngineSession {
 				this._replaceMessageInPlace(event.message, replacement);
 			}
 		} else if (event.type === "tool_execution_start") {
+			// Anti-loop: detect consecutive identical tool calls
+			const sig = `${event.toolName}:${JSON.stringify(event.args ?? {})}`;
+			if (sig === this._lastToolSignature) {
+				this._consecutiveIdenticalToolCalls++;
+				if (this._consecutiveIdenticalToolCalls >= EngineSession.MAX_CONSECUTIVE_IDENTICAL_TOOL_CALLS) {
+					// Emit warning and break the loop
+					const warnMsg = `[Loop detected] Same tool call repeated ${this._consecutiveIdenticalToolCalls} times: ${event.toolName}. Breaking loop.`;
+					this._consecutiveIdenticalToolCalls = 0;
+					this._lastToolSignature = "";
+					for (const listener of this._eventListeners) {
+						await listener({ type: "engine_end", reason: "error", error: new Error(warnMsg) });
+					}
+					if (this.engine.state.isStreaming) {
+						this.engine.cancel();
+					}
+					return;
+				}
+			} else {
+				this._lastToolSignature = sig;
+				this._consecutiveIdenticalToolCalls = 1;
+			}
+
 			const extensionEvent: ToolExecutionStartEvent = {
 				type: "tool_execution_start",
 				toolCallId: event.toolCallId,
@@ -837,6 +867,13 @@ export class EngineSession {
 
 	getBrowserBridgeStatus() {
 		return getBrowserBridgeStatus();
+	}
+
+	/**
+	 * Check if design mode is auto-detected and active.
+	 */
+	isDesignModeActive(): boolean {
+		return this._baseSystemPromptOptions?.designMode === true;
 	}
 
 	/**
@@ -1005,6 +1042,10 @@ export class EngineSession {
 			currentModel?.provider === "ollama" ||
 			(currentModel?.provider === "openai" && process.env.MOON_COMPACT_PROMPT === "true");
 
+		// Design mode: auto-detect based on project context
+		// Checks for design-systems/ dir or DESIGN.md in project
+		const designMode = this._detectDesignMode();
+
 		this._baseSystemPromptOptions = {
 			cwd: this._cwd,
 			skills: loadedSkills,
@@ -1019,8 +1060,25 @@ export class EngineSession {
 			roboticsEnabled,
 			roboticsFunctions,
 			compactMode: isLocalModel,
+			designMode,
 		};
 		return buildSystemPrompt(this._baseSystemPromptOptions);
+	}
+
+	/**
+	 * Auto-detect design mode by checking if project has design-systems/
+	 * directory or DESIGN.md file.
+	 */
+	private _detectDesignMode(): boolean {
+		try {
+			const { existsSync } = require("node:fs");
+			const { join } = require("node:path");
+			if (existsSync(join(this._cwd, "design-systems"))) return true;
+			if (existsSync(join(this._cwd, "DESIGN.md"))) return true;
+			return false;
+		} catch {
+			return false;
+		}
 	}
 
 	// =========================================================================
