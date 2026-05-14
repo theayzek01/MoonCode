@@ -60,9 +60,19 @@ const browserPageSchema = Type.Object({
 	script: Type.Optional(Type.String({ description: "JavaScript expression for evaluate action" })),
 	maxChars: Type.Optional(Type.Number({ description: "Maximum characters for read action" })),
 	direction: Type.Optional(
-		Type.Union([Type.Literal("up"), Type.Literal("down"), Type.Literal("top"), Type.Literal("bottom")], {
-			description: "Direction for scroll action",
-		}),
+		Type.Union(
+			[
+				Type.Literal("up"),
+				Type.Literal("down"),
+				Type.Literal("left"),
+				Type.Literal("right"),
+				Type.Literal("top"),
+				Type.Literal("bottom"),
+			],
+			{
+				description: "Direction for scroll action",
+			},
+		),
 	),
 	amount: Type.Optional(Type.Number({ description: "Pixels to scroll" })),
 	ms: Type.Optional(Type.Number({ description: "Milliseconds to wait (max 15000)" })),
@@ -138,7 +148,7 @@ export function createBrowserPageToolDefinition(): ToolDefinition<typeof browser
 			"Use browser_page upload_file with a local absolute filePath when a site needs a file picker/input.",
 			"Use browser_page drag with selector and targetSelector for drag/drop interactions.",
 			"Prefer small maxChars/maxElements values to reduce token usage; only request more when needed.",
-			"Use browser_page scroll to navigate through long pages.",
+			"Use browser_page scroll to navigate through long pages; it targets the nearest scrollable area around the viewport center when possible.",
 			"Use browser_page press_key with key=Enter/Tab/Escape and optional modifiers=[ctrl,shift].",
 			"Use browser_page wait to pause between actions (ms, max 15000).",
 			"Use browser_page console_logs to debug JavaScript errors or see page logs.",

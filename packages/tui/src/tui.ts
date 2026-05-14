@@ -113,6 +113,16 @@ function isTermuxSession(): boolean {
 	return Boolean(process.env.TERMUX_VERSION);
 }
 
+function resolveMinRenderIntervalMs(): number {
+	const configured = Number(process.env.MOON_TUI_RENDER_INTERVAL_MS ?? process.env.PI_TUI_RENDER_INTERVAL_MS);
+	if (Number.isFinite(configured) && configured >= 0) {
+		return Math.min(configured, 250);
+	}
+	// Windows conhost/cmd is noticeably slower at processing dense ANSI diffs.
+	// A 30 FPS cap keeps input responsive without making modern terminals feel slow.
+	return process.platform === "win32" && process.stdout.isTTY ? 33 : 16;
+}
+
 /**
  * Options for overlay positioning and sizing.
  * Values can be absolute numbers or percentage strings (e.g., "50%").
@@ -309,11 +319,12 @@ export class TUI extends Container {
 	private renderRequested = false;
 	private renderTimer: NodeJS.Timeout | undefined;
 	private lastRenderAt = 0;
-	private static readonly MIN_RENDER_INTERVAL_MS = 16;
+	private readonly minRenderIntervalMs = resolveMinRenderIntervalMs();
 	private cursorRow = 0; // Logical cursor row (end of rendered content)
 	private hardwareCursorRow = 0; // Actual terminal cursor row (may differ due to IME positioning)
 	private showHardwareCursor = process.env.PI_HARDWARE_CURSOR === "1";
 	private clearOnShrink = process.env.PI_CLEAR_ON_SHRINK === "1"; // Clear empty rows when content shrinks (default: off)
+	private clearScrollbackOnFullRedraw = process.env.MOON_TUI_CLEAR_SCROLLBACK === "1";
 	private maxLinesRendered = 0; // Track terminal's working area (max lines ever rendered)
 	private previousViewportTop = 0; // Track previous viewport top for resize-aware cursor moves
 	private fullRedrawCount = 0;
@@ -585,7 +596,7 @@ export class TUI extends Container {
 			return;
 		}
 		const elapsed = performance.now() - this.lastRenderAt;
-		const delay = Math.max(0, TUI.MIN_RENDER_INTERVAL_MS - elapsed);
+		const delay = Math.max(0, this.minRenderIntervalMs - elapsed);
 		this.renderTimer = setTimeout(() => {
 			this.renderTimer = undefined;
 			if (this.stopped || !this.renderRequested) {
@@ -888,6 +899,24 @@ export class TUI extends Container {
 		return lines;
 	}
 
+	private clampLinesToWidth(lines: string[], width: number): string[] {
+		if (width <= 0) return lines;
+		const reset = TUI.SEGMENT_RESET;
+		for (let i = 0; i < lines.length; i++) {
+			const line = lines[i];
+			if (isImageLine(line) || visibleWidth(line) <= width) continue;
+
+			// Final production safety net: custom components should truncate, but a
+			// one-column overflow must never crash an active coding session.
+			let clipped = sliceByColumn(line, 0, width, true) + reset;
+			if (visibleWidth(clipped) > width) {
+				clipped = sliceByColumn(clipped, 0, width, true) + reset;
+			}
+			lines[i] = clipped;
+		}
+		return lines;
+	}
+
 	/** Splice overlay content into a base line at a specific column. Single-pass optimized. */
 	private compositeLineAt(
 		baseLine: string,
@@ -994,13 +1023,17 @@ export class TUI extends Container {
 		// Extract cursor position before applying line resets (marker must be found first)
 		const cursorPos = this.extractCursorPosition(newLines, height);
 
-		newLines = this.applyLineResets(newLines);
+		newLines = this.clampLinesToWidth(this.applyLineResets(newLines), width);
 
 		// Helper to clear scrollback and viewport and render all new lines
 		const fullRender = (clear: boolean): void => {
 			this.fullRedrawCount += 1;
 			let buffer = "\x1b[?2026h"; // Begin synchronized output
-			if (clear) buffer += "\x1b[2J\x1b[H\x1b[3J"; // Clear screen, home, then clear scrollback
+			if (clear) {
+				// Do not clear terminal scrollback by default. Clearing scrollback makes some
+				// terminals jump to the top while output is still streaming/coding.
+				buffer += this.clearScrollbackOnFullRedraw ? "\x1b[2J\x1b[H\x1b[3J" : "\x1b[2J\x1b[H";
+			}
 			for (let i = 0; i < newLines.length; i++) {
 				if (i > 0) buffer += "\r\n";
 				buffer += newLines[i];
@@ -1182,35 +1215,10 @@ export class TUI extends Container {
 		for (let i = firstChanged; i <= renderEnd; i++) {
 			if (i > firstChanged) buffer += "\r\n";
 			buffer += "\x1b[2K"; // Clear current line
-			const line = newLines[i];
-			const isImage = isImageLine(line);
-			if (!isImage && visibleWidth(line) > width) {
-				// Log all lines to crash file for debugging
-				const crashLogPath = path.join(os.homedir(), ".Mooncli", "engine", "Mooncli-crash.log");
-				const crashData = [
-					`Crash at ${new Date().toISOString()}`,
-					`Terminal width: ${width}`,
-					`Line ${i} visible width: ${visibleWidth(line)}`,
-					"",
-					"=== All rendered lines ===",
-					...newLines.map((l, idx) => `[${idx}] (w=${visibleWidth(l)}) ${l}`),
-					"",
-				].join("\n");
-				fs.mkdirSync(path.dirname(crashLogPath), { recursive: true });
-				fs.writeFileSync(crashLogPath, crashData);
-
-				// Clean up terminal state before throwing
-				this.stop();
-
-				const errorMsg = [
-					`Rendered line ${i} exceeds terminal width (${visibleWidth(line)} > ${width}).`,
-					"",
-					"This is likely caused by a custom TUI component not truncating its output.",
-					"Use visibleWidth() to measure and truncateToWidth() to truncate lines.",
-					"",
-					`Debug log written to: ${crashLogPath}`,
-				].join("\n");
-				throw new Error(errorMsg);
+			let line = newLines[i];
+			if (!isImageLine(line) && visibleWidth(line) > width) {
+				line = sliceByColumn(line, 0, width, true) + TUI.SEGMENT_RESET;
+				newLines[i] = line;
 			}
 			buffer += line;
 		}

@@ -19,6 +19,15 @@ function formatTokens(count: number): string {
 	return `${Math.round(count / 1000000)}M`;
 }
 
+function compactPath(cwd: string, width: number): string {
+	if (visibleWidth(cwd) <= width) return cwd;
+	const parts = cwd.replace(/\\/g, "/").split("/").filter(Boolean);
+	if (parts.length <= 2) return truncateToWidth(cwd, width, "…");
+	const tail = parts.slice(-2).join("/");
+	const prefix = cwd.startsWith("~") ? "~/…/" : "…/";
+	return truncateToWidth(`${prefix}${tail}`, width, "…");
+}
+
 function joinMuted(parts: Array<string | undefined | false>): string {
 	return parts.filter(Boolean).join(theme.fg("dim", " · "));
 }
@@ -82,9 +91,14 @@ export class FooterComponent implements Component {
 		let cwd = this.session.sessionManager.getCwd();
 		const home = process.env.HOME || process.env.USERPROFILE;
 		if (home && cwd.startsWith(home)) cwd = `~${cwd.slice(home.length)}`;
+		cwd = compactPath(cwd, Math.max(18, Math.floor(width * 0.38)));
 		const branch = this.footerData.getGitBranch();
 		const sessionName = this.session.sessionManager.getSessionName();
-		const location = joinMuted([cwd, branch && `git:${branch}`, sessionName]);
+		const location = joinMuted([
+			cwd,
+			branch && `git:${truncateToWidth(branch, 18, "…")}`,
+			sessionName && truncateToWidth(sessionName, 24, "…"),
+		]);
 
 		const activeToolNames = this.session.getActiveToolNames();
 		const modelName = state.model?.id || "no-model";
@@ -105,14 +119,18 @@ export class FooterComponent implements Component {
 				: this.session.modelRegistry.isUsingOAuth(state.model)
 					? "sub"
 					: undefined,
-			`tools ${activeToolNames.length}`,
+			activeToolNames.length ? `tools ${activeToolNames.length}` : undefined,
 		]);
 
 		const left = theme.fg("muted", location || "workspace");
-		const right = joinMuted([theme.fg("muted", model), automation, thinking, coloredContext]);
-		const divider = theme.fg("borderMuted", "─".repeat(Math.max(1, width)));
-		const lines = [divider, fitPair(left, right, width)];
-		if (usage) lines.push(theme.fg("dim", usage));
+		const right = joinMuted([
+			theme.fg("muted", truncateToWidth(model, Math.max(14, Math.floor(width * 0.28)), "…")),
+			automation,
+			thinking,
+			coloredContext,
+			usage && width >= 92 ? usage : undefined,
+		]);
+		const lines = [fitPair(left, right, width)];
 
 		const extensionStatuses = this.footerData.getExtensionStatuses();
 		if (extensionStatuses.size > 0) {
@@ -121,6 +139,8 @@ export class FooterComponent implements Component {
 				.map(([, text]) => sanitizeStatusText(text))
 				.join("  ");
 			lines.push(truncateToWidth(theme.fg("dim", statusLine), width, theme.fg("dim", "...")));
+		} else if (usage && width < 92 && width >= 64) {
+			lines.push(theme.fg("dim", truncateToWidth(usage, width, "…")));
 		}
 
 		return lines;

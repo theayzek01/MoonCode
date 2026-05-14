@@ -1014,7 +1014,7 @@ export const MODELS = {
 				cacheWrite: 0,
 			},
 			contextWindow: 128000,
-			maxTokens: 4096,
+			maxTokens: 16384,
 		} satisfies Model<"bedrock-converse-stream">,
 		"openai.gpt-oss-20b-1:0": {
 			id: "openai.gpt-oss-20b-1:0",
@@ -1031,7 +1031,7 @@ export const MODELS = {
 				cacheWrite: 0,
 			},
 			contextWindow: 128000,
-			maxTokens: 4096,
+			maxTokens: 16384,
 		} satisfies Model<"bedrock-converse-stream">,
 		"openai.gpt-oss-safeguard-120b": {
 			id: "openai.gpt-oss-safeguard-120b",
@@ -1048,7 +1048,7 @@ export const MODELS = {
 				cacheWrite: 0,
 			},
 			contextWindow: 128000,
-			maxTokens: 4096,
+			maxTokens: 16384,
 		} satisfies Model<"bedrock-converse-stream">,
 		"openai.gpt-oss-safeguard-20b": {
 			id: "openai.gpt-oss-safeguard-20b",
@@ -1065,7 +1065,7 @@ export const MODELS = {
 				cacheWrite: 0,
 			},
 			contextWindow: 128000,
-			maxTokens: 4096,
+			maxTokens: 16384,
 		} satisfies Model<"bedrock-converse-stream">,
 		"qwen.qwen3-235b-a22b-2507-v1:0": {
 			id: "qwen.qwen3-235b-a22b-2507-v1:0",
@@ -1840,8 +1840,8 @@ export const MODELS = {
 		} satisfies Model<"anthropic-messages">,
 	},
 	"antigravity": {
-		"claude-opus-4-6-thinking": {
-			id: "claude-opus-4-6-thinking",
+		"antigravity-claude-opus-4-6-thinking": {
+			id: "antigravity-claude-opus-4-6-thinking",
 			name: "Claude Opus 4.6 Thinking (Antigravity)",
 			api: "google-antigravity",
 			provider: "antigravity",
@@ -1856,11 +1856,11 @@ export const MODELS = {
 				cacheWrite: 6.25,
 			},
 			contextWindow: 200000,
-			maxTokens: 128000,
+			maxTokens: 64000,
 		} satisfies Model<"google-antigravity">,
-		"claude-sonnet-4-6": {
-			id: "claude-sonnet-4-6",
-			name: "Claude Sonnet 4.6 (Antigravity)",
+		"antigravity-claude-sonnet-4-6": {
+			id: "antigravity-claude-sonnet-4-6",
+			name: "Claude Sonnet 4.6 Thinking (Antigravity)",
 			api: "google-antigravity",
 			provider: "antigravity",
 			baseUrl: "https://daily-cloudcode-pa.sandbox.googleapis.com",
@@ -1875,8 +1875,8 @@ export const MODELS = {
 			contextWindow: 200000,
 			maxTokens: 64000,
 		} satisfies Model<"google-antigravity">,
-		"gemini-3-flash": {
-			id: "gemini-3-flash",
+		"antigravity-gemini-3-flash": {
+			id: "antigravity-gemini-3-flash",
 			name: "Gemini 3 Flash (Antigravity)",
 			api: "google-antigravity",
 			provider: "antigravity",
@@ -1890,10 +1890,10 @@ export const MODELS = {
 				cacheWrite: 0,
 			},
 			contextWindow: 1048576,
-			maxTokens: 65535,
+			maxTokens: 65536,
 		} satisfies Model<"google-antigravity">,
-		"gemini-3.1-pro-high": {
-			id: "gemini-3.1-pro-high",
+		"antigravity-gemini-3.1-pro-high": {
+			id: "antigravity-gemini-3.1-pro-high",
 			name: "Gemini 3.1 Pro High (Antigravity)",
 			api: "google-antigravity",
 			provider: "antigravity",
@@ -1909,8 +1909,8 @@ export const MODELS = {
 			contextWindow: 1048576,
 			maxTokens: 65535,
 		} satisfies Model<"google-antigravity">,
-		"gemini-3.1-pro-low": {
-			id: "gemini-3.1-pro-low",
+		"antigravity-gemini-3.1-pro-low": {
+			id: "antigravity-gemini-3.1-pro-low",
 			name: "Gemini 3.1 Pro Low (Antigravity)",
 			api: "google-antigravity",
 			provider: "antigravity",
@@ -1926,8 +1926,8 @@ export const MODELS = {
 			contextWindow: 1048576,
 			maxTokens: 65535,
 		} satisfies Model<"google-antigravity">,
-		"gpt-oss-120b": {
-			id: "gpt-oss-120b",
+		"antigravity-gpt-oss-120b": {
+			id: "antigravity-gpt-oss-120b",
 			name: "GPT-OSS 120B Medium (Antigravity)",
 			api: "google-antigravity",
 			provider: "antigravity",
@@ -1940,8 +1940,8 @@ export const MODELS = {
 				cacheRead: 0,
 				cacheWrite: 0,
 			},
-			contextWindow: 131072,
-			maxTokens: 32768,
+			contextWindow: 128000,
+			maxTokens: 16384,
 		} satisfies Model<"google-antigravity">,
 	},
 	"azure-openai-responses": {
@@ -8107,23 +8107,23 @@ export const MODELS = {
 			contextWindow: 262144,
 			maxTokens: 65536,
 		} satisfies Model<"anthropic-messages">,
-		"ring-2.6-1t-free": {
-			id: "ring-2.6-1t-free",
-			name: "Ring 2.6 1T Free",
-			api: "openai-completions",
+		"qwen3.6-plus-free": {
+			id: "qwen3.6-plus-free",
+			name: "Qwen3.6 Plus Free",
+			api: "anthropic-messages",
 			provider: "opencode",
-			baseUrl: "https://opencode.ai/zen/v1",
+			baseUrl: "https://opencode.ai/zen",
 			reasoning: true,
-			input: ["text"],
+			input: ["text", "image"],
 			cost: {
 				input: 0,
 				output: 0,
 				cacheRead: 0,
 				cacheWrite: 0,
 			},
-			contextWindow: 262000,
-			maxTokens: 66000,
-		} satisfies Model<"openai-completions">,
+			contextWindow: 262144,
+			maxTokens: 65536,
+		} satisfies Model<"anthropic-messages">,
 	},
 	"opencode-go": {
 		"deepseek-v4-flash": {
@@ -9092,6 +9092,25 @@ export const MODELS = {
 			contextWindow: 1048576,
 			maxTokens: 131072,
 		} satisfies Model<"openai-completions">,
+		"deepseek/deepseek-v4-flash:free": {
+			id: "deepseek/deepseek-v4-flash:free",
+			name: "DeepSeek: DeepSeek V4 Flash (free)",
+			api: "openai-completions",
+			provider: "openrouter",
+			baseUrl: "https://openrouter.ai/api/v1",
+			compat: {"requiresReasoningContentOnAssistantMessages":true,"thinkingFormat":"deepseek"},
+			reasoning: true,
+			thinkingLevelMap: {"minimal":null,"low":null,"medium":null,"high":"high","xhigh":"max"},
+			input: ["text"],
+			cost: {
+				input: 0,
+				output: 0,
+				cacheRead: 0,
+				cacheWrite: 0,
+			},
+			contextWindow: 1048576,
+			maxTokens: 384000,
+		} satisfies Model<"openai-completions">,
 		"deepseek/deepseek-v4-pro": {
 			id: "deepseek/deepseek-v4-pro",
 			name: "DeepSeek: DeepSeek V4 Pro",
@@ -9732,7 +9751,7 @@ export const MODELS = {
 			reasoning: true,
 			input: ["text"],
 			cost: {
-				input: 0.28,
+				input: 0.26,
 				output: 1.2,
 				cacheRead: 0,
 				cacheWrite: 0,
@@ -10123,8 +10142,8 @@ export const MODELS = {
 			reasoning: false,
 			input: ["text"],
 			cost: {
-				input: 0.39999999999999997,
-				output: 2,
+				input: 0.6,
+				output: 2.5,
 				cacheRead: 0,
 				cacheWrite: 0,
 			},
@@ -10174,8 +10193,8 @@ export const MODELS = {
 			reasoning: true,
 			input: ["text", "image"],
 			cost: {
-				input: 0.74,
-				output: 3.5,
+				input: 0.73,
+				output: 3.49,
 				cacheRead: 0.25,
 				cacheWrite: 0,
 			},
@@ -11529,7 +11548,7 @@ export const MODELS = {
 			reasoning: true,
 			input: ["text"],
 			cost: {
-				input: 0.06,
+				input: 0.09999999999999999,
 				output: 0.24,
 				cacheRead: 0,
 				cacheWrite: 0,
@@ -12041,7 +12060,7 @@ export const MODELS = {
 			cost: {
 				input: 0.39,
 				output: 2.34,
-				cacheRead: 0,
+				cacheRead: 0.195,
 				cacheWrite: 0,
 			},
 			contextWindow: 262144,
@@ -12107,8 +12126,8 @@ export const MODELS = {
 			reasoning: true,
 			input: ["text", "image"],
 			cost: {
-				input: 0.39999999999999997,
-				output: 2.4,
+				input: 0.3,
+				output: 1.7999999999999998,
 				cacheRead: 0,
 				cacheWrite: 0,
 			},
@@ -12158,10 +12177,10 @@ export const MODELS = {
 			reasoning: true,
 			input: ["text", "image"],
 			cost: {
-				input: 0.25,
-				output: 1.5,
+				input: 0.1875,
+				output: 1.125,
 				cacheRead: 0,
-				cacheWrite: 0.3125,
+				cacheWrite: 0.234375,
 			},
 			contextWindow: 1000000,
 			maxTokens: 65536,
@@ -12702,13 +12721,13 @@ export const MODELS = {
 			reasoning: true,
 			input: ["text"],
 			cost: {
-				input: 0.39,
-				output: 1.9,
-				cacheRead: 0,
+				input: 0.43,
+				output: 1.74,
+				cacheRead: 0.08,
 				cacheWrite: 0,
 			},
-			contextWindow: 204800,
-			maxTokens: 204800,
+			contextWindow: 202752,
+			maxTokens: 131072,
 		} satisfies Model<"openai-completions">,
 		"z-ai/glm-4.6v": {
 			id: "z-ai/glm-4.6v",
@@ -12804,13 +12823,13 @@ export const MODELS = {
 			reasoning: true,
 			input: ["text"],
 			cost: {
-				input: 1.0499999999999998,
-				output: 3.5,
-				cacheRead: 0.5249999999999999,
+				input: 0.98,
+				output: 3.08,
+				cacheRead: 0.182,
 				cacheWrite: 0,
 			},
 			contextWindow: 202752,
-			maxTokens: 65535,
+			maxTokens: 4096,
 		} satisfies Model<"openai-completions">,
 		"z-ai/glm-5v-turbo": {
 			id: "z-ai/glm-5v-turbo",
@@ -12923,8 +12942,8 @@ export const MODELS = {
 			reasoning: true,
 			input: ["text", "image"],
 			cost: {
-				input: 0.74,
-				output: 3.5,
+				input: 0.73,
+				output: 3.49,
 				cacheRead: 0.25,
 				cacheWrite: 0,
 			},
@@ -14989,7 +15008,7 @@ export const MODELS = {
 		} satisfies Model<"anthropic-messages">,
 		"openai/gpt-oss-20b": {
 			id: "openai/gpt-oss-20b",
-			name: "GPT OSS 120B",
+			name: "GPT OSS 20B",
 			api: "anthropic-messages",
 			provider: "vercel-ai-gateway",
 			baseUrl: "https://ai-gateway.vercel.sh",

@@ -1,4 +1,4 @@
-# Contributing to Mooncli
+# Contributing to MoonCode
 
 This guide exists to save both sides time.
 
@@ -6,7 +6,7 @@ This guide exists to save both sides time.
 
 **You must understand your code.** If you cannot explain what your changes do and how they interact with the rest of the system, your PR will be closed.
 
-Using Core to write code is fine. Submitting Core-generated slop without understanding it is not.
+Using an AI coding engine to write code is fine. Submitting generated slop without understanding it is not.
 
 If you use an engine, run it from the root directory so it picks up `docs/AGENTS.md` automatically. Your engine must follow the rules and guidelines in that file.
 
@@ -64,7 +64,7 @@ If you are adding a new provider, see `docs/AGENTS.md` for required tests.
 
 ## Philosophy
 
-Mooncli's core is minimal. If your feature does not belong in the core, it should be an extension. PRs that bloat the core will likely be rejected.
+MoonCode's core is minimal. If your feature does not belong in the core, it should be an extension. PRs that bloat the core will likely be rejected.
 
 ## Questions?
 

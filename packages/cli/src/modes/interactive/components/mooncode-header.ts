@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Text, visibleWidth } from "moon-tui";
+import { Text, truncateToWidth, visibleWidth } from "moon-tui";
 import { APP_TITLE } from "../../../config.js";
 import type { AppKeybinding } from "../../../core/keybindings.js";
 import { theme } from "../theme/theme.js";
@@ -18,8 +18,12 @@ function padAnsi(line: string, width: number): string {
 	return `${line}${" ".repeat(Math.max(0, width - visibleWidth(line)))}`;
 }
 
-function rule(width: number): string {
-	return theme.fg("borderMuted", "─".repeat(Math.max(1, width)));
+function lineFit(line: string, width: number): string {
+	return padAnsi(truncateToWidth(line, width, theme.fg("dim", "…")), width);
+}
+
+function pill(text: string, color: "accent" | "muted" | "dim" = "muted"): string {
+	return `${theme.fg("borderMuted", "[")}${theme.fg(color, text)}${theme.fg("borderMuted", "]")}`;
 }
 
 function hint(command: string, description: string): string {
@@ -33,7 +37,7 @@ export class MoonCodeHeaderComponent extends Text {
 		_tui: unknown,
 		private options: MoonCodeHeaderOptions,
 	) {
-		super("", options.paddingX ?? 1, options.paddingY ?? 0);
+		super("", options.paddingX ?? 0, options.paddingY ?? 0);
 		this.expanded = options.expanded ?? false;
 		this.refresh();
 	}
@@ -46,44 +50,40 @@ export class MoonCodeHeaderComponent extends Text {
 	dispose(): void {}
 
 	private build(width = 88): string {
-		const inner = Math.max(46, Math.min(104, width - 2));
-		const frames = ["◐", "◓", "◑", "◒"];
-		const frame = frames[Math.floor(Date.now() / 900) % frames.length];
-		const title = `${theme.fg("accent", frame)} ${theme.bold(APP_TITLE)} ${theme.fg("dim", `v${this.options.version}`)}`;
-		const subtitle = theme.fg("muted", "serious terminal coding workspace");
-		const quick = [
-			hint("/index", "haritala"),
-			hint("/browser", "tarayıcı"),
-			hint("/compact", "bağlamı küçült"),
+		const inner = Math.max(44, Math.min(110, width - 2));
+		const frames = ["◜", "◠", "◝", "◞", "◡", "◟"];
+		const frame = frames[Math.floor(Date.now() / 140) % frames.length];
+		const top = `${theme.fg("borderMuted", "╭")}${theme.fg("borderMuted", "─".repeat(inner))}${theme.fg("borderMuted", "╮")}`;
+		const bottom = `${theme.fg("borderMuted", "╰")}${theme.fg("borderMuted", "─".repeat(inner))}${theme.fg("borderMuted", "╯")}`;
+		const brand = `${theme.fg("accent", frame)} ${theme.bold(APP_TITLE)} ${theme.fg("dim", `v${this.options.version}`)}`;
+		const mode = `${pill("logic", "dim")} ${pill("act", "accent")} ${pill("verify", "dim")}`;
+		const commands = [
+			hint("/", "komut"),
+			hint("/index", "harita"),
+			hint("/browser", "web"),
 			hint("/diff", "kontrol"),
-			hint("/ship", "yayınla"),
-		].join(theme.fg("dim", "  ·  "));
-		const statusLine = `${theme.fg("dim", "logic")}${theme.fg("borderMuted", " ─ ")}${theme.fg("muted", "inspect → act → verify")}${theme.fg("borderMuted", " ─ ")}${theme.fg("dim", "minimal")}`;
+			hint("/ship", "yayın"),
+		].join(theme.fg("dim", "   "));
 
-		const compact = [
-			`${title}  ${subtitle}`,
-			rule(inner),
-			statusLine,
-			quick,
-			theme.fg("muted", `Yardım: /  ·  detay: ${keyText("app.tools.expand" as AppKeybinding)}`),
+		const lines = [
+			top,
+			`${theme.fg("borderMuted", "│")}${lineFit(`${brand}  ${theme.fg("dim", "serious terminal workspace")}  ${mode}`, inner)}${theme.fg("borderMuted", "│")}`,
+			`${theme.fg("borderMuted", "│")}${lineFit(commands, inner)}${theme.fg("borderMuted", "│")}`,
 		];
 
-		if (!this.expanded) return compact.map((line) => padAnsi(line, inner)).join("\n");
+		if (this.expanded) {
+			const more = [
+				"",
+				`${theme.bold("Akış")}  iste → küçük değiştir → test et → ship`,
+				this.options.expandedInstructions,
+				theme.fg("muted", `Kapat/aç: ${keyText("app.tools.expand" as AppKeybinding)}`),
+			];
+			for (const line of more)
+				lines.push(`${theme.fg("borderMuted", "│")}${lineFit(line, inner)}${theme.fg("borderMuted", "│")}`);
+		}
 
-		const expanded = [
-			...compact,
-			"",
-			theme.bold("Ciddi çalışma akışı"),
-			`${theme.fg("dim", "1.")} ${hint("/index", "kod tabanını hazırla")}`,
-			`${theme.fg("dim", "2.")} Normal yaz: ${theme.fg("muted", "ne yapmak istediğini anlat")}`,
-			`${theme.fg("dim", "3.")} ${hint("/browser", "Chrome eklenti bağlantısını kontrol et")}`,
-			`${theme.fg("dim", "4.")} ${hint("/diff", "son değişiklikleri kontrol et")}`,
-			`${theme.fg("dim", "5.")} ${hint("/ship", "branch/commit/push/PR akışı")}`,
-			"",
-			theme.bold("Kısayollar"),
-			this.options.expandedInstructions,
-		];
-		return expanded.map((line) => padAnsi(line, inner)).join("\n");
+		lines.push(bottom);
+		return lines.join("\n");
 	}
 
 	render(width: number): string[] {

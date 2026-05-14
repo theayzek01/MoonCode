@@ -200,8 +200,13 @@ export function extractRetryDelay(errorText: string, response?: Response | Heade
 	return undefined;
 }
 
-function needsClaudeThinkingBetaHeader(model: Model<"google-gemini-cli">): boolean {
-	return model.provider === "google-antigravity" && model.id.startsWith("claude-") && model.reasoning;
+export function needsClaudeThinkingBetaHeader(model: Model<"google-antigravity">): boolean {
+	const id = model.id.toLowerCase();
+	return (
+		(model.provider === "google-antigravity" || model.provider === "antigravity") &&
+		id.includes("claude-") &&
+		model.reasoning
+	);
 }
 
 function isGemini3ProModel(modelId: string): boolean {
@@ -926,9 +931,13 @@ export function buildRequest(
 	}
 
 	if (context.tools && context.tools.length > 0) {
-		// Claude models on Cloud Code Assist need the legacy `parameters` field;
-		// the API translates it into Anthropic's `input_schema`.
-		const useParameters = model.id.startsWith("claude-");
+		// Claude and GPT-OSS models on Cloud Code Assist need the legacy `parameters` field;
+		// the API translates it into Anthropic's `input_schema` or equivalent.
+		const useParameters =
+			model.id.startsWith("claude-") ||
+			model.id.startsWith("gpt-oss-") ||
+			model.id.startsWith("antigravity-claude-") ||
+			model.id.startsWith("antigravity-gpt-");
 		request.tools = convertTools(context.tools, useParameters);
 		if (options.toolChoice) {
 			request.toolConfig = {

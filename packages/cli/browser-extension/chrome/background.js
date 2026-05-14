@@ -1,5 +1,5 @@
 const BRIDGE_URL = "ws://127.0.0.1:3133/ws";
-const VERSION = "1.26-5-browser-hardening";
+const VERSION = "1.34.0-browser-pro";
 const HEARTBEAT_INTERVAL_MS = 30000;
 const RECONNECT_DELAY_MS = 3000;
 const COMMAND_TIMEOUT_MS = 12000;
@@ -101,7 +101,7 @@ function sendHello() {
     type: "hello",
     extensionId: chrome.runtime.id,
     version: VERSION,
-    capabilities: ["tabs", "page", "debugger", "screenshot", "scroll",
+    capabilities: ["tabs", "page", "debugger", "screenshot", "scroll", "smart_scroll",
       "console_logs", "read_dom", "hover", "drag", "upload_file", "press_key", "get_elements", "evaluate", "clear_ui"]
   });
 }
@@ -189,12 +189,43 @@ async function executePage(args) {
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
       func: (direction, amount) => {
-        const val = amount || 500;
-        if (direction === "up")     window.scrollBy(0, -val);
-        else if (direction === "down")   window.scrollBy(0, val);
-        else if (direction === "top")    window.scrollTo(0, 0);
-        else if (direction === "bottom") window.scrollTo(0, document.body.scrollHeight);
-        return { scrolled: true, direction, position: window.scrollY };
+        const val = Math.max(1, Math.min(Number(amount) || 500, 5000));
+        const before = { x: window.scrollX, y: window.scrollY };
+
+        const isScrollable = (el) => {
+          if (!el || el === document.body || el === document.documentElement) return false;
+          const st = getComputedStyle(el);
+          const canY = /(auto|scroll|overlay)/.test(st.overflowY) && el.scrollHeight > el.clientHeight + 2;
+          const canX = /(auto|scroll|overlay)/.test(st.overflowX) && el.scrollWidth > el.clientWidth + 2;
+          return canY || canX;
+        };
+        const center = document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2);
+        let target = center;
+        while (target && !isScrollable(target)) target = target.parentElement;
+
+        const scrollTarget = target || window;
+        if (direction === "up") scrollTarget.scrollBy?.(0, -val);
+        else if (direction === "down") scrollTarget.scrollBy?.(0, val);
+        else if (direction === "left") scrollTarget.scrollBy?.(-val, 0);
+        else if (direction === "right") scrollTarget.scrollBy?.(val, 0);
+        else if (direction === "top") target ? (target.scrollTop = 0) : window.scrollTo(window.scrollX, 0);
+        else if (direction === "bottom") target ? (target.scrollTop = target.scrollHeight) : window.scrollTo(window.scrollX, document.documentElement.scrollHeight || document.body.scrollHeight);
+        else throw new Error(`Unknown scroll direction: ${direction}`);
+
+        return {
+          scrolled: true,
+          direction,
+          target: target ? cssPath(target) : "window",
+          before,
+          after: target ? { x: target.scrollLeft, y: target.scrollTop } : { x: window.scrollX, y: window.scrollY }
+        };
+
+        function cssPath(el) {
+          if (!el || !el.tagName) return "window";
+          if (el.id) return `#${CSS.escape(el.id)}`;
+          const cls = String(el.className || "").trim().split(/\s+/).filter(Boolean).slice(0, 2).map(c => `.${CSS.escape(c)}`).join("");
+          return `${el.tagName.toLowerCase()}${cls}`;
+        }
       },
       args: [args.direction || "down", args.amount || 500]
     });
