@@ -25,15 +25,15 @@ Piyasada bir sürü AI aracı var (Cursor, Claude Code, Windsurf vb.). MoonCode'
 | Özellik | MoonCode | Diğer Araçlar |
 | :--- | :--- | :--- |
 | **Otonomi** | **✓** Tam Otonom (Kendi test eder, düzeltir) | **✕** Sadece Kod Önerir |
-| **Token Kullanımı** | **✓** Semantik Filtre (%80 Tasarruf) | **✕** Tüm Dosyayı Gönderir |
+| **Bağlam (Context)** | **✓** Semantik Filtre (Sadece ilgili kodu okur) | **✕** Tüm Dosyayı Gönderir |
+| **Maliyet (Token)** | **✓** Ortalama %80 daha ucuz | **✕** Sürekli limit doldurur |
 | **Çalışma Ortamı** | **✓** Native Terminal (Çok Hafif) | **✕** Ağır IDE (Electron) |
-| **Sürü Zekası** | **✓** Paralel Ajanlar (Mimar, Coder) | **✕** Tekil Model |
 
 <br>
 
 **◈ Gerçek Otonomi:** Hata mı çıktı? Kodu yazar, testi koşturur, hata alırsa logları okuyup tekrar dener. Sen sadece en son çıkan doğru koda onay verirsin.
 
-**◈ Cebini Düşünür:** Diğer araçlar her soruda tüm projeyi yapay zekaya gönderip kredi yakarken, MoonCode kendi içindeki filtreleme sistemiyle sadece gerekli dosyaları bulur. Ortalama %80 daha ucuzdur.
+**◈ Token Tasarrufu:** 2000 satırlık bir dosyada tek satır değiştirmek için tüm dosyayı yapay zekaya göndermez. Sadece ilgili 50 satırı (chunk) VectorDB'den çeker.
 
 <br>
 
@@ -70,11 +70,17 @@ Terminale sadece `mooncode` yazman yeterli.
 
 <br>
 
-### ✧ Sık Kullanılan Komutlar
+### ✧ İstasyon Komutları
 
-* **`/swarm`** ⏤ Çok büyük bir özellik mi ekleyeceksin? Bu komut işi parçalara böler ve arka planda birden fazla ajana dağıtır.
-* **`/fix`** ⏤ Projendeki derleme veya linter hatalarını bulup otomatik olarak çözer.
-* **`/browser`** ⏤ MoonCode'un terminalden çıkmadan webt'te araştırma yapmasını sağlar.
+Yapay zekayı yönlendirmek için terminalden bu komutları kullanabilirsin:
+
+| Komut | Yetenek | Açıklama |
+| :--- | :--- | :--- |
+| **`/swarm`** | **❖** Sürü Zekası | Büyük işleri mimar, coder ve reviewer ajanlarına bölerek paralel çözdürür. |
+| **`/fix`** | **⚙** Otonom Tamir | Projedeki derleme veya linter hatalarını bulur ve tamamen düzelene kadar loop'a girer. |
+| **`/evolve`**| **⌬** Meta-Evrim | MoonCode'un kendi kaynak kodunu okuyup kendini geliştirmesini sağlar. |
+| **`/index`** | **☷** Vektör Dizini | Hızı 10 kat artırmak için projenin AST tabanlı anlamsal (semantic) haritasını çıkarır. |
+| **`/browser`**| **◧** Web Köprüsü | Terminalden çıkmadan webt'te araştırma yapmasını veya döküman okumasını sağlar. |
 
 <br>
 
