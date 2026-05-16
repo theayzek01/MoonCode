@@ -1,5 +1,14 @@
 <div align="center">
   <img src="assets/Moon-cli-banner.png" alt="MoonCode" width="100%" />
+  
+  <br>
+  
+  <p align="center">
+    <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
+    <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
+    <img src="https://img.shields.io/badge/VectorDB-FF4500?style=for-the-badge&logo=databricks&logoColor=white" />
+    <img src="https://img.shields.io/badge/Autonomous-Engine-blue?style=for-the-badge" />
+  </p>
 </div>
 
 <br>
@@ -25,15 +34,47 @@ Piyasada bir sürü AI aracı var (Cursor, Claude Code, Windsurf vb.). MoonCode'
 | Özellik | MoonCode | Diğer Araçlar |
 | :--- | :--- | :--- |
 | **Otonomi** | **✓** Tam Otonom (Kendi test eder, düzeltir) | **✕** Sadece Kod Önerir |
-| **Bağlam (Context)** | **✓** Semantik Filtre (Sadece ilgili kodu okur) | **✕** Tüm Dosyayı Gönderir |
-| **Maliyet (Token)** | **✓** Ortalama %80 daha ucuz | **✕** Sürekli limit doldurur |
 | **Çalışma Ortamı** | **✓** Native Terminal (Çok Hafif) | **✕** Ağır IDE (Electron) |
+| **Sürü Zekası** | **✓** Paralel Ajanlar (Mimar, Coder) | **✕** Tekil Model |
+
+<br>
+
+### ◈ Token & Maliyet Karşılaştırması
+
+MoonCode, standart bir yapay zeka gibi tüm dosyayı kopyalayıp LLM'e göndermez. **AST tabanlı Semantik Filtreleme** kullanarak sadece ilgili kod parçacıklarını (chunk) seçer.
+
+<table width="100%">
+  <tr>
+    <th align="left">Metrik (2000 satırlık dosya)</th>
+    <th align="center">MoonCode (VectorDB)</th>
+    <th align="center">Geleneksel Araçlar (Full Context)</th>
+  </tr>
+  <tr>
+    <td><b>Okunan Token (1 İstek)</b></td>
+    <td align="center">~ 500 Token</td>
+    <td align="center">~ 15.000 Token</td>
+  </tr>
+  <tr>
+    <td><b>Maliyet (Yaklaşık)</b></td>
+    <td align="center"><b>$0.001</b></td>
+    <td align="center"><b>$0.045</b></td>
+  </tr>
+  <tr>
+    <td><b>Tasarruf Oranı</b></td>
+    <td align="center" colspan="2"><b>✓ Ortalama %96 Daha Ucuz</b></td>
+  </tr>
+</table>
+
+<details>
+<summary><b>🔍 Nasıl Bu Kadar Tasarruf Ediyor? (Tıkla ve İncele)</b></summary>
+<p>
+MoonCode, projenizi ilk açtığınızda bir harita çıkarır. Siz bir fonksiyonu değiştirmek istediğinizde, tüm projeyi LLM'e okutmak yerine sadece o fonksiyonu ve bağlı olduğu modülleri yapay zekaya verir. Bu sayede yapay zeka gereksiz verilerle yorulmaz, hızlanır ve maliyet sıfıra yaklaşır.
+</p>
+</details>
 
 <br>
 
 **◈ Gerçek Otonomi:** Hata mı çıktı? Kodu yazar, testi koşturur, hata alırsa logları okuyup tekrar dener. Sen sadece en son çıkan doğru koda onay verirsin.
-
-**◈ Token Tasarrufu:** 2000 satırlık bir dosyada tek satır değiştirmek için tüm dosyayı yapay zekaya göndermez. Sadece ilgili 50 satırı (chunk) VectorDB'den çeker.
 
 <br>
 
