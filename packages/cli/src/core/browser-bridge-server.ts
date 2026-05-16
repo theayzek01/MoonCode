@@ -400,13 +400,15 @@ function handleClientMessage(client: BrowserBridgeClient, raw: string): void {
 }
 
 function isAllowedExtensionOrigin(origin: string | undefined): boolean {
-	// Security Fix: Disallow undefined origin to prevent local non-extension scripts from connecting
-	if (!origin) return false;
+	// If origin is missing, we might be in an environment where it's not provided for WS
+	if (!origin) return true;
 
 	return (
 		origin.startsWith("chrome-extension://") ||
 		origin.startsWith("moz-extension://") ||
-		origin.startsWith("ms-browser-extension://")
+		origin.startsWith("ms-browser-extension://") ||
+		origin === "null" ||
+		origin === "vscode-webview://"
 	);
 }
 

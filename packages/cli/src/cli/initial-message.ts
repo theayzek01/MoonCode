@@ -1,7 +1,6 @@
 // @ts-nocheck
 import os from "node:os";
 import chalk from "chalk";
-import { APP_TITLE, VERSION } from "../config.js";
 
 export function buildInitialMessage(): { text: string } {
 	const platform = os.platform();
@@ -10,32 +9,35 @@ export function buildInitialMessage(): { text: string } {
 	const cpu = os.cpus()[0]?.model || "Unknown CPU";
 	const totalMem = `${Math.round(os.totalmem() / (1024 * 1024 * 1024))}GB`;
 
-	const accent = chalk.hex("#D08A7A");
+	const cyan = chalk.hex("#05D5FF");
+	const magenta = chalk.hex("#FF0099");
+	const amber = chalk.hex("#FFB86C");
 	const dim = chalk.gray;
 	const bold = chalk.bold;
 
-	const logo = `
-   ${accent("")}  ${bold(APP_TITLE.toUpperCase())}
-   ${dim(`Version ${VERSION}`)}
-	`;
-
 	const sysInfo = [
-		`${dim("Software:")}  MoonCode Engine v${VERSION}`,
-		`${dim("Hardware:")}  ${cpu} (${arch})`,
-		`${dim("Memory:")}    ${totalMem} unified`,
-		`${dim("System:")}    ${platform} ${release}`,
+		`${cyan("◆")} ${bold("SOFTWARE")}  MoonCode Hyper-Engine ${bold("v2026-3")}`,
+		`${cyan("◆")} ${bold("HARDWARE")}  ${cpu} (${arch})`,
+		`${cyan("◆")} ${bold("RESOURCES")} ${totalMem} Unified Memory`,
+		`${cyan("◆")} ${bold("RUNTIME")}   ${platform} ${release}`,
 	].join("\n   ");
 
-	const divider = dim("─".repeat(40));
+	const divider = dim("─".repeat(50));
 
 	const introText = `
-${logo}
+   ${magenta.bold("MOONCODE OS [READY]")}
+   ${dim("Establishing Neural Bridge...")}
+
    ${sysInfo}
 
    ${divider}
-   ${accent("●")} ${bold("MOONCODE - HYPER-INTELLIGENCE MODE")}
-   ${dim("Optimized for all models (Low/High Latency)")}
-   ${dim("Type")} ${accent("/")} ${dim("to see all 40+ commands")}
+   ${magenta("●")} ${bold("CORE OBJECTIVES")}
+   ${dim("1. Multi-Agent Coordination")}
+   ${dim("2. Autonomous Problem Solving")}
+   ${dim("3. Semantic Codebase Intelligence")}
+
+   ${amber("»")} ${bold("HYPER-INTELLIGENCE MODE ACTIVE")}
+   ${dim("Type")} ${cyan("/")} ${dim("for command pallete • Press")} ${cyan("Ctrl+Space")} ${dim("for autocomplete")}
 	`;
 
 	return { text: introText };

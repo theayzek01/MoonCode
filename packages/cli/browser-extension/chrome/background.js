@@ -1,5 +1,5 @@
 const BRIDGE_URL = "ws://127.0.0.1:3133/ws";
-const VERSION = "2026.2.0";
+const VERSION = "2026.3.0";
 const HEARTBEAT_INTERVAL_MS = 30000;
 const RECONNECT_DELAY_MS = 3000;
 const COMMAND_TIMEOUT_MS = 12000;
@@ -10,6 +10,8 @@ let socket = null;
 let reconnectTimer = null;
 let heartbeatTimer = null;
 let isConnecting = false;
+let reconnectAttempts = 0;
+const MAX_RECONNECT_DELAY = 30000;
 let debuggerAttachedTabs = new Set();
 
 // ── Init ──────────────────────────────────────────────────────────────────────
@@ -49,36 +51,33 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 // ── Connection ────────────────────────────────────────────────────────────────
 function connect() {
-  if (isConnecting) return;
-  if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
-    updateBadgeFromSocket();
-    return;
-  }
+  if (socket || isConnecting) return;
 
   isConnecting = true;
-  clearTimeout(reconnectTimer);
-  clearInterval(heartbeatTimer);
   setBadge(false, "connecting");
 
   try {
     socket = new WebSocket(BRIDGE_URL);
   } catch (e) {
-    isConnecting = false;
-    scheduleReconnect();
+    handleDisconnect();
     return;
   }
 
   socket.onopen = () => {
     isConnecting = false;
+    reconnectAttempts = 0;
     setBadge(true, "connected");
+    console.log("[Moon] Connected to bridge");
     sendHello();
-    heartbeatTimer = setInterval(() => {
-      if (socket?.readyState === WebSocket.OPEN) {
-        send({ type: "ping", time: Date.now() });
-      } else {
-        clearInterval(heartbeatTimer);
-      }
-    }, HEARTBEAT_INTERVAL_MS);
+    startHeartbeat();
+  };
+
+  socket.onclose = (event) => {
+    handleDisconnect(event.code);
+  };
+
+  socket.onerror = () => {
+    handleDisconnect();
   };
 
   socket.onmessage = async (event) => {
@@ -95,25 +94,42 @@ function connect() {
       send({ type: "result", id: message.id, ok: false, error: error?.message || String(error) });
     }
   };
-
-  socket.onclose = (event) => {
-    isConnecting = false;
-    clearInterval(heartbeatTimer);
-    setBadge(false, "disconnected");
-    scheduleReconnect(event.code);
-  };
-
-  socket.onerror = () => {
-    isConnecting = false;
-    // onclose fires next, let that handle reconnect
-  };
 }
 
-function scheduleReconnect(code) {
+function handleDisconnect(code) {
+  if (socket) {
+    try { socket.onclose = null; socket.onerror = null; socket.close(); } catch {}
+    socket = null;
+  }
+  isConnecting = false;
+  stopHeartbeat();
+  setBadge(false, "offline");
+
   clearTimeout(reconnectTimer);
-  // 1000 = normal close; reconnect sooner, otherwise back off
-  const delay = (code === 1000) ? 1000 : RECONNECT_DELAY_MS;
+  reconnectAttempts++;
+  
+  // 1000 = normal close; use small fixed delay
+  const baseDelay = (code === 1000) ? 1000 : RECONNECT_DELAY_MS;
+  const delay = Math.min(baseDelay * Math.pow(1.5, Math.max(0, reconnectAttempts - 1)), MAX_RECONNECT_DELAY);
+  
+  console.log(`[Moon] Disconnected (code=${code}). Retrying in ${Math.round(delay)}ms...`);
   reconnectTimer = setTimeout(connect, delay);
+}
+
+function startHeartbeat() {
+  stopHeartbeat();
+  heartbeatTimer = setInterval(() => {
+    if (socket?.readyState === WebSocket.OPEN) {
+      send({ type: "ping", time: Date.now() });
+    } else {
+      stopHeartbeat();
+    }
+  }, HEARTBEAT_INTERVAL_MS);
+}
+
+function stopHeartbeat() {
+  clearInterval(heartbeatTimer);
+  heartbeatTimer = null;
 }
 
 function sendHello() {

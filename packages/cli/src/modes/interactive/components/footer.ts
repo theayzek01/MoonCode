@@ -150,7 +150,7 @@ export class FooterComponent implements Component {
 			`${theme.fg("muted", "CTX ") + contextBar} ${coloredContext}`,
 			runningPart,
 		].filter(Boolean);
-		const row2 = truncateToWidth((row2Parts as string[]).join(theme.fg("dim", " • ")), width, "…");
+		const row2 = truncateToWidth((row2Parts as string[]).join(theme.fg("dim", "  •  ")), width, "…");
 
 		// ── Row 3: tokens · cost · mem · extension statuses ──────────────
 		const row3Parts: string[] = [];
@@ -171,7 +171,7 @@ export class FooterComponent implements Component {
 			row3Parts.push(theme.fg("dim", statusLine));
 		}
 
-		const row3 = truncateToWidth(row3Parts.join(theme.fg("dim", " • ")), width, "…");
+		const row3 = truncateToWidth(row3Parts.join(theme.fg("dim", "  •  ")), width, "…");
 
 		return [row1, row2, row3];
 	}
