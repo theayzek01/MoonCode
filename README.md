@@ -4,119 +4,117 @@
   <br />
 
   <p align="center">
-    <img src="https://img.shields.io/badge/Status-Hardened-blue?style=for-the-badge" />
-    <img src="https://img.shields.io/badge/Engine-Autonomous-orange?style=for-the-badge" />
-    <img src="https://img.shields.io/badge/Security-Lvl_9-red?style=for-the-badge" />
+    <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
+    <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
+    <img src="https://img.shields.io/badge/VectorDB-FF4500?style=for-the-badge&logo=databricks&logoColor=white" />
+    <img src="https://img.shields.io/badge/Hardened-Security-blue?style=for-the-badge" />
   </p>
-
-  <br />
-  
-  <code>█▀▄▀█ █▀▀█ █▀▀█ █▀▀▄ █▀▀ █▀▀█ █▀▀▄ █▀▀</code><br />
-  <code>█ ▀ █ █  █ █  █ █  █ █   █  █ █  █ █▀▀</code><br />
-  <code>▀   ▀ ▀▀▀▀ ▀▀▀▀ ▀  ▀ ▀▀▀ ▀▀▀▀ ▀▀▀  ▀▀▀</code>
 </div>
 
----
+```diff
+@@ SİSTEM BAŞLATILIYOR @@
++ MoonCode Mühendislik İstasyonu [v2026.2.0]
++ Durum: Çevrimiçi, Tam Otonom
+- Eski Nesil IDE'ler: Devre Dışı
+```
 
-### ┌─ [ Giriş ] ──────────────────────────────────────────┐
+## [ GENEL BAKIŞ ]
 
-MoonCode, klasik kodlama asistanlarının aksine, terminalde yaşayan otonom bir **AI Mühendislik İstasyonudur**. Sadece kod önermez; projeyi bir bütün olarak anlar, hataları testler üzerinden doğrular ve kendi kendini iyileştiren döngüler (Self-Correction) kurar.
+MoonCode, standart kodlama asistanlarının sınırlarını aşan, son derece optimize edilmiş, otonom bir AI mühendislik terminalidir. Derin depo (repository) anlayışı, vektör tabanlı semantik filtreleme ve paralel ajan yürütme mimarisi ile doğrudan iş akışınıza entegre olur.
 
-### └────────────────────────────────────────────────────────┘
-
----
-
-### ▒▒ [ Benchmark: MoonCode vs Sektör ] ▒▒
-
-Sıradan araçlar (Claude Code, Cursor, Windsurf) repo bağlamını yönetirken tüm dosyaları LLM'e göndererek hem maliyeti artırır hem de zekayı dağıtır. MoonCode, **Semantic Context Filtering (SCF)** ile sadece kritik olanı işler.
-
-| Metrik | MoonCode | Claude Code | Cursor |
-|:---|:---:|:---:|:---:|
-| **Token Verimliliği** | ▓▓▓▓▓▓▓▓░░ %80 | ░░░░░░░░░░ %0 | ▓▓░░░░░░░░ %20 |
-| **Otonom Onarım** | Native Loop | Sınırlı | Yok |
-| **Bağlam Yönetimi** | VectorDB Search | Full Context | Basic Index |
-| **Yürütme Hızı** | High-Speed Bridge | Node.js | Heavy IDE |
-
-> **Analiz:** Claude Code 1000 satırlık bir dosyayı her küçük değişiklikte baştan okurken, MoonCode sadece ilgili semantik "chunk"ları çeker. Bu, orta ölçekli bir projede ayda **$200+** tasarruf demektir.
+Sadece kod önermekle kalmaz. Tüm kod tabanını okur, testleri yazar, derleme işlemini gerçekleştirir, hata loglarını (stack trace) analiz eder ve gerekli yamaları otonom olarak uygular.
 
 ---
 
-### █▓▒░ [ Teknik Mimari ] ░▒▓█
+## [ MİMARİ ]
 
-MoonCode, kurumsal seviyede güvenilirlik için 4 ana katmandan oluşur:
+Sistem, yürütme motorunun her zaman hafif kalmasını ve yoğun LLM operasyonları sırasında bile arayüzün akıcı olmasını sağlayan "decoupled" (ayrıştırılmış) bir monorepo yapısı üzerinde çalışır.
 
-#### 1. ┤ core ├
-Sistemin sinir merkezi.
-- **VectorDB:** Tüm repo'yu semantik olarak indeksler.
-- **AuditManager:** Her AI kararını ve dosya değişikliğini denetlenebilir şekilde loglar.
-- **Native Bridge:** Vektör hesaplamaları gibi ağır işleri Rust/WASM hızında koşturur.
-
-#### 2. ┤ engine ├
-Yürütücü beyin.
-- **Swarm Intelligence:** Mimar, Kodlayıcı ve Denetçi ajanlarının paralel işbirliği.
-- **Meta-Evolver:** Sistemin kendi darboğazlarını analiz eden öz-iyileştirme motoru.
-- **Auto-Healer:** Hata alındığında terminal loglarını analiz edip kodu düzelten döngü.
-
-#### 3. ┤ cli ├
-Kullanıcı arayüzü ve entegrasyon.
-- **High-Performance TUI:** Uzun kodlama seansları için optimize edilmiş, göz yormayan terminal arayüzü.
-- **Browser Bridge:** Chrome üzerinden canlı web araştırması ve otomasyon katmanı.
-
----
-
-### 🚀 [ Hızlı Kurulum ]
-
-```bash
-# Klonla ve İnşa Et
-git clone https://github.com/theayzek01/MoonCode.git
-cd MoonCode
-
-npm install
-npm run build
-npm install -g ./packages/cli
-
-# Başlat
-mooncode
+```json
+{
+  "packages": {
+    "core": "Sinir merkezi. VectorDB, Denetim Yönetimi ve Native FFI Köprülerini işler.",
+    "engine": "Yürütme beyni. Swarm (Sürü) mimarisini yönetir ve Meta-Evrim döngüsünü çalıştırır.",
+    "cli": "Yüksek performanslı arayüz. Tarayıcı Köprü Sunucusu ve yerel ortam bağlamaları.",
+    "tui": "Diferansiyel render katmanı. Sürekli veri akışında terminalin titremesini engeller."
+  }
+}
 ```
 
 ---
 
-### 🛠️ [ Komut Kütüphanesi ]
+## [ BENCHMARK & METRİKLER ]
 
-- ` /swarm `  ─ Devasa görevleri (örn: "Tüm CSS'i Tailwind'e çevir") parçalara böler.
-- ` /fix   `  ─ Projedeki hataları tarar ve testlerden geçene kadar otonom tamir eder.
-- ` /evolve`  ─ MoonCode'un kendi kodunu optimize ettiği meta-döngü.
-- ` /index `  ─ Yeni repo'lar için semantik vektör indekslemesi yapar.
-- ` /browser `─ Tarayıcı bağlantısını ve web otomasyonunu yönetir.
+Standart yapay zeka araçları, tüm dosyaları LLM'e göndererek devasa bir bağlam (context) israfı yaratır. MoonCode, **Semantik Bağlam Sıkıştırma (Context Compaction)** uygulayarak yalnızca VectorDB'den ilgili işlevsel parçaları çeker.
 
----
+```diff
+> PERFORMANS KARŞILAŞTIRMASI <
 
-### 🗺️ [ Yol Haritası (Roadmap) ]
+  [ Metrik ]                [ MoonCode ]         [ Claude Code ]      [ Cursor ]
+! Token Harcaması           Optimize (-%80)      Tüm Dosya            Kısmi
+! Otonom Düzeltme           Sonsuz Döngü         Sınırlı              Yok
+! Çalışma Ortamı            Native Terminal      Node.js              Electron IDE
+! Bağlam Motoru             Vector DB            Temel Arama          İndeksli
+```
 
-- [x] Swarm Multi-Agent Orchestration
-- [x] Semantic Context Compaction (VectorDB)
-- [x] Meta-Evolution Engine
-- [ ] **Native Rust Bridge Implementation (Hız +10x)**
-- [ ] **Collaborative Swarm (Birden fazla MoonCode instance işbirliği)**
-- [ ] **Direct Deployment Integrations (AWS/Vercel)**
+> **Verimlilik Notu:** 2000 satırlık bir dosyada tek bir fonksiyonu değiştirmek, MoonCode ile token maliyetinin çok küçük bir kısmına denk gelir. Sistem AST (Soyut Sözdizimi Ağacı) haritasını çıkarır, parçaları vektörize eder ve yalnızca düzenleme için gereken kesin bağımlılıkları LLM'e gönderir.
 
 ---
 
-### 💬 [ İletişim ]
+## [ KURULUM ]
 
-Sorunlarınız veya önerileriniz için topluluğumuza katılın:
+Mühendislik istasyonunu yerel makinenizde başlatmak için aşağıdaki derleme sekansını çalıştırın. Node.js >= 20.0.0 gerektirir.
 
-<p align="left">
-  <a href="https://discord.gg/kanser"><img src="https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white" /></a>
-  <a href="https://instagram.com/theayzek01"><img src="https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white" /></a>
-</p>
+```bash
+> Repoyu klonla
+$ git clone https://github.com/theayzek01/MoonCode.git
+$ cd MoonCode
+
+> Çekirdek motoru derle
+$ npm install
+$ npm run build
+
+> Global ortama bağla
+$ npm install -g ./packages/cli
+
+> İstasyonu başlat
+$ mooncode
+```
+
+---
+
+## [ KOMUT PROTOKOLLERİ ]
+
+İstasyona giriş yaptıktan sonra, yürütme akışını slash (/) komutları ile kontrol edersiniz.
+
+* `/swarm` | Karmaşık görevleri paralelleştirmek için çoklu ajan kümesini (Mimar, Kodlayıcı, İnceleyici) devreye sokar.
+* `/fix`   | Otonom kendi kendini iyileştirme döngüsünü tetikler. Derleyici hatalarını tarar ve onarır.
+* `/evolve`| MoonCode'un kendi mimarisini yeniden yapılandırmasına (refactor) olanak tanıyan meta-evrim motorunu etkinleştirir.
+* `/index` | Mevcut depo için semantik VectorDB indeksini sıfırdan oluşturur.
+* `/browser`| Web etkileşimi için MoonCode Chrome Eklentisine olan bağlantıyı yönetir.
+
+---
+
+## [ TELEMETRİ & GÜVENLİK ]
+
+Kurumsal düzeydeki operasyonlar mutlak şeffaflık gerektirir. MoonCode, katı bir yerel denetim iziyle çalışır. Her LLM kararı, dosya değişikliği ve terminal komutu yürütmesi, dahili `AuditManager` aracılığıyla güvenli bir şekilde günlüğe kaydedilir. Hiçbir veri gizlice dışarı aktarılmaz.
+
+---
+
+## [ AĞ & TOPLULUK ]
+
+Çekirdek ekiple ve diğer mühendislerle bağlantı kurun:
+
+* **[ Discord ]**  <https://discord.gg/kanser>
+* **[ Instagram ]** <https://instagram.com/theayzek01>
 
 ---
 
 <div align="center">
   <img src="assets/Moon-cli-logo.png" alt="MoonCode Logo" width="60" />
   <br />
-  <b>Hızlı hareket et. Sorunları çöz. Moon kal.</b>
+  <code>[ Hızlı hareket et. Sorunları çöz. Moon kal. ]</code>
   <br />
-  <sub>MIT © 2026 Ozen (theayzek01)</sub>
+  <br />
+  <sub>MIT License | Copyright (c) 2026 Ozen (theayzek01)</sub>
 </div>
