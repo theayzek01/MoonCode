@@ -2,26 +2,46 @@
   <img src="assets/Moon-cli-banner.png" alt="MoonCode" width="100%" />
 </div>
 
-# MoonCode
+<br>
+
+# ✦ MoonCode
 
 MoonCode, terminalden çıkmadan bütün projeyi yönetmeni sağlayan otonom bir mühendislik asistanıdır. 
 
 Sadece kod yazıp bırakmaz; projeni okur, testleri çalıştırır, hataları bulur ve sen onay verene kadar düzeltir. 
 
+<br>
+
 ---
 
-## Neden MoonCode?
+<br>
+
+## ❖ Neden MoonCode?
 
 Piyasada bir sürü AI aracı var (Cursor, Claude Code, Windsurf vb.). MoonCode'un onlardan farkı ne?
 
-* **Gerçek Otonomi:** Hata mı çıktı? Kodu yazar, testi koşturur, hata alırsa logları okuyup tekrar dener. Sen sadece en son çıkan doğru koda onay verirsin.
-* **Cebini Düşünür:** Diğer araçlar her soruda tüm projeyi yapay zekaya gönderip token (kredi) yakarken, MoonCode kendi içindeki filtreleme sistemiyle sadece gerekli dosyaları bulur. Ortalama %80 daha ucuzdur.
-* **Terminal Odaklı:** Ağır editörlere veya yavaş web arayüzlerine bağlı kalmazsın. Doğrudan terminalinde, çok hafif ve hızlı çalışır.
-* **Sürü Zekası (Swarm):** Büyük bir iş verdiğinde, arka planda mimar ve kodlayıcı ajanlar kendi aralarında iş bölümü yaparak paralel çalışır.
+<br>
+
+| Özellik | MoonCode | Diğer Araçlar |
+| :--- | :--- | :--- |
+| **Otonomi** | **✓** Tam Otonom (Kendi test eder, düzeltir) | **✕** Sadece Kod Önerir |
+| **Token Kullanımı** | **✓** Semantik Filtre (%80 Tasarruf) | **✕** Tüm Dosyayı Gönderir |
+| **Çalışma Ortamı** | **✓** Native Terminal (Çok Hafif) | **✕** Ağır IDE (Electron) |
+| **Sürü Zekası** | **✓** Paralel Ajanlar (Mimar, Coder) | **✕** Tekil Model |
+
+<br>
+
+**◈ Gerçek Otonomi:** Hata mı çıktı? Kodu yazar, testi koşturur, hata alırsa logları okuyup tekrar dener. Sen sadece en son çıkan doğru koda onay verirsin.
+
+**◈ Cebini Düşünür:** Diğer araçlar her soruda tüm projeyi yapay zekaya gönderip kredi yakarken, MoonCode kendi içindeki filtreleme sistemiyle sadece gerekli dosyaları bulur. Ortalama %80 daha ucuzdur.
+
+<br>
 
 ---
 
-## Kurulum
+<br>
+
+## ❖ Kurulum
 
 Sadece birkaç komutla çalışmaya hazır:
 
@@ -34,37 +54,51 @@ npm run build
 npm install -g ./packages/cli
 ```
 
+<br>
+
 ---
 
-## Nasıl Kullanılır?
+<br>
+
+## ❖ Nasıl Kullanılır?
 
 Terminale sadece `mooncode` yazman yeterli.
 
-1. **İsteğini söyle:** Örn: _"Kullanıcı giriş sistemini yaz ve testlerini ekle."_
-2. **Arkanı yaslan:** MoonCode dosyaları tarar, plan yapar ve kodu yazar.
-3. **Onayla:** Ekrana gelen değişiklikleri kontrol et, mantıklıysa terminalden onayla ve dosyalarına işlensin.
+**1 ▹ İsteğini söyle:** Örn: _"Kullanıcı giriş sistemini yaz ve testlerini ekle."_
+**2 ▹ Arkanı yaslan:** MoonCode dosyaları tarar, plan yapar ve kodu yazar.
+**3 ▹ Onayla:** Ekrana gelen değişiklikleri kontrol et, mantıklıysa terminalden onayla ve dosyalarına işlensin.
 
-**En Çok Kullanılan Komutlar:**
-* `/swarm` - Çok büyük bir özellik mi ekleyeceksin? Bu komut işi parçalara böler ve arka planda birden fazla ajana dağıtır.
-* `/fix` - Projendeki derleme veya linter hatalarını bulup otomatik olarak çözer.
-* `/browser` - MoonCode'un terminalden çıkmadan Google'da araştırma yapmasını veya web sitelerini okumasını sağlar.
+<br>
+
+### ✧ Sık Kullanılan Komutlar
+
+* **`/swarm`** ⏤ Çok büyük bir özellik mi ekleyeceksin? Bu komut işi parçalara böler ve arka planda birden fazla ajana dağıtır.
+* **`/fix`** ⏤ Projendeki derleme veya linter hatalarını bulup otomatik olarak çözer.
+* **`/browser`** ⏤ MoonCode'un terminalden çıkmadan webt'te araştırma yapmasını sağlar.
+
+<br>
 
 ---
 
-## İletişim & Topluluk
+<br>
+
+## ❖ İletişim & Topluluk
 
 Projeyle ilgili bir sorun yaşarsan, fikir vermek istersen veya sadece muhabbet etmek istersen buradayız:
 
 * **Discord:** [discord.gg/kanser](https://discord.gg/kanser)
 * **Instagram:** [@theayzek01](https://instagram.com/theayzek01)
 
+<br>
+
 ---
+
+<br>
 
 <div align="center">
   <img src="assets/Moon-cli-logo.png" alt="MoonCode Logo" width="60" />
-  <br />
+  <br><br>
   <b>Hızlı hareket et. Sorunları çöz. Moon kal.</b>
-  <br />
-  <br />
+  <br><br>
   <sub>MIT License | Copyright (c) 2026 Ozen (theayzek01)</sub>
 </div>
