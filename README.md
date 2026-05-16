@@ -23,6 +23,15 @@ mooncode
 
 ---
 
+### Nasıl Kullanılır?
+
+1. **Başlat:** Terminale `mooncode` yaz ve gir.
+2. **Sor:** Yapmak istediğin işi doğal dilde söyle (Örn: "Auth sistemindeki hatayı bul ve düzelt").
+3. **İzle:** MoonCode projeni tarar, çözüm üretir ve onayını bekler.
+4. **Onayla:** Çözüm mantıklıysa terminalden onay ver, MoonCode dosyalara uygulasın.
+
+---
+
 ### Öne Çıkanlar
 
 - **Self-Correction:** Kod hatalarını otonom tarar ve testlerden geçene kadar düzeltir.
