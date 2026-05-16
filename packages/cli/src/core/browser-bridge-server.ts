@@ -57,38 +57,58 @@ const clients = new Map<string, BrowserBridgeClient>();
 const pendingCommands = new Map<string, PendingCommand>();
 
 export function startBrowserBridgeServer(options: { port?: number; keepAlive?: boolean } = {}): BrowserBridgeStatus {
-	port = options.port ?? Number(process.env.MOON_BROWSER_BRIDGE_PORT || DEFAULT_PORT);
+	const preferredPort = options.port ?? Number(process.env.MOON_BROWSER_BRIDGE_PORT || DEFAULT_PORT);
+
 	if (server) return getBrowserBridgeStatus();
 
 	startupError = undefined;
-	server = createServer((req, res) => {
-		if (req.url === "/health") {
-			const body = JSON.stringify(getBrowserBridgeStatus());
-			res.writeHead(200, { "Content-Type": "application/json" });
-			res.end(body);
-			return;
-		}
-		res.writeHead(404);
-		res.end("not found");
-	});
+	let currentPort = preferredPort;
+	const maxAttempts = 10;
+	let attempts = 0;
 
-	server.on("upgrade", (req, socket) => handleUpgrade(req, socket));
-	server.on("error", (error: NodeJS.ErrnoException) => {
-		startupError = error.code === "EADDRINUSE" ? `Port ${port} is already in use` : error.message;
-		console.error(`[Moon Bridge Error] ${startupError}`);
-	});
+	const tryBind = (p: number) => {
+		const s = createServer((req, res) => {
+			if (req.url === "/health") {
+				const body = JSON.stringify(getBrowserBridgeStatus());
+				res.writeHead(200, { "Content-Type": "application/json" });
+				res.end(body);
+				return;
+			}
+			res.writeHead(404);
+			res.end("not found");
+		});
 
-	server.listen(port, "localhost", () => {
-		// Only log if not in TUI mode (stderr is safer than stdout)
-		if (!process.env.PI_TUI_MODE) {
-			console.error(`\n\x1b[32m[Moon] Browser Bridge is active on ws://127.0.0.1:${port}\x1b[0m`);
-			console.error(`\x1b[33m[Security] Session Token: ${sessionToken}\x1b[0m\n`);
-		}
-	});
+		s.on("upgrade", (req, socket) => handleUpgrade(req, socket));
 
-	if (!options.keepAlive) {
-		server.unref();
-	}
+		s.on("error", (error: NodeJS.ErrnoException) => {
+			if (error.code === "EADDRINUSE" && attempts < maxAttempts) {
+				attempts++;
+				currentPort++;
+				s.close();
+				tryBind(currentPort);
+			} else {
+				startupError =
+					error.code === "EADDRINUSE"
+						? `Port ${p} is already in use (tried ${attempts + 1} ports)`
+						: error.message;
+				console.error(`[Moon Bridge Error] ${startupError}`);
+			}
+		});
+
+		s.listen(p, "127.0.0.1", () => {
+			server = s;
+			port = p;
+			if (!process.env.PI_TUI_MODE) {
+				console.error(`\n\x1b[32m[Moon] Browser Bridge is active on ws://127.0.0.1:${p}\x1b[0m`);
+			}
+			if (!options.keepAlive) {
+				server.unref();
+			}
+		});
+	};
+
+	tryBind(currentPort);
+
 	return getBrowserBridgeStatus();
 }
 
