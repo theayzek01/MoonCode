@@ -28,7 +28,7 @@ export class MoonCodeHeaderComponent extends Container {
 
 		this.addChild(new Text(this.applyGradient(asciiLogo), 1, 0));
 
-		const versionText = theme.fg("dim", " ✦ ") + theme.fg("accent", "VERSION 2026-3") + theme.fg("dim", " ✦ ");
+		const versionText = theme.fg("dim", " ✦ ") + theme.fg("accent", "VERSION 2026-4") + theme.fg("dim", " ✦ ");
 		this.addChild(new Text(versionText, 1, 0));
 
 		this.addChild(new Spacer(1));
@@ -38,9 +38,9 @@ export class MoonCodeHeaderComponent extends Container {
 
 	private applyGradient(text: string): string {
 		const lines = text.split("\n");
-		// Premium Cyberpunk Palette (Cyan to Magenta)
-		const color1 = { r: 5, g: 213, b: 255 }; // Electric Cyan
-		const color2 = { r: 255, g: 0, b: 153 }; // Deep Magenta
+		// Red Palette (Light Red to Dark Red)
+		const color1 = { r: 255, g: 77, b: 77 }; // Light Red
+		const color2 = { r: 139, g: 0, b: 0 }; // Dark Red
 
 		const maxLen = Math.max(...lines.map((l) => l.length));
 

@@ -1,5 +1,5 @@
-const BRIDGE_URL = "ws://127.0.0.1:3133/ws";
-const VERSION = "2026.3.0";
+const BRIDGE_URL = "ws://localhost:3133/ws";
+const VERSION = "2026.4.0";
 const HEARTBEAT_INTERVAL_MS = 30000;
 const RECONNECT_DELAY_MS = 3000;
 const COMMAND_TIMEOUT_MS = 12000;

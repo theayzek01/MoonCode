@@ -78,7 +78,7 @@ export function startBrowserBridgeServer(options: { port?: number; keepAlive?: b
 		console.error(`[Moon Bridge Error] ${startupError}`);
 	});
 
-	server.listen(port, "127.0.0.1", () => {
+	server.listen(port, "localhost", () => {
 		// Only log if not in TUI mode (stderr is safer than stdout)
 		if (!process.env.PI_TUI_MODE) {
 			console.error(`\n\x1b[32m[Moon] Browser Bridge is active on ws://127.0.0.1:${port}\x1b[0m`);
