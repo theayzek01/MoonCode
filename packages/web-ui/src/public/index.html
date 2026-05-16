@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="tr">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="theme-color" content="#0f172a" />
+	<title>Mooncli v12.05.2026-v2 · Command Center</title>
+	<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+	<div class="cursor-glow" aria-hidden="true"></div>
+	<div id="app">
+		<header class="topbar glass">
+			<div class="brand">
+				<b>Mooncli</b>
+				<span>v12.05.2026-v2 · command center</span>
+			</div>
+			<nav>
+				<span class="pill">sessions</span>
+				<span class="pill">chat</span>
+				<span class="pill">stats</span>
+			</nav>
+			<button id="themeToggle" class="btn" type="button">Tema</button>
+		</header>
+
+		<aside class="glass">
+			<h1>Sessions</h1>
+			<p class="hint">Geçmiş oturumlardan birini seç.</p>
+			<div id="sessions"></div>
+		</aside>
+
+		<main class="glass">
+			<div class="panel-meta">
+				<strong>Live</strong>
+				<span id="liveMouse" class="muted">Mouse: x:0 y:0</span>
+			</div>
+			<div id="chat" class="panel empty">Oturum seç</div>
+		</main>
+
+		<section class="glass">
+			<h2>Stats</h2>
+			<pre id="stats">-</pre>
+		</section>
+	</div>
+	<script src="/app.js"></script>
+</body>
+</html>

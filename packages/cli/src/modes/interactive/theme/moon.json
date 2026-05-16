@@ -1,0 +1,88 @@
+{
+	"$schema": "https://raw.githubusercontent.com/badlogic/MoonCode-mono/main/packages/cli/src/modes/interactive/theme/theme-schema.json",
+	"name": "moon",
+	"vars": {
+		"moonBg": "#0c0e1a",
+		"moonFg": "#dde5ff",
+		"moonAccent": "#7c8fff",
+		"moonSecondary": "#a78bfa",
+		"moonTertiary": "#f0a86e",
+		"moonBorder": "#2a3060",
+		"moonMuted": "#5a6899",
+		"moonDim": "#323a5a",
+		"moonSuccess": "#6ee7a0",
+		"moonError": "#f87272",
+		"moonWarning": "#fbbf24",
+		"selectedBg": "#141828",
+		"userMsgBg": "#0f1220",
+		"toolPendingBg": "#0d1020",
+		"toolSuccessBg": "#0a1218",
+		"toolErrorBg": "#140e1c",
+		"customMsgBg": "#0f1022"
+	},
+	"colors": {
+		"accent": "moonAccent",
+		"border": "moonBorder",
+		"borderAccent": "moonAccent",
+		"borderMuted": "moonDim",
+		"success": "moonSuccess",
+		"error": "moonError",
+		"warning": "moonWarning",
+		"muted": "moonMuted",
+		"dim": "moonDim",
+		"text": "moonFg",
+		"thinkingText": "moonSecondary",
+
+		"selectedBg": "selectedBg",
+		"userMessageBg": "userMsgBg",
+		"userMessageText": "moonFg",
+		"customMessageBg": "customMsgBg",
+		"customMessageText": "moonFg",
+		"customMessageLabel": "moonSecondary",
+		"toolPendingBg": "toolPendingBg",
+		"toolSuccessBg": "toolSuccessBg",
+		"toolErrorBg": "toolErrorBg",
+		"toolTitle": "moonTertiary",
+		"toolOutput": "moonMuted",
+
+		"mdHeading": "moonAccent",
+		"mdLink": "moonSecondary",
+		"mdLinkUrl": "moonMuted",
+		"mdCode": "moonTertiary",
+		"mdCodeBlock": "moonFg",
+		"mdCodeBlockBorder": "moonBorder",
+		"mdQuote": "moonMuted",
+		"mdQuoteBorder": "moonSecondary",
+		"mdHr": "moonBorder",
+		"mdListBullet": "moonTertiary",
+
+		"toolDiffAdded": "moonSuccess",
+		"toolDiffRemoved": "moonError",
+		"toolDiffContext": "moonMuted",
+
+		"syntaxComment": "#3d4d7a",
+		"syntaxKeyword": "#a78bfa",
+		"syntaxFunction": "#7c8fff",
+		"syntaxVariable": "#93c5fd",
+		"syntaxString": "#6ee7a0",
+		"syntaxNumber": "#f0a86e",
+		"syntaxType": "#67e8f9",
+		"syntaxOperator": "#dde5ff",
+		"syntaxPunctuation": "#5a6899",
+
+		"thinkingOff": "moonDim",
+		"thinkingMinimal": "#252e52",
+		"thinkingLow": "#2a3870",
+		"thinkingMedium": "#303080",
+		"thinkingHigh": "#3a2880",
+		"thinkingXhigh": "#4a1890",
+
+		"bashMode": "moonWarning"
+	},
+	"export": {
+		"pageBg": "#0c0e1a",
+		"cardBg": "#141828",
+		"infoBg": "#181030"
+	}
+}
+
