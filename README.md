@@ -30,6 +30,15 @@ mooncode
 3. **İzle:** MoonCode projeni tarar, çözüm üretir ve onayını bekler.
 4. **Onayla:** Çözüm mantıklıysa terminalden onay ver, MoonCode dosyalara uygulasın.
 
+### Neden Diğerleri Değil?
+
+| Özellik | MoonCode | Diğerleri (Cursor/Bolt vb.) |
+|---|---|---|
+| **Otonomi** | Tam otonom, testleri kendi koşturur. | Genelde sadece kod önerir. |
+| **Bağlam Yönetimi** | Semantic Filter ile %80 token tasarrufu. | Tüm dosyaları okuyup kredi bitirir. |
+| **Self-Correction** | Kendi hatasını bulup düzeltene kadar durmaz. | Hatayı senin bulup söylemen gerekir. |
+| **Terminal First** | Tamamen TUI odaklı, hafif ve hızlı. | Ağır IDE'lere gömülüdür. |
+
 ---
 
 ### Öne Çıkanlar
