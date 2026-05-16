@@ -8,7 +8,7 @@ const errorLogPath = join(tmpdir(), "moodcli-browser-smoke-errors.log");
 
 try {
 	await build({
-		entryPoints: ["scripts/browser-smoke-entry.ts"],
+		entryPoints: ["tools/scripts/browser-smoke-entry.ts"],
 		bundle: true,
 		platform: "browser",
 		format: "esm",
