@@ -9,7 +9,9 @@ import type { ExtensionFactory, ToolExecutionStartEvent } from "../../src/core/e
  * Provides a /rewind command to restore files with a single click.
  */
 const shadowGitExtension: ExtensionFactory = (api) => {
-	api.ui.setStatus("shadow", "☾ Shadow Protection: Active");
+	api.on("session_start", async (_event, ctx) => {
+		ctx.ui.setStatus("shadow", "☾ Shadow Protection: Active");
+	});
 
 	api.on("tool_execution_start", async (event: ToolExecutionStartEvent) => {
 		const { toolName, args } = event;

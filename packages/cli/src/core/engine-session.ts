@@ -1907,15 +1907,16 @@ export class EngineSession {
 
 		const normalized = text.toLowerCase();
 		const detailedPattern =
-			/\b(xhigh|detayl[ıi]|kapsaml[ıi]|mimari|analiz|debug|hata ay[ıi]kla|security|g[üu]venlik|refactor|tasarla|plan|neden|t[üu]m proje|performans|optimi[sz]e)\b/i;
+			/\b(xhigh|detayl[ıi]|kapsaml[ıi]|mimari|analiz|debug|hata ay[ıi]kla|security|g[üu]venlik|refactor|tasarla|plan|neden|t[üu]m proje|performans|optimi[sz]e|apex|deepthink|core|mcp|swarm|evolve|tui)\b/i;
 		const executionPattern =
-			/\b(build|test|lint|format|commit|push|publish|s[üu]r[üu]m|version|yaz|ekle|de[ğg]i[şs]tir|d[üu]zelt|sil|rename)\b/i;
+			/\b(build|test|lint|format|commit|push|publish|s[üu]r[üu]m|version|yaz|ekle|de[ğg]i[şs]tir|d[üu]zelt|sil|rename|fix|repair)\b/i;
 
 		if (detailedPattern.test(normalized)) {
+			// S3 - S4 level triggers
 			return "xhigh";
 		}
 		if (executionPattern.test(normalized)) {
-			return "minimal";
+			return "medium";
 		}
 		return "low";
 	}

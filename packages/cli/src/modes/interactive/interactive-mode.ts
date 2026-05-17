@@ -2510,6 +2510,16 @@ export class InteractiveMode {
 			if (!text) return;
 
 			// Handle commands
+			if (text === "/status") {
+				this.editor.setText("");
+				await this.handleStatusDiagnosticsCommand();
+				return;
+			}
+			if (text === "/help") {
+				this.editor.setText("");
+				this.handleHelpCommand();
+				return;
+			}
 			if (text === "/metrics") {
 				if (this.activeMetricsChart) {
 					this.activeMetricsChart.stop();
@@ -5901,6 +5911,118 @@ export class InteractiveMode {
 		} catch (err: any) {
 			this.showError(`Marketplace hata: ${err.message}`);
 		}
+	}
+
+	private handleHelpCommand(): void {
+		let info = `\n${theme.bold(theme.fg("accent", "╭─ MoonCode Premium Grouped Commands ──────────────────────╮"))}\n`;
+
+		const categories = {
+			"Session & Context": [
+				{ name: "/new", desc: "Start a clean session" },
+				{ name: "/resume", desc: "Resume saved session" },
+				{ name: "/name", desc: "Rename session" },
+				{ name: "/session", desc: "Show session info and stats" },
+				{ name: "/context", desc: "Show context and token usage" },
+				{ name: "/compact", desc: "Compress session context" },
+				{ name: "/fork", desc: "Fork from a message" },
+				{ name: "/clone", desc: "Clone session in current location" },
+				{ name: "/tree", desc: "Navigate session tree" },
+				{ name: "/export", desc: "Export session (.html or .jsonl)" },
+				{ name: "/import", desc: "Import a session from JSONL" },
+				{ name: "/share", desc: "Share session as a GitHub Gist" },
+				{ name: "/copy", desc: "Copy the last response" },
+			],
+			"Model & Settings": [
+				{ name: "/models", desc: "Select a model" },
+				{ name: "/scoped-models", desc: "Edit quick-switch models" },
+				{ name: "/settings", desc: "Open settings" },
+				{ name: "/autothink", desc: "Toggle automatic thinking level" },
+				{ name: "/login", desc: "Configure Provider API keys" },
+			],
+			Modes: [
+				{ name: "/plan", desc: "Toggle plan mode" },
+				{ name: "/automation", desc: "Toggle automation mode" },
+				{ name: "/agentmode", desc: "Toggle agent mode" },
+				{ name: "/zen", desc: "Toggle Zen mode (hide UI elements)" },
+			],
+			"Tools & Swarm": [
+				{ name: "/init", desc: "Create project config files" },
+				{ name: "/ship", desc: "Ship changes (branch/commit/push/PR)" },
+				{ name: "/diff", desc: "Show git changes" },
+				{ name: "/index", desc: "Index codebase for semantic search" },
+				{ name: "/browser", desc: "Chrome extension status and control" },
+				{ name: "/mcp", desc: "List connected MCP servers" },
+				{ name: "/swarm", desc: "Trigger Multi-Agent Swarm" },
+				{ name: "/fix", desc: "Run Autonomous Auto-Healer" },
+				{ name: "/evolve", desc: "Trigger Meta-Evolution (Self-Improvement Loop)" },
+			],
+			"Diagnostics & System": [
+				{ name: "/status", desc: "Show detailed runtime diagnostics panel" },
+				{ name: "/metrics", desc: "Show system metrics and token usage" },
+				{ name: "/update", desc: "Update MoonCode to latest version" },
+				{ name: "/reload", desc: "Reload system components" },
+				{ name: "/hotkeys", desc: "List keyboard shortcuts" },
+				{ name: "/quit", desc: "Quit MoonCode" },
+			],
+		};
+
+		for (const [catName, list] of Object.entries(categories)) {
+			info += `  ${theme.bold(theme.fg("success", `[ ${catName} ]`))}\n`;
+			for (const cmd of list) {
+				const paddedName = cmd.name.padEnd(16);
+				info += `    ${theme.fg("accent", paddedName)} ${theme.fg("text", cmd.desc)}\n`;
+			}
+			info += `\n`;
+		}
+
+		info += `${theme.bold(theme.fg("accent", "╰──────────────────────────────────────────────────────────╯"))}\n`;
+		this.chatContainer.addChild(new Spacer(1));
+		this.chatContainer.addChild(new Text(info, 1, 0));
+		this.ui.requestRender();
+	}
+
+	private async handleStatusDiagnosticsCommand(): Promise<void> {
+		const stats = this.session.getSessionStats();
+		const currentModel = this.session.model;
+		const contextUsage = this.session.getContextUsage();
+		const memUsage = process.memoryUsage().heapUsed / 1024 / 1024;
+		const branch = this.footerDataProvider.getGitBranch() || "N/A";
+
+		let totalCost = 0;
+		for (const entry of this.session.sessionManager.getEntries()) {
+			if (entry.type === "message" && entry.message.role === "assistant") {
+				totalCost += entry.message.usage.cost.total;
+			}
+		}
+
+		let info = `\n${theme.bold(theme.fg("accent", "╭─ MoonCode Apex Diagnostics Panel ───────────────────────╮"))}\n`;
+
+		info += `  ${theme.bold(theme.fg("success", "[ Agent Configuration ]"))}\n`;
+		info += `    Apex Mode:          ${theme.fg("accent", "Active ✦")}\n`;
+		info += `    DeepThink:          ${theme.fg("accent", this.session.supportsThinking() ? "Enabled" : "Disabled")}\n`;
+		info += `    AutoThink:          ${theme.fg("accent", this.session.getAutoThinkEnabled() ? "Enabled" : "Disabled")}\n`;
+		info += `    Thinking Level:     ${theme.fg("accent", this.session.thinkingLevel || "N/A")}\n`;
+		info += `    Active Tools:       ${theme.fg("accent", this.session.getActiveToolNames().join(", "))}\n\n`;
+
+		info += `  ${theme.bold(theme.fg("success", "[ Model Metrics ]"))}\n`;
+		info += `    Provider:           ${theme.fg("text", currentModel?.provider || "N/A")}\n`;
+		info += `    Model:              ${theme.fg("text", currentModel?.id || "N/A")}\n`;
+		info += `    Context Limit:      ${theme.fg("text", (currentModel?.contextWindow || 0).toLocaleString())}\n`;
+		info += `    Context Used:       ${theme.fg("text", contextUsage ? `${contextUsage.percent.toFixed(1)}%` : "0%")}\n`;
+		info += `    Total Cost:         ${theme.fg("accent", `$${totalCost.toFixed(3)}`)}\n\n`;
+
+		info += `  ${theme.bold(theme.fg("success", "[ Project & Runtime ]"))}\n`;
+		info += `    Git Branch:         ${theme.fg("text", branch)}\n`;
+		info += `    Working Directory:  ${theme.fg("text", this.session.sessionManager.getCwd())}\n`;
+		info += `    Memory Heap:        ${theme.fg("text", `${memUsage.toFixed(1)} MB`)}\n`;
+		info += `    Browser Clients:    ${theme.fg("text", this.session.getBrowserBridgeStatus().clients.toString())}\n`;
+		info += `    Oturum Sayısı:      ${theme.fg("text", stats.userMessages.toString())} User / ${stats.assistantMessages.toString()} Assistant\n`;
+
+		info += `${theme.bold(theme.fg("accent", "╰──────────────────────────────────────────────────────────╯"))}\n`;
+
+		this.chatContainer.addChild(new Spacer(1));
+		this.chatContainer.addChild(new Text(info, 1, 0));
+		this.ui.requestRender();
 	}
 
 	private async handleUpdateCommand(args: string): Promise<void> {

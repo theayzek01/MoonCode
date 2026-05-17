@@ -9411,13 +9411,13 @@ export const MODELS = {
 			reasoning: true,
 			input: ["text", "image"],
 			cost: {
-				input: 0.06,
-				output: 0.33,
+				input: 0.07,
+				output: 0.33999999999999997,
 				cacheRead: 0,
 				cacheWrite: 0,
 			},
 			contextWindow: 262144,
-			maxTokens: 4096,
+			maxTokens: 16384,
 		} satisfies Model<"openai-completions">,
 		"google/gemma-4-26b-a4b-it:free": {
 			id: "google/gemma-4-26b-a4b-it:free",
@@ -10007,12 +10007,12 @@ export const MODELS = {
 			input: ["text"],
 			cost: {
 				input: 0.02,
-				output: 0.03,
+				output: 0.04,
 				cacheRead: 0,
 				cacheWrite: 0,
 			},
 			contextWindow: 131072,
-			maxTokens: 4096,
+			maxTokens: 16384,
 		} satisfies Model<"openai-completions">,
 		"mistralai/mistral-saba": {
 			id: "mistralai/mistral-saba",
@@ -10295,13 +10295,13 @@ export const MODELS = {
 			reasoning: true,
 			input: ["text"],
 			cost: {
-				input: 0.09,
-				output: 0.44999999999999996,
+				input: 0.09999999999999999,
+				output: 0.5,
 				cacheRead: 0,
 				cacheWrite: 0,
 			},
 			contextWindow: 1000000,
-			maxTokens: 4096,
+			maxTokens: 16384,
 		} satisfies Model<"openai-completions">,
 		"nvidia/nemotron-3-super-120b-a12b:free": {
 			id: "nvidia/nemotron-3-super-120b-a12b:free",
@@ -11124,12 +11124,12 @@ export const MODELS = {
 			input: ["text"],
 			cost: {
 				input: 0.039,
-				output: 0.18,
+				output: 0.19,
 				cacheRead: 0,
 				cacheWrite: 0,
 			},
 			contextWindow: 131072,
-			maxTokens: 4096,
+			maxTokens: 131072,
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-oss-120b:free": {
 			id: "openai/gpt-oss-120b:free",

@@ -18,7 +18,9 @@ import type { ExtensionFactory, ToolExecutionStartEvent } from "../../src/core/e
  * Provides a /rewind command to restore files with a single click.
  */
 const shadowGitExtension: ExtensionFactory = (api) => {
-	api.ui.setStatus("shadow", "◆ Shadow: Active");
+	api.on("session_start", async (_event, ctx) => {
+		ctx.ui.setStatus("shadow", "◆ Shadow: Active");
+	});
 
 	// Auto-cleanup: Keep only last 100 snapshots
 	const cleanupShadows = (shadowDir: string) => {
@@ -37,7 +39,7 @@ const shadowGitExtension: ExtensionFactory = (api) => {
 		} catch (_e) {}
 	};
 
-	const getDiff = (oldContent: string, newContent: string): string => {
+	const getDiff = (oldContent: string, newContent: string, theme: any): string => {
 		const oldLines = oldContent.split("\n");
 		const newLines = newContent.split("\n");
 		const diff: string[] = [];
@@ -132,7 +134,7 @@ const shadowGitExtension: ExtensionFactory = (api) => {
 			if (existsSync(bakPath) && existsSync(meta.originalPath)) {
 				const current = readFileSync(meta.originalPath, "utf-8");
 				const shadow = readFileSync(bakPath, "utf-8");
-				const diff = getDiff(current, shadow);
+				const diff = getDiff(current, shadow, context.ui.theme);
 
 				if (diff) {
 					context.ui.notify(`Diff for ${meta.fileName}:\n${diff}`, "info");
