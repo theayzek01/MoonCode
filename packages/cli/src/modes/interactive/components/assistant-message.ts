@@ -18,6 +18,9 @@ export class AssistantMessageComponent extends Container {
 	private lastMessage?: AssistantMessage;
 	private hasToolCalls = false;
 
+	private cachedWidth?: number;
+	private cachedLines?: string[];
+
 	constructor(
 		message?: AssistantMessage,
 		hideThinkingBlock = false,
@@ -41,6 +44,8 @@ export class AssistantMessageComponent extends Container {
 
 	override invalidate(): void {
 		super.invalidate();
+		this.cachedWidth = undefined;
+		this.cachedLines = undefined;
 		if (this.lastMessage) {
 			this.updateContent(this.lastMessage);
 		}
@@ -48,6 +53,8 @@ export class AssistantMessageComponent extends Container {
 
 	setHideThinkingBlock(hide: boolean): void {
 		this.hideThinkingBlock = hide;
+		this.cachedWidth = undefined;
+		this.cachedLines = undefined;
 		if (this.lastMessage) {
 			this.updateContent(this.lastMessage);
 		}
@@ -55,24 +62,37 @@ export class AssistantMessageComponent extends Container {
 
 	setHiddenThinkingLabel(label: string): void {
 		this.hiddenThinkingLabel = label;
+		this.cachedWidth = undefined;
+		this.cachedLines = undefined;
 		if (this.lastMessage) {
 			this.updateContent(this.lastMessage);
 		}
 	}
 
 	override render(width: number): string[] {
+		if (this.cachedLines && this.cachedWidth === width) {
+			return this.cachedLines;
+		}
+
 		const lines = super.render(width);
 		if (this.hasToolCalls || lines.length === 0) {
+			this.cachedWidth = width;
+			this.cachedLines = lines;
 			return lines;
 		}
 
-		lines[0] = OSC133_ZONE_START + lines[0];
-		lines[lines.length - 1] = OSC133_ZONE_END + OSC133_ZONE_FINAL + lines[lines.length - 1];
-		return lines;
+		const result = [...lines];
+		result[0] = OSC133_ZONE_START + result[0];
+		result[result.length - 1] = OSC133_ZONE_END + OSC133_ZONE_FINAL + result[result.length - 1];
+		this.cachedWidth = width;
+		this.cachedLines = result;
+		return result;
 	}
 
 	updateContent(message: AssistantMessage): void {
 		this.lastMessage = message;
+		this.cachedWidth = undefined;
+		this.cachedLines = undefined;
 
 		const hasVisibleContent = message.content.some(
 			(c) => (c.type === "text" && c.text.trim()) || (c.type === "thinking" && c.thinking.trim()),
@@ -80,7 +100,7 @@ export class AssistantMessageComponent extends Container {
 
 		// Initialize label if needed
 		if (hasVisibleContent && this.contentContainer.children.length === 0) {
-			this.contentContainer.addChild(new Text(theme.bold(theme.fg("accent", "◈ MoonCode")), 1, 0));
+			this.contentContainer.addChild(new Text(theme.bold(theme.fg("accent", "✦ MoonCode")), 1, 0));
 		}
 
 		// Keep track of which content blocks we've rendered
@@ -88,9 +108,6 @@ export class AssistantMessageComponent extends Container {
 
 		for (let i = 0; i < message.content.length; i++) {
 			const content = message.content[i];
-			const _hasVisibleContentAfter = message.content
-				.slice(i + 1)
-				.some((c) => (c.type === "text" && c.text.trim()) || (c.type === "thinking" && c.thinking.trim()));
 
 			if (content.type === "text" && content.text.trim()) {
 				const text = content.text.trim();
@@ -146,11 +163,7 @@ export class AssistantMessageComponent extends Container {
 					message.errorMessage && message.errorMessage !== "Request was aborted"
 						? message.errorMessage
 						: "Operation cancelled";
-				if (hasVisibleContent) {
-					this.contentContainer.addChild(new Spacer(1));
-				} else {
-					this.contentContainer.addChild(new Spacer(1));
-				}
+				this.contentContainer.addChild(new Spacer(1));
 				this.contentContainer.addChild(new Text(theme.fg("error", abortMessage), 1, 0));
 			} else if (message.stopReason === "error") {
 				const errorMsg = message.errorMessage || "Bilinmeyen hata";

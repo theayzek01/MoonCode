@@ -638,7 +638,7 @@ export class InteractiveMode {
 				hint("app.tools.expand", "yardim"),
 			].join(theme.fg("dim", " • "));
 
-			this.builtInHeader = new MoonCodeHeaderComponent();
+			this.builtInHeader = new MoonCodeHeaderComponent(this.session, this.footerDataProvider);
 
 			// Setup UI layout
 			this.headerContainer.addChild(this.builtInHeader);
@@ -5991,34 +5991,39 @@ export class InteractiveMode {
 		let totalCost = 0;
 		for (const entry of this.session.sessionManager.getEntries()) {
 			if (entry.type === "message" && entry.message.role === "assistant") {
-				totalCost += entry.message.usage.cost.total;
+				const costVal = entry.message.usage?.cost?.total;
+				if (typeof costVal === "number" && Number.isFinite(costVal)) {
+					totalCost += costVal;
+				}
 			}
 		}
 
-		let info = `\n${theme.bold(theme.fg("accent", "╭─ MoonCode Apex Diagnostics Panel ───────────────────────╮"))}\n`;
+		let info = `\n${theme.bold(theme.fg("accent", "✦ MOONCODE CONTROL CENTER"))}\n\n`;
 
-		info += `  ${theme.bold(theme.fg("success", "[ Agent Configuration ]"))}\n`;
-		info += `    Apex Mode:          ${theme.fg("accent", "Active ✦")}\n`;
-		info += `    DeepThink:          ${theme.fg("accent", this.session.supportsThinking() ? "Enabled" : "Disabled")}\n`;
-		info += `    AutoThink:          ${theme.fg("accent", this.session.getAutoThinkEnabled() ? "Enabled" : "Disabled")}\n`;
-		info += `    Thinking Level:     ${theme.fg("accent", this.session.thinkingLevel || "N/A")}\n`;
-		info += `    Active Tools:       ${theme.fg("accent", this.session.getActiveToolNames().join(", "))}\n\n`;
+		info += `  ${theme.bold(theme.fg("success", "■ AGENT"))}\n`;
+		info += `    Apex Mode:          ${theme.fg("accent", "Active")}\n`;
+		info += `    DeepThink:          ${theme.fg("text", this.session.supportsThinking() ? "Enabled" : "Disabled")}\n`;
+		info += `    AutoThink:          ${theme.fg("text", this.session.getAutoThinkEnabled() ? "Enabled" : "Disabled")}\n`;
+		info += `    Thinking Level:     ${theme.fg("text", this.session.thinkingLevel || "N/A")}\n`;
+		const activeTools = this.session.getActiveToolNames().join(", ") || "None";
+		info += `    Active Tools:       ${theme.fg("text", activeTools)}\n\n`;
 
-		info += `  ${theme.bold(theme.fg("success", "[ Model Metrics ]"))}\n`;
+		info += `  ${theme.bold(theme.fg("success", "■ MODEL & METRICS"))}\n`;
 		info += `    Provider:           ${theme.fg("text", currentModel?.provider || "N/A")}\n`;
 		info += `    Model:              ${theme.fg("text", currentModel?.id || "N/A")}\n`;
-		info += `    Context Limit:      ${theme.fg("text", (currentModel?.contextWindow || 0).toLocaleString())}\n`;
-		info += `    Context Used:       ${theme.fg("text", contextUsage ? `${contextUsage.percent.toFixed(1)}%` : "0%")}\n`;
+		const ctxLimit = currentModel?.contextWindow ? currentModel.contextWindow.toLocaleString() : "N/A";
+		const ctxUsed = contextUsage ? `${contextUsage.percent.toFixed(1)}%` : "0%";
+		info += `    Context Limit:      ${theme.fg("text", ctxLimit)}\n`;
+		info += `    Context Used:       ${theme.fg("text", ctxUsed)}\n`;
 		info += `    Total Cost:         ${theme.fg("accent", `$${totalCost.toFixed(3)}`)}\n\n`;
 
-		info += `  ${theme.bold(theme.fg("success", "[ Project & Runtime ]"))}\n`;
+		info += `  ${theme.bold(theme.fg("success", "■ PROJECT & RUNTIME"))}\n`;
+		info += `    Working Dir:        ${theme.fg("text", this.session.sessionManager.getCwd())}\n`;
 		info += `    Git Branch:         ${theme.fg("text", branch)}\n`;
-		info += `    Working Directory:  ${theme.fg("text", this.session.sessionManager.getCwd())}\n`;
 		info += `    Memory Heap:        ${theme.fg("text", `${memUsage.toFixed(1)} MB`)}\n`;
-		info += `    Browser Clients:    ${theme.fg("text", this.session.getBrowserBridgeStatus().clients.toString())}\n`;
-		info += `    Oturum Sayısı:      ${theme.fg("text", stats.userMessages.toString())} User / ${stats.assistantMessages.toString()} Assistant\n`;
-
-		info += `${theme.bold(theme.fg("accent", "╰──────────────────────────────────────────────────────────╯"))}\n`;
+		const browserCount = this.session.getBrowserBridgeStatus().clients;
+		info += `    Browser Bridge:     ${theme.fg("text", `${browserCount} client${browserCount === 1 ? "" : "s"} connected`)}\n`;
+		info += `    Session Stats:      ${theme.fg("text", `${stats.userMessages} User / ${stats.assistantMessages} Assistant`)}\n`;
 
 		this.chatContainer.addChild(new Spacer(1));
 		this.chatContainer.addChild(new Text(info, 1, 0));

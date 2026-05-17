@@ -18,6 +18,9 @@ export class CustomMessageComponent extends Container {
 	private markdownTheme: MarkdownTheme;
 	private _expanded = false;
 
+	private cachedWidth?: number;
+	private cachedLines?: string[];
+
 	constructor(
 		message: CustomMessage<unknown>,
 		customRenderer?: MessageRenderer,
@@ -45,10 +48,24 @@ export class CustomMessageComponent extends Container {
 
 	override invalidate(): void {
 		super.invalidate();
+		this.cachedWidth = undefined;
+		this.cachedLines = undefined;
 		this.rebuild();
 	}
 
+	override render(width: number): string[] {
+		if (this.cachedLines && this.cachedWidth === width) {
+			return this.cachedLines;
+		}
+		const lines = super.render(width);
+		this.cachedWidth = width;
+		this.cachedLines = lines;
+		return lines;
+	}
+
 	private rebuild(): void {
+		this.cachedWidth = undefined;
+		this.cachedLines = undefined;
 		// Remove previous content component
 		if (this.customComponent) {
 			this.removeChild(this.customComponent);

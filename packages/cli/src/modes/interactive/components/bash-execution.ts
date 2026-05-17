@@ -65,6 +65,9 @@ export class BashExecutionComponent extends Container {
 		this.addChild(new DynamicBorder(borderColor));
 	}
 
+	private cachedWidth?: number;
+	private cachedLines?: string[];
+
 	/**
 	 * Set whether the output is expanded (shows full output) or collapsed (preview only).
 	 */
@@ -75,7 +78,19 @@ export class BashExecutionComponent extends Container {
 
 	override invalidate(): void {
 		super.invalidate();
+		this.cachedWidth = undefined;
+		this.cachedLines = undefined;
 		this.updateDisplay();
+	}
+
+	override render(width: number): string[] {
+		if (this.cachedLines && this.cachedWidth === width) {
+			return this.cachedLines;
+		}
+		const lines = super.render(width);
+		this.cachedWidth = width;
+		this.cachedLines = lines;
+		return lines;
 	}
 
 	appendOutput(chunk: string): void {
@@ -118,6 +133,8 @@ export class BashExecutionComponent extends Container {
 	}
 
 	private updateDisplay(): void {
+		this.cachedWidth = undefined;
+		this.cachedLines = undefined;
 		// Apply truncation for Provider context limits (same limits as bash tool)
 		const fullOutput = this.outputLines.join("\n");
 		const contextTruncation = truncateTail(fullOutput, {

@@ -200,6 +200,7 @@ interface LayoutLine {
 
 export interface EditorTheme {
 	borderColor: (str: string) => string;
+	borderAccentColor?: (str: string) => string;
 	selectList: SelectListTheme;
 }
 
@@ -237,6 +238,7 @@ export class Editor implements Component, Focusable {
 
 	// Border color (can be changed dynamically)
 	public borderColor: (str: string) => string;
+	public borderAccentColor: (str: string) => string;
 
 	// Autocomplete support
 	private autocompleteProvider?: AutocompleteProvider;
@@ -290,6 +292,7 @@ export class Editor implements Component, Focusable {
 		this.tui = tui;
 		this.theme = theme;
 		this.borderColor = theme.borderColor;
+		this.borderAccentColor = theme.borderAccentColor || theme.borderColor;
 		const paddingX = options.paddingX ?? 0;
 		this.paddingX = Number.isFinite(paddingX) ? Math.max(0, Math.floor(paddingX)) : 0;
 		const maxVisible = options.autocompleteMaxVisible ?? 5;
@@ -408,18 +411,11 @@ export class Editor implements Component, Focusable {
 	}
 
 	render(width: number): string[] {
-		const maxPadding = Math.max(0, Math.floor((width - 1) / 2));
-		const paddingX = Math.min(this.paddingX, maxPadding);
-		const contentWidth = Math.max(1, width - paddingX * 2);
-
-		// Layout width: with padding the cursor can overflow into it,
-		// without padding we reserve 1 column for the cursor.
-		const layoutWidth = Math.max(1, contentWidth - (paddingX ? 0 : 1));
+		const contentWidth = Math.max(1, width - 4); // 2 columns for left border, 2 columns padding/right margin
+		const layoutWidth = Math.max(1, contentWidth - 1);
 
 		// Store for cursor navigation (must match wrapping width)
 		this.lastWidth = layoutWidth;
-
-		const horizontal = this.borderColor("─");
 
 		// Layout the text
 		const layoutLines = this.layoutText(layoutWidth);
@@ -447,76 +443,96 @@ export class Editor implements Component, Focusable {
 		const visibleLines = layoutLines.slice(this.scrollOffset, this.scrollOffset + maxVisibleLines);
 
 		const result: string[] = [];
-		const leftPadding = " ".repeat(paddingX);
-		const rightPadding = leftPadding;
 
-		// Render top border (with scroll indicator if scrolled down)
+		// Render top border
+		const topCorner = this.focused ? this.borderAccentColor("╭─ ") : this.borderColor("┌─ ");
+		const topLabel = this.focused ? this.borderAccentColor("Prompt ") : this.borderColor("Prompt ");
+		const baseHeader = topCorner + topLabel;
+		const baseHeaderLen = 9;
+
 		if (this.scrollOffset > 0) {
-			const indicator = `─── ↑ ${this.scrollOffset} more `;
-			const remaining = width - visibleWidth(indicator);
+			const indicator = `↑ ${this.scrollOffset} more `;
+			const remaining = width - baseHeaderLen - visibleWidth(indicator);
 			if (remaining >= 0) {
-				result.push(this.borderColor(indicator + "─".repeat(remaining)));
+				result.push(baseHeader + this.borderColor("─".repeat(remaining)) + this.borderColor(indicator));
 			} else {
-				result.push(this.borderColor(truncateToWidth(indicator, width)));
+				result.push(truncateToWidth(baseHeader + this.borderColor("─".repeat(width)), width));
 			}
 		} else {
-			result.push(horizontal.repeat(width));
+			const remaining = Math.max(0, width - baseHeaderLen);
+			result.push(baseHeader + this.borderColor("─".repeat(remaining)));
 		}
 
 		// Render each visible layout line
 		// Emit hardware cursor marker only when focused and not showing autocomplete
 		const emitCursorMarker = this.focused && !this.autocompleteState;
+		const sideBorder = this.focused ? this.borderAccentColor("│ ") : this.borderColor("│ ");
 
-		for (const layoutLine of visibleLines) {
-			let displayText = layoutLine.text;
-			let lineVisibleWidth = visibleWidth(layoutLine.text);
-			let cursorInPadding = false;
+		const textIsEmpty = this.getText().length === 0;
 
-			// Add cursor if this line has it
-			if (layoutLine.hasCursor && layoutLine.cursorPos !== undefined) {
-				const before = displayText.slice(0, layoutLine.cursorPos);
-				const after = displayText.slice(layoutLine.cursorPos);
+		if (textIsEmpty) {
+			// Elegant placeholder text inside the input field
+			const placeholder = "Ask MoonCode to inspect, edit, debug, or build. Type / for commands.";
+			let lineText = this.borderColor(placeholder);
+			const lineLen = visibleWidth(placeholder);
 
-				// Hardware cursor marker (zero-width, emitted before fake cursor for IME positioning)
+			if (this.focused) {
 				const marker = emitCursorMarker ? CURSOR_MARKER : "";
-
-				if (after.length > 0) {
-					// Cursor is on a character (grapheme) - replace it with highlighted version
-					// Get the first grapheme from 'after'
-					const afterGraphemes = [...this.segment(after)];
-					const firstGrapheme = afterGraphemes[0]?.segment || "";
-					const restAfter = after.slice(firstGrapheme.length);
-					const cursor = `\x1b[7m${firstGrapheme}\x1b[0m`;
-					displayText = before + marker + cursor + restAfter;
-					// lineVisibleWidth stays the same - we're replacing, not adding
-				} else {
-					// Cursor is at the end - add highlighted space
-					const cursor = "\x1b[7m \x1b[0m";
-					displayText = before + marker + cursor;
-					lineVisibleWidth = lineVisibleWidth + 1;
-					// If cursor overflows content width into the padding, flag it
-					if (lineVisibleWidth > contentWidth && paddingX > 0) {
-						cursorInPadding = true;
-					}
-				}
+				const cursor = "\x1b[7m \x1b[0m";
+				lineText = marker + cursor + this.borderColor(placeholder.slice(1));
 			}
 
-			// Calculate padding based on actual visible width
-			const padding = " ".repeat(Math.max(0, contentWidth - lineVisibleWidth));
-			const lineRightPadding = cursorInPadding ? rightPadding.slice(1) : rightPadding;
+			const padding = " ".repeat(Math.max(0, contentWidth - lineLen));
+			result.push(`${sideBorder}${lineText}${padding}  `);
+		} else {
+			for (const layoutLine of visibleLines) {
+				let displayText = layoutLine.text;
+				let lineVisibleWidth = visibleWidth(layoutLine.text);
 
-			// Render the line (no side borders, just horizontal lines above and below)
-			result.push(`${leftPadding}${displayText}${padding}${lineRightPadding}`);
+				// Add cursor if this line has it
+				if (layoutLine.hasCursor && layoutLine.cursorPos !== undefined) {
+					const before = displayText.slice(0, layoutLine.cursorPos);
+					const after = displayText.slice(layoutLine.cursorPos);
+					const marker = emitCursorMarker ? CURSOR_MARKER : "";
+
+					if (after.length > 0) {
+						const afterGraphemes = [...this.segment(after)];
+						const firstGrapheme = afterGraphemes[0]?.segment || "";
+						const restAfter = after.slice(firstGrapheme.length);
+						const cursor = `\x1b[7m${firstGrapheme}\x1b[0m`;
+						displayText = before + marker + cursor + restAfter;
+					} else {
+						const cursor = "\x1b[7m \x1b[0m";
+						displayText = before + marker + cursor;
+						lineVisibleWidth = lineVisibleWidth + 1;
+					}
+				}
+
+				const padding = " ".repeat(Math.max(0, contentWidth - lineVisibleWidth));
+				result.push(`${sideBorder}${displayText}${padding}  `);
+			}
 		}
 
-		// Render bottom border (with scroll indicator if more content below)
+		// Add autocomplete list inside the side borders if active
+		if (this.autocompleteState && this.autocompleteList) {
+			const autocompleteResult = this.autocompleteList.render(contentWidth);
+			for (const line of autocompleteResult) {
+				const lineWidth = visibleWidth(line);
+				const linePadding = " ".repeat(Math.max(0, contentWidth - lineWidth));
+				result.push(`${sideBorder}${line}${linePadding}  `);
+			}
+		}
+
+		// Render bottom border
 		const linesBelow = layoutLines.length - (this.scrollOffset + visibleLines.length);
+		const bottomCorner = this.focused ? this.borderAccentColor("╰") : this.borderColor("└");
+
 		if (linesBelow > 0) {
-			const indicator = `─── ↓ ${linesBelow} more `;
-			const remaining = width - visibleWidth(indicator);
-			result.push(this.borderColor(indicator + "─".repeat(Math.max(0, remaining))));
+			const indicator = ` ── ↓ ${linesBelow} more `;
+			const remaining = width - 1 - visibleWidth(indicator);
+			result.push(bottomCorner + this.borderColor("─".repeat(Math.max(0, remaining))) + this.borderColor(indicator));
 		} else {
-			result.push(horizontal.repeat(width));
+			result.push(bottomCorner + this.borderColor("─".repeat(width - 1)));
 		}
 
 		// Add autocomplete list if active

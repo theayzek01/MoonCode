@@ -1,50 +1,38 @@
-import { Container, Spacer, Text } from "moon-tui";
-import { theme } from "../theme/theme.js";
+// @ts-nocheck
 
-export interface MoonCodeHeaderOptions {
-	version: string;
-	compactInstructions: string;
-	expandedInstructions: string;
-	expanded?: boolean;
-	paddingX?: number;
-	paddingY?: number;
-}
+import * as path from "node:path";
+import { Container, Text } from "moon-tui";
+import type { EngineSession } from "../../../core/engine-session.js";
+import type { ReadonlyFooterDataProvider } from "../../../core/footer-data-provider.js";
+import { theme } from "../theme/theme.js";
 
 export class MoonCodeHeaderComponent extends Container {
 	private divider: Text;
+	private session?: EngineSession;
+	private footerData?: ReadonlyFooterDataProvider;
+	private cachedWidth?: number;
+	private cachedLines?: string[];
 
-	constructor() {
+	constructor(session?: EngineSession, footerData?: ReadonlyFooterDataProvider) {
 		super();
+		this.session = session;
+		this.footerData = footerData;
 
-		// Modern block ASCII Logo
-		const asciiLogo = [
-			" ███╗   ███╗ ██████╗  ██████╗ ███╗   ██╗ ██████╗  ██████╗ ██████╗ ███████╗",
-			" ████╗ ████║██╔═══██╗██╔═══██╗████╗  ██║██╔════╝ ██╔═══██╗██╔══██╗██╔════╝",
-			" ██╔████╔██║██║   ██║██║   ██║██╔██╗ ██║██║      ██║   ██║██║  ██║█████╗  ",
-			" ██║╚██╔╝██║██║   ██║██║   ██║██║╚██╗██║██║      ██║   ██║██║  ██║██╔══╝  ",
-			" ██║ ╚═╝ ██║╚██████╔╝╚██████╔╝██║ ╚████║╚██████╗╚██████╔╝██████╔╝███████╗",
-			" ╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝",
-		].join("\n");
-
-		this.addChild(new Text(this.applyGradient(asciiLogo), 1, 0));
-
-		const versionText =
-			theme.fg("dim", " ✦ ") +
-			theme.fg("accent", "VERSION 2026-5") +
-			theme.fg("dim", " ✦ ") +
-			theme.fg("success", "APEX MODE ACTIVE ✦ DEEPTHINK ENABLED");
-		this.addChild(new Text(versionText, 1, 0));
-
-		this.addChild(new Spacer(1));
 		this.divider = new Text("", 0, 0);
 		this.addChild(this.divider);
 	}
 
+	override invalidate(): void {
+		super.invalidate();
+		this.cachedWidth = undefined;
+		this.cachedLines = undefined;
+	}
+
 	private applyGradient(text: string): string {
 		const lines = text.split("\n");
-		// Red Palette (Light Red to Dark Red)
-		const color1 = { r: 255, g: 77, b: 77 }; // Light Red
-		const color2 = { r: 139, g: 0, b: 0 }; // Dark Red
+		// Dark Crimson to Neon Red gradient
+		const color1 = { r: 255, g: 60, b: 60 }; // Bright Red
+		const color2 = { r: 120, g: 10, b: 10 }; // Deep Crimson
 
 		const maxLen = Math.max(...lines.map((l) => l.length));
 
@@ -62,7 +50,6 @@ export class MoonCodeHeaderComponent extends Container {
 						char === "╗" ||
 						char === "║"
 					) {
-						// Keep boxes and symbols slightly dimmed or use specific gradient
 						const t = i / Math.max(1, maxLen - 1);
 						const r = Math.round(color1.r + (color2.r - color1.r) * t);
 						const g = Math.round(color1.g + (color2.g - color1.g) * t);
@@ -84,8 +71,91 @@ export class MoonCodeHeaderComponent extends Container {
 	}
 
 	override render(width: number): string[] {
-		this.divider.setText(theme.fg("dim", "─".repeat(width)));
-		return super.render(width);
+		if (this.cachedLines && this.cachedWidth === width) {
+			return this.cachedLines;
+		}
+
+		// Resolve current logoMode configuration
+		let logoMode = "auto";
+		if (this.session?.settingsManager) {
+			logoMode = this.session.settingsManager.getLogoMode();
+		}
+
+		// Auto compact logic: compact if there are chat entries
+		if (logoMode === "auto") {
+			const entries = this.session?.sessionManager?.getEntries() || [];
+			if (entries.length > 0) {
+				logoMode = "compact";
+			} else {
+				logoMode = "hero";
+			}
+		}
+
+		if (logoMode === "off") {
+			this.cachedWidth = width;
+			this.cachedLines = [];
+			return [];
+		}
+
+		const lines: string[] = [];
+
+		if (logoMode === "minimal") {
+			const minimalText = theme.fg("accent", "✦ MoonCode ") + theme.fg("dim", "v2026-5");
+			lines.push(minimalText);
+			lines.push(theme.fg("dim", "─".repeat(width)));
+			this.cachedWidth = width;
+			this.cachedLines = lines;
+			return lines;
+		}
+
+		if (logoMode === "compact") {
+			// Compact persistent header: MoonCode · v2026-5 · Apex · project/branch
+			const cwd = this.session?.sessionManager?.getCwd() || "";
+			const project = cwd ? path.basename(cwd) : "";
+			const branch = this.footerData?.getGitBranch() || "";
+			const projBranch = project && branch ? `${project}/${branch}` : project || branch;
+
+			const parts = [
+				theme.bold(theme.fg("accent", "MOONCODE")),
+				theme.fg("dim", "v2026-5"),
+				theme.fg("success", "APEX"),
+				projBranch ? theme.fg("muted", projBranch) : undefined,
+			].filter(Boolean);
+
+			const headerText = parts.join(theme.fg("dim", "  ·  "));
+			lines.push(` ${headerText}`);
+			lines.push(theme.fg("dim", "─".repeat(width)));
+			this.cachedWidth = width;
+			this.cachedLines = lines;
+			return lines;
+		}
+
+		// Hero logo state (Logo mode "hero")
+		const asciiLogo = [
+			" ███╗   ███╗ ██████╗  ██████╗ ███╗   ██╗ ██████╗  ██████╗ ██████╗ ███████╗",
+			" ████╗ ████║██╔═══██╗██╔═══██╗████╗  ██║██╔════╝ ██╔═══██╗██╔══██╗██╔════╝",
+			" ██╔████╔██║██║   ██║██║   ██║██╔██╗ ██║██║      ██║   ██║██║  ██║█████╗  ",
+			" ██║╚██╔╝██║██║   ██║██║   ██║██║╚██╗██║██║      ██║   ██║██║  ██║██╔══╝  ",
+			" ██║ ╚═╝ ██║╚██████╔╝╚██████╔╝██║ ╚████║╚██████╗╚██████╔╝██████╔╝███████╗",
+			" ╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝",
+		].join("\n");
+
+		lines.push(this.applyGradient(asciiLogo));
+		lines.push("");
+
+		const versionText =
+			" " +
+			theme.fg("dim", "✦ ") +
+			theme.fg("accent", "VERSION 2026-5") +
+			theme.fg("dim", " ✦ ") +
+			theme.fg("success", "APEX MODE ACTIVE ✦ DEEPTHINK ENABLED");
+		lines.push(versionText);
+		lines.push("");
+		lines.push(theme.fg("dim", "─".repeat(width)));
+
+		this.cachedWidth = width;
+		this.cachedLines = lines;
+		return lines;
 	}
 
 	setExpanded(): void {}
