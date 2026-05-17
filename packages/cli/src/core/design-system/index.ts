@@ -9,6 +9,13 @@
  * - Auto-direction picker based on project context
  */
 
+export {
+	DEFAULT_UI_DESIGN_SYSTEM_PROMPT,
+	DEFAULT_UI_STYLE_GUIDELINE,
+	hasExplicitVisualStyleOverride,
+	isUiOrFrontendTask,
+	shouldInjectDefaultUiDesignPrompt,
+} from "./default-ui.js";
 export { DESIGN_DIRECTIONS, type DesignDirection } from "./directions.js";
 export { buildDesignPrompt, pickDesignDirection } from "./prompt.js";
 export {

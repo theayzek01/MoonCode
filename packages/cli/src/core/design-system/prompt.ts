@@ -6,12 +6,26 @@
  * from context clues, or uses a user-specified design system.
  */
 
+import { DEFAULT_UI_DESIGN_SYSTEM_PROMPT } from "./default-ui.js";
 import { DESIGN_DIRECTIONS, type DesignDirection } from "./directions.js";
 import { type DesignSystemSummary, listDesignSystems } from "./registry.js";
 
 /** Keywords that suggest which direction to auto-pick */
 const DIRECTION_KEYWORDS: Record<string, string[]> = {
-	"modern-minimal": ["saas", "dashboard", "admin", "startup", "tool", "platform", "analytics", "minimal", "clean"],
+	"modern-minimal": [
+		"shadcn",
+		"vercel",
+		"saas",
+		"dashboard",
+		"admin",
+		"startup",
+		"tool",
+		"platform",
+		"analytics",
+		"minimal",
+		"clean",
+		"dark",
+	],
 	"editorial-monocle": ["blog", "magazine", "editorial", "news", "article", "publication", "press", "media"],
 	"human-approachable": ["consumer", "marketplace", "education", "social", "wellness", "community", "app", "mobile"],
 	"tech-utility": ["developer", "devtool", "api", "cli", "terminal", "code", "ide", "github", "dark"],
@@ -72,7 +86,8 @@ export function buildDesignPrompt(options: {
 
 	sections.push(formatDirection(direction));
 
-	// 3. Design rules (universal)
+	// 3. MoonCode's default UI taste + universal quality rules
+	sections.push(DEFAULT_UI_DESIGN_SYSTEM_PROMPT);
 	sections.push(DESIGN_RULES);
 
 	return `\n\n## Design System Context\n\n${sections.join("\n\n")}`;
@@ -113,8 +128,8 @@ function formatAvailableSystems(systems: DesignSystemSummary[]): string {
 
 const DESIGN_RULES = `### Design Quality Rules
 
-When generating HTML/CSS for UI or design artifacts:
-1. **Bind tokens first.** Set CSS custom properties on \`:root\` from the active direction/system before writing any component. Never freestyle colors.
+When generating HTML/CSS/React/Tailwind for UI or design artifacts:
+1. **Bind tokens first.** Use the existing project tokens/component system when present; otherwise set CSS custom properties on \`:root\` from the active direction/system before writing components. Never freestyle colors.
 2. **Typography hierarchy.** At least 3 distinct levels (display → body → caption). Use the specified font stacks. Set \`line-height\`, \`letter-spacing\`, \`font-weight\` deliberately.
 3. **Spacing system.** Use a consistent base unit (4px or 8px). All margin/padding should be multiples.
 4. **Color discipline.** Max 1 accent color for primary actions. Neutral palette carries 90% of the UI. Status colors (success/warning/error) are semantic, not decorative.

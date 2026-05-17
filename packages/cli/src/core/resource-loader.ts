@@ -60,6 +60,8 @@ function loadContextFileFromDir(dir: string): { path: string; content: string } 
 	const candidates = [
 		"MOONCODE.md",
 		"MOONCODE.MD",
+		"MOON.md",
+		"MOON.MD",
 		"Moon.md",
 		"Moon.MD",
 		"AGENTS.md",

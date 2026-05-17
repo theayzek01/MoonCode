@@ -1,3 +1,5 @@
+import { DEFAULT_UI_STYLE_GUIDELINE } from "./design-system/index.js";
+
 export type CodingAgentMode = "off" | "auto" | "always";
 export type CodingAgentVerbosity = "quiet" | "summary" | "verbose";
 
@@ -43,14 +45,14 @@ export const DEFAULT_CODING_AGENT_PROFILES: readonly CodingAgentProfile[] = [
 		id: "frontend",
 		name: "Frontend Agent",
 		department: "product",
-		focus: "TUI/Web flow, state, empty/loading/error states",
+		focus: "TUI/Web flow, state, responsive behavior, empty/loading/error states, default premium dark SaaS UI",
 		useWhen: "when UI or interaction changes",
 	},
 	{
 		id: "uiux",
 		name: "UI/UX Agent",
 		department: "product",
-		focus: "readability, simplicity, clear experience",
+		focus: "readability, accessibility, shadcn/Vercel dark SaaS polish, clear experience",
 		useWhen: "for everything visible on screen",
 	},
 	{
@@ -142,6 +144,7 @@ Rules:
 - Do not make agents verbose.
 - Do not answer per role; produce one clear solution.
 - For code work, inspect repo context first, then implement, then run checks.
+- ${DEFAULT_UI_STYLE_GUIDELINE}
 - ${getVisibilityInstruction(verbosity)}`;
 }
 

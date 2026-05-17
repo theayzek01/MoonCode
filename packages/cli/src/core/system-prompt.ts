@@ -4,7 +4,7 @@
  */
 
 import { buildCodingAgentsPrompt, type CodingAgentsSettings } from "./agents.js";
-import { buildDesignPrompt } from "./design-system/index.js";
+import { buildDesignPrompt, DEFAULT_UI_STYLE_GUIDELINE } from "./design-system/index.js";
 import { formatSkillsForPrompt, type Skill } from "./skills.js";
 
 export interface RoboticsFunction {
@@ -83,6 +83,7 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 	const appendSection = appendSystemPrompt ? `\n\n${appendSystemPrompt}` : "";
 	const affectiveSection = affectivePrompt ? `\n\n${affectivePrompt}` : "";
 	const agentsSection = buildCodingAgentsPrompt(agents);
+	const defaultUiSection = `\n\n## MoonCode Default UI Taste\n- ${DEFAULT_UI_STYLE_GUIDELINE}`;
 
 	const contextFiles = providedContextFiles ?? [];
 	const skills = providedSkills ?? [];
@@ -100,6 +101,12 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 
 		if (agentsSection) {
 			prompt += agentsSection;
+		}
+
+		prompt += defaultUiSection;
+
+		if (designMode) {
+			prompt += buildDesignPrompt({ projectRoot: resolvedCwd });
 		}
 
 		// Append project context files
@@ -152,6 +159,7 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 	const hasBrowser = hasBrowserTabs || hasBrowserPage;
 
 	addGuideline("Always show file paths clearly; include relevant paths when explaining code or diffs.");
+	addGuideline(DEFAULT_UI_STYLE_GUIDELINE);
 
 	// File exploration guidelines
 	if (hasBash && !hasGrep && !hasFind && !hasLs) {
@@ -269,7 +277,7 @@ Follow these rigid steps for non-trivial turns:
 3. **Verification Gates**:
    - Code Gate: Verify imports, syntax, type alignments.
    - Test Gate: Consider and execute relevant test suites where possible. Do not claim tests pass if they weren't run.
-   - UI Gate: If designing UI, default to Premium modern dark SaaS themes (Vercel/shadcn quality): clean rounded cards, high typographic hierarchy, Tailwind-ready structure, proper handling of hover, disabled, active, loading, empty, and error states.
+   - UI Gate: If designing UI, default to premium shadcn/ui + Vercel-style dark SaaS quality: Tailwind/Radix/Lucide feel, near-black background, neutral cards, thin borders, restrained accents, strong hierarchy, responsive layout, accessibility, and complete hover/focus/disabled/loading/empty/error/active states unless the user explicitly requests another style.
    - Security Gate: Never leak secrets, enable path traversal, allow shell command injection, or expose API keys.
 4. **Final Response Contract**:
    For completed engineering tasks, always end your response with this EXACT format:
@@ -347,7 +355,8 @@ function buildCompactSystemPrompt(options: BuildSystemPromptOptions): string {
 Tools: ${toolsList}
 Rules: concise, correct, stay on target, infer safely.
 CRITICAL: Use Ultra-Compact Cognitive Language in <thought> (no vowels, heavy math/logic symbols, extreme abbreviations). Look like alien code. Output normal text/code ONLY when responding.
-Inspect before edits, verify when possible.${hasBrowser ? " Chrome bridge active." : ""}`;
+Inspect before edits, verify when possible.${hasBrowser ? " Chrome bridge active." : ""}
+UI default: shadcn/ui + Vercel dark SaaS; existing design system and explicit user style win.`;
 
 	if (appendSystemPrompt) {
 		prompt += `\n\n${appendSystemPrompt}`;

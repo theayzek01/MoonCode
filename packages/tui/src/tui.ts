@@ -12,6 +12,8 @@ import type { Terminal } from "./terminal.js";
 import { getCapabilities, isImageLine, setCellDimensions } from "./terminal-image.js";
 import { extractSegments, normalizeTerminalOutput, sliceByColumn, sliceWithWidth, visibleWidth } from "./utils.js";
 
+const PRINTABLE_ASCII_LINE_REGEX = /^[\x20-\x7e]*$/;
+
 /**
  * Component interface - all components must implement this
  */
@@ -905,7 +907,12 @@ export class TUI extends Container {
 		const reset = TUI.SEGMENT_RESET;
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
-			if (isImageLine(line) || visibleWidth(line) <= width) continue;
+			if (
+				isImageLine(line) ||
+				(line.length <= width && PRINTABLE_ASCII_LINE_REGEX.test(line)) ||
+				visibleWidth(line) <= width
+			)
+				continue;
 
 			// Final production safety net: custom components should truncate, but a
 			// one-column overflow must never crash an active coding session.
@@ -1024,7 +1031,7 @@ export class TUI extends Container {
 		// Extract cursor position before applying line resets (marker must be found first)
 		const cursorPos = this.extractCursorPosition(newLines, height);
 
-		newLines = this.clampLinesToWidth(this.applyLineResets(newLines), width);
+		newLines = this.applyLineResets(this.clampLinesToWidth(newLines, width));
 
 		// Helper to clear scrollback and viewport and render all new lines
 		const fullRender = (clear: boolean): void => {
@@ -1123,7 +1130,8 @@ export class TUI extends Container {
 		let firstChanged = -1;
 		let lastChanged = -1;
 		const maxLines = Math.max(newLines.length, this.previousLines.length);
-		for (let i = 0; i < maxLines; i++) {
+		const compareStart = Math.max(0, Math.min(prevViewportTop, maxLines));
+		for (let i = compareStart; i < maxLines; i++) {
 			const oldLine = i < this.previousLines.length ? this.previousLines[i] : "";
 			const newLine = i < newLines.length ? newLines[i] : "";
 
