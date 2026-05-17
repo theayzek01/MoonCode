@@ -141,6 +141,7 @@ export class FooterComponent implements Component {
 
 		const row2Parts = [
 			theme.fg("accent", pulse),
+			theme.fg("success", "✦ APEX"),
 			designIndicator,
 			browserIndicator,
 			theme.fg("muted", "MODEL ") +

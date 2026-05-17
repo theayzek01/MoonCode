@@ -28,7 +28,11 @@ export class MoonCodeHeaderComponent extends Container {
 
 		this.addChild(new Text(this.applyGradient(asciiLogo), 1, 0));
 
-		const versionText = theme.fg("dim", " ✦ ") + theme.fg("accent", "VERSION 2026-4") + theme.fg("dim", " ✦ ");
+		const versionText =
+			theme.fg("dim", " ✦ ") +
+			theme.fg("accent", "VERSION 2026-4") +
+			theme.fg("dim", " ✦ ") +
+			theme.fg("success", "APEX MODE ACTIVE ✦ DEEPTHINK ENABLED");
 		this.addChild(new Text(versionText, 1, 0));
 
 		this.addChild(new Spacer(1));
