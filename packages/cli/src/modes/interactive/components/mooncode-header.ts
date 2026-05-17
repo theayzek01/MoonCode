@@ -30,7 +30,7 @@ export class MoonCodeHeaderComponent extends Container {
 
 		const versionText =
 			theme.fg("dim", " ✦ ") +
-			theme.fg("accent", "VERSION 2026-4") +
+			theme.fg("accent", "VERSION 2026-5") +
 			theme.fg("dim", " ✦ ") +
 			theme.fg("success", "APEX MODE ACTIVE ✦ DEEPTHINK ENABLED");
 		this.addChild(new Text(versionText, 1, 0));

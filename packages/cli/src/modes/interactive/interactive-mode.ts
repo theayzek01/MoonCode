@@ -5982,7 +5982,7 @@ export class InteractiveMode {
 	}
 
 	private async handleStatusDiagnosticsCommand(): Promise<void> {
-		const stats = this.session.sessionManager.getStats();
+		const stats = this.session.getSessionStats();
 		const currentModel = this.session.model;
 		const contextUsage = this.session.getContextUsage();
 		const memUsage = process.memoryUsage().heapUsed / 1024 / 1024;
