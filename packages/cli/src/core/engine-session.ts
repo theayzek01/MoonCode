@@ -1916,7 +1916,7 @@ export class EngineSession {
 			return "xhigh";
 		}
 		if (executionPattern.test(normalized)) {
-			return "minimal";
+			return "medium";
 		}
 		return "low";
 	}
