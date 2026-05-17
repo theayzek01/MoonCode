@@ -67,6 +67,7 @@ export interface MarkdownTheme {
 	strikethrough: (text: string) => string;
 	underline: (text: string) => string;
 	highlightCode?: (code: string, lang?: string) => string[];
+	tableDensity?: "compact" | "normal" | "detailed";
 	/** Prefix applied to each rendered code block line (default: "  ") */
 	codeBlockIndent?: string;
 }
@@ -690,9 +691,16 @@ export class Markdown implements Component {
 			return lines;
 		}
 
-		// Calculate border overhead: "│ " + (n-1) * " │ " + " │"
-		// = 2 + (n-1) * 3 + 2 = 3n + 1
-		const borderOverhead = 3 * numCols + 1;
+		const density = this.theme.tableDensity ?? "compact";
+
+		// Calculate border overhead dynamically based on density
+		let borderOverhead = 3 * numCols + 1; // "detailed" default
+		if (density === "compact") {
+			borderOverhead = 2 * (numCols - 1);
+		} else if (density === "normal") {
+			borderOverhead = 3 * (numCols - 1);
+		}
+
 		const availableForCells = availableWidth - borderOverhead;
 		if (availableForCells < numCols) {
 			// Too narrow to render a stable table. Fall back to raw markdown.
@@ -705,7 +713,7 @@ export class Markdown implements Component {
 
 		const maxUnbrokenWordWidth = 30;
 
-		// Calculate natural column widths (what each column needs without constraints)
+		// Calculate natural column widths
 		const naturalWidths: number[] = [];
 		const minWordWidths: number[] = [];
 		for (let i = 0; i < numCols; i++) {
@@ -758,10 +766,8 @@ export class Markdown implements Component {
 		let columnWidths: number[];
 
 		if (totalNaturalWidth <= availableWidth) {
-			// Everything fits naturally
 			columnWidths = naturalWidths.map((width, index) => Math.max(width, minColumnWidths[index]));
 		} else {
-			// Need to shrink columns to fit
 			const totalGrowPotential = naturalWidths.reduce((total, width, index) => {
 				return total + Math.max(0, width - minColumnWidths[index]);
 			}, 0);
@@ -776,7 +782,6 @@ export class Markdown implements Component {
 				return minWidth + grow;
 			});
 
-			// Adjust for rounding errors - distribute remaining space
 			const allocated = columnWidths.reduce((a, b) => a + b, 0);
 			let remaining = availableForCells - allocated;
 			while (remaining > 0) {
@@ -796,7 +801,11 @@ export class Markdown implements Component {
 
 		// Render top border
 		const topBorderCells = columnWidths.map((w) => "─".repeat(w));
-		lines.push(`┌─${topBorderCells.join("─┬─")}─┐`);
+		if (density === "detailed") {
+			lines.push(`┌─${topBorderCells.join("─┬─")}─┐`);
+		} else if (density === "normal") {
+			lines.push(`  ${topBorderCells.join("─┬─")}  `);
+		}
 
 		// Render header with wrapping
 		const headerCellLines: string[][] = token.header.map((cell, i) => {
@@ -811,13 +820,26 @@ export class Markdown implements Component {
 				const padded = text + " ".repeat(Math.max(0, columnWidths[colIdx] - visibleWidth(text)));
 				return this.theme.bold(padded);
 			});
-			lines.push(`│ ${rowParts.join(" │ ")} │`);
+			if (density === "detailed") {
+				lines.push(`│ ${rowParts.join(" │ ")} │`);
+			} else if (density === "normal") {
+				lines.push(`  ${rowParts.join(" │ ")}  `);
+			} else {
+				// "compact"
+				lines.push(rowParts.join("  "));
+			}
 		}
 
 		// Render separator
 		const separatorCells = columnWidths.map((w) => "─".repeat(w));
-		const separatorLine = `├─${separatorCells.join("─┼─")}─┤`;
-		lines.push(separatorLine);
+		if (density === "detailed") {
+			lines.push(`├─${separatorCells.join("─┼─")}─┤`);
+		} else if (density === "normal") {
+			lines.push(`  ${separatorCells.join("─┼─")}  `);
+		} else {
+			// "compact"
+			lines.push(separatorCells.join("  "));
+		}
 
 		// Render rows with wrapping
 		for (let rowIndex = 0; rowIndex < token.rows.length; rowIndex++) {
@@ -833,17 +855,32 @@ export class Markdown implements Component {
 					const text = cellLines[lineIdx] || "";
 					return text + " ".repeat(Math.max(0, columnWidths[colIdx] - visibleWidth(text)));
 				});
-				lines.push(`│ ${rowParts.join(" │ ")} │`);
+				if (density === "detailed") {
+					lines.push(`│ ${rowParts.join(" │ ")} │`);
+				} else if (density === "normal") {
+					lines.push(`  ${rowParts.join(" │ ")}  `);
+				} else {
+					// "compact"
+					lines.push(rowParts.join("  "));
+				}
 			}
 
 			if (rowIndex < token.rows.length - 1) {
-				lines.push(separatorLine);
+				if (density === "detailed") {
+					lines.push(`├─${separatorCells.join("─┼─")}─┤`);
+				} else if (density === "normal") {
+					lines.push(`  ${separatorCells.join("─┼─")}  `);
+				}
 			}
 		}
 
 		// Render bottom border
 		const bottomBorderCells = columnWidths.map((w) => "─".repeat(w));
-		lines.push(`└─${bottomBorderCells.join("─┴─")}─┘`);
+		if (density === "detailed") {
+			lines.push(`└─${bottomBorderCells.join("─┴─")}─┘`);
+		} else if (density === "normal") {
+			lines.push(`  ${bottomBorderCells.join("─┴─")}  `);
+		}
 
 		if (nextTokenType && nextTokenType !== "space") {
 			lines.push(""); // Add spacing after table

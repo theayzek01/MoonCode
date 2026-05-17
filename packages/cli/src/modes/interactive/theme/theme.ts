@@ -1102,6 +1102,7 @@ export function getLanguageFromPath(filePath: string): string | undefined {
 
 export function getMarkdownTheme(): MarkdownTheme {
 	return {
+		tableDensity: "compact",
 		heading: (text: string) => theme.fg("mdHeading", text),
 		link: (text: string) => theme.fg("mdLink", text),
 		linkUrl: (text: string) => theme.fg("mdLinkUrl", text),

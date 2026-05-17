@@ -49,6 +49,59 @@ export class FooterComponent implements Component {
 		let modelName = state.model?.id || "no-model";
 		const provider = state.model?.provider;
 
+		// Calculate dynamic Effort level and Phase
+		const entries = this.session.sessionManager?.getEntries() || [];
+		let hasEdits = false;
+		let hasBash = false;
+		let hasErrors = false;
+
+		for (const entry of entries) {
+			if (entry.type === "toolCall") {
+				const tool = entry.toolName;
+				if (tool === "edit" || tool === "write") hasEdits = true;
+				if (tool === "bash" || tool === "git_ship") hasBash = true;
+			}
+			if (entry.type === "message" && entry.message.role === "assistant" && entry.message.stopReason === "error") {
+				hasErrors = true;
+			}
+		}
+
+		if (activeToolNames.includes("edit") || activeToolNames.includes("write")) hasEdits = true;
+		if (activeToolNames.includes("bash")) hasBash = true;
+
+		let effort = "S0";
+		if (hasErrors) {
+			effort = "S4";
+		} else if (hasBash) {
+			effort = "S3";
+		} else if (hasEdits) {
+			effort = "S2";
+		} else if (entries.length > 2) {
+			effort = "S1";
+		}
+
+		let phase = "done";
+		if (entries.length === 0) {
+			phase = "idle";
+		} else if (this.session.isStreaming) {
+			phase = "planning";
+		} else if (activeToolNames.length > 0) {
+			const tool = activeToolNames[0];
+			if (tool === "read" || tool === "find" || tool === "grep" || tool === "ls") {
+				phase = "reading";
+			} else if (tool === "edit" || tool === "write") {
+				phase = "editing";
+			} else if (tool === "bash") {
+				phase = hasErrors ? "repairing" : "verifying";
+			} else {
+				phase = "running";
+			}
+		} else if (this.session.isCompacting) {
+			phase = "classifying";
+		} else if (hasErrors) {
+			phase = "blocked";
+		}
+
 		// Clean up redundant prefix
 		if (provider && modelName.toLowerCase().startsWith(`${provider.toLowerCase()}-`)) {
 			modelName = modelName.slice(provider.length + 1);
@@ -80,38 +133,46 @@ export class FooterComponent implements Component {
 		// 1. APEX Mode Indicator
 		parts.push(theme.bold(theme.fg("success", "APEX")));
 
-		// 2. Git Branch (if available)
-		if (branch && width > 70) {
+		// 2. Effort Level
+		parts.push(theme.fg("accent", effort));
+
+		// 3. Current Phase
+		parts.push(theme.fg("muted", phase));
+
+		// 4. Git Branch (if available)
+		if (branch && width > 80) {
 			parts.push(theme.fg("muted", truncateToWidth(branch, 12, "…")));
 		}
 
-		// 3. Model
+		// 5. Model
 		if (width > 60) {
-			parts.push(theme.fg("muted", "MODEL ") + theme.fg("text", truncateToWidth(modelName, 16, "…")));
+			parts.push(theme.fg("text", truncateToWidth(modelName, 16, "…")));
 		} else {
 			parts.push(theme.fg("text", truncateToWidth(modelName, 10, "…")));
 		}
 
-		// 4. Thinking state
-		if (thinkingText && width > 85) {
+		// 6. Thinking state
+		if (thinkingText && width > 90) {
 			parts.push(theme.fg(thinkingColor, thinkingText));
 		}
 
-		// 5. Context Usage
+		// 7. Context Usage
 		const ctxText = this.autoCompactEnabled ? `${contextPercent} auto` : contextPercent;
 		parts.push(theme.fg("muted", "CTX ") + theme.fg("text", ctxText));
 
-		// 6. Running tasks count
+		// 8. Running tasks count
 		if (activeToolNames.length > 0) {
 			parts.push(theme.fg("warning", `RUN ×${activeToolNames.length}`));
 		}
 
-		// 7. Cost
+		// 9. Cost
 		if (costText && width > 95) {
 			parts.push(theme.fg("dim", costText));
+		} else if (width > 95) {
+			parts.push(theme.fg("dim", "COST $0.000"));
 		}
 
-		// 8. Memory Usage
+		// 10. Memory Usage
 		if (width > 110) {
 			parts.push(theme.fg("dim", memText));
 		}
