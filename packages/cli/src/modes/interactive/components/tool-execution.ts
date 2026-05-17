@@ -212,6 +212,10 @@ export class ToolExecutionComponent extends Container {
 	private cachedWidth?: number;
 	private cachedLines?: string[];
 
+	getToolName(): string {
+		return this.toolName;
+	}
+
 	setImageWidthCells(width: number): void {
 		this.imageWidthCells = Math.max(1, Math.floor(width));
 		this.updateDisplay();

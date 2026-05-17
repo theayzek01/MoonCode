@@ -10,11 +10,15 @@ import { theme } from "../theme/theme.js";
  */
 export class FooterComponent implements Component {
 	private autoCompactEnabled = true;
+	private getExecutingToolNames?: () => string[];
 
 	constructor(
 		private session: EngineSession,
 		private footerData: ReadonlyFooterDataProvider,
-	) {}
+		getExecutingToolNames?: () => string[],
+	) {
+		this.getExecutingToolNames = getExecutingToolNames;
+	}
 
 	setSession(session: EngineSession): void {
 		this.session = session;
@@ -45,7 +49,7 @@ export class FooterComponent implements Component {
 		const contextPercent = contextUsage?.percent !== null ? `${contextPercentValue.toFixed(0)}%` : "?";
 
 		const branch = this.footerData.getGitBranch();
-		const activeToolNames = this.session.getActiveToolNames();
+		const activeToolNames = this.getExecutingToolNames ? this.getExecutingToolNames() : [];
 		let modelName = state.model?.id || "no-model";
 		const provider = state.model?.provider;
 
