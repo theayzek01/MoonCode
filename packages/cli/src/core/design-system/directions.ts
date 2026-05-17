@@ -37,25 +37,25 @@ export interface DesignDirection {
 export const DESIGN_DIRECTIONS: DesignDirection[] = [
 	{
 		id: "modern-minimal",
-		label: "Modern Minimal — Linear / Vercel / Stripe",
-		mood: "Quiet, precise, software-native. System fonts, crisp neutrals, and a focused product palette so the UI feels shipped rather than greyscale.",
-		references: ["Linear", "Vercel", "Notion 2024", "Stripe docs"],
-		displayFont: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif",
-		bodyFont: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif",
+		label: "Premium Dark SaaS — shadcn/ui / Vercel / Linear",
+		mood: "Dark-first, precise, software-native. Near-black canvas, neutral cards, thin borders, muted copy, strong headings, and restrained accents so generated UI feels like a shipped developer/productivity dashboard.",
+		references: ["shadcn/ui", "Vercel dashboard", "Linear", "Raycast"],
+		displayFont: "Geist, Inter, -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif",
+		bodyFont: "Geist, Inter, -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif",
 		palette: {
-			bg: "oklch(99% 0.002 240)",
-			surface: "oklch(100% 0 0)",
-			fg: "oklch(18% 0.012 250)",
-			muted: "oklch(54% 0.012 250)",
-			border: "oklch(92% 0.005 250)",
-			accent: "oklch(58% 0.18 255)", // cobalt
+			bg: "oklch(12% 0.006 260)",
+			surface: "oklch(17% 0.008 260)",
+			fg: "oklch(96% 0.004 260)",
+			muted: "oklch(66% 0.01 260)",
+			border: "oklch(27% 0.008 260)",
+			accent: "oklch(68% 0.14 245)", // restrained blue/cyan
 		},
 		posture: [
-			"tight letter-spacing on display sizes (-0.02em)",
-			"hairline borders only, no shadows except dropdowns/modals",
-			"mono numerics with tabular-nums",
-			"sticky frosted nav, content-led layouts",
-			"primary action color + one secondary signal + status colors",
+			"dark-first layout with near-black background and neutral card surfaces",
+			"thin subtle borders, rounded-xl/2xl cards, shadow-sm only when useful",
+			"Tailwind/shadcn token feel: bg-background, bg-card, border-border, text-muted-foreground",
+			"sidebar + header + command/search patterns for product dashboards",
+			"hover, focus-visible, disabled, loading, empty, error, selected, and responsive states are part of the component, not afterthoughts",
 		],
 	},
 	{

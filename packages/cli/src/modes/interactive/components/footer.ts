@@ -11,6 +11,11 @@ import { theme } from "../theme/theme.js";
 export class FooterComponent implements Component {
 	private autoCompactEnabled = true;
 	private getExecutingToolNames?: () => string[];
+	private cachedEntryCount = -1;
+	private cachedCostTotal = 0;
+	private cachedHasEdits = false;
+	private cachedHasBash = false;
+	private cachedHasErrors = false;
 
 	constructor(
 		private session: EngineSession,
@@ -22,27 +27,47 @@ export class FooterComponent implements Component {
 
 	setSession(session: EngineSession): void {
 		this.session = session;
+		this.invalidate();
 	}
 
 	setAutoCompactEnabled(enabled: boolean): void {
 		this.autoCompactEnabled = enabled;
 	}
 
-	invalidate(): void {}
+	invalidate(): void {
+		this.cachedEntryCount = -1;
+	}
 	dispose(): void {}
 
 	render(width: number): string[] {
 		const state = this.session.state;
-		let totalCost = 0;
+		const entries = this.session.sessionManager?.getEntries() || [];
 
-		for (const entry of this.session.sessionManager.getEntries()) {
-			if (entry.type === "message" && entry.message.role === "assistant") {
-				const costValue = entry.message.usage?.cost?.total;
-				if (typeof costValue === "number" && Number.isFinite(costValue)) {
-					totalCost += costValue;
+		if (entries.length !== this.cachedEntryCount) {
+			this.cachedEntryCount = entries.length;
+			this.cachedCostTotal = 0;
+			this.cachedHasEdits = false;
+			this.cachedHasBash = false;
+			this.cachedHasErrors = false;
+
+			for (const entry of entries) {
+				if (entry.type === "message" && entry.message.role === "assistant") {
+					const costValue = entry.message.usage?.cost?.total;
+					if (typeof costValue === "number" && Number.isFinite(costValue)) {
+						this.cachedCostTotal += costValue;
+					}
+					if (entry.message.stopReason === "error") {
+						this.cachedHasErrors = true;
+					}
+				} else if (entry.type === "toolCall") {
+					const tool = entry.toolName;
+					if (tool === "edit" || tool === "write") this.cachedHasEdits = true;
+					if (tool === "bash" || tool === "git_ship") this.cachedHasBash = true;
 				}
 			}
 		}
+
+		const totalCost = this.cachedCostTotal;
 
 		const contextUsage = this.session.getContextUsage();
 		const contextPercentValue = contextUsage?.percent ?? 0;
@@ -54,21 +79,9 @@ export class FooterComponent implements Component {
 		const provider = state.model?.provider;
 
 		// Calculate dynamic Effort level and Phase
-		const entries = this.session.sessionManager?.getEntries() || [];
-		let hasEdits = false;
-		let hasBash = false;
-		let hasErrors = false;
-
-		for (const entry of entries) {
-			if (entry.type === "toolCall") {
-				const tool = entry.toolName;
-				if (tool === "edit" || tool === "write") hasEdits = true;
-				if (tool === "bash" || tool === "git_ship") hasBash = true;
-			}
-			if (entry.type === "message" && entry.message.role === "assistant" && entry.message.stopReason === "error") {
-				hasErrors = true;
-			}
-		}
+		let hasEdits = this.cachedHasEdits;
+		let hasBash = this.cachedHasBash;
+		const hasErrors = this.cachedHasErrors;
 
 		if (activeToolNames.includes("edit") || activeToolNames.includes("write")) hasEdits = true;
 		if (activeToolNames.includes("bash")) hasBash = true;
@@ -119,8 +132,8 @@ export class FooterComponent implements Component {
 		const thinkingText = state.model?.reasoning ? `THINK ${thinkingLevel}` : undefined;
 
 		// Memory usage
-		const memUsage = process.memoryUsage().heapUsed / 1024 / 1024;
-		const memText = `MEM ${memUsage.toFixed(0)}MB`;
+		const memUsage = process.memoryUsage().rss / 1024 / 1024;
+		const memText = `RSS ${memUsage.toFixed(0)}MB`;
 
 		// Format cost nicely
 		let costText: string | undefined;
@@ -172,8 +185,6 @@ export class FooterComponent implements Component {
 		// 9. Cost
 		if (costText && width > 95) {
 			parts.push(theme.fg("dim", costText));
-		} else if (width > 95) {
-			parts.push(theme.fg("dim", "COST $0.000"));
 		}
 
 		// 10. Memory Usage
