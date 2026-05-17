@@ -9,6 +9,7 @@
     <img src="https://img.shields.io/badge/VectorDB-FF4500?style=for-the-badge&logo=databricks&logoColor=white" />
     <img src="https://img.shields.io/badge/Autonomous-Engine-blue?style=for-the-badge" />
   </p>
+  <p align="center"><b>Sürüm: 2026-4</b></p>
 </div>
 
 <br>

@@ -1102,6 +1102,7 @@ export function getLanguageFromPath(filePath: string): string | undefined {
 
 export function getMarkdownTheme(): MarkdownTheme {
 	return {
+		tableDensity: "compact",
 		heading: (text: string) => theme.fg("mdHeading", text),
 		link: (text: string) => theme.fg("mdLink", text),
 		linkUrl: (text: string) => theme.fg("mdLinkUrl", text),
@@ -1157,6 +1158,7 @@ export function getSelectListTheme(): SelectListTheme {
 export function getEditorTheme(): EditorTheme {
 	return {
 		borderColor: (text: string) => theme.fg("borderMuted", text),
+		borderAccentColor: (text: string) => theme.fg("borderAccent", text),
 		selectList: getSelectListTheme(),
 	};
 }

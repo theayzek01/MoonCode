@@ -46,6 +46,7 @@ export interface TerminalSettings {
 	imageWidthCells?: number; // default: 60 (preferred inline image width in terminal cells)
 	clearOnShrink?: boolean; // default: false (clear empty rows when content shrinks)
 	showTerminalProgress?: boolean; // default: false (OSC 9;4 terminal progress indicators)
+	logoMode?: "hero" | "compact" | "minimal" | "off" | "auto"; // default: "auto"
 }
 
 export interface ImageSettings {
@@ -1049,6 +1050,19 @@ export class SettingsManager {
 		}
 		this.globalSettings.terminal.showTerminalProgress = enabled;
 		this.markModified("terminal", "showTerminalProgress");
+		this.save();
+	}
+
+	getLogoMode(): "hero" | "compact" | "minimal" | "off" | "auto" {
+		return this.settings.terminal?.logoMode ?? "auto";
+	}
+
+	setLogoMode(mode: "hero" | "compact" | "minimal" | "off" | "auto"): void {
+		if (!this.globalSettings.terminal) {
+			this.globalSettings.terminal = {};
+		}
+		this.globalSettings.terminal.logoMode = mode;
+		this.markModified("terminal", "logoMode");
 		this.save();
 	}
 

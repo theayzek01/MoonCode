@@ -1,37 +1,69 @@
-const BRIDGE_URL = "ws://127.0.0.1:3133/ws";
-const VERSION = "2026.2.0";
+const BASE_PORT = 3133;
+const MAX_PORT_OFFSET = 9; // Scan 3133 to 3142
+const VERSION = "2026.4.0";
 const HEARTBEAT_INTERVAL_MS = 30000;
-const RECONNECT_DELAY_MS = 3000;
-const COMMAND_TIMEOUT_MS = 12000;
-const MAX_TABS_RETURNED = 80;
+const RECONNECT_DELAY_MS = 5000;
+const COMMAND_TIMEOUT_MS = 15000;
+const MAX_TABS_RETURNED = 100;
 const ALARM_NAME = "mooncode-bridge-reconnect";
 
-let socket = null;
-let reconnectTimer = null;
+/** @type {Map<number, { socket: WebSocket, info?: any }>} */
+let connections = new Map();
+/** @type {Set<number>} */
+let connectingPorts = new Set();
 let heartbeatTimer = null;
-let isConnecting = false;
-let debuggerAttachedTabs = new Set();
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-setBadge(false, "starting");
-connect();
-chrome.runtime.onStartup.addListener(connect);
+chrome.runtime.onStartup.addListener(startDiscovery);
 chrome.runtime.onInstalled.addListener(() => {
   chrome.alarms.create(ALARM_NAME, { periodInMinutes: 1 });
-  chrome.contextMenus.create({
-    id: "mooncode-ingest",
-    title: "Send to MoonCode Knowledge Base",
-    contexts: ["page", "selection"]
+  
+  // Cleanup old context menus first to avoid errors on reload
+  chrome.contextMenus.removeAll(() => {
+    chrome.contextMenus.create({
+      id: "mooncode-ingest",
+      title: "Send to MoonCode Knowledge Base",
+      contexts: ["page", "selection"]
+    }, () => {
+       if (chrome.runtime.lastError) console.log("ContextMenu error:", chrome.runtime.lastError.message);
+    });
   });
-  connect();
+
+  startDiscovery();
 });
+
 chrome.action.onClicked.addListener(() => {
-  if (socket?.readyState !== WebSocket.OPEN) connect();
+  chrome.tabs.create({ url: "dashboard.html" });
+  startDiscovery();
 });
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === "get_status") {
+    const conns = [];
+    let totalClients = 0;
+    for (let i = 0; i <= MAX_PORT_OFFSET; i++) {
+      const port = BASE_PORT + i;
+      const conn = connections.get(port);
+      if (conn?.info) totalClients++;
+      conns.push({
+        port,
+        status: (conn?.socket?.readyState === WebSocket.OPEN) ? "connected" : (connectingPorts.has(port) ? "connecting" : "scanning"),
+        info: conn?.info
+      });
+    }
+    sendResponse({ connections: conns, totalClients });
+    return true;
+  }
+  if (message.type === "reconnect_all") {
+    startDiscovery();
+    sendResponse({ ok: true });
+  }
+});
+
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === "mooncode-ingest" && tab?.id) {
     executePage({ action: "read_dom", tabId: tab.id, maxChars: 20000 }).then(result => {
-      send({
+      broadcast({
         type: "knowledge_ingest",
         url: result?.url || tab.url,
         title: result?.title || tab.title,
@@ -43,42 +75,61 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     });
   }
 });
+
 chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === ALARM_NAME && socket?.readyState !== WebSocket.OPEN) connect();
+  if (alarm.name === ALARM_NAME) startDiscovery();
 });
 
-// ── Connection ────────────────────────────────────────────────────────────────
-function connect() {
-  if (isConnecting) return;
-  if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
-    updateBadgeFromSocket();
-    return;
+// ── Discovery & Connection ──────────────────────────────────────────────────
+function startDiscovery() {
+  for (let i = 0; i <= MAX_PORT_OFFSET; i++) {
+    connectToPort(BASE_PORT + i);
   }
+  startHeartbeat();
+}
 
-  isConnecting = true;
-  clearTimeout(reconnectTimer);
-  clearInterval(heartbeatTimer);
-  setBadge(false, "connecting");
+function connectToPort(port) {
+  if (connections.has(port) || connectingPorts.has(port)) return;
 
+  connectingPorts.add(port);
+  updateBadge();
+
+  const url = `ws://localhost:${port}/ws`;
+  let socket;
   try {
-    socket = new WebSocket(BRIDGE_URL);
+    socket = new WebSocket(url);
   } catch (e) {
-    isConnecting = false;
-    scheduleReconnect();
+    connectingPorts.delete(port);
     return;
   }
 
   socket.onopen = () => {
-    isConnecting = false;
-    setBadge(true, "connected");
-    sendHello();
-    heartbeatTimer = setInterval(() => {
-      if (socket?.readyState === WebSocket.OPEN) {
-        send({ type: "ping", time: Date.now() });
-      } else {
-        clearInterval(heartbeatTimer);
-      }
-    }, HEARTBEAT_INTERVAL_MS);
+    connectingPorts.delete(port);
+    connections.set(port, { socket });
+    updateBadge();
+    console.log(`[Moon] Connected to port ${port}`);
+    sendToSocket(socket, {
+      type: "hello",
+      extensionId: chrome.runtime.id,
+      version: VERSION,
+      capabilities: ["tabs", "page", "debugger", "scroll", "smart_scroll", "mouse", "canvas_info", "canvas_draw",
+        "console_logs", "read_dom", "hover", "drag", "upload_file", "press_key", "get_elements", "evaluate", "clear_ui"]
+    });
+  };
+
+  socket.onclose = () => {
+    connections.delete(port);
+    connectingPorts.delete(port);
+    updateBadge();
+    // Aggressive retry if we have no connections at all
+    if (connections.size === 0) {
+      setTimeout(() => connectToPort(port), RECONNECT_DELAY_MS);
+    }
+  };
+
+  socket.onerror = () => {
+    connectingPorts.delete(port);
+    updateBadge();
   };
 
   socket.onmessage = async (event) => {
@@ -86,62 +137,72 @@ function connect() {
     try { message = JSON.parse(event.data); } catch { return; }
 
     if (message.type === "pong") return;
+    
+    if (message.type === "hello") {
+      const conn = connections.get(port);
+      if (conn) {
+        conn.info = {
+          version: message.version || "Unknown",
+          capabilities: message.capabilities || [],
+          extensionId: message.extensionId || "N/A",
+          connectedAt: Date.now()
+        };
+        updateBadge(); // Update badge to show authenticated count if preferred
+      }
+      return;
+    }
+
     if (message.type !== "command" || !message.id) return;
 
     try {
       const result = await withTimeout(executeCommand(message.action, message.args || {}), COMMAND_TIMEOUT_MS, message.action);
-      send({ type: "result", id: message.id, ok: true, result });
+      sendToSocket(socket, { type: "result", id: message.id, ok: true, result });
     } catch (error) {
-      send({ type: "result", id: message.id, ok: false, error: error?.message || String(error) });
+      sendToSocket(socket, { type: "result", id: message.id, ok: false, error: error?.message || String(error) });
     }
   };
-
-  socket.onclose = (event) => {
-    isConnecting = false;
-    clearInterval(heartbeatTimer);
-    setBadge(false, "disconnected");
-    scheduleReconnect(event.code);
-  };
-
-  socket.onerror = () => {
-    isConnecting = false;
-    // onclose fires next, let that handle reconnect
-  };
 }
 
-function scheduleReconnect(code) {
-  clearTimeout(reconnectTimer);
-  // 1000 = normal close; reconnect sooner, otherwise back off
-  const delay = (code === 1000) ? 1000 : RECONNECT_DELAY_MS;
-  reconnectTimer = setTimeout(connect, delay);
+function broadcast(message) {
+  for (const socket of connections.values()) {
+    sendToSocket(socket, message);
+  }
 }
 
-function sendHello() {
-  send({
-    type: "hello",
-    extensionId: chrome.runtime.id,
-    version: VERSION,
-    capabilities: ["tabs", "page", "debugger", "scroll", "smart_scroll", "mouse", "canvas_info", "canvas_draw",
-      "console_logs", "read_dom", "hover", "drag", "upload_file", "press_key", "get_elements", "evaluate", "clear_ui"]
-  });
-}
-
-function send(message) {
+function sendToSocket(socket, message) {
   if (socket?.readyState === WebSocket.OPEN) {
     try { socket.send(JSON.stringify(message)); } catch { /* ignore */ }
   }
 }
 
-function updateBadgeFromSocket() {
-  const ok = socket?.readyState === WebSocket.OPEN;
-  setBadge(ok, ok ? "connected" : "connecting");
+function startHeartbeat() {
+  if (heartbeatTimer) return;
+  heartbeatTimer = setInterval(() => {
+    if (connections.size === 0) {
+        // Try to rediscover if everything is dead
+        startDiscovery();
+    }
+    broadcast({ type: "ping", time: Date.now() });
+  }, HEARTBEAT_INTERVAL_MS);
 }
 
-function setBadge(connected, title) {
-  chrome.action.setBadgeText({ text: connected ? "ON" : "OFF" });
-  chrome.action.setBadgeBackgroundColor({ color: connected ? "#22c55e" : "#ef4444" });
-  chrome.action.setTitle({ title: `MoonCode Browser Bridge: ${title}` });
+function updateBadge() {
+  const activeCount = connections.size;
+  const isConnecting = connectingPorts.size > 0;
+
+  if (activeCount > 0) {
+    chrome.action.setBadgeText({ text: String(activeCount) });
+    chrome.action.setBadgeBackgroundColor({ color: "#22c55e" });
+    chrome.action.setTitle({ title: `MoonCode: ${activeCount} session(s) active` });
+  } else {
+    chrome.action.setBadgeText({ text: isConnecting ? "..." : "OFF" });
+    chrome.action.setBadgeBackgroundColor({ color: isConnecting ? "#38bdf8" : "#ef4444" });
+    chrome.action.setTitle({ title: isConnecting ? "MoonCode: Scanning ports..." : "MoonCode: Offline" });
+  }
 }
+
+// Ensure discovery starts immediately
+startDiscovery();
 
 // ── Command dispatcher ────────────────────────────────────────────────────────
 async function executeCommand(action, args) {

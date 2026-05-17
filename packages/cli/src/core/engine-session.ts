@@ -15,7 +15,7 @@
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { basename, dirname, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import type { AssistantMessage, ImageContent, Message, Model, TextContent } from "moon-core";
 import {
 	clampThinkingLevel,
@@ -53,6 +53,7 @@ import {
 	shouldCompact,
 } from "./compaction/index.js";
 import { DEFAULT_THINKING_LEVEL } from "./defaults.js";
+import { buildDesignPrompt, shouldInjectDefaultUiDesignPrompt } from "./design-system/index.js";
 import { exportSessionToHtml, type ToolHtmlRenderer } from "./export-html/index.js";
 import { createToolHtmlRenderer } from "./export-html/tool-renderer.js";
 import {
@@ -1076,14 +1077,28 @@ export class EngineSession {
 	 */
 	private _detectDesignMode(): boolean {
 		try {
-			const { existsSync } = require("node:fs");
-			const { join } = require("node:path");
 			if (existsSync(join(this._cwd, "design-systems"))) return true;
 			if (existsSync(join(this._cwd, "DESIGN.md"))) return true;
 			return false;
 		} catch {
 			return false;
 		}
+	}
+
+	private _buildTurnSystemPrompt(userText: string): string {
+		if (this._baseSystemPromptOptions?.designMode) {
+			return this._baseSystemPrompt;
+		}
+		if (!shouldInjectDefaultUiDesignPrompt(userText)) {
+			return this._baseSystemPrompt;
+		}
+		const designPrompt = buildDesignPrompt({ projectRoot: this._cwd, userContext: userText });
+		const apexMarker = "\n\n## APEX MODE";
+		const apexIndex = this._baseSystemPrompt.indexOf(apexMarker);
+		if (apexIndex === -1) {
+			return `${this._baseSystemPrompt}${designPrompt}`;
+		}
+		return `${this._baseSystemPrompt.slice(0, apexIndex)}${designPrompt}${this._baseSystemPrompt.slice(apexIndex)}`;
 	}
 
 	// =========================================================================
@@ -1372,11 +1387,13 @@ export class EngineSession {
 			}
 			this._pendingNextTurnMessages = [];
 
+			const turnSystemPrompt = this._buildTurnSystemPrompt(expandedText);
+
 			// Emit before_engine_start extension event
 			const result = await this._extensionRunner.emitBeforeEngineStart(
 				expandedText,
 				currentImages,
-				this._baseSystemPrompt,
+				turnSystemPrompt,
 				this._baseSystemPromptOptions,
 			);
 			// Add all custom messages from extensions
@@ -1399,10 +1416,8 @@ export class EngineSession {
 					? `${memoryPreface}\n${result.systemPrompt}`
 					: result.systemPrompt;
 			} else {
-				// Ensure we're using the base prompt (in case previous turn had modifications)
-				this.engine.state.systemPrompt = memoryPreface
-					? `${memoryPreface}\n${this._baseSystemPrompt}`
-					: this._baseSystemPrompt;
+				// Ensure we're using this turn's prompt (in case previous turn had modifications)
+				this.engine.state.systemPrompt = memoryPreface ? `${memoryPreface}\n${turnSystemPrompt}` : turnSystemPrompt;
 			}
 		} catch (error) {
 			preflightResult?.(false);
@@ -1907,15 +1922,16 @@ export class EngineSession {
 
 		const normalized = text.toLowerCase();
 		const detailedPattern =
-			/\b(xhigh|detayl[ıi]|kapsaml[ıi]|mimari|analiz|debug|hata ay[ıi]kla|security|g[üu]venlik|refactor|tasarla|plan|neden|t[üu]m proje|performans|optimi[sz]e)\b/i;
+			/\b(xhigh|detayl[ıi]|kapsaml[ıi]|mimari|analiz|debug|hata ay[ıi]kla|security|g[üu]venlik|refactor|tasarla|plan|neden|t[üu]m proje|performans|optimi[sz]e|apex|deepthink|core|mcp|swarm|evolve|tui)\b/i;
 		const executionPattern =
-			/\b(build|test|lint|format|commit|push|publish|s[üu]r[üu]m|version|yaz|ekle|de[ğg]i[şs]tir|d[üu]zelt|sil|rename)\b/i;
+			/\b(build|test|lint|format|commit|push|publish|s[üu]r[üu]m|version|yaz|ekle|de[ğg]i[şs]tir|d[üu]zelt|sil|rename|fix|repair)\b/i;
 
 		if (detailedPattern.test(normalized)) {
+			// S3 - S4 level triggers
 			return "xhigh";
 		}
 		if (executionPattern.test(normalized)) {
-			return "minimal";
+			return "medium";
 		}
 		return "low";
 	}

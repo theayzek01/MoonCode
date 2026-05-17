@@ -209,6 +209,13 @@ export class ToolExecutionComponent extends Container {
 		this.updateDisplay();
 	}
 
+	private cachedWidth?: number;
+	private cachedLines?: string[];
+
+	getToolName(): string {
+		return this.toolName;
+	}
+
 	setImageWidthCells(width: number): void {
 		this.imageWidthCells = Math.max(1, Math.floor(width));
 		this.updateDisplay();
@@ -216,6 +223,8 @@ export class ToolExecutionComponent extends Container {
 
 	override invalidate(): void {
 		super.invalidate();
+		this.cachedWidth = undefined;
+		this.cachedLines = undefined;
 		this.updateDisplay();
 	}
 
@@ -223,10 +232,18 @@ export class ToolExecutionComponent extends Container {
 		if (this.hideComponent) {
 			return [];
 		}
-		return super.render(width);
+		if (this.cachedLines && this.cachedWidth === width) {
+			return this.cachedLines;
+		}
+		const lines = super.render(width);
+		this.cachedWidth = width;
+		this.cachedLines = lines;
+		return lines;
 	}
 
 	private updateDisplay(): void {
+		this.cachedWidth = undefined;
+		this.cachedLines = undefined;
 		const bgFn = this.isPartial
 			? (text: string) => theme.bg("toolPendingBg", text)
 			: this.result?.isError

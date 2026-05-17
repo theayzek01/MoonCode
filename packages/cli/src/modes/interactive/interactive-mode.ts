@@ -75,6 +75,7 @@ import { FooterDataProvider, type ReadonlyFooterDataProvider } from "../../core/
 import { type AppKeybinding, KeybindingsManager } from "../../core/keybindings.js";
 import { createCompactionSummaryMessage } from "../../core/messages.js";
 import { defaultModelPerProvider, findExactModelReferenceMatch, resolveModelScope } from "../../core/model-resolver.js";
+import { OmegaKernel } from "../../core/omega-kernel.js";
 import { DefaultPackageManager } from "../../core/package-manager.js";
 import { BUILT_IN_PROVIDER_DISPLAY_NAMES } from "../../core/provider-display-names.js";
 import type { ResourceDiagnostic } from "../../core/resource-loader.js";
@@ -399,7 +400,13 @@ export class InteractiveMode {
 		this.editorContainer = new Container();
 		this.editorContainer.addChild(this.editor as Component);
 		this.footerDataProvider = new FooterDataProvider(this.sessionManager.getCwd());
-		this.footer = new FooterComponent(this.session, this.footerDataProvider);
+		this.footer = new FooterComponent(this.session, this.footerDataProvider, () => {
+			const active = Array.from(this.pendingTools.values()).map((comp) => comp.getToolName());
+			if (this.bashComponent) {
+				active.push("bash");
+			}
+			return active;
+		});
 		this.footer.setAutoCompactEnabled(this.session.autoCompactionEnabled);
 
 		// Load hide thinking block setting
@@ -638,7 +645,7 @@ export class InteractiveMode {
 				hint("app.tools.expand", "yardim"),
 			].join(theme.fg("dim", " • "));
 
-			this.builtInHeader = new MoonCodeHeaderComponent();
+			this.builtInHeader = new MoonCodeHeaderComponent(this.session, this.footerDataProvider);
 
 			// Setup UI layout
 			this.headerContainer.addChild(this.builtInHeader);
@@ -2510,6 +2517,16 @@ export class InteractiveMode {
 			if (!text) return;
 
 			// Handle commands
+			if (text === "/status") {
+				this.editor.setText("");
+				await this.handleStatusDiagnosticsCommand();
+				return;
+			}
+			if (text === "/help") {
+				this.editor.setText("");
+				this.handleHelpCommand();
+				return;
+			}
 			if (text === "/metrics") {
 				if (this.activeMetricsChart) {
 					this.activeMetricsChart.stop();
@@ -2850,6 +2867,10 @@ export class InteractiveMode {
 			// First, move any pending bash components to chat
 			this.flushPendingBashComponents();
 
+			// Initialize task in Omega Kernel
+			const kernel = OmegaKernel.getInstance();
+			await kernel.initializeTask(text, this.sessionManager.getCwd());
+
 			if (this.onInputCallback) {
 				this.onInputCallback(text);
 			}
@@ -3105,7 +3126,7 @@ export class InteractiveMode {
 				break;
 			}
 
-			case "engine_end":
+			case "engine_end": {
 				if (this.settingsManager.getShowTerminalProgress()) {
 					this.ui.terminal.setProgress(false);
 				}
@@ -3121,6 +3142,19 @@ export class InteractiveMode {
 				}
 				this.pendingTools.clear();
 
+				// Trigger verification and certificate creation in Omega Kernel asynchronously
+				const oKernel = OmegaKernel.getInstance();
+				if (oKernel.currentIntent && oKernel.currentIntent.effortMode !== "S0") {
+					const cwd = this.sessionManager.getCwd();
+					oKernel
+						.verifyTask(cwd)
+						.then((verResult) => {
+							oKernel.buildPatchCertificate("", [], verResult);
+							this.ui.requestRender();
+						})
+						.catch(() => {});
+				}
+
 				// Clear roadmap for next task
 				this.currentSteps = [];
 				this.roadmap.setSteps([]);
@@ -3130,6 +3164,7 @@ export class InteractiveMode {
 
 				this.ui.requestRender();
 				break;
+			}
 
 			case "compaction_start": {
 				if (this.settingsManager.getShowTerminalProgress()) {
@@ -5903,6 +5938,139 @@ export class InteractiveMode {
 		}
 	}
 
+	private handleHelpCommand(): void {
+		let info = `\n${theme.bold(theme.fg("accent", "╭─ MoonCode Premium Grouped Commands ──────────────────────╮"))}\n`;
+
+		const categories = {
+			"Session & Context": [
+				{ name: "/new", desc: "Start a clean session" },
+				{ name: "/resume", desc: "Resume saved session" },
+				{ name: "/name", desc: "Rename session" },
+				{ name: "/session", desc: "Show session info and stats" },
+				{ name: "/context", desc: "Show context and token usage" },
+				{ name: "/compact", desc: "Compress session context" },
+				{ name: "/fork", desc: "Fork from a message" },
+				{ name: "/clone", desc: "Clone session in current location" },
+				{ name: "/tree", desc: "Navigate session tree" },
+				{ name: "/export", desc: "Export session (.html or .jsonl)" },
+				{ name: "/import", desc: "Import a session from JSONL" },
+				{ name: "/share", desc: "Share session as a GitHub Gist" },
+				{ name: "/copy", desc: "Copy the last response" },
+			],
+			"Model & Settings": [
+				{ name: "/models", desc: "Select a model" },
+				{ name: "/scoped-models", desc: "Edit quick-switch models" },
+				{ name: "/settings", desc: "Open settings" },
+				{ name: "/autothink", desc: "Toggle automatic thinking level" },
+				{ name: "/login", desc: "Configure Provider API keys" },
+			],
+			Modes: [
+				{ name: "/plan", desc: "Toggle plan mode" },
+				{ name: "/automation", desc: "Toggle automation mode" },
+				{ name: "/agentmode", desc: "Toggle agent mode" },
+				{ name: "/zen", desc: "Toggle Zen mode (hide UI elements)" },
+			],
+			"Tools & Swarm": [
+				{ name: "/init", desc: "Create project config files" },
+				{ name: "/ship", desc: "Ship changes (branch/commit/push/PR)" },
+				{ name: "/diff", desc: "Show git changes" },
+				{ name: "/index", desc: "Index codebase for semantic search" },
+				{ name: "/browser", desc: "Chrome extension status and control" },
+				{ name: "/mcp", desc: "List connected MCP servers" },
+				{ name: "/swarm", desc: "Trigger Multi-Agent Swarm" },
+				{ name: "/fix", desc: "Run Autonomous Auto-Healer" },
+				{ name: "/evolve", desc: "Trigger Meta-Evolution (Self-Improvement Loop)" },
+			],
+			"Diagnostics & System": [
+				{ name: "/status", desc: "Show detailed runtime diagnostics panel" },
+				{ name: "/metrics", desc: "Show system metrics and token usage" },
+				{ name: "/update", desc: "Update MoonCode to latest version" },
+				{ name: "/reload", desc: "Reload system components" },
+				{ name: "/hotkeys", desc: "List keyboard shortcuts" },
+				{ name: "/quit", desc: "Quit MoonCode" },
+			],
+		};
+
+		for (const [catName, list] of Object.entries(categories)) {
+			info += `  ${theme.bold(theme.fg("success", `[ ${catName} ]`))}\n`;
+			for (const cmd of list) {
+				const paddedName = cmd.name.padEnd(16);
+				info += `    ${theme.fg("accent", paddedName)} ${theme.fg("text", cmd.desc)}\n`;
+			}
+			info += `\n`;
+		}
+
+		info += `${theme.bold(theme.fg("accent", "╰──────────────────────────────────────────────────────────╯"))}\n`;
+		this.chatContainer.addChild(new Spacer(1));
+		this.chatContainer.addChild(new Text(info, 1, 0));
+		this.ui.requestRender();
+	}
+
+	private async handleStatusDiagnosticsCommand(): Promise<void> {
+		const stats = this.session.getSessionStats();
+		const currentModel = this.session.model;
+		const contextUsage = this.session.getContextUsage();
+		const memUsage = process.memoryUsage().heapUsed / 1024 / 1024;
+		const branch = this.footerDataProvider.getGitBranch() || "N/A";
+
+		let totalCost = 0;
+		for (const entry of this.session.sessionManager.getEntries()) {
+			if (entry.type === "message" && entry.message.role === "assistant") {
+				const costVal = entry.message.usage?.cost?.total;
+				if (typeof costVal === "number" && Number.isFinite(costVal)) {
+					totalCost += costVal;
+				}
+			}
+		}
+
+		let info = `\n${theme.bold(theme.fg("accent", "✦ MOONCODE CONTROL CENTER"))}\n\n`;
+
+		info += `  ${theme.bold(theme.fg("success", "■ AGENT"))}\n`;
+		info += `    Apex Mode:          ${theme.fg("accent", "Active")}\n`;
+		info += `    DeepThink:          ${theme.fg("text", this.session.supportsThinking() ? "Enabled" : "Disabled")}\n`;
+		info += `    AutoThink:          ${theme.fg("text", this.session.getAutoThinkEnabled() ? "Enabled" : "Disabled")}\n`;
+		info += `    Thinking Level:     ${theme.fg("text", this.session.thinkingLevel || "N/A")}\n`;
+		const activeTools = this.session.getActiveToolNames().join(", ") || "None";
+		info += `    Active Tools:       ${theme.fg("text", activeTools)}\n\n`;
+
+		// Omega Kernel Section
+		const kernel = OmegaKernel.getInstance();
+		info += `  ${theme.bold(theme.fg("success", "■ Ω KERNEL (MATHEMATICAL ENGINE)"))}\n`;
+		info += `    Kernel State:       ${theme.fg("accent", "Ω Active")}\n`;
+		info += `    Intent Contract:    ${theme.fg("text", kernel.currentIntent ? "Generated" : "None")}\n`;
+		info += `    Effort Level:       ${theme.fg("text", kernel.currentIntent?.effortMode || "S0 (Direct)")}\n`;
+		info += `    Entropy / Risk:     ${theme.fg("text", kernel.currentRouter ? `${kernel.currentRouter.entropy.toFixed(2)} (${kernel.currentIntent?.riskLevel || "low"} risk)` : "0.10 (low risk)")}\n`;
+		info += `    Model Route:        ${theme.fg("text", kernel.currentRouter?.recommendedModelTier || "local")}\n`;
+		info += `    Repo Graph State:   ${theme.fg("text", kernel.repoGraph.status || "fresh")}\n`;
+		info += `    Patch Memory:       ${theme.fg("text", kernel.memoryHit ? "HIT (Edit macro retrieved)" : "MISS (Pattern indexed)")}\n`;
+		info += `    Verification:       ${theme.fg("text", kernel.currentVerification?.status || "pending")}\n`;
+		if (kernel.currentVerification?.errorHighlights) {
+			info += `    Errors Detected:    ${theme.fg("error", kernel.currentVerification.errorHighlights.join(", "))}\n`;
+		}
+		info += `\n`;
+
+		info += `  ${theme.bold(theme.fg("success", "■ MODEL & METRICS"))}\n`;
+		info += `    Provider:           ${theme.fg("text", currentModel?.provider || "N/A")}\n`;
+		info += `    Model:              ${theme.fg("text", currentModel?.id || "N/A")}\n`;
+		const ctxLimit = currentModel?.contextWindow ? currentModel.contextWindow.toLocaleString() : "N/A";
+		const ctxUsed = contextUsage ? `${contextUsage.percent.toFixed(1)}%` : "0%";
+		info += `    Context Limit:      ${theme.fg("text", ctxLimit)}\n`;
+		info += `    Context Used:       ${theme.fg("text", ctxUsed)}\n`;
+		info += `    Total Cost:         ${theme.fg("accent", `$${totalCost.toFixed(3)}`)}\n\n`;
+
+		info += `  ${theme.bold(theme.fg("success", "■ PROJECT & RUNTIME"))}\n`;
+		info += `    Working Dir:        ${theme.fg("text", this.session.sessionManager.getCwd())}\n`;
+		info += `    Git Branch:         ${theme.fg("text", branch)}\n`;
+		info += `    Memory Heap:        ${theme.fg("text", `${memUsage.toFixed(1)} MB`)}\n`;
+		const browserCount = this.session.getBrowserBridgeStatus().clients;
+		info += `    Browser Bridge:     ${theme.fg("text", `${browserCount} client${browserCount === 1 ? "" : "s"} connected`)}\n`;
+		info += `    Session Stats:      ${theme.fg("text", `${stats.userMessages} User / ${stats.assistantMessages} Assistant`)}\n`;
+
+		this.chatContainer.addChild(new Spacer(1));
+		this.chatContainer.addChild(new Text(info, 1, 0));
+		this.ui.requestRender();
+	}
+
 	private async handleUpdateCommand(args: string): Promise<void> {
 		if (this.session.isStreaming || this.session.isCompacting) {
 			this.showWarning("Guncelleme icin mevcut islemin bitmesini bekleyin.");
@@ -6419,6 +6587,14 @@ export class InteractiveMode {
 			"## Teknoloji Stack",
 			"",
 			"<!-- Proje teknolojilerini buraya ekle -->",
+			"",
+			"## UI Tasarim Varsayilani",
+			"",
+			"- Kullanici farkli bir stil istemedikce UI: shadcn/ui + Vercel dark SaaS + Linear/Raycast temizligi",
+			"- Mevcut proje design system'i ve component convention'lari onceliklidir",
+			"- Tailwind/Radix/Lucide varsa kullan; yoksa bagimlilik eklemeden ayni estetigi mevcut stack ile taklit et",
+			"- Dark-first, near-black background, neutral cards, thin borders, muted text, strong headings, rounded-xl/2xl",
+			"- Hover, focus-visible, disabled, loading, empty, error, active ve responsive state'leri dusun",
 			"",
 			"## Kod Standartlari",
 			"",

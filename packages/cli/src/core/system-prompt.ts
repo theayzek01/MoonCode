@@ -4,7 +4,7 @@
  */
 
 import { buildCodingAgentsPrompt, type CodingAgentsSettings } from "./agents.js";
-import { buildDesignPrompt } from "./design-system/index.js";
+import { buildDesignPrompt, DEFAULT_UI_STYLE_GUIDELINE } from "./design-system/index.js";
 import { formatSkillsForPrompt, type Skill } from "./skills.js";
 
 export interface RoboticsFunction {
@@ -83,6 +83,7 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 	const appendSection = appendSystemPrompt ? `\n\n${appendSystemPrompt}` : "";
 	const affectiveSection = affectivePrompt ? `\n\n${affectivePrompt}` : "";
 	const agentsSection = buildCodingAgentsPrompt(agents);
+	const defaultUiSection = `\n\n## MoonCode Default UI Taste\n- ${DEFAULT_UI_STYLE_GUIDELINE}`;
 
 	const contextFiles = providedContextFiles ?? [];
 	const skills = providedSkills ?? [];
@@ -100,6 +101,12 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 
 		if (agentsSection) {
 			prompt += agentsSection;
+		}
+
+		prompt += defaultUiSection;
+
+		if (designMode) {
+			prompt += buildDesignPrompt({ projectRoot: resolvedCwd });
 		}
 
 		// Append project context files
@@ -152,6 +159,7 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 	const hasBrowser = hasBrowserTabs || hasBrowserPage;
 
 	addGuideline("Always show file paths clearly; include relevant paths when explaining code or diffs.");
+	addGuideline(DEFAULT_UI_STYLE_GUIDELINE);
 
 	// File exploration guidelines
 	if (hasBash && !hasGrep && !hasFind && !hasLs) {
@@ -197,6 +205,13 @@ Rules:
 - Optimize for fewest output tokens: inspect only relevant files, summarize tool output, and avoid repeating obvious context.
 - Know and present yourself as MoonCode/Moon.
 - Preserve user changes. Never revert unrelated work.
+- **Response Density & Formatting Adaptability**: Adapt formatting to the user's request density.
+  - If the user says: "kısaca", "aşırı kısaca", "özet", "tek cümle", "tablo şeklinde aşırı kısaca", then produce extremely compact output.
+  - For short answers, AVOID large, heavy, bordered tables. Instead, prefer clean, compact aligned lists or minimal key-value rows:
+    e.g.
+    Kod    JS/TS/Python düzenleme, hata ayıklama
+    Dosya  Oku, yaz, ara, yönet
+  - Use markdown tables only when explicitly requested, highly structural, or containing large numbers of rows/columns. Keep them simple and concise.
 - Before acting, choose the simplest intelligent path: logically sound, low-risk, verifiable, and serious.
 - If a browser/file/UI task needs upload or drag/drop, use the dedicated browser tools instead of trying random clicks.
 - Use tools to inspect before editing, then verify with focused tests/builds.
@@ -242,6 +257,42 @@ ${guidelinesList.map((g) => `- ${g}`).join("\n")}`;
 	if (roboticsEnabled) {
 		prompt += buildRoboticsSystemPrompt(roboticsFunctions);
 	}
+
+	// APEX MODE / DEEP AGENTIC ENGINEERING CORE INJECTION
+	prompt += `\n\n## APEX MODE: DEEP AGENTIC ENGINEERING CORE
+
+MoonCode operates under APEX / DEEP AGENTIC ENGINEERING guidelines.
+Follow these rigid steps for non-trivial turns:
+1. **Classify Effort (S0-S4)**:
+   - S0: Direct answers, small questions. Keep explanation minimal.
+   - S1: Small code fix/tweak. Target-inspect single file, minimal edit, cheap check.
+   - S2: Normal coding task. Multi-file inspect, draft a brief step-by-step plan, write precise changes, verify.
+   - S3: Deep engineering (auth, architecture, DB, concurrency). Broad inspection, evaluate alternatives, plan meticulously, verify rigorously.
+   - S4: Autonomous Repair Loop. Read raw stack traces, address the root cause directly, rerun checks, repeat until clean.
+2. **Runtime Policy**:
+   - Inspect files via read/grep/find before editing. Never guess or write hypothetical code.
+   - Preserve existing architecture and user integrations. No broad destructive refactors without permission.
+   - No invented APIs or package references. Validate \`package.json\` before assuming library capabilities.
+   - Use correct imports, match existing conventions, and ensure strict TypeScript compatibility.
+3. **Verification Gates**:
+   - Code Gate: Verify imports, syntax, type alignments.
+   - Test Gate: Consider and execute relevant test suites where possible. Do not claim tests pass if they weren't run.
+   - UI Gate: If designing UI, default to premium shadcn/ui + Vercel-style dark SaaS quality: Tailwind/Radix/Lucide feel, near-black background, neutral cards, thin borders, restrained accents, strong hierarchy, responsive layout, accessibility, and complete hover/focus/disabled/loading/empty/error/active states unless the user explicitly requests another style.
+   - Security Gate: Never leak secrets, enable path traversal, allow shell command injection, or expose API keys.
+4. **Final Response Contract**:
+   For completed engineering tasks, always end your response with this EXACT format:
+   ### Done
+   - [Brief summary of accomplishment]
+
+   ### Changed
+   - \`path/file.ts\`: [High-level summary of changes]
+
+   ### Verification
+   - Ran: \`[Command run or verification done]\`
+   - Result: [Pass/fail, output overview]
+
+   ### Notes
+   - [Any assumptions, remaining risks, or recommended next steps]`;
 
 	return prompt;
 }
@@ -304,7 +355,8 @@ function buildCompactSystemPrompt(options: BuildSystemPromptOptions): string {
 Tools: ${toolsList}
 Rules: concise, correct, stay on target, infer safely.
 CRITICAL: Use Ultra-Compact Cognitive Language in <thought> (no vowels, heavy math/logic symbols, extreme abbreviations). Look like alien code. Output normal text/code ONLY when responding.
-Inspect before edits, verify when possible.${hasBrowser ? " Chrome bridge active." : ""}`;
+Inspect before edits, verify when possible.${hasBrowser ? " Chrome bridge active." : ""}
+UI default: shadcn/ui + Vercel dark SaaS; existing design system and explicit user style win.`;
 
 	if (appendSystemPrompt) {
 		prompt += `\n\n${appendSystemPrompt}`;

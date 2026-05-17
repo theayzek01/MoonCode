@@ -1,6 +1,6 @@
 {
 	"name": "moon-engine",
-	"version": "2026.2.0",
+	"version": "2026.4.0",
 	"description": "General-purpose state management engine",
 	"type": "module",
 	"main": "./dist/index.js",
@@ -19,7 +19,7 @@
 	"dependencies": {
 		"@modelcontextprotocol/sdk": "^1.29.0",
 		"typebox": "^1.1.24",
-		"moon-core": "^2026.2.0"
+		"moon-core": "^2026.3.0"
 	},
 	"keywords": [
 		"engine",
