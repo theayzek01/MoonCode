@@ -9,6 +9,8 @@ import { theme } from "../theme/theme.js";
  * Prioritizes signal over noise and collapses responsively on smaller terminals.
  */
 export class FooterComponent implements Component {
+	private autoCompactEnabled = true;
+
 	constructor(
 		private session: EngineSession,
 		private footerData: ReadonlyFooterDataProvider,
@@ -16,6 +18,10 @@ export class FooterComponent implements Component {
 
 	setSession(session: EngineSession): void {
 		this.session = session;
+	}
+
+	setAutoCompactEnabled(enabled: boolean): void {
+		this.autoCompactEnabled = enabled;
 	}
 
 	invalidate(): void {}
@@ -92,7 +98,8 @@ export class FooterComponent implements Component {
 		}
 
 		// 5. Context Usage
-		parts.push(theme.fg("muted", "CTX ") + theme.fg("text", contextPercent));
+		const ctxText = this.autoCompactEnabled ? `${contextPercent} auto` : contextPercent;
+		parts.push(theme.fg("muted", "CTX ") + theme.fg("text", ctxText));
 
 		// 6. Running tasks count
 		if (activeToolNames.length > 0) {
