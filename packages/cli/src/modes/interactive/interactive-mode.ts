@@ -46,7 +46,6 @@ import {
 	TUI,
 	visibleWidth,
 } from "moon-tui";
-import { OmegaKernel } from "../../../core/omega-kernel.js";
 import { buildInitialMessage } from "../../cli/initial-message.js";
 import {
 	APP_NAME,
@@ -76,6 +75,7 @@ import { FooterDataProvider, type ReadonlyFooterDataProvider } from "../../core/
 import { type AppKeybinding, KeybindingsManager } from "../../core/keybindings.js";
 import { createCompactionSummaryMessage } from "../../core/messages.js";
 import { defaultModelPerProvider, findExactModelReferenceMatch, resolveModelScope } from "../../core/model-resolver.js";
+import { OmegaKernel } from "../../core/omega-kernel.js";
 import { DefaultPackageManager } from "../../core/package-manager.js";
 import { BUILT_IN_PROVIDER_DISPLAY_NAMES } from "../../core/provider-display-names.js";
 import type { ResourceDiagnostic } from "../../core/resource-loader.js";
