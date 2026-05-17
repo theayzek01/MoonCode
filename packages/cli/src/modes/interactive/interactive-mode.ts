@@ -5986,7 +5986,7 @@ export class InteractiveMode {
 		const currentModel = this.session.model;
 		const contextUsage = this.session.getContextUsage();
 		const memUsage = process.memoryUsage().heapUsed / 1024 / 1024;
-		const branch = this.footerData.getGitBranch() || "N/A";
+		const branch = this.footerDataProvider.getGitBranch() || "N/A";
 
 		let totalCost = 0;
 		for (const entry of this.session.sessionManager.getEntries()) {

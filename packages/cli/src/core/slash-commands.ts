@@ -61,6 +61,7 @@ export const BUILTIN_SLASH_COMMANDS: ReadonlyArray<BuiltinSlashCommand> = [
 	{ name: "agents", description: "Agent management" },
 
 	// === Update & System ===
+	{ name: "status", description: "Show detailed diagnostics" },
 	{ name: "update", description: "Update MoonCode to latest version" },
 	{ name: "ollama", description: "Ollama model management" },
 	{ name: "hotkeys", description: "List keyboard shortcuts" },
