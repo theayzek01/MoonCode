@@ -46,6 +46,7 @@ import {
 	TUI,
 	visibleWidth,
 } from "moon-tui";
+import { OmegaKernel } from "../../../core/omega-kernel.js";
 import { buildInitialMessage } from "../../cli/initial-message.js";
 import {
 	APP_NAME,
@@ -2866,6 +2867,10 @@ export class InteractiveMode {
 			// First, move any pending bash components to chat
 			this.flushPendingBashComponents();
 
+			// Initialize task in Omega Kernel
+			const kernel = OmegaKernel.getInstance();
+			await kernel.initializeTask(text, this.sessionManager.getCwd());
+
 			if (this.onInputCallback) {
 				this.onInputCallback(text);
 			}
@@ -3121,7 +3126,7 @@ export class InteractiveMode {
 				break;
 			}
 
-			case "engine_end":
+			case "engine_end": {
 				if (this.settingsManager.getShowTerminalProgress()) {
 					this.ui.terminal.setProgress(false);
 				}
@@ -3137,6 +3142,19 @@ export class InteractiveMode {
 				}
 				this.pendingTools.clear();
 
+				// Trigger verification and certificate creation in Omega Kernel asynchronously
+				const oKernel = OmegaKernel.getInstance();
+				if (oKernel.currentIntent && oKernel.currentIntent.effortMode !== "S0") {
+					const cwd = this.sessionManager.getCwd();
+					oKernel
+						.verifyTask(cwd)
+						.then((verResult) => {
+							oKernel.buildPatchCertificate("", [], verResult);
+							this.ui.requestRender();
+						})
+						.catch(() => {});
+				}
+
 				// Clear roadmap for next task
 				this.currentSteps = [];
 				this.roadmap.setSteps([]);
@@ -3146,6 +3164,7 @@ export class InteractiveMode {
 
 				this.ui.requestRender();
 				break;
+			}
 
 			case "compaction_start": {
 				if (this.settingsManager.getShowTerminalProgress()) {
@@ -6013,6 +6032,22 @@ export class InteractiveMode {
 		info += `    Thinking Level:     ${theme.fg("text", this.session.thinkingLevel || "N/A")}\n`;
 		const activeTools = this.session.getActiveToolNames().join(", ") || "None";
 		info += `    Active Tools:       ${theme.fg("text", activeTools)}\n\n`;
+
+		// Omega Kernel Section
+		const kernel = OmegaKernel.getInstance();
+		info += `  ${theme.bold(theme.fg("success", "■ Ω KERNEL (MATHEMATICAL ENGINE)"))}\n`;
+		info += `    Kernel State:       ${theme.fg("accent", "Ω Active")}\n`;
+		info += `    Intent Contract:    ${theme.fg("text", kernel.currentIntent ? "Generated" : "None")}\n`;
+		info += `    Effort Level:       ${theme.fg("text", kernel.currentIntent?.effortMode || "S0 (Direct)")}\n`;
+		info += `    Entropy / Risk:     ${theme.fg("text", kernel.currentRouter ? `${kernel.currentRouter.entropy.toFixed(2)} (${kernel.currentIntent?.riskLevel || "low"} risk)` : "0.10 (low risk)")}\n`;
+		info += `    Model Route:        ${theme.fg("text", kernel.currentRouter?.recommendedModelTier || "local")}\n`;
+		info += `    Repo Graph State:   ${theme.fg("text", kernel.repoGraph.status || "fresh")}\n`;
+		info += `    Patch Memory:       ${theme.fg("text", kernel.memoryHit ? "HIT (Edit macro retrieved)" : "MISS (Pattern indexed)")}\n`;
+		info += `    Verification:       ${theme.fg("text", kernel.currentVerification?.status || "pending")}\n`;
+		if (kernel.currentVerification?.errorHighlights) {
+			info += `    Errors Detected:    ${theme.fg("error", kernel.currentVerification.errorHighlights.join(", "))}\n`;
+		}
+		info += `\n`;
 
 		info += `  ${theme.bold(theme.fg("success", "■ MODEL & METRICS"))}\n`;
 		info += `    Provider:           ${theme.fg("text", currentModel?.provider || "N/A")}\n`;
