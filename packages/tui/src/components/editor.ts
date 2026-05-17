@@ -535,16 +535,6 @@ export class Editor implements Component, Focusable {
 			result.push(bottomCorner + this.borderColor("─".repeat(width - 1)));
 		}
 
-		// Add autocomplete list if active
-		if (this.autocompleteState && this.autocompleteList) {
-			const autocompleteResult = this.autocompleteList.render(contentWidth);
-			for (const line of autocompleteResult) {
-				const lineWidth = visibleWidth(line);
-				const linePadding = " ".repeat(Math.max(0, contentWidth - lineWidth));
-				result.push(`${leftPadding}${line}${linePadding}${rightPadding}`);
-			}
-		}
-
 		return result;
 	}
 
