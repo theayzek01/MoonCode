@@ -32,9 +32,13 @@ function updateUI() {
 
 document.getElementById("reconnect-btn").addEventListener("click", () => {
   chrome.runtime.sendMessage({ type: "reconnect_all" });
-  setTimeout(updateUI, 500);
+  setTimeout(updateUI, 250);
+});
+
+document.getElementById("dashboard-btn").addEventListener("click", () => {
+  chrome.tabs.create({ url: chrome.runtime.getURL("dashboard.html") });
 });
 
 // Update UI every second when popup is open
-setInterval(updateUI, 1000);
+setInterval(updateUI, 750);
 updateUI();

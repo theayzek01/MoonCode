@@ -1,9 +1,9 @@
 const BASE_PORT = 3133;
 const MAX_PORT_OFFSET = 9; // Scan 3133 to 3142
-const VERSION = "2026.4.0";
-const HEARTBEAT_INTERVAL_MS = 30000;
-const RECONNECT_DELAY_MS = 5000;
-const COMMAND_TIMEOUT_MS = 15000;
+const VERSION = "2026.7.0";
+const HEARTBEAT_INTERVAL_MS = 20000;
+const RECONNECT_DELAY_MS = 2000;
+const COMMAND_TIMEOUT_MS = 12000;
 const MAX_TABS_RETURNED = 100;
 const ALARM_NAME = "mooncode-bridge-reconnect";
 
@@ -11,6 +11,7 @@ const ALARM_NAME = "mooncode-bridge-reconnect";
 let connections = new Map();
 /** @type {Set<number>} */
 let connectingPorts = new Set();
+const debuggerAttachedTabs = new Set();
 let heartbeatTimer = null;
 
 // ── Init ──────────────────────────────────────────────────────────────────────
@@ -94,7 +95,7 @@ function connectToPort(port) {
   connectingPorts.add(port);
   updateBadge();
 
-  const url = `ws://localhost:${port}/ws`;
+  const url = `ws://127.0.0.1:${port}/ws`;
   let socket;
   try {
     socket = new WebSocket(url);
@@ -113,7 +114,7 @@ function connectToPort(port) {
       extensionId: chrome.runtime.id,
       version: VERSION,
       capabilities: ["tabs", "page", "debugger", "scroll", "smart_scroll", "mouse", "canvas_info", "canvas_draw",
-        "console_logs", "read_dom", "hover", "drag", "upload_file", "press_key", "get_elements", "evaluate", "clear_ui"]
+        "console_logs", "screenshot", "read_dom", "hover", "drag", "upload_file", "press_key", "get_elements", "evaluate", "clear_ui"]
     });
   };
 
@@ -264,10 +265,10 @@ async function executePage(args) {
     : await chrome.tabs.get(Number(args.tabId));
   const tabId = tab.id;
   if (tabId === undefined) throw new Error("No target tab id");
-  assertScriptableTab(tab);
+  if (action !== "screenshot") assertScriptableTab(tab);
 
   // Only script actions need the document to be ready. Avoid blocking lightweight actions.
-  if (!["wait", "mouse"].includes(action)) await waitForTabReady(tabId, 2500);
+  if (!["wait", "mouse", "screenshot", "console_logs"].includes(action)) await waitForTabReady(tabId, 1200);
 
   if (action === "scroll") {
     const [result] = await chrome.scripting.executeScript({
@@ -318,6 +319,10 @@ async function executePage(args) {
 
   if (action === "console_logs") {
     return getConsoleLogs(tabId);
+  }
+
+  if (action === "screenshot") {
+    return captureScreenshot(tab, args);
   }
 
   if (action === "read_dom") {
@@ -843,6 +848,51 @@ async function executePage(args) {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+async function captureScreenshot(tab, args = {}) {
+  const tabId = tab?.id;
+  if (tabId === undefined) throw new Error("screenshot requires a tab id");
+  const format = args.format === "jpeg" ? "jpeg" : "png";
+  const quality = Math.max(1, Math.min(Number(args.quality) || 85, 100));
+
+  if (!tab.active) await chrome.tabs.update(tabId, { active: true });
+  if (tab.windowId !== undefined) await chrome.windows.update(tab.windowId, { focused: true });
+  await new Promise(r => setTimeout(r, 80));
+
+  const captureOptions = format === "jpeg" ? { format, quality } : { format };
+  const dataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, captureOptions);
+  const match = /^data:([^;]+);base64,(.*)$/.exec(dataUrl || "");
+  if (!match) throw new Error("captureVisibleTab returned invalid image data");
+
+  let page = {};
+  try {
+    const [dims] = await chrome.scripting.executeScript({
+      target: { tabId },
+      func: () => ({
+        viewport: { width: window.innerWidth, height: window.innerHeight, devicePixelRatio: window.devicePixelRatio || 1 },
+        scroll: { x: window.scrollX, y: window.scrollY },
+        title: document.title,
+        url: location.href
+      })
+    });
+    page = dims?.result || {};
+  } catch {
+    page = { title: tab.title, url: tab.url };
+  }
+
+  return {
+    title: page.title || tab.title || "",
+    url: page.url || tab.url || "",
+    viewport: page.viewport,
+    scroll: page.scroll,
+    screenshot: {
+      mimeType: match[1],
+      data: match[2],
+      format,
+      capturedAt: new Date().toISOString()
+    }
+  };
+}
+
 async function getCanvasInfo(tabId) {
   const [result] = await chrome.scripting.executeScript({
     target: { tabId },

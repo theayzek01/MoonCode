@@ -141,7 +141,8 @@ export async function sendBrowserCommand(
 	let client = getLatestClient();
 	if (!client) {
 		launchBrowserForBridge();
-		client = await waitForLatestClient(8000);
+		const connectTimeoutMs = Number(process.env.MOON_BROWSER_CONNECT_TIMEOUT_MS || 4000);
+		client = await waitForLatestClient(Math.max(500, Math.min(connectTimeoutMs, 15000)));
 	}
 	if (!client) {
 		throw new Error(
@@ -203,7 +204,7 @@ async function waitForLatestClient(timeoutMs: number): Promise<BrowserBridgeClie
 	while (Date.now() - start < timeoutMs) {
 		const client = getLatestClient();
 		if (client) return client;
-		await new Promise((resolve) => setTimeout(resolve, 250));
+		await new Promise((resolve) => setTimeout(resolve, 100));
 	}
 	return getLatestClient();
 }
@@ -420,8 +421,7 @@ function handleClientMessage(client: BrowserBridgeClient, raw: string): void {
 }
 
 function isAllowedExtensionOrigin(origin: string | undefined): boolean {
-	// If origin is missing, we might be in an environment where it's not provided for WS
-	if (!origin) return true;
+	if (!origin) return process.env.MOON_BROWSER_ALLOW_MISSING_ORIGIN === "1";
 
 	return (
 		origin.startsWith("chrome-extension://") ||
@@ -443,7 +443,8 @@ export function getSessionToken(): string {
  */
 function isAuthorized(_client: BrowserBridgeClient, message: any): boolean {
 	const token = message.token || message.auth || message.secret;
-	return token === sessionToken || token === "mooncode_internal_secure_token" || true; // Temporary bypass until extension UI is built
+	if (token === sessionToken || token === "mooncode_internal_secure_token") return true;
+	return typeof message.extensionId === "string" || typeof _client.extensionId === "string";
 }
 
 /**

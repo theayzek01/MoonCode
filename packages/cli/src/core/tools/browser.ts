@@ -40,6 +40,7 @@ const browserPageSchema = Type.Object({
 		Type.Literal("evaluate"),
 		Type.Literal("scroll"),
 		Type.Literal("console_logs"),
+		Type.Literal("screenshot"),
 		Type.Literal("wait"),
 		Type.Literal("clear_ui"),
 	]),
@@ -95,6 +96,8 @@ const browserPageSchema = Type.Object({
 	),
 	amount: Type.Optional(Type.Number({ description: "Pixels to scroll" })),
 	ms: Type.Optional(Type.Number({ description: "Milliseconds to wait (max 15000)" })),
+	format: Type.Optional(Type.Union([Type.Literal("png"), Type.Literal("jpeg")], { description: "Screenshot format" })),
+	quality: Type.Optional(Type.Number({ description: "JPEG screenshot quality, 1-100" })),
 });
 
 export type BrowserTabsToolInput = Static<typeof browserTabsSchema>;
@@ -158,7 +161,7 @@ export function createBrowserPageToolDefinition(): ToolDefinition<typeof browser
 		name: "browser_page",
 		label: "browser_page",
 		description:
-			"Read or operate the current Chrome page through the MoonCode Chrome extension. Actions: read, read_dom, click, type, hover, drag, mouse, canvas_info, canvas_draw, upload_file, press_key, get_elements, evaluate, scroll, console_logs, wait, clear_ui.",
+			"Read or operate the current Chrome page through the MoonCode Chrome extension. Actions: read, read_dom, click, type, hover, drag, mouse, canvas_info, canvas_draw, upload_file, press_key, get_elements, evaluate, scroll, console_logs, screenshot, wait, clear_ui.",
 		promptSnippet: "Read or operate the connected Chrome page",
 		promptGuidelines: [
 			"Use browser_page read to get page title, URL, selection, and visible text.",
@@ -173,6 +176,7 @@ export function createBrowserPageToolDefinition(): ToolDefinition<typeof browser
 			"Use browser_page press_key with key=Enter/Tab/Escape and optional modifiers=[ctrl,shift].",
 			"Use browser_page wait to pause between actions (ms, max 15000).",
 			"Use browser_page console_logs to debug JavaScript errors or see page logs.",
+			"Use browser_page screenshot when visual state matters; it returns an image block to the model, not just text.",
 			"For browser_page evaluate, prefer short JavaScript expressions and return serializable data.",
 		],
 		parameters: browserPageSchema,
@@ -181,9 +185,9 @@ export function createBrowserPageToolDefinition(): ToolDefinition<typeof browser
 			if (signal?.aborted) throw new Error("Operation aborted");
 			validatePageParams(params);
 			const commandParams = normalizeBrowserPageParams(params);
-			const result = await sendBrowserCommand("page", commandParams, { timeoutMs: 45_000 });
+			const result = await sendBrowserCommand("page", commandParams, { timeoutMs: 30_000 });
 			return {
-				content: [{ type: "text", text: stringifyResult(result) }],
+				content: formatBrowserCommandResult(result),
 				details: { action: params.action, connected: true },
 			};
 		},
@@ -256,6 +260,27 @@ function normalizeBrowserPageParams(params: BrowserPageToolInput): Record<string
 		throw new Error(`browser_page upload_file file not found: ${missing.join(", ")}`);
 	}
 	return { ...(params as Record<string, unknown>), filePaths, filePath: filePaths[0] };
+}
+
+function formatBrowserCommandResult(
+	value: unknown,
+): Array<{ type: "text"; text: string } | { type: "image"; data: string; mimeType: string }> {
+	const record = value && typeof value === "object" ? (value as Record<string, unknown>) : undefined;
+	const screenshot = record?.screenshot as Record<string, unknown> | undefined;
+	if (screenshot && typeof screenshot.data === "string" && typeof screenshot.mimeType === "string") {
+		const textPayload = {
+			...record,
+			screenshot: {
+				...screenshot,
+				data: `[image data omitted: ${screenshot.data.length} chars]`,
+			},
+		};
+		return [
+			{ type: "text", text: stringifyResult(textPayload) },
+			{ type: "image", data: screenshot.data, mimeType: screenshot.mimeType },
+		];
+	}
+	return [{ type: "text", text: stringifyResult(value) }];
 }
 
 function stringifyResult(value: unknown): string {

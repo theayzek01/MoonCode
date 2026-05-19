@@ -153,6 +153,41 @@ function isExpandable(obj: unknown): obj is Expandable {
 	return typeof obj === "object" && obj !== null && "setExpanded" in obj && typeof obj.setExpanded === "function";
 }
 
+class VirtualizedChatContainer extends Container {
+	private readonly maxLines = Math.max(
+		0,
+		Math.min(Number(process.env.MOON_TUI_CHAT_MAX_LINES ?? process.env.PI_TUI_CHAT_MAX_LINES ?? 900) || 900, 5000),
+	);
+
+	override render(width: number): string[] {
+		if (this.maxLines === 0 || this.children.length === 0) return super.render(width);
+		const lines: string[] = [];
+		let hiddenChildren = 0;
+		for (let i = this.children.length - 1; i >= 0; i--) {
+			const childLines = this.children[i].render(width);
+			if (lines.length === 0 && childLines.length > this.maxLines) {
+				lines.unshift(...childLines.slice(-this.maxLines));
+				hiddenChildren = i;
+				break;
+			}
+			if (lines.length + childLines.length > this.maxLines) {
+				hiddenChildren = i + 1;
+				break;
+			}
+			lines.unshift(...childLines);
+		}
+		if (hiddenChildren > 0) {
+			lines.unshift(
+				theme.fg(
+					"dim",
+					`… ${hiddenChildren} older chat item(s) hidden for terminal speed. Full session context is still preserved.`,
+				),
+			);
+		}
+		return lines;
+	}
+}
+
 class ExpandableText extends Text implements Expandable {
 	constructor(
 		private readonly getCollapsedText: () => string,
@@ -383,7 +418,7 @@ export class InteractiveMode {
 		this.ui = new TUI(new ProcessTerminal(), this.settingsManager.getShowHardwareCursor());
 		this.ui.setClearOnShrink(this.settingsManager.getClearOnShrink());
 		this.headerContainer = new Container();
-		this.chatContainer = new Container();
+		this.chatContainer = new VirtualizedChatContainer();
 		this.pendingMessagesContainer = new Container();
 		this.statusContainer = new Container();
 		this.widgetContainerAbove = new Container();
@@ -6498,10 +6533,10 @@ export class InteractiveMode {
 
 		if (enable) {
 			// Plan mode: write, edit, bash toollarini kaldir
-			this.session.setActiveToolsByName(["read", "grep", "find", "ls", "web_search"]);
+			this.session.setActiveToolsByName(["read", "grep", "find", "ls", "browser_tabs", "browser_page"]);
 			const msg =
 				`${theme.bold(theme.fg("accent", "Plan Modu Aktif"))}\n\n` +
-				`${theme.fg("dim", "Dosya yazma ve bash devre disi. Model sadece okuyabilir ve analiz yapabilir.")}\n` +
+				`${theme.fg("dim", "Dosya yazma ve bash devre disi. Web erisimi sadece Browser Bridge uzerinden.")}\n` +
 				`${theme.fg("dim", "Onay vermeden hicbir degisiklik yapilmayacak.")}\n\n` +
 				`${theme.fg("muted", "/plan off ile normal moda don.")}\n`;
 			this.chatContainer.addChild(new Spacer(1));
@@ -6509,10 +6544,21 @@ export class InteractiveMode {
 			this.showStatus("[PLAN] Plan modu aktif - model sadece okuyabilir");
 		} else {
 			// Normal moda don: tum toollar geri
-			this.session.setActiveToolsByName(["read", "bash", "edit", "write", "grep", "find", "ls", "web_search"]);
+			this.session.setActiveToolsByName([
+				"read",
+				"bash",
+				"edit",
+				"write",
+				"grep",
+				"find",
+				"ls",
+				"git_ship",
+				"browser_tabs",
+				"browser_page",
+			]);
 			const msg =
 				`${theme.bold(theme.fg("success", "Normal Mod"))}\n\n` +
-				`${theme.fg("dim", "Tum toollar yeniden aktif. Dosya yazma ve bash kullanilabilir.")}\n`;
+				`${theme.fg("dim", "Tum toollar yeniden aktif. Dosya yazma, bash, git_ship ve Browser Bridge kullanilabilir.")}\n`;
 			this.chatContainer.addChild(new Spacer(1));
 			this.chatContainer.addChild(new Text(msg, 1, 0));
 			this.showStatus("Plan modu kapandi - tum toollar aktif");
