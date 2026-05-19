@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/Moon-cli-banner.png" alt="MoonCode" width="100%" />
+  <img src="assets/MooncodeWhiteBanner.png" alt="MoonCode Banner" width="100%" />
   
   <br>
   
@@ -9,16 +9,30 @@
     <img src="https://img.shields.io/badge/VectorDB-FF4500?style=for-the-badge&logo=databricks&logoColor=white" />
     <img src="https://img.shields.io/badge/Autonomous-Engine-blue?style=for-the-badge" />
   </p>
-  <p align="center"><b>Sürüm: 2026-7</b></p>
+  <p align="center"><b>Sürüm: 2026-10 (Apex Mode Active)</b></p>
 </div>
 
 <br>
 
+---
+
+<br>
+
 # ✦ MoonCode
+### Dünyanın İlk 3D Grafik & Detaylı Oyun Destekli Otonom Mühendislik Terminali
 
-MoonCode, terminalden çıkmadan bütün projeyi yönetmeni sağlayan otonom bir mühendislik asistanıdır. 
+Yapay zeka asistanları bugüne kadar 3D oyunlar, Roblox modelleri veya Three.js / WebGL sahneleri kodlarken hep aynı hataya düştü: **"Acemi ve bebek seviyesi"** kalitesiz tasarımlar, düz küpler, basit materyaller ve profesyonellikten uzak asset kullanımı. 
 
-Sadece kod yazıp bırakmaz; projeni okur, testleri çalıştırır, hataları bulur ve sen onay verene kadar düzeltir. 
+**MoonCode bu düzene son veriyor.** 
+
+MoonCode, dünyada ilk kez otonom bir terminal asistanına entegre edilen **3D Game & Graphics Cognitive Core** ile yapay zekayı profesyonel bir 3D Grafik Sanatçısına dönüştürüyor. Artık 3D Roblox oyunları, sofistike WebGL projeleri ve karmaşık mesh hiyerarşileri otonom olarak ve olağanüstü bir ince işçilikle inşa ediliyor.
+
+<br>
+
+<div align="center">
+  <img src="assets/Mooncode update.png" alt="MoonCode v2026-10 TUI Update" width="90%" style="border-radius: 8px; border: 1px solid #1f2030;" />
+  <p><i>v2026-10 Güncellemesi: Yeni Lüks Emojisiz Durum Çubuğu & Ultra-Kararlı Web Entegrasyonu</i></p>
+</div>
 
 <br>
 
@@ -28,54 +42,29 @@ Sadece kod yazıp bırakmaz; projeni okur, testleri çalıştırır, hataları b
 
 ## ❖ Neden MoonCode?
 
-Piyasada bir sürü AI aracı var (Cursor, Claude Code, Windsurf vb.). MoonCode'un onlardan farkı ne?
+### 1. ✦ 3D Oyun & Grafik Devrimi (Dünyada Bir İlk)
+Diğer yapay zekalar sadece "kod yazar". MoonCode ise profesyonel 3D tasarım prensiplerini bilir:
+* **Micro-Detail Geometry:** Basit "red cube, blue sphere" oyuncaklar yerine, yumuşatılmış köşeler (beveling), çoklu mesh hiyerarşileri ve organik formlar üretir.
+* **PBR (Physically Based Rendering):** Roughness, metalness, normal maps ve dynamic environment maps kullanarak yüzeylere gerçekçi doku kazandırır.
+* **Shaders & Shading:** Custom GLSL Shaders kullanarak büyüleyici parçacık sistemleri ve post-processing (Bloom, Depth-of-Field, Ambient Occlusion) entegrasyonu yapar.
+* **Roblox & Lua 3D Pro-Level:** Gelişmiş mesh part'ları, pürüzsüz smooth terrain haritaları, constraint-based fizik sistemleri (yaylar, menteşeler) ve modern Lua kütüphane pratiklerini harmanlar.
 
-<br>
+### 2. ✦ Ultra-Premium Cognitive TUI (v2026-10)
+Emojilerin getirdiği o "çocuksu" ve sıradan terminal havası tamamen kaldırıldı. Yerine siberpunk ve kozmik asilliğe uygun, tamamen profesyonel Unicode sembolleri yerleştirildi:
+```
+ ○ WEB │ ✦ S0 │ ✓ DONE │ ⚙ gemini-3.5 │ ⚛ THINK HIGH │ ☷ CTX 0% auto │ ◆ COST $0.00 │ ⛁ RSS 165MB
+```
+* **Otomatik Satır Kaydırma (Multi-row Wrap):** Ekran genişliği daraldığında alt paneldeki hiçbir bilgi (tam model adı, harcama sayacı vb.) kırpılmaz, akıllıca alt satıra geçer.
+* **Canlı USD Harcama Takibi (`◆ COST`):** Yapılan her asistan isteğinin ardından harcanan API maliyetini yeşil tonlu dijital sayaçla anlık olarak gösterir.
+* **Moon Apex Teması:** Arka planda kozmik uzay obsyeni (`#0a0b10`), neon mor (`#c084fc`) ve turkuaz (`#22d3ee`) neon renk vurgularıyla gözlerinizi yormayan elit bir kodlama deneyimi.
 
-| Özellik | MoonCode | Diğer Araçlar |
-| :--- | :--- | :--- |
-| **Otonomi** | **✓** Tam Otonom (Kendi test eder, düzeltir) | **✕** Sadece Kod Önerir |
-| **Çalışma Ortamı** | **✓** Native Terminal (Çok Hafif) | **✕** Ağır IDE (Electron) |
-| **Sürü Zekası** | **✓** Paralel Ajanlar (Mimar, Coder) | **✕** Tekil Model |
+### 3. ✦ Sıfır Token İsrafı (Semantik AST Filtreleme)
+MoonCode, geleneksel asistanlar gibi binlerce satırlık dosyalarınızı LLM'e kopyalayıp tokenlarınızı yakmaz. **AST tabanlı semantik indeksleme** kullanarak sadece ilgili kod parçacıklarını seçer.
+* **Okunan Token (1 İstek):** ~500 Token (Geleneksel araçlarda ~15.000 Token)
+* **Maliyet Oranı:** Ortalama %96 daha ucuz.
 
-<br>
-
-### ◈ Token & Maliyet Karşılaştırması
-
-MoonCode, standart bir yapay zeka gibi tüm dosyayı kopyalayıp LLM'e göndermez. **AST tabanlı Semantik Filtreleme** kullanarak sadece ilgili kod parçacıklarını (chunk) seçer.
-
-<table width="100%">
-  <tr>
-    <th align="left">Metrik (2000 satırlık dosya)</th>
-    <th align="center">MoonCode (VectorDB)</th>
-    <th align="center">Geleneksel Araçlar (Full Context)</th>
-  </tr>
-  <tr>
-    <td><b>Okunan Token (1 İstek)</b></td>
-    <td align="center">~ 500 Token</td>
-    <td align="center">~ 15.000 Token</td>
-  </tr>
-  <tr>
-    <td><b>Maliyet (Yaklaşık)</b></td>
-    <td align="center"><b>$0.001</b></td>
-    <td align="center"><b>$0.045</b></td>
-  </tr>
-  <tr>
-    <td><b>Tasarruf Oranı</b></td>
-    <td align="center" colspan="2"><b>✓ Ortalama %96 Daha Ucuz</b></td>
-  </tr>
-</table>
-
-<details>
-<summary><b>🔍 Nasıl Bu Kadar Tasarruf Ediyor? (Tıkla ve İncele)</b></summary>
-<p>
-MoonCode, projenizi ilk açtığınızda bir harita çıkarır. Siz bir fonksiyonu değiştirmek istediğinizde, tüm projeyi LLM'e okutmak yerine sadece o fonksiyonu ve bağlı olduğu modülleri yapay zekaya verir. Bu sayede yapay zeka gereksiz verilerle yorulmaz, hızlanır ve maliyet sıfıra yaklaşır.
-</p>
-</details>
-
-<br>
-
-**◈ Gerçek Otonomi:** Hata mı çıktı? Kodu yazar, testi koşturur, hata alırsa logları okuyup tekrar dener. Sen sadece en son çıkan doğru koda onay verirsin.
+### 4. ✦ Tek Portlu Kararlı Web Köprüsü (Browser Bridge)
+Port çakışmaları, duplicate sunucu başlatma hataları ve süreç sızıntıları tamamen tarihe gömüldü. Terminal açık olduğu sürece tek port üzerinden çalışan, tarayıcı eklentisiyle %100 senkronize olan ve kararlılığı doğrulanan yeni web mimarisi devrede!
 
 <br>
 
@@ -83,7 +72,7 @@ MoonCode, projenizi ilk açtığınızda bir harita çıkarır. Siz bir fonksiyo
 
 <br>
 
-## ❖ Kurulum
+## ❖ Kurulum & Başlangıç
 
 Sadece birkaç komutla çalışmaya hazır:
 
@@ -96,33 +85,25 @@ npm run build
 npm install -g ./packages/cli
 ```
 
+Kurulum tamamlandıktan sonra herhangi bir projede terminale `mooncode` yazmanız yeterlidir.
+
 <br>
 
 ---
 
 <br>
 
-## ❖ Nasıl Kullanılır?
+## ❖ İstasyon Komutları
 
-Terminale sadece `mooncode` yazman yeterli.
-
-**1 ▹ İsteğini söyle:** Örn: _"Kullanıcı giriş sistemini yaz ve testlerini ekle."_
-**2 ▹ Arkanı yaslan:** MoonCode dosyaları tarar, plan yapar ve kodu yazar.
-**3 ▹ Onayla:** Ekrana gelen değişiklikleri kontrol et, mantıklıysa terminalden onayla ve dosyalarına işlensin.
-
-<br>
-
-### ✧ İstasyon Komutları
-
-Yapay zekayı yönlendirmek için terminalden bu komutları kullanabilirsin:
+Yapay zekayı yönlendirmek için terminalden bu komutları kullanabilirsiniz:
 
 | Komut | Yetenek | Açıklama |
 | :--- | :--- | :--- |
 | **`/swarm`** | **❖** Sürü Zekası | Büyük işleri mimar, coder ve reviewer ajanlarına bölerek paralel çözdürür. |
 | **`/fix`** | **⚙** Otonom Tamir | Projedeki derleme veya linter hatalarını bulur ve tamamen düzelene kadar loop'a girer. |
-| **`/evolve`**| **⌬** Meta-Evrim | MoonCode'un kendi kaynak kodunu okuyup kendini geliştirmesini sağlar. |
+| **`/evolve`**| **⌬** Meta-Evrim | MoonCode'un kendi kaynak kodunu okup kendini geliştirmesini sağlar. |
 | **`/index`** | **☷** Vektör Dizini | Hızı 10 kat artırmak için projenin AST tabanlı anlamsal (semantic) haritasını çıkarır. |
-| **`/browser`**| **◧** Web Köprüsü | Terminalden çıkmadan webt'te araştırma yapmasını veya döküman okumasını sağlar. |
+| **`/browser`**| **◧** Web Köprüsü | Terminalden çıkmadan web'te araştırma yapmasını veya döküman okumasını sağlar. |
 
 <br>
 
@@ -132,19 +113,13 @@ Yapay zekayı yönlendirmek için terminalden bu komutları kullanabilirsin:
 
 ## ❖ İletişim & Topluluk
 
-Projeyle ilgili bir sorun yaşarsan, fikir vermek istersen veya sadece muhabbet etmek istersen buradayız:
-
 * **Discord:** [discord.gg/kanser](https://discord.gg/kanser)
 * **Instagram:** [@theayzek01](https://instagram.com/theayzek01)
 
 <br>
 
----
-
-<br>
-
 <div align="center">
-  <img src="assets/Moon-cli-logo.png" alt="MoonCode Logo" width="60" />
+  <img src="assets/Mooncodewhitelogo.png" alt="MoonCode Logo" width="60" />
   <br><br>
   <b>Hızlı hareket et. Sorunları çöz. Moon kal.</b>
   <br><br>

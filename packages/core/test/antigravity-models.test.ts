@@ -34,6 +34,26 @@ describe("Antigravity model metadata", () => {
 		expect(request.userAgent).toBe("antigravity");
 	});
 
+	test("maps gemini 3.1 pro high and low to their correct cloud code assist ids", () => {
+		const requestHigh = buildRequest(
+			antigravityModels["antigravity-gemini-3.1-pro-high"],
+			{ messages: [{ role: "user", content: [{ type: "text", text: "hi" }] }] },
+			"moon-project",
+			{},
+			true,
+		);
+		expect(requestHigh.model).toBe("gemini-3.1-pro-high");
+
+		const requestLow = buildRequest(
+			antigravityModels["antigravity-gemini-3.1-pro-low"],
+			{ messages: [{ role: "user", content: [{ type: "text", text: "hi" }] }] },
+			"moon-project",
+			{},
+			true,
+		);
+		expect(requestLow.model).toBe("gemini-3.1-pro-low");
+	});
+
 	test("adds Claude thinking beta eligibility for antigravity provider ids", () => {
 		expect(needsClaudeThinkingBetaHeader(antigravityModels["antigravity-claude-sonnet-4-6"])).toBe(true);
 		expect(needsClaudeThinkingBetaHeader(antigravityModels["antigravity-gemini-3-flash"])).toBe(false);

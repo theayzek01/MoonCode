@@ -4,23 +4,32 @@
   <meta charset="UTF-8">
   <title>MoonCode Bridge</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap');
+
     :root {
-      --bg: #0f172a;
-      --surface: #1e293b;
-      --primary: #38bdf8;
-      --primary-glow: rgba(56, 189, 248, 0.3);
-      --success: #22c55e;
+      --bg: #09090b;
+      --surface: #09090b;
+      --card: #121214;
+      --border: #1f1f23;
+      --accent: #27272a;
+      --primary: #ffffff;
+      --primary-hover: #e4e4e7;
+      --success: #10b981;
       --danger: #ef4444;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --border: #334155;
+      --text: #fafafa;
+      --text-muted: #a1a1aa;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Geist', -apple-system, system-ui, sans-serif;
+      transition: all 0.15s ease;
     }
 
     body {
-      width: 320px;
+      width: 330px;
       margin: 0;
       padding: 16px;
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
       user-select: none;
@@ -29,135 +38,183 @@
     .header {
       display: flex;
       align-items: center;
-      gap: 12px;
+      justify-content: space-between;
       margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .logo {
-      width: 32px;
-      height: 32px;
+      width: 28px;
+      height: 28px;
       background: var(--primary);
-      border-radius: 8px;
+      color: #000;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 15px var(--primary-glow);
+      font-weight: 700;
+      font-size: 14px;
     }
 
     .title-group h1 {
       margin: 0;
-      font-size: 18px;
-      font-weight: 700;
-      background: linear-gradient(to right, #fff, #94a3b8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
     }
 
     .title-group p {
       margin: 0;
-      font-size: 11px;
+      font-size: 10px;
       color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .badge-status {
+      font-size: 9px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
-    .status-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
-      position: relative;
-      overflow: hidden;
+    .badge-status.connected {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.2);
     }
 
-    .status-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 4px;
-      height: 100%;
-      background: var(--primary);
+    .badge-status.offline {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.2);
     }
 
-    .status-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-
-    .status-row:last-child {
-      margin-bottom: 0;
-    }
-
-    .label {
-      font-size: 13px;
-      color: var(--text-muted);
-    }
-
-    .value {
-      font-size: 13px;
+    .section-title {
+      font-size: 11px;
       font-weight: 600;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
     }
-
-    .value.connected { color: var(--success); }
-    .value.offline { color: var(--danger); }
 
     .port-list {
       display: flex;
       flex-direction: column;
       gap: 8px;
-      max-height: 150px;
+      max-height: 160px;
       overflow-y: auto;
-      margin-top: 12px;
+      margin-bottom: 20px;
     }
 
     .port-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 12px;
-      background: rgba(255, 255, 255, 0.03);
-      border-radius: 6px;
-      font-size: 12px;
+      padding: 10px 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .port-item span {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
     }
 
     .port-badge {
       padding: 2px 6px;
       border-radius: 4px;
-      font-weight: 700;
-      font-size: 10px;
+      font-weight: 600;
+      font-size: 9px;
       text-transform: uppercase;
+      letter-spacing: 0.2px;
     }
 
-    .port-badge.active { background: rgba(34, 197, 94, 0.2); color: var(--success); }
-    .port-badge.scanning { background: rgba(56, 189, 248, 0.2); color: var(--primary); }
-
-    .footer {
-      margin-top: 16px;
-      text-align: center;
+    .port-badge.active {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
     }
 
-    button {
+    .port-badge.scanning {
+      background: rgba(161, 161, 170, 0.1);
+      color: var(--text-muted);
+    }
+
+    .close-port-btn {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+      padding: 3px 8px;
+      font-size: 10px;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .close-port-btn:hover {
+      background: var(--danger);
+      color: #ffffff;
+    }
+
+    .action-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    button.btn {
       width: 100%;
-      background: var(--primary);
-      color: var(--bg);
       border: none;
       padding: 10px;
-      border-radius: 8px;
+      border-radius: 6px;
       font-weight: 600;
+      font-size: 12px;
       cursor: pointer;
-      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
 
-    button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px var(--primary-glow);
+    .btn-primary {
+      background: var(--primary);
+      color: #000000;
     }
 
-    button:active {
-      transform: translateY(0);
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: var(--accent);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+    }
+
+    .btn-danger:hover {
+      background: var(--danger);
+      color: #ffffff;
     }
 
     ::-webkit-scrollbar {
@@ -174,34 +231,35 @@
 </head>
 <body>
   <div class="header">
-    <div class="logo">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-      </svg>
+    <div class="logo-group">
+      <div class="logo">M</div>
+      <div class="title-group">
+        <h1>MoonCode</h1>
+        <p>Tarayıcı Köprüsü</p>
+      </div>
     </div>
-    <div class="title-group">
-      <h1>MoonCode</h1>
-      <p>BROWSER BRIDGE</p>
-    </div>
+    <span id="overall-status" class="badge-status offline">Bağlantı Yok</span>
   </div>
 
-  <div class="status-card">
-    <div class="status-row">
-      <span class="label">Overall Status</span>
-      <span id="overall-status" class="value offline">Offline</span>
-    </div>
-    <div class="status-row">
-      <span class="label">Active Ports</span>
-      <span id="active-count" class="value">0</span>
-    </div>
-    
-    <div id="port-list" class="port-list">
-      <!-- Port items will be injected here -->
-    </div>
+  <div class="section-title">Aktif Portlar</div>
+  <div id="port-list" class="port-list">
+    <!-- Dinamik portlar -->
   </div>
 
-  <button id="reconnect-btn">Reconnect All</button>
-  <button id="dashboard-btn" style="margin-top:8px;background:#111827;color:#e5e7eb;border:1px solid var(--border);">Open Console</button>
+  <div class="action-group">
+    <button class="btn btn-primary" id="reconnect-btn">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 11-.57-8.38l5.67-5.67"/></svg>
+      Portları Yeniden Tara
+    </button>
+    <button class="btn btn-secondary" id="dashboard-btn">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+      Köprü Konsolunu Aç
+    </button>
+    <button class="btn btn-danger" id="close-all-btn">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18.36 6.64a9 9 0 11-12.73 0M12 2v10"/></svg>
+      Tüm Oturumları Kapat
+    </button>
+  </div>
 
   <script src="popup.js"></script>
 </body>

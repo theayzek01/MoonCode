@@ -1,6 +1,6 @@
 const BASE_PORT = 3133;
 const MAX_PORT_OFFSET = 9; // Scan 3133 to 3142
-const VERSION = "2026.9.0";
+const VERSION = "2026-9-browser";
 const HEARTBEAT_INTERVAL_MS = 20000;
 const RECONNECT_DELAY_MS = 2000;
 const COMMAND_TIMEOUT_MS = 12000;
@@ -48,7 +48,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (conn?.info) totalClients++;
       conns.push({
         port,
-        status: (conn?.socket?.readyState === WebSocket.OPEN) ? "connected" : (connectingPorts.has(port) ? "connecting" : "scanning"),
+        status: (conn?.socket?.readyState === WebSocket.OPEN && conn?.info) ? "connected" : (connectingPorts.has(port) ? "connecting" : "scanning"),
         info: conn?.info
       });
     }
@@ -57,6 +57,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
   if (message.type === "reconnect_all") {
     startDiscovery();
+    sendResponse({ ok: true });
+  }
+  if (message.type === "close_all_sessions") {
+    broadcast({ type: "close_session" });
+    sendResponse({ ok: true });
+  }
+  if (message.type === "close_port") {
+    const port = Number(message.port);
+    const conn = connections.get(port);
+    if (conn && conn.socket && conn.socket.readyState === WebSocket.OPEN) {
+      try {
+        conn.socket.send(JSON.stringify({ type: "close_session" }));
+      } catch (e) {
+        // ignore
+      }
+    }
     sendResponse({ ok: true });
   }
 });
@@ -106,12 +122,20 @@ function connectToPort(port) {
 
   socket.onopen = () => {
     connectingPorts.delete(port);
-    connections.set(port, { socket });
+    connections.set(port, { 
+      socket,
+      info: {
+        version: "Connecting...",
+        capabilities: [],
+        extensionId: "N/A",
+        connectedAt: Date.now()
+      }
+    });
     updateBadge();
     console.log(`[Moon] Connected to port ${port}`);
     sendToSocket(socket, {
       type: "hello",
-      extensionId: chrome.runtime.id,
+      extensionId: chrome.runtime.id || "N/A",
       version: VERSION,
       capabilities: ["tabs", "page", "debugger", "scroll", "smart_scroll", "mouse", "canvas_info", "canvas_draw",
         "console_logs", "screenshot", "read_dom", "hover", "drag", "upload_file", "press_key", "get_elements", "evaluate", "clear_ui"]
@@ -123,7 +147,8 @@ function connectToPort(port) {
     connectingPorts.delete(port);
     updateBadge();
     // Aggressive retry if we have no connections at all
-    if (connections.size === 0) {
+    const activeCount = Array.from(connections.values()).filter(c => c.info).length;
+    if (activeCount === 0) {
       setTimeout(() => connectToPort(port), RECONNECT_DELAY_MS);
     }
   };
@@ -179,7 +204,8 @@ function sendToSocket(socket, message) {
 function startHeartbeat() {
   if (heartbeatTimer) return;
   heartbeatTimer = setInterval(() => {
-    if (connections.size === 0) {
+    const activeCount = Array.from(connections.values()).filter(c => c.info).length;
+    if (activeCount === 0) {
         // Try to rediscover if everything is dead
         startDiscovery();
     }
@@ -188,7 +214,7 @@ function startHeartbeat() {
 }
 
 function updateBadge() {
-  const activeCount = connections.size;
+  const activeCount = Array.from(connections.values()).filter(c => c.info).length;
   const isConnecting = connectingPorts.size > 0;
 
   if (activeCount > 0) {
