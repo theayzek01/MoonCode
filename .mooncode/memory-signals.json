@@ -1,0 +1,26 @@
+[
+  {
+    "timestamp": "2026-05-19T11:52:20.568Z",
+    "text": "güzel projeyi dahada geliştir baya baya baya bi geliştir ve şey  yapay zeka aynı hatayı tekrar yapmaması için öyle bi sistem yapki yapay zeka hatalarından ders çıkarsın ve şey bot aynı Tony stark gibi düşünsün  ve şey hmm  ve tüm olası açık vb.. hepsini gider tui geliştir hiçbir açık ve şey olmadığından emin ol hmm  mooncode aşırı akıllı olsun içinde machine learning olsun gittikçe öğrensin gelişs…",
+    "tag": "workflow",
+    "weight": 6
+  },
+  {
+    "timestamp": "2026-05-17T15:17:08.945Z",
+    "text": "hala eski tui gözüküyo ve şey sohbette optimizasyon yapman lazım bi sohbetten sonra terminal öyle bi kasıyorki",
+    "tag": "workflow",
+    "weight": 5
+  },
+  {
+    "timestamp": "2026-05-19T11:44:13.185Z",
+    "text": "mesela diyelim gemini-3-1-flash kullanıyorum hızlı çalışıyo ama claude 4.7 opus thinking higt kadar iyi sonuç vermiyo buna bi çözüm bulabilirmisin :?",
+    "tag": "workflow",
+    "weight": 5
+  },
+  {
+    "timestamp": "2026-05-19T11:48:24.517Z",
+    "text": "dostum sen beni yanlış aldın ben onu istemiyorum düşük bi model o kadar yüksek bi model kadar performans vermesini istiyorum mooncli de açınca",
+    "tag": "preference",
+    "weight": 5
+  }
+]

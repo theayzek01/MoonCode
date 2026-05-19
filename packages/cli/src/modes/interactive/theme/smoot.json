@@ -1,0 +1,86 @@
+{
+	"$schema": "https://raw.githubusercontent.com/badlogic/MoonCode-mono/main/packages/cli/src/modes/interactive/theme/theme-schema.json",
+	"name": "Smoot",
+	"vars": {
+		"bg": "#1b1517",
+		"fg": "#eadbd5",
+		"accent": "#d08a7a",
+		"secondary": "#c99a8d",
+		"tertiary": "#d6b08a",
+		"border": "#3a2628",
+		"muted": "#9a7774",
+		"dim": "#5a3f40",
+		"success": "#a8b58f",
+		"error": "#d17b83",
+		"warning": "#d0a36f",
+		"thinking": "#4a3032",
+		"selectedBg": "#2a1d20",
+		"userMsgBg": "#241a1d",
+		"toolBg": "#21181b"
+	},
+	"colors": {
+		"accent": "accent",
+		"border": "border",
+		"borderAccent": "accent",
+		"borderMuted": "dim",
+		"success": "success",
+		"error": "error",
+		"warning": "warning",
+		"muted": "muted",
+		"dim": "dim",
+		"text": "fg",
+		"thinkingText": "dim",
+
+		"selectedBg": "selectedBg",
+		"userMessageBg": "userMsgBg",
+		"userMessageText": "fg",
+		"customMessageBg": "userMsgBg",
+		"customMessageText": "fg",
+		"customMessageLabel": "accent",
+		"toolPendingBg": "toolBg",
+		"toolSuccessBg": "toolBg",
+		"toolErrorBg": "toolBg",
+		"toolTitle": "secondary",
+		"toolOutput": "muted",
+
+		"mdHeading": "accent",
+		"mdLink": "secondary",
+		"mdLinkUrl": "muted",
+		"mdCode": "tertiary",
+		"mdCodeBlock": "fg",
+		"mdCodeBlockBorder": "border",
+		"mdQuote": "muted",
+		"mdQuoteBorder": "accent",
+		"mdHr": "border",
+		"mdListBullet": "tertiary",
+
+		"toolDiffAdded": "success",
+		"toolDiffRemoved": "error",
+		"toolDiffContext": "muted",
+
+		"syntaxComment": "muted",
+		"syntaxKeyword": "#d08a7a",
+		"syntaxFunction": "#c99a8d",
+		"syntaxVariable": "#d6b08a",
+		"syntaxString": "#a8b58f",
+		"syntaxNumber": "#c99876",
+		"syntaxType": "#c58f8f",
+		"syntaxOperator": "#eadbd5",
+		"syntaxPunctuation": "#b58b85",
+
+		"thinkingOff": "dim",
+		"thinkingMinimal": "#3a2628",
+		"thinkingLow": "#4a3032",
+		"thinkingMedium": "#6a4645",
+		"thinkingHigh": "#9a635d",
+		"thinkingXhigh": "#d08a7a",
+
+		"bashMode": "warning"
+	},
+	"export": {
+		"pageBg": "#1b1517",
+		"cardBg": "#241a1d",
+		"infoBg": "#21181b"
+	}
+}
+

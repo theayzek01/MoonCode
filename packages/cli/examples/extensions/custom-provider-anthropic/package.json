@@ -1,0 +1,19 @@
+{
+  "name": "MoonCode-extension-custom-provider-anthropic",
+  "private": true,
+  "version": "2026.7.0",
+  "type": "module",
+  "scripts": {
+    "clean": "echo 'nothing to clean'",
+    "build": "echo 'nothing to build'",
+    "check": "echo 'nothing to check'"
+  },
+  "MoonCode": {
+    "extensions": [
+      "./index.ts"
+    ]
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.52.0"
+  }
+}

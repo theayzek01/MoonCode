@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>MoonCode Bridge</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --primary: #38bdf8;
+      --primary-glow: rgba(56, 189, 248, 0.3);
+      --success: #22c55e;
+      --danger: #ef4444;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+    }
+
+    body {
+      width: 320px;
+      margin: 0;
+      padding: 16px;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      user-select: none;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .logo {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 15px var(--primary-glow);
+    }
+
+    .title-group h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(to right, #fff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .title-group p {
+      margin: 0;
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .status-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .status-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--primary);
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .status-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .label {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .value {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .value.connected { color: var(--success); }
+    .value.offline { color: var(--danger); }
+
+    .port-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 150px;
+      overflow-y: auto;
+      margin-top: 12px;
+    }
+
+    .port-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .port-badge {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 10px;
+      text-transform: uppercase;
+    }
+
+    .port-badge.active { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+    .port-badge.scanning { background: rgba(56, 189, 248, 0.2); color: var(--primary); }
+
+    .footer {
+      margin-top: 16px;
+      text-align: center;
+    }
+
+    button {
+      width: 100%;
+      background: var(--primary);
+      color: var(--bg);
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+      </svg>
+    </div>
+    <div class="title-group">
+      <h1>MoonCode</h1>
+      <p>BROWSER BRIDGE</p>
+    </div>
+  </div>
+
+  <div class="status-card">
+    <div class="status-row">
+      <span class="label">Overall Status</span>
+      <span id="overall-status" class="value offline">Offline</span>
+    </div>
+    <div class="status-row">
+      <span class="label">Active Ports</span>
+      <span id="active-count" class="value">0</span>
+    </div>
+    
+    <div id="port-list" class="port-list">
+      <!-- Port items will be injected here -->
+    </div>
+  </div>
+
+  <button id="reconnect-btn">Reconnect All</button>
+  <button id="dashboard-btn" style="margin-top:8px;background:#111827;color:#e5e7eb;border:1px solid var(--border);">Open Console</button>
+
+  <script src="popup.js"></script>
+</body>
+</html>
