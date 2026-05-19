@@ -1031,7 +1031,7 @@ export class TUI extends Container {
 		// Extract cursor position before applying line resets (marker must be found first)
 		const cursorPos = this.extractCursorPosition(newLines, height);
 
-		const forceFullProcess = (this.previousLines.length === 0) || widthChanged || (heightChanged && !isTermuxSession());
+		const forceFullProcess = this.previousLines.length === 0 || widthChanged || (heightChanged && !isTermuxSession());
 		const processStartIndex = forceFullProcess ? 0 : prevViewportTop;
 
 		newLines = this.applyLineResets(this.clampLinesToWidth(newLines, width, processStartIndex), processStartIndex);

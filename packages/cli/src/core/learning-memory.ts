@@ -1,6 +1,6 @@
 import * as fs from "node:fs";
-import * as path from "node:path";
 import * as os from "node:os";
+import * as path from "node:path";
 
 export interface ExperienceItem {
 	error: string;
@@ -58,7 +58,7 @@ export class LearningMemory {
 
 		// Avoid duplicate records
 		const exists = this.experiences.some(
-			(exp) => exp.error === cleanError && exp.attemptedFix === cleanFix && exp.outcome === outcome
+			(exp) => exp.error === cleanError && exp.attemptedFix === cleanFix && exp.outcome === outcome,
 		);
 		if (exists) return;
 
@@ -82,14 +82,12 @@ export class LearningMemory {
 		if (this.experiences.length === 0) return [];
 
 		// Return latest experiences formatted nicely
-		return this.experiences
-			.slice(-limit)
-			.map((exp) => {
-				if (exp.outcome === "success") {
-					return `- **Learned Pattern (Success)**: When faced with error \`${exp.error.replace(/\n/g, " ")}\`, the successful fix is: \`${exp.attemptedFix.replace(/\n/g, " ")}\`. Reason: ${exp.lesson}`;
-				} else {
-					return `- **Trap Avoided (Failure)**: When faced with error \`${exp.error.replace(/\n/g, " ")}\`, DO NOT attempt: \`${exp.attemptedFix.replace(/\n/g, " ")}\`, because it was tested and failed in previous runs. Reason: ${exp.lesson}`;
-				}
-			});
+		return this.experiences.slice(-limit).map((exp) => {
+			if (exp.outcome === "success") {
+				return `- **Learned Pattern (Success)**: When faced with error \`${exp.error.replace(/\n/g, " ")}\`, the successful fix is: \`${exp.attemptedFix.replace(/\n/g, " ")}\`. Reason: ${exp.lesson}`;
+			} else {
+				return `- **Trap Avoided (Failure)**: When faced with error \`${exp.error.replace(/\n/g, " ")}\`, DO NOT attempt: \`${exp.attemptedFix.replace(/\n/g, " ")}\`, because it was tested and failed in previous runs. Reason: ${exp.lesson}`;
+			}
+		});
 	}
 }

@@ -6595,7 +6595,9 @@ export class InteractiveMode {
 		const normalized = arg.trim().toLowerCase();
 		if (normalized === "on" || normalized === "true" || normalized === "1") {
 			this.session.setAutoEscalateModel(true);
-			this.showStatus("Model Routing acildi. Gemini/Ollama gibi hizli modeller kullanilirken, karmasik plan ve refactor islemlerinde otomatik olarak Claude'a gecilecek.");
+			this.showStatus(
+				"Model Routing acildi. Gemini/Ollama gibi hizli modeller kullanilirken, karmasik plan ve refactor islemlerinde otomatik olarak Claude'a gecilecek.",
+			);
 			return;
 		}
 		if (normalized === "off" || normalized === "false" || normalized === "0") {
@@ -6603,7 +6605,7 @@ export class InteractiveMode {
 			this.showStatus("Model Routing kapatildi. Model gecisleri sadece manuel olarak yapilacak.");
 			return;
 		}
-		
+
 		const status = this.session.getAutoEscalateModel() ? "on" : "off";
 		const smart = this.session.settingsManager.getSmartModel();
 		const smartStr = smart ? `${smart.provider}/${smart.id}` : "yok";

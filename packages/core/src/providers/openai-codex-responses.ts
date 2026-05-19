@@ -724,7 +724,7 @@ async function connectWebSocket(url: string, headers: Headers, signal?: AbortSig
 				throw lastError;
 			}
 			// Wait before retrying (exponential backoff)
-			const delay = Math.min(500 * Math.pow(2, attempt - 1), 3000);
+			const delay = Math.min(500 * 2 ** (attempt - 1), 3000);
 			if (attempt < maxRetries) {
 				await new Promise((resolve) => setTimeout(resolve, delay));
 			}
