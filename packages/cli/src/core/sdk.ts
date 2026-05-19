@@ -275,7 +275,6 @@ export async function createEngineSession(
 		"bash",
 		"edit",
 		"write",
-		"web_search",
 		"git_ship",
 		"browser_tabs",
 		"browser_page",

@@ -14,9 +14,10 @@ Chrome extension for local MoonCode browser automation.
 ## Tools
 
 - `browser_tabs`: list, active, open, close, focus, reload, navigate.
-- `browser_page`: read, read_dom, get_elements, click, hover, type, drag, mouse, canvas_info, canvas_draw, upload_file, press_key, scroll, evaluate, console_logs, wait, clear_ui.
+- `browser_page`: read, read_dom, get_elements, screenshot, click, hover, type, drag, mouse, canvas_info, canvas_draw, upload_file, press_key, scroll, evaluate, console_logs, wait, clear_ui.
 - `mouse`: real Chrome DevTools mouse input for canvas apps, block editors, drawing, and simple games (`x`, `y`, optional `toX`, `toY`, `button`, `steps`, `ms`).
 - `canvas_info` / `canvas_draw`: finds canvases and draws deliberate point paths without dumping image data.
+- `screenshot`: captures the visible tab and returns an image block to the model.
 - `scroll`: up, down, left, right, top, bottom. It prefers the nearest scrollable container around the viewport center before falling back to window scrolling.
 
 ## Design goals

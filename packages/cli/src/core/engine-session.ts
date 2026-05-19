@@ -2789,7 +2789,6 @@ export class EngineSession {
 					"bash",
 					"edit",
 					"write",
-					"web_search",
 					"git_ship",
 					"browser_tabs",
 					"browser_page",
@@ -2821,9 +2820,8 @@ export class EngineSession {
 					"discord_get_channels",
 					"discord_send_message",
 					"discord_manage_channel",
-					"web_search",
 				]
-			: [...activeToolNames, ...browserToolNames, "web_search"];
+			: [...activeToolNames, ...browserToolNames];
 		this._buildRuntime({
 			activeToolNames: nextActiveToolNames,
 			flagValues: previousFlagValues,
