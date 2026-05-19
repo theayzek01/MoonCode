@@ -649,7 +649,7 @@ function scheduleSessionWebSocketExpiry(sessionId: string, entry: CachedWebSocke
 	}, SESSION_WEBSOCKET_CACHE_TTL_MS);
 }
 
-async function connectWebSocket(url: string, headers: Headers, signal?: AbortSignal): Promise<WebSocketLike> {
+async function connectWebSocketAttempt(url: string, headers: Headers, signal?: AbortSignal): Promise<WebSocketLike> {
 	const WebSocketCtor = getWebSocketConstructor();
 	if (!WebSocketCtor) {
 		throw new Error("WebSocket transport is not available in this runtime");
@@ -709,6 +709,28 @@ async function connectWebSocket(url: string, headers: Headers, signal?: AbortSig
 		socket.addEventListener("close", onClose);
 		signal?.addEventListener("abort", onAbort);
 	});
+}
+
+async function connectWebSocket(url: string, headers: Headers, signal?: AbortSignal): Promise<WebSocketLike> {
+	const maxRetries = 3;
+	let lastError: Error | undefined;
+
+	for (let attempt = 1; attempt <= maxRetries; attempt++) {
+		try {
+			return await connectWebSocketAttempt(url, headers, signal);
+		} catch (err) {
+			lastError = err instanceof Error ? err : new Error(String(err));
+			if (signal?.aborted) {
+				throw lastError;
+			}
+			// Wait before retrying (exponential backoff)
+			const delay = Math.min(500 * 2 ** (attempt - 1), 3000);
+			if (attempt < maxRetries) {
+				await new Promise((resolve) => setTimeout(resolve, delay));
+			}
+		}
+	}
+	throw lastError || new Error("Failed to connect to WebSocket");
 }
 
 async function acquireWebSocket(

@@ -891,9 +891,9 @@ export class TUI extends Container {
 
 	private static readonly SEGMENT_RESET = "\x1b[0m\x1b]8;;\x07";
 
-	private applyLineResets(lines: string[]): string[] {
+	private applyLineResets(lines: string[], startIndex = 0): string[] {
 		const reset = TUI.SEGMENT_RESET;
-		for (let i = 0; i < lines.length; i++) {
+		for (let i = startIndex; i < lines.length; i++) {
 			const line = lines[i];
 			if (!isImageLine(line)) {
 				lines[i] = normalizeTerminalOutput(line) + reset;
@@ -902,10 +902,10 @@ export class TUI extends Container {
 		return lines;
 	}
 
-	private clampLinesToWidth(lines: string[], width: number): string[] {
+	private clampLinesToWidth(lines: string[], width: number, startIndex = 0): string[] {
 		if (width <= 0) return lines;
 		const reset = TUI.SEGMENT_RESET;
-		for (let i = 0; i < lines.length; i++) {
+		for (let i = startIndex; i < lines.length; i++) {
 			const line = lines[i];
 			if (
 				isImageLine(line) ||
@@ -1031,7 +1031,10 @@ export class TUI extends Container {
 		// Extract cursor position before applying line resets (marker must be found first)
 		const cursorPos = this.extractCursorPosition(newLines, height);
 
-		newLines = this.applyLineResets(this.clampLinesToWidth(newLines, width));
+		const forceFullProcess = this.previousLines.length === 0 || widthChanged || (heightChanged && !isTermuxSession());
+		const processStartIndex = forceFullProcess ? 0 : prevViewportTop;
+
+		newLines = this.applyLineResets(this.clampLinesToWidth(newLines, width, processStartIndex), processStartIndex);
 
 		// Helper to clear scrollback and viewport and render all new lines
 		const fullRender = (clear: boolean): void => {

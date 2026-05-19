@@ -272,6 +272,7 @@ export class CombinedAutocompleteProvider implements AutocompleteProvider {
 	private commands: (SlashCommand | AutocompleteItem)[];
 	private basePath: string;
 	private fdPath: string | null;
+	private dirCache = new Map<string, { entries: any[]; timestamp: number }>();
 
 	constructor(commands: (SlashCommand | AutocompleteItem)[] = [], basePath: string, fdPath: string | null = null) {
 		this.commands = commands;
@@ -604,7 +605,15 @@ export class CombinedAutocompleteProvider implements AutocompleteProvider {
 				searchPrefix = file;
 			}
 
-			const entries = readdirSync(searchDir, { withFileTypes: true });
+			let entries: any[] = [];
+			const cached = this.dirCache.get(searchDir);
+			const now = Date.now();
+			if (cached && now - cached.timestamp < 1500) {
+				entries = cached.entries;
+			} else {
+				entries = readdirSync(searchDir, { withFileTypes: true });
+				this.dirCache.set(searchDir, { entries, timestamp: now });
+			}
 			const suggestions: AutocompleteItem[] = [];
 
 			for (const entry of entries) {

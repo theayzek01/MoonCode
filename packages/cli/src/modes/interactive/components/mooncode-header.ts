@@ -100,7 +100,7 @@ export class MoonCodeHeaderComponent extends Container {
 		const lines: string[] = [];
 
 		if (logoMode === "minimal") {
-			const minimalText = theme.fg("accent", "✦ MoonCode ") + theme.fg("dim", "v2026-7");
+			const minimalText = theme.fg("accent", "✦ MoonCode ") + theme.fg("dim", "v2026-9");
 			lines.push(minimalText);
 			lines.push(theme.fg("dim", "─".repeat(width)));
 			this.cachedWidth = width;
@@ -109,7 +109,7 @@ export class MoonCodeHeaderComponent extends Container {
 		}
 
 		if (logoMode === "compact") {
-			// Compact persistent header: MoonCode · v2026-7 · Apex · project/branch
+			// Compact persistent header: MoonCode · v2026-9 · Apex · project/branch
 			const cwd = this.session?.sessionManager?.getCwd() || "";
 			const project = cwd ? path.basename(cwd) : "";
 			const branch = this.footerData?.getGitBranch() || "";
@@ -117,7 +117,7 @@ export class MoonCodeHeaderComponent extends Container {
 
 			const parts = [
 				theme.bold(theme.fg("accent", "MOONCODE")),
-				theme.fg("dim", "v2026-7"),
+				theme.fg("dim", "v2026-9"),
 				theme.fg("success", "APEX"),
 				projBranch ? theme.fg("muted", projBranch) : undefined,
 			].filter(Boolean);
@@ -146,7 +146,7 @@ export class MoonCodeHeaderComponent extends Container {
 		const versionText =
 			" " +
 			theme.fg("dim", "✦ ") +
-			theme.fg("accent", "VERSION 2026-7") +
+			theme.fg("accent", "VERSION 2026-9") +
 			theme.fg("dim", " ✦ ") +
 			theme.fg("success", "APEX MODE ACTIVE ✦ DEEPTHINK ENABLED");
 		lines.push(versionText);
