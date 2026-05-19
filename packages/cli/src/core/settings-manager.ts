@@ -111,6 +111,8 @@ export interface Settings {
 	defaultModel?: string;
 	defaultThinkingLevel?: "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
 	autoThink?: boolean;
+	autoEscalateModel?: boolean;
+	smartModel?: { provider: string; id: string };
 	automation?: { enabled?: boolean; requireConfirmation?: boolean };
 	transport?: TransportSetting; // default: "auto"
 	steeringMode?: "all" | "one-at-a-time";
@@ -707,6 +709,30 @@ export class SettingsManager {
 	setAutoThinkEnabled(enabled: boolean): void {
 		this.globalSettings.autoThink = enabled;
 		this.markModified("autoThink");
+		this.save();
+	}
+
+	getAutoEscalateModel(): boolean {
+		return this.settings.autoEscalateModel ?? false;
+	}
+
+	setAutoEscalateModel(enabled: boolean): void {
+		this.globalSettings.autoEscalateModel = enabled;
+		this.markModified("autoEscalateModel");
+		this.save();
+	}
+
+	getSmartModel(): { provider: string; id: string } | undefined {
+		if (this.settings.smartModel) {
+			return this.settings.smartModel;
+		}
+		// Default smart model: prefer Claude 3.5 Sonnet if available
+		return { provider: "anthropic", id: "claude-3-5-sonnet-latest" };
+	}
+
+	setSmartModel(provider: string, id: string): void {
+		this.globalSettings.smartModel = { provider, id };
+		this.markModified("smartModel");
 		this.save();
 	}
 

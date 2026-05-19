@@ -2845,6 +2845,12 @@ export class InteractiveMode {
 				this.handleAutoThinkCommand(arg);
 				return;
 			}
+			if (text === "/routing" || text.startsWith("/routing ")) {
+				const arg = text.startsWith("/routing ") ? text.slice(9).trim() : "";
+				this.editor.setText("");
+				this.handleRoutingCommand(arg);
+				return;
+			}
 			if (text === "/automation" || text.startsWith("/automation ")) {
 				const arg = text.startsWith("/automation ") ? text.slice(12).trim() : "";
 				this.editor.setText("");
@@ -6583,6 +6589,27 @@ export class InteractiveMode {
 			return;
 		}
 		this.showStatus(`Kullanim: /autothink on|off (su an: ${this.session.getAutoThinkEnabled() ? "on" : "off"})`);
+	}
+
+	private handleRoutingCommand(arg: string): void {
+		const normalized = arg.trim().toLowerCase();
+		if (normalized === "on" || normalized === "true" || normalized === "1") {
+			this.session.setAutoEscalateModel(true);
+			this.showStatus(
+				"Model Routing acildi. Gemini/Ollama gibi hizli modeller kullanilirken, karmasik plan ve refactor islemlerinde otomatik olarak Claude'a gecilecek.",
+			);
+			return;
+		}
+		if (normalized === "off" || normalized === "false" || normalized === "0") {
+			this.session.setAutoEscalateModel(false);
+			this.showStatus("Model Routing kapatildi. Model gecisleri sadece manuel olarak yapilacak.");
+			return;
+		}
+
+		const status = this.session.getAutoEscalateModel() ? "on" : "off";
+		const smart = this.session.settingsManager.getSmartModel();
+		const smartStr = smart ? `${smart.provider}/${smart.id}` : "yok";
+		this.showStatus(`Kullanim: /routing on|off (su an: ${status}). Hedef premium model: ${smartStr}`);
 	}
 	private handleAutomationCommand(arg: string): void {
 		const normalized = arg.trim().toLowerCase();

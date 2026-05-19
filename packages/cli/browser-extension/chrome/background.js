@@ -1,6 +1,6 @@
 const BASE_PORT = 3133;
 const MAX_PORT_OFFSET = 9; // Scan 3133 to 3142
-const VERSION = "2026.7.0";
+const VERSION = "2026.9.0";
 const HEARTBEAT_INTERVAL_MS = 20000;
 const RECONNECT_DELAY_MS = 2000;
 const COMMAND_TIMEOUT_MS = 12000;
@@ -225,7 +225,8 @@ async function executeTabs(args) {
   }
   if (action === "open") {
     if (!args.url) throw new Error("open requires url");
-    const tab = await chrome.tabs.create({ url: args.url, active: args.active !== false });
+    const smartUrl = resolveSmartUrl(args.url);
+    const tab = await chrome.tabs.create({ url: smartUrl, active: args.active !== false });
     return tabSummary(tab);
   }
   if (action === "close") {
@@ -248,8 +249,8 @@ async function executeTabs(args) {
   if (action === "navigate") {
     const tabId = args.tabId === undefined ? (await getActiveTab()).id : requireTabId(args);
     if (!args.url) throw new Error("navigate requires url");
-    const url = args.url.startsWith("http") ? args.url : `https://${args.url}`;
-    await chrome.tabs.update(tabId, { url, active: args.active !== false });
+    const smartUrl = resolveSmartUrl(args.url);
+    await chrome.tabs.update(tabId, { url: smartUrl, active: args.active !== false });
     await waitForTabReady(tabId);
     await injectOverlay(tabId, "MoonCode Synchronized");
     return tabSummary(await chrome.tabs.get(tabId));
@@ -559,6 +560,10 @@ async function executePage(args) {
         if (visual && window.__moon_move_cursor) await window.__moon_move_cursor(rect.left + rect.width / 2, rect.top + rect.height / 2, 'hand');
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
+        if (visual) {
+          if (window.__moon_highlight_element) window.__moon_highlight_element(selector);
+          if (window.__moon_click_animation) window.__moon_click_animation(cx, cy);
+        }
         // Full mouse sequence
         for (const type of ['pointerdown', 'mousedown', 'pointerup', 'mouseup']) {
           el.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, view: window, clientX: cx, clientY: cy }));
@@ -621,6 +626,9 @@ async function executePage(args) {
         el.scrollIntoView({ behavior: "instant", block: "center", inline: "center" });
         await new Promise(r => setTimeout(r, 20));
         const rect = el.getBoundingClientRect();
+        if (visual) {
+          if (window.__moon_highlight_element) window.__moon_highlight_element(selector);
+        }
         if (visual && window.__moon_move_cursor) await window.__moon_move_cursor(rect.left + rect.width / 2, rect.top + rect.height / 2, "arrow");
         for (const type of ["pointerover", "pointerenter", "mouseover", "mouseenter"]) {
           el.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, view: window }));
@@ -635,34 +643,78 @@ async function executePage(args) {
   if (action === "type") {
     if (!args.selector) throw new Error("type requires selector");
     const selector = await resolveSelector(tabId, args.selector);
-    if (args.visual === true) await injectOverlay(tabId, `Typing into ${selector}`);
-    const [result] = await chrome.scripting.executeScript({
+    if (args.visual === true) {
+      await injectOverlay(tabId, `Typing into ${selector}`);
+      await chrome.scripting.executeScript({
+        target: { tabId },
+        func: (sel) => {
+          if (window.__moon_highlight_element) window.__moon_highlight_element(sel);
+        },
+        args: [selector]
+      });
+    }
+
+    // 1. Move virtual cursor and focus target element first
+    const [focusResult] = await chrome.scripting.executeScript({
       target: { tabId },
-      func: async (selector, text, append, visual) => {
+      func: async (selector, visual) => {
         const el = document.querySelector(selector);
-        if (!el) return { typed: false, reason: "selector not found" };
+        if (!el) return false;
         el.scrollIntoView({ behavior: "instant", block: "center", inline: "center" });
         await new Promise(r => setTimeout(r, 20));
         const rect = el.getBoundingClientRect();
-        if (visual && window.__moon_move_cursor) await window.__moon_move_cursor(rect.left + rect.width / 2, rect.top + rect.height / 2, "type");
-        el.focus?.();
-        const nextValue = append ? (("value" in el ? el.value : el.textContent) || "") + text : text;
-        if ("value" in el) {
-          const proto = el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
-          const setter = Object.getOwnPropertyDescriptor(proto, "value")?.set;
-          setter ? setter.call(el, nextValue) : (el.value = nextValue);
-        } else if (el.isContentEditable) {
-          el.textContent = nextValue;
-        } else {
-          el.textContent = nextValue;
+        if (visual && window.__moon_move_cursor) {
+          await window.__moon_move_cursor(rect.left + rect.width / 2, rect.top + rect.height / 2, "type");
         }
-        el.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: text }));
-        el.dispatchEvent(new Event("change", { bubbles: true }));
-        return { typed: true, selector, length: text.length };
+        el.focus?.();
+        return true;
       },
-      args: [selector, args.text ?? "", args.append === true, args.visual === true]
+      args: [selector, args.visual === true]
     });
-    return result?.result;
+
+    if (!focusResult?.result) {
+      return { typed: false, reason: `Element not found or not focusable: ${selector}` };
+    }
+
+    // 2. Emulated hardware typing via CDP for React/Vue/Angular compatibility
+    const didAttach = await attachDebugger(tabId);
+    try {
+      if (!args.append) {
+        // Select-all and delete existing content
+        await chrome.debugger.sendCommand({ tabId }, "Input.dispatchKeyEvent", {
+          type: "keyDown", modifiers: 2, key: "a", code: "KeyA", windowsVirtualKeyCode: 65
+        });
+        await chrome.debugger.sendCommand({ tabId }, "Input.dispatchKeyEvent", {
+          type: "keyUp", modifiers: 2, key: "a", code: "KeyA", windowsVirtualKeyCode: 65
+        });
+        await chrome.debugger.sendCommand({ tabId }, "Input.dispatchKeyEvent", {
+          type: "keyDown", key: "Backspace", code: "Backspace", windowsVirtualKeyCode: 8
+        });
+        await chrome.debugger.sendCommand({ tabId }, "Input.dispatchKeyEvent", {
+          type: "keyUp", key: "Backspace", code: "Backspace", windowsVirtualKeyCode: 8
+        });
+      }
+      
+      // Hardware-emulate typing using CDP insertText
+      await chrome.debugger.sendCommand({ tabId }, "Input.insertText", { text: args.text ?? "" });
+    } finally {
+      if (didAttach) await detachDebugger(tabId);
+    }
+
+    // Dispatch input/change events to be absolutely sure triggers fire
+    await chrome.scripting.executeScript({
+      target: { tabId },
+      func: (selector) => {
+        const el = document.querySelector(selector);
+        if (el) {
+          el.dispatchEvent(new InputEvent("input", { bubbles: true }));
+          el.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+      },
+      args: [selector]
+    });
+
+    return { typed: true, selector, length: (args.text ?? "").length, method: "cdp" };
   }
 
   if (action === "drag") {
@@ -826,6 +878,43 @@ async function executePage(args) {
 
   if (action === "wait") {
     const ms = Math.min(Number(args.ms) || 1000, 15000);
+    const selector = args.selector;
+    const text = args.text;
+    const timeoutMs = Math.max(100, Math.min(Number(args.timeoutMs || args.timeout) || 10000, 15000));
+
+    if (selector) {
+      const start = Date.now();
+      const resolvedSel = await resolveSelector(tabId, selector);
+      while (Date.now() - start < timeoutMs) {
+        const [found] = await chrome.scripting.executeScript({
+          target: { tabId },
+          func: (sel) => !!document.querySelector(sel),
+          args: [resolvedSel]
+        });
+        if (found?.result) return { waited: Date.now() - start, found: resolvedSel };
+        await new Promise(r => setTimeout(r, 200));
+      }
+      throw new Error(`Timeout waiting for selector: ${selector}`);
+    }
+
+    if (text) {
+      const start = Date.now();
+      const lowerText = String(text).toLowerCase();
+      while (Date.now() - start < timeoutMs) {
+        const [found] = await chrome.scripting.executeScript({
+          target: { tabId },
+          func: (txt) => {
+            const bodyText = (document.body || document.documentElement).textContent || "";
+            return bodyText.toLowerCase().includes(txt);
+          },
+          args: [lowerText]
+        });
+        if (found?.result) return { waited: Date.now() - start, foundText: text };
+        await new Promise(r => setTimeout(r, 200));
+      }
+      throw new Error(`Timeout waiting for text: ${text}`);
+    }
+
     await new Promise(r => setTimeout(r, ms));
     return { waited: ms };
   }
@@ -1218,6 +1307,22 @@ function tabSummary(tab) {
   };
 }
 
+function resolveSmartUrl(url) {
+  const trimmed = String(url).trim();
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("about:") || trimmed.startsWith("chrome://")) {
+    return trimmed;
+  }
+  // Check if it's a domain/URL structure (e.g. "google.com" or "localhost:3000")
+  const isUrl = /^[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:[0-9]+)?(\/.*)?$/.test(trimmed)
+    || /^localhost(:[0-9]+)?(\/.*)?$/.test(trimmed);
+  
+  if (isUrl) {
+    return `https://${trimmed}`;
+  }
+  // Otherwise, treat as Google search query
+  return `https://www.google.com/search?q=${encodeURIComponent(trimmed)}`;
+}
+
 // Overlay is injected once and reused; message updates in-place
 const overlayInjectedTabs = new Set();
 
@@ -1330,6 +1435,59 @@ async function injectOverlay(tabId, message = "MoonCode Active Control") {
         cur.style.left = x + "px";
         setTimeout(resolve, 380);
       });
+
+      window.__moon_click_animation = (x, y) => {
+        const ripple = document.createElement("div");
+        ripple.style.cssText = `
+          position: fixed;
+          top: ${y}px;
+          left: ${x}px;
+          width: 6px;
+          height: 6px;
+          background: #38bdf8;
+          border-radius: 50%;
+          z-index: 2147483647;
+          pointer-events: none;
+          transform: translate(-50%, -50%);
+          box-shadow: 0 0 12px #38bdf8, 0 0 24px #38bdf8;
+          transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        `;
+        (document.body || document.documentElement).appendChild(ripple);
+        requestAnimationFrame(() => {
+          ripple.style.width = "48px";
+          ripple.style.height = "48px";
+          ripple.style.opacity = "0";
+        });
+        setTimeout(() => ripple.remove(), 500);
+      };
+
+      window.__moon_highlight_element = (selector) => {
+        const el = document.querySelector(selector);
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const glow = document.createElement("div");
+        glow.className = "moon-element-glow";
+        glow.style.cssText = `
+          position: fixed;
+          top: ${rect.top - 4}px;
+          left: ${rect.left - 4}px;
+          width: ${rect.width + 8}px;
+          height: ${rect.height + 8}px;
+          border: 2px solid #0ea5e9;
+          border-radius: 6px;
+          box-shadow: 0 0 15px rgba(14, 165, 233, 0.5);
+          z-index: 2147483646;
+          pointer-events: none;
+          opacity: 0;
+          transition: all 0.3s ease;
+        `;
+        (document.body || document.documentElement).appendChild(glow);
+        requestAnimationFrame(() => glow.style.opacity = "1");
+        setTimeout(() => {
+          glow.style.opacity = "0";
+          setTimeout(() => glow.remove(), 300);
+        }, 1500);
+      };
     },
     args: [message, arrowUrl, handUrl, typeUrl]
   });

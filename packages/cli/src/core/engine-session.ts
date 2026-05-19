@@ -82,10 +82,12 @@ import {
 	wrapRegisteredTools,
 } from "./extensions/index.js";
 import { emitSessionShutdownEvent } from "./extensions/runner.js";
+import { LearningMemory } from "./learning-memory.js";
 import { getMemoryPreface, persistMemorySignal, shouldPersistMemorySignal } from "./memory-policy.js";
 import type { BashExecutionMessage, CustomMessage } from "./messages.js";
 import { pickFallbackModel } from "./model-orchestrator.js";
 import type { ModelRegistry } from "./model-registry.js";
+import { OmegaKernel } from "./omega-kernel.js";
 import { expandPromptTemplate, type PromptTemplate } from "./prompt-templates.js";
 import type { ResourceExtensionPaths, ResourceLoader } from "./resource-loader.js";
 import { TaskPlanner } from "./robotics/task-planner.js";
@@ -304,6 +306,8 @@ export class EngineSession {
 	private _retryAttempt = 0;
 	private _retryPromise: Promise<void> | undefined = undefined;
 	private _retryResolve: (() => void) | undefined = undefined;
+	private _originalModelBeforeEscalation?: Model<any>;
+	private _lastEncounteredError?: string;
 
 	// Bash execution state
 	private _bashAbortController: AbortController | undefined = undefined;
@@ -593,6 +597,14 @@ export class EngineSession {
 			) {
 				// Regular Provider message - persist as SessionMessageEntry
 				this.sessionManager.appendMessage(event.message);
+
+				// Capture failed tool results or bash execution failures for learning experience
+				if (event.message.role === "toolResult") {
+					const contentStr = JSON.stringify(event.message.content);
+					if (event.message.isError || /failed|error|stderr/i.test(contentStr)) {
+						this._lastEncounteredError = contentStr.slice(0, 500);
+					}
+				}
 			}
 			// Other message types (bashExecution, compactionSummary, branchSummary) are persisted elsewhere
 
@@ -603,6 +615,8 @@ export class EngineSession {
 				const assistantMsg = event.message as AssistantMessage;
 				if (assistantMsg.stopReason !== "error") {
 					this._overflowRecoveryAttempted = false;
+				} else {
+					this._lastEncounteredError = assistantMsg.errorMessage || "Unknown assistant error";
 				}
 
 				this._recordAffectiveAssistantOutcome(assistantMsg);
@@ -617,22 +631,66 @@ export class EngineSession {
 					});
 					this._retryAttempt = 0;
 				}
+
+				// Record successful repair experience in experience memory
+				if (assistantMsg.stopReason !== "error" && this._lastEncounteredError) {
+					const fixText = assistantMsg.content
+						.filter((c) => c.type === "text")
+						.map((c) => c.text)
+						.join("\n");
+					if (fixText) {
+						try {
+							const memory = LearningMemory.getInstance();
+							memory.recordExperience(
+								this._lastEncounteredError,
+								fixText,
+								"success",
+								`Successfully resolved error in current session using ${this.model?.name || "active model"}`,
+							);
+						} catch {}
+					}
+					this._lastEncounteredError = undefined;
+				}
 			}
 		}
 
 		// Check auto-retry and auto-compaction after engine completes
-		if (event.type === "engine_end" && this._lastAssistantMessage) {
-			const msg = this._lastAssistantMessage;
-			this._lastAssistantMessage = undefined;
+		if (event.type === "engine_end") {
+			// Restore original model if escalated
+			if (this._originalModelBeforeEscalation) {
+				const targetModel = this._originalModelBeforeEscalation;
+				this._originalModelBeforeEscalation = undefined;
 
-			// Check for retryable errors first (overloaded, rate limit, server errors)
-			if (this._isRetryableError(msg)) {
-				const didRetry = await this._handleRetryableError(msg);
-				if (didRetry) return; // Retry was initiated, don't proceed to compaction
+				const previousModel = this.model;
+				this.engine.state.model = targetModel;
+				this.sessionManager.appendModelChange(targetModel.provider, targetModel.id);
+				this.settingsManager.setDefaultModelAndProvider(targetModel.provider, targetModel.id);
+
+				const thinkingLevel = this._getThinkingLevelForModelSwitch();
+				this.setThinkingLevel(thinkingLevel);
+
+				await this._emitModelSelect(targetModel, previousModel, "set");
+
+				this.sessionManager.appendCustomMessageEntry(
+					"system_announcement",
+					[{ type: "text", text: `✦ MoonCode dynamic router restored original model: **${targetModel.name}**.` }],
+					true,
+				);
 			}
 
-			this._resolveRetry();
-			await this._checkCompaction(msg);
+			if (this._lastAssistantMessage) {
+				const msg = this._lastAssistantMessage;
+				this._lastAssistantMessage = undefined;
+
+				// Check for retryable errors first (overloaded, rate limit, server errors)
+				if (this._isRetryableError(msg)) {
+					const didRetry = await this._handleRetryableError(msg);
+					if (didRetry) return; // Retry was initiated, don't proceed to compaction
+				}
+
+				this._resolveRetry();
+				await this._checkCompaction(msg);
+			}
 		}
 	}
 
@@ -1015,6 +1073,39 @@ export class EngineSession {
 			}
 		}
 
+		// Apply dynamic APEX Cognitive Boost for cheap/Flash models to emulate Claude 4.7 Opus performance
+		const currentModel = this.engine.state.model;
+		const isCheapModel =
+			currentModel &&
+			(currentModel.provider === "google" ||
+				currentModel.provider === "ollama" ||
+				currentModel.id.includes("flash") ||
+				currentModel.id.includes("mini") ||
+				currentModel.id.includes("3.2") ||
+				currentModel.id.includes("llama"));
+
+		if (isCheapModel) {
+			promptGuidelines.push(
+				"**APEX COGNITIVE BOOST PROTOCOL**: Since you are running in high-performance mode, you must apply the following Claude-4.7-Opus intelligence emulations:",
+				"1. **Step-by-Step Chain-of-Thought**: Before writing any tool call or code, you MUST outline the files, functions, and symbols you will touch, explain why, and list the exact imports/dependencies you need to preserve.",
+				"2. **100% Complete Implementations**: Never write placeholder comments (like '// TODO' or '// rest of code remains the same...'). Write the entire code block fully to prevent data loss.",
+				"3. **Strict Import and Syntax Verification**: Verify that every import path exists, uses correct extensions (e.g. `.js` for TypeScript output if using ESM), and matches exact capitalization.",
+				"4. **Defensive Mutation**: Never delete unrelated user code, unused styles, or comments unless explicitly requested. Keep the existing architecture 100% intact.",
+				"5. **Self-Correction & Syntax Guard**: If a bash tool returns an error or a test fails, do NOT repeat the same change. You must stop, read the exact stderr, trace it to the root cause, and write a completely different fix.",
+			);
+		}
+
+		// Inject dynamic experience lessons learned in previous sessions (Machine Learning Loop)
+		try {
+			const memory = LearningMemory.getInstance();
+			const lessons = memory.getLessonsForPrompt(5);
+			if (lessons.length > 0) {
+				promptGuidelines.push("**LEARNED EXPERIENCE MEMORY (Avoid repeating errors)**:", ...lessons);
+			}
+		} catch {
+			// ignore memory load errors
+		}
+
 		const loaderSystemPrompt = this._resourceLoader.getSystemPrompt();
 		const loaderAppendSystemPrompt = this._resourceLoader.getAppendSystemPrompt();
 		const appendSystemPrompt =
@@ -1043,7 +1134,6 @@ export class EngineSession {
 		}
 
 		// Ollama veya local model ise compactMode ac - kucuk context window tasarrufu
-		const currentModel = this.engine.state.model;
 		const isLocalModel =
 			currentModel?.provider === "ollama" ||
 			(currentModel?.provider === "openai" && process.env.MOON_COMPACT_PROMPT === "true");
@@ -1271,6 +1361,56 @@ export class EngineSession {
 	 * @throws Error if no model selected or no API key available (when not streaming)
 	 */
 	async prompt(text: string, options?: PromptOptions): Promise<void> {
+		// Check for automatic model escalation for complex tasks
+		if (this.settingsManager.getAutoEscalateModel() && this.model && !this.isStreaming) {
+			const kernel = OmegaKernel.getInstance();
+			const contract = kernel.classifyRequestToContract(text);
+			const router = kernel.calculateEntropy(contract, this._cwd);
+
+			const isCheapModel =
+				!this.model.reasoning &&
+				(this.model.provider === "google" ||
+					this.model.provider === "ollama" ||
+					this.model.id.includes("flash") ||
+					this.model.id.includes("mini") ||
+					this.model.id.includes("3.2"));
+			const requiresHighIntelligence =
+				router.entropy > 0.45 ||
+				contract.effortMode === "S2" ||
+				contract.effortMode === "S3" ||
+				contract.effortMode === "S4";
+
+			if (isCheapModel && requiresHighIntelligence) {
+				const smartConfig = this.settingsManager.getSmartModel();
+				if (smartConfig) {
+					const available = await this._modelRegistry.getAvailable();
+					const smartModel = available.find((m) => m.provider === smartConfig.provider && m.id === smartConfig.id);
+					if (smartModel && this._modelRegistry.hasConfiguredAuth(smartModel)) {
+						this._originalModelBeforeEscalation = this.model;
+						const previousModel = this.model;
+						this.engine.state.model = smartModel;
+						this.sessionManager.appendModelChange(smartModel.provider, smartModel.id);
+						this.setThinkingLevel("high");
+
+						await this._emitModelSelect(smartModel, previousModel, "set");
+
+						this._pendingNextTurnMessages.push({
+							role: "custom",
+							customType: "system_announcement",
+							content: [
+								{
+									type: "text",
+									text: `✦ MoonCode dynamic router escalated task to **${smartModel.name}** (APEX Thinking High) for complex refactoring/planning.`,
+								},
+							],
+							display: true,
+							timestamp: Date.now(),
+						});
+					}
+				}
+			}
+		}
+
 		const optimized = optimizePromptText(text);
 		if (optimized.wasOptimized) {
 			text = optimized.optimizedText;
@@ -1895,6 +2035,14 @@ export class EngineSession {
 
 	setAutoThinkEnabled(enabled: boolean): void {
 		this.settingsManager.setAutoThinkEnabled(enabled);
+	}
+
+	getAutoEscalateModel(): boolean {
+		return this.settingsManager.getAutoEscalateModel();
+	}
+
+	setAutoEscalateModel(enabled: boolean): void {
+		this.settingsManager.setAutoEscalateModel(enabled);
 	}
 
 	getAutomationEnabled(): boolean {
@@ -2883,6 +3031,24 @@ export class EngineSession {
 		this._retryAttempt++;
 
 		if (this._retryAttempt > settings.maxRetries) {
+			// Record failure/trap in LearningMemory
+			if (this._lastEncounteredError) {
+				const lastAttemptText = message.content
+					.filter((c) => c.type === "text")
+					.map((c) => c.text)
+					.join("\n");
+				try {
+					const memory = LearningMemory.getInstance();
+					memory.recordExperience(
+						this._lastEncounteredError,
+						lastAttemptText,
+						"failure",
+						`Attempted fix failed to resolve error after maximum retries. Do not try this exact approach again.`,
+					);
+				} catch {}
+				this._lastEncounteredError = undefined;
+			}
+
 			// Max retries exceeded, emit final failure and reset
 			this._emit({
 				type: "auto_retry_end",
