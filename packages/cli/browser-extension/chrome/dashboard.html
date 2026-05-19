@@ -220,6 +220,27 @@
       background: #ccc;
     }
 
+    .terminate-btn {
+      margin-top: 16px;
+      width: 100%;
+      background: rgba(255, 59, 48, 0.08);
+      border: 1px solid rgba(255, 59, 48, 0.15);
+      color: var(--red);
+      padding: 10px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 11px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .terminate-btn:hover {
+      background: var(--red) !important;
+      color: #fff !important;
+      box-shadow: 0 4px 15px rgba(255, 59, 48, 0.3);
+    }
+
     @keyframes spin {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
@@ -237,14 +258,14 @@
       <div class="logo-box">M</div>
       <div class="logo-text">
         <h1>MOONCODE</h1>
-        <p>COMMAND CENTER</p>
+        <p>KOMUTA MERKEZİ</p>
       </div>
     </div>
     <button class="refresh-btn" id="refresh-btn">
       <svg id="sync-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
         <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"></path>
       </svg>
-      Sync Nodes
+      Portları Tara
     </button>
   </nav>
 
@@ -254,21 +275,21 @@
         <div class="stat-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
         </div>
-        <span class="stat-label">Active Sessions</span>
+        <span class="stat-label">Aktif Oturumlar</span>
         <div class="stat-value" id="active-nodes">0</div>
       </div>
       <div class="stat-card">
         <div class="stat-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
         </div>
-        <span class="stat-label">Total Clients</span>
+        <span class="stat-label">Toplam İstemci</span>
         <div class="stat-value" id="total-clients">0</div>
       </div>
       <div class="stat-card">
         <div class="stat-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
         </div>
-        <span class="stat-label">System Load</span>
+        <span class="stat-label">Sistem Yükü</span>
         <div class="stat-value">2%</div>
       </div>
     </div>

@@ -453,6 +453,256 @@ export async function main(args: string[], options?: MainOptions) {
 		return;
 	}
 
+	if (args[0] === "service-daemon") {
+		const fs = await import("node:fs");
+		const path = await import("node:path");
+		const serviceLogPath = "C:\\Users\\ozenc\\.gemini\\antigravity\\services.log";
+		const logDir = path.dirname(serviceLogPath);
+		if (!fs.existsSync(logDir)) {
+			fs.mkdirSync(logDir, { recursive: true });
+		}
+		const logStream = fs.createWriteStream(serviceLogPath, { flags: "a" });
+		// Redirect console output cleanly
+		console.log = (...msgArgs) => {
+			logStream.write(`${msgArgs.map((a) => (typeof a === "object" ? JSON.stringify(a) : String(a))).join(" ")}\n`);
+		};
+		console.error = (...msgArgs) => {
+			logStream.write(
+				`[ERROR] ${msgArgs.map((a) => (typeof a === "object" ? JSON.stringify(a) : String(a))).join(" ")}\n`,
+			);
+		};
+
+		const bridgeStatus = startBrowserBridgeServer({ keepAlive: true });
+		console.log(`[Moon Service] Browser Bridge listening on ws://127.0.0.1:${bridgeStatus.port}/ws`);
+		console.log(`[Moon Service] Web UI active on http://127.0.0.1:3131`);
+
+		process.on("SIGINT", () => process.exit(0));
+		process.on("SIGTERM", () => process.exit(0));
+		await new Promise(() => {});
+		return;
+	}
+
+	if (args[0] === "service") {
+		const action = args[1];
+		if (!action || !["start", "stop", "restart", "status", "logs"].includes(action)) {
+			console.log("Usage: mooncode service <start|stop|restart|status|logs>");
+			return;
+		}
+
+		const _os = await import("node:os");
+		const fs = await import("node:fs");
+		const path = await import("node:path");
+		const serviceLogPath = "C:\\Users\\ozenc\\.gemini\\antigravity\\services.log";
+
+		const logDir = path.dirname(serviceLogPath);
+		if (!fs.existsSync(logDir)) {
+			fs.mkdirSync(logDir, { recursive: true });
+		}
+
+		const postToShutdown = async () => {
+			const http = await import("node:http");
+			return new Promise((resolve) => {
+				const req = http.request(
+					{
+						hostname: "127.0.0.1",
+						port: 3133,
+						path: "/shutdown",
+						method: "POST",
+						timeout: 2000,
+					},
+					(res) => {
+						res.on("data", () => {});
+						res.on("end", () => resolve(true));
+					},
+				);
+				req.on("error", () => resolve(false));
+				req.end();
+			});
+		};
+
+		const checkRunning = async () => {
+			const http = await import("node:http");
+			return new Promise((resolve) => {
+				const req = http.request(
+					{
+						hostname: "127.0.0.1",
+						port: 3133,
+						path: "/health",
+						method: "GET",
+						timeout: 1000,
+					},
+					(res) => {
+						let data = "";
+						res.on("data", (chunk) => {
+							data += chunk;
+						});
+						res.on("end", () => {
+							try {
+								const parsed = JSON.parse(data);
+								resolve(parsed.running ? parsed : null);
+							} catch {
+								resolve(null);
+							}
+						});
+					},
+				);
+				req.on("error", () => resolve(null));
+				req.end();
+			});
+		};
+
+		if (action === "start") {
+			const runningStatus = await checkRunning();
+			if (runningStatus) {
+				console.log(
+					chalk.yellow(`MoonCode Service is already running on port 3133 (Clients: ${runningStatus.clients}).`),
+				);
+				return;
+			}
+
+			console.log("Starting MoonCode background service daemon...");
+			const { spawn } = await import("node:child_process");
+			const cliEntry = process.argv[1];
+
+			const isWin = process.platform === "win32";
+			const child = isWin
+				? spawn(
+						"powershell.exe",
+						[
+							"-NoProfile",
+							"-NonInteractive",
+							"-Command",
+							`Start-Process "${process.execPath}" -ArgumentList @('${cliEntry}', 'service-daemon') -WindowStyle Hidden`,
+						],
+						{
+							detached: true,
+							stdio: "ignore",
+							windowsHide: true,
+						},
+					)
+				: spawn(process.execPath, [cliEntry, "service-daemon"], {
+						detached: true,
+						stdio: "ignore",
+						env: { ...process.env, PI_TUI_MODE: "1" },
+					});
+			child.unref();
+
+			let success = false;
+			for (let i = 0; i < 80; i++) {
+				await new Promise((r) => setTimeout(r, 100));
+				if (await checkRunning()) {
+					success = true;
+					break;
+				}
+			}
+
+			if (success) {
+				console.log(chalk.green(`✓ MoonCode Service started successfully.`));
+				console.log(`Logs: ${serviceLogPath}`);
+				console.log(`Dashboard: http://127.0.0.1:3131`);
+			} else {
+				console.log(chalk.red(`✗ Service failed to start within 8 seconds. Check logs at: ${serviceLogPath}`));
+			}
+			return;
+		}
+
+		if (action === "stop") {
+			const isRunning = await checkRunning();
+			if (!isRunning) {
+				console.log(chalk.yellow("MoonCode Service is not running."));
+				return;
+			}
+
+			console.log("Stopping MoonCode Service...");
+			const stopped = await postToShutdown();
+			if (stopped) {
+				console.log(chalk.green("✓ MoonCode Service stopped successfully."));
+			} else {
+				console.log(chalk.red("✗ Failed to stop service."));
+			}
+			return;
+		}
+
+		if (action === "restart") {
+			const isRunning = await checkRunning();
+			if (isRunning) {
+				console.log("Stopping MoonCode Service...");
+				await postToShutdown();
+				await new Promise((r) => setTimeout(r, 1000));
+			}
+
+			console.log("Starting MoonCode background service daemon...");
+			const { spawn } = await import("node:child_process");
+			const cliEntry = process.argv[1];
+			const isWin = process.platform === "win32";
+			const child = isWin
+				? spawn(
+						"powershell.exe",
+						[
+							"-NoProfile",
+							"-NonInteractive",
+							"-Command",
+							`Start-Process "${process.execPath}" -ArgumentList "\\"${cliEntry}\\" service-daemon" -WindowStyle Hidden`,
+						],
+						{
+							detached: true,
+							stdio: "ignore",
+							windowsHide: true,
+						},
+					)
+				: spawn(process.execPath, [cliEntry, "service-daemon"], {
+						detached: true,
+						stdio: "ignore",
+						env: { ...process.env, PI_TUI_MODE: "1" },
+					});
+			child.unref();
+
+			let success = false;
+			for (let i = 0; i < 80; i++) {
+				await new Promise((r) => setTimeout(r, 100));
+				if (await checkRunning()) {
+					success = true;
+					break;
+				}
+			}
+
+			if (success) {
+				console.log(chalk.green(`✓ MoonCode Service restarted successfully.`));
+				console.log(`Logs: ${serviceLogPath}`);
+				console.log(`Dashboard: http://127.0.0.1:3131`);
+			} else {
+				console.log(chalk.red(`✗ Service failed to restart. Check logs at: ${serviceLogPath}`));
+			}
+			return;
+		}
+
+		if (action === "status") {
+			const runningStatus = await checkRunning();
+			if (runningStatus) {
+				console.log(chalk.green("● MoonCode Service: RUNNING"));
+				console.log(`  Bridge Port:  3133`);
+				console.log(`  Web Port:     3131`);
+				console.log(`  Clients:      ${runningStatus.clients}`);
+				console.log(`  Dashboard:    http://127.0.0.1:3131`);
+			} else {
+				console.log(chalk.red("○ MoonCode Service: STOPPED"));
+			}
+			return;
+		}
+
+		if (action === "logs") {
+			if (!fs.existsSync(serviceLogPath)) {
+				console.log(chalk.yellow("No logs found. Service has not been started yet."));
+				return;
+			}
+			const lines = fs.readFileSync(serviceLogPath, "utf-8").split("\n");
+			const tail = lines.slice(-50).join("\n");
+			console.log(chalk.cyan("--- Service Logs (last 50 lines) ---"));
+			console.log(tail);
+			return;
+		}
+	}
+
 	startBrowserBridgeServer();
 
 	const offlineMode = args.includes("--offline") || isTruthyEnvFlag(process.env.PI_OFFLINE);

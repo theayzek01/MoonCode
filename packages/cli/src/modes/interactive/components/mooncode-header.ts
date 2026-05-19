@@ -2,6 +2,7 @@
 
 import * as path from "node:path";
 import { Container, Text } from "moon-tui";
+import { VERSION } from "../../../config.js";
 import type { EngineSession } from "../../../core/engine-session.js";
 import type { ReadonlyFooterDataProvider } from "../../../core/footer-data-provider.js";
 import { theme } from "../theme/theme.js";
@@ -30,9 +31,9 @@ export class MoonCodeHeaderComponent extends Container {
 
 	private applyGradient(text: string): string {
 		const lines = text.split("\n");
-		// Dark Crimson to Neon Red gradient
-		const color1 = { r: 255, g: 60, b: 60 }; // Bright Red
-		const color2 = { r: 120, g: 10, b: 10 }; // Deep Crimson
+		// Premium Neon Purple to Electric Cyan gradient
+		const color1 = { r: 192, g: 132, b: 252 }; // Luminous Purple (#c084fc)
+		const color2 = { r: 34, g: 211, b: 238 }; // Electric Cyan (#22d3ee)
 
 		const maxLen = Math.max(...lines.map((l) => l.length));
 
@@ -100,7 +101,7 @@ export class MoonCodeHeaderComponent extends Container {
 		const lines: string[] = [];
 
 		if (logoMode === "minimal") {
-			const minimalText = theme.fg("accent", "✦ MoonCode ") + theme.fg("dim", "v2026-9");
+			const minimalText = theme.fg("accent", "✦ MoonCode ") + theme.fg("dim", `v${VERSION}`);
 			lines.push(minimalText);
 			lines.push(theme.fg("dim", "─".repeat(width)));
 			this.cachedWidth = width;
@@ -109,7 +110,7 @@ export class MoonCodeHeaderComponent extends Container {
 		}
 
 		if (logoMode === "compact") {
-			// Compact persistent header: MoonCode · v2026-9 · Apex · project/branch
+			// Compact persistent header: MoonCode · v2026-10 · Apex · project/branch
 			const cwd = this.session?.sessionManager?.getCwd() || "";
 			const project = cwd ? path.basename(cwd) : "";
 			const branch = this.footerData?.getGitBranch() || "";
@@ -117,7 +118,7 @@ export class MoonCodeHeaderComponent extends Container {
 
 			const parts = [
 				theme.bold(theme.fg("accent", "MOONCODE")),
-				theme.fg("dim", "v2026-9"),
+				theme.fg("dim", `v${VERSION}`),
 				theme.fg("success", "APEX"),
 				projBranch ? theme.fg("muted", projBranch) : undefined,
 			].filter(Boolean);
@@ -146,7 +147,7 @@ export class MoonCodeHeaderComponent extends Container {
 		const versionText =
 			" " +
 			theme.fg("dim", "✦ ") +
-			theme.fg("accent", "VERSION 2026-9") +
+			theme.fg("accent", `VERSION ${VERSION}`) +
 			theme.fg("dim", " ✦ ") +
 			theme.fg("success", "APEX MODE ACTIVE ✦ DEEPTHINK ENABLED");
 		lines.push(versionText);

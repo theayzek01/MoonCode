@@ -5940,11 +5940,20 @@ export class InteractiveMode {
 
 	private async handleWebCommand(): Promise<void> {
 		try {
-			if (!this.webUiProcess) {
-				const server = await import("../../core/web-ui-server.js");
-				this.webUiProcess = server.startWebUiServer({ port: 3131 });
+			const { getBrowserBridgeStatus } = await import("../../core/browser-bridge-server.js");
+			const bridgeStatus = getBrowserBridgeStatus();
+			let url = "http://127.0.0.1:3131";
+
+			if (bridgeStatus.isClientOnly) {
+				this.showStatus(`Sunucu CLIENT-ONLY modunda. Ana Web-UI'a bağlanılıyor: ${url}`);
+			} else {
+				if (!this.webUiProcess) {
+					const server = await import("../../core/web-ui-server.js");
+					this.webUiProcess = server.startWebUiServer({ port: 3131 });
+				}
+				url = this.webUiProcess.url || url;
 			}
-			const url = this.webUiProcess.url || "http://127.0.0.1:3131";
+
 			const opener = process.platform === "win32" ? "cmd" : process.platform === "darwin" ? "open" : "xdg-open";
 			const args = process.platform === "win32" ? ["/c", "start", "", url] : [url];
 			spawnSync(opener, args, { stdio: "ignore", shell: false });

@@ -1252,28 +1252,48 @@ export class TUI extends Container {
 			hardwareCursorRow = moveTargetRow;
 		}
 
-		// Move cursor to first changed line (use hardwareCursorRow for actual position)
-		const lineDiff = computeLineDiff(moveTargetRow);
-		if (lineDiff > 0) {
-			buffer += `\x1b[${lineDiff}B`; // Move down
-		} else if (lineDiff < 0) {
-			buffer += `\x1b[${-lineDiff}A`; // Move up
-		}
-
-		buffer += appendStart ? "\r\n" : "\r"; // Move to column 0
-
-		// Only render changed lines (firstChanged to lastChanged), not all lines to end
-		// This reduces flicker when only a single line changes (e.g., spinner animation)
+		// Render only the lines that actually changed or are new
 		const renderEnd = Math.min(lastChanged, newLines.length - 1);
 		for (let i = firstChanged; i <= renderEnd; i++) {
-			if (i > firstChanged) buffer += "\r\n";
-			buffer += "\x1b[2K"; // Clear current line
-			let line = newLines[i];
-			if (!isImageLine(line) && visibleWidth(line) > width) {
-				line = sliceByColumn(line, 0, width, true) + TUI.SEGMENT_RESET;
-				newLines[i] = line;
+			const oldLine = i < this.previousLines.length ? this.previousLines[i] : undefined;
+			const newLine = newLines[i];
+
+			if (oldLine === undefined) {
+				// Brand new line. Move to previous row and print newline to append it.
+				const targetPrevRow = i - 1;
+				const diff = targetPrevRow - viewportTop - (hardwareCursorRow - prevViewportTop);
+				if (diff > 0) {
+					buffer += `\x1b[${diff}B`;
+				} else if (diff < 0) {
+					buffer += `\x1b[${-diff}A`;
+				}
+				buffer += "\r\n";
+
+				let line = newLine;
+				if (!isImageLine(line) && visibleWidth(line) > width) {
+					line = sliceByColumn(line, 0, width, true) + TUI.SEGMENT_RESET;
+					newLines[i] = line;
+				}
+				buffer += line;
+				hardwareCursorRow = i;
+			} else if (oldLine !== newLine) {
+				// Changed line. Move, clear, and write.
+				const diff = i - viewportTop - (hardwareCursorRow - prevViewportTop);
+				if (diff > 0) {
+					buffer += `\x1b[${diff}B`;
+				} else if (diff < 0) {
+					buffer += `\x1b[${-diff}A`;
+				}
+				buffer += "\r\x1b[2K";
+
+				let line = newLine;
+				if (!isImageLine(line) && visibleWidth(line) > width) {
+					line = sliceByColumn(line, 0, width, true) + TUI.SEGMENT_RESET;
+					newLines[i] = line;
+				}
+				buffer += line;
+				hardwareCursorRow = i;
 			}
-			buffer += line;
 		}
 
 		// Track where cursor ended up after rendering

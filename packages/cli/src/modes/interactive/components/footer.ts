@@ -97,26 +97,68 @@ export class FooterComponent implements Component {
 			effort = "S1";
 		}
 
-		let phase = "done";
+		let phaseLabel = "done";
+		let phaseIcon = "✓";
+		let phaseColor = "success";
+
 		if (entries.length === 0) {
-			phase = "idle";
+			phaseLabel = "IDLE";
+			phaseIcon = "◽";
+			phaseColor = "muted";
 		} else if (this.session.isStreaming) {
-			phase = "planning";
+			phaseLabel = "PLANNING";
+			phaseIcon = "⬡";
+			phaseColor = "accent";
 		} else if (activeToolNames.length > 0) {
 			const tool = activeToolNames[0];
-			if (tool === "read" || tool === "find" || tool === "grep" || tool === "ls") {
-				phase = "reading";
-			} else if (tool === "edit" || tool === "write") {
-				phase = "editing";
-			} else if (tool === "bash") {
-				phase = hasErrors ? "repairing" : "verifying";
+			if (
+				tool === "read" ||
+				tool === "find" ||
+				tool === "grep" ||
+				tool === "ls" ||
+				tool === "view_file" ||
+				tool === "list_dir"
+			) {
+				phaseLabel = "READING";
+				phaseIcon = "◈";
+				phaseColor = "muted";
+			} else if (
+				tool === "edit" ||
+				tool === "write" ||
+				tool === "replace_file_content" ||
+				tool === "multi_replace_file_content" ||
+				tool === "write_to_file"
+			) {
+				phaseLabel = "EDITING";
+				phaseIcon = "⬥";
+				phaseColor = "accent";
+			} else if (tool === "bash" || tool === "run_command") {
+				if (hasErrors) {
+					phaseLabel = "REPAIRING";
+					phaseIcon = "⚒";
+					phaseColor = "warning";
+				} else {
+					phaseLabel = "VERIFYING";
+					phaseIcon = "⚙";
+					phaseColor = "success";
+				}
 			} else {
-				phase = "running";
+				phaseLabel = "RUNNING";
+				phaseIcon = "▲";
+				phaseColor = "warning";
 			}
 		} else if (this.session.isCompacting) {
-			phase = "classifying";
+			phaseLabel = "CLASSIFYING";
+			phaseIcon = "☷";
+			phaseColor = "muted";
 		} else if (hasErrors) {
-			phase = "blocked";
+			phaseLabel = "BLOCKED";
+			phaseIcon = "✖";
+			phaseColor = "error";
+		} else {
+			phaseLabel = "DONE";
+			phaseIcon = "✓";
+			phaseColor = "success";
 		}
 
 		// Clean up redundant prefix
@@ -135,72 +177,92 @@ export class FooterComponent implements Component {
 		const memUsage = process.memoryUsage().rss / 1024 / 1024;
 		const memText = `RSS ${memUsage.toFixed(0)}MB`;
 
-		// Format cost nicely
-		let costText: string | undefined;
-		if (this.session.modelRegistry?.isUsingOAuth?.(state.model)) {
-			// Subscribtion/OAuth mode: Omit COST rendering bug "COST sub" completely
-			costText = undefined;
-		} else if (totalCost > 0) {
-			costText = `COST $${totalCost.toFixed(3)}`;
-		}
+		// Format cost nicely (always display it)
+		const costColor = totalCost > 0 ? "success" : "dim";
+		const costText = `◆ COST $${totalCost.toFixed(2)}`;
 
 		// Build parts with clean hierarchy
 		const parts: string[] = [];
 
-		// 1. APEX Mode Indicator
-		parts.push(theme.bold(theme.fg("success", "APEX")));
+		// 1. Web Connection Indicator (WEB ON / WEB OFF)
+		const hasBrowser = this.session.getBrowserBridgeStatus().clients > 0;
+		const modeText = hasBrowser ? "● WEB" : "○ WEB";
+		const modeColor = hasBrowser ? "success" : "error";
+		parts.push(theme.bold(theme.fg(modeColor, modeText)));
 
 		// 2. Effort Level
-		parts.push(theme.fg("accent", effort));
+		parts.push(theme.fg("accent", `✦ ${effort}`));
 
 		// 3. Current Phase
-		parts.push(theme.fg("muted", phase));
+		parts.push(theme.fg(phaseColor as ThemeColor, `${phaseIcon} ${phaseLabel}`));
 
 		// 4. Git Branch (if available)
-		if (branch && width > 80) {
-			parts.push(theme.fg("muted", truncateToWidth(branch, 12, "…")));
+		if (branch) {
+			parts.push(theme.fg("muted", `⎇ ${truncateToWidth(branch, 12, "…")}`));
 		}
 
-		// 5. Model
-		if (width > 60) {
-			parts.push(theme.fg("text", truncateToWidth(modelName, 16, "…")));
-		} else {
-			parts.push(theme.fg("text", truncateToWidth(modelName, 10, "…")));
-		}
+		// 5. Model (Rendered fully, no truncation)
+		parts.push(theme.fg("accent", "⚙ ") + theme.fg("text", modelName));
 
 		// 6. Thinking state
-		if (thinkingText && width > 90) {
-			parts.push(theme.fg(thinkingColor, thinkingText));
+		if (thinkingText) {
+			parts.push(theme.fg(thinkingColor, `⚛ ${thinkingText.toUpperCase()}`));
 		}
 
 		// 7. Context Usage
 		const ctxText = this.autoCompactEnabled ? `${contextPercent} auto` : contextPercent;
-		parts.push(theme.fg("muted", "CTX ") + theme.fg("text", ctxText));
+		parts.push(theme.fg("muted", "☷ CTX ") + theme.fg("text", ctxText));
 
 		// 8. Running tasks count
 		if (activeToolNames.length > 0) {
-			parts.push(theme.fg("warning", `RUN ×${activeToolNames.length}`));
+			parts.push(theme.fg("warning", `⚙ RUN ×${activeToolNames.length}`));
 		}
 
-		// 9. Cost
-		if (costText && width > 95) {
-			parts.push(theme.fg("dim", costText));
-		}
+		// 9. Cost (Always visible)
+		parts.push(theme.fg(costColor, costText));
 
 		// 10. Memory Usage
-		if (width > 110) {
-			parts.push(theme.fg("dim", memText));
+		parts.push(theme.fg("dim", `⛁ ${memText}`));
+
+		// Join everything with modern premium vertical separator
+		const separator = theme.fg("dim", " │ ");
+		const separatorWidth = 3; // " │ " visible length is 3
+
+		// Multi-row responsive wrapping algorithm
+		const lines: string[][] = [[]];
+		let currentLineVisWidth = 0;
+
+		for (const part of parts) {
+			const partWidth = visibleWidth(part);
+			const currentLineParts = lines[lines.length - 1];
+
+			if (currentLineParts.length === 0) {
+				currentLineParts.push(part);
+				currentLineVisWidth = partWidth;
+			} else {
+				// Check if adding this part with separator fits in width (leaving a small 2-char margin)
+				if (currentLineVisWidth + separatorWidth + partWidth > width - 2) {
+					lines.push([part]);
+					currentLineVisWidth = partWidth;
+				} else {
+					currentLineParts.push(part);
+					currentLineVisWidth += separatorWidth + partWidth;
+				}
+			}
 		}
 
-		// Join everything with modern premium separators
-		const separator = theme.fg("dim", "  ·  ");
-		const statusLine = ` ${parts.join(separator)}`;
+		const renderedLines = lines.map((lineParts) => {
+			const lineText = ` ${lineParts.join(separator)}`;
+			const lineVisWidth = visibleWidth(lineText);
+			if (lineVisWidth < width) {
+				return lineText + " ".repeat(width - lineVisWidth);
+			}
+			if (lineVisWidth > width) {
+				return truncateToWidth(lineText, width);
+			}
+			return lineText;
+		});
 
-		const totalVisibleWidth = visibleWidth(statusLine);
-		if (totalVisibleWidth < width) {
-			return [statusLine + " ".repeat(width - totalVisibleWidth)];
-		}
-
-		return [truncateToWidth(statusLine, width, "…")];
+		return renderedLines;
 	}
 }

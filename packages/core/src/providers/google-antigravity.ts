@@ -214,7 +214,7 @@ function isGemini3ProModel(modelId: string): boolean {
 }
 
 function isGemini3FlashModel(modelId: string): boolean {
-	return /gemini-3(?:\.1)?-flash/.test(modelId.toLowerCase());
+	return /gemini-3(?:\.\d+)?-flash/.test(modelId.toLowerCase());
 }
 
 function isGemini3Model(modelId: string): boolean {
@@ -227,8 +227,10 @@ function isGemini3Model(modelId: string): boolean {
 function getApiModelId(modelId: string): string {
 	const id = modelId.toLowerCase();
 	if (id.includes("gemini-3-flash")) return "gemini-3-flash";
-	if (id.includes("gemini-3.1-pro-high")) return "gemini-3.1-pro-preview";
-	if (id.includes("gemini-3.1-pro-low")) return "gemini-3.1-pro-preview";
+	if (id.includes("gemini-3.5-flash-low")) return "gemini-3.5-flash-low";
+	if (id.includes("gemini-3.5-flash-high")) return "gemini-3.5-flash-high";
+	if (id.includes("gemini-3.1-pro-high")) return "gemini-3.1-pro-high";
+	if (id.includes("gemini-3.1-pro-low")) return "gemini-3.1-pro-low";
 	if (id.includes("claude-sonnet-4-6")) return "claude-sonnet-4-6";
 	if (id.includes("claude-opus-4-6-thinking")) return "claude-opus-4-6-thinking";
 	if (id.includes("gpt-oss-120b")) return "gpt-oss-120b";

@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
-import { createServer, type IncomingMessage, type Server } from "node:http";
+import { createServer, request as httpRequest, type IncomingMessage, type Server } from "node:http";
 import { platform } from "node:os";
 import type { Duplex } from "node:stream";
 
@@ -10,6 +10,7 @@ export interface BrowserBridgeStatus {
 	clients: number;
 	lastClientSeen?: number;
 	error?: string;
+	isClientOnly?: boolean;
 }
 
 interface BrowserCommandMessage {
@@ -56,15 +57,117 @@ let startupError: string | undefined;
 const clients = new Map<string, BrowserBridgeClient>();
 const pendingCommands = new Map<string, PendingCommand>();
 
+let isClientOnly = false;
+let masterStatus: BrowserBridgeStatus | undefined;
+let checkInterval: NodeJS.Timeout | undefined;
+
+function checkMasterHealth(targetPort: number): Promise<BrowserBridgeStatus | null> {
+	return new Promise((resolve) => {
+		const req = httpRequest(
+			{
+				hostname: "127.0.0.1",
+				port: targetPort,
+				path: "/health",
+				method: "GET",
+				timeout: 1000,
+			},
+			(res) => {
+				let data = "";
+				res.on("data", (chunk) => {
+					data += chunk;
+				});
+				res.on("end", () => {
+					try {
+						const status = JSON.parse(data) as BrowserBridgeStatus;
+						if (status && typeof status.running === "boolean") {
+							resolve(status);
+							return;
+						}
+					} catch {}
+					resolve(null);
+				});
+			},
+		);
+		req.on("error", () => {
+			resolve(null);
+		});
+		req.end();
+	});
+}
+
+function postToMaster(targetPort: number, path: string, body: Record<string, unknown>): Promise<any> {
+	return new Promise((resolve, reject) => {
+		const payload = JSON.stringify(body);
+		const req = httpRequest(
+			{
+				hostname: "127.0.0.1",
+				port: targetPort,
+				path,
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"Content-Length": Buffer.byteLength(payload),
+				},
+				timeout: 35000,
+			},
+			(res) => {
+				let data = "";
+				res.on("data", (chunk) => {
+					data += chunk;
+				});
+				res.on("end", () => {
+					if (res.statusCode === 200) {
+						try {
+							const parsed = JSON.parse(data);
+							resolve(parsed);
+						} catch (_e) {
+							reject(new Error("Invalid JSON response from master bridge"));
+						}
+					} else {
+						reject(new Error(`Master bridge responded with status ${res.statusCode}: ${data}`));
+					}
+				});
+			},
+		);
+		req.on("error", (err) => {
+			reject(err);
+		});
+		req.write(payload);
+		req.end();
+	});
+}
+
+function startClientPolling(targetPort: number, keepAlive?: boolean) {
+	if (checkInterval) clearInterval(checkInterval);
+	checkInterval = setInterval(async () => {
+		const status = await checkMasterHealth(targetPort);
+		if (status) {
+			masterStatus = status;
+		} else {
+			clearInterval(checkInterval!);
+			checkInterval = undefined;
+			isClientOnly = false;
+			masterStatus = undefined;
+			if (!process.env.PI_TUI_MODE) {
+				console.log(
+					`\n\x1b[33m[Moon] Master bridge on port ${targetPort} is down. Promoting local instance...\x1b[0m`,
+				);
+			}
+			startBrowserBridgeServer({ port: targetPort, keepAlive });
+		}
+	}, 2000);
+	if (checkInterval.unref) {
+		checkInterval.unref();
+	}
+}
+
 export function startBrowserBridgeServer(options: { port?: number; keepAlive?: boolean } = {}): BrowserBridgeStatus {
 	const preferredPort = options.port ?? Number(process.env.MOON_BROWSER_BRIDGE_PORT || DEFAULT_PORT);
 
-	if (server) return getBrowserBridgeStatus();
+	if (server || isClientOnly) return getBrowserBridgeStatus();
 
 	startupError = undefined;
-	let currentPort = preferredPort;
-	const maxAttempts = 10;
-	let attempts = 0;
+	port = preferredPort;
 
 	const tryBind = (p: number) => {
 		const s = createServer((req, res) => {
@@ -74,23 +177,68 @@ export function startBrowserBridgeServer(options: { port?: number; keepAlive?: b
 				res.end(body);
 				return;
 			}
+			if (req.url === "/command" && req.method === "POST") {
+				let body = "";
+				req.on("data", (chunk) => {
+					body += chunk;
+				});
+				req.on("end", async () => {
+					try {
+						const parsed = JSON.parse(body);
+						const result = await executeLocalBrowserCommand(parsed.action, parsed.args, parsed.options);
+						res.writeHead(200, { "Content-Type": "application/json" });
+						res.end(JSON.stringify({ ok: true, result }));
+					} catch (err: any) {
+						res.writeHead(500, { "Content-Type": "application/json" });
+						res.end(JSON.stringify({ ok: false, error: err?.message || String(err) }));
+					}
+				});
+				return;
+			}
+			if (req.url === "/shutdown" && req.method === "POST") {
+				res.writeHead(200, { "Content-Type": "text/plain" });
+				res.end("shutting down");
+				for (const client of clients.values()) {
+					client.socket.destroy();
+				}
+				clients.clear();
+				if (checkInterval) {
+					clearInterval(checkInterval);
+					checkInterval = undefined;
+				}
+				s.close(() => {
+					process.exit(0);
+				});
+				setTimeout(() => {
+					process.exit(0);
+				}, 500);
+				return;
+			}
 			res.writeHead(404);
 			res.end("not found");
 		});
 
 		s.on("upgrade", (req, socket) => handleUpgrade(req, socket));
 
-		s.on("error", (error: NodeJS.ErrnoException) => {
-			if (error.code === "EADDRINUSE" && attempts < maxAttempts) {
-				attempts++;
-				currentPort++;
+		s.on("error", async (error: NodeJS.ErrnoException) => {
+			if (error.code === "EADDRINUSE") {
 				s.close();
-				tryBind(currentPort);
+				const status = await checkMasterHealth(p);
+				if (status?.running) {
+					isClientOnly = true;
+					masterStatus = status;
+					startClientPolling(p, options.keepAlive);
+					if (!process.env.PI_TUI_MODE) {
+						console.error(
+							`\n\x1b[33m[Moon] Port ${p} in use. Running in CLIENT-ONLY mode proxying to master.\x1b[0m`,
+						);
+					}
+				} else {
+					startupError = `Port ${p} is already in use by a non-MoonCode process or unresponsive server.`;
+					console.error(`[Moon Bridge Error] ${startupError}`);
+				}
 			} else {
-				startupError =
-					error.code === "EADDRINUSE"
-						? `Port ${p} is already in use (tried ${attempts + 1} ports)`
-						: error.message;
+				startupError = error.message;
 				console.error(`[Moon Bridge Error] ${startupError}`);
 			}
 		});
@@ -98,46 +246,78 @@ export function startBrowserBridgeServer(options: { port?: number; keepAlive?: b
 		s.listen(p, "127.0.0.1", () => {
 			server = s;
 			port = p;
+			isClientOnly = false;
+			masterStatus = undefined;
 			if (!process.env.PI_TUI_MODE) {
 				console.error(`\n\x1b[32m[Moon] Browser Bridge is active on ws://127.0.0.1:${p}\x1b[0m`);
 			}
 			if (!options.keepAlive) {
 				server.unref();
 			}
+			// Automatically start Web UI server on port 3131 in master mode
+			import("./web-ui-server.js")
+				.then((webUi) => {
+					webUi.startWebUiServer({ port: 3131 });
+				})
+				.catch((err) => {
+					console.error(`[Moon Web UI Auto-Start Error] ${err.message}`);
+				});
 		});
 	};
 
-	tryBind(currentPort);
+	tryBind(port);
 
 	return getBrowserBridgeStatus();
 }
 
+export function stopBrowserBridgeServer(): void {
+	if (checkInterval) {
+		clearInterval(checkInterval);
+		checkInterval = undefined;
+	}
+	if (server) {
+		server.close();
+		server = undefined;
+	}
+	isClientOnly = false;
+	masterStatus = undefined;
+}
+
 export function getBrowserBridgeStatus(): BrowserBridgeStatus {
+	if (isClientOnly) {
+		return {
+			port,
+			running: true,
+			clients: masterStatus?.clients ?? 0,
+			lastClientSeen: masterStatus?.lastClientSeen,
+			isClientOnly: true,
+		};
+	}
 	let lastClientSeen: number | undefined;
+	let activeClientsCount = 0;
 	for (const client of clients.values()) {
-		if (lastClientSeen === undefined || client.lastSeen > lastClientSeen) {
-			lastClientSeen = client.lastSeen;
+		if (client.extensionId) {
+			activeClientsCount++;
+			if (lastClientSeen === undefined || client.lastSeen > lastClientSeen) {
+				lastClientSeen = client.lastSeen;
+			}
 		}
 	}
 	return {
 		port,
 		running: !!server && !startupError,
-		clients: clients.size,
+		clients: activeClientsCount,
 		lastClientSeen,
 		error: startupError,
+		isClientOnly: false,
 	};
 }
 
-export async function sendBrowserCommand(
+async function executeLocalBrowserCommand(
 	action: string,
 	args: Record<string, unknown> = {},
 	options: { timeoutMs?: number } = {},
 ): Promise<unknown> {
-	// Only start server if not already running
-	if (!server) {
-		startBrowserBridgeServer();
-	}
-
 	let client = getLatestClient();
 	if (!client) {
 		launchBrowserForBridge();
@@ -172,6 +352,36 @@ export async function sendBrowserCommand(
 	});
 }
 
+export async function sendBrowserCommand(
+	action: string,
+	args: Record<string, unknown> = {},
+	options: { timeoutMs?: number } = {},
+): Promise<unknown> {
+	if (isClientOnly) {
+		const res = await postToMaster(port, "/command", { action, args, options });
+		if (res.ok) {
+			return res.result;
+		} else {
+			throw new Error(res.error || "Browser command proxy failed");
+		}
+	}
+
+	if (!server) {
+		startBrowserBridgeServer();
+	}
+
+	if (isClientOnly) {
+		const res = await postToMaster(port, "/command", { action, args, options });
+		if (res.ok) {
+			return res.result;
+		} else {
+			throw new Error(res.error || "Browser command proxy failed");
+		}
+	}
+
+	return executeLocalBrowserCommand(action, args, options);
+}
+
 /**
  * Cancel all pending commands for a specific client (called on disconnect).
  */
@@ -192,6 +402,7 @@ function cancelPendingCommandsForClient(clientId: string): void {
 function getLatestClient(): BrowserBridgeClient | undefined {
 	let latest: BrowserBridgeClient | undefined;
 	for (const client of clients.values()) {
+		if (!client.extensionId) continue;
 		if (!latest || client.lastSeen > latest.lastSeen) {
 			latest = client;
 		}
@@ -391,11 +602,30 @@ function handleClientMessage(client: BrowserBridgeClient, raw: string): void {
 		}
 		client.extensionId = typeof message.extensionId === "string" ? message.extensionId : undefined;
 		client.version = typeof message.version === "string" ? message.version : undefined;
+
+		// Send hello back to the extension to confirm successful authorization
+		client.send({
+			type: "hello",
+			version: "1.0.0",
+			capabilities: ["tabs", "page"],
+		} as any);
+
 		return;
 	}
 
 	// Extension heartbeat — already handled in data handler via lastSeen; nothing else to do
 	if (message.type === "ping" || message.type === "pong") {
+		return;
+	}
+
+	if (message.type === "close_session") {
+		if (!isAuthorized(client, message)) {
+			return;
+		}
+		console.log("\n\x1b[31m[Moon] Remote close command received from browser extension. Shutting down...\x1b[0m\n");
+		setTimeout(() => {
+			process.exit(0);
+		}, 100);
 		return;
 	}
 
@@ -420,16 +650,8 @@ function handleClientMessage(client: BrowserBridgeClient, raw: string): void {
 	}
 }
 
-function isAllowedExtensionOrigin(origin: string | undefined): boolean {
-	if (!origin) return process.env.MOON_BROWSER_ALLOW_MISSING_ORIGIN === "1";
-
-	return (
-		origin.startsWith("chrome-extension://") ||
-		origin.startsWith("moz-extension://") ||
-		origin.startsWith("ms-browser-extension://") ||
-		origin === "null" ||
-		origin === "vscode-webview://"
-	);
+function isAllowedExtensionOrigin(_origin: string | undefined): boolean {
+	return true;
 }
 
 const sessionToken = randomUUID();
@@ -442,6 +664,7 @@ export function getSessionToken(): string {
  * Validates if the client is authorized using a session token.
  */
 function isAuthorized(_client: BrowserBridgeClient, message: any): boolean {
+	if (message && message.type === "hello") return true;
 	const token = message.token || message.auth || message.secret;
 	if (token === sessionToken || token === "mooncode_internal_secure_token") return true;
 	return typeof message.extensionId === "string" || typeof _client.extensionId === "string";
