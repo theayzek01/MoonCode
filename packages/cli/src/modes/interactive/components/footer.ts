@@ -2,7 +2,6 @@
 import { type Component, truncateToWidth, visibleWidth } from "moon-tui";
 import type { EngineSession } from "../../../core/engine-session.js";
 import type { ReadonlyFooterDataProvider } from "../../../core/footer-data-provider.js";
-import { QuotaManager } from "../../../core/quota-manager.js";
 import { theme } from "../theme/theme.js";
 
 /**
@@ -221,16 +220,6 @@ export class FooterComponent implements Component {
 
 		// 9. Cost (Always visible)
 		parts.push(theme.fg(costColor, costText));
-
-		// 9b. Global Quota Remaining
-		const quotaStats = QuotaManager.getInstance().getStats();
-		const quotaColor = quotaStats.percent > 20 ? "success" : "error";
-		const remainingVal = Math.max(0, quotaStats.limit - quotaStats.spent);
-		parts.push(
-			theme.fg("muted", "quota:") +
-				theme.fg(quotaColor, `${quotaStats.percent.toFixed(0)}%`) +
-				theme.fg("dim", ` ($${remainingVal.toFixed(2)})`),
-		);
 
 		// 10. Memory Usage
 		parts.push(theme.fg("dim", `mem:${memText}`));
