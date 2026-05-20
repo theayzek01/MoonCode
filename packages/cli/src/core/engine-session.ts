@@ -89,6 +89,7 @@ import { pickFallbackModel } from "./model-orchestrator.js";
 import type { ModelRegistry } from "./model-registry.js";
 import { OmegaKernel } from "./omega-kernel.js";
 import { expandPromptTemplate, type PromptTemplate } from "./prompt-templates.js";
+import { QuotaManager } from "./quota-manager.js";
 import type { ResourceExtensionPaths, ResourceLoader } from "./resource-loader.js";
 import { TaskPlanner } from "./robotics/task-planner.js";
 import type { BranchSummaryEntry, CompactionEntry, SessionManager } from "./session-manager.js";
@@ -581,6 +582,12 @@ export class EngineSession {
 
 		// Handle session persistence
 		if (event.type === "message_end") {
+			if (event.message.role === "assistant") {
+				const cost = event.message.usage?.cost?.total;
+				if (typeof cost === "number" && cost > 0) {
+					QuotaManager.getInstance().addCost(cost);
+				}
+			}
 			// Check if this is a custom message from extensions
 			if (event.message.role === "custom") {
 				// Persist as CustomMessageEntry

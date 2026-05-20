@@ -51,6 +51,7 @@ export const BUILTIN_SLASH_COMMANDS: ReadonlyArray<BuiltinSlashCommand> = [
 	{ name: "diff", description: "Show git changes" },
 	{ name: "index", description: "Index codebase for semantic search" },
 	{ name: "browser", description: "Chrome extension status and control" },
+	{ name: "interface", description: "Open MoonCode Special OpenClaw OS Interface" },
 	{ name: "mcp", description: "List connected MCP servers" },
 	{ name: "swarm", description: "Trigger Multi-Agent Swarm" },
 	{ name: "fix", description: "Run Autonomous Auto-Healer" },

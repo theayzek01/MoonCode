@@ -210,11 +210,13 @@ export function needsClaudeThinkingBetaHeader(model: Model<"google-antigravity">
 }
 
 function isGemini3ProModel(modelId: string): boolean {
-	return /gemini-3(?:\.1)?-pro/.test(modelId.toLowerCase());
+	const id = modelId.toLowerCase();
+	return /gemini-3(?:\.1)?-pro/.test(id) || id.includes("-high");
 }
 
 function isGemini3FlashModel(modelId: string): boolean {
-	return /gemini-3(?:\.\d+)?-flash/.test(modelId.toLowerCase());
+	const id = modelId.toLowerCase();
+	return /gemini-3(?:\.\d+)?-flash/.test(id) && !id.includes("-high");
 }
 
 function isGemini3Model(modelId: string): boolean {

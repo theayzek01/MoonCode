@@ -20,6 +20,10 @@ export {
 	createBrowserTabsToolDefinition,
 } from "./browser.js";
 export {
+	createCodebaseIndexTool,
+	createCodebaseIndexToolDefinition,
+} from "./codebase_index.js";
+export {
 	createDiscordGetChannelsTool,
 	createDiscordListGuildsTool,
 	createDiscordManageChannelTool,
@@ -100,6 +104,7 @@ import {
 	createBrowserTabsTool,
 	createBrowserTabsToolDefinition,
 } from "./browser.js";
+import { createCodebaseIndexTool, createCodebaseIndexToolDefinition } from "./codebase_index.js";
 import {
 	createDiscordGetChannelsTool,
 	createDiscordListGuildsTool,
@@ -128,6 +133,7 @@ export type ToolName =
 	| "find"
 	| "ls"
 	| "semantic_search"
+	| "codebase_index"
 	| "git_ship"
 	| "browser_tabs"
 	| "browser_page"
@@ -144,6 +150,7 @@ export const allToolNames: Set<ToolName> = new Set([
 	"find",
 	"ls",
 	"semantic_search",
+	"codebase_index",
 	"git_ship",
 	"browser_tabs",
 	"browser_page",
@@ -182,6 +189,8 @@ export function createToolDefinition(toolName: ToolName, cwd: string, options?: 
 			return createLsToolDefinition(cwd, options?.ls);
 		case "semantic_search":
 			return createSemanticSearchToolDefinition(cwd);
+		case "codebase_index":
+			return createCodebaseIndexToolDefinition(cwd);
 		case "git_ship":
 			return createGitShipToolDefinition(cwd);
 		case "browser_tabs":
@@ -216,6 +225,8 @@ export function createTool(toolName: ToolName, cwd: string, options?: ToolsOptio
 			return createLsTool(cwd, options?.ls);
 		case "semantic_search":
 			return createSemanticSearchTool(cwd);
+		case "codebase_index":
+			return createCodebaseIndexTool(cwd);
 		case "git_ship":
 			return createGitShipTool(cwd);
 		case "browser_tabs":
@@ -241,6 +252,7 @@ export function createCodingToolDefinitions(cwd: string, options?: ToolsOptions)
 		createBashToolDefinition(cwd, options?.bash),
 		createEditToolDefinition(cwd, options?.edit),
 		createWriteToolDefinition(cwd, options?.write),
+		createCodebaseIndexToolDefinition(cwd),
 	];
 }
 
@@ -264,6 +276,7 @@ export function createAllToolDefinitions(cwd: string, options?: ToolsOptions): R
 		find: createFindToolDefinition(cwd, options?.find),
 		ls: createLsToolDefinition(cwd, options?.ls),
 		semantic_search: createSemanticSearchToolDefinition(cwd),
+		codebase_index: createCodebaseIndexToolDefinition(cwd),
 		git_ship: createGitShipToolDefinition(cwd),
 		browser_tabs: createBrowserTabsToolDefinition(),
 		browser_page: createBrowserPageToolDefinition(),

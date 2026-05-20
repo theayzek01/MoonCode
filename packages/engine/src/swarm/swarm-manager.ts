@@ -40,12 +40,14 @@ export class SwarmManager extends EventEmitter {
 	private agents: Map<string, SwarmAgent> = new Map();
 	private isBusy = false;
 	private readonly streamFn: StreamFunction<Api, SimpleStreamOptions>;
+	private defaultModel: Model<Api>;
 
 	constructor(
 		_defaultModel: Model<Api>,
 		private options: SwarmManagerOptions = {},
 	) {
 		super();
+		this.defaultModel = _defaultModel;
 		this.streamFn = options.streamFn ?? streamSimple;
 		this.initializeSwarm();
 	}
@@ -70,6 +72,19 @@ export class SwarmManager extends EventEmitter {
 	private routeToModel(role: SwarmAgent["role"]): Model<Api> {
 		const highIntelligenceRoles = ["coder", "architect"];
 		const _bulkProcessingRoles = ["reader", "searcher", "reviewer", "growth_hacker"];
+
+		const provider = this.defaultModel.provider;
+
+		if (provider === "google-antigravity") {
+			if (highIntelligenceRoles.includes(role)) {
+				return { provider: "google-antigravity", name: "gemini-3.5-flash-high" } as Model<Api>;
+			}
+			return { provider: "google-antigravity", name: "gemini-3.5-flash-low" } as Model<Api>;
+		}
+
+		if (provider === "google-vertex" || provider === "vercel-ai-gateway" || provider === "openrouter") {
+			return this.defaultModel;
+		}
 
 		if (highIntelligenceRoles.includes(role)) {
 			// NASA Grade: Use high-reasoning models (Claude 3.5 Sonnet / GPT-4o)

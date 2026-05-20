@@ -1,10 +1,11 @@
 {
   "name": "MoonCode-web-ui",
-  "version": "2026.10.0",
+  "version": "2026.11.0",
   "type": "module",
   "private": true,
   "main": "src/server.ts",
   "scripts": {
+    "clean": "echo 'nothing to clean'",
     "dev": "tsx src/server.ts",
     "start": "tsx src/server.ts",
     "build": "tsc -p tsconfig.json --noEmit"

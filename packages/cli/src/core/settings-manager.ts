@@ -798,9 +798,15 @@ export class SettingsManager {
 		return this.getCompactionProfile() === "aggressive" ? 12000 : 20000;
 	}
 
-	getCompactionSettings(): { enabled: boolean; reserveTokens: number; keepRecentTokens: number } {
+	getCompactionSettings(): {
+		enabled: boolean;
+		profile: "aggressive" | "balanced" | "off";
+		reserveTokens: number;
+		keepRecentTokens: number;
+	} {
 		return {
 			enabled: this.getCompactionEnabled(),
+			profile: this.getCompactionProfile(),
 			reserveTokens: this.getCompactionReserveTokens(),
 			keepRecentTokens: this.getCompactionKeepRecentTokens(),
 		};

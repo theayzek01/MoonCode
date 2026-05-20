@@ -224,11 +224,22 @@ export function shouldCompact(contextTokens: number, contextWindow: number, sett
 	// Some provider definitions do not expose a context window. Use a conservative
 	// default instead of either never compacting or compacting every turn.
 	const effectiveWindow = Number.isFinite(contextWindow) && contextWindow > 0 ? contextWindow : 128_000;
-	const reserve = Math.max(4_096, Math.min(settings.reserveTokens, Math.floor(effectiveWindow * 0.5)));
+	const reserve = Math.max(4_096, Math.min(settings.reserveTokens ?? 16384, Math.floor(effectiveWindow * 0.5)));
 
-	// Trigger at the safer of: reserved-output boundary or ~78% of window.
-	// This mirrors modern agent CLIs: compact before quality collapses, not after.
-	const boundary = Math.min(effectiveWindow - reserve, Math.floor(effectiveWindow * 0.78));
+	// If we want nearly 0 cost, we should aggressively compact when context reaches a ceiling.
+	// We set a hard ceiling depending on the compaction profile:
+	// - aggressive: compact if context reaches 25,000 tokens (highly optimized for low cost & fast speed)
+	// - balanced: compact if context reaches 50,000 tokens
+	// - default/conservative: wait until window limit
+	let profileCeiling = Infinity;
+	if (settings.profile === "aggressive") {
+		profileCeiling = 25_000;
+	} else if (settings.profile === "balanced" || !settings.profile) {
+		profileCeiling = 50_000;
+	}
+
+	// Trigger at the safer of: reserved-output boundary or profile ceiling.
+	const boundary = Math.min(effectiveWindow - reserve, Math.min(profileCeiling, Math.floor(effectiveWindow * 0.78)));
 	return contextTokens >= boundary;
 }
 

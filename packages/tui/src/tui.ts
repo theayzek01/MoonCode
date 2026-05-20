@@ -201,6 +201,9 @@ export interface ContainerStyle {
 export class Container implements Component {
 	children: Component[] = [];
 	style: ContainerStyle = { flexDirection: "column" };
+	cachedLines?: string[];
+	cachedWidth?: number;
+	enableCaching = false;
 
 	setStyle(style: ContainerStyle): void {
 		this.style = { ...this.style, ...style };
@@ -209,26 +212,38 @@ export class Container implements Component {
 	addChild(component: Component): void {
 		if (this.children.includes(component)) return;
 		this.children.push(component);
+		this.cachedLines = undefined;
+		this.cachedWidth = undefined;
 	}
 
 	removeChild(component: Component): void {
 		const index = this.children.indexOf(component);
 		if (index !== -1) {
 			this.children.splice(index, 1);
+			this.cachedLines = undefined;
+			this.cachedWidth = undefined;
 		}
 	}
 
 	clear(): void {
 		this.children = [];
+		this.cachedLines = undefined;
+		this.cachedWidth = undefined;
 	}
 
 	invalidate(): void {
+		this.cachedLines = undefined;
+		this.cachedWidth = undefined;
 		for (const child of this.children) {
 			child.invalidate?.();
 		}
 	}
 
 	render(width: number): string[] {
+		if (this.enableCaching && this.cachedLines && this.cachedWidth === width) {
+			return this.cachedLines;
+		}
+
 		// Handle width override
 		let targetWidth = width;
 		if (typeof this.style.width === "number") {
@@ -291,6 +306,11 @@ export class Container implements Component {
 				});
 				lines.push(combinedLine);
 			}
+
+			if (this.enableCaching) {
+				this.cachedWidth = width;
+				this.cachedLines = lines;
+			}
 			return lines;
 		}
 
@@ -302,6 +322,11 @@ export class Container implements Component {
 			for (const line of childLines) {
 				lines.push(line);
 			}
+		}
+
+		if (this.enableCaching) {
+			this.cachedWidth = width;
+			this.cachedLines = lines;
 		}
 		return lines;
 	}

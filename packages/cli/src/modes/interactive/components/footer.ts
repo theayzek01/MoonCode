@@ -2,6 +2,7 @@
 import { type Component, truncateToWidth, visibleWidth } from "moon-tui";
 import type { EngineSession } from "../../../core/engine-session.js";
 import type { ReadonlyFooterDataProvider } from "../../../core/footer-data-provider.js";
+import { QuotaManager } from "../../../core/quota-manager.js";
 import { theme } from "../theme/theme.js";
 
 /**
@@ -86,28 +87,28 @@ export class FooterComponent implements Component {
 		if (activeToolNames.includes("edit") || activeToolNames.includes("write")) hasEdits = true;
 		if (activeToolNames.includes("bash")) hasBash = true;
 
-		let effort = "S0";
+		let effort = "FAST";
 		if (hasErrors) {
-			effort = "S4";
+			effort = "REPAIR";
 		} else if (hasBash) {
-			effort = "S3";
+			effort = "DEEP";
 		} else if (hasEdits) {
-			effort = "S2";
+			effort = "BALANCED";
 		} else if (entries.length > 2) {
-			effort = "S1";
+			effort = "FAST";
 		}
 
-		let phaseLabel = "done";
-		let phaseIcon = "✓";
+		let phaseLabel = "DONE";
+		let phaseIcon = "[OK]";
 		let phaseColor = "success";
 
 		if (entries.length === 0) {
 			phaseLabel = "IDLE";
-			phaseIcon = "◽";
+			phaseIcon = "[-] ";
 			phaseColor = "muted";
 		} else if (this.session.isStreaming) {
-			phaseLabel = "PLANNING";
-			phaseIcon = "⬡";
+			phaseLabel = "PLAN";
+			phaseIcon = "[?] ";
 			phaseColor = "accent";
 		} else if (activeToolNames.length > 0) {
 			const tool = activeToolNames[0];
@@ -119,8 +120,8 @@ export class FooterComponent implements Component {
 				tool === "view_file" ||
 				tool === "list_dir"
 			) {
-				phaseLabel = "READING";
-				phaseIcon = "◈";
+				phaseLabel = "READ";
+				phaseIcon = "[R] ";
 				phaseColor = "muted";
 			} else if (
 				tool === "edit" ||
@@ -129,35 +130,35 @@ export class FooterComponent implements Component {
 				tool === "multi_replace_file_content" ||
 				tool === "write_to_file"
 			) {
-				phaseLabel = "EDITING";
-				phaseIcon = "⬥";
+				phaseLabel = "EDIT";
+				phaseIcon = "[E] ";
 				phaseColor = "accent";
 			} else if (tool === "bash" || tool === "run_command") {
 				if (hasErrors) {
-					phaseLabel = "REPAIRING";
-					phaseIcon = "⚒";
+					phaseLabel = "REPAIR";
+					phaseIcon = "[!] ";
 					phaseColor = "warning";
 				} else {
-					phaseLabel = "VERIFYING";
-					phaseIcon = "⚙";
+					phaseLabel = "VERIFY";
+					phaseIcon = "[V] ";
 					phaseColor = "success";
 				}
 			} else {
-				phaseLabel = "RUNNING";
-				phaseIcon = "▲";
+				phaseLabel = "RUN";
+				phaseIcon = "[*] ";
 				phaseColor = "warning";
 			}
 		} else if (this.session.isCompacting) {
-			phaseLabel = "CLASSIFYING";
-			phaseIcon = "☷";
+			phaseLabel = "COMPACT";
+			phaseIcon = "[C] ";
 			phaseColor = "muted";
 		} else if (hasErrors) {
 			phaseLabel = "BLOCKED";
-			phaseIcon = "✖";
+			phaseIcon = "[X] ";
 			phaseColor = "error";
 		} else {
 			phaseLabel = "DONE";
-			phaseIcon = "✓";
+			phaseIcon = "[OK]";
 			phaseColor = "success";
 		}
 
@@ -179,50 +180,60 @@ export class FooterComponent implements Component {
 
 		// Format cost nicely (always display it)
 		const costColor = totalCost > 0 ? "success" : "dim";
-		const costText = `◆ COST $${totalCost.toFixed(2)}`;
+		const costText = `spend:$${totalCost.toFixed(3)}`;
 
 		// Build parts with clean hierarchy
 		const parts: string[] = [];
 
 		// 1. Web Connection Indicator (WEB ON / WEB OFF)
 		const hasBrowser = this.session.getBrowserBridgeStatus().clients > 0;
-		const modeText = hasBrowser ? "● WEB" : "○ WEB";
+		const modeText = hasBrowser ? "WEB:ON" : "WEB:OFF";
 		const modeColor = hasBrowser ? "success" : "error";
 		parts.push(theme.bold(theme.fg(modeColor, modeText)));
 
 		// 2. Effort Level
-		parts.push(theme.fg("accent", `✦ ${effort}`));
+		parts.push(theme.fg("accent", `[${effort}]`));
 
 		// 3. Current Phase
-		parts.push(theme.fg(phaseColor as ThemeColor, `${phaseIcon} ${phaseLabel}`));
+		parts.push(theme.fg(phaseColor as ThemeColor, `${phaseIcon}${phaseLabel}`));
 
 		// 4. Git Branch (if available)
 		if (branch) {
-			parts.push(theme.fg("muted", `⎇ ${truncateToWidth(branch, 12, "…")}`));
+			parts.push(theme.fg("muted", `git:${truncateToWidth(branch, 12, "...")}`));
 		}
 
 		// 5. Model (Rendered fully, no truncation)
-		parts.push(theme.fg("accent", "⚙ ") + theme.fg("text", modelName));
+		parts.push(theme.fg("accent", "model:") + theme.fg("text", modelName));
 
 		// 6. Thinking state
 		if (thinkingText) {
-			parts.push(theme.fg(thinkingColor, `⚛ ${thinkingText.toUpperCase()}`));
+			parts.push(theme.fg(thinkingColor, `[${thinkingText.toUpperCase()}]`));
 		}
 
 		// 7. Context Usage
-		const ctxText = this.autoCompactEnabled ? `${contextPercent} auto` : contextPercent;
-		parts.push(theme.fg("muted", "☷ CTX ") + theme.fg("text", ctxText));
+		const ctxText = this.autoCompactEnabled ? `${contextPercent} (auto)` : contextPercent;
+		parts.push(theme.fg("muted", "ctx:") + theme.fg("text", ctxText));
 
 		// 8. Running tasks count
 		if (activeToolNames.length > 0) {
-			parts.push(theme.fg("warning", `⚙ RUN ×${activeToolNames.length}`));
+			parts.push(theme.fg("warning", `[RUNNING:${activeToolNames.length}]`));
 		}
 
 		// 9. Cost (Always visible)
 		parts.push(theme.fg(costColor, costText));
 
+		// 9b. Global Quota Remaining
+		const quotaStats = QuotaManager.getInstance().getStats();
+		const quotaColor = quotaStats.percent > 20 ? "success" : "error";
+		const remainingVal = Math.max(0, quotaStats.limit - quotaStats.spent);
+		parts.push(
+			theme.fg("muted", "quota:") +
+				theme.fg(quotaColor, `${quotaStats.percent.toFixed(0)}%`) +
+				theme.fg("dim", ` ($${remainingVal.toFixed(2)})`),
+		);
+
 		// 10. Memory Usage
-		parts.push(theme.fg("dim", `⛁ ${memText}`));
+		parts.push(theme.fg("dim", `mem:${memText}`));
 
 		// Join everything with modern premium vertical separator
 		const separator = theme.fg("dim", " │ ");

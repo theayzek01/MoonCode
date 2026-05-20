@@ -35,7 +35,7 @@ const leadingNonPrintingRegex = /^[\p{Default_Ignorable_Code_Point}\p{Control}\p
 const rgiEmojiRegex = /^\p{RGI_Emoji}$/v;
 
 // Cache for non-ASCII strings
-const WIDTH_CACHE_SIZE = 512;
+const WIDTH_CACHE_SIZE = 50000;
 const widthCache = new Map<string, number>();
 
 function isPrintableAscii(str: string): boolean {
@@ -110,17 +110,34 @@ function truncateFragmentToWidth(text: string, maxWidth: number): { text: string
 			end++;
 		}
 
-		for (const { segment } of segmenter.segment(text.slice(i, end))) {
-			const w = graphemeWidth(segment);
-			if (width + w > maxWidth) {
-				return { text: result, width };
+		const portion = text.slice(i, end);
+		if (isPrintableAscii(portion)) {
+			for (let idx = 0; idx < portion.length; idx++) {
+				const char = portion[idx];
+				const w = 1;
+				if (width + w > maxWidth) {
+					return { text: result, width };
+				}
+				if (pendingAnsi) {
+					result += pendingAnsi;
+					pendingAnsi = "";
+				}
+				result += char;
+				width += w;
 			}
-			if (pendingAnsi) {
-				result += pendingAnsi;
-				pendingAnsi = "";
+		} else {
+			for (const { segment } of segmenter.segment(portion)) {
+				const w = graphemeWidth(segment);
+				if (width + w > maxWidth) {
+					return { text: result, width };
+				}
+				if (pendingAnsi) {
+					result += pendingAnsi;
+					pendingAnsi = "";
+				}
+				result += segment;
+				width += w;
 			}
-			result += segment;
-			width += w;
 		}
 		i = end;
 	}
@@ -240,8 +257,12 @@ export function visibleWidth(str: string): number {
 
 	// Calculate width
 	let width = 0;
-	for (const { segment } of segmenter.segment(clean)) {
-		width += graphemeWidth(segment);
+	if (isPrintableAscii(clean)) {
+		width = clean.length;
+	} else {
+		for (const { segment } of segmenter.segment(clean)) {
+			width += graphemeWidth(segment);
+		}
 	}
 
 	// Cache result
@@ -752,8 +773,14 @@ function breakLongWord(word: string, width: number, tracker: AnsiCodeTracker): s
 			}
 			// Segment this non-ANSI portion into graphemes
 			const textPortion = word.slice(i, end);
-			for (const seg of segmenter.segment(textPortion)) {
-				segments.push({ type: "grapheme", value: seg.segment });
+			if (isPrintableAscii(textPortion)) {
+				for (let idx = 0; idx < textPortion.length; idx++) {
+					segments.push({ type: "grapheme", value: textPortion[idx] });
+				}
+			} else {
+				for (const seg of segmenter.segment(textPortion)) {
+					segments.push({ type: "grapheme", value: seg.segment });
+				}
 			}
 			i = end;
 		}
@@ -929,24 +956,47 @@ export function truncateToWidth(
 				end++;
 			}
 
-			for (const { segment } of segmenter.segment(text.slice(i, end))) {
-				const width = graphemeWidth(segment);
-				if (keepContiguousPrefix && keptWidth + width <= targetWidth) {
-					if (pendingAnsi) {
-						result += pendingAnsi;
+			const portion = text.slice(i, end);
+			if (isPrintableAscii(portion)) {
+				for (let idx = 0; idx < portion.length; idx++) {
+					const char = portion[idx];
+					const width = 1;
+					if (keepContiguousPrefix && keptWidth + width <= targetWidth) {
+						if (pendingAnsi) {
+							result += pendingAnsi;
+							pendingAnsi = "";
+						}
+						result += char;
+						keptWidth += width;
+					} else {
+						keepContiguousPrefix = false;
 						pendingAnsi = "";
 					}
-					result += segment;
-					keptWidth += width;
-				} else {
-					keepContiguousPrefix = false;
-					pendingAnsi = "";
+					visibleSoFar += width;
+					if (visibleSoFar > maxWidth) {
+						overflowed = true;
+						break;
+					}
 				}
-
-				visibleSoFar += width;
-				if (visibleSoFar > maxWidth) {
-					overflowed = true;
-					break;
+			} else {
+				for (const { segment } of segmenter.segment(portion)) {
+					const width = graphemeWidth(segment);
+					if (keepContiguousPrefix && keptWidth + width <= targetWidth) {
+						if (pendingAnsi) {
+							result += pendingAnsi;
+							pendingAnsi = "";
+						}
+						result += segment;
+						keptWidth += width;
+					} else {
+						keepContiguousPrefix = false;
+						pendingAnsi = "";
+					}
+					visibleSoFar += width;
+					if (visibleSoFar > maxWidth) {
+						overflowed = true;
+						break;
+					}
 				}
 			}
 			if (overflowed) {
@@ -999,20 +1049,40 @@ export function sliceWithWidth(
 		let textEnd = i;
 		while (textEnd < line.length && !extractAnsiCode(line, textEnd)) textEnd++;
 
-		for (const { segment } of segmenter.segment(line.slice(i, textEnd))) {
-			const w = graphemeWidth(segment);
-			const inRange = currentCol >= startCol && currentCol < endCol;
-			const fits = !strict || currentCol + w <= endCol;
-			if (inRange && fits) {
-				if (pendingAnsi) {
-					result += pendingAnsi;
-					pendingAnsi = "";
+		const portion = line.slice(i, textEnd);
+		if (isPrintableAscii(portion)) {
+			for (let idx = 0; idx < portion.length; idx++) {
+				const char = portion[idx];
+				const w = 1;
+				const inRange = currentCol >= startCol && currentCol < endCol;
+				const fits = !strict || currentCol + w <= endCol;
+				if (inRange && fits) {
+					if (pendingAnsi) {
+						result += pendingAnsi;
+						pendingAnsi = "";
+					}
+					result += char;
+					resultWidth += w;
 				}
-				result += segment;
-				resultWidth += w;
+				currentCol += w;
+				if (currentCol >= endCol) break;
 			}
-			currentCol += w;
-			if (currentCol >= endCol) break;
+		} else {
+			for (const { segment } of segmenter.segment(portion)) {
+				const w = graphemeWidth(segment);
+				const inRange = currentCol >= startCol && currentCol < endCol;
+				const fits = !strict || currentCol + w <= endCol;
+				if (inRange && fits) {
+					if (pendingAnsi) {
+						result += pendingAnsi;
+						pendingAnsi = "";
+					}
+					result += segment;
+					resultWidth += w;
+				}
+				currentCol += w;
+				if (currentCol >= endCol) break;
+			}
 		}
 		i = textEnd;
 		if (currentCol >= endCol) break;
@@ -1071,32 +1141,64 @@ export function extractSegments(
 		let textEnd = i;
 		while (textEnd < line.length && !extractAnsiCode(line, textEnd)) textEnd++;
 
-		for (const { segment } of segmenter.segment(line.slice(i, textEnd))) {
-			const w = graphemeWidth(segment);
+		const portion = line.slice(i, textEnd);
+		if (isPrintableAscii(portion)) {
+			for (let idx = 0; idx < portion.length; idx++) {
+				const char = portion[idx];
+				const w = 1;
 
-			if (currentCol < beforeEnd) {
-				if (pendingAnsiBefore) {
-					before += pendingAnsiBefore;
-					pendingAnsiBefore = "";
-				}
-				before += segment;
-				beforeWidth += w;
-			} else if (currentCol >= afterStart && currentCol < afterEnd) {
-				const fits = !strictAfter || currentCol + w <= afterEnd;
-				if (fits) {
-					// On first "after" grapheme, prepend inherited styling from before overlay
-					if (!afterStarted) {
-						after += pooledStyleTracker.getActiveCodes();
-						afterStarted = true;
+				if (currentCol < beforeEnd) {
+					if (pendingAnsiBefore) {
+						before += pendingAnsiBefore;
+						pendingAnsiBefore = "";
 					}
-					after += segment;
-					afterWidth += w;
+					before += char;
+					beforeWidth += w;
+				} else if (currentCol >= afterStart && currentCol < afterEnd) {
+					const fits = !strictAfter || currentCol + w <= afterEnd;
+					if (fits) {
+						// On first "after" grapheme, prepend inherited styling from before overlay
+						if (!afterStarted) {
+							after += pooledStyleTracker.getActiveCodes();
+							afterStarted = true;
+						}
+						after += char;
+						afterWidth += w;
+					}
 				}
-			}
 
-			currentCol += w;
-			// Early exit: done with "before" only, or done with both segments
-			if (afterLen <= 0 ? currentCol >= beforeEnd : currentCol >= afterEnd) break;
+				currentCol += w;
+				// Early exit: done with "before" only, or done with both segments
+				if (afterLen <= 0 ? currentCol >= beforeEnd : currentCol >= afterEnd) break;
+			}
+		} else {
+			for (const { segment } of segmenter.segment(portion)) {
+				const w = graphemeWidth(segment);
+
+				if (currentCol < beforeEnd) {
+					if (pendingAnsiBefore) {
+						before += pendingAnsiBefore;
+						pendingAnsiBefore = "";
+					}
+					before += segment;
+					beforeWidth += w;
+				} else if (currentCol >= afterStart && currentCol < afterEnd) {
+					const fits = !strictAfter || currentCol + w <= afterEnd;
+					if (fits) {
+						// On first "after" grapheme, prepend inherited styling from before overlay
+						if (!afterStarted) {
+							after += pooledStyleTracker.getActiveCodes();
+							afterStarted = true;
+						}
+						after += segment;
+						afterWidth += w;
+					}
+				}
+
+				currentCol += w;
+				// Early exit: done with "before" only, or done with both segments
+				if (afterLen <= 0 ? currentCol >= beforeEnd : currentCol >= afterEnd) break;
+			}
 		}
 		i = textEnd;
 		if (afterLen <= 0 ? currentCol >= beforeEnd : currentCol >= afterEnd) break;
