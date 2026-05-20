@@ -21,7 +21,7 @@ const INDEX_HTML = `<!doctype html>
       <div class="logo">
         <div class="logo-circle"></div>
         <b>MoonCode</b>
-        <span class="version-tag">v2.1 Premium</span>
+        <span class="version-tag">2026-Pre16</span>
       </div>
       <nav class="nav-links">
         <button id="tab-sessions" class="nav-btn active">Oturum Geçmişi</button>
@@ -116,11 +116,11 @@ const INDEX_HTML = `<!doctype html>
         </main>
 
         <section class="designer-export card">
-          <h3>Tema Dışa Aktarım Kodu</h3>
-          <p class="hint">Apache-2.0 Lisanslı CSS Değişkenleri</p>
+          <h3>MoonCode Yapay Zeka İstemi (AI Prompt)</h3>
+          <p class="hint">Bu istemi kopyalayıp MoonCode'a ileterek seçtiğiniz tasarımı tüm projenize uygulamasını isteyebilirsiniz.</p>
           <div class="code-container">
-            <button class="copy-btn" id="copy-theme-btn">CSS'i Kopyala</button>
-            <pre id="theme-code"></pre>
+            <button class="copy-btn" id="copy-theme-btn">İstemi Kopyala</button>
+            <textarea id="prompt-code" readonly style="width: 100%; height: 280px; background: #000000; color: #10b981; border: 1px solid var(--line); border-radius: 8px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; resize: none; outline: none;"></textarea>
           </div>
         </section>
       </div>
@@ -326,6 +326,17 @@ body {
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 16px;
+}
+.msg.user-msg {
+  border-left: 3px solid var(--accent);
+}
+.msg.assistant-msg {
+  border-left: 3px solid #3b82f6;
+}
+.msg.system-msg {
+  opacity: 0.75;
+  border-left: 3px solid var(--muted);
+  background: transparent;
 }
 .role {
   font-family: 'Outfit', sans-serif;
@@ -764,7 +775,31 @@ async function loadSession(id){
   document.querySelectorAll('.session').forEach(e=>e.classList.toggle('active',e.dataset.id===id));
   const data=await fetch('/api/session/'+encodeURIComponent(id)).then(r=>r.json());
   $('#stats').textContent=JSON.stringify(data.stats,null,2);
-  $('#chat').innerHTML=data.entries.filter(e=>e.role||e.type).map(e=>\`<div class="msg"><div class="role">\${e.role||e.type}</div><pre>\${escapeHtml(textOf(e.content||e.message||e.text||e))}</pre></div>\`).join('');
+  $('#chat').innerHTML=data.entries.map(e=>{
+    if (e.type === 'message' && e.message) {
+      const role = e.message.role;
+      const contentStr = textOf(e.message.content || e.message.text || e.message);
+      if (role === 'tool') {
+        return \`<div class="msg system-msg">
+          <div class="role">Araç Sonucu</div>
+          <pre>\${escapeHtml(contentStr)}</pre>
+        </div>\`;
+      }
+      const roleClass = role === 'user' ? 'user-msg' : 'assistant-msg';
+      const roleName = role === 'user' ? 'Kullanıcı' : 'MoonCode';
+      return \`<div class="msg \${roleClass}">
+        <div class="role">\${roleName}</div>
+        <pre>\${escapeHtml(contentStr)}</pre>
+      </div>\`;
+    }
+    if (e.type === 'toolCall') {
+      return \`<div class="msg system-msg">
+        <div class="role">Araç Çalıştırıldı: \${e.toolName}</div>
+        <pre>\${escapeHtml(JSON.stringify(e.input, null, 2))}</pre>
+      </div>\`;
+    }
+    return '';
+  }).filter(Boolean).join('');
 }
 
 function escapeHtml(s){
@@ -787,6 +822,74 @@ function getVal(css, name) {
   return parseVariables(css)[name] || '#fff';
 }
 
+function generatePrompt(preset, h, s, l, code) {
+  const bg = getVal(code, '--p-bg');
+  const panel = getVal(code, '--p-panel');
+  const primary = getVal(code, '--p-primary');
+  const secBg = getVal(code, '--p-sec-bg');
+  const border = getVal(code, '--p-line');
+  const radius = getVal(code, '--p-radius') || '8px';
+  const fg = getVal(code, '--p-fg') || '#ffffff';
+  const muted = getVal(code, '--p-muted') || '#a0a0a0';
+
+  return "======================================================================\n" +
+"MOONCODE DETAYLI TEMA UYGULAMA VE REFAKTÖR YÖNERGESİ (PREMIUM TASARIM SİSTEMİ)\n" +
+"======================================================================\n\n" +
+"Hey MoonCode! Aşağıdaki renk kodlarını, HSL matrisini ve gelişmiş tasarım kurallarını baz alarak projemizin hem TUI (Terminal User Interface) hem de Web UI (Dashboard) arayüzlerini baştan aşağı yenilemeni istiyorum.\n\n" +
+"Seçilen Stil Şablonu: " + preset.toUpperCase() + "\n" +
+"HSL Ayarları: Hue: " + h + "°, Saturation: " + s + "%, Lightness: " + l + "%\n\n" +
+"[BİRİNCİL RENK PALETİ VE DEĞİŞKENLER]\n" +
+"- Arka Plan (Background): " + bg + "\n" +
+"- Panel Rengi (Card/Surface): " + panel + "\n" +
+"- Birincil Vurgu Rengi (Primary Accent): " + primary + "\n" +
+"- İkincil Panel (Secondary BG): " + secBg + "\n" +
+"- Kenarlık Çizgisi (Border/Divider): " + border + "\n" +
+"- Yazı Rengi (Foreground): " + fg + "\n" +
+"- İkincil Yazı Rengi (Muted Text): " + muted + "\n" +
+"- Köşe Yumuşatma Çapı (Border Radius): " + radius + "\n\n" +
+"----------------------------------------------------------------------\n" +
+"ADIM 1: WEB ARAYÜZÜ (WEB CLIENT & NEXTJS & TAILWIND) ENTEGRASYONU\n" +
+"----------------------------------------------------------------------\n" +
+"1. Global CSS veya Tailwind Config dosyasına yukarıdaki renk değişkenlerini entegre et. CSS değişken tanımları şu şekilde olmalıdır:\n" +
+":root {\n" +
+"  --background: " + bg + ";\n" +
+"  --card: " + panel + ";\n" +
+"  --card-foreground: " + fg + ";\n" +
+"  --popover: " + panel + ";\n" +
+"  --popover-foreground: " + fg + ";\n" +
+"  --primary: " + primary + ";\n" +
+"  --primary-foreground: " + bg + ";\n" +
+"  --secondary: " + secBg + ";\n" +
+"  --secondary-foreground: " + fg + ";\n" +
+"  --muted: " + secBg + ";\n" +
+"  --muted-foreground: " + muted + ";\n" +
+"  --accent: " + primary + ";\n" +
+"  --accent-foreground: " + bg + ";\n" +
+"  --destructive: oklch(63.7% 0.237 25.33);\n" +
+"  --border: " + border + ";\n" +
+"  --input: " + border + ";\n" +
+"  --ring: " + primary + ";\n" +
+"  --radius: " + radius + ";\n" +
+"}\n\n" +
+"2. Arayüz elemanlarını (Sidebar, Chat Window, Settings Panels) bu renklerle eşleştir.\n" +
+"   - Tüm kartlar ve ana sohbet kutusu background-color: var(--card) ve border: 1px solid var(--border) ile sınırlandırılmalıdır.\n" +
+"   - Butonların hover efektlerinde var(--primary) renginin %10 daha koyu veya parlak versiyonunu kullan.\n" +
+"   - Aktif menü öğelerinin soluna veya altına 3px kalınlığında var(--primary) çizgisi ekle.\n\n" +
+"----------------------------------------------------------------------\n" +
+"ADIM 2: TUI (TERMINAL USER INTERFACE) GÖRSEL UYUMU\n" +
+"----------------------------------------------------------------------\n" +
+"1. Terminal ekranındaki monospace çizimlerin ve çerçevelerin renklerini güncelle.\n" +
+"2. TUI Footer (Alt durum çubuğu) bileşeninde (packages/cli/src/modes/interactive/components/footer.ts) yer alan durum etiketlerini ve model isimlerini bu birincil vurgu rengine göre boya.\n" +
+"3. Giriş satırındaki (input editor) cursor ve komut tamamlama (autocomplete) yazı renklerini bu temayla uyumlu hale getir.\n\n" +
+"----------------------------------------------------------------------\n" +
+"ADIM 3: PREMIUM DETAYLAR VE MİKRO-ETKİLEŞİMLER\n" +
+"----------------------------------------------------------------------\n" +
+"- Yazı tiplerini başlıklar için 'Outfit' veya 'Plus Jakarta Sans', kod blokları için ise 'JetBrains Mono' olarak ayarla.\n" +
+"- Kaydırma çubuklarını (Scrollbar) son derece ince (6px) yap. Kaydırma çubuğu thumb rengi var(--border) ile uyumlu olmalı, arka planı ise şeffaf kalmalıdır.\n" +
+"- Tüm input alanlarına focus olunduğunda 2px genişliğinde var(--ring) outline/shadow efekti uygula.\n\n" +
+"Lütfen tüm bu değişiklikleri ilgili dosyalara (CSS, Tailwind dosyaları, CLI TUI dosyaları) en az kod değişikliğiyle ve mevcut çalışma mantığını bozmadan, son derece temiz ve profesyonel bir şekilde uygula. İşlem bittiğinde hangi dosyaları güncellediğini liste halinde bildir.";
+}
+
 function updateTheme() {
   const h = $('#hue').value;
   const s = $('#sat').value;
@@ -798,7 +901,7 @@ function updateTheme() {
 
   const preset = document.querySelector('.preset-btn.active').dataset.preset;
   const code = PRESETS[preset].css(h, s, l);
-  $('#theme-code').textContent = code;
+  $('#prompt-code').value = generatePrompt(preset, h, s, l, code);
 
   $('.swatch.bg').style.background = getVal(code, '--p-bg');
   $('.swatch.panel').style.background = getVal(code, '--p-panel');
@@ -849,7 +952,7 @@ document.querySelectorAll('.preset-btn').forEach(btn => {
 
 // Copy Action
 $('#copy-theme-btn').onclick = () => {
-  navigator.clipboard.writeText($('#theme-code').textContent);
+  navigator.clipboard.writeText($('#prompt-code').value);
   const originalText = $('#copy-theme-btn').textContent;
   $('#copy-theme-btn').textContent = 'Kopyalandı!';
   setTimeout(() => {

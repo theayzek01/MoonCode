@@ -9,7 +9,7 @@
     <img src="https://img.shields.io/badge/VectorDB-FF4500?style=for-the-badge&logo=databricks&logoColor=white" />
     <img src="https://img.shields.io/badge/Autonomous-Engine-blue?style=for-the-badge" />
   </p>
-  <p align="center"><b>Sürüm: 2026-10 (Apex Mode Active)</b></p>
+  <p align="center"><b>Sürüm: 2026-Pre16 (Apex Mode Active)</b></p>
 </div>
 
 <br>
@@ -30,8 +30,8 @@ MoonCode, dünyada ilk kez otonom bir terminal asistanına entegre edilen **3D G
 <br>
 
 <div align="center">
-  <img src="assets/Mooncode update.png" alt="MoonCode v2026-10 TUI Update" width="90%" style="border-radius: 8px; border: 1px solid #1f2030;" />
-  <p><i>v2026-10 Güncellemesi: Yeni Lüks Emojisiz Durum Çubuğu & Ultra-Kararlı Web Entegrasyonu</i></p>
+  <img src="assets/Mooncode update.png" alt="MoonCode v2026-Pre16 TUI Update" width="90%" style="border-radius: 8px; border: 1px solid #1f2030;" />
+  <p><i>v2026-Pre16 Güncellemesi: Yeni Lüks Emojisiz Durum Çubuğu & Ultra-Kararlı Web Entegrasyonu</i></p>
 </div>
 
 <br>
@@ -80,12 +80,65 @@ Sadece birkaç komutla çalışmaya hazır:
 git clone https://github.com/theayzek01/MoonCode.git
 cd MoonCode
 
+# 1. Bağımlılıkları Yükle
 npm install
+
+# 2. Projeyi Derle
 npm run build
-npm install -g ./packages/cli
+
+# 3. Global Olarak Bağla (npm link)
+cd packages/cli
+npm link
 ```
 
 Kurulum tamamlandıktan sonra herhangi bir projede terminale `mooncode` yazmanız yeterlidir.
+
+### ⚠️ PATH Hatası (Command Not Found / gg) Çözümü
+
+Eğer terminale `mooncode` yazınca komut bulunamadı hatası alıyorsanız (PATH tanımlanmamış demektir), işletim sisteminize göre aşağıdaki adımları takip edin:
+
+#### 1. Windows için Çözüm:
+1. `npm config get prefix` komutunu çalıştırın ve çıktıyı kopyalayın (örn: `C:\Users\KullaniciAdi\AppData\Roaming\npm`).
+2. Windows Arama çubuğuna **"Sistem ortam değişkenlerini düzenleyin"** yazın ve açın.
+3. **"Ortam Değişkenleri"** butonuna tıklayın.
+4. **"Kullanıcı değişkenleri"** altında yer alan `Path` değişkenini seçip **Düzenle** deyin.
+5. **Yeni** butonuna basarak kopyaladığınız yolu buraya ekleyin ve **Tamam**'a basıp tüm pencereleri kapatın.
+6. Yeni bir terminal (PowerShell veya CMD) açıp `mooncode` yazarak çalıştırın.
+
+#### 2. macOS / Linux için Çözüm:
+Terminalinizde kullandığınız kabuğa (shell) göre global npm yolunu PATH'e ekleyin:
+
+**Bash kullanıyorsanız (`~/.bashrc` veya `~/.bash_profile`):**
+```bash
+echo 'export PATH="'$(npm config get prefix)'/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+**Zsh kullanıyorsanız (`~/.zshrc` - macOS Varsayılanı):**
+```bash
+echo 'export PATH="'$(npm config get prefix)'/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+### 🔄 MoonCode Güncelleme (Update) Adımları
+
+Eğer projenin yeni bir versiyonu çıktıysa veya güncel kodları çekmek istiyorsanız aşağıdaki komutları sırasıyla çalıştırın:
+
+```bash
+# 1. En güncel kodları GitHub'dan çekin
+git pull origin pr-branch
+
+# 2. Eski build dosyalarını temizleyin ve yeni bağımlılıkları yükleyin
+npm run clean
+npm install
+
+# 3. Projeyi yeniden derleyin
+npm run build
+
+# 4. Global npm link'ini yenileyin
+cd packages/cli
+npm link
+```
 
 <br>
 

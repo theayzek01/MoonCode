@@ -154,35 +154,55 @@ function isExpandable(obj: unknown): obj is Expandable {
 }
 
 class VirtualizedChatContainer extends Container {
-	private readonly maxLines = Math.max(
-		0,
-		Math.min(Number(process.env.MOON_TUI_CHAT_MAX_LINES ?? process.env.PI_TUI_CHAT_MAX_LINES ?? 900) || 900, 5000),
-	);
+	private cachedHeight?: number;
 
 	override render(width: number): string[] {
-		if (this.maxLines === 0 || this.children.length === 0) return super.render(width);
-		const lines: string[] = [];
-		let hiddenChildren = 0;
-		for (let i = this.children.length - 1; i >= 0; i--) {
-			const childLines = this.children[i].render(width);
-			if (lines.length === 0 && childLines.length > this.maxLines) {
-				lines.unshift(...childLines.slice(-this.maxLines));
-				hiddenChildren = i;
-				break;
-			}
-			if (lines.length + childLines.length > this.maxLines) {
-				hiddenChildren = i + 1;
-				break;
-			}
-			lines.unshift(...childLines);
+		const terminalHeight = process.stdout.rows || 40;
+		// Keep at most 2.5x the terminal height of chat history rendered in TUI to remain extremely fast.
+		// Never let it drop below 35 lines or exceed 250 lines to keep performance ultra-high.
+		const dynamicMaxLines = Math.max(35, Math.min(terminalHeight * 2.5, 250));
+
+		if (
+			this.enableCaching &&
+			this.cachedLines &&
+			this.cachedWidth === width &&
+			this.cachedHeight === terminalHeight
+		) {
+			return this.cachedLines;
 		}
-		if (hiddenChildren > 0) {
-			lines.unshift(
-				theme.fg(
-					"dim",
-					`… ${hiddenChildren} older chat item(s) hidden for terminal speed. Full session context is still preserved.`,
-				),
-			);
+
+		let lines: string[] = [];
+		if (this.children.length === 0) {
+			lines = super.render(width);
+		} else {
+			let hiddenChildren = 0;
+			for (let i = this.children.length - 1; i >= 0; i--) {
+				const childLines = this.children[i].render(width);
+				if (lines.length === 0 && childLines.length > dynamicMaxLines) {
+					lines.unshift(...childLines.slice(-dynamicMaxLines));
+					hiddenChildren = i;
+					break;
+				}
+				if (lines.length + childLines.length > dynamicMaxLines) {
+					hiddenChildren = i + 1;
+					break;
+				}
+				lines.unshift(...childLines);
+			}
+			if (hiddenChildren > 0) {
+				lines.unshift(
+					theme.fg(
+						"dim",
+						`… ${hiddenChildren} older chat item(s) hidden for terminal speed. Full session context is still preserved.`,
+					),
+				);
+			}
+		}
+
+		if (this.enableCaching) {
+			this.cachedWidth = width;
+			this.cachedHeight = terminalHeight;
+			this.cachedLines = lines;
 		}
 		return lines;
 	}
@@ -287,6 +307,7 @@ export class InteractiveMode {
 	private isInitialized = false;
 	private initPromise: Promise<void> | undefined;
 	private onInputCallback?: (text: string) => void;
+	private isSubmitting = false;
 	private loadingAnimation: Loader | undefined = undefined;
 	private workingMessage: string | undefined = undefined;
 	private workingVisible = true;
@@ -419,6 +440,7 @@ export class InteractiveMode {
 		this.ui.setClearOnShrink(this.settingsManager.getClearOnShrink());
 		this.headerContainer = new Container();
 		this.chatContainer = new VirtualizedChatContainer();
+		this.chatContainer.enableCaching = true;
 		this.pendingMessagesContainer = new Container();
 		this.statusContainer = new Container();
 		this.widgetContainerAbove = new Container();
@@ -2548,374 +2570,390 @@ export class InteractiveMode {
 
 	private setupEditorSubmitHandler(): void {
 		this.defaultEditor.onSubmit = async (text: string) => {
-			text = text.trim();
-			if (!text) return;
+			if (this.isSubmitting) return;
+			this.isSubmitting = true;
+			try {
+				text = text.trim();
+				if (!text) return;
 
-			// Handle commands
-			if (text === "/status") {
-				this.editor.setText("");
-				await this.handleStatusDiagnosticsCommand();
-				return;
-			}
-			if (text === "/help") {
-				this.editor.setText("");
-				this.handleHelpCommand();
-				return;
-			}
-			if (text === "/metrics") {
-				if (this.activeMetricsChart) {
-					this.activeMetricsChart.stop();
-					this.chatContainer.removeChild(this.activeMetricsChart);
-				}
-				// Mock data generation for now
-				const memData = Array.from({ length: 40 }, () => Math.random() * 50 + 50);
-				const tokenData = Array.from({ length: 40 }, () => Math.random() * 1000);
-				this.activeMetricsChart = new MetricsChartComponent(memData, tokenData);
-				this.chatContainer.addChild(this.activeMetricsChart);
-				this.ui.requestRender();
-				this.editor.setText("");
-				return;
-			}
-			if (text === "/zen") {
-				this.toggleZenMode();
-				this.editor.setText("");
-				return;
-			}
-			if (text === "/settings") {
-				this.showSettingsSelector();
-				this.editor.setText("");
-				return;
-			}
-			if (text === "/mcp") {
-				this.handleMcpCommand();
-				this.editor.setText("");
-				return;
-			}
-			if (text === "/scoped-models") {
-				this.editor.setText("");
-				await this.showModelsSelector();
-				return;
-			}
-			if (text === "/models" || text.startsWith("/models ")) {
-				const searchTerm = text.startsWith("/models ") ? text.slice(8).trim() : undefined;
-				this.editor.setText("");
-				await this.handleModelsCommand(searchTerm);
-				return;
-			}
-			if (text === "/export" || text.startsWith("/export ")) {
-				await this.handleExportCommand(text);
-				this.editor.setText("");
-				return;
-			}
-			if (text === "/import" || text.startsWith("/import ")) {
-				await this.handleImportCommand(text);
-				this.editor.setText("");
-				return;
-			}
-			if (text === "/share") {
-				await this.handleShareCommand();
-				this.editor.setText("");
-				return;
-			}
-			if (text === "/copy") {
-				await this.handleCopyCommand();
-				this.editor.setText("");
-				return;
-			}
-			if (text === "/name" || text.startsWith("/name ")) {
-				this.handleNameCommand(text);
-				this.editor.setText("");
-				return;
-			}
-			if (text === "/session") {
-				this.handleSessionCommand();
-				this.editor.setText("");
-				return;
-			}
-			if (text === "/changelog") {
-				this.handleChangelogCommand();
-				this.editor.setText("");
-				return;
-			}
-			if (text === "/hotkeys") {
-				this.handleHotkeysCommand();
-				this.editor.setText("");
-				return;
-			}
-			if (text === "/fork") {
-				this.showUserMessageSelector();
-				this.editor.setText("");
-				return;
-			}
-			if (text === "/swarm" || text.startsWith("/swarm ")) {
-				const arg = text.startsWith("/swarm ") ? text.slice(7).trim() : "";
-				this.editor.setText("");
-				await this.handleSwarmCommand(arg);
-				return;
-			}
-			if (text === "/fix" || text.startsWith("/fix ")) {
-				const arg = text.startsWith("/fix ") ? text.slice(5).trim() : "";
-				this.editor.setText("");
-				await this.handleFixCommand(arg);
-				return;
-			}
-			if (text === "/evolve") {
-				this.editor.setText("");
-				await this.handleEvolveCommand();
-				return;
-			}
-			if (text === "/clone") {
-				this.editor.setText("");
-				await this.handleCloneCommand();
-				return;
-			}
-			if (text === "/tree") {
-				this.showTreeSelector();
-				this.editor.setText("");
-				return;
-			}
-			if (text === "/login") {
-				this.showOAuthSelector("login");
-				this.editor.setText("");
-				return;
-			}
-			if (text === "/logout") {
-				this.showOAuthSelector("logout");
-				this.editor.setText("");
-				return;
-			}
-			if (text === "/new") {
-				this.editor.setText("");
-				await this.handleClearCommand();
-				return;
-			}
-			if (text === "/compact" || text.startsWith("/compact ")) {
-				const customInstructions = text.startsWith("/compact ") ? text.slice(9).trim() : undefined;
-				this.editor.setText("");
-				await this.handleCompactCommand(customInstructions);
-				return;
-			}
-			if (text === "/reload") {
-				this.editor.setText("");
-				await this.handleReloadCommand();
-				return;
-			}
-			if (text === "/agentmode" || text.startsWith("/agentmode ")) {
-				const args = text.startsWith("/agentmode ") ? text.slice(11).trim() : "";
-				this.editor.setText("");
-				this.handleAgentModeCommand(args);
-				return;
-			}
-			if (text === "/agents" || text.startsWith("/agents ")) {
-				const args = text.startsWith("/agents ") ? text.slice(8).trim() : "";
-				this.editor.setText("");
-				this.handleAgentsCommand(args);
-				return;
-			}
-			if (text === "/workspace") {
-				this.editor.setText("");
-				this.handleWorkspaceCommand();
-				return;
-			}
-			if (text === "/mood" || text.startsWith("/mood ")) {
-				const args = text.startsWith("/mood ") ? text.slice(6).trim() : "";
-				this.editor.setText("");
-				this.handleMoodCommand(args);
-				return;
-			}
-			if (text === "/browser") {
-				this.editor.setText("");
-				this.handleBrowserCommand();
-				return;
-			}
-			if (text === "/robotics" || text.startsWith("/robotics ")) {
-				const args = text.startsWith("/robotics ") ? text.slice(10).trim() : "";
-				this.editor.setText("");
-				await this.handleRoboticsCommand(args);
-				return;
-			}
-			if (text === "/discord" || text.startsWith("/discord ")) {
-				const args = text.startsWith("/discord ") ? text.slice(9).trim() : "";
-				this.editor.setText("");
-				await this.handleDiscordCommand(args);
-				return;
-			}
-			if (text === "/telegram" || text.startsWith("/telegram ")) {
-				const args = text.startsWith("/telegram ") ? text.slice(10).trim() : "";
-				this.editor.setText("");
-				await this.handleTelegramCommand(args);
-				return;
-			}
-			if (text === "/update" || text.startsWith("/update ") || text === "/upgrade" || text.startsWith("/upgrade ")) {
-				const args = text.startsWith("/upgrade ")
-					? text.slice(9).trim()
-					: text.startsWith("/update ")
-						? text.slice(8).trim()
-						: "";
-				this.editor.setText("");
-				await this.handleUpdateCommand(args);
-				return;
-			}
-			if (text === "/impmodel" || text.startsWith("/impmodel ")) {
-				// Redirect to /ollama pull <model>
-				const args = text.startsWith("/impmodel ") ? text.slice(10).trim() : "";
-				this.editor.setText("");
-				await this.handleOllamaSlashCommand(args ? `pull ${args}` : "models");
-				return;
-			}
-			if (text === "/index" || text.startsWith("/index ")) {
-				this.editor.setText("");
-				await this.handleIndexCommand(text.startsWith("/index ") ? text.slice(7).trim() : "");
-				return;
-			}
-			if (text === "/ship" || text.startsWith("/ship ")) {
-				this.editor.setText("");
-				await this.handleShipCommand(text.startsWith("/ship ") ? text.slice(6).trim() : "");
-				return;
-			}
-			if (text === "/git" || text.startsWith("/git ")) {
-				this.editor.setText("");
-				await this.handleGitCommand(text.startsWith("/git ") ? text.slice(5).trim() : "status");
-				return;
-			}
-			if (text === "/ollama" || text.startsWith("/ollama ")) {
-				this.editor.setText("");
-				await this.handleOllamaSlashCommand(text.startsWith("/ollama ") ? text.slice(8).trim() : "models");
-				return;
-			}
-			if (text === "/diff") {
-				this.editor.setText("");
-				await this.handleDiffCommand();
-				return;
-			}
-			if (text === "/web" || text.startsWith("/web ")) {
-				this.editor.setText("");
-				await this.handleWebCommand();
-				return;
-			}
-			if (text === "/marketplace" || text.startsWith("/marketplace ")) {
-				this.editor.setText("");
-				await this.handleMarketplaceCommand(text.startsWith("/marketplace ") ? text.slice(13).trim() : "");
-				return;
-			}
-			if (text === "/debug") {
-				this.handleDebugCommand();
-				this.editor.setText("");
-				return;
-			}
-			if (text === "/arminsayshi") {
-				this.handleArminSaysHi();
-				this.editor.setText("");
-				return;
-			}
-			if (text === "/dementedelves") {
-				this.handleDementedDelves();
-				this.editor.setText("");
-				return;
-			}
-			if (text === "/resume") {
-				this.showSessionSelector();
-				this.editor.setText("");
-				return;
-			}
-			if (text === "/quit") {
-				this.editor.setText("");
-				await this.shutdown();
-				return;
-			}
-			if (text === "/context") {
-				this.handleContextCommand();
-				this.editor.setText("");
-				return;
-			}
-			if (text === "/hub") {
-				this.handleHubCommand();
-				this.editor.setText("");
-				return;
-			}
-			if (text === "/plan" || text.startsWith("/plan ")) {
-				const arg = text.startsWith("/plan ") ? text.slice(6).trim() : "";
-				this.editor.setText("");
-				this.handlePlanCommand(arg);
-				return;
-			}
-			if (text === "/autothink" || text.startsWith("/autothink ")) {
-				const arg = text.startsWith("/autothink ") ? text.slice(11).trim() : "";
-				this.editor.setText("");
-				this.handleAutoThinkCommand(arg);
-				return;
-			}
-			if (text === "/routing" || text.startsWith("/routing ")) {
-				const arg = text.startsWith("/routing ") ? text.slice(9).trim() : "";
-				this.editor.setText("");
-				this.handleRoutingCommand(arg);
-				return;
-			}
-			if (text === "/automation" || text.startsWith("/automation ")) {
-				const arg = text.startsWith("/automation ") ? text.slice(12).trim() : "";
-				this.editor.setText("");
-				this.handleAutomationCommand(arg);
-				return;
-			}
-			if (text === "/init") {
-				this.editor.setText("");
-				await this.handleInitCommand();
-				return;
-			}
-
-			// Handle bash command (! for normal, !! for excluded from context)
-			if (text.startsWith("!")) {
-				const isExcluded = text.startsWith("!!");
-				const command = isExcluded ? text.slice(2).trim() : text.slice(1).trim();
-				if (command) {
-					if (this.session.isBashRunning) {
-						this.showWarning("Bir bash komutu zaten çalışıyor. Cancel etmek için önce Esc tuşuna basın.");
-						this.editor.setText(text);
-						return;
-					}
-					this.editor.addToHistory?.(text);
-					await this.handleBashCommand(command, isExcluded);
-					this.isBashMode = false;
-					this.updateEditorBorderColor();
+				// Handle commands
+				if (text === "/status") {
+					this.editor.setText("");
+					await this.handleStatusDiagnosticsCommand();
 					return;
 				}
-			}
+				if (text === "/help") {
+					this.editor.setText("");
+					this.handleHelpCommand();
+					return;
+				}
+				if (text === "/metrics") {
+					if (this.activeMetricsChart) {
+						this.activeMetricsChart.stop();
+						this.chatContainer.removeChild(this.activeMetricsChart);
+					}
+					// Mock data generation for now
+					const memData = Array.from({ length: 40 }, () => Math.random() * 50 + 50);
+					const tokenData = Array.from({ length: 40 }, () => Math.random() * 1000);
+					this.activeMetricsChart = new MetricsChartComponent(memData, tokenData);
+					this.chatContainer.addChild(this.activeMetricsChart);
+					this.ui.requestRender();
+					this.editor.setText("");
+					return;
+				}
+				if (text === "/zen") {
+					this.toggleZenMode();
+					this.editor.setText("");
+					return;
+				}
+				if (text === "/settings") {
+					this.showSettingsSelector();
+					this.editor.setText("");
+					return;
+				}
+				if (text === "/mcp") {
+					this.handleMcpCommand();
+					this.editor.setText("");
+					return;
+				}
+				if (text === "/scoped-models") {
+					this.editor.setText("");
+					await this.showModelsSelector();
+					return;
+				}
+				if (text === "/models" || text.startsWith("/models ")) {
+					const searchTerm = text.startsWith("/models ") ? text.slice(8).trim() : undefined;
+					this.editor.setText("");
+					await this.handleModelsCommand(searchTerm);
+					return;
+				}
+				if (text === "/export" || text.startsWith("/export ")) {
+					await this.handleExportCommand(text);
+					this.editor.setText("");
+					return;
+				}
+				if (text === "/import" || text.startsWith("/import ")) {
+					await this.handleImportCommand(text);
+					this.editor.setText("");
+					return;
+				}
+				if (text === "/share") {
+					await this.handleShareCommand();
+					this.editor.setText("");
+					return;
+				}
+				if (text === "/copy") {
+					await this.handleCopyCommand();
+					this.editor.setText("");
+					return;
+				}
+				if (text === "/name" || text.startsWith("/name ")) {
+					this.handleNameCommand(text);
+					this.editor.setText("");
+					return;
+				}
+				if (text === "/session") {
+					this.handleSessionCommand();
+					this.editor.setText("");
+					return;
+				}
+				if (text === "/changelog") {
+					this.handleChangelogCommand();
+					this.editor.setText("");
+					return;
+				}
+				if (text === "/hotkeys") {
+					this.handleHotkeysCommand();
+					this.editor.setText("");
+					return;
+				}
+				if (text === "/fork") {
+					this.showUserMessageSelector();
+					this.editor.setText("");
+					return;
+				}
+				if (text === "/swarm" || text.startsWith("/swarm ")) {
+					const arg = text.startsWith("/swarm ") ? text.slice(7).trim() : "";
+					this.editor.setText("");
+					await this.handleSwarmCommand(arg);
+					return;
+				}
+				if (text === "/fix" || text.startsWith("/fix ")) {
+					const arg = text.startsWith("/fix ") ? text.slice(5).trim() : "";
+					this.editor.setText("");
+					await this.handleFixCommand(arg);
+					return;
+				}
+				if (text === "/evolve") {
+					this.editor.setText("");
+					await this.handleEvolveCommand();
+					return;
+				}
+				if (text === "/clone") {
+					this.editor.setText("");
+					await this.handleCloneCommand();
+					return;
+				}
+				if (text === "/tree") {
+					this.showTreeSelector();
+					this.editor.setText("");
+					return;
+				}
+				if (text === "/login") {
+					this.showOAuthSelector("login");
+					this.editor.setText("");
+					return;
+				}
+				if (text === "/logout") {
+					this.showOAuthSelector("logout");
+					this.editor.setText("");
+					return;
+				}
+				if (text === "/new") {
+					this.editor.setText("");
+					await this.handleClearCommand();
+					return;
+				}
+				if (text === "/compact" || text.startsWith("/compact ")) {
+					const customInstructions = text.startsWith("/compact ") ? text.slice(9).trim() : undefined;
+					this.editor.setText("");
+					await this.handleCompactCommand(customInstructions);
+					return;
+				}
+				if (text === "/reload") {
+					this.editor.setText("");
+					await this.handleReloadCommand();
+					return;
+				}
+				if (text === "/agentmode" || text.startsWith("/agentmode ")) {
+					const args = text.startsWith("/agentmode ") ? text.slice(11).trim() : "";
+					this.editor.setText("");
+					this.handleAgentModeCommand(args);
+					return;
+				}
+				if (text === "/agents" || text.startsWith("/agents ")) {
+					const args = text.startsWith("/agents ") ? text.slice(8).trim() : "";
+					this.editor.setText("");
+					this.handleAgentsCommand(args);
+					return;
+				}
+				if (text === "/workspace") {
+					this.editor.setText("");
+					this.handleWorkspaceCommand();
+					return;
+				}
+				if (text === "/mood" || text.startsWith("/mood ")) {
+					const args = text.startsWith("/mood ") ? text.slice(6).trim() : "";
+					this.editor.setText("");
+					this.handleMoodCommand(args);
+					return;
+				}
+				if (text === "/browser") {
+					this.editor.setText("");
+					this.handleBrowserCommand();
+					return;
+				}
+				if (text === "/interface") {
+					this.editor.setText("");
+					await this.handleInterfaceCommand();
+					return;
+				}
+				if (text === "/robotics" || text.startsWith("/robotics ")) {
+					const args = text.startsWith("/robotics ") ? text.slice(10).trim() : "";
+					this.editor.setText("");
+					await this.handleRoboticsCommand(args);
+					return;
+				}
+				if (text === "/discord" || text.startsWith("/discord ")) {
+					const args = text.startsWith("/discord ") ? text.slice(9).trim() : "";
+					this.editor.setText("");
+					await this.handleDiscordCommand(args);
+					return;
+				}
+				if (text === "/telegram" || text.startsWith("/telegram ")) {
+					const args = text.startsWith("/telegram ") ? text.slice(10).trim() : "";
+					this.editor.setText("");
+					await this.handleTelegramCommand(args);
+					return;
+				}
+				if (
+					text === "/update" ||
+					text.startsWith("/update ") ||
+					text === "/upgrade" ||
+					text.startsWith("/upgrade ")
+				) {
+					const args = text.startsWith("/upgrade ")
+						? text.slice(9).trim()
+						: text.startsWith("/update ")
+							? text.slice(8).trim()
+							: "";
+					this.editor.setText("");
+					await this.handleUpdateCommand(args);
+					return;
+				}
+				if (text === "/impmodel" || text.startsWith("/impmodel ")) {
+					// Redirect to /ollama pull <model>
+					const args = text.startsWith("/impmodel ") ? text.slice(10).trim() : "";
+					this.editor.setText("");
+					await this.handleOllamaSlashCommand(args ? `pull ${args}` : "models");
+					return;
+				}
+				if (text === "/index" || text.startsWith("/index ")) {
+					this.editor.setText("");
+					await this.handleIndexCommand(text.startsWith("/index ") ? text.slice(7).trim() : "");
+					return;
+				}
+				if (text === "/ship" || text.startsWith("/ship ")) {
+					this.editor.setText("");
+					await this.handleShipCommand(text.startsWith("/ship ") ? text.slice(6).trim() : "");
+					return;
+				}
+				if (text === "/git" || text.startsWith("/git ")) {
+					this.editor.setText("");
+					await this.handleGitCommand(text.startsWith("/git ") ? text.slice(5).trim() : "status");
+					return;
+				}
+				if (text === "/ollama" || text.startsWith("/ollama ")) {
+					this.editor.setText("");
+					await this.handleOllamaSlashCommand(text.startsWith("/ollama ") ? text.slice(8).trim() : "models");
+					return;
+				}
+				if (text === "/diff") {
+					this.editor.setText("");
+					await this.handleDiffCommand();
+					return;
+				}
+				if (text === "/web" || text.startsWith("/web ")) {
+					this.editor.setText("");
+					await this.handleWebCommand();
+					return;
+				}
+				if (text === "/marketplace" || text.startsWith("/marketplace ")) {
+					this.editor.setText("");
+					await this.handleMarketplaceCommand(text.startsWith("/marketplace ") ? text.slice(13).trim() : "");
+					return;
+				}
+				if (text === "/debug") {
+					this.handleDebugCommand();
+					this.editor.setText("");
+					return;
+				}
+				if (text === "/arminsayshi") {
+					this.handleArminSaysHi();
+					this.editor.setText("");
+					return;
+				}
+				if (text === "/dementedelves") {
+					this.handleDementedDelves();
+					this.editor.setText("");
+					return;
+				}
+				if (text === "/resume") {
+					this.showSessionSelector();
+					this.editor.setText("");
+					return;
+				}
+				if (text === "/quit") {
+					this.editor.setText("");
+					await this.shutdown();
+					return;
+				}
+				if (text === "/context") {
+					this.handleContextCommand();
+					this.editor.setText("");
+					return;
+				}
+				if (text === "/hub") {
+					this.handleHubCommand();
+					this.editor.setText("");
+					return;
+				}
+				if (text === "/plan" || text.startsWith("/plan ")) {
+					const arg = text.startsWith("/plan ") ? text.slice(6).trim() : "";
+					this.editor.setText("");
+					this.handlePlanCommand(arg);
+					return;
+				}
+				if (text === "/autothink" || text.startsWith("/autothink ")) {
+					const arg = text.startsWith("/autothink ") ? text.slice(11).trim() : "";
+					this.editor.setText("");
+					this.handleAutoThinkCommand(arg);
+					return;
+				}
+				if (text === "/routing" || text.startsWith("/routing ")) {
+					const arg = text.startsWith("/routing ") ? text.slice(9).trim() : "";
+					this.editor.setText("");
+					this.handleRoutingCommand(arg);
+					return;
+				}
+				if (text === "/automation" || text.startsWith("/automation ")) {
+					const arg = text.startsWith("/automation ") ? text.slice(12).trim() : "";
+					this.editor.setText("");
+					this.handleAutomationCommand(arg);
+					return;
+				}
+				if (text === "/init") {
+					this.editor.setText("");
+					await this.handleInitCommand();
+					return;
+				}
 
-			// Queue input during compaction (extension commands execute immediately)
-			if (this.session.isCompacting) {
-				if (this.isExtensionCommand(text)) {
+				// Handle bash command (! for normal, !! for excluded from context)
+				if (text.startsWith("!")) {
+					const isExcluded = text.startsWith("!!");
+					const command = isExcluded ? text.slice(2).trim() : text.slice(1).trim();
+					if (command) {
+						if (this.session.isBashRunning) {
+							this.showWarning("Bir bash komutu zaten çalışıyor. Cancel etmek için önce Esc tuşuna basın.");
+							this.editor.setText(text);
+							return;
+						}
+						this.editor.addToHistory?.(text);
+						await this.handleBashCommand(command, isExcluded);
+						this.isBashMode = false;
+						this.updateEditorBorderColor();
+						return;
+					}
+				}
+
+				// Queue input during compaction (extension commands execute immediately)
+				if (this.session.isCompacting) {
+					if (this.isExtensionCommand(text)) {
+						this.editor.addToHistory?.(text);
+						this.editor.setText("");
+						await this.session.prompt(text);
+					} else {
+						this.queueCompactionMessage(text, "steer");
+					}
+					return;
+				}
+
+				// If streaming, use prompt() with steer behavior
+				// This handles extension commands (execute immediately), prompt template expansion, and queueing
+				if (this.session.isStreaming) {
 					this.editor.addToHistory?.(text);
 					this.editor.setText("");
-					await this.session.prompt(text);
-				} else {
-					this.queueCompactionMessage(text, "steer");
+					await this.session.prompt(text, { streamingBehavior: "steer" });
+					this.updatePendingMessagesDisplay();
+					this.ui.requestRender();
+					return;
 				}
-				return;
-			}
 
-			// If streaming, use prompt() with steer behavior
-			// This handles extension commands (execute immediately), prompt template expansion, and queueing
-			if (this.session.isStreaming) {
+				// Normal message submission
+				// First, move any pending bash components to chat
+				this.flushPendingBashComponents();
+
+				// Initialize task in Omega Kernel
+				const kernel = OmegaKernel.getInstance();
+				await kernel.initializeTask(text, this.sessionManager.getCwd());
+
+				if (this.onInputCallback) {
+					this.onInputCallback(text);
+				}
 				this.editor.addToHistory?.(text);
-				this.editor.setText("");
-				await this.session.prompt(text, { streamingBehavior: "steer" });
-				this.updatePendingMessagesDisplay();
-				this.ui.requestRender();
-				return;
+			} finally {
+				this.isSubmitting = false;
 			}
-
-			// Normal message submission
-			// First, move any pending bash components to chat
-			this.flushPendingBashComponents();
-
-			// Initialize task in Omega Kernel
-			const kernel = OmegaKernel.getInstance();
-			await kernel.initializeTask(text, this.sessionManager.getCwd());
-
-			if (this.onInputCallback) {
-				this.onInputCallback(text);
-			}
-			this.editor.addToHistory?.(text);
 		};
 	}
 
@@ -2930,6 +2968,7 @@ export class InteractiveMode {
 			await this.init();
 		}
 
+		this.chatContainer.invalidate();
 		this.updateWorkingMessageContextually?.(event);
 		this.footer.invalidate();
 
@@ -4170,7 +4209,10 @@ export class InteractiveMode {
 	 * @param create Factory that receives a `done` callback and returns the component and focus target
 	 */
 	private showSelector(create: (done: () => void) => { component: Component; focus: Component }): void {
+		let isDone = false;
 		const done = () => {
+			if (isDone) return;
+			isDone = true;
 			this.editorContainer.clear();
 			this.editorContainer.addChild(this.editor);
 			this.ui.setFocus(this.editor);
@@ -5215,6 +5257,59 @@ export class InteractiveMode {
 		this.ui.requestRender();
 	}
 
+	private async handleInterfaceCommand(): Promise<void> {
+		try {
+			const { getBrowserBridgeStatus } = await import("../../core/browser-bridge-server.js");
+			const bridgeStatus = getBrowserBridgeStatus();
+			let url = "http://127.0.0.1:3131";
+
+			if (bridgeStatus.isClientOnly) {
+				url = "http://127.0.0.1:3131";
+			} else {
+				if (!this.webUiProcess) {
+					const server = await import("../../core/web-ui-server.js");
+					this.webUiProcess = server.startWebUiServer({ port: 3131 });
+				}
+				url = this.webUiProcess.url || url;
+			}
+
+			const bridgeStatusText = bridgeStatus.running
+				? `BAGLI (${bridgeStatus.clients} eklenti aktif)`
+				: "BAĞLANTI BEKLENİYOR (Eklentiyi yükleyin)";
+
+			const interfaceWelcome = [
+				"┌────────────────────────────────────────────────────────┐",
+				"│         ✦  M O O N C O D E   O S   I N T E R F A C E ✦  │",
+				"├────────────────────────────────────────────────────────┤",
+				"│  Entegre Geliştirici Arayüzü: MoonCode OS              │",
+				"│  Yerel Adres: http://127.0.0.1:3131                    │",
+				"│                                                        │",
+				"│  Özellikler:                                           │",
+				"│  • Otonom Ajan Yönetimi & Kod Çıktı Takibi             │",
+				"│  • Canlı Workspace, CPU ve Bellek İzleyici             │",
+				"│  • Gelişmiş CSS Tema Editörü (Realtime Sync)           │",
+				"│                                                        │",
+				`│  Browser Bridge Durumu: ${bridgeStatusText.padEnd(31)}│`,
+				"└────────────────────────────────────────────────────────┘",
+				"",
+				"🚀 Yerel MoonCode OS varsayılan tarayıcınızda başlatılıyor...",
+			].join("\n");
+
+			this.chatContainer.addChild(new Text(interfaceWelcome, 1, 0));
+			this.ui.requestRender();
+
+			if (process.platform === "win32") {
+				spawnSync("cmd", ["/c", `start "" "${url}"`], { stdio: "ignore", shell: true });
+			} else if (process.platform === "darwin") {
+				spawnSync("open", [url], { stdio: "ignore" });
+			} else {
+				spawnSync("xdg-open", [url], { stdio: "ignore" });
+			}
+		} catch (err: any) {
+			this.showError(`MoonCode OS açma hatası: ${err.message}`);
+		}
+	}
+
 	private handleMoodCommand(args: string): void {
 		const parts = args.split(/\s+/).filter(Boolean);
 		const cmd = parts[0]?.toLowerCase();
@@ -6026,6 +6121,7 @@ export class InteractiveMode {
 				{ name: "/diff", desc: "Show git changes" },
 				{ name: "/index", desc: "Index codebase for semantic search" },
 				{ name: "/browser", desc: "Chrome extension status and control" },
+				{ name: "/interface", desc: "Open MoonCode Special OpenClaw OS Interface" },
 				{ name: "/mcp", desc: "List connected MCP servers" },
 				{ name: "/swarm", desc: "Trigger Multi-Agent Swarm" },
 				{ name: "/fix", desc: "Run Autonomous Auto-Healer" },
@@ -7202,8 +7298,10 @@ export class InteractiveMode {
 			const { SwarmManager } = await import("moon-engine");
 
 			const swarm = new SwarmManager(this.session.model, {
-				streamFn: this.session.streamFn,
-				getApiKey: this.session.getApiKey,
+				streamFn: this.session.engine.streamFn,
+				getApiKey: async (provider: string) => {
+					return await this.session.modelRegistry.getApiKeyForProvider(provider);
+				},
 			});
 
 			swarm.on("swarm:start", (data: any) => this.showStatus(`[Swarm] Başladı: ${data.taskDescription}`));

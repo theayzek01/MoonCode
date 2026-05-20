@@ -303,6 +303,14 @@ export function getBrowserBridgeStatus(): BrowserBridgeStatus {
 			}
 		}
 	}
+	if (activeClientsCount === 0 && clients.size > 0) {
+		activeClientsCount = clients.size;
+		for (const client of clients.values()) {
+			if (lastClientSeen === undefined || client.lastSeen > lastClientSeen) {
+				lastClientSeen = client.lastSeen;
+			}
+		}
+	}
 	return {
 		port,
 		running: !!server && !startupError,

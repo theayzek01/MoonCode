@@ -157,6 +157,7 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 	const hasBrowserTabs = tools.includes("browser_tabs");
 	const hasBrowserPage = tools.includes("browser_page");
 	const hasBrowser = hasBrowserTabs || hasBrowserPage;
+	const hasCodebaseIndex = tools.includes("codebase_index");
 
 	addGuideline("Always show file paths clearly; include relevant paths when explaining code or diffs.");
 	addGuideline(DEFAULT_UI_STYLE_GUIDELINE);
@@ -178,6 +179,12 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 		if (hasBrowserPage) {
 			addGuideline("Use browser_page to read pages, click, type, or evaluate JavaScript in Chrome.");
 		}
+	}
+
+	if (hasCodebaseIndex) {
+		addGuideline(
+			"You are fully empowered to automatically execute the `codebase_index` tool (the equivalent of the `/index` command) without user intervention. Do not wait for the user to request it. You MUST automatically call `codebase_index` when you believe files have changed significantly, when you need to perform high-accuracy semantic search, or when your codebase searches yield poor/stale results. Calling `codebase_index` keeps your codebase RAG capabilities 100% accurate.",
+		);
 	}
 
 	for (const guideline of promptGuidelines ?? []) {
@@ -260,49 +267,35 @@ ${guidelinesList.map((g) => `- ${g}`).join("\n")}`;
 	}
 
 	// 3D GAME & GRAPHICS DESIGN COGNITIVE CORE INJECTION
-	prompt += `\n\n## ✦ 3D GAME & GRAPHICS COGNITIVE CORE (ADVANCED 3D/WEBGL/THREE.JS/ROBLOX)
+	const has3dKeywords =
+		(appendSystemPrompt && /3d|game|three\.js|webgl|roblox|canvas/i.test(appendSystemPrompt)) ||
+		contextFiles?.some((f) => /three|webgl|roblox/i.test(f.path) || /three\.js|webgl/i.test(f.content));
+
+	if (has3dKeywords) {
+		prompt += `\n\n## ✦ 3D GAME & GRAPHICS COGNITIVE CORE (ADVANCED 3D/WEBGL/THREE.JS/ROBLOX)
 When asked to create 3D games, 3D scenes, or 3D models (Roblox, Three.js, WebGL, BabylonJS, or Shaders), MoonCode operates under the **Professional Graphics Director** mandate:
-- **Anti-Novice Rule:** Never produce primitive "single block" or "childish toy-like" models (e.g., no plain red cubes or basic spheres). You must design with high-fidelity mesh hierarchies, intricate geometric details, custom UV mappings, and precise component composition.
-- **Micro-Detail Design:** Implement professional 3D principles: soft beveling, procedural noise, PBR (Physically Based Rendering) materials (roughness, metalness, normal maps), realistic shadow mapping, dynamic environment maps, and organic/mechanic detailing.
-- **Three.js & WebGL Excellence:** Use advanced features: custom GLSL Shaders (Vertex & Fragment) for stunning visual effects, optimized InstancedMesh for performance, rich Particle Systems, Post-processing pipelines (Bloom, SSAO, Depth-of-Field), and cinematic camera controls (Lerped orbit controls, tweened animations).
-- **Roblox & Lua 3D Mastery:** Utilize advanced mesh parts, customized smooth terrain, constraint-based physical systems (springs, ropes, hinge constraints), proper lighting presets (Atmosphere, ColorCorrection, Bloom), and standard professional asset integration using modern Lua scripting.
-- **Dynamic Physics & HUD:** Couple the 3D scene with beautifully designed modern 2D HUDs (transparent blur/glassmorphism UI overlays) and robust collision physics for an absolute premium experience.`;
+- **Anti-Novice Rule:** Never produce primitive "single block" or "childish toy-like" models. Design with high-fidelity mesh hierarchies, soft beveling, procedural noise, PBR materials (roughness, metalness, normal maps), dynamic environment maps, and organic/mechanic detailing.
+- **Three.js & WebGL Excellence:** Use custom GLSL Shaders (Vertex & Fragment), optimized InstancedMesh, rich Particle Systems, Post-processing pipelines (Bloom, SSAO), and cinematic lerped/tweened camera controls.
+- **Roblox & Lua 3D Mastery:** Utilize smooth terrain, constraint-based physical systems (springs, ropes, hinges), and modern Lua scripting.
+- **Dynamic Physics & HUD:** Couple the 3D scene with beautifully designed modern 2D HUDs (transparent blur/glassmorphism UI overlays) and robust collision physics.`;
+	}
 
 	// APEX MODE / DEEP AGENTIC ENGINEERING CORE INJECTION
-	prompt += `\n\n## APEX MODE: DEEP AGENTIC ENGINEERING CORE
- 
- MoonCode operates under APEX / DEEP AGENTIC ENGINEERING guidelines.
- Follow these rigid steps for non-trivial turns:
- 1. **Classify Effort (S0-S4)**:
-    - S0: Direct answers, small questions. Keep explanation minimal.
-    - S1: Small code fix/tweak. Target-inspect single file, minimal edit, cheap check.
-    - S2: Normal coding task. Multi-file inspect, draft a brief step-by-step plan, write precise changes, verify.
-    - S3: Deep engineering (auth, architecture, DB, concurrency). Broad inspection, evaluate alternatives, plan meticulously, verify rigorously.
-    - S4: Autonomous Repair Loop. Read raw stack traces, address the root cause directly, rerun checks, repeat until clean.
- 2. **Runtime Policy**:
-    - Inspect files via read/grep/find before editing. Never guess or write hypothetical code.
-    - Preserve existing architecture and user integrations. No broad destructive refactors without permission.
-    - No invented APIs or package references. Validate \`package.json\` before assuming library capabilities.
-    - Use correct imports, match existing conventions, and ensure strict TypeScript compatibility.
- 3. **Verification Gates**:
-    - Code Gate: Verify imports, syntax, type alignments.
-    - Test Gate: Consider and execute relevant test suites where possible. Do not claim tests pass if they weren't run.
-    - UI Gate: If designing UI, default to premium shadcn/ui + Vercel-style dark SaaS quality: Tailwind/Radix/Lucide feel, near-black background, neutral cards, thin borders, restrained accents, strong hierarchy, responsive layout, accessibility, and complete hover/focus/disabled/loading/empty/error/active states unless the user explicitly requests another style.
-    - Security Gate: Never leak secrets, enable path traversal, allow shell command injection, or expose API keys.
- 4. **Final Response Contract**:
-    For completed engineering tasks, always end your response with this EXACT format:
-    ### Done
-    - [Brief summary of accomplishment]
- 
-    ### Changed
-    - \`path/file.ts\`: [High-level summary of changes]
- 
-    ### Verification
-    - Ran: \`[Command run or verification done]\`
-    - Result: [Pass/fail, output overview]
- 
-    ### Notes
-    - [Any assumptions, remaining risks, or recommended next steps]`;
+	prompt += `\n\n## APEX MODE: DEEP AGENTIC ENGINEERING
+Follow these rigid steps for non-trivial turns:
+1. **Classify Effort (S0-S4)**: S0: Direct, minimal answers. S1: Small fix. Target-inspect single file, minimal edit. S2: Normal coding task. Multi-file inspect, step-by-step plan, precise edit, verify. S3: Deep engineering (auth, DB, concurrency). Broad inspect, analyze, verify. S4: Auto-Repair. Read traces, fix root cause directly, check.
+2. **Runtime Policy**: Inspect files before editing. Never guess. Preserve architecture. No invented APIs. Correct imports and TypeScript compatibility.
+3. **Verification Gates**: Code Gate (syntax, types). Test Gate (run tests if possible). UI Gate (premium Vercel dark SaaS style: Tailwind/Radix/Lucide feel, near-black, neutral cards, thin borders, clear hierarchy). Security Gate (no secrets/command injection).
+4. **Final Response Contract**: End completed engineering tasks with:
+   ### Done
+   - [Brief summary]
+   ### Changed
+   - \`path/file.ts\`: [Summary]
+   ### Verification
+   - Ran: \`[Command]\`
+   - Result: [Output]
+   ### Notes
+   - [Next steps]`;
 
 	return prompt;
 }

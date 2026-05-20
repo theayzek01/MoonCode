@@ -1,6 +1,6 @@
 const BASE_PORT = 3133;
 const MAX_PORT_OFFSET = 9; // Scan 3133 to 3142
-const VERSION = "2026-9-browser";
+const VERSION = "2026-12-browser";
 const HEARTBEAT_INTERVAL_MS = 20000;
 const RECONNECT_DELAY_MS = 2000;
 const COMMAND_TIMEOUT_MS = 12000;
@@ -383,13 +383,27 @@ async function executePage(args) {
           if (["script", "style", "noscript", "svg", "path", "head", "meta", "link"].includes(tag)) return "";
           if (!isVisible(node)) return "";
 
+          // Fast path: if no interactive elements in entire subtree, return textContent directly
+          const hasInteractive = isInteractive(node) || (() => {
+            try {
+              return !!node.querySelector('a, button, input, select, textarea, [role="button"], [role="link"], [role="checkbox"], [role="tab"], [onclick]');
+            } catch {
+              return true;
+            }
+          })();
+
+          if (!hasInteractive) {
+            const txt = node.textContent.replace(/\s+/g, " ").trim();
+            return txt.length > 2 ? txt : "";
+          }
+
           const children = Array.from(node.childNodes).slice(0, 80)
             .map(c => walk(c, depth + 1))
             .filter(Boolean)
             .join(" ");
 
           if (isInteractive(node)) {
-            const label = node.getAttribute("aria-label") || node.title || node.placeholder || children || "";
+            const label = node.getAttribute("aria-label") || node.title || node.placeholder || children || node.textContent.trim() || "";
             const href = node.getAttribute("href") || "";
             return `\n[${tag.toUpperCase()}${href ? " href=" + href : ""}: ${label.slice(0, 80)}]\n`;
           }
@@ -970,11 +984,38 @@ async function captureScreenshot(tab, args = {}) {
   const quality = Math.max(1, Math.min(Number(args.quality) || 85, 100));
 
   if (!tab.active) await chrome.tabs.update(tabId, { active: true });
-  if (tab.windowId !== undefined) await chrome.windows.update(tab.windowId, { focused: true });
+  
+  let windowId = tab.windowId;
+  if (windowId === undefined) {
+    try {
+      const currentWin = await chrome.windows.getCurrent();
+      windowId = currentWin?.id;
+    } catch {
+      // ignore
+    }
+  }
+  
+  if (windowId !== undefined) {
+    try {
+      await chrome.windows.update(windowId, { focused: true });
+    } catch {
+      // ignore
+    }
+  }
   await new Promise(r => setTimeout(r, 80));
 
   const captureOptions = format === "jpeg" ? { format, quality } : { format };
-  const dataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, captureOptions);
+  let dataUrl = "";
+  try {
+    dataUrl = await chrome.tabs.captureVisibleTab(windowId, captureOptions);
+  } catch (err) {
+    try {
+      dataUrl = await chrome.tabs.captureVisibleTab(captureOptions);
+    } catch (innerErr) {
+      throw new Error(`Screenshot capture failed: ${innerErr.message || String(innerErr)}. Make sure the browser window is active and not on an internal chrome:// page.`);
+    }
+  }
+  
   const match = /^data:([^;]+);base64,(.*)$/.exec(dataUrl || "");
   if (!match) throw new Error("captureVisibleTab returned invalid image data");
 
@@ -1052,15 +1093,40 @@ async function drawOnCanvas(tabId, args) {
     x: Math.max(-10000, Math.min(Number(p?.[0]) || 0, 10000)) + (absolute ? 0 : rect.x),
     y: Math.max(-10000, Math.min(Number(p?.[1]) || 0, 10000)) + (absolute ? 0 : rect.y)
   }));
+
+  const button = args.button || "left";
+  const steps = Math.max(1, Math.min(Number(args.steps) || 2, 10));
+  const delayMs = Math.max(0, Math.min(Number(args.ms) || 5, 500));
+  const wait = (ms) => new Promise(r => setTimeout(r, ms));
+
+  const didAttach = await attachDebugger(tabId);
+
+  // Press down at the first point
+  await chrome.debugger.sendCommand({ tabId }, "Input.dispatchMouseEvent", {
+    type: "mousePressed", x: points[0].x, y: points[0].y, button, clickCount: 1
+  });
+  if (delayMs) await wait(delayMs);
+
+  // Drag through intermediate points
   for (let i = 1; i < points.length; i++) {
-    await dispatchMouse(tabId, {
-      x: points[i - 1].x, y: points[i - 1].y,
-      toX: points[i].x, toY: points[i].y,
-      button: args.button || "left",
-      steps: Math.max(1, Math.min(Number(args.steps) || 4, 24)),
-      ms: Math.max(0, Math.min(Number(args.ms) || 0, 2000))
-    });
+    const prev = points[i - 1];
+    const curr = points[i];
+    for (let s = 1; s <= steps; s++) {
+      const nx = prev.x + ((curr.x - prev.x) * s) / steps;
+      const ny = prev.y + ((curr.y - prev.y) * s) / steps;
+      await chrome.debugger.sendCommand({ tabId }, "Input.dispatchMouseEvent", {
+        type: "mouseMoved", x: nx, y: ny, button
+      });
+      if (delayMs) await wait(Math.max(1, delayMs / steps));
+    }
   }
+
+  // Release at the last point
+  const lastPoint = points[points.length - 1];
+  await chrome.debugger.sendCommand({ tabId }, "Input.dispatchMouseEvent", {
+    type: "mouseReleased", x: lastPoint.x, y: lastPoint.y, button, clickCount: 1
+  });
+
   return { drawn: true, points: points.length, canvas: { x: Math.round(rect.x), y: Math.round(rect.y), width: Math.round(rect.width), height: Math.round(rect.height) } };
 }
 
@@ -1215,13 +1281,24 @@ async function resolveSelector(tabId, selector) {
 }
 
 async function waitForTabReady(tabId, timeoutMs = 5000) {
+  // Try rapid check first to see if page is already loaded and interactive
+  try {
+    const [res] = await chrome.scripting.executeScript({
+      target: { tabId },
+      func: () => document.readyState !== "loading" && !!document.body
+    });
+    if (res?.result) return;
+  } catch {
+    // Ignore and fallback
+  }
+
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     try {
       const tab = await chrome.tabs.get(tabId);
       if (tab.status === "complete") return;
     } catch { return; }
-    await new Promise(r => setTimeout(r, 200));
+    await new Promise(r => setTimeout(r, 50));
   }
 }
 

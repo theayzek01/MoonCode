@@ -50,12 +50,31 @@ async function loadSession(id) {
   document.querySelectorAll(".session").forEach((e) => e.classList.toggle("active", e.dataset.id === id));
   const data = await fetch(`/api/session/${encodeURIComponent(id)}`).then((r) => r.json());
   $("#stats").textContent = JSON.stringify(data.stats, null, 2);
-  $("#chat").innerHTML = data.entries
-    .filter((e) => e.role || e.type)
-    .map(
-      (e) => `<div class="msg"><div class="role">${e.role || e.type}</div><pre>${escapeHtml(textOf(e.content || e.message || e.text || e))}</pre></div>`,
-    )
-    .join("");
+  $("#chat").innerHTML = data.entries.map(e => {
+    if (e.type === 'message' && e.message) {
+      const role = e.message.role;
+      const contentStr = textOf(e.message.content || e.message.text || e.message);
+      if (role === 'tool') {
+        return `<div class="msg system-msg">
+          <div class="role">Araç Sonucu</div>
+          <pre>${escapeHtml(contentStr)}</pre>
+        </div>`;
+      }
+      const roleClass = role === 'user' ? 'user-msg' : 'assistant-msg';
+      const roleName = role === 'user' ? 'Kullanıcı' : 'MoonCode';
+      return `<div class="msg ${roleClass}">
+        <div class="role">${roleName}</div>
+        <pre>${escapeHtml(contentStr)}</pre>
+      </div>`;
+    }
+    if (e.type === 'toolCall') {
+      return `<div class="msg system-msg">
+        <div class="role">Araç Çalıştırıldı: ${e.toolName}</div>
+        <pre>${escapeHtml(JSON.stringify(e.input, null, 2))}</pre>
+      </div>`;
+    }
+    return '';
+  }).filter(Boolean).join("");
 }
 
 function escapeHtml(s) {

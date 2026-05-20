@@ -2,6 +2,7 @@
 import { type Model, modelsAreEqual } from "moon-core";
 import { Container, type Focusable, fuzzyFilter, getKeybindings, Input, Spacer, Text, type TUI } from "moon-tui";
 import type { ModelRegistry } from "../../../core/model-registry.js";
+import { QuotaManager } from "../../../core/quota-manager.js";
 import type { SettingsManager } from "../../../core/settings-manager.js";
 import { theme } from "../theme/theme.js";
 import { DynamicBorder } from "./dynamic-border.js";
@@ -205,14 +206,33 @@ export class ModelSelectorComponent extends Container implements Focusable {
 				lastProvider = item.provider;
 			}
 
-			let line = "";
-			const check = isCurrent ? theme.fg("success", " ●") : "  ";
-			const reasoning = item.model.reasoning ? theme.fg("warning", " ⚡") : "";
+			const idStr = item.id;
+			const providerStr = `[${item.provider}]`;
+			const ctx = item.model.contextWindow ? `${Math.floor(item.model.contextWindow / 1024)}k` : "";
+			const ctxStr = ctx ? `(${ctx} ctx)` : "";
 
+			// Left column: ID, Right columns: provider and context aligned to the right!
+			const rightContent = `${providerStr} ${ctxStr}`;
+
+			// Calculate padding based on a fixed width
+			const targetWidth = 52;
+			const visibleLeft = idStr.length + 2;
+			const visibleRight = rightContent.length;
+			const paddingNeeded = Math.max(2, targetWidth - visibleLeft - visibleRight);
+			const spacePadding = " ".repeat(paddingNeeded);
+
+			const reasoning = item.model.reasoning ? theme.fg("warning", " ⚛") : "  ";
+			const check = isCurrent ? theme.fg("success", " ●") : "  ";
+
+			let line = "";
 			if (isSelected) {
-				line = theme.bg("selectedBg", theme.fg("accent", ` ❯ ${item.id} `)) + reasoning + check;
+				const highlightedId = theme.bold(theme.fg("accent", ` ❯ ${idStr}`));
+				const highlightedInfo = theme.fg("dim", rightContent);
+				line = `${theme.bg("selectedBg", ` ${highlightedId}${spacePadding}${highlightedInfo} `)}${reasoning}${check}`;
 			} else {
-				line = theme.fg("text", `   ${item.id} `) + reasoning + check;
+				const dimId = theme.fg("text", `   ${idStr}`);
+				const dimInfo = theme.fg("dim", rightContent);
+				line = ` ${dimId}${spacePadding}${dimInfo} ${reasoning}${check}`;
 			}
 
 			this.listContainer.addChild(new Text(line, 0, 0));
@@ -223,10 +243,27 @@ export class ModelSelectorComponent extends Container implements Focusable {
 		if (selected) {
 			this.listContainer.addChild(new Spacer(1));
 			const detailBox = new Container();
-			detailBox.addChild(new Text(theme.fg("accent", ` ╭─ Bilgi: ${selected.model.name}`), 0, 0));
-			const ctx = selected.model.contextWindow ? `${Math.floor(selected.model.contextWindow / 1024)}k` : "???";
-			const info = ` │ Sağlayıcı: ${selected.provider} • Bağlam: ${ctx} • Zihin: ${selected.model.reasoning ? "Aktif" : "Kapalı"}`;
-			detailBox.addChild(new Text(theme.fg("dim", info), 0, 0));
+			detailBox.addChild(
+				new Text(
+					theme.fg("accent", ` ┌─ BİLGİ: ${selected.model.name.toUpperCase()} ──────────────────────────`),
+					0,
+					0,
+				),
+			);
+			const ctx = selected.model.contextWindow
+				? `${Math.floor(selected.model.contextWindow / 1024)}k`
+				: "Bilinmiyor";
+			const info = ` │  Sağlayıcı : ${selected.provider.toUpperCase()}\n │  Bağlam    : ${ctx} tokens\n │  Zihin     : ${selected.model.reasoning ? "Aktif (DeepThink)" : "Standart Model"}`;
+
+			const quotaStats = QuotaManager.getInstance().getStats();
+			const quotaColor = quotaStats.percent > 20 ? "success" : "error";
+			const remainingVal = Math.max(0, quotaStats.limit - quotaStats.spent);
+			const quotaLine = `\n │  Kota      : ${theme.fg(quotaColor, `${quotaStats.percent.toFixed(1)}%`)} (${theme.fg("dim", `$${remainingVal.toFixed(2)} kaldı`)})`;
+
+			detailBox.addChild(new Text(theme.fg("dim", info + quotaLine), 0, 0));
+			detailBox.addChild(
+				new Text(theme.fg("accent", ` └──────────────────────────────────────────────────────────`), 0, 0),
+			);
 			this.listContainer.addChild(detailBox);
 		}
 	}

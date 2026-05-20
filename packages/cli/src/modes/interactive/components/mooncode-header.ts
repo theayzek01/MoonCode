@@ -110,7 +110,7 @@ export class MoonCodeHeaderComponent extends Container {
 		}
 
 		if (logoMode === "compact") {
-			// Compact persistent header: MoonCode · v2026-10 · Apex · project/branch
+			// Compact persistent header: MoonCode · v2026-10 · project/branch
 			const cwd = this.session?.sessionManager?.getCwd() || "";
 			const project = cwd ? path.basename(cwd) : "";
 			const branch = this.footerData?.getGitBranch() || "";
@@ -119,7 +119,6 @@ export class MoonCodeHeaderComponent extends Container {
 			const parts = [
 				theme.bold(theme.fg("accent", "MOONCODE")),
 				theme.fg("dim", `v${VERSION}`),
-				theme.fg("success", "APEX"),
 				projBranch ? theme.fg("muted", projBranch) : undefined,
 			].filter(Boolean);
 
@@ -149,7 +148,7 @@ export class MoonCodeHeaderComponent extends Container {
 			theme.fg("dim", "✦ ") +
 			theme.fg("accent", `VERSION ${VERSION}`) +
 			theme.fg("dim", " ✦ ") +
-			theme.fg("success", "APEX MODE ACTIVE ✦ DEEPTHINK ENABLED");
+			theme.fg("success", "INTELLIGENT RUNTIME ACTIVE");
 		lines.push(versionText);
 		lines.push("");
 		lines.push(theme.fg("dim", "─".repeat(width)));
