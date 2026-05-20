@@ -211,12 +211,13 @@ export function needsClaudeThinkingBetaHeader(model: Model<"google-antigravity">
 
 function isGemini3ProModel(modelId: string): boolean {
 	const id = modelId.toLowerCase();
-	return /gemini-3(?:\.1)?-pro/.test(id) || id.includes("-high");
+	if (id.includes("flash")) return false;
+	return /gemini-3(?:\.1)?-pro/.test(id) || id.includes("-high") || id.includes("-low");
 }
 
 function isGemini3FlashModel(modelId: string): boolean {
 	const id = modelId.toLowerCase();
-	return /gemini-3(?:\.\d+)?-flash/.test(id) && !id.includes("-high");
+	return /gemini-3(?:\.\d+)?-flash/.test(id) || id.includes("flash");
 }
 
 function isGemini3Model(modelId: string): boolean {

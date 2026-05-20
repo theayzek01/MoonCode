@@ -154,29 +154,36 @@ function isExpandable(obj: unknown): obj is Expandable {
 }
 
 class VirtualizedChatContainer extends Container {
-	private readonly maxLines = Math.max(
-		0,
-		Math.min(Number(process.env.MOON_TUI_CHAT_MAX_LINES ?? process.env.PI_TUI_CHAT_MAX_LINES ?? 900) || 900, 5000),
-	);
+	private cachedHeight?: number;
 
 	override render(width: number): string[] {
-		if (this.enableCaching && this.cachedLines && this.cachedWidth === width) {
+		const terminalHeight = process.stdout.rows || 40;
+		// Keep at most 2.5x the terminal height of chat history rendered in TUI to remain extremely fast.
+		// Never let it drop below 35 lines or exceed 250 lines to keep performance ultra-high.
+		const dynamicMaxLines = Math.max(35, Math.min(terminalHeight * 2.5, 250));
+
+		if (
+			this.enableCaching &&
+			this.cachedLines &&
+			this.cachedWidth === width &&
+			this.cachedHeight === terminalHeight
+		) {
 			return this.cachedLines;
 		}
 
 		let lines: string[] = [];
-		if (this.maxLines === 0 || this.children.length === 0) {
+		if (this.children.length === 0) {
 			lines = super.render(width);
 		} else {
 			let hiddenChildren = 0;
 			for (let i = this.children.length - 1; i >= 0; i--) {
 				const childLines = this.children[i].render(width);
-				if (lines.length === 0 && childLines.length > this.maxLines) {
-					lines.unshift(...childLines.slice(-this.maxLines));
+				if (lines.length === 0 && childLines.length > dynamicMaxLines) {
+					lines.unshift(...childLines.slice(-dynamicMaxLines));
 					hiddenChildren = i;
 					break;
 				}
-				if (lines.length + childLines.length > this.maxLines) {
+				if (lines.length + childLines.length > dynamicMaxLines) {
 					hiddenChildren = i + 1;
 					break;
 				}
@@ -194,6 +201,7 @@ class VirtualizedChatContainer extends Container {
 
 		if (this.enableCaching) {
 			this.cachedWidth = width;
+			this.cachedHeight = terminalHeight;
 			this.cachedLines = lines;
 		}
 		return lines;
