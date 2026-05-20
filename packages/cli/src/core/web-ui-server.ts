@@ -21,7 +21,7 @@ const INDEX_HTML = `<!doctype html>
       <div class="logo">
         <div class="logo-circle"></div>
         <b>MoonCode</b>
-        <span class="version-tag">v2.1 Premium</span>
+        <span class="version-tag">2026-Pre16</span>
       </div>
       <nav class="nav-links">
         <button id="tab-sessions" class="nav-btn active">Oturum Geçmişi</button>
@@ -779,6 +779,12 @@ async function loadSession(id){
     if (e.type === 'message' && e.message) {
       const role = e.message.role;
       const contentStr = textOf(e.message.content || e.message.text || e.message);
+      if (role === 'tool') {
+        return \`<div class="msg system-msg">
+          <div class="role">Araç Sonucu</div>
+          <pre>\${escapeHtml(contentStr)}</pre>
+        </div>\`;
+      }
       const roleClass = role === 'user' ? 'user-msg' : 'assistant-msg';
       const roleName = role === 'user' ? 'Kullanıcı' : 'MoonCode';
       return \`<div class="msg \${roleClass}">

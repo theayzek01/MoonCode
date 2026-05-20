@@ -9,7 +9,7 @@
     <img src="https://img.shields.io/badge/VectorDB-FF4500?style=for-the-badge&logo=databricks&logoColor=white" />
     <img src="https://img.shields.io/badge/Autonomous-Engine-blue?style=for-the-badge" />
   </p>
-  <p align="center"><b>Sürüm: 2026-15 (Apex Mode Active)</b></p>
+  <p align="center"><b>Sürüm: 2026-Pre16 (Apex Mode Active)</b></p>
 </div>
 
 <br>
@@ -30,8 +30,8 @@ MoonCode, dünyada ilk kez otonom bir terminal asistanına entegre edilen **3D G
 <br>
 
 <div align="center">
-  <img src="assets/Mooncode update.png" alt="MoonCode v2026-15 TUI Update" width="90%" style="border-radius: 8px; border: 1px solid #1f2030;" />
-  <p><i>v2026-15 Güncellemesi: Yeni Lüks Emojisiz Durum Çubuğu & Ultra-Kararlı Web Entegrasyonu</i></p>
+  <img src="assets/Mooncode update.png" alt="MoonCode v2026-Pre16 TUI Update" width="90%" style="border-radius: 8px; border: 1px solid #1f2030;" />
+  <p><i>v2026-Pre16 Güncellemesi: Yeni Lüks Emojisiz Durum Çubuğu & Ultra-Kararlı Web Entegrasyonu</i></p>
 </div>
 
 <br>
