@@ -5250,41 +5250,55 @@ export class InteractiveMode {
 	}
 
 	private async handleInterfaceCommand(): Promise<void> {
-		const url =
-			"https://www.openui.com/openclaw-os?utm_source=youtube&utm_medium=dedicated_yt&utm_campaign=yusuf_ipek";
-
-		const status = this.session.getBrowserBridgeStatus();
-		const bridgeStatusText = status.running
-			? `BAGLI (${status.clients} eklenti aktif)`
-			: "BAĞLANTI BEKLENİYOR (Eklentiyi yükleyin)";
-
-		const interfaceWelcome = [
-			"┌────────────────────────────────────────────────────────┐",
-			"│           ✦  M O O N C O D E   I N T E R F A C E  ✦      │",
-			"├────────────────────────────────────────────────────────┤",
-			"│  Açık Kaynak Entegrasyon Modeli: OpenClaw OS           │",
-			"│  Hedef Arayüz: https://www.openui.com/openclaw-os      │",
-			"│                                                        │",
-			"│  Özellikler:                                           │",
-			"│  • Generative UI: İsteğe bağlı dinamik arayüzler       │",
-			"│  • Persistent Apps: Canlı verilerle güncellenen yapılar│",
-			"│  • Görsel Kontrol: Tüm araç çağrıları ve log takipleri │",
-			"│                                                        │",
-			`│  Browser Bridge Durumu: ${bridgeStatusText.padEnd(31)}│`,
-			"└────────────────────────────────────────────────────────┘",
-			"",
-			"🚀 Tarayıcı otomatik olarak başlatılıyor ve sayfaya yönlendiriliyor...",
-		].join("\n");
-
-		this.chatContainer.addChild(new Text(interfaceWelcome, 1, 0));
-		this.ui.requestRender();
-
 		try {
-			const opener = process.platform === "win32" ? "cmd" : process.platform === "darwin" ? "open" : "xdg-open";
-			const args = process.platform === "win32" ? ["/c", "start", "", url] : [url];
-			spawnSync(opener, args, { stdio: "ignore", shell: false });
+			const { getBrowserBridgeStatus } = await import("../../core/browser-bridge-server.js");
+			const bridgeStatus = getBrowserBridgeStatus();
+			let url = "http://127.0.0.1:3131";
+
+			if (bridgeStatus.isClientOnly) {
+				url = "http://127.0.0.1:3131";
+			} else {
+				if (!this.webUiProcess) {
+					const server = await import("../../core/web-ui-server.js");
+					this.webUiProcess = server.startWebUiServer({ port: 3131 });
+				}
+				url = this.webUiProcess.url || url;
+			}
+
+			const bridgeStatusText = bridgeStatus.running
+				? `BAGLI (${bridgeStatus.clients} eklenti aktif)`
+				: "BAĞLANTI BEKLENİYOR (Eklentiyi yükleyin)";
+
+			const interfaceWelcome = [
+				"┌────────────────────────────────────────────────────────┐",
+				"│         ✦  M O O N C O D E   O S   I N T E R F A C E ✦  │",
+				"├────────────────────────────────────────────────────────┤",
+				"│  Entegre Geliştirici Arayüzü: MoonCode OS              │",
+				"│  Yerel Adres: http://127.0.0.1:3131                    │",
+				"│                                                        │",
+				"│  Özellikler:                                           │",
+				"│  • Otonom Ajan Yönetimi & Kod Çıktı Takibi             │",
+				"│  • Canlı Workspace, CPU ve Bellek İzleyici             │",
+				"│  • Gelişmiş CSS Tema Editörü (Realtime Sync)           │",
+				"│                                                        │",
+				`│  Browser Bridge Durumu: ${bridgeStatusText.padEnd(31)}│`,
+				"└────────────────────────────────────────────────────────┘",
+				"",
+				"🚀 Yerel MoonCode OS varsayılan tarayıcınızda başlatılıyor...",
+			].join("\n");
+
+			this.chatContainer.addChild(new Text(interfaceWelcome, 1, 0));
+			this.ui.requestRender();
+
+			if (process.platform === "win32") {
+				spawnSync("cmd", ["/c", `start "" "${url}"`], { stdio: "ignore", shell: true });
+			} else if (process.platform === "darwin") {
+				spawnSync("open", [url], { stdio: "ignore" });
+			} else {
+				spawnSync("xdg-open", [url], { stdio: "ignore" });
+			}
 		} catch (err: any) {
-			this.showError(`Tarayıcı açma hatası: ${err.message}`);
+			this.showError(`MoonCode OS açma hatası: ${err.message}`);
 		}
 	}
 
