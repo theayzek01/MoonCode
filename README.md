@@ -120,6 +120,26 @@ echo 'export PATH="'$(npm config get prefix)'/bin:$PATH"' >> ~/.zshrc
 source ~/.zshrc
 ```
 
+### 🔄 MoonCode Güncelleme (Update) Adımları
+
+Eğer projenin yeni bir versiyonu çıktıysa veya güncel kodları çekmek istiyorsanız aşağıdaki komutları sırasıyla çalıştırın:
+
+```bash
+# 1. En güncel kodları GitHub'dan çekin
+git pull origin pr-branch
+
+# 2. Eski build dosyalarını temizleyin ve yeni bağımlılıkları yükleyin
+npm run clean
+npm install
+
+# 3. Projeyi yeniden derleyin
+npm run build
+
+# 4. Global npm link'ini yenileyin
+cd packages/cli
+npm link
+```
+
 <br>
 
 ---
