@@ -795,7 +795,7 @@ export class SettingsManager {
 	getCompactionKeepRecentTokens(): number {
 		const explicit = this.settings.compaction?.keepRecentTokens;
 		if (typeof explicit === "number") return explicit;
-		return this.getCompactionProfile() === "aggressive" ? 12000 : 20000;
+		return this.getCompactionProfile() === "aggressive" ? 8000 : 16000;
 	}
 
 	getCompactionSettings(): {
@@ -873,7 +873,7 @@ export class SettingsManager {
 	}
 
 	getQuietStartup(): boolean {
-		return this.settings.quietStartup ?? false;
+		return this.settings.quietStartup ?? true;
 	}
 
 	setQuietStartup(quiet: boolean): void {
@@ -903,7 +903,7 @@ export class SettingsManager {
 	}
 
 	getCollapseChangelog(): boolean {
-		return this.settings.collapseChangelog ?? false;
+		return this.settings.collapseChangelog ?? true;
 	}
 
 	setCollapseChangelog(collapse: boolean): void {
@@ -1246,12 +1246,12 @@ export class SettingsManager {
 
 	getAgentsSettings(): CodingAgentSettings {
 		const configured = this.settings.agents ?? {};
-		const mode = configured.mode ?? (configured.enabled === false ? "off" : "auto");
+		const mode = configured.mode ?? (configured.enabled ? "auto" : "off");
 		return {
 			...configured,
-			enabled: configured.enabled ?? mode !== "off",
+			enabled: configured.enabled ?? false,
 			mode,
-			verbosity: configured.verbosity ?? "summary",
+			verbosity: configured.verbosity ?? "quiet",
 		};
 	}
 

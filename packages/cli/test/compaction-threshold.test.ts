@@ -7,9 +7,9 @@ describe("compaction threshold", () => {
 		expect(shouldCompact(100_000, 0, { enabled: true, reserveTokens: 32_768, keepRecentTokens: 12_000 })).toBe(true);
 	});
 
-	it("compacts before the hard provider limit", () => {
+	it("compacts well before the hard provider limit", () => {
 		expect(shouldCompact(70_000, 100_000, { enabled: true, reserveTokens: 16_384, keepRecentTokens: 20_000 })).toBe(
-			false,
+			true,
 		);
 		expect(shouldCompact(78_000, 100_000, { enabled: true, reserveTokens: 16_384, keepRecentTokens: 20_000 })).toBe(
 			true,

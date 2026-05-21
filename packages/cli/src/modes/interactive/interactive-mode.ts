@@ -376,6 +376,7 @@ export class InteractiveMode {
 	// Shutdown state
 	private shutdownRequested = false;
 	private webUiProcess: any = undefined;
+	private editorActionListenerRegistered = false;
 
 	// Extension UI state
 	private extensionSelector: ExtensionSelectorComponent | undefined = undefined;
@@ -890,29 +891,89 @@ export class InteractiveMode {
 			try {
 				let promptInput = userInput;
 				const lowerInput = userInput.toLowerCase();
+				const videoEditIntentTerms = [
+					"video edit",
+					"video düzenle",
+					"videoyu düzenle",
+					"videoyu kes",
+					"video kes",
+					"klip kes",
+					"kurgu yap",
+					"montaj yap",
+					"video yap",
+					"short yap",
+					"shorts yap",
+					"short videosu",
+					"tiktok videosu",
+					"reels yap",
+					"altyazı ekle",
+					"otomatik altyazı",
+					"seslendirme ekle",
+					"glitch efekti",
+					"vhs efekti",
+					"cinematic video",
+					"ffmpeg",
+					"render video",
+					"videoeditle",
+				];
+				const photoEditIntentTerms = [
+					"fotoğraf düzenle",
+					"fotoğrafı düzenle",
+					"fotoğraf edit",
+					"photo edit",
+					"resim düzenle",
+					"resmi düzenle",
+					"resmi editle",
+					"görsel düzenle",
+					"görsel editle",
+					"photoeditle",
+					"yüzdeki leke",
+					"lekeleri temizle",
+					"leke temizle",
+					"cildi yumuşat",
+					"cilt yumuşat",
+					"cildi doğal",
+					"gözleri netleştir",
+					"portre gibi",
+					"profesyonel portre",
+					"retouch",
+					"rötuş",
+					"arka planı sil",
+					"background remove",
+					"obje kaldır",
+					"nesne kaldır",
+					"inpaint",
+					"upscale",
+					"görseli kaydet",
+					"png olarak",
+					"jpg olarak",
+				];
+				const hasImageFileHint =
+					/\b(png|jpe?g|webp|gif|bmp|tiff?)\b/i.test(userInput) ||
+					lowerInput.includes("foto") ||
+					lowerInput.includes("resim") ||
+					lowerInput.includes("görsel");
+				const hasVideoFileHint =
+					/\b(mp4|mov|mkv|webm|avi|m4v)\b/i.test(userInput) ||
+					lowerInput.includes("video") ||
+					lowerInput.includes("klip");
 				const isVideo =
-					lowerInput.includes("video edit") ||
-					lowerInput.includes("video düzenle") ||
-					lowerInput.includes("videoyu kes") ||
-					lowerInput.includes("video yap") ||
-					lowerInput.includes("short yap") ||
-					lowerInput.includes("short videosu") ||
-					lowerInput.includes("videoeditle");
+					videoEditIntentTerms.some((term) => lowerInput.includes(term)) ||
+					(hasVideoFileHint &&
+						/\b(kes|cut|trim|split|altyazı|short|reels|render|efekt|filter|filtre)\b/i.test(userInput));
 				const isPhoto =
-					lowerInput.includes("fotoğraf düzenle") ||
-					lowerInput.includes("photo edit") ||
-					lowerInput.includes("fotoğraf edit") ||
-					lowerInput.includes("resim düzenle") ||
-					lowerInput.includes("resmi editle") ||
-					lowerInput.includes("görsel editle") ||
-					lowerInput.includes("photoeditle");
+					photoEditIntentTerms.some((term) => lowerInput.includes(term)) ||
+					(hasImageFileHint &&
+						/\b(leke|cilt|yüz|goz|göz|portre|retouch|rötuş|arka plan|obje|nesne|upscale|netleştir|yumuşat|temizle|renk|lut|kontrast|parlaklık)\b/i.test(
+							userInput,
+						));
 
 				if (isVideo) {
 					await this.handleVideoEditCommand();
 					promptInput = `[Sistem: Kullanıcının talebi üzerine MoonCode Video Studio tarayıcıda otomatik olarak açıldı. Lütfen kullanıcıya video düzenleme konusunda nasıl yardımcı olabileceğini sor ve rehberlik et. Dosya konumları, kesme/cut, efektler, keyframe, altyazı vb. işlemler yapabileceğini ve Browser Bridge üzerinden tarayıcı sekmesini kontrol edebildiğini belirt.]\n\n${userInput}`;
 				} else if (isPhoto) {
 					await this.handlePhotoEditCommand();
-					promptInput = `[Sistem: Kullanıcının talebi üzerine MoonCode Photo Studio tarayıcıda otomatik olarak açıldı. Lütfen kullanıcıya fotoğraf düzenleme konusunda nasıl yardımcı olabileceğini sor ve rehberlik et. Katmanlar, AI arka plan silme, renk ayarları (curves/LUTs), filtreler vb. işlemler yapabileceğini ve Browser Bridge üzerinden tarayıcı sekmesini kontrol edebildiğini belirt.]\n\n${userInput}`;
+					promptInput = `[Sistem: Kullanıcının mesajı profesyonel fotoğraf düzenleme/retouch niyeti taşıyor; MoonCode Photo Studio tarayıcıda otomatik açıldı. Komut yazmasını bekleme. Önce klasördeki uygun görsel dosyayı bul (png/jpg/webp vb.), sonra Photo Studio ve Browser Bridge üzerinden yükleme/işlem akışını yürüt. İstenen işlem örn. yüz lekesi temizleme, cilt yumuşatma, göz netleştirme, profesyonel portre, arka plan/obje kaldırma, LUT/curves/upscale/export olabilir. Gerekirse yalnızca eksik dosya yolu veya export hedefi sor.]\n\n${userInput}`;
 				}
 
 				await this.session.prompt(promptInput);
@@ -5346,17 +5407,101 @@ export class InteractiveMode {
 		}
 	}
 
+	private registerEditorActionListener(server: any): void {
+		if (this.editorActionListenerRegistered || !server?.editorActionsListeners) return;
+		this.editorActionListenerRegistered = true;
+
+		server.editorActionsListeners.add((data: { type: "video" | "photo"; action: string; params: any }) => {
+			const editorName = data.type === "video" ? "Video Studio" : "Photo Studio";
+			const payload = data.params || {};
+			const compactState = JSON.stringify(payload.state || {}, null, 2).slice(0, 4000);
+			const compactParams = JSON.stringify(payload.params || {}, null, 2).slice(0, 2000);
+			const prompt = [
+				`[Sistem: MoonCode ${editorName} tarayıcı arayüzünden profesyonel edit aksiyonu geldi.]`,
+				`Editör: ${data.type}`,
+				`Aksiyon: ${data.action}`,
+				`Parametreler: ${compactParams}`,
+				`Editör state özeti: ${compactState}`,
+				"Kullanıcının istediği işlemi ciddi bir video/fotoğraf edit projesi gibi ele al. Gerekirse dosya yollarını sor; ffmpeg/ImageMagick/yerel araçlar veya mevcut tool'larla uygulanabilir net adımları çıkar; export/render hedefini belirt; tarayıcı editöründeki durumu dikkate al.",
+			].join("\n");
+
+			this.chatContainer.addChild(new Text(`↳ ${editorName} aksiyonu alındı: ${data.action}`, 1, 0));
+			this.ui.requestRender();
+
+			void this.session.prompt(prompt).catch((err: any) => {
+				this.showError(`${editorName} aksiyon hatası: ${err?.message || err}`);
+			});
+		});
+	}
+
+	private async isEditorEndpointReady(url: string): Promise<boolean> {
+		try {
+			const controller = new AbortController();
+			const timer = setTimeout(() => controller.abort(), 1200);
+			const res = await fetch(url, { signal: controller.signal });
+			clearTimeout(timer);
+			if (!res.ok) return false;
+			const text = await res.text();
+			return (
+				text.includes("MoonCode Video Studio") ||
+				text.includes("MoonCode Photo Studio") ||
+				text.includes("MoonCode AI Video Studio") ||
+				text.includes("MoonCode AI Photo Studio")
+			);
+		} catch {
+			return false;
+		}
+	}
+
+	private async ensureEditorServer(server: any, route: "/videoedit" | "/photoedit"): Promise<string> {
+		const ports = [3131, 3132, 3133, 3134, 3135, 3136, 3137, 3138, 3139, 3140];
+
+		if (this.webUiProcess?.url) {
+			const url = `${this.webUiProcess.url}${route}`;
+			if (await this.isEditorEndpointReady(url)) return url;
+			try {
+				this.webUiProcess.server?.close?.();
+			} catch {}
+			this.webUiProcess = undefined;
+		}
+
+		for (const port of ports) {
+			try {
+				const candidate = server.startWebUiServer({ port });
+				await new Promise((resolve) => setTimeout(resolve, 180));
+				const url = `${candidate.url}${route}`;
+				if (await this.isEditorEndpointReady(url)) {
+					this.webUiProcess = candidate;
+					return url;
+				}
+				try {
+					candidate.server?.close?.();
+				} catch {}
+			} catch {
+				// Try next port.
+			}
+		}
+
+		throw new Error(`${route} için çalışan MoonCode Web UI bulunamadı. 3131-3140 portlarını kontrol edin.`);
+	}
+
+	private openEditorUrl(url: string): void {
+		if (process.platform === "win32") {
+			spawnSync("cmd", ["/c", `start "" "${url}"`], { stdio: "ignore", shell: true });
+		} else if (process.platform === "darwin") {
+			spawnSync("open", [url], { stdio: "ignore" });
+		} else {
+			spawnSync("xdg-open", [url], { stdio: "ignore" });
+		}
+	}
+
 	private async handleVideoEditCommand(): Promise<void> {
 		try {
 			const { getBrowserBridgeStatus } = await import("../../core/browser-bridge-server.js");
 			const bridgeStatus = getBrowserBridgeStatus();
-			let url = "http://127.0.0.1:3131/videoedit";
-
-			if (!this.webUiProcess) {
-				const server = await import("../../core/web-ui-server.js");
-				this.webUiProcess = server.startWebUiServer({ port: 3131 });
-			}
-			url = this.webUiProcess.url ? `${this.webUiProcess.url}/videoedit` : url;
+			const server = await import("../../core/web-ui-server.js");
+			this.registerEditorActionListener(server);
+			const url = await this.ensureEditorServer(server, "/videoedit");
 
 			const bridgeStatusText = bridgeStatus.running
 				? `BAGLI (${bridgeStatus.clients} eklenti aktif)`
@@ -5367,7 +5512,7 @@ export class InteractiveMode {
 				"│       ✦  M O O N C O D E   V I D E O   S T U D I O  ✦  │",
 				"├────────────────────────────────────────────────────────┤",
 				"│  MoonCode Pro Video Editor / Yapay Zeka Stüdyosu       │",
-				"│  Yerel Adres: http://127.0.0.1:3131/videoedit          │",
+				`│  Yerel Adres: ${url.padEnd(40)}│`,
 				"│                                                        │",
 				"│  Özellikler:                                           │",
 				"│  • Çoklu Timeline (Kanallar), Split/Cut, Trim          │",
@@ -5384,14 +5529,7 @@ export class InteractiveMode {
 
 			this.chatContainer.addChild(new Text(videoWelcome, 1, 0));
 			this.ui.requestRender();
-
-			if (process.platform === "win32") {
-				spawnSync("cmd", ["/c", `start "" "${url}"`], { stdio: "ignore", shell: true });
-			} else if (process.platform === "darwin") {
-				spawnSync("open", [url], { stdio: "ignore" });
-			} else {
-				spawnSync("xdg-open", [url], { stdio: "ignore" });
-			}
+			this.openEditorUrl(url);
 		} catch (err: any) {
 			this.showError(`MoonCode Video Studio açma hatası: ${err.message}`);
 		}
@@ -5401,13 +5539,9 @@ export class InteractiveMode {
 		try {
 			const { getBrowserBridgeStatus } = await import("../../core/browser-bridge-server.js");
 			const bridgeStatus = getBrowserBridgeStatus();
-			let url = "http://127.0.0.1:3131/photoedit";
-
-			if (!this.webUiProcess) {
-				const server = await import("../../core/web-ui-server.js");
-				this.webUiProcess = server.startWebUiServer({ port: 3131 });
-			}
-			url = this.webUiProcess.url ? `${this.webUiProcess.url}/photoedit` : url;
+			const server = await import("../../core/web-ui-server.js");
+			this.registerEditorActionListener(server);
+			const url = await this.ensureEditorServer(server, "/photoedit");
 
 			const bridgeStatusText = bridgeStatus.running
 				? `BAGLI (${bridgeStatus.clients} eklenti aktif)`
@@ -5418,7 +5552,7 @@ export class InteractiveMode {
 				"│       ✦  M O O N C O D E   P H O T O   S T U D I O  ✦  │",
 				"├────────────────────────────────────────────────────────┤",
 				"│  MoonCode Pro Professional Photo/Graphic Suite         │",
-				"│  Yerel Adres: http://127.0.0.1:3131/photoedit          │",
+				`│  Yerel Adres: ${url.padEnd(40)}│`,
 				"│                                                        │",
 				"│  Özellikler:                                           │",
 				"│  • Katman Yönetimi (Layers), Opacity & Blend Modes    │",
@@ -5435,14 +5569,7 @@ export class InteractiveMode {
 
 			this.chatContainer.addChild(new Text(photoWelcome, 1, 0));
 			this.ui.requestRender();
-
-			if (process.platform === "win32") {
-				spawnSync("cmd", ["/c", `start "" "${url}"`], { stdio: "ignore", shell: true });
-			} else if (process.platform === "darwin") {
-				spawnSync("open", [url], { stdio: "ignore" });
-			} else {
-				spawnSync("xdg-open", [url], { stdio: "ignore" });
-			}
+			this.openEditorUrl(url);
 		} catch (err: any) {
 			this.showError(`MoonCode Photo Studio açma hatası: ${err.message}`);
 		}

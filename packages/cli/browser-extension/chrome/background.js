@@ -1035,7 +1035,11 @@ async function captureScreenshot(tab, args = {}) {
   try {
     dataUrl = await captureWithTimeout();
   } catch (innerErr) {
-    throw new Error(`Screenshot capture failed: ${innerErr.message || String(innerErr)}. Make sure the browser window is active and not on an internal chrome:// page.`);
+    try {
+      dataUrl = await captureScreenshotWithDebugger(tabId, format, quality);
+    } catch (debuggerErr) {
+      throw new Error(`Screenshot capture failed: ${innerErr.message || String(innerErr)}; debugger fallback failed: ${debuggerErr.message || String(debuggerErr)}. Make sure the browser window is active and not on an internal chrome:// page.`);
+    }
   }
   
   const match = /^data:([^;]+);base64,(.*)$/.exec(dataUrl || "");
@@ -1069,6 +1073,26 @@ async function captureScreenshot(tab, args = {}) {
       capturedAt: new Date().toISOString()
     }
   };
+}
+
+async function captureScreenshotWithDebugger(tabId, format, quality) {
+  const target = { tabId };
+  let attached = false;
+  try {
+    await chrome.debugger.attach(target, "1.3");
+    attached = true;
+    const result = await chrome.debugger.sendCommand(target, "Page.captureScreenshot", {
+      format: format === "jpeg" ? "jpeg" : "png",
+      quality: format === "jpeg" ? quality : undefined,
+      fromSurface: true
+    });
+    if (!result?.data) throw new Error("Page.captureScreenshot returned no data");
+    return `data:image/${format};base64,${result.data}`;
+  } finally {
+    if (attached) {
+      try { await chrome.debugger.detach(target); } catch { /* already detached */ }
+    }
+  }
 }
 
 async function getCanvasInfo(tabId) {

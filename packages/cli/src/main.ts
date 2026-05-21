@@ -754,8 +754,10 @@ export async function main(args: string[], options?: MainOptions) {
 		const engineDir = getEngineDir();
 		const memorySignalsFile = resolve(engineDir, "memory-signals.json");
 		const developerProfileFile = resolve(engineDir, "developer-profile.json");
+		const learningExperienceFile = resolve(engineDir, "..", "learning-experience.json");
 		if (existsSync(memorySignalsFile)) rmSync(memorySignalsFile, { force: true });
 		if (existsSync(developerProfileFile)) rmSync(developerProfileFile, { force: true });
+		if (existsSync(learningExperienceFile)) rmSync(learningExperienceFile, { force: true });
 
 		const localConfigDir = resolve(process.cwd(), CONFIG_DIR_NAME);
 		const localMemoryFile = resolve(localConfigDir, "memory-signals.json");
@@ -764,7 +766,7 @@ export async function main(args: string[], options?: MainOptions) {
 		if (existsSync(localProfileFile)) rmSync(localProfileFile, { force: true });
 
 		console.log(`Cleared MoonCode session memory: ${sessionsDir}`);
-		console.log(`Cleared MoonCode global and local memory signals/profiles`);
+		console.log(`Cleared MoonCode global and local memory signals/profiles/lessons`);
 		process.exit(0);
 	}
 
@@ -1022,6 +1024,14 @@ export async function main(args: string[], options?: MainOptions) {
 		if (exitCode !== 0) process.exitCode = exitCode;
 		return;
 	} else if (appMode === "interactive") {
+		if (parsed.messages.length === 0 && !initialMessage) {
+			const { showEpicDashboard } = await import("./cli/dashboard.js");
+			const shouldContinue = await showEpicDashboard(VERSION, process.cwd());
+			if (!shouldContinue) {
+				process.exit(0);
+			}
+		}
+
 		if (scopedModels.length > 0 && (parsed.verbose || !settingsManager.getQuietStartup())) {
 			const modelList = scopedModels
 				.map((sm) => {

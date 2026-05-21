@@ -11,9 +11,8 @@ export interface DeveloperProfile {
 }
 
 /**
- * God-Mode Memory (Style Cloning)
- * Local vector-like persistent storage for the user's coding habits.
- * Remembers exact preferences across sessions so MoonCode perfectly mimics the user's style.
+ * Optional local profile storage for explicit coding preferences.
+ * Disabled by default at the session layer; kept only for callers that opt in.
  */
 export class MemoryProfile {
 	private profilePath: string;
@@ -126,12 +125,11 @@ export class MemoryProfile {
 	}
 
 	/**
-	 * Injects the developer's exact coding style directly into the prompt context.
-	 * This guarantees the LLM writes code the exact way the user wants it.
+	 * Builds an opt-in prompt section for explicit coding preferences.
 	 */
 	public getPromptInjection(): string {
-		let injection = `// MoonCode Developer Profile Injection\n`;
-		injection += `// Follow these EXACT rules when generating code:\n\n`;
+		let injection = `MoonCode developer profile:\n`;
+		injection += `Use only the explicit preferences below.\n\n`;
 
 		if (this.profile.forbiddenPatterns.length > 0) {
 			injection += `NEVER USE THESE PATTERNS:\n`;

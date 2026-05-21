@@ -114,9 +114,9 @@ describe("buildSystemPrompt", () => {
 				cwd: process.cwd(),
 			});
 
-			expect(prompt).toContain("Stay on target");
-			expect(prompt).toContain("fewer tokens");
-			expect(prompt).toContain("acceptance criteria");
+			expect(prompt).toContain("Inspect only what is needed");
+			expect(prompt).toContain("smallest correct change");
+			expect(prompt).toContain("Do not add boilerplate");
 		});
 
 		test("compact mode keeps the same discipline in shorter form", () => {
@@ -128,8 +128,8 @@ describe("buildSystemPrompt", () => {
 				compactMode: true,
 			});
 
-			expect(prompt).toContain("stay on target");
-			expect(prompt).toContain("minimize tokens/output");
+			expect(prompt).toContain("Inspect only what is needed");
+			expect(prompt).toContain("Make the smallest correct change");
 		});
 	});
 

@@ -1,5 +1,5 @@
 export const DEFAULT_UI_STYLE_GUIDELINE =
-	"Default UI taste: unless the user explicitly requests another style, create/modify UI with a premium shadcn/ui + Vercel dark SaaS dashboard aesthetic; respect existing project design systems first.";
+	"Default UI taste: respect the existing project design first; otherwise keep UI plain, stable, responsive, and minimal.";
 
 export const DEFAULT_UI_DESIGN_SYSTEM_PROMPT = `## Default UI Design System
 
@@ -8,29 +8,29 @@ Applies to every UI/frontend/component/dashboard/site MoonCode creates or modifi
 Priority:
 1. User's explicit visual style request wins.
 2. Existing project design system/component conventions win.
-3. MoonCode default applies: premium shadcn/ui + Vercel dark SaaS + Linear/Raycast cleanliness.
+3. MoonCode default applies: plain, stable, responsive, minimal UI.
 
 Visual language:
-- Dark-first near-black background, neutral panels, thin subtle borders, muted text, strong white headings.
-- Rounded cards, clean spacing, restrained accent color, subtle shadows/gradients only when useful.
-- Professional developer/productivity SaaS feel; never childish, random, rainbow, cluttered, or generic.
+- Use the project's existing palette, spacing, typography, and components first.
+- Keep hierarchy clear, spacing predictable, and decoration restrained.
+- Avoid random palettes, gratuitous gradients, nested cards, clutter, and oversized marketing layouts.
 
 Preferred stack when already supported by the project:
-- shadcn/ui components, Radix primitives, Tailwind CSS, Lucide React icons.
-- Recharts for charts; TanStack Table or project-native table solution for data tables.
-- Geist/Inter-style typography if available.
+- Project-native components and utilities.
+- Lucide-style icons only when the project already uses compatible icons.
+- Existing chart/table solutions before adding anything new.
 - Do not add dependencies automatically; emulate the aesthetic with the existing stack if needed.
 
 Dashboard/component quality bar:
-- Include clear page title/description, primary action, responsive layout, search/filter where useful.
-- Use metric cards, tabs, tables/lists, badges, dropdown row actions, dialogs/sheets/forms when relevant.
+- Include clear page title, primary action, responsive layout, search/filter where useful.
+- Use tabs, tables/lists, badges, dialogs/forms only when they serve the workflow.
 - Always consider hover, focus-visible, disabled, loading skeleton, empty, error, selected/active, and mobile states.
 - Use semantic HTML, labels/aria-labels, keyboard-friendly interactions, and readable contrast.
 
-Tailwind feel:
-- rounded-xl/2xl, border border-border, bg-background/bg-card, text-foreground/text-muted-foreground.
-- gap-4/gap-6, p-4/p-6, text-sm for dense UI, text-xl/2xl for page titles.
-- Icons: Lucide-style, sparse, consistent 16/20px, never decorative spam.`;
+Implementation:
+- Prefer small edits to existing components.
+- Do not introduce a new design system unless the user asks for it.
+- Icons should be sparse, consistent, and functional.`;
 
 const UI_TASK_KEYWORDS = [
 	"ui",

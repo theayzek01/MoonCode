@@ -356,7 +356,7 @@ export class EngineSession {
 	private _baseSystemPrompt = "";
 	private _baseSystemPromptOptions!: BuildSystemPromptOptions;
 
-	private _noMemory = false;
+	private _noMemory = true;
 
 	constructor(config: EngineSessionConfig) {
 		this.engine = config.engine;
@@ -373,7 +373,7 @@ export class EngineSession {
 		this._baseToolsOverride = config.baseToolsOverride;
 		this._sessionStartEvent = config.sessionStartEvent ?? { type: "session_start", reason: "startup" };
 		this._mcpManager = config.mcpManager;
-		this._noMemory = config.noMemory ?? false;
+		this._noMemory = config.noMemory ?? true;
 		startBrowserBridgeServer();
 
 		// Always subscribe to engine events for internal handling
@@ -639,8 +639,7 @@ export class EngineSession {
 					this._retryAttempt = 0;
 				}
 
-				// Record successful repair experience in experience memory
-				if (assistantMsg.stopReason !== "error" && this._lastEncounteredError) {
+				if (!this._noMemory && assistantMsg.stopReason !== "error" && this._lastEncounteredError) {
 					const fixText = assistantMsg.content
 						.filter((c) => c.type === "text")
 						.map((c) => c.text)
@@ -1080,8 +1079,7 @@ export class EngineSession {
 			}
 		}
 
-		// Optional heavy reasoning hints. Disabled by default because they add a lot of
-		// prompt tokens and slow down fast/cheap models.
+		// Keep small/local models stable with shorter prompts and fewer assumptions.
 		const currentModel = this.engine.state.model;
 		const isCheapModel =
 			currentModel &&
@@ -1092,26 +1090,23 @@ export class EngineSession {
 				currentModel.id.includes("3.2") ||
 				currentModel.id.includes("llama"));
 
-		if (isCheapModel && process.env.MOON_APEX_PROMPT === "true") {
+		if (isCheapModel) {
 			promptGuidelines.push(
-				"**APEX COGNITIVE BOOST PROTOCOL**: Since you are running in high-performance mode, you must apply the following Claude-4.7-Opus intelligence emulations:",
-				"1. **Step-by-Step Chain-of-Thought**: Before writing any tool call or code, you MUST outline the files, functions, and symbols you will touch, explain why, and list the exact imports/dependencies you need to preserve.",
-				"2. **100% Complete Implementations**: Never write placeholder comments (like '// TODO' or '// rest of code remains the same...'). Write the entire code block fully to prevent data loss.",
-				"3. **Strict Import and Syntax Verification**: Verify that every import path exists, uses correct extensions (e.g. `.js` for TypeScript output if using ESM), and matches exact capitalization.",
-				"4. **Defensive Mutation**: Never delete unrelated user code, unused styles, or comments unless explicitly requested. Keep the existing architecture 100% intact.",
-				"5. **Self-Correction & Syntax Guard**: If a bash tool returns an error or a test fails, do NOT repeat the same change. You must stop, read the exact stderr, trace it to the root cause, and write a completely different fix.",
+				"For local or small models: keep reasoning private, inspect less, edit less, and verify with one focused check.",
+				"Do not emulate another model, add planning boilerplate, or write placeholder code.",
 			);
 		}
 
-		// Inject dynamic experience lessons learned in previous sessions (Machine Learning Loop)
-		try {
-			const memory = LearningMemory.getInstance();
-			const lessons = memory.getLessonsForPrompt(5);
-			if (lessons.length > 0) {
-				promptGuidelines.push("**LEARNED EXPERIENCE MEMORY (Avoid repeating errors)**:", ...lessons);
+		if (!this._noMemory) {
+			try {
+				const memory = LearningMemory.getInstance();
+				const lessons = memory.getLessonsForPrompt(3);
+				if (lessons.length > 0) {
+					promptGuidelines.push("Learned error patterns:", ...lessons);
+				}
+			} catch {
+				// ignore memory load errors
 			}
-		} catch {
-			// ignore memory load errors
 		}
 
 		const loaderSystemPrompt = this._resourceLoader.getSystemPrompt();
@@ -1122,7 +1117,8 @@ export class EngineSession {
 		const loadedContextFiles = this._resourceLoader.getEnginesFiles().enginesFiles;
 
 		const agents = this.settingsManager.getAgentsSettings();
-		const affectivePrompt = buildAffectiveSystemPrompt(this.settingsManager.getAffectiveSettings());
+		const affectiveSettings = this.settingsManager.getAffectiveSettings();
+		const affectivePrompt = affectiveSettings.enabled ? buildAffectiveSystemPrompt(affectiveSettings) : undefined;
 		const automationPrompt = this.settingsManager.getAutomationEnabled()
 			? buildAutomationSystemPrompt(this.settingsManager.getAutomationRequireConfirmation())
 			: undefined;
@@ -1189,13 +1185,7 @@ export class EngineSession {
 		if (!shouldInjectDefaultUiDesignPrompt(userText)) {
 			return this._baseSystemPrompt;
 		}
-		const designPrompt = buildDesignPrompt({ projectRoot: this._cwd, userContext: userText });
-		const apexMarker = "\n\n## APEX MODE";
-		const apexIndex = this._baseSystemPrompt.indexOf(apexMarker);
-		if (apexIndex === -1) {
-			return `${this._baseSystemPrompt}${designPrompt}`;
-		}
-		return `${this._baseSystemPrompt.slice(0, apexIndex)}${designPrompt}${this._baseSystemPrompt.slice(apexIndex)}`;
+		return `${this._baseSystemPrompt}${buildDesignPrompt({ projectRoot: this._cwd, userContext: userText })}`;
 	}
 
 	// =========================================================================
@@ -1407,7 +1397,7 @@ export class EngineSession {
 							content: [
 								{
 									type: "text",
-									text: `✦ MoonCode dynamic router escalated task to **${smartModel.name}** (APEX Thinking High) for complex refactoring/planning.`,
+									text: `MoonCode switched to ${smartModel.name} for this task.`,
 								},
 							],
 							display: true,
@@ -3038,8 +3028,7 @@ export class EngineSession {
 		this._retryAttempt++;
 
 		if (this._retryAttempt > settings.maxRetries) {
-			// Record failure/trap in LearningMemory
-			if (this._lastEncounteredError) {
+			if (!this._noMemory && this._lastEncounteredError) {
 				const lastAttemptText = message.content
 					.filter((c) => c.type === "text")
 					.map((c) => c.text)

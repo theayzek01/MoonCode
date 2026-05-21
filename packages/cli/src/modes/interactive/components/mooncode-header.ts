@@ -33,22 +33,18 @@ export class MoonCodeHeaderComponent extends Container {
 		if (this.cachedLines && this.cachedWidth === width) {
 			return this.cachedLines;
 		}
-		const lines: string[] = [];
+
 		const cwd = this.session?.sessionManager?.getCwd() || "";
 		const project = cwd ? path.basename(cwd) : "";
 		const branch = this.footerData?.getGitBranch() || "";
-		const projBranch = project && branch ? `${project}/${branch}` : project || branch;
-
+		const location = project && branch ? `${project}/${branch}` : project || branch;
 		const parts = [
-			theme.bold(theme.fg("accent", "✦ MoonCode")),
+			theme.bold(theme.fg("accent", "MoonCode")),
 			theme.fg("dim", `v${VERSION}`),
-			projBranch ? theme.fg("muted", projBranch) : undefined,
+			location ? theme.fg("muted", location) : undefined,
 		].filter(Boolean);
 
-		const headerText = parts.join(theme.fg("dim", " · "));
-		lines.push(` ${headerText}`);
-		lines.push(theme.fg("dim", "─".repeat(width)));
-
+		const lines = [` ${parts.join(theme.fg("dim", " | "))}`, theme.fg("dim", "-".repeat(Math.max(0, width)))];
 		this.cachedWidth = width;
 		this.cachedLines = lines;
 		return lines;

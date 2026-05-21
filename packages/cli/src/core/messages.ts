@@ -25,6 +25,29 @@ export const BRANCH_SUMMARY_PREFIX = `Asagidaki, bu konusmanin geri dondugu bir 
 
 export const BRANCH_SUMMARY_SUFFIX = `</summary>`;
 
+const USER_CONTEXT_MAX_CHARS = 16_000;
+const ASSISTANT_CONTEXT_MAX_CHARS = 8_000;
+const TOOL_RESULT_CONTEXT_MAX_CHARS = 6_000;
+const CUSTOM_CONTEXT_MAX_CHARS = 8_000;
+
+function compactContextText(text: string, maxChars: number): string {
+	const optimized = optimizePromptText(text).optimizedText;
+	if (optimized.length <= maxChars) return optimized;
+
+	const headChars = Math.floor(maxChars * 0.65);
+	const tailChars = maxChars - headChars;
+	const skippedChars = optimized.length - maxChars;
+	return `${optimized.slice(0, headChars)}\n\n...[${skippedChars} chars trimmed for context stability]...\n\n${optimized.slice(-tailChars)}`;
+}
+
+function compactTextContent<T extends { type: string; text?: string }>(content: T[], maxChars: number): T[] {
+	return content.map((part) =>
+		part.type === "text" && typeof part.text === "string"
+			? { ...part, text: compactContextText(part.text, maxChars) }
+			: part,
+	);
+}
+
 /**
  * Message type for bash executions via the ! command.
  */
@@ -165,9 +188,11 @@ export function convertToLlm(messages: EngineMessage[]): Message[] {
 				case "custom": {
 					const content =
 						typeof m.content === "string"
-							? [{ type: "text" as const, text: optimizePromptText(m.content).optimizedText }]
+							? [{ type: "text" as const, text: compactContextText(m.content, CUSTOM_CONTEXT_MAX_CHARS) }]
 							: m.content.map((part) =>
-									part.type === "text" ? { ...part, text: optimizePromptText(part.text).optimizedText } : part,
+									part.type === "text"
+										? { ...part, text: compactContextText(part.text, CUSTOM_CONTEXT_MAX_CHARS) }
+										: part,
 								);
 					return {
 						role: "user",
@@ -190,9 +215,26 @@ export function convertToLlm(messages: EngineMessage[]): Message[] {
 						timestamp: m.timestamp,
 					};
 				case "user":
+					return {
+						...m,
+						content:
+							typeof m.content === "string"
+								? compactContextText(m.content, USER_CONTEXT_MAX_CHARS)
+								: compactTextContent(m.content, USER_CONTEXT_MAX_CHARS),
+					};
 				case "assistant":
+					return {
+						...m,
+						content: compactTextContent(
+							m.content.filter((part) => part.type !== "thinking"),
+							ASSISTANT_CONTEXT_MAX_CHARS,
+						),
+					};
 				case "toolResult":
-					return m;
+					return {
+						...m,
+						content: compactTextContent(m.content, TOOL_RESULT_CONTEXT_MAX_CHARS),
+					};
 				default:
 					// biome-ignore lint/correctness/noSwitchDeclarations: fine
 					const _exhaustiveCheck: never = m;
