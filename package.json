@@ -54,7 +54,7 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "version": "2026.16.0-pre16",
+  "version": "2026.11.0-pre18",
   "repository": {
     "type": "git",
     "url": "https://github.com/theayzek01/MoonCode"

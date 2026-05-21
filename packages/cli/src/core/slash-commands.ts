@@ -52,6 +52,8 @@ export const BUILTIN_SLASH_COMMANDS: ReadonlyArray<BuiltinSlashCommand> = [
 	{ name: "index", description: "Index codebase for semantic search" },
 	{ name: "browser", description: "Chrome extension status and control" },
 	{ name: "interface", description: "Open MoonCode Special OpenClaw OS Interface" },
+	{ name: "videoedit", description: "Open MoonCode Pro Video Studio (Browser)" },
+	{ name: "photoedit", description: "Open MoonCode Pro Photo Editor (Browser)" },
 	{ name: "mcp", description: "List connected MCP servers" },
 	{ name: "swarm", description: "Trigger Multi-Agent Swarm" },
 	{ name: "fix", description: "Run Autonomous Auto-Healer" },

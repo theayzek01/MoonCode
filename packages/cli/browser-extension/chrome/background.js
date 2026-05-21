@@ -1,6 +1,6 @@
 const BASE_PORT = 3133;
 const MAX_PORT_OFFSET = 9; // Scan 3133 to 3142
-const VERSION = "2026-12-browser";
+const VERSION = "2026-11-browser";
 const HEARTBEAT_INTERVAL_MS = 20000;
 const RECONNECT_DELAY_MS = 2000;
 const COMMAND_TIMEOUT_MS = 12000;
@@ -190,8 +190,8 @@ function connectToPort(port) {
 }
 
 function broadcast(message) {
-  for (const socket of connections.values()) {
-    sendToSocket(socket, message);
+  for (const conn of connections.values()) {
+    sendToSocket(conn.socket, message);
   }
 }
 
@@ -252,7 +252,7 @@ async function executeTabs(args) {
   if (action === "open") {
     if (!args.url) throw new Error("open requires url");
     const smartUrl = resolveSmartUrl(args.url);
-    const tab = await chrome.tabs.create({ url: smartUrl, active: args.active !== false });
+    const tab = await createTabResilient(smartUrl, args.active !== false);
     return tabSummary(tab);
   }
   if (action === "close") {
@@ -278,7 +278,7 @@ async function executeTabs(args) {
     const smartUrl = resolveSmartUrl(args.url);
     await chrome.tabs.update(tabId, { url: smartUrl, active: args.active !== false });
     await waitForTabReady(tabId);
-    await injectOverlay(tabId, "MoonCode Synchronized");
+    try { await injectOverlay(tabId, "MoonCode Synchronized"); } catch { /* internal/CSP pages are still navigated */ }
     return tabSummary(await chrome.tabs.get(tabId));
   }
   throw new Error(`Unknown tabs action: ${action}`);
@@ -983,7 +983,16 @@ async function captureScreenshot(tab, args = {}) {
   const format = args.format === "jpeg" ? "jpeg" : "png";
   const quality = Math.max(1, Math.min(Number(args.quality) || 85, 100));
 
-  if (!tab.active) await chrome.tabs.update(tabId, { active: true });
+  if (!tab.active) {
+    try {
+      await Promise.race([
+        chrome.tabs.update(tabId, { active: true }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Tab update timeout")), 1500))
+      ]);
+    } catch (e) {
+      // ignore or log
+    }
+  }
   
   let windowId = tab.windowId;
   if (windowId === undefined) {
@@ -997,23 +1006,36 @@ async function captureScreenshot(tab, args = {}) {
   
   if (windowId !== undefined) {
     try {
-      await chrome.windows.update(windowId, { focused: true });
+      await Promise.race([
+        chrome.windows.update(windowId, { focused: true }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Window update timeout")), 1500))
+      ]);
     } catch {
       // ignore
     }
   }
-  await new Promise(r => setTimeout(r, 80));
+  await new Promise(r => setTimeout(r, 100));
 
   const captureOptions = format === "jpeg" ? { format, quality } : { format };
   let dataUrl = "";
+  
+  const captureWithTimeout = async () => {
+    return Promise.race([
+      (async () => {
+        try {
+          return await chrome.tabs.captureVisibleTab(windowId, captureOptions);
+        } catch (err) {
+          return await chrome.tabs.captureVisibleTab(captureOptions);
+        }
+      })(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error("captureVisibleTab call timed out")), 5000))
+    ]);
+  };
+
   try {
-    dataUrl = await chrome.tabs.captureVisibleTab(windowId, captureOptions);
-  } catch (err) {
-    try {
-      dataUrl = await chrome.tabs.captureVisibleTab(captureOptions);
-    } catch (innerErr) {
-      throw new Error(`Screenshot capture failed: ${innerErr.message || String(innerErr)}. Make sure the browser window is active and not on an internal chrome:// page.`);
-    }
+    dataUrl = await captureWithTimeout();
+  } catch (innerErr) {
+    throw new Error(`Screenshot capture failed: ${innerErr.message || String(innerErr)}. Make sure the browser window is active and not on an internal chrome:// page.`);
   }
   
   const match = /^data:([^;]+);base64,(.*)$/.exec(dataUrl || "");
@@ -1303,21 +1325,22 @@ async function waitForTabReady(tabId, timeoutMs = 5000) {
 }
 
 async function evaluateInPage(tabId, expression) {
-  const [result] = await chrome.scripting.executeScript({
-    target: { tabId },
-    func: async (source) => {
-      try {
-        const value = await (0, eval)(source);
-        return { ok: true, value: makeSerializable(value) };
-      } catch (error) {
-        return { ok: false, error: error?.message || String(error) };
-      }
-    },
-    args: [expression]
-  });
-  const payload = result?.result;
-  if (!payload?.ok) throw new Error(payload?.error || "Evaluation error");
-  return payload.value;
+  const didAttach = await attachDebugger(tabId);
+  try {
+    const payload = await chrome.debugger.sendCommand({ tabId }, "Runtime.evaluate", {
+      expression: String(expression),
+      awaitPromise: true,
+      returnByValue: true,
+      userGesture: true
+    });
+    if (payload?.exceptionDetails) {
+      const text = payload.exceptionDetails.text || payload.exceptionDetails.exception?.description || "Evaluation error";
+      throw new Error(text);
+    }
+    return makeSerializable(payload?.result?.value);
+  } finally {
+    if (didAttach) await detachDebugger(tabId);
+  }
 }
 
 async function getConsoleLogs(tabId) {
@@ -1384,10 +1407,30 @@ async function detachDebugger(tabId) {
   debuggerAttachedTabs.delete(tabId);
 }
 
-async function getActiveTab() {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab?.id) throw new Error("No active Chrome tab found");
+async function createTabResilient(url, active = true) {
+  try {
+    const tab = await chrome.tabs.create({ url, active });
+    if (tab?.id) return tab;
+  } catch {
+    // Fall through to new-window fallback for sessions with no normal browser window.
+  }
+
+  const win = await chrome.windows.create({ url, focused: active });
+  const tab = win?.tabs?.find(t => t?.id !== undefined);
+  if (!tab?.id) throw new Error(`Failed to open tab for ${url}`);
   return tab;
+}
+
+async function getActiveTab() {
+  const [focused] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+  if (focused?.id) return focused;
+  const activeTabs = await chrome.tabs.query({ active: true });
+  const active = activeTabs.find(tab => tab.id !== undefined);
+  if (active?.id) return active;
+  const tabs = await chrome.tabs.query({});
+  const fallback = tabs.find(tab => tab.id !== undefined);
+  if (fallback?.id) return fallback;
+  throw new Error("No Chrome tab found");
 }
 
 function requireTabId(args) {
@@ -1412,16 +1455,15 @@ function tabSummary(tab) {
 
 function resolveSmartUrl(url) {
   const trimmed = String(url).trim();
-  if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("about:") || trimmed.startsWith("chrome://")) {
-    return trimmed;
-  }
-  // Check if it's a domain/URL structure (e.g. "google.com" or "localhost:3000")
-  const isUrl = /^[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:[0-9]+)?(\/.*)?$/.test(trimmed)
-    || /^localhost(:[0-9]+)?(\/.*)?$/.test(trimmed);
-  
-  if (isUrl) {
-    return `https://${trimmed}`;
-  }
+  if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) return trimmed;
+
+  const localUrl = /^(localhost|127\.0\.0\.1|0\.0\.0\.0)(:[0-9]+)?(\/.*)?$/i.test(trimmed);
+  if (localUrl) return `http://${trimmed}`;
+
+  // Check if it's a domain/URL structure (e.g. "google.com")
+  const isUrl = /^[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:[0-9]+)?(\/.*)?$/.test(trimmed);
+  if (isUrl) return `https://${trimmed}`;
+
   // Otherwise, treat as Google search query
   return `https://www.google.com/search?q=${encodeURIComponent(trimmed)}`;
 }

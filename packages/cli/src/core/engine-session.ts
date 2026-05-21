@@ -1080,7 +1080,8 @@ export class EngineSession {
 			}
 		}
 
-		// Apply dynamic APEX Cognitive Boost for cheap/Flash models to emulate Claude 4.7 Opus performance
+		// Optional heavy reasoning hints. Disabled by default because they add a lot of
+		// prompt tokens and slow down fast/cheap models.
 		const currentModel = this.engine.state.model;
 		const isCheapModel =
 			currentModel &&
@@ -1091,7 +1092,7 @@ export class EngineSession {
 				currentModel.id.includes("3.2") ||
 				currentModel.id.includes("llama"));
 
-		if (isCheapModel) {
+		if (isCheapModel && process.env.MOON_APEX_PROMPT === "true") {
 			promptGuidelines.push(
 				"**APEX COGNITIVE BOOST PROTOCOL**: Since you are running in high-performance mode, you must apply the following Claude-4.7-Opus intelligence emulations:",
 				"1. **Step-by-Step Chain-of-Thought**: Before writing any tool call or code, you MUST outline the files, functions, and symbols you will touch, explain why, and list the exact imports/dependencies you need to preserve.",
@@ -1140,10 +1141,9 @@ export class EngineSession {
 			}
 		}
 
-		// Ollama veya local model ise compactMode ac - kucuk context window tasarrufu
-		const isLocalModel =
-			currentModel?.provider === "ollama" ||
-			(currentModel?.provider === "openai" && process.env.MOON_COMPACT_PROMPT === "true");
+		// Default to the compact prompt for speed and token efficiency.
+		// Set MOON_FULL_PROMPT=true only when debugging the long prompt itself.
+		const compactPrompt = process.env.MOON_FULL_PROMPT !== "true";
 
 		// Design mode: auto-detect based on project context
 		// Checks for design-systems/ dir or DESIGN.md in project
@@ -1162,7 +1162,7 @@ export class EngineSession {
 			affectivePrompt: [affectivePrompt, automationPrompt].filter(Boolean).join("\n\n") || undefined,
 			roboticsEnabled,
 			roboticsFunctions,
-			compactMode: isLocalModel,
+			compactMode: compactPrompt,
 			designMode,
 		};
 		return buildSystemPrompt(this._baseSystemPromptOptions);

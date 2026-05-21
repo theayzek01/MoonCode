@@ -92,7 +92,7 @@ import { extensionForImageMimeType, readClipboardImage } from "../../utils/clipb
 import { parseGitUrl } from "../../utils/git.js";
 import { getMoonCodeUserEngine } from "../../utils/moon-user-engine.js";
 import { killTrackedDetachedChildren } from "../../utils/shell.js";
-import { ensureTool } from "../../utils/tools-manager.js";
+import { ensureTool, getToolPath } from "../../utils/tools-manager.js";
 import { checkForNewMoonCodeVersion } from "../../utils/version-check.js";
 import { ArminComponent } from "./components/armin.js";
 import { AssistantMessageComponent } from "./components/assistant-message.js";
@@ -656,10 +656,19 @@ export class InteractiveMode {
 		// Load changelog (only show new entries, skip for resumed sessions)
 		this.changelogMarkdown = this.getChangelogForDisplay();
 
-		// Ensure fd and rg are available (downloads if missing, adds to PATH via getBinDir)
-		// Both are needed: fd for autocomplete, rg for grep tool and bash commands
-		const [fdPath] = await Promise.all([ensureTool("fd"), ensureTool("rg")]);
-		this.fdPath = fdPath;
+		// Do not block startup on helper downloads. Use what already exists, then
+		// warm missing tools in the background for autocomplete/search.
+		this.fdPath = getToolPath("fd") ?? undefined;
+		void Promise.all([ensureTool("fd", true), ensureTool("rg", true)])
+			.then(([fdPath]) => {
+				if (fdPath && fdPath !== this.fdPath) {
+					this.fdPath = fdPath;
+					this.setupAutocompleteProvider();
+				}
+			})
+			.catch(() => {
+				// Tool downloads are best-effort; grep/find will report if invoked and unavailable.
+			});
 
 		// Add header container
 		// this.ui.addChild(this.headerContainer); // Removed from here, added before mainLayout
@@ -785,11 +794,12 @@ export class InteractiveMode {
 		}
 		this.renderWidgets();
 		this.ui.addChild(this.widgetContainerAbove);
-		this.ui.addChild(this.editorContainer);
 		this.ui.addChild(this.widgetContainerBelow);
 		if (!this.isZenMode) {
-			this.ui.addChild(this.footer);
+			this.ui.addChild(this.customFooter ?? this.footer);
 		}
+		// Keep composer as the final child so its bottom border stays pinned to the last terminal row.
+		this.ui.addChild(this.editorContainer);
 		this.ui.setFocus(this.editor);
 		this.ui.requestRender();
 	}
@@ -878,7 +888,34 @@ export class InteractiveMode {
 		while (true) {
 			const userInput = await this.getUserInput();
 			try {
-				await this.session.prompt(userInput);
+				let promptInput = userInput;
+				const lowerInput = userInput.toLowerCase();
+				const isVideo =
+					lowerInput.includes("video edit") ||
+					lowerInput.includes("video düzenle") ||
+					lowerInput.includes("videoyu kes") ||
+					lowerInput.includes("video yap") ||
+					lowerInput.includes("short yap") ||
+					lowerInput.includes("short videosu") ||
+					lowerInput.includes("videoeditle");
+				const isPhoto =
+					lowerInput.includes("fotoğraf düzenle") ||
+					lowerInput.includes("photo edit") ||
+					lowerInput.includes("fotoğraf edit") ||
+					lowerInput.includes("resim düzenle") ||
+					lowerInput.includes("resmi editle") ||
+					lowerInput.includes("görsel editle") ||
+					lowerInput.includes("photoeditle");
+
+				if (isVideo) {
+					await this.handleVideoEditCommand();
+					promptInput = `[Sistem: Kullanıcının talebi üzerine MoonCode Video Studio tarayıcıda otomatik olarak açıldı. Lütfen kullanıcıya video düzenleme konusunda nasıl yardımcı olabileceğini sor ve rehberlik et. Dosya konumları, kesme/cut, efektler, keyframe, altyazı vb. işlemler yapabileceğini ve Browser Bridge üzerinden tarayıcı sekmesini kontrol edebildiğini belirt.]\n\n${userInput}`;
+				} else if (isPhoto) {
+					await this.handlePhotoEditCommand();
+					promptInput = `[Sistem: Kullanıcının talebi üzerine MoonCode Photo Studio tarayıcıda otomatik olarak açıldı. Lütfen kullanıcıya fotoğraf düzenleme konusunda nasıl yardımcı olabileceğini sor ve rehberlik et. Katmanlar, AI arka plan silme, renk ayarları (curves/LUTs), filtreler vb. işlemler yapabileceğini ve Browser Bridge üzerinden tarayıcı sekmesini kontrol edebildiğini belirt.]\n\n${userInput}`;
+				}
+
+				await this.session.prompt(promptInput);
 			} catch (error: unknown) {
 				const errorMessage = error instanceof Error ? error.message : "Bilinmeyen bir hata oluştu";
 				this.showError(errorMessage);
@@ -1987,24 +2024,15 @@ export class InteractiveMode {
 			this.customFooter.dispose();
 		}
 
-		// Remove current footer from UI
-		if (this.customFooter) {
-			this.ui.removeChild(this.customFooter);
-		} else {
-			this.ui.removeChild(this.footer);
-		}
-
 		if (factory) {
-			// Create and add custom footer, passing the data provider
+			// Create custom footer, passing the data provider. refreshLayout places it above the composer.
 			this.customFooter = factory(this.ui, theme, this.footerDataProvider);
-			this.ui.addChild(this.customFooter);
 		} else {
 			// Restore built-in footer
 			this.customFooter = undefined;
-			this.ui.addChild(this.footer);
 		}
 
-		this.ui.requestRender();
+		this.refreshLayout();
 	}
 
 	/**
@@ -2758,6 +2786,16 @@ export class InteractiveMode {
 					await this.handleInterfaceCommand();
 					return;
 				}
+				if (text === "/videoedit") {
+					this.editor.setText("");
+					await this.handleVideoEditCommand();
+					return;
+				}
+				if (text === "/photoedit") {
+					this.editor.setText("");
+					await this.handlePhotoEditCommand();
+					return;
+				}
 				if (text === "/robotics" || text.startsWith("/robotics ")) {
 					const args = text.startsWith("/robotics ") ? text.slice(10).trim() : "";
 					this.editor.setText("");
@@ -3256,18 +3294,16 @@ export class InteractiveMode {
 					this.session.abortCompaction();
 				};
 				this.statusContainer.clear();
-				const cancelHint = `(${keyText("app.interrupt")} to cancel)`;
-				const label =
-					event.reason === "manual"
-						? `Compacting context... ${cancelHint}`
-						: `${event.reason === "overflow" ? "Context overflow detected, " : ""}Auto-compacting... ${cancelHint}`;
-				this.autoCompactionLoader = new Loader(
-					this.ui,
-					(spinner) => theme.fg("accent", spinner),
-					(text) => theme.fg("muted", text),
-					label,
-				);
-				this.statusContainer.addChild(this.autoCompactionLoader);
+				if (event.reason === "manual") {
+					const cancelHint = `(${keyText("app.interrupt")} to cancel)`;
+					this.autoCompactionLoader = new Loader(
+						this.ui,
+						(spinner) => theme.fg("accent", spinner),
+						(text) => theme.fg("muted", text),
+						`Compacting context... ${cancelHint}`,
+					);
+					this.statusContainer.addChild(this.autoCompactionLoader);
+				}
 				this.ui.requestRender();
 				break;
 			}
@@ -5310,6 +5346,108 @@ export class InteractiveMode {
 		}
 	}
 
+	private async handleVideoEditCommand(): Promise<void> {
+		try {
+			const { getBrowserBridgeStatus } = await import("../../core/browser-bridge-server.js");
+			const bridgeStatus = getBrowserBridgeStatus();
+			let url = "http://127.0.0.1:3131/videoedit";
+
+			if (!this.webUiProcess) {
+				const server = await import("../../core/web-ui-server.js");
+				this.webUiProcess = server.startWebUiServer({ port: 3131 });
+			}
+			url = this.webUiProcess.url ? `${this.webUiProcess.url}/videoedit` : url;
+
+			const bridgeStatusText = bridgeStatus.running
+				? `BAGLI (${bridgeStatus.clients} eklenti aktif)`
+				: "BAĞLANTI BEKLENİYOR (Eklentiyi yükleyin)";
+
+			const videoWelcome = [
+				"┌────────────────────────────────────────────────────────┐",
+				"│       ✦  M O O N C O D E   V I D E O   S T U D I O  ✦  │",
+				"├────────────────────────────────────────────────────────┤",
+				"│  MoonCode Pro Video Editor / Yapay Zeka Stüdyosu       │",
+				"│  Yerel Adres: http://127.0.0.1:3131/videoedit          │",
+				"│                                                        │",
+				"│  Özellikler:                                           │",
+				"│  • Çoklu Timeline (Kanallar), Split/Cut, Trim          │",
+				"│  • Efektler & Filtreler (AI, Vintage, Glitch, Cinematic)│",
+				"│  • Ses Ekleme, Background Music & Ses Efektleri         │",
+				"│  • Shorts/TikTok (9:16) ve YouTube (16:9) Formatlama    │",
+				"│  • Altyazı Ekleme, Metin Şablonları & Keyframe         │",
+				"│                                                        │",
+				`│  Browser Bridge Durumu: ${bridgeStatusText.padEnd(31)}│`,
+				"└────────────────────────────────────────────────────────┘",
+				"",
+				"🚀 MoonCode Video Studio varsayılan tarayıcınızda başlatılıyor...",
+			].join("\n");
+
+			this.chatContainer.addChild(new Text(videoWelcome, 1, 0));
+			this.ui.requestRender();
+
+			if (process.platform === "win32") {
+				spawnSync("cmd", ["/c", `start "" "${url}"`], { stdio: "ignore", shell: true });
+			} else if (process.platform === "darwin") {
+				spawnSync("open", [url], { stdio: "ignore" });
+			} else {
+				spawnSync("xdg-open", [url], { stdio: "ignore" });
+			}
+		} catch (err: any) {
+			this.showError(`MoonCode Video Studio açma hatası: ${err.message}`);
+		}
+	}
+
+	private async handlePhotoEditCommand(): Promise<void> {
+		try {
+			const { getBrowserBridgeStatus } = await import("../../core/browser-bridge-server.js");
+			const bridgeStatus = getBrowserBridgeStatus();
+			let url = "http://127.0.0.1:3131/photoedit";
+
+			if (!this.webUiProcess) {
+				const server = await import("../../core/web-ui-server.js");
+				this.webUiProcess = server.startWebUiServer({ port: 3131 });
+			}
+			url = this.webUiProcess.url ? `${this.webUiProcess.url}/photoedit` : url;
+
+			const bridgeStatusText = bridgeStatus.running
+				? `BAGLI (${bridgeStatus.clients} eklenti aktif)`
+				: "BAĞLANTI BEKLENİYOR (Eklentiyi yükleyin)";
+
+			const photoWelcome = [
+				"┌────────────────────────────────────────────────────────┐",
+				"│       ✦  M O O N C O D E   P H O T O   S T U D I O  ✦  │",
+				"├────────────────────────────────────────────────────────┤",
+				"│  MoonCode Pro Professional Photo/Graphic Suite         │",
+				"│  Yerel Adres: http://127.0.0.1:3131/photoedit          │",
+				"│                                                        │",
+				"│  Özellikler:                                           │",
+				"│  • Katman Yönetimi (Layers), Opacity & Blend Modes    │",
+				"│  • Smart Retouch, Renk Derecelendirme (LUTs/Curves)    │",
+				"│  • AI Arka Plan Silme & Obje Kaldırma                  │",
+				"│  • Profesyonel Filtreler, Işık & Kontrast Ayarları    │",
+				"│  • Metin Katmanları, Brush Tool & Canvas Boyutlandırma│",
+				"│                                                        │",
+				`│  Browser Bridge Durumu: ${bridgeStatusText.padEnd(31)}│`,
+				"└────────────────────────────────────────────────────────┘",
+				"",
+				"🚀 MoonCode Photo Studio varsayılan tarayıcınızda başlatılıyor...",
+			].join("\n");
+
+			this.chatContainer.addChild(new Text(photoWelcome, 1, 0));
+			this.ui.requestRender();
+
+			if (process.platform === "win32") {
+				spawnSync("cmd", ["/c", `start "" "${url}"`], { stdio: "ignore", shell: true });
+			} else if (process.platform === "darwin") {
+				spawnSync("open", [url], { stdio: "ignore" });
+			} else {
+				spawnSync("xdg-open", [url], { stdio: "ignore" });
+			}
+		} catch (err: any) {
+			this.showError(`MoonCode Photo Studio açma hatası: ${err.message}`);
+		}
+	}
+
 	private handleMoodCommand(args: string): void {
 		const parts = args.split(/\s+/).filter(Boolean);
 		const cmd = parts[0]?.toLowerCase();
@@ -6122,6 +6260,8 @@ export class InteractiveMode {
 				{ name: "/index", desc: "Index codebase for semantic search" },
 				{ name: "/browser", desc: "Chrome extension status and control" },
 				{ name: "/interface", desc: "Open MoonCode Special OpenClaw OS Interface" },
+				{ name: "/videoedit", desc: "Open MoonCode Pro Video Studio (Browser)" },
+				{ name: "/photoedit", desc: "Open MoonCode Pro Photo Editor (Browser)" },
 				{ name: "/mcp", desc: "List connected MCP servers" },
 				{ name: "/swarm", desc: "Trigger Multi-Agent Swarm" },
 				{ name: "/fix", desc: "Run Autonomous Auto-Healer" },

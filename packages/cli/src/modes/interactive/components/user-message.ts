@@ -15,9 +15,9 @@ export class UserMessageComponent extends Container {
 
 	constructor(text: string, markdownTheme: MarkdownTheme = getMarkdownTheme()) {
 		super();
-		this.addChild(new Text(theme.bold(theme.fg("success", "◆ You")), 1, 0));
+		this.addChild(new Text(theme.bold(theme.fg("success", "you")), 0, 0));
 		this.addChild(
-			new Markdown(text, 1, 0, markdownTheme, {
+			new Markdown(text, 0, 0, markdownTheme, {
 				color: (content: string) => theme.fg("userMessageText", content),
 			}),
 		);

@@ -444,35 +444,39 @@ export class Editor implements Component, Focusable {
 
 		const result: string[] = [];
 
-		// Render top border
-		const topCorner = this.focused ? this.borderAccentColor("╭─ ") : this.borderColor("┌─ ");
-		const topLabel = this.focused ? this.borderAccentColor("Prompt ") : this.borderColor("Prompt ");
+		// Render top border. The composer is a full-width frame so its edges never visually drift.
+		const topCorner = this.focused ? this.borderAccentColor("╭─ ") : this.borderColor("╭─ ");
+		const topLabel = this.focused ? this.borderAccentColor("MoonCode ") : this.borderColor("MoonCode ");
+		const rightCorner = this.focused ? this.borderAccentColor("╮") : this.borderColor("╮");
 		const baseHeader = topCorner + topLabel;
-		const baseHeaderLen = 9;
+		const baseHeaderLen = visibleWidth(baseHeader);
 
 		if (this.scrollOffset > 0) {
 			const indicator = `↑ ${this.scrollOffset} more `;
-			const remaining = width - baseHeaderLen - visibleWidth(indicator);
+			const remaining = width - baseHeaderLen - visibleWidth(indicator) - 1;
 			if (remaining >= 0) {
-				result.push(baseHeader + this.borderColor("─".repeat(remaining)) + this.borderColor(indicator));
+				result.push(
+					baseHeader + this.borderColor("─".repeat(remaining)) + this.borderColor(indicator) + rightCorner,
+				);
 			} else {
-				result.push(truncateToWidth(baseHeader + this.borderColor("─".repeat(width)), width));
+				result.push(truncateToWidth(baseHeader + this.borderColor("─".repeat(width)) + rightCorner, width));
 			}
 		} else {
-			const remaining = Math.max(0, width - baseHeaderLen);
-			result.push(baseHeader + this.borderColor("─".repeat(remaining)));
+			const remaining = Math.max(0, width - baseHeaderLen - 1);
+			result.push(baseHeader + this.borderColor("─".repeat(remaining)) + rightCorner);
 		}
 
 		// Render each visible layout line
 		// Emit hardware cursor marker only when focused and not showing autocomplete
 		const emitCursorMarker = this.focused && !this.autocompleteState;
 		const sideBorder = this.focused ? this.borderAccentColor("│ ") : this.borderColor("│ ");
+		const rightBorder = this.focused ? this.borderAccentColor(" │") : this.borderColor(" │");
 
 		const textIsEmpty = this.getText().length === 0;
 
 		if (textIsEmpty) {
 			// Elegant placeholder text inside the input field
-			const placeholder = "Ask MoonCode to inspect, edit, debug, or build. Type / for commands.";
+			const placeholder = "Message MoonCode…  / commands · ! bash";
 			let lineText = this.borderColor(placeholder);
 			const lineLen = visibleWidth(placeholder);
 
@@ -483,7 +487,7 @@ export class Editor implements Component, Focusable {
 			}
 
 			const padding = " ".repeat(Math.max(0, contentWidth - lineLen));
-			result.push(`${sideBorder}${lineText}${padding}  `);
+			result.push(`${sideBorder}${lineText}${padding}${rightBorder}`);
 		} else {
 			for (const layoutLine of visibleLines) {
 				let displayText = layoutLine.text;
@@ -509,7 +513,7 @@ export class Editor implements Component, Focusable {
 				}
 
 				const padding = " ".repeat(Math.max(0, contentWidth - lineVisibleWidth));
-				result.push(`${sideBorder}${displayText}${padding}  `);
+				result.push(`${sideBorder}${displayText}${padding}${rightBorder}`);
 			}
 		}
 
@@ -519,20 +523,26 @@ export class Editor implements Component, Focusable {
 			for (const line of autocompleteResult) {
 				const lineWidth = visibleWidth(line);
 				const linePadding = " ".repeat(Math.max(0, contentWidth - lineWidth));
-				result.push(`${sideBorder}${line}${linePadding}  `);
+				result.push(`${sideBorder}${line}${linePadding}${rightBorder}`);
 			}
 		}
 
 		// Render bottom border
 		const linesBelow = layoutLines.length - (this.scrollOffset + visibleLines.length);
-		const bottomCorner = this.focused ? this.borderAccentColor("╰") : this.borderColor("└");
+		const bottomCorner = this.focused ? this.borderAccentColor("╰") : this.borderColor("╰");
+		const bottomRightCorner = this.focused ? this.borderAccentColor("╯") : this.borderColor("╯");
 
 		if (linesBelow > 0) {
 			const indicator = ` ── ↓ ${linesBelow} more `;
-			const remaining = width - 1 - visibleWidth(indicator);
-			result.push(bottomCorner + this.borderColor("─".repeat(Math.max(0, remaining))) + this.borderColor(indicator));
+			const remaining = width - 2 - visibleWidth(indicator);
+			result.push(
+				bottomCorner +
+					this.borderColor("─".repeat(Math.max(0, remaining))) +
+					this.borderColor(indicator) +
+					bottomRightCorner,
+			);
 		} else {
-			result.push(bottomCorner + this.borderColor("─".repeat(width - 1)));
+			result.push(bottomCorner + this.borderColor("─".repeat(Math.max(0, width - 2))) + bottomRightCorner);
 		}
 
 		return result;

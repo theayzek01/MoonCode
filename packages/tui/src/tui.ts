@@ -920,6 +920,12 @@ export class TUI extends Container {
 		const reset = TUI.SEGMENT_RESET;
 		for (let i = startIndex; i < lines.length; i++) {
 			const line = lines[i];
+			if (line.endsWith(reset)) {
+				continue;
+			}
+			if (this.previousLines && i < this.previousLines.length && line === this.previousLines[i]) {
+				continue;
+			}
 			if (!isImageLine(line)) {
 				lines[i] = normalizeTerminalOutput(line) + reset;
 			}
@@ -932,6 +938,9 @@ export class TUI extends Container {
 		const reset = TUI.SEGMENT_RESET;
 		for (let i = startIndex; i < lines.length; i++) {
 			const line = lines[i];
+			if (this.previousLines && i < this.previousLines.length && line === this.previousLines[i]) {
+				continue;
+			}
 			if (
 				isImageLine(line) ||
 				(line.length <= width && PRINTABLE_ASCII_LINE_REGEX.test(line)) ||

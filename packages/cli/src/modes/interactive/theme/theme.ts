@@ -377,7 +377,7 @@ export class Theme {
 
 	bg(color: ThemeBg, text: string): string {
 		const ansi = this.bgColors.get(color);
-		if (!ansi) throw new Error(`Unknown theme background color: ${color}`);
+		if (!ansi) return text;
 		return `${ansi}${text}\x1b[49m`; // Reset only background color
 	}
 

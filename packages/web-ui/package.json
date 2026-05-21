@@ -1,6 +1,6 @@
 {
   "name": "MoonCode-web-ui",
-  "version": "2026.16.0-pre16",
+  "version": "2026.11.0-pre18",
   "type": "module",
   "private": true,
   "main": "src/server.ts",

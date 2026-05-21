@@ -3,7 +3,7 @@
  * Component for displaying bash command execution with streaming output.
  */
 
-import { Container, Loader, Spacer, Text, type TUI } from "moon-tui";
+import { Container, Loader, Text, type TUI } from "moon-tui";
 import stripAnsi from "strip-ansi";
 import {
 	DEFAULT_MAX_BYTES,
@@ -12,8 +12,8 @@ import {
 	truncateTail,
 } from "../../../core/tools/truncate.js";
 import { theme } from "../theme/theme.js";
-import { DynamicBorder } from "./dynamic-border.js";
 import { keyHint, keyText } from "./keybinding-hints.js";
+import { renderToolFrame, type ToolFrameState } from "./tool-frame.js";
 import { truncateToVisualLines } from "./visual-truncate.js";
 
 // Preview line limit when not expanded (matches tool execution behavior)
@@ -34,17 +34,10 @@ export class BashExecutionComponent extends Container {
 		super();
 		this.command = command;
 
-		// Use dim border for excluded-from-context commands (!! prefix)
+		// Use dim header for excluded-from-context commands (!! prefix)
 		const colorKey = excludeFromContext ? "dim" : "bashMode";
-		const borderColor = (str: string) => theme.fg(colorKey, str);
 
-		// Add spacer
-		this.addChild(new Spacer(1));
-
-		// Top border
-		this.addChild(new DynamicBorder(borderColor));
-
-		// Content container (holds dynamic content between borders)
+		// Content container (wrapped by renderToolFrame in render())
 		this.contentContainer = new Container();
 		this.addChild(this.contentContainer);
 
@@ -60,9 +53,6 @@ export class BashExecutionComponent extends Container {
 			`Running... (cancel: ${keyText("tui.select.cancel")})`, // Plain text for loader
 		);
 		this.contentContainer.addChild(this.loader);
-
-		// Bottom border
-		this.addChild(new DynamicBorder(borderColor));
 	}
 
 	private cachedWidth?: number;
@@ -87,10 +77,21 @@ export class BashExecutionComponent extends Container {
 		if (this.cachedLines && this.cachedWidth === width) {
 			return this.cachedLines;
 		}
-		const lines = super.render(width);
+		const frameWidth = Math.max(8, width);
+		const innerWidth = Math.max(1, frameWidth - 2);
+		const lines = super.render(innerWidth);
+		const state: ToolFrameState =
+			this.status === "running"
+				? "running"
+				: this.status === "error"
+					? "error"
+					: this.status === "cancelled"
+						? "cancelled"
+						: "success";
+		const framed = renderToolFrame("bash", state, lines, frameWidth);
 		this.cachedWidth = width;
-		this.cachedLines = lines;
-		return lines;
+		this.cachedLines = framed;
+		return framed;
 	}
 
 	appendOutput(chunk: string): void {

@@ -5,6 +5,7 @@ import { createAllToolDefinitions, type ToolName } from "../../../core/tools/ind
 import { getTextOutput as getRenderedTextOutput } from "../../../core/tools/render-utils.js";
 import { convertToPng } from "../../../utils/image-convert.js";
 import { theme } from "../theme/theme.js";
+import { renderToolFrame, type ToolFrameState } from "./tool-frame.js";
 
 export interface ToolExecutionOptions {
 	showImages?: boolean;
@@ -61,13 +62,11 @@ export class ToolExecutionComponent extends Container {
 		this.ui = ui;
 		this.cwd = cwd;
 
-		this.addChild(new Spacer(1));
-
 		// Always create all shell variants. contentBox is used for default renderer-based composition.
 		// selfRenderContainer is used when the tool renders its own framing.
 		// contentText is reserved for generic fallback rendering when no tool definition exists.
-		this.contentBox = new Box(1, 1, (text: string) => theme.bg("toolPendingBg", text));
-		this.contentText = new Text("", 1, 1, (text: string) => theme.bg("toolPendingBg", text));
+		this.contentBox = new Box(0, 0, (text: string) => theme.bg("toolPendingBg", text));
+		this.contentText = new Text("", 0, 0, (text: string) => theme.bg("toolPendingBg", text));
 		this.selfRenderContainer = new Container();
 
 		if (this.hasRendererDefinition()) {
@@ -235,10 +234,14 @@ export class ToolExecutionComponent extends Container {
 		if (this.cachedLines && this.cachedWidth === width) {
 			return this.cachedLines;
 		}
-		const lines = super.render(width);
+		const frameWidth = Math.max(8, width);
+		const innerWidth = Math.max(1, frameWidth - 2);
+		const lines = super.render(innerWidth);
+		const state: ToolFrameState = this.isPartial ? "running" : this.result?.isError ? "error" : "success";
+		const framed = renderToolFrame(this.toolName, state, lines, frameWidth);
 		this.cachedWidth = width;
-		this.cachedLines = lines;
-		return lines;
+		this.cachedLines = framed;
+		return framed;
 	}
 
 	private updateDisplay(): void {

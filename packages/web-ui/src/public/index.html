@@ -1,47 +1,125 @@
 <!doctype html>
 <html lang="tr">
 <head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<meta name="theme-color" content="#0f172a" />
-	<title>MoonCode OS Dashboard · Command Center</title>
-	<link rel="stylesheet" href="/style.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MoonCode Premium Dashboard</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-	<div class="cursor-glow" aria-hidden="true"></div>
-	<div id="app">
-		<header class="topbar glass">
-			<div class="brand">
-				<b>MoonCode OS</b>
-				<span>2026-Pre16 · command center</span>
-			</div>
-			<nav>
-				<span class="pill">sessions</span>
-				<span class="pill">chat</span>
-				<span class="pill">stats</span>
-			</nav>
-			<button id="themeToggle" class="btn" type="button">Tema</button>
-		</header>
+  <div id="app">
+    <header class="topbar">
+      <div class="logo">
+        <div class="logo-circle"></div>
+        <b>MoonCode</b>
+        <span class="version-tag">2026-pre18</span>
+      </div>
+      <nav class="nav-links">
+        <button id="tab-sessions" class="nav-btn">Oturum Geçmişi</button>
+        <button id="tab-designer" class="nav-btn active">Tema Tasarımcısı</button>
+      </nav>
+    </header>
 
-		<aside class="glass">
-			<h1>Sessions</h1>
-			<p class="hint">Geçmiş oturumlardan birini seç.</p>
-			<div id="sessions"></div>
-		</aside>
+    <!-- Sessions Tab Content -->
+    <div id="sessions-view" class="tab-content">
+      <div class="workspace-grid">
+        <aside class="sidebar">
+          <div class="sidebar-header">
+            <h2>Aktif Oturumlar</h2>
+            <p class="hint">İncelemek istediğiniz oturumu seçin</p>
+          </div>
+          <div id="sessions"></div>
+        </aside>
+        
+        <main class="chat-area">
+          <div id="chat" class="panel empty">Lütfen sol panelden bir oturum seçin.</div>
+        </main>
+        
+        <section class="stats-panel">
+          <h2>Telemetri ve İstatistikler</h2>
+          <pre id="stats">-</pre>
+        </section>
+      </div>
+    </div>
 
-		<main class="glass">
-			<div class="panel-meta">
-				<strong>Live</strong>
-				<span id="liveMouse" class="muted">Mouse: x:0 y:0</span>
-			</div>
-			<div id="chat" class="panel empty">Oturum seç</div>
-		</main>
+    <!-- Designer Tab Content -->
+    <div id="designer-view" class="tab-content active">
+      <div class="designer-grid">
+        <aside class="designer-controls card">
+          <h3>Hazır Stil Şablonları</h3>
+          <div class="preset-buttons">
+            <button class="preset-btn active" data-preset="brutalist">Neo Brutalist</button>
+            <button class="preset-btn" data-preset="minimalist">Zen Minimalist</button>
+            <button class="preset-btn" data-preset="editorial">High Editorial</button>
+            <button class="preset-btn" data-preset="softwarm">Soft Warm</button>
+            <button class="preset-btn" data-preset="techutility">Tech Utility</button>
+          </div>
 
-		<section class="glass">
-			<h2>Stats</h2>
-			<pre id="stats">-</pre>
-		</section>
-	</div>
-	<script src="/app.js"></script>
+          <h3 style="margin-top: 24px;">HSL İnce Renk Ayarları</h3>
+          <div class="slider-group">
+            <div class="slider-label"><span>Ana Renk Tonu (Hue)</span><span id="hue-val">160°</span></div>
+            <input type="range" id="hue" min="0" max="360" value="160" class="slider" />
+          </div>
+          <div class="slider-group">
+            <div class="slider-label"><span>Doygunluk (Saturation)</span><span id="sat-val">60%</span></div>
+            <input type="range" id="sat" min="0" max="100" value="60" class="slider" />
+          </div>
+          <div class="slider-group">
+            <div class="slider-label"><span>Aydınlık (Lightness)</span><span id="light-val">50%</span></div>
+            <input type="range" id="light" min="10" max="90" value="50" class="slider" />
+          </div>
+
+          <div class="color-palette-preview">
+            <h4>Üretilen Renk Paleti</h4>
+            <div class="palette-swatches">
+              <div class="swatch bg" title="Arka Plan">bg</div>
+              <div class="swatch panel" title="Panel">pnl</div>
+              <div class="swatch primary" title="Birincil Vurgu">pri</div>
+              <div class="swatch secondary" title="İkincil Vurgu">sec</div>
+              <div class="swatch border" title="Kenarlık/Çizgi">bor</div>
+            </div>
+          </div>
+        </aside>
+
+        <main class="designer-preview card">
+          <div class="preview-header">
+            <h3>Bileşen Canlı Önizlemesi</h3>
+            <span class="preview-badge">Etkileşimli Panel</span>
+          </div>
+          
+          <div class="preview-container" id="preview-frame">
+            <div class="preview-card">
+              <span class="p-badge">Öne Çıkan Bileşen</span>
+              <h2 class="p-title">MoonCode Tasarım Sistemi</h2>
+              <p class="p-text">Bu önizleme, üretilen HSL değişkenlerinin gerçek zamanlı olarak bileşenlere uygulanmasını gösterir. Değerleri değiştirmek için kaydırıcıları sürükleyebilir veya hazır şablonları seçebilirsiniz.</p>
+              
+              <div class="p-alert">
+                <span class="p-alert-icon">✦</span>
+                <span class="p-alert-text">Tema renk değerleri başarıyla senkronize edildi.</span>
+              </div>
+
+              <div class="p-actions">
+                <button class="p-btn primary">Etkileşime Geç</button>
+                <button class="p-btn secondary">Kapat</button>
+              </div>
+            </div>
+          </div>
+        </main>
+
+        <section class="designer-export card">
+          <h3>MoonCode Yapay Zeka İstemi (AI Prompt)</h3>
+          <p class="hint">Bu istemi kopyalayıp MoonCode'a ileterek seçtiğiniz tasarımı tüm projenize uygulamasını isteyebilirsiniz.</p>
+          <div class="code-container">
+            <button class="copy-btn" id="copy-theme-btn">İstemi Kopyala</button>
+            <textarea id="prompt-code" readonly style="width: 100%; height: 280px; background: #000000; color: #10b981; border: 1px solid var(--line); border-radius: 8px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; resize: none; outline: none;"></textarea>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+  <script src="/app.js"></script>
 </body>
 </html>

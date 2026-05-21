@@ -100,7 +100,7 @@ export class AssistantMessageComponent extends Container {
 
 		// Initialize label if needed
 		if (hasVisibleContent && this.contentContainer.children.length === 0) {
-			this.contentContainer.addChild(new Text(theme.bold(theme.fg("accent", "✦ MoonCode")), 1, 0));
+			this.contentContainer.addChild(new Text(theme.bold(theme.fg("accent", "moon")), 0, 0));
 		}
 
 		// Keep track of which content blocks we've rendered
@@ -115,7 +115,7 @@ export class AssistantMessageComponent extends Container {
 
 				if (!(component instanceof Markdown) || (component as any).isThinking) {
 					// Need a new text Markdown component
-					component = new Markdown(text, 1, 0, this.markdownTheme);
+					component = new Markdown(text, 0, 0, this.markdownTheme);
 					this.contentContainer.children[childIndex] = component;
 				} else {
 					component.setText(text);
@@ -127,14 +127,14 @@ export class AssistantMessageComponent extends Container {
 				if (this.hideThinkingBlock) {
 					let component = this.contentContainer.children[childIndex] as Text | undefined;
 					if (!(component instanceof Text)) {
-						component = new Text(theme.italic(theme.fg("thinkingText", this.hiddenThinkingLabel)), 1, 0);
+						component = new Text(theme.italic(theme.fg("thinkingText", this.hiddenThinkingLabel)), 0, 0);
 						this.contentContainer.children[childIndex] = component;
 					}
 					childIndex++;
 				} else {
 					let component = this.contentContainer.children[childIndex] as Markdown | undefined;
 					if (!(component instanceof Markdown) || !(component as any).isThinking) {
-						component = new Markdown(thinking, 1, 0, this.markdownTheme, {
+						component = new Markdown(thinking, 0, 0, this.markdownTheme, {
 							color: (text: string) => theme.fg("thinkingText", text),
 							italic: true,
 						});
@@ -164,11 +164,11 @@ export class AssistantMessageComponent extends Container {
 						? message.errorMessage
 						: "Operation cancelled";
 				this.contentContainer.addChild(new Spacer(1));
-				this.contentContainer.addChild(new Text(theme.fg("error", abortMessage), 1, 0));
+				this.contentContainer.addChild(new Text(theme.fg("error", abortMessage), 0, 0));
 			} else if (message.stopReason === "error") {
 				const errorMsg = message.errorMessage || "Bilinmeyen hata";
 				this.contentContainer.addChild(new Spacer(1));
-				this.contentContainer.addChild(new Text(theme.fg("error", `Error: ${errorMsg}`), 1, 0));
+				this.contentContainer.addChild(new Text(theme.fg("error", `Error: ${errorMsg}`), 0, 0));
 			}
 		}
 	}

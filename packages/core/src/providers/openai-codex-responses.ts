@@ -169,7 +169,7 @@ export const streamOpenAICodexResponses: StreamFunction<"openai-codex-responses"
 			const transport = options?.transport || "auto";
 
 			if (transport !== "sse") {
-				let websocketStarted = false;
+				let _websocketStarted = false;
 				try {
 					await processWebSocketStream(
 						resolveCodexWebSocketUrl(model.baseUrl),
@@ -179,7 +179,7 @@ export const streamOpenAICodexResponses: StreamFunction<"openai-codex-responses"
 						stream,
 						model,
 						() => {
-							websocketStarted = true;
+							_websocketStarted = true;
 						},
 						options,
 					);
@@ -195,9 +195,10 @@ export const streamOpenAICodexResponses: StreamFunction<"openai-codex-responses"
 					stream.end();
 					return;
 				} catch (error) {
-					if (transport === "websocket" || transport === "websocket-cached" || websocketStarted) {
+					if (transport === "websocket" || transport === "websocket-cached") {
 						throw error;
 					}
+					_websocketStarted = false;
 				}
 			}
 
