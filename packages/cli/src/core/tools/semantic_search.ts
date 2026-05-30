@@ -16,7 +16,7 @@ const semanticSearchSchema = Type.Object({
 // git grep fallback - index hazır değilse veya hata olursa
 function gitGrepFallback(cwd: string, query: string, signal?: AbortSignal): Promise<string> {
 	return new Promise((resolve, reject) => {
-		const child = spawn("git", ["grep", "-i", "-n", "-C", "2", query], {
+		const child = spawn("git", ["grep", "-i", "-n", "-C", "1", query], {
 			cwd,
 			env: getShellEnv(),
 			shell: true,
@@ -53,50 +53,45 @@ export function createSemanticSearchToolDefinition(cwd: string): ToolDefinition<
 		name: "semantic_search",
 		label: "semantic_search",
 		description:
-			"Smart semantic project-wide search. Uses TF-IDF codebase indexing to find functions, classes, variables, and logic.",
-		promptSnippet: "Search smart semantic project context (codebase RAG)",
+			"BM25 semantic codebase search. Returns file:line locations and symbols. Use read tool for full content.",
+		promptSnippet: "Search semantic project context (BM25 RAG)",
 		parameters: semanticSearchSchema,
 		async execute(_id, { query }, signal) {
 			if (signal?.aborted) throw new Error("aborted");
 
 			try {
-				// Önce RAG engine'i dene
-				const results = searchProject(cwd, query, 8);
+				// BM25 semantic RAG - limit 5, snippet-only (az token)
+				const results = searchProject(cwd, query, 5);
 
 				if (results.length > 0) {
 					const formatted = formatSearchResults(results);
-					const truncation = truncateTail(formatted, { maxLines: 500 });
+					const truncation = truncateTail(formatted, { maxLines: 80 });
 					return {
 						content: [{ type: "text", text: truncation.content || "" }],
 					};
 				}
 
-				// RAG sonuç bulamadıysa git grep fallback
+				// RAG sonuç bulamadıysa git grep fallback (kısa)
 				const grepOutput = await gitGrepFallback(cwd, query, signal);
 				if (!grepOutput.trim()) {
 					return {
 						content: [{ type: "text", text: `"${query}" matched no results.` }],
 					};
 				}
-				const truncation = truncateTail(grepOutput, { maxLines: 500 });
+				const truncation = truncateTail(grepOutput, { maxLines: 80 });
 				return {
 					content: [{ type: "text", text: truncation.content || "" }],
 				};
 			} catch (err) {
 				if (err instanceof Error && err.message === "aborted") throw err;
 
-				// Herhangi bir hata olursa git grep'e düş
 				try {
 					const grepOutput = await gitGrepFallback(cwd, query, signal);
 					if (!grepOutput.trim()) {
-						return {
-							content: [{ type: "text", text: `"${query}" matched no results.` }],
-						};
+						return { content: [{ type: "text", text: `"${query}" matched no results.` }] };
 					}
-					const truncation = truncateTail(grepOutput, { maxLines: 500 });
-					return {
-						content: [{ type: "text", text: truncation.content || "" }],
-					};
+					const truncation = truncateTail(grepOutput, { maxLines: 80 });
+					return { content: [{ type: "text", text: truncation.content || "" }] };
 				} catch {
 					return {
 						content: [

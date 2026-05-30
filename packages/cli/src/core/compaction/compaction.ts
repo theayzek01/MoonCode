@@ -228,14 +228,14 @@ export function shouldCompact(contextTokens: number, contextWindow: number, sett
 
 	// If we want nearly 0 cost, we should aggressively compact when context reaches a ceiling.
 	// We set a hard ceiling depending on the compaction profile:
-	// - aggressive: compact if context reaches 25,000 tokens (highly optimized for low cost & fast speed)
-	// - balanced: compact if context reaches 50,000 tokens
+	// - aggressive: compact if context reaches 10,000 tokens (highly optimized for low cost & fast speed)
+	// - balanced: compact if context reaches 25,000 tokens
 	// - default/conservative: wait until window limit
 	let profileCeiling = Infinity;
 	if (settings.profile === "aggressive") {
-		profileCeiling = 25_000;
+		profileCeiling = 10_000;
 	} else if (settings.profile === "balanced" || !settings.profile) {
-		profileCeiling = 50_000;
+		profileCeiling = 25_000;
 	}
 
 	// Trigger at the safer of: reserved-output boundary or profile ceiling.

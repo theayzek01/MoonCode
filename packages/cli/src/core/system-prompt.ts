@@ -314,7 +314,12 @@ function buildCompactSystemPrompt(options: BuildSystemPromptOptions): string {
 	const { cwd, selectedTools, toolSnippets, contextFiles, skills, appendSystemPrompt, affectivePrompt } = options;
 	const promptCwd = cwd.replace(/\\/g, "/");
 	const now = new Date();
-	const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+	const d =
+		now.getFullYear() +
+		"-" +
+		String(now.getMonth() + 1).padStart(2, "0") +
+		"-" +
+		String(now.getDate()).padStart(2, "0");
 
 	const tools = selectedTools || ["read", "bash", "edit", "write"];
 	const visibleTools = tools.filter((n) => !!toolSnippets?.[n]);
@@ -324,45 +329,52 @@ function buildCompactSystemPrompt(options: BuildSystemPromptOptions): string {
 			: "read, bash, edit, write";
 
 	const hasBrowser = tools.includes("browser_tabs") || tools.includes("browser_page");
-	const hasCodebaseIndex = tools.includes("codebase_index");
-	let prompt = `MoonCode.
-Slogan: En minimal. En akilli. En az token. En sade.
-Tools: ${toolsList}
-Rules:
-- Inspect only what is needed.
-- Make the smallest correct change.
-- Avoid boilerplate, placeholder code, decorative abstractions, and unrelated rewrites.
-- Prefer removing complexity over adding code.
-- Verify with the cheapest real check.
-- Keep answers short.
-- Preserve user changes. Ask before destructive ops. Mask secrets.
-${hasBrowser ? "- Browser bridge is available when connected.\n" : ""}${hasCodebaseIndex ? "- Use codebase_index only when search is stale or weak.\n" : ""}UI: existing design wins; default to plain, stable terminal output.`;
+	const hasSemanticSearch = tools.includes("semantic_search");
+	const browserLine = hasBrowser ? "\n- Browser bridge available when connected." : "";
+	const searchLine = hasSemanticSearch
+		? "\n- semantic_search finds candidates only. Always verify against source files."
+		: "";
 
-	if (appendSystemPrompt) {
-		prompt += `\n\n${appendSystemPrompt}`;
-	}
+	// Brain.md distilled: uncertainty-reduction engine, minimal token footprint.
+	// Every rule is an invariant from brain.md — not decoration.
+	const lines = [
+		"You are MoonCode. Created by Theayzek. Do not introduce yourself unless asked.",
+		`Tools: ${toolsList}`,
+		`Date: ${d} | Cwd: ${promptCwd}`,
+		"",
+		"## Directives",
+		"- Reduce uncertainty. Every action must answer a question or repair an invariant.",
+		"- Read only what the current task requires. Never scan randomly.",
+		"- Smallest correct change. Minimal = precision, not laziness.",
+		"- Verify with cheapest real check (build/test/typecheck). Never claim done without it.",
+		"- Preserve user changes. Ask before destructive ops. Mask secrets.",
+		"- Short answers. No filler, no motivation, no over-explaining.",
+		`- Match user language: Turkish in -> Turkish out. Casual -> casual.${browserLine}${searchLine}`,
+		"",
+		"## Workflow",
+		"Inspect minimum -> hypothesis -> smallest change -> verify -> report.",
+		"Done. Changed: <file>. Verified: <result>. Notes: <risk if any>.",
+		"",
+		"## UI",
+		"Existing design wins. Default: plain, stable terminal output.",
+	];
 
-	if (affectivePrompt) {
-		prompt += `\n\n${affectivePrompt}`;
-	}
+	let out = lines.join("\n");
 
-	// Context dosyalarini ekle (varsa, kisa tut)
+	if (appendSystemPrompt) out += "\n\n" + appendSystemPrompt;
+	if (affectivePrompt) out += "\n\n" + affectivePrompt;
+
 	const contextFiles_ = contextFiles ?? [];
 	if (contextFiles_.length > 0) {
-		prompt += "\n\nProject context:";
+		out += "\n\nContext (first 10 lines; read full on demand):";
 		for (const { path: filePath, content } of contextFiles_) {
-			// Keep context cheap by default; detailed files can still be read on demand.
-			const trimmed = content.split("\n").slice(0, 12).join("\n");
-			prompt += `\n## ${filePath}\n${trimmed}`;
+			const trimmed = content.split("\n").slice(0, 10).join("\n");
+			out += `\n## ${filePath}\n${trimmed}`;
 		}
 	}
 
-	// Skills'i ekle (varsa)
 	const skills_ = skills ?? [];
-	if (skills_.length > 0) {
-		prompt += formatSkillsForPrompt(skills_);
-	}
+	if (skills_.length > 0) out += formatSkillsForPrompt(skills_);
 
-	prompt += `\nDate: ${date} | Cwd: ${promptCwd}`;
-	return prompt;
+	return out;
 }

@@ -1188,6 +1188,24 @@ export class EngineSession {
 		return `${this._baseSystemPrompt}${buildDesignPrompt({ projectRoot: this._cwd, userContext: userText })}`;
 	}
 
+	private _determineActiveToolsForPrompt(text: string): string[] {
+		const lower = text.trim().toLowerCase();
+		const defaultTools = this._baseToolsOverride
+			? Object.keys(this._baseToolsOverride)
+			: ["read", "bash", "edit", "write", "git_ship", "browser_tabs", "browser_page"];
+
+		const hasCodingKeywords =
+			lower.length > 50 ||
+			/read|cat|view|edit|write|replace|modify|update|change|create|delete|remove|make|file|folder|dir|directory|find|grep|search|rg|bash|run|exec|cmd|command|git|ship|commit|push|pr|branch|diff|status|browser|tab|page|click|open|chrome|url|website|site|test|build|compile|npm|pnpm|yarn|bun|node/i.test(
+				lower,
+			);
+
+		if (!hasCodingKeywords) {
+			return ["read"];
+		}
+		return defaultTools;
+	}
+
 	// =========================================================================
 	// Agent System
 	// =========================================================================
@@ -1523,6 +1541,9 @@ export class EngineSession {
 				messages.push(msg);
 			}
 			this._pendingNextTurnMessages = [];
+
+			const dynamicTools = this._determineActiveToolsForPrompt(expandedText);
+			this.setActiveToolsByName(dynamicTools);
 
 			const turnSystemPrompt = this._buildTurnSystemPrompt(expandedText);
 

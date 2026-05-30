@@ -789,13 +789,13 @@ export class SettingsManager {
 	getCompactionReserveTokens(): number {
 		const explicit = this.settings.compaction?.reserveTokens;
 		if (typeof explicit === "number") return explicit;
-		return this.getCompactionProfile() === "aggressive" ? 32768 : 16384;
+		return this.getCompactionProfile() === "aggressive" ? 4096 : 8192;
 	}
 
 	getCompactionKeepRecentTokens(): number {
 		const explicit = this.settings.compaction?.keepRecentTokens;
 		if (typeof explicit === "number") return explicit;
-		return this.getCompactionProfile() === "aggressive" ? 8000 : 16000;
+		return this.getCompactionProfile() === "aggressive" ? 3000 : 8000;
 	}
 
 	getCompactionSettings(): {
