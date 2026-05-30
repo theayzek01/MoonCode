@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "MoonCode",
-  "version": "2026.21.0",
-  "version_name": "2026-21",
+  "version": "2026.23.0",
+  "version_name": "2026-v23",
   "description": "Connects Chrome tabs to MoonCode.",
   "permissions": [
     "tabs",
