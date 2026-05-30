@@ -2,14 +2,14 @@
   <img src="assets/MooncodeWhiteBanner.png" alt="MoonCode Banner" width="100%" />
   <br />
   <p>
-    <b>MoonCode v2026-20</b><br />
+    <b>MoonCode v2026-21</b><br />
     Terminal tabanlı, minimal ve akıllı otonom yazılım geliştirme ajanı.
   </p>
   <p>
     <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white" />
     <img src="https://img.shields.io/badge/Node.js-339933?style=flat&logo=nodedotjs&logoColor=white" />
     <img src="https://img.shields.io/badge/CLI-000000?style=flat" />
-    <img src="https://img.shields.io/badge/Version-2026--20-blue?style=flat" />
+    <img src="https://img.shields.io/badge/Version-2026--21-blue?style=flat" />
   </p>
 </div>
 

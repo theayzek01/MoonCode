@@ -1,6 +1,6 @@
 const BASE_PORT = 3133;
 const MAX_PORT_OFFSET = 9; // Scan 3133 to 3142
-const VERSION = "2026-11-browser";
+const VERSION = "2026-21-browser";
 const HEARTBEAT_INTERVAL_MS = 20000;
 const RECONNECT_DELAY_MS = 2000;
 const COMMAND_TIMEOUT_MS = 12000;
