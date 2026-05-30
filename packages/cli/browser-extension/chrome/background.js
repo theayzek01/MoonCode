@@ -105,179 +105,89 @@ function startDiscovery() {
   startHeartbeat();
 }
 
-// Retry timers per port
-const retryTimers = new Map();
-
-function scheduleRetry(port) {
-  if (retryTimers.has(port)) return;
-  const t = setTimeout(() => {
-    retryTimers.delete(port);
-    connectToPort(port);
-  }, RECONNECT_DELAY_MS);
-  retryTimers.set(port, t);
-}
-
 function connectToPort(port) {
   if (connections.has(port) || connectingPorts.has(port)) return;
-  if (retryTimers.has(port)) return;
 
   connectingPorts.add(port);
   updateBadge();
 
+  const url = `ws://127.0.0.1:${port}/ws`;
   let socket;
   try {
-    socket = new WebSocket('ws://127.0.0.1:' + port + '/ws');
+    socket = new WebSocket(url);
   } catch (e) {
     connectingPorts.delete(port);
-    scheduleRetry(port);
     return;
   }
 
-  let opened = false;
-  let finished = false;
-
-  const cleanup = () => {
-    if (finished) return;
-    finished = true;
-    connections.delete(port);
-    connectingPorts.delete(port);
-    updateBadge();
-    scheduleRetry(port);
-  };
-
   socket.onopen = () => {
-    opened = true;
     connectingPorts.delete(port);
-    connections.set(port, { socket, info: null });
+    connections.set(port, { 
+      socket,
+      info: {
+        version: "Connecting...",
+        capabilities: [],
+        extensionId: "N/A",
+        connectedAt: Date.now()
+      }
+    });
     updateBadge();
-    console.log('[Moon] Connected ' + port);
+    console.log(`[Moon] Connected to port ${port}`);
     sendToSocket(socket, {
-      type: 'hello',
-      extensionId: chrome.runtime.id || 'N/A',
+      type: "hello",
+      extensionId: chrome.runtime.id || "N/A",
       version: VERSION,
-      capabilities: ['tabs','page','debugger','scroll','smart_scroll','mouse','canvas_info','canvas_draw',
-        'console_logs','screenshot','read_dom','hover','drag','upload_file','press_key','get_elements','evaluate','clear_ui']
+      capabilities: ["tabs", "page", "debugger", "scroll", "smart_scroll", "mouse", "canvas_info", "canvas_draw",
+        "console_logs", "screenshot", "read_dom", "hover", "drag", "upload_file", "press_key", "get_elements", "evaluate", "clear_ui"]
     });
   };
 
   socket.onclose = () => {
-    if (opened) console.log('[Moon] Disconnected ' + port);
-    cleanup();
+    connections.delete(port);
+    connectingPorts.delete(port);
+    updateBadge();
+    // Aggressive retry if we have no connections at all
+    const activeCount = Array.from(connections.values()).filter(c => c.info).length;
+    if (activeCount === 0) {
+      setTimeout(() => connectToPort(port), RECONNECT_DELAY_MS);
+    }
   };
 
   socket.onerror = () => {
-    if (!opened) {
-      connectingPorts.delete(port);
-      connections.delete(port);
-      finished = true;
-      updateBadge();
-      scheduleRetry(port);
-    }
-  };st VERSION = "2026-11-browser";
-const HEARTBEAT_INTERVAL_MS = 20000;
-const RECONNECT_DELAY_MS = 2000;
-const COMMAND_TIMEOUT_MS = 12000;
-const MAX_TABS_RETURNED = 100;
-const ALARM_NAME = "mooncode-bridge-reconnect";
+    connectingPorts.delete(port);
+    updateBadge();
+  };
 
-/** @type {Map<number, { socket: WebSocket, info?: any }>} */
-let connections = new Map();
-/** @type {Set<number>} */
-let connectingPorts = new Set();
-const debuggerAttachedTabs = new Set();
-let heartbeatTimer = null;
+  socket.onmessage = async (event) => {
+    let message;
+    try { message = JSON.parse(event.data); } catch { return; }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
-chrome.runtime.onStartup.addListener(startDiscovery);
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.alarms.create(ALARM_NAME, { periodInMinutes: 1 });
-  
-  // Cleanup old context menus first to avoid errors on reload
-  chrome.contextMenus.removeAll(() => {
-    chrome.contextMenus.create({
-      id: "mooncode-ingest",
-      title: "Send to MoonCode Knowledge Base",
-      contexts: ["page", "selection"]
-    }, () => {
-       if (chrome.runtime.lastError) console.log("ContextMenu error:", chrome.runtime.lastError.message);
-    });
-  });
-
-  startDiscovery();
-});
-
-chrome.action.onClicked.addListener(() => {
-  chrome.tabs.create({ url: "dashboard.html" });
-  startDiscovery();
-});
-
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === "get_status") {
-    const conns = [];
-    let totalClients = 0;
-    for (let i = 0; i <= MAX_PORT_OFFSET; i++) {
-      const port = BASE_PORT + i;
+    if (message.type === "pong") return;
+    
+    if (message.type === "hello") {
       const conn = connections.get(port);
-      if (conn?.info) totalClients++;
-      conns.push({
-        port,
-        status: (conn?.socket?.readyState === WebSocket.OPEN && conn?.info) ? "connected" : (connectingPorts.has(port) ? "connecting" : "scanning"),
-        info: conn?.info
-      });
-    }
-    sendResponse({ connections: conns, totalClients });
-    return true;
-  }
-  if (message.type === "reconnect_all") {
-    startDiscovery();
-    sendResponse({ ok: true });
-  }
-  if (message.type === "close_all_sessions") {
-    broadcast({ type: "close_session" });
-    sendResponse({ ok: true });
-  }
-  if (message.type === "close_port") {
-    const port = Number(message.port);
-    const conn = connections.get(port);
-    if (conn && conn.socket && conn.socket.readyState === WebSocket.OPEN) {
-      try {
-        conn.socket.send(JSON.stringify({ type: "close_session" }));
-      } catch (e) {
-        // ignore
+      if (conn) {
+        conn.info = {
+          version: message.version || "Unknown",
+          capabilities: message.capabilities || [],
+          extensionId: message.extensionId || "N/A",
+          connectedAt: Date.now()
+        };
+        updateBadge(); // Update badge to show authenticated count if preferred
       }
+      return;
     }
-    sendResponse({ ok: true });
-  }
-});
 
-chrome.contextMenus.onClicked.addListener((info, tab) => {
-  if (info.menuItemId === "mooncode-ingest" && tab?.id) {
-    executePage({ action: "read_dom", tabId: tab.id, maxChars: 20000 }).then(result => {
-      broadcast({
-        type: "knowledge_ingest",
-        url: result?.url || tab.url,
-        title: result?.title || tab.title,
-        content: result?.content || ""
-      });
-      injectOverlay(tab.id, "Sent to MoonCode Knowledge Base ✓");
-    }).catch(err => {
-      console.error("Failed to ingest knowledge:", err);
-    });
-  }
-});
+    if (message.type !== "command" || !message.id) return;
 
-chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === ALARM_NAME) startDiscovery();
-});
-
-// ── Discovery & Connection ──────────────────────────────────────────────────
-function startDiscovery() {
-  for (let i = 0; i <= MAX_PORT_OFFSET; i++) {
-    connectToPort(BASE_PORT + i);
-  }
-  startHeartbeat();
+    try {
+      const result = await withTimeout(executeCommand(message.action, message.args || {}), COMMAND_TIMEOUT_MS, message.action);
+      sendToSocket(socket, { type: "result", id: message.id, ok: true, result });
+    } catch (error) {
+      sendToSocket(socket, { type: "result", id: message.id, ok: false, error: error?.message || String(error) });
+    }
+  };
 }
-
 
 function broadcast(message) {
   for (const conn of connections.values()) {
