@@ -316,7 +316,12 @@ export function createBrowserPageToolDefinition(
 				const visionOk = getModelVisionSupport ? getModelVisionSupport() : true;
 				if (!visionOk) {
 					return {
-						content: [{ type: "text" as const, text: "⚠️ Aktif model görsel girdisini desteklemiyor. Screenshot bu modelde kullanılamaz. Görsel destekleyen bir model seç (Claude, GPT-4o, Gemini Pro/Flash)." }],
+						content: [
+							{
+								type: "text" as const,
+								text: "⚠️ Aktif model görsel girdisini desteklemiyor. Screenshot bu modelde kullanılamaz. Görsel destekleyen bir model seç (Claude, GPT-4o, Gemini Pro/Flash).",
+							},
+						],
 						details: { action: params.action, connected: true, hasScreenshot: false },
 					};
 				}

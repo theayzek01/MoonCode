@@ -21,7 +21,7 @@ const INDEX_HTML = `<!doctype html>
     <a class="brand" href="#top" aria-label="MoonCode">
       <span class="mark"><img src="/assets/Mooncodewhitelogo.png" alt="" /></span>
       <span class="word">MoonCode</span>
-      <span class="version">2026.11</span>
+      <span class="version">2026-v23</span>
     </a>
     <button class="menu" type="button" aria-expanded="false" aria-controls="nav">Menü</button>
     <nav id="nav" class="nav" aria-label="Ana menü">
@@ -129,7 +129,7 @@ mooncode</pre>
   </main>
 
   <footer class="footer shell">
-    <span>MoonCode 2026.11</span>
+    <span>MoonCode 2026-v23</span>
     <a href="https://github.com/theayzek01/mooncode" target="_blank" rel="noreferrer">github.com/theayzek01/mooncode</a>
   </footer>
 
@@ -447,6 +447,945 @@ if (sessionsEl) {
   setInterval(() => loadSessions(false), 7500);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) loadSessions(true); });
 }`;
+
+const APP_HTML = `<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MoonCode — Web Studio</title>
+  <link rel="stylesheet" href="/app.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">
+          <span class="logo-emoji">🌝</span>
+          <div class="brand-text">
+            <h2>MoonCode</h2>
+            <span>Web Studio</span>
+          </div>
+        </div>
+      </div>
+      <div class="session-search">
+        <input type="text" id="search-input" placeholder="Oturumlarda ara..." />
+      </div>
+      <div class="sessions-list" id="sessions-list">
+        <!-- Oturumlar dinamik olarak buraya gelecek -->
+      </div>
+    </aside>
+
+    <main class="chat-container">
+      <header class="chat-header">
+        <div class="active-session-info">
+          <span class="status-indicator live"></span>
+          <h3 id="active-session-name">Oturum Seçin</h3>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-secondary" id="btn-unlock-tui">TUI'a Dön</button>
+        </div>
+      </header>
+
+      <div class="messages-viewport" id="messages-viewport">
+        <div class="welcome-screen">
+          <span class="moon-mascot">🌝</span>
+          <h1>Merhaba! Ben MoonCode.</h1>
+          <p>Yandaki menüden canlı bir oturum seçebilir veya yeni bir sohbet başlatabilirsiniz.</p>
+        </div>
+      </div>
+
+      <footer class="input-bar">
+        <form id="message-form" class="message-form">
+          <textarea id="message-input" placeholder="MoonCode'a bir şeyler yaz... [Enter gönderir]" rows="1"></textarea>
+          <button type="submit" class="btn btn-primary" id="btn-send">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+          </button>
+        </form>
+      </footer>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="unlock-modal">
+    <div class="modal-card">
+      <span class="modal-icon">🔓</span>
+      <h2>TUI Kilidi Açıldı!</h2>
+      <p>Terminalinize geri dönebilirsiniz. Bu tarayıcı sekmesini kapatabilirsiniz.</p>
+      <button class="btn btn-primary" onclick="document.getElementById('unlock-modal').style.display='none'">Tamam</button>
+    </div>
+  </div>
+
+  <script src="/app-client.js"></script>
+</body>
+</html>`;
+
+const APP_CSS = `:root {
+  --bg: #090a0f;
+  --surface: #141620;
+  --surface-hover: #1d212f;
+  --border: #24293a;
+  --border-light: rgba(255,255,255,0.06);
+  --fg: #f4f5f8;
+  --muted: #8d97a9;
+  --accent: #ff4766;
+  --accent-light: rgba(255,71,102,0.12);
+  --green: #58cc02;
+  --green-light: rgba(88,204,2,0.15);
+  --blue: #3b82f6;
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 12px 40px rgba(0,0,0,0.24);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  height: 100vh;
+}
+
+.sidebar {
+  background: #0d0e14;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sidebar-header {
+  padding: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-emoji {
+  font-size: 32px;
+  animation: bounce 2s infinite ease-in-out;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.brand-text h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.brand-text span {
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.session-search {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.session-search input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,0.2);
+  color: var(--fg);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.session-search input:focus {
+  border-color: var(--accent);
+}
+
+.sessions-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.session-card {
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.session-card:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-light);
+}
+
+.session-card.active {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: var(--shadow);
+}
+
+.session-card b {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.session-card span {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg);
+  position: relative;
+}
+
+.chat-header {
+  height: 72px;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  background: rgba(9,10,15,0.7);
+  backdrop-filter: blur(12px);
+  z-index: 10;
+}
+
+.active-session-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.status-indicator.live {
+  background: var(--green);
+  box-shadow: 0 0 12px var(--green);
+  animation: pulse 1.6s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.6; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.active-session-info h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.messages-viewport {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.welcome-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+  text-align: center;
+  max-width: 420px;
+}
+
+.moon-mascot {
+  font-size: 64px;
+  margin-bottom: 16px;
+  animation: float 4s infinite ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.welcome-screen h1 {
+  font-size: 24px;
+  margin: 0 0 12px;
+  font-weight: 700;
+}
+
+.welcome-screen p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.msg-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 85%;
+}
+
+.msg-wrapper.user {
+  align-self: flex-end;
+}
+
+.msg-wrapper.assistant {
+  align-self: flex-start;
+}
+
+.msg-card {
+  padding: 16px 20px;
+  border-radius: var(--radius-lg);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.msg-wrapper.user .msg-card {
+  background: var(--surface);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-top-right-radius: 4px;
+}
+
+.msg-wrapper.assistant .msg-card {
+  background: var(--surface-hover);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-top-left-radius: 4px;
+}
+
+.msg-author {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.msg-author-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  background: var(--border);
+}
+
+.msg-wrapper.user .msg-author {
+  align-self: flex-end;
+}
+
+.thinking-card {
+  background: rgba(254, 240, 138, 0.05);
+  border: 1px solid rgba(254, 240, 138, 0.15);
+  border-radius: var(--radius-md);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.thinking-header {
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fef08a;
+  background: rgba(254, 240, 138, 0.03);
+}
+
+.thinking-content {
+  padding: 14px;
+  font-size: 13px;
+  color: #eab308;
+  line-height: 1.5;
+  border-top: 1px solid rgba(254, 240, 138, 0.1);
+  white-space: pre-wrap;
+  font-family: monospace;
+}
+
+.tool-card {
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: var(--radius-md);
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.tool-header {
+  padding: 10px 14px;
+  font-weight: 600;
+  color: #60a5fa;
+  background: rgba(59, 130, 246, 0.03);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tool-body {
+  padding: 12px;
+  border-top: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.tool-body pre {
+  margin: 0;
+  white-space: pre-wrap;
+  font-family: monospace;
+}
+
+.tool-result-card {
+  background: rgba(16, 185, 129, 0.04);
+  border: 1px solid rgba(16, 185, 129, 0.12);
+  border-radius: var(--radius-md);
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.tool-result-header {
+  padding: 8px 14px;
+  font-weight: 600;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.03);
+}
+
+.tool-result-body {
+  padding: 12px;
+  border-top: 1px solid rgba(16, 185, 129, 0.08);
+}
+
+.tool-result-body pre {
+  margin: 0;
+  white-space: pre-wrap;
+  font-family: monospace;
+}
+
+.code-block {
+  background: #090b10;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin: 12px 0;
+  overflow: hidden;
+}
+
+.code-header {
+  padding: 6px 12px;
+  background: #141722;
+  border-bottom: 1px solid var(--border);
+  font-family: monospace;
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.code-block pre {
+  margin: 0;
+}
+
+.code-block code {
+  display: block;
+  padding: 14px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #e2e8f0;
+}
+
+.code-inline {
+  background: rgba(255,255,255,0.06);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 13px;
+  color: #fca5a5;
+}
+
+.table-container {
+  overflow-x: auto;
+  margin: 14px 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th {
+  background: var(--surface);
+  padding: 10px 12px;
+  font-weight: 600;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+}
+
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+.input-bar {
+  padding: 20px 32px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.message-form {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  padding: 8px 12px 8px 20px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.message-form:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 71, 102, 0.15);
+}
+
+.message-form textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--fg);
+  font-size: 14px;
+  line-height: 1.5;
+  outline: none;
+  resize: none;
+  padding: 8px 0;
+  max-height: 160px;
+  font-family: inherit;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
+  outline: none;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: var(--green);
+  color: #fff;
+  border-bottom: 4px solid #48a602;
+}
+
+.btn-primary:hover {
+  background: #61df02;
+}
+
+.btn-primary:active {
+  border-bottom-width: 0px;
+  margin-top: 4px;
+}
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--fg);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background: var(--surface-hover);
+}
+
+#btn-send {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: var(--shadow);
+  animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes popIn {
+  from { transform: scale(0.9) translateY(10px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.modal-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.modal-card h2 {
+  margin: 0 0 12px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.modal-card p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0 0 24px;
+}
+`;
+
+const APP_CLIENT_JS = `const $ = (s) => document.querySelector(s);
+let activeSessionId = null;
+let currentSessionData = null;
+let pollTimer = null;
+
+function escapeHtml(text) {
+  if (!text) return "";
+  return String(text).replace(/[&<>]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[char]));
+}
+
+function parseMarkdown(text) {
+  if (!text) return "";
+
+  const codeBlocks = [];
+  let html = text.replace(/\`\`\`(\\w*)\\n([\\s\\S]*?)\`\`\`/g, (match, lang, code) => {
+    const id = \`__CODE_BLOCK_\${codeBlocks.length}__\`;
+    codeBlocks.push('<div class="code-block"><div class="code-header">' + escapeHtml(lang || "code") + '</div><pre><code>' + escapeHtml(code) + '</code></pre></div>');
+    return id;
+  });
+
+  html = html.replace(/(?:^|\\n)(\\|[^\\n]+\\|\\r?\\n\\|[ \\t]*[-:|]+\\|[ \\t]*[\\s\\S]*?)(?=\\n\\n|\\n[^\\n|]|$)/g, (match, tableRaw) => {
+    const lines = tableRaw.trim().split("\\n");
+    if (lines.length < 2) return match;
+    const headerRow = lines[0].split("|").slice(1, -1).map(c => c.trim());
+    const bodyRows = lines.slice(2).map(line => line.split("|").slice(1, -1).map(c => c.trim()));
+
+    let tableHtml = '<div class="table-container"><table><thead><tr>';
+    headerRow.forEach(h => { tableHtml += '<th>' + escapeHtml(h) + '</th>'; });
+    tableHtml += '</tr></thead><tbody>';
+    bodyRows.forEach(row => {
+      if (row.every(cell => cell === '')) return;
+      tableHtml += '<tr>';
+      row.forEach(cell => { tableHtml += '<td>' + escapeHtml(cell) + '</td>'; });
+      tableHtml += '</tr>';
+    });
+    tableHtml += '</tbody></table></div>';
+    return tableHtml;
+  });
+
+  html = escapeHtml(html);
+
+  codeBlocks.forEach((block, idx) => {
+    html = html.replace(\`__CODE_BLOCK_\${idx}__\`, block);
+  });
+
+  html = html.replace(/\\*\\*([^\\*]+)\\*\\*/g, '<strong>$1</strong>');
+  html = html.replace(/\\*([^\\*]+)\\*/g, '<em>$1</em>');
+  html = html.replace(/\`([^\`\\n]+)\`/g, '<code class="code-inline">$1</code>');
+
+  html = html.split("\\n\\n").map(p => '<p>' + p.replace(/\\n/g, '<br>') + '</p>').join("");
+
+  return html;
+}
+
+function textOf(content) {
+  if (!content) return "";
+  if (typeof content === "string") return content;
+  if (Array.isArray(content)) return content.map(c => textOf(c)).join("\\n");
+  if (content.type === "text") return content.text || "";
+  if (content.type === "thinking") return content.thinking || "";
+  try { return JSON.stringify(content); } catch { return String(content); }
+}
+
+async function loadSessions() {
+  try {
+    const res = await fetch("/api/sessions", { cache: "no-store" });
+    const sessions = await res.json();
+    const listEl = $("#sessions-list");
+    if (!listEl) return;
+
+    let html = "";
+    sessions.forEach(s => {
+      const activeClass = s.id === activeSessionId ? "active" : "";
+      const dateStr = new Date(s.modified).toLocaleTimeString("tr-TR", { hour: '2-digit', minute: '2-digit' });
+      html += \`
+        <div class="session-card \${activeClass}" data-id="\${s.id}">
+          <b>\${escapeHtml(s.id)}</b>
+          <span>\${escapeHtml(s.cwd)} · \${dateStr}</span>
+        </div>
+      \`;
+    });
+    listEl.innerHTML = html;
+  } catch (err) {
+    console.error("Sessions load error:", err);
+  }
+}
+
+async function loadSession(id, isPoll = false) {
+  if (!id) return;
+  try {
+    const res = await fetch(\`/api/session/\${encodeURIComponent(id)}\`, { cache: "no-store" });
+    const data = await res.json();
+    currentSessionData = data;
+
+    $("#active-session-name").textContent = id;
+
+    const viewport = $("#messages-viewport");
+    if (!viewport) return;
+
+    const entries = data.entries || [];
+    let html = "";
+
+    entries.forEach(entry => {
+      if (entry.type === "message") {
+        const role = entry.message.role;
+        if (role === "toolResult") return;
+
+        const isUser = role === "user";
+        const content = entry.message.content || entry.message;
+        const textParts = Array.isArray(content) ? content : [content];
+
+        let msgHtml = "";
+        let thinkingHtml = "";
+
+        textParts.forEach(part => {
+          if (part.type === "text" || typeof part === "string" || part.text) {
+            msgHtml += parseMarkdown(textOf(part));
+          } else if (part.type === "thinking" && part.thinking.trim()) {
+            thinkingHtml += \`
+              <div class="thinking-card">
+                <div class="thinking-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
+                  <span>💡 Düşünce Zinciri (Genişlet)</span>
+                  <span>▼</span>
+                </div>
+                <div class="thinking-content" style="display: none;">&nbsp;\${escapeHtml(part.thinking)}</div>
+              </div>
+            \`;
+          }
+        });
+
+        if (msgHtml.trim() || thinkingHtml.trim()) {
+          const wrapperClass = isUser ? "user" : "assistant";
+          const avatar = isUser ? "👤" : "🌝";
+          const authorLabel = isUser ? "Kullanıcı" : "MoonCode";
+
+          html += \`
+            <div class="msg-wrapper \${wrapperClass}">
+              <div class="msg-author">
+                <span class="msg-author-avatar">\${avatar}</span>
+                <span>\${authorLabel}</span>
+              </div>
+              \${thinkingHtml}
+              <div class="msg-card">
+                \${msgHtml}
+              </div>
+            </div>
+          \`;
+        }
+      } else if (entry.type === "toolCall") {
+        html += \`
+          <div class="tool-card">
+            <div class="tool-header">
+              <span>🛠️ Tool Çağrısı: <b>\${escapeHtml(entry.toolName)}</b></span>
+            </div>
+            <div class="tool-body">
+              <pre><code>\${escapeHtml(JSON.stringify(entry.input || {}, null, 2))}</code></pre>
+            </div>
+          </div>
+        \`;
+      } else if (entry.type === "toolResult") {
+        html += \`
+          <div class="tool-result-card">
+            <div class="tool-result-header">
+              <span>✅ Tool Sonucu</span>
+            </div>
+            <div class="tool-result-body">
+              <pre><code>\${escapeHtml(textOf(entry.output || entry.result || entry))}</code></pre>
+            </div>
+          </div>
+        \`;
+      }
+    });
+
+    const wasAtBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 60;
+    viewport.innerHTML = html || \`
+      <div class="welcome-screen">
+        <span class="moon-mascot">🌝</span>
+        <h1>Oturum Boş</h1>
+        <p>Henüz bu oturumda mesaj yok.</p>
+      </div>
+    \`;
+
+    if (!isPoll || wasAtBottom) {
+      viewport.scrollTop = viewport.scrollHeight;
+    }
+  } catch (err) {
+    console.error("Session load error:", err);
+  }
+}
+
+async function init() {
+  try {
+    const res = await fetch("/api/active-session");
+    const data = await res.json();
+    if (data.activeSessionId) {
+      activeSessionId = data.activeSessionId;
+    }
+  } catch {}
+
+  await loadSessions();
+  if (activeSessionId) {
+    await loadSession(activeSessionId);
+  }
+
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(() => {
+    if (activeSessionId) {
+      loadSession(activeSessionId, true);
+    }
+    loadSessions();
+  }, 1000);
+}
+
+$("#sessions-list").addEventListener("click", (e) => {
+  const card = e.target.closest(".session-card");
+  if (card) {
+    activeSessionId = card.dataset.id;
+    $(".session-card.active")?.classList.remove("active");
+    card.classList.add("active");
+    loadSession(activeSessionId);
+  }
+});
+
+$("#btn-unlock-tui").addEventListener("click", async () => {
+  try {
+    await fetch("/api/unlock", { method: "POST" });
+    $("#unlock-modal").style.display = "flex";
+  } catch (err) {
+    alert("TUI kilidi açma hatası: " + err.message);
+  }
+});
+
+$("#message-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const input = $("#message-input");
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = "";
+  input.disabled = true;
+  $("#btn-send").disabled = true;
+
+  try {
+    const res = await fetch("/api/message", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text })
+    });
+    const data = await res.json();
+    if (!data.ok) {
+      alert("Gönderim hatası: " + data.error);
+    }
+  } catch (err) {
+    alert("Gönderim bağlantı hatası: " + err.message);
+  } finally {
+    input.disabled = false;
+    $("#btn-send").disabled = false;
+    input.focus();
+    if (activeSessionId) {
+      loadSession(activeSessionId);
+    }
+  }
+});
+
+$("#message-input").addEventListener("input", function() {
+  this.style.height = "auto";
+  this.style.height = (this.scrollHeight - 16) + "px";
+});
+
+$("#message-input").addEventListener("keydown", function(e) {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    $("#message-form").dispatchEvent(new Event("submit"));
+  }
+});
+
+init();
+`;
+
 const _webUiDir = dirname(fileURLToPath(import.meta.url));
 const VIDEOEDIT_HTML: string = readFileSync(join(_webUiDir, "videoedit.html"), "utf-8");
 const PHOTOEDIT_HTML: string = readFileSync(join(_webUiDir, "photoedit.html"), "utf-8");
@@ -511,6 +1450,18 @@ function serveEmbedded(res: ServerResponse, pathname: string): boolean {
 		send(res, 200, APP_JS, MIME[".js"]);
 		return true;
 	}
+	if (pathname === "/app" || pathname === "/app/index.html" || pathname === "/app/") {
+		send(res, 200, APP_HTML, MIME[".html"]);
+		return true;
+	}
+	if (pathname === "/app.css") {
+		send(res, 200, APP_CSS, MIME[".css"]);
+		return true;
+	}
+	if (pathname === "/app-client.js") {
+		send(res, 200, APP_CLIENT_JS, MIME[".js"]);
+		return true;
+	}
 	if (pathname === "/videoedit" || pathname === "/videoedit/index.html" || pathname === "/videoedit/") {
 		send(res, 200, VIDEOEDIT_HTML, MIME[".html"]);
 		return true;
@@ -546,6 +1497,14 @@ function serveStaticFile(res: ServerResponse, root: string, pathname: string): v
 export const editorActionsListeners = new Set<
 	(data: { type: "video" | "photo"; action: string; params: any; state?: any }) => void
 >();
+
+export const webUiMessageListeners = new Set<(message: string) => void>();
+export const webUiUnlockListeners = new Set<() => void>();
+export let activeSessionId: string | null = null;
+
+export function setActiveSessionId(id: string | null): void {
+	activeSessionId = id;
+}
 
 export function startWebUiServer(options: { port?: number; staticRoot?: string } = {}) {
 	const port = options.port || Number(process.env.MOON_WEB_PORT || 3131);
@@ -599,6 +1558,38 @@ export function startWebUiServer(options: { port?: number; staticRoot?: string }
 				}
 			});
 			return;
+		}
+
+		if (url.pathname === "/api/active-session") {
+			return json(res, { activeSessionId });
+		}
+		if (req.method === "POST" && url.pathname === "/api/message") {
+			let body = "";
+			req.on("data", (chunk) => {
+				body += chunk;
+			});
+			req.on("end", () => {
+				try {
+					const data = JSON.parse(body);
+					const msg = data.message || "";
+					if (msg.trim()) {
+						for (const listener of webUiMessageListeners) {
+							listener(msg);
+						}
+						return json(res, { ok: true });
+					}
+					return json(res, { ok: false, error: "Mesaj boş olamaz." });
+				} catch (err: any) {
+					return json(res, { ok: false, error: err.message });
+				}
+			});
+			return;
+		}
+		if (req.method === "POST" && url.pathname === "/api/unlock") {
+			for (const listener of webUiUnlockListeners) {
+				listener();
+			}
+			return json(res, { ok: true });
 		}
 
 		if (url.pathname === "/api/sessions") {

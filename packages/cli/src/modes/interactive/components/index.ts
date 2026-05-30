@@ -1,5 +1,6 @@
 // @ts-nocheck
 // UI Components for extensions
+export { AppLockComponent } from "./app-lock.js";
 export { ArminComponent } from "./armin.js";
 export { AssistantMessageComponent } from "./assistant-message.js";
 export { BashExecutionComponent } from "./bash-execution.js";

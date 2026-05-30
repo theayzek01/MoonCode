@@ -34,6 +34,8 @@ import {
 	type Component,
 	Container,
 	fuzzyFilter,
+	getCapabilities,
+	Image,
 	Loader,
 	type LoaderIndicatorOptions,
 	Markdown,
@@ -45,8 +47,6 @@ import {
 	TruncatedText,
 	TUI,
 	visibleWidth,
-	Image,
-	getCapabilities,
 } from "moon-tui";
 import { buildInitialMessage } from "../../cli/initial-message.js";
 import {
@@ -96,6 +96,7 @@ import { getMoonCodeUserEngine } from "../../utils/moon-user-engine.js";
 import { killTrackedDetachedChildren } from "../../utils/shell.js";
 import { ensureTool, getToolPath } from "../../utils/tools-manager.js";
 import { checkForNewMoonCodeVersion } from "../../utils/version-check.js";
+import { AppLockComponent } from "./components/app-lock.js";
 import { ArminComponent } from "./components/armin.js";
 import { AssistantMessageComponent } from "./components/assistant-message.js";
 import { BashExecutionComponent } from "./components/bash-execution.js";
@@ -112,6 +113,7 @@ import { ExtensionEditorComponent } from "./components/extension-editor.js";
 import { ExtensionInputComponent } from "./components/extension-input.js";
 import { ExtensionSelectorComponent } from "./components/extension-selector.js";
 import { FooterComponent } from "./components/footer.js";
+import { buildIntroLines } from "./components/intro.js";
 import { keyHint, keyText, rawKeyHint } from "./components/keybinding-hints.js";
 import { LoginDialogComponent } from "./components/login-dialog.js";
 import { McpSelectorComponent } from "./components/mcp-selector.js";
@@ -128,7 +130,6 @@ import { ToolExecutionComponent } from "./components/tool-execution.js";
 import { TreeSelectorComponent } from "./components/tree-selector.js";
 import { UserMessageComponent } from "./components/user-message.js";
 import { UserMessageSelectorComponent } from "./components/user-message-selector.js";
-import { buildIntroLines } from "./components/intro.js";
 // WorkspacePanelComponent removed — right panel disabled
 import {
 	getAvailableThemes,
@@ -154,6 +155,21 @@ interface Expandable {
 
 function isExpandable(obj: unknown): obj is Expandable {
 	return typeof obj === "object" && obj !== null && "setExpanded" in obj && typeof obj.setExpanded === "function";
+}
+
+function isChatMessageComponent(child: any): boolean {
+	if (!child || typeof child !== "object") return false;
+	const name = child.constructor?.name;
+	return (
+		name === "UserMessageComponent" ||
+		name === "AssistantMessageComponent" ||
+		name === "CustomMessageComponent" ||
+		name === "BranchSummaryMessageComponent" ||
+		name === "CompactionSummaryMessageComponent" ||
+		name === "SkillInvocationMessageComponent" ||
+		name === "ToolExecutionComponent" ||
+		name === "BashExecutionComponent"
+	);
 }
 
 class VirtualizedChatContainer extends Container {
@@ -194,12 +210,20 @@ class VirtualizedChatContainer extends Container {
 				lines.unshift(...childLines);
 			}
 			if (hiddenChildren > 0) {
-				lines.unshift(
-					theme.fg(
-						"dim",
-						`… ${hiddenChildren} older chat item(s) hidden for terminal speed. Full session context is still preserved.`,
-					),
-				);
+				let hiddenChatItemsCount = 0;
+				for (let i = 0; i < hiddenChildren; i++) {
+					if (isChatMessageComponent(this.children[i])) {
+						hiddenChatItemsCount++;
+					}
+				}
+				if (hiddenChatItemsCount > 0) {
+					lines.unshift(
+						theme.fg(
+							"dim",
+							`… ${hiddenChatItemsCount} older chat item(s) hidden for terminal speed. Full session context is still preserved.`,
+						),
+					);
+				}
 			}
 		}
 
@@ -2672,11 +2696,11 @@ export class InteractiveMode {
 	private parseAndExtractImages(text: string): { cleanedText: string; images?: ImageContent[] } {
 		const images: ImageContent[] = [];
 		const matches = text.match(/(?:[a-zA-Z]:)?[\\/][^"'`\n\r\t<>|:*?]+\.(?:png|jpg|jpeg|webp|gif)/gi) || [];
-		
+
 		let cleanedText = text;
 		for (let p of matches) {
 			p = p.trim();
-			p = p.replace(/^["'\(]+|["'\)]+$/g, "");
+			p = p.replace(/^["'(]+|["')]+$/g, "");
 			if (fs.existsSync(p)) {
 				try {
 					const data = fs.readFileSync(p).toString("base64");
@@ -2701,6 +2725,11 @@ export class InteractiveMode {
 				if (!text) return;
 
 				// Handle commands
+				if (text === "/app") {
+					this.editor.setText("");
+					await this.handleAppCommand();
+					return;
+				}
 				if (text === "/status") {
 					this.editor.setText("");
 					await this.handleStatusDiagnosticsCommand();
@@ -3669,7 +3698,7 @@ export class InteractiveMode {
 					}
 
 					// Render attached images directly in the TUI chat!
-					const images = Array.isArray(message.content) ? message.content.filter(c => c.type === "image") : [];
+					const images = Array.isArray(message.content) ? message.content.filter((c) => c.type === "image") : [];
 					const caps = getCapabilities();
 					const showImages = this.settingsManager.getShowImages();
 					const imageWidthCells = this.settingsManager.getImageWidthCells();
@@ -3680,7 +3709,7 @@ export class InteractiveMode {
 								img.data,
 								img.mimeType,
 								{ fallbackColor: (s) => theme.fg("toolOutput", s) },
-								{ maxWidthCells: imageWidthCells }
+								{ maxWidthCells: imageWidthCells },
 							);
 							this.chatContainer.addChild(imageComponent);
 						}
@@ -5629,6 +5658,103 @@ export class InteractiveMode {
 		} catch (err: any) {
 			this.showError(`MoonCode Photo Studio açma hatası: ${err.message}`);
 		}
+	}
+
+	private async handleAppCommand(): Promise<void> {
+		try {
+			const server = await import("../../core/web-ui-server.js");
+			const url = await this.ensureAppServer(server);
+
+			// Set active session ID for the web app to load
+			server.setActiveSessionId(this.session.id);
+
+			let cleanup;
+
+			// Web arayüzünden gelen mesajları canlı olarak motora besleyen dinleyici
+			const messageListener = (msg) => {
+				if (this.onInputCallback) {
+					this.onInputCallback(msg);
+				}
+			};
+
+			// Web arayüzünden kilit açma (Unlock) tetiklendiğinde çalışan dinleyici
+			const unlockListener = () => {
+				if (cleanup) cleanup();
+			};
+
+			// Dinleyicileri web sunucusuna kayıt edelim
+			server.webUiMessageListeners.add(messageListener);
+			server.webUiUnlockListeners.add(unlockListener);
+
+			let isUnlocked = false;
+			const unlockTui = () => {
+				if (isUnlocked) return;
+				isUnlocked = true;
+
+				// Bellek sızıntılarını önlemek için dinleyicileri temizleyelim
+				server.webUiMessageListeners.delete(messageListener);
+				server.webUiUnlockListeners.delete(unlockListener);
+
+				// Sunucudaki aktif oturum bilgisini sıfırlayalım
+				server.setActiveSessionId(null);
+			};
+			cleanup = unlockTui;
+
+			// TUI üzerinde editörü gizleyip premium kilit ekranı bileşenini gösterelim
+			this.showSelector((done) => {
+				const lockComp = new AppLockComponent(() => {
+					unlockTui();
+					done();
+					this.ui.requestRender();
+				});
+
+				// Hem yerel tuşlar hem de uzaktan kilit açma için ortak temizleme rutini
+				cleanup = () => {
+					unlockTui();
+					done();
+					this.ui.requestRender();
+				};
+
+				return { component: lockComp, focus: lockComp };
+			});
+
+			this.ui.requestRender();
+			this.openEditorUrl(url);
+		} catch (err) {
+			this.showError(`Web arayüzü başlatılamadı: ${err.message}`);
+		}
+	}
+
+	private async ensureAppServer(server) {
+		const ports = [3131, 3132, 3133, 3134, 3135, 3136, 3137, 3138, 3139, 3140];
+
+		if (this.webUiProcess?.url) {
+			const url = `${this.webUiProcess.url}/app`;
+			if (await this.isEditorEndpointReady(url)) return url;
+			try {
+				this.webUiProcess.server?.close?.();
+			} catch {}
+			this.webUiProcess = undefined;
+		}
+
+		for (const port of ports) {
+			try {
+				const candidate = server.startWebUiServer({ port });
+				await new Promise((resolve) => setTimeout(resolve, 180));
+				const url = `${candidate.url}/app`;
+				if (await this.isEditorEndpointReady(url)) {
+					this.webUiProcess = candidate;
+					return url;
+				}
+				try {
+					candidate.server?.close?.();
+				} catch {}
+			} catch {
+				// Sonraki porta geç
+			}
+		}
+
+		throw new Error("Çalışan MoonCode Web UI sunucusu bulunamadı. 3131-3140 portlarını kontrol edin.");
 	}
 
 	private handleMoodCommand(args: string): void {

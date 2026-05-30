@@ -1,6 +1,6 @@
 {
 	"name": "mooncode",
-	"version": "2026.0.0-beta1",
+	"version": "2026-v23",
 	"description": "MoonCode terminal coding agent",
 	"type": "module",
 	"moonConfig": {

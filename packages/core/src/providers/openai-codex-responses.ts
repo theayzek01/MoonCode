@@ -44,8 +44,8 @@ import { buildBaseOptions } from "./simple-options.js";
 
 const DEFAULT_CODEX_BASE_URL = "https://chatgpt.com/backend-api";
 const JWT_CLCoreM_PATH = "https://api.openai.com/auth" as const;
-const MAX_RETRIES = 3;
-const BASE_DELAY_MS = 1000;
+const MAX_RETRIES = 2;
+const BASE_DELAY_MS = 300;
 const CODEX_TOOL_CALL_PROVIDERS = new Set(["openai", "openai-codex", "opencode"]);
 
 const CODEX_RESPONSE_STATUSES = new Set<CodexResponseStatus>([

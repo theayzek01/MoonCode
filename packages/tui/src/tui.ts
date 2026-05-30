@@ -122,7 +122,7 @@ function resolveMinRenderIntervalMs(): number {
 	}
 	// Windows conhost/cmd is noticeably slower at processing dense ANSI diffs.
 	// A 30 FPS cap keeps input responsive without making modern terminals feel slow.
-	return process.platform === "win32" && process.stdout.isTTY ? 33 : 16;
+	return 16;
 }
 
 /**
