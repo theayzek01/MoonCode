@@ -99,10 +99,10 @@ export class FooterComponent implements Component {
 			thinkingBadge,
 			tokenUsage
 		];
-		const rightJoined = rightParts.join("  ");
-		const rightJoinedVisWidth = modelName.length + thinkingBadgeText.length + 4 + tokenUsage.length + 4; 
+		const rightJoined = rightParts.join("  •  ");
+		const rightJoinedVisWidth = visibleWidth(rightJoined);
 
-		const leftVisWidth = currentPath.length;
+		const leftVisWidth = visibleWidth(currentPath);
 		const row1Padding = Math.max(0, width - leftVisWidth - rightJoinedVisWidth);
 		const statusBarLine = statusBarBg(mutedGrayText(currentPath) + " ".repeat(row1Padding) + dimGrayText(rightJoined) + " ");
 
@@ -121,11 +121,11 @@ export class FooterComponent implements Component {
 			costText,
 			toolCount
 		];
-		const browserRight = browserParts.join(darkGrayText(" • "));
-		const browserRightVisWidth = (hasBrowser ? 9 : 12) + costText.length + toolCount.length + 6;
+		const browserRight = browserParts.join(darkGrayText("  •  "));
+		const browserRightVisWidth = visibleWidth(browserRight);
 
 		const browserLeft = `${globeIcon} ${browserTag}`;
-		const browserLeftVisWidth = 2 + 1 + 8;
+		const browserLeftVisWidth = visibleWidth(browserLeft);
 		const row2Padding = Math.max(0, width - browserLeftVisWidth - browserRightVisWidth);
 		const browserBarLine = browserBarBg(browserLeft + " ".repeat(row2Padding) + browserRight + " ");
 

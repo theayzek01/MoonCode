@@ -284,7 +284,7 @@ export class Container implements Component {
 				if (w === -1) childWidths[i] = flexWidth;
 			});
 
-			const allChildLines: string[][] = childWidths.map((w, i) => this.children[i].render(w));
+			const allChildLines: string[][] = childWidths.map((w, i) => this.children[i].render(w) || []);
 			const maxLines = Math.max(0, ...allChildLines.map((l) => l.length));
 			const lines: string[] = [];
 
@@ -318,7 +318,7 @@ export class Container implements Component {
 		const lines: string[] = [];
 		for (const child of this.children) {
 			if (!child || typeof child.render !== "function") continue;
-			const childLines = child.render(targetWidth);
+			const childLines = child.render(targetWidth) || [];
 			for (const line of childLines) {
 				lines.push(line);
 			}
@@ -871,7 +871,7 @@ export class TUI extends Container {
 			const { width, maxHeight } = this.resolveOverlayLayout(options, 0, termWidth, termHeight);
 
 			// Render component at calculated width
-			let overlayLines = component.render(width);
+			let overlayLines = component.render(width) || [];
 
 			// Apply maxHeight if specified
 			if (maxHeight !== undefined && overlayLines.length > maxHeight) {

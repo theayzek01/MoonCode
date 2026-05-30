@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, basename } from "node:path";
+import { createHash } from "node:crypto";
 import { CONFIG_DIR_NAME, getEngineDir } from "../config.js";
 
 export interface MemorySignal {
@@ -12,8 +13,12 @@ export interface MemorySignal {
 const GLOBAL_MEMORY_FILE = join(getEngineDir(), "memory-signals.json");
 
 function getMemoryFile(cwd?: string): string {
+	const baseDir = getEngineDir();
+	const historyDir = join(baseDir, "history");
 	if (cwd) {
-		return join(cwd, CONFIG_DIR_NAME, "memory-signals.json");
+		const hash = createHash("sha256").update(cwd.replace(/\\/g, "/").toLowerCase()).digest("hex").slice(0, 12);
+		const folderName = basename(cwd) || "project";
+		return join(historyDir, `${folderName}-${hash}-memory.json`);
 	}
 	return GLOBAL_MEMORY_FILE;
 }

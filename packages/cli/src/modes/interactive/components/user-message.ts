@@ -7,7 +7,7 @@ const OSC133_ZONE_END = "\x1b]133;B\x07";
 const OSC133_ZONE_FINAL = "\x1b]133;C\x07";
 
 /**
- * Component that renders a user message in a highly elegant, minimal way.
+ * Component that renders a user message in a highly elegant, elevated input bar.
  */
 export class UserMessageComponent extends Container {
 	private cachedWidth?: number;
@@ -15,7 +15,7 @@ export class UserMessageComponent extends Container {
 
 	constructor(text: string, markdownTheme: MarkdownTheme = getMarkdownTheme()) {
 		super();
-		this.addChild(new Text(theme.bold(theme.fg("success", "you")), 0, 0));
+		this.addChild(new Text("you", 0, 0)); // keep dummy child for compatibility
 		this.addChild(
 			new Markdown(text, 0, 0, markdownTheme, {
 				color: (content: string) => theme.fg("userMessageText", content),
@@ -33,12 +33,26 @@ export class UserMessageComponent extends Container {
 		if (this.cachedLines && this.cachedWidth === width) {
 			return this.cachedLines;
 		}
-		const lines = super.render(width);
-		if (lines.length === 0) {
-			this.cachedWidth = width;
-			this.cachedLines = lines;
-			return lines;
+		
+		const child = this.children[1] || this.children[0];
+		const childLines = child ? child.render(width - 6) : []; 
+
+		const steelBlueStripe = `\x1b[38;2;95;158;160m┃\x1b[39m`;
+		const userMessageBgCode = `\x1b[48;2;28;34;39m`; // #1c2227 background
+		const textWhiteCode = `\x1b[38;2;255;255;255m`;
+		const resetCode = `\x1b[0m`;
+
+		const lines: string[] = [];
+		lines.push(""); // spacer above
+
+		for (const line of childLines) {
+			const cleanLine = line.replace(/\x1b\[[0-9;]*m/g, "");
+			const paddedLength = Math.max(0, width - 6 - cleanLine.length);
+			const lineBg = `${userMessageBgCode}${textWhiteCode} ${cleanLine}${" ".repeat(paddedLength)} ${resetCode}`;
+			lines.push(` ${steelBlueStripe} ${lineBg}`);
 		}
+		
+		lines.push(""); // spacer below
 
 		const result = [...lines];
 		result[0] = OSC133_ZONE_START + result[0];

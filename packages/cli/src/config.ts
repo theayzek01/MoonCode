@@ -357,7 +357,7 @@ const moonConfigName: string | undefined = pkg.moonConfig?.name;
 export const PACKAGE_NAME: string = pkg.name || "mooncode";
 export const APP_NAME: string = moonConfigName || "Moon";
 export const APP_TITLE: string = moonConfigName || "Moon";
-export const CONFIG_DIR_NAME: string = pkg.moonConfig?.configDir || ".mooncode";
+export const CONFIG_DIR_NAME: string = pkg.moonConfig?.configDir || ".moonagent";
 export const VERSION: string = "2026.0.0-beta1";
 
 export const ENV_AGENT_DIR = `${APP_NAME.toUpperCase()}_CODING_AGENT_DIR`;

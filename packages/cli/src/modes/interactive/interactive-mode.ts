@@ -173,11 +173,13 @@ class VirtualizedChatContainer extends Container {
 
 		let lines: string[] = [];
 		if (this.children.length === 0) {
-			lines = super.render(width);
+			lines = super.render(width) || [];
 		} else {
 			let hiddenChildren = 0;
 			for (let i = this.children.length - 1; i >= 0; i--) {
-				const childLines = this.children[i].render(width);
+				const child = this.children[i];
+				if (!child) continue;
+				const childLines = child.render(width) || [];
 				if (lines.length === 0 && childLines.length > dynamicMaxLines) {
 					lines.unshift(...childLines.slice(-dynamicMaxLines));
 					hiddenChildren = i;
