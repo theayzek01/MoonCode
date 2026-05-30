@@ -155,12 +155,11 @@ function isExpandable(obj: unknown): obj is Expandable {
 
 class VirtualizedChatContainer extends Container {
 	private cachedHeight?: number;
+	staticOverhead = 10;
 
 	override render(width: number): string[] {
 		const terminalHeight = process.stdout.rows || 40;
-		// Keep at most 2.5x the terminal height of chat history rendered in TUI to remain extremely fast.
-		// Never let it drop below 35 lines or exceed 250 lines to keep performance ultra-high.
-		const dynamicMaxLines = Math.max(35, Math.min(terminalHeight * 2.5, 250));
+		const maxVisible = Math.max(10, Math.min(terminalHeight - this.staticOverhead, 300));
 
 		if (
 			this.enableCaching &&
@@ -180,12 +179,12 @@ class VirtualizedChatContainer extends Container {
 				const child = this.children[i];
 				if (!child) continue;
 				const childLines = child.render(width) || [];
-				if (lines.length === 0 && childLines.length > dynamicMaxLines) {
-					lines.unshift(...childLines.slice(-dynamicMaxLines));
+				if (lines.length === 0 && childLines.length > maxVisible) {
+					lines.unshift(...childLines.slice(-maxVisible));
 					hiddenChildren = i;
 					break;
 				}
-				if (lines.length + childLines.length > dynamicMaxLines) {
+				if (lines.length + childLines.length > maxVisible) {
 					hiddenChildren = i + 1;
 					break;
 				}
@@ -200,6 +199,9 @@ class VirtualizedChatContainer extends Container {
 				);
 			}
 		}
+
+		// Fill remaining space so composer stays pinned to bottom
+		while (lines.length < maxVisible) lines.unshift('');
 
 		if (this.enableCaching) {
 			this.cachedWidth = width;

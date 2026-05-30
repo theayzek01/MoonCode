@@ -8,6 +8,8 @@ import { sendBrowserCommand } from "../browser-bridge-server.js";
 import type { ToolDefinition, ToolRenderResultOptions } from "../extensions/types.js";
 import { wrapToolDefinition } from "./tool-definition-wrapper.js";
 
+// ─── Schemas ──────────────────────────────────────────────────────────────────
+
 const browserTabsSchema = Type.Object({
 	action: Type.Union([
 		Type.Literal("list"),
@@ -45,9 +47,7 @@ const browserPageSchema = Type.Object({
 		Type.Literal("clear_ui"),
 	]),
 	tabId: Type.Optional(Type.Number({ description: "Chrome tab id. Defaults to active tab." })),
-	selector: Type.Optional(
-		Type.String({ description: "CSS selector for click/type/hover/upload_file/drag source actions" }),
-	),
+	selector: Type.Optional(Type.String({ description: "CSS selector for click/type/hover/upload_file/drag source actions" })),
 	targetSelector: Type.Optional(Type.String({ description: "CSS selector for drag target" })),
 	x: Type.Optional(Type.Number({ description: "Viewport X coordinate for mouse actions" })),
 	y: Type.Optional(Type.Number({ description: "Viewport Y coordinate for mouse actions" })),
@@ -61,18 +61,14 @@ const browserPageSchema = Type.Object({
 			description: "Canvas draw points as [x,y] pairs, relative to canvas unless absolute=true",
 		}),
 	),
-	color: Type.Optional(
-		Type.String({ description: "Canvas draw color when page supports injected 2D drawing fallback" }),
-	),
+	color: Type.Optional(Type.String({ description: "Canvas draw color when page supports injected 2D drawing fallback" })),
 	width: Type.Optional(Type.Number({ description: "Canvas draw stroke width" })),
 	absolute: Type.Optional(Type.Boolean({ description: "Treat canvas_draw points as viewport coordinates" })),
 	text: Type.Optional(Type.String({ description: "Text to type" })),
 	filePath: Type.Optional(Type.String({ description: "Local file path for upload_file" })),
 	filePaths: Type.Optional(Type.Array(Type.String(), { description: "Local file paths for upload_file" })),
 	visual: Type.Optional(Type.Boolean({ description: "Show temporary visual overlay/cursor for actions" })),
-	showLabels: Type.Optional(
-		Type.Boolean({ description: "Show visual labels for get_elements (default false; IDs still work)" }),
-	),
+	showLabels: Type.Optional(Type.Boolean({ description: "Show visual labels for get_elements (default false; IDs still work)" })),
 	maxElements: Type.Optional(Type.Number({ description: "Maximum elements returned by get_elements" })),
 	append: Type.Optional(Type.Boolean({ description: "Append to existing value instead of replacing (type action)" })),
 	key: Type.Optional(Type.String({ description: "Key name for press_key action (e.g. Enter, Tab, Escape)" })),
@@ -89,9 +85,7 @@ const browserPageSchema = Type.Object({
 				Type.Literal("top"),
 				Type.Literal("bottom"),
 			],
-			{
-				description: "Direction for scroll action",
-			},
+			{ description: "Direction for scroll action" },
 		),
 	),
 	amount: Type.Optional(Type.Number({ description: "Pixels to scroll" })),
@@ -106,20 +100,132 @@ export type BrowserPageToolInput = Static<typeof browserPageSchema>;
 export interface BrowserToolDetails {
 	action: string;
 	connected: boolean;
+	hasScreenshot?: boolean;
 }
 
-function formatBrowserCall(name: string, action: string | undefined, theme: Theme): string {
-	return `${theme.fg("toolTitle", theme.bold(name))} ${theme.fg("accent", action ?? "<missing action>")}`;
+// ─── Icons ─────────────────────────────────────────────────────────────────────
+
+const ACTION_ICON: Record<string, string> = {
+	read: "👁",
+	read_dom: "🌲",
+	click: "🖱",
+	type: "⌨",
+	hover: "↗",
+	drag: "↔",
+	mouse: "🖱",
+	canvas_info: "🖼",
+	canvas_draw: "✏",
+	upload_file: "📤",
+	press_key: "⌨",
+	get_elements: "🔍",
+	evaluate: "⚡",
+	scroll: "⤵",
+	console_logs: "📋",
+	screenshot: "📸",
+	wait: "⏳",
+	clear_ui: "🧹",
+	list: "📋",
+	active: "✅",
+	open: "🔗",
+	close: "✕",
+	focus: "🎯",
+	reload: "🔄",
+	navigate: "🧭",
+};
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function getIcon(action: string | undefined): string {
+	return ACTION_ICON[action ?? ""] ?? "⬡";
 }
 
-function formatBrowserResult(
+function renderCall(toolName: string, action: string | undefined, theme: Theme): string {
+	const icon = getIcon(action);
+	return `${icon}  ${theme.bold(theme.fg("toolTitle", toolName))} ${theme.fg("accent", action ?? "<missing>")}`;
+}
+
+function truncateJson(value: unknown, maxChars = 6000): string {
+	const raw = JSON.stringify(
+		value,
+		(_k, v) => {
+			if (typeof v === "string") {
+				if (v.startsWith("data:image/")) return `[image data: ${v.length} chars]`;
+				if (v.length > 3000) return `${v.slice(0, 3000)}\n… [${v.length - 3000} chars truncated]`;
+			}
+			return v;
+		},
+		2,
+	) ?? "null";
+	return raw.length > maxChars ? `${raw.slice(0, maxChars)}\n… [${raw.length - maxChars} chars truncated]` : raw;
+}
+
+/**
+ * Parse browser command result.
+ * If it contains a screenshot, returns both text (with omitted data note) and image block.
+ */
+function parseCommandResult(
+	value: unknown,
+): Array<{ type: "text"; text: string } | { type: "image"; data: string; mimeType: string }> {
+	const rec = value && typeof value === "object" ? (value as Record<string, unknown>) : undefined;
+	const ss = rec?.screenshot as Record<string, unknown> | undefined;
+
+	if (ss && typeof ss.data === "string" && typeof ss.mimeType === "string") {
+		const sanitized = {
+			...rec,
+			screenshot: { ...ss, data: `[screenshot: ${ss.data.length} chars of base64]` },
+		};
+		return [
+			{ type: "text", text: truncateJson(sanitized) },
+			{ type: "image", data: ss.data, mimeType: ss.mimeType },
+		];
+	}
+
+	return [{ type: "text", text: truncateJson(value) }];
+}
+
+function renderResult(
 	result: { content: Array<{ type: string; text?: string }>; details?: BrowserToolDetails },
 	_options: ToolRenderResultOptions,
 	theme: Theme,
 ): string {
-	const output = result.content.find((part) => part.type === "text")?.text ?? "";
-	return output ? `\n${theme.fg("toolOutput", output)}` : theme.fg("muted", "\nNo browser output.");
+	const text = result.content.find((p) => p.type === "text")?.text ?? "";
+	const hasImg = result.details?.hasScreenshot;
+	const imgNote = hasImg ? theme.fg("accent", "\n📸 Screenshot captured → sent to model") : "";
+	return text
+		? `\n${theme.fg("toolOutput", text.slice(0, 1200))}${text.length > 1200 ? theme.fg("dim", `\n… ${text.length - 1200} chars hidden`) : ""}${imgNote}`
+		: theme.fg("muted", "\nNo browser output.") + imgNote;
 }
+
+// ─── Validation ────────────────────────────────────────────────────────────────
+
+function validateTabs(p: BrowserTabsToolInput): void {
+	if ((p.action === "open" || p.action === "navigate") && !p.url) throw new Error(`browser_tabs ${p.action} requires url`);
+	if (["close", "focus"].includes(p.action) && p.tabId === undefined) throw new Error(`browser_tabs ${p.action} requires tabId`);
+}
+
+function validatePage(p: BrowserPageToolInput): void {
+	if (["click", "type", "hover", "upload_file"].includes(p.action) && !p.selector)
+		throw new Error(`browser_page ${p.action} requires selector`);
+	if (p.action === "type" && p.text === undefined) throw new Error("browser_page type requires text");
+	if (p.action === "press_key" && !p.key) throw new Error("browser_page press_key requires key");
+	if (p.action === "evaluate" && !p.script) throw new Error("browser_page evaluate requires script");
+	if (p.action === "drag" && (!p.selector || !p.targetSelector)) throw new Error("browser_page drag requires selector and targetSelector");
+	if (p.action === "mouse" && (p.x === undefined || p.y === undefined)) throw new Error("browser_page mouse requires x and y");
+	if (p.action === "canvas_draw" && (!p.points || p.points.length < 2)) throw new Error("browser_page canvas_draw requires at least 2 points");
+	if (p.action === "upload_file" && !p.filePath && (!p.filePaths || p.filePaths.length === 0))
+		throw new Error("browser_page upload_file requires filePath or filePaths");
+}
+
+function normalizePageParams(p: BrowserPageToolInput): Record<string, unknown> {
+	if (p.action !== "upload_file") return p as Record<string, unknown>;
+	const rawPaths = p.filePaths?.length ? p.filePaths : p.filePath ? [p.filePath] : [];
+	const filePaths = rawPaths.map((fp) => resolve(fp));
+	const missing = filePaths.filter((fp) => !existsSync(fp));
+	if (missing.length > 0) throw new Error(`browser_page upload_file: file not found: ${missing.join(", ")}`);
+	return { ...(p as Record<string, unknown>), filePaths, filePath: filePaths[0] };
+}
+
+// ─── Tool definitions ──────────────────────────────────────────────────────────
 
 export function createBrowserTabsToolDefinition(): ToolDefinition<typeof browserTabsSchema, BrowserToolDetails> {
 	return {
@@ -134,23 +240,26 @@ export function createBrowserTabsToolDefinition(): ToolDefinition<typeof browser
 		],
 		parameters: browserTabsSchema,
 		executionMode: "sequential",
-		async execute(_toolCallId, params, signal) {
+
+		async execute(_id, params, signal) {
 			if (signal?.aborted) throw new Error("Operation aborted");
-			validateTabsParams(params);
+			validateTabs(params);
 			const result = await sendBrowserCommand("tabs", params as Record<string, unknown>);
 			return {
-				content: [{ type: "text", text: stringifyResult(result) }],
+				content: [{ type: "text", text: truncateJson(result) }],
 				details: { action: params.action, connected: true },
 			};
 		},
+
 		renderCall(args, theme, context) {
 			const text = (context.lastComponent as Text | undefined) ?? new Text("", 0, 0);
-			text.setText(formatBrowserCall("browser_tabs", args?.action, theme));
+			text.setText(renderCall("browser_tabs", args?.action, theme));
 			return text;
 		},
+
 		renderResult(result, options, theme, context) {
 			const text = (context.lastComponent as Text | undefined) ?? new Text("", 0, 0);
-			text.setText(formatBrowserResult(result, options, theme));
+			text.setText(renderResult(result, options, theme));
 			return text;
 		},
 	};
@@ -166,39 +275,47 @@ export function createBrowserPageToolDefinition(): ToolDefinition<typeof browser
 		promptGuidelines: [
 			"Use browser_page read to get page title, URL, selection, and visible text.",
 			"Use browser_page read_dom for a structured view of interactive page elements.",
-			"Use browser_page get_elements to get numbered interactive elements; labels are hidden by default to keep pages clean, but #id still works.",
+			"Use browser_page get_elements to get numbered interactive elements.",
+			"Use browser_page screenshot when visual state matters — it sends a real image to the model, not just text. Always use this before clicking unfamiliar UI.",
+			"Use browser_page click with selector or x/y coordinates. Prefer selector when possible.",
+			"Use browser_page mouse with x/y for canvas, games, drawing apps, and rich editors where DOM selectors don't work.",
+			"Use browser_page drag with selector+targetSelector for DOM drag/drop; use mouse for pixel-level drag.",
+			"Use browser_page canvas_info then canvas_draw for canvas design work.",
+			"Use browser_page type to type into focused/selected input. Set append:true to add to existing value.",
+			"Use browser_page press_key with key=Enter/Tab/Escape and optional modifiers=[ctrl,shift,alt,meta].",
+			"Use browser_page scroll to navigate long pages. direction: up/down/left/right/top/bottom.",
 			"Use browser_page upload_file with a local absolute filePath when a site needs a file picker/input.",
-			"Use browser_page drag with selector and targetSelector for DOM drag/drop interactions.",
-			"Use browser_page mouse with viewport coordinates for canvas/block editors/games/drawing when DOM selectors are not enough.",
-			"Use browser_page canvas_info then canvas_draw for canvas design work; keep points small and deliberate to avoid loops/token waste.",
-			"Prefer small maxChars/maxElements values to reduce token usage; only request more when needed.",
-			"Use browser_page scroll to navigate through long pages; it targets the nearest scrollable area around the viewport center when possible.",
-			"Use browser_page press_key with key=Enter/Tab/Escape and optional modifiers=[ctrl,shift].",
-			"Use browser_page wait to pause between actions (ms, max 15000).",
+			"Use browser_page evaluate for short JavaScript expressions. Return serializable data.",
 			"Use browser_page console_logs to debug JavaScript errors or see page logs.",
-			"Use browser_page screenshot when visual state matters; it returns an image block to the model, not just text.",
-			"For browser_page evaluate, prefer short JavaScript expressions and return serializable data.",
+			"Use browser_page wait to pause between actions (ms, max 15000).",
+			"Use browser_page clear_ui to dismiss any MoonCode visual overlays/labels on the page.",
+			"Prefer small maxChars/maxElements to reduce token usage; only request more when needed.",
 		],
 		parameters: browserPageSchema,
 		executionMode: "sequential",
-		async execute(_toolCallId, params, signal) {
+
+		async execute(_id, params, signal) {
 			if (signal?.aborted) throw new Error("Operation aborted");
-			validatePageParams(params);
-			const commandParams = normalizeBrowserPageParams(params);
-			const result = await sendBrowserCommand("page", commandParams, { timeoutMs: 30_000 });
+			validatePage(params);
+			const cmdParams = normalizePageParams(params);
+			const result = await sendBrowserCommand("page", cmdParams);
+			const content = parseCommandResult(result);
+			const hasScreenshot = content.some((c) => c.type === "image");
 			return {
-				content: formatBrowserCommandResult(result),
-				details: { action: params.action, connected: true },
+				content,
+				details: { action: params.action, connected: true, hasScreenshot },
 			};
 		},
+
 		renderCall(args, theme, context) {
 			const text = (context.lastComponent as Text | undefined) ?? new Text("", 0, 0);
-			text.setText(formatBrowserCall("browser_page", args?.action, theme));
+			text.setText(renderCall("browser_page", args?.action, theme));
 			return text;
 		},
+
 		renderResult(result, options, theme, context) {
 			const text = (context.lastComponent as Text | undefined) ?? new Text("", 0, 0);
-			text.setText(formatBrowserResult(result, options, theme));
+			text.setText(renderResult(result, options, theme));
 			return text;
 		},
 	};
@@ -210,96 +327,4 @@ export function createBrowserTabsTool(): EngineTool<typeof browserTabsSchema, Br
 
 export function createBrowserPageTool(): EngineTool<typeof browserPageSchema, BrowserToolDetails> {
 	return wrapToolDefinition(createBrowserPageToolDefinition());
-}
-
-function validateTabsParams(params: BrowserTabsToolInput): void {
-	if ((params.action === "open" || params.action === "navigate") && !params.url) {
-		throw new Error(`browser_tabs ${params.action} requires url`);
-	}
-	if (["close", "focus"].includes(params.action) && params.tabId === undefined) {
-		throw new Error(`browser_tabs ${params.action} requires tabId`);
-	}
-}
-
-function validatePageParams(params: BrowserPageToolInput): void {
-	const requiresSelector = ["click", "type", "hover", "upload_file"] as const;
-	if (requiresSelector.includes(params.action as (typeof requiresSelector)[number]) && !params.selector) {
-		throw new Error(`browser_page ${params.action} requires selector`);
-	}
-	if (params.action === "type" && params.text === undefined) {
-		throw new Error("browser_page type requires text");
-	}
-	if (params.action === "press_key" && !params.key) {
-		throw new Error("browser_page press_key requires key");
-	}
-	if (params.action === "evaluate" && !params.script) {
-		throw new Error("browser_page evaluate requires script");
-	}
-	if (params.action === "drag" && (!params.selector || !params.targetSelector)) {
-		throw new Error("browser_page drag requires selector and targetSelector");
-	}
-	if (params.action === "mouse" && (params.x === undefined || params.y === undefined)) {
-		throw new Error("browser_page mouse requires x and y");
-	}
-	if (params.action === "canvas_draw" && (!params.points || params.points.length < 2)) {
-		throw new Error("browser_page canvas_draw requires at least two points");
-	}
-	if (params.action === "upload_file" && !params.filePath && (!params.filePaths || params.filePaths.length === 0)) {
-		throw new Error("browser_page upload_file requires filePath or filePaths");
-	}
-}
-
-function normalizeBrowserPageParams(params: BrowserPageToolInput): Record<string, unknown> {
-	if (params.action !== "upload_file") {
-		return params as Record<string, unknown>;
-	}
-	const rawPaths = params.filePaths?.length ? params.filePaths : params.filePath ? [params.filePath] : [];
-	const filePaths = rawPaths.map((filePath) => resolve(filePath));
-	const missing = filePaths.filter((filePath) => !existsSync(filePath));
-	if (missing.length > 0) {
-		throw new Error(`browser_page upload_file file not found: ${missing.join(", ")}`);
-	}
-	return { ...(params as Record<string, unknown>), filePaths, filePath: filePaths[0] };
-}
-
-function formatBrowserCommandResult(
-	value: unknown,
-): Array<{ type: "text"; text: string } | { type: "image"; data: string; mimeType: string }> {
-	const record = value && typeof value === "object" ? (value as Record<string, unknown>) : undefined;
-	const screenshot = record?.screenshot as Record<string, unknown> | undefined;
-	if (screenshot && typeof screenshot.data === "string" && typeof screenshot.mimeType === "string") {
-		const textPayload = {
-			...record,
-			screenshot: {
-				...screenshot,
-				data: `[image data omitted: ${screenshot.data.length} chars]`,
-			},
-		};
-		return [
-			{ type: "text", text: stringifyResult(textPayload) },
-			{ type: "image", data: screenshot.data, mimeType: screenshot.mimeType },
-		];
-	}
-	return [{ type: "text", text: stringifyResult(value) }];
-}
-
-function stringifyResult(value: unknown): string {
-	const json =
-		JSON.stringify(
-			value,
-			(_key, nestedValue) => {
-				if (typeof nestedValue === "string") {
-					if (nestedValue.startsWith("data:image/")) {
-						return `[image data omitted: ${nestedValue.length} chars]`;
-					}
-					if (nestedValue.length > 4000) {
-						return `${nestedValue.slice(0, 4000)}\n... [${nestedValue.length - 4000} chars truncated] ...`;
-					}
-				}
-				return nestedValue;
-			},
-			2,
-		) ?? "null";
-	const MAX = 8_000;
-	return json.length > MAX ? `${json.slice(0, MAX)}\n... [${json.length - MAX} chars truncated] ...` : json;
 }
