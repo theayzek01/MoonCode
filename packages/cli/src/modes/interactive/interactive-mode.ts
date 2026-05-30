@@ -45,6 +45,8 @@ import {
 	TruncatedText,
 	TUI,
 	visibleWidth,
+	Image,
+	getCapabilities,
 } from "moon-tui";
 import { buildInitialMessage } from "../../cli/initial-message.js";
 import {
@@ -126,6 +128,7 @@ import { ToolExecutionComponent } from "./components/tool-execution.js";
 import { TreeSelectorComponent } from "./components/tree-selector.js";
 import { UserMessageComponent } from "./components/user-message.js";
 import { UserMessageSelectorComponent } from "./components/user-message-selector.js";
+import { buildIntroLines } from "./components/intro.js";
 // WorkspacePanelComponent removed — right panel disabled
 import {
 	getAvailableThemes,
@@ -201,7 +204,7 @@ class VirtualizedChatContainer extends Container {
 		}
 
 		// Fill remaining space so composer stays pinned to bottom
-		while (lines.length < maxVisible) lines.unshift('');
+		while (lines.length < maxVisible) lines.unshift("");
 
 		if (this.enableCaching) {
 			this.cachedWidth = width;
@@ -310,7 +313,7 @@ export class InteractiveMode {
 	private version: string;
 	private isInitialized = false;
 	private initPromise: Promise<void> | undefined;
-	private onInputCallback?: (text: string) => void;
+	private onInputCallback?: (text: string, images?: ImageContent[]) => void;
 	private isSubmitting = false;
 	private loadingAnimation: Loader | undefined = undefined;
 	private workingMessage: string | undefined = undefined;
@@ -623,6 +626,11 @@ export class InteractiveMode {
 		}
 		this.startupNoticesShown = true;
 
+		// ASCII intro - tek seferlik açılış
+		const termW = process.stdout.columns || 100;
+		const introText = new Text(buildIntroLines(termW).join("\n"), 0, 0);
+		this.chatContainer.addChild(introText);
+
 		if (!this.changelogMarkdown) {
 			return;
 		}
@@ -800,11 +808,11 @@ export class InteractiveMode {
 		this.renderWidgets();
 		this.ui.addChild(this.widgetContainerAbove);
 		this.ui.addChild(this.widgetContainerBelow);
+		// Composer FIRST (üstte), footer BAR ALTTA
+		this.ui.addChild(this.editorContainer);
 		if (!this.isZenMode) {
 			this.ui.addChild(this.customFooter ?? this.footer);
 		}
-		// Keep composer as the final child so its bottom border stays pinned to the last terminal row.
-		this.ui.addChild(this.editorContainer);
 		this.ui.setFocus(this.editor);
 		this.ui.requestRender();
 	}
@@ -891,7 +899,7 @@ export class InteractiveMode {
 
 		// Main interactive loop
 		while (true) {
-			const userInput = await this.getUserInput();
+			const { text: userInput, images } = await this.getUserInput();
 			try {
 				let promptInput = userInput;
 				const lowerInput = userInput.toLowerCase();
@@ -980,7 +988,7 @@ export class InteractiveMode {
 					promptInput = `[Sistem: Kullanıcının mesajı profesyonel fotoğraf düzenleme/retouch niyeti taşıyor; MoonCode Photo Studio tarayıcıda otomatik açıldı. Komut yazmasını bekleme. Önce klasördeki uygun görsel dosyayı bul (png/jpg/webp vb.), sonra Photo Studio ve Browser Bridge üzerinden yükleme/işlem akışını yürüt. İstenen işlem örn. yüz lekesi temizleme, cilt yumuşatma, göz netleştirme, profesyonel portre, arka plan/obje kaldırma, LUT/curves/upscale/export olabilir. Gerekirse yalnızca eksik dosya yolu veya export hedefi sor.]\n\n${userInput}`;
 				}
 
-				await this.session.prompt(promptInput);
+				await this.session.prompt(promptInput, { images });
 			} catch (error: unknown) {
 				const errorMessage = error instanceof Error ? error.message : "Bilinmeyen bir hata oluştu";
 				this.showError(errorMessage);
@@ -2661,6 +2669,29 @@ export class InteractiveMode {
 		}
 	}
 
+	private parseAndExtractImages(text: string): { cleanedText: string; images?: ImageContent[] } {
+		const images: ImageContent[] = [];
+		const matches = text.match(/(?:[a-zA-Z]:)?[\\/][^"'`\n\r\t<>|:*?]+\.(?:png|jpg|jpeg|webp|gif)/gi) || [];
+		
+		let cleanedText = text;
+		for (let p of matches) {
+			p = p.trim();
+			p = p.replace(/^["'\(]+|["'\)]+$/g, "");
+			if (fs.existsSync(p)) {
+				try {
+					const data = fs.readFileSync(p).toString("base64");
+					const ext = path.extname(p).toLowerCase().slice(1);
+					const mimeType = ext === "jpg" ? "image/jpeg" : `image/${ext}`;
+					images.push({ type: "image", data, mimeType });
+					cleanedText = cleanedText.replace(p, `[Attached Image: ${path.basename(p)}]`);
+				} catch {
+					// ignore
+				}
+			}
+		}
+		return { cleanedText, images: images.length > 0 ? images : undefined };
+	}
+
 	private setupEditorSubmitHandler(): void {
 		this.defaultEditor.onSubmit = async (text: string) => {
 			if (this.isSubmitting) return;
@@ -3036,7 +3067,8 @@ export class InteractiveMode {
 				if (this.session.isStreaming) {
 					this.editor.addToHistory?.(text);
 					this.editor.setText("");
-					await this.session.prompt(text, { streamingBehavior: "steer" });
+					const { cleanedText, images } = this.parseAndExtractImages(text);
+					await this.session.prompt(cleanedText, { streamingBehavior: "steer", images });
 					this.updatePendingMessagesDisplay();
 					this.ui.requestRender();
 					return;
@@ -3051,7 +3083,8 @@ export class InteractiveMode {
 				await kernel.initializeTask(text, this.sessionManager.getCwd());
 
 				if (this.onInputCallback) {
-					this.onInputCallback(text);
+					const { cleanedText, images } = this.parseAndExtractImages(text);
+					this.onInputCallback(cleanedText, images);
 				}
 				this.editor.addToHistory?.(text);
 			} finally {
@@ -3634,6 +3667,25 @@ export class InteractiveMode {
 						const userComponent = new UserMessageComponent(textContent, this.getMarkdownThemeWithSettings());
 						this.chatContainer.addChild(userComponent);
 					}
+
+					// Render attached images directly in the TUI chat!
+					const images = Array.isArray(message.content) ? message.content.filter(c => c.type === "image") : [];
+					const caps = getCapabilities();
+					const showImages = this.settingsManager.getShowImages();
+					const imageWidthCells = this.settingsManager.getImageWidthCells();
+					for (const img of images) {
+						if (caps.images && showImages && img.data && img.mimeType) {
+							this.chatContainer.addChild(new Spacer(1));
+							const imageComponent = new Image(
+								img.data,
+								img.mimeType,
+								{ fallbackColor: (s) => theme.fg("toolOutput", s) },
+								{ maxWidthCells: imageWidthCells }
+							);
+							this.chatContainer.addChild(imageComponent);
+						}
+					}
+
 					if (options?.populateHistory) {
 						this.editor.addToHistory?.(textContent);
 					}
@@ -3758,11 +3810,11 @@ export class InteractiveMode {
 		}
 	}
 
-	async getUserInput(): Promise<string> {
+	async getUserInput(): Promise<{ text: string; images?: ImageContent[] }> {
 		return new Promise((resolve) => {
-			this.onInputCallback = (text: string) => {
+			this.onInputCallback = (text: string, images?: ImageContent[]) => {
 				this.onInputCallback = undefined;
-				resolve(text);
+				resolve({ text, images });
 			};
 		});
 	}

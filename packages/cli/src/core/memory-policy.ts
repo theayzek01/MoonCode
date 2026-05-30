@@ -1,6 +1,6 @@
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
-import { dirname, join, basename } from "node:path";
 import { createHash } from "node:crypto";
+import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { basename, dirname, join } from "node:path";
 import { CONFIG_DIR_NAME, getEngineDir } from "../config.js";
 
 export interface MemorySignal {

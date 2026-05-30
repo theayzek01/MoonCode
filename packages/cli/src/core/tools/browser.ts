@@ -47,7 +47,9 @@ const browserPageSchema = Type.Object({
 		Type.Literal("clear_ui"),
 	]),
 	tabId: Type.Optional(Type.Number({ description: "Chrome tab id. Defaults to active tab." })),
-	selector: Type.Optional(Type.String({ description: "CSS selector for click/type/hover/upload_file/drag source actions" })),
+	selector: Type.Optional(
+		Type.String({ description: "CSS selector for click/type/hover/upload_file/drag source actions" }),
+	),
 	targetSelector: Type.Optional(Type.String({ description: "CSS selector for drag target" })),
 	x: Type.Optional(Type.Number({ description: "Viewport X coordinate for mouse actions" })),
 	y: Type.Optional(Type.Number({ description: "Viewport Y coordinate for mouse actions" })),
@@ -61,14 +63,18 @@ const browserPageSchema = Type.Object({
 			description: "Canvas draw points as [x,y] pairs, relative to canvas unless absolute=true",
 		}),
 	),
-	color: Type.Optional(Type.String({ description: "Canvas draw color when page supports injected 2D drawing fallback" })),
+	color: Type.Optional(
+		Type.String({ description: "Canvas draw color when page supports injected 2D drawing fallback" }),
+	),
 	width: Type.Optional(Type.Number({ description: "Canvas draw stroke width" })),
 	absolute: Type.Optional(Type.Boolean({ description: "Treat canvas_draw points as viewport coordinates" })),
 	text: Type.Optional(Type.String({ description: "Text to type" })),
 	filePath: Type.Optional(Type.String({ description: "Local file path for upload_file" })),
 	filePaths: Type.Optional(Type.Array(Type.String(), { description: "Local file paths for upload_file" })),
 	visual: Type.Optional(Type.Boolean({ description: "Show temporary visual overlay/cursor for actions" })),
-	showLabels: Type.Optional(Type.Boolean({ description: "Show visual labels for get_elements (default false; IDs still work)" })),
+	showLabels: Type.Optional(
+		Type.Boolean({ description: "Show visual labels for get_elements (default false; IDs still work)" }),
+	),
 	maxElements: Type.Optional(Type.Number({ description: "Maximum elements returned by get_elements" })),
 	append: Type.Optional(Type.Boolean({ description: "Append to existing value instead of replacing (type action)" })),
 	key: Type.Optional(Type.String({ description: "Key name for press_key action (e.g. Enter, Tab, Escape)" })),
@@ -145,17 +151,18 @@ function renderCall(toolName: string, action: string | undefined, theme: Theme):
 }
 
 function truncateJson(value: unknown, maxChars = 6000): string {
-	const raw = JSON.stringify(
-		value,
-		(_k, v) => {
-			if (typeof v === "string") {
-				if (v.startsWith("data:image/")) return `[image data: ${v.length} chars]`;
-				if (v.length > 3000) return `${v.slice(0, 3000)}\n… [${v.length - 3000} chars truncated]`;
-			}
-			return v;
-		},
-		2,
-	) ?? "null";
+	const raw =
+		JSON.stringify(
+			value,
+			(_k, v) => {
+				if (typeof v === "string") {
+					if (v.startsWith("data:image/")) return `[image data: ${v.length} chars]`;
+					if (v.length > 3000) return `${v.slice(0, 3000)}\n… [${v.length - 3000} chars truncated]`;
+				}
+				return v;
+			},
+			2,
+		) ?? "null";
 	return raw.length > maxChars ? `${raw.slice(0, maxChars)}\n… [${raw.length - maxChars} chars truncated]` : raw;
 }
 
@@ -199,8 +206,10 @@ function renderResult(
 // ─── Validation ────────────────────────────────────────────────────────────────
 
 function validateTabs(p: BrowserTabsToolInput): void {
-	if ((p.action === "open" || p.action === "navigate") && !p.url) throw new Error(`browser_tabs ${p.action} requires url`);
-	if (["close", "focus"].includes(p.action) && p.tabId === undefined) throw new Error(`browser_tabs ${p.action} requires tabId`);
+	if ((p.action === "open" || p.action === "navigate") && !p.url)
+		throw new Error(`browser_tabs ${p.action} requires url`);
+	if (["close", "focus"].includes(p.action) && p.tabId === undefined)
+		throw new Error(`browser_tabs ${p.action} requires tabId`);
 }
 
 function validatePage(p: BrowserPageToolInput): void {
@@ -209,9 +218,12 @@ function validatePage(p: BrowserPageToolInput): void {
 	if (p.action === "type" && p.text === undefined) throw new Error("browser_page type requires text");
 	if (p.action === "press_key" && !p.key) throw new Error("browser_page press_key requires key");
 	if (p.action === "evaluate" && !p.script) throw new Error("browser_page evaluate requires script");
-	if (p.action === "drag" && (!p.selector || !p.targetSelector)) throw new Error("browser_page drag requires selector and targetSelector");
-	if (p.action === "mouse" && (p.x === undefined || p.y === undefined)) throw new Error("browser_page mouse requires x and y");
-	if (p.action === "canvas_draw" && (!p.points || p.points.length < 2)) throw new Error("browser_page canvas_draw requires at least 2 points");
+	if (p.action === "drag" && (!p.selector || !p.targetSelector))
+		throw new Error("browser_page drag requires selector and targetSelector");
+	if (p.action === "mouse" && (p.x === undefined || p.y === undefined))
+		throw new Error("browser_page mouse requires x and y");
+	if (p.action === "canvas_draw" && (!p.points || p.points.length < 2))
+		throw new Error("browser_page canvas_draw requires at least 2 points");
 	if (p.action === "upload_file" && !p.filePath && (!p.filePaths || p.filePaths.length === 0))
 		throw new Error("browser_page upload_file requires filePath or filePaths");
 }
@@ -265,7 +277,9 @@ export function createBrowserTabsToolDefinition(): ToolDefinition<typeof browser
 	};
 }
 
-export function createBrowserPageToolDefinition(): ToolDefinition<typeof browserPageSchema, BrowserToolDetails> {
+export function createBrowserPageToolDefinition(
+	getModelVisionSupport?: () => boolean,
+): ToolDefinition<typeof browserPageSchema, BrowserToolDetails> {
 	return {
 		name: "browser_page",
 		label: "browser_page",
@@ -296,6 +310,18 @@ export function createBrowserPageToolDefinition(): ToolDefinition<typeof browser
 
 		async execute(_id, params, signal) {
 			if (signal?.aborted) throw new Error("Operation aborted");
+
+			// Screenshot: model vision desteklemiyorsa engelle
+			if (params.action === "screenshot") {
+				const visionOk = getModelVisionSupport ? getModelVisionSupport() : true;
+				if (!visionOk) {
+					return {
+						content: [{ type: "text" as const, text: "⚠️ Aktif model görsel girdisini desteklemiyor. Screenshot bu modelde kullanılamaz. Görsel destekleyen bir model seç (Claude, GPT-4o, Gemini Pro/Flash)." }],
+						details: { action: params.action, connected: true, hasScreenshot: false },
+					};
+				}
+			}
+
 			validatePage(params);
 			const cmdParams = normalizePageParams(params);
 			const result = await sendBrowserCommand("page", cmdParams);
@@ -325,6 +351,8 @@ export function createBrowserTabsTool(): EngineTool<typeof browserTabsSchema, Br
 	return wrapToolDefinition(createBrowserTabsToolDefinition());
 }
 
-export function createBrowserPageTool(): EngineTool<typeof browserPageSchema, BrowserToolDetails> {
-	return wrapToolDefinition(createBrowserPageToolDefinition());
+export function createBrowserPageTool(
+	getModelVisionSupport?: () => boolean,
+): EngineTool<typeof browserPageSchema, BrowserToolDetails> {
+	return wrapToolDefinition(createBrowserPageToolDefinition(getModelVisionSupport));
 }

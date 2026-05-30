@@ -2922,6 +2922,11 @@ export class EngineSession {
 					read: { autoResizeImages },
 					bash: { commandPrefix: shellCommandPrefix, shellPath },
 					discord: { token: discordToken },
+					getModelVisionSupport: () => {
+						const m = this.model;
+						if (!m) return true; // bilinmiyorsa izin ver
+						return Array.isArray(m.input) && m.input.includes("image");
+					},
 				});
 
 		this._baseToolDefinitions = new Map(

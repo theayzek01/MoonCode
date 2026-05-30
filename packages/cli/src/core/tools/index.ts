@@ -169,6 +169,8 @@ export interface ToolsOptions {
 	find?: FindToolOptions;
 	ls?: LsToolOptions;
 	discord?: DiscordToolOptions;
+	/** Returns whether the current model supports image/vision input */
+	getModelVisionSupport?: () => boolean;
 }
 
 export function createToolDefinition(toolName: ToolName, cwd: string, options?: ToolsOptions): ToolDef {
@@ -232,7 +234,7 @@ export function createTool(toolName: ToolName, cwd: string, options?: ToolsOptio
 		case "browser_tabs":
 			return createBrowserTabsTool();
 		case "browser_page":
-			return createBrowserPageTool();
+			return createBrowserPageTool(options?.getModelVisionSupport);
 		case "discord_list_guilds":
 			return createDiscordListGuildsTool(options?.discord);
 		case "discord_get_channels":
@@ -315,7 +317,7 @@ export function createAllTools(cwd: string, options?: ToolsOptions): Record<Tool
 		semantic_search: createSemanticSearchTool(cwd),
 		git_ship: createGitShipTool(cwd),
 		browser_tabs: createBrowserTabsTool(),
-		browser_page: createBrowserPageTool(),
+		browser_page: createBrowserPageTool(options?.getModelVisionSupport),
 		discord_list_guilds: createDiscordListGuildsTool(options?.discord),
 		discord_get_channels: createDiscordGetChannelsTool(options?.discord),
 		discord_send_message: createDiscordSendMessageTool(options?.discord),

@@ -1,4 +1,4 @@
-import { type Component } from "moon-tui";
+import type { Component } from "moon-tui";
 import type { EngineSession } from "../../../core/engine-session.js";
 import type { ReadonlyFooterDataProvider } from "../../../core/footer-data-provider.js";
 
@@ -10,12 +10,24 @@ function pad(n: number): string {
 	return n > 0 ? " ".repeat(n) : "";
 }
 
-function steel(s: string): string { return `\x1b[38;2;95;158;160m${s}\x1b[39m`; }
-function dim(s: string): string { return `\x1b[38;2;90;90;90m${s}\x1b[39m`; }
-function muted(s: string): string { return `\x1b[38;2;140;140;140m${s}\x1b[39m`; }
-function sage(s: string): string { return `\x1b[38;2;110;170;120m${s}\x1b[39m`; }
-function bg1(s: string): string { return `\x1b[48;2;18;22;28m${s}\x1b[49m`; }
-function bg2(s: string): string { return `\x1b[48;2;10;12;16m${s}\x1b[49m`; }
+function steel(s: string): string {
+	return `\x1b[38;2;95;158;160m${s}\x1b[39m`;
+}
+function dim(s: string): string {
+	return `\x1b[38;2;90;90;90m${s}\x1b[39m`;
+}
+function muted(s: string): string {
+	return `\x1b[38;2;140;140;140m${s}\x1b[39m`;
+}
+function sage(s: string): string {
+	return `\x1b[38;2;110;170;120m${s}\x1b[39m`;
+}
+function bg1(s: string): string {
+	return `\x1b[48;2;18;22;28m${s}\x1b[49m`;
+}
+function bg2(s: string): string {
+	return `\x1b[48;2;10;12;16m${s}\x1b[49m`;
+}
 
 function shortenPath(p: string): string {
 	if (!p) return ".";
@@ -36,9 +48,14 @@ export class FooterComponent implements Component {
 		this.getExecutingToolNames = getExecutingToolNames;
 	}
 
-	setSession(s: EngineSession): void { this.session = s; this.invalidate(); }
+	setSession(s: EngineSession): void {
+		this.session = s;
+		this.invalidate();
+	}
 	setAutoCompactEnabled(_e: boolean): void {}
-	invalidate(): void { this.lastEntryCount = -1; }
+	invalidate(): void {
+		this.lastEntryCount = -1;
+	}
 	dispose(): void {}
 
 	render(width: number): string[] {
@@ -78,12 +95,7 @@ export class FooterComponent implements Component {
 		const compacting = (this.session as any).isCompacting;
 		const phase = compacting ? steel("compact") : streaming ? steel("thinking") : dim("idle");
 
-		const right1Parts = [
-			muted(model),
-			dim(`think:${thinkLevel}`),
-			dim(`ctx:${ctxPct}`),
-			phase,
-		];
+		const right1Parts = [muted(model), dim(`think:${thinkLevel}`), dim(`ctx:${ctxPct}`), phase];
 		const right1 = right1Parts.join(dim("  ·  "));
 
 		const left1W = vw(pathStr);

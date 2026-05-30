@@ -33,9 +33,9 @@ export class UserMessageComponent extends Container {
 		if (this.cachedLines && this.cachedWidth === width) {
 			return this.cachedLines;
 		}
-		
+
 		const child = this.children[1] || this.children[0];
-		const childLines = child ? child.render(width - 6) : []; 
+		const childLines = child ? child.render(width - 6) : [];
 
 		const steelBlueStripe = `\x1b[38;2;95;158;160m┃\x1b[39m`;
 		const userMessageBgCode = `\x1b[48;2;28;34;39m`; // #1c2227 background
@@ -51,7 +51,7 @@ export class UserMessageComponent extends Container {
 			const lineBg = `${userMessageBgCode}${textWhiteCode} ${cleanLine}${" ".repeat(paddedLength)} ${resetCode}`;
 			lines.push(` ${steelBlueStripe} ${lineBg}`);
 		}
-		
+
 		lines.push(""); // spacer below
 
 		const result = [...lines];
