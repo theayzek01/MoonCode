@@ -30,7 +30,7 @@ export function buildIntroLines(width: number): string[] {
 
 	// Tagline
 	const tagline = bright("  En minimal.  En akıllı.  En az token.  En sade.");
-	const version = dim("  v2026-v23  ·  github.com/theayzek01/MoonCode");
+	const version = dim("  v2026-v24  ·  github.com/theayzek01/MoonCode");
 	const hint = dim("  /help  ·  /index  ·  /browser  ·  /ship  ·  Ctrl+C çıkış");
 
 	// Separator

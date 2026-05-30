@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { createReadStream, existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { createServer, type ServerResponse } from "node:http";
+import type { AddressInfo } from "node:net";
 import { dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { getSessionsDir } from "../config.js";
@@ -21,7 +22,7 @@ const INDEX_HTML = `<!doctype html>
     <a class="brand" href="#top" aria-label="MoonCode">
       <span class="mark"><img src="/assets/Mooncodewhitelogo.png" alt="" /></span>
       <span class="word">MoonCode</span>
-      <span class="version">2026-v23</span>
+      <span class="version">2026-v24</span>
     </a>
     <button class="menu" type="button" aria-expanded="false" aria-controls="nav">Menü</button>
     <nav id="nav" class="nav" aria-label="Ana menü">
@@ -129,7 +130,7 @@ mooncode</pre>
   </main>
 
   <footer class="footer shell">
-    <span>MoonCode 2026-v23</span>
+    <span>MoonCode 2026-v24</span>
     <a href="https://github.com/theayzek01/mooncode" target="_blank" rel="noreferrer">github.com/theayzek01/mooncode</a>
   </footer>
 
@@ -1507,7 +1508,7 @@ export function setActiveSessionId(id: string | null): void {
 }
 
 export function startWebUiServer(options: { port?: number; staticRoot?: string } = {}) {
-	const port = options.port || Number(process.env.MOON_WEB_PORT || 3131);
+	const requestedPort = options.port ?? Number(process.env.MOON_WEB_PORT || 3131);
 	const server = createServer((req, res) => {
 		const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
 
@@ -1642,15 +1643,22 @@ export function startWebUiServer(options: { port?: number; staticRoot?: string }
 	});
 	server.on("error", (err: any) => {
 		if (err.code === "EADDRINUSE") {
-			if (!process.env.PI_TUI_MODE) {
-				console.error(
-					`\n\x1b[33m[Moon Web UI] Port ${port} is already in use. Dashboard may already be active.\x1b[0m`,
-				);
-			}
+			server.listen(0, "127.0.0.1");
 		} else {
 			console.error(`\n\x1b[31m[Moon Web UI Error] ${err.message}\x1b[0m`);
 		}
 	});
-	server.listen(port, "127.0.0.1");
-	return { server, url: `http://127.0.0.1:${port}`, port };
+	server.listen(requestedPort, "127.0.0.1");
+	return {
+		server,
+		get url() {
+			const address = server.address() as AddressInfo | null;
+			const activePort = address?.port || requestedPort;
+			return `http://127.0.0.1:${activePort}`;
+		},
+		get port() {
+			const address = server.address() as AddressInfo | null;
+			return address?.port || requestedPort;
+		},
+	};
 }

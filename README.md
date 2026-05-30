@@ -2,7 +2,7 @@
   <img src="assets/MooncodeWhiteBanner.png" alt="MoonCode Banner" width="100%" />
   <br />
   <p>
-    <b>MoonCode 2026-v23</b><br />
+    <b>MoonCode 2026-v24</b><br />
     Terminal tabanlı, minimal ve akıllı otonom yazılım geliştirme ajanı.
   </p>
   <p>
@@ -26,9 +26,9 @@
 * **Ultra-Düşük Token Sarfiyatı:** Akıllı metadata ve sembol-bazlı indeksleme sayesinde bağlam pencerelerini doldurmaz, hızlı ve ucuz çalışır.
 * **Dynamic ADHD Tool Router:** Basit ve casual sohbetlerde gereksiz ağır araç şemalarını yüklemez; teknik görevlerde ise tüm yetenekleri otomatik devreye sokar.
 * **Temiz Çalışma Alanı (Merkezi Hafıza):** Proje dizinlerinizi `.mooncode.md` veya benzeri kalıcı dosyalarla kirletmez; tüm hafıza ve geçmişi merkezi `~/.moonagent` dizini altında güvenle yönetir.
-* **Gelişmiş TUI Arayüzü:** Akıllı Spacer ve Padding mantığıyla composer (yazma alanı) her zaman ekranın en altında sabit kalır. FPS donmalarına karşı Virtualized render korumalıdır; 2026-v23 ile render tepkiselliği artırıldı.
+* **Gelişmiş TUI Arayüzü:** Akıllı Spacer ve Padding mantığıyla composer (yazma alanı) her zaman ekranın en altında sabit kalır. FPS donmalarına karşı Virtualized render korumalıdır; 2026-v24 ile render tepkiselliği artırıldı.
 * **/app Web Studio:** TUI kilidiyle birlikte çalışan web arayüzü üzerinden aktif oturuma mesaj gönderme ve kilidi açma akışı desteklenir.
-* **Hızlı Codex/OpenAI Akışı:** 2026-v23 retry/backoff ayarlarıyla Codex/GPT streaming gecikmeleri azaltıldı.
+* **Hızlı Codex/OpenAI Akışı:** 2026-v24 retry/backoff ayarlarıyla Codex/GPT streaming gecikmeleri azaltıldı.
 * **Browser Bridge & Akıllı Screenshot:** Entegre Chrome uzantısıyla tarayıcıyı kontrol eder. Modeliniz görsel (Vision) girdi destekliyorsa ekran görüntülerini anında analiz eder, desteklemiyorsa sistem kaynaklarını korumak için screenshot özelliğini otomatik kapatır.
 
 ---

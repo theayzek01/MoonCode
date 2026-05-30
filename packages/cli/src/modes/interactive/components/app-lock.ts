@@ -7,7 +7,10 @@ import { DynamicBorder } from "./dynamic-border.js";
  * AppLockComponent - displays a beautiful lock overlay when /app is active
  */
 export class AppLockComponent extends Container {
-	constructor(private onUnlock: () => void) {
+	constructor(
+		private onUnlock: () => void,
+		private readonly appUrl = "http://127.0.0.1:3131/app",
+	) {
 		super();
 
 		// Top border
@@ -24,7 +27,7 @@ export class AppLockComponent extends Container {
 		this.addChild(new Spacer(1));
 
 		// Address info
-		this.addChild(new Text(`  Adres: ${theme.fg("accent", theme.underline("http://127.0.0.1:3131/app"))}`, 0, 0));
+		this.addChild(new Text(`  Adres: ${theme.fg("accent", theme.underline(this.appUrl))}`, 0, 0));
 		this.addChild(new Spacer(1));
 
 		// Key hints

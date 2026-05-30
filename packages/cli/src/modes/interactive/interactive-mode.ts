@@ -5706,7 +5706,7 @@ export class InteractiveMode {
 					unlockTui();
 					done();
 					this.ui.requestRender();
-				});
+				}, url);
 
 				// Hem yerel tuşlar hem de uzaktan kilit açma için ortak temizleme rutini
 				cleanup = () => {
@@ -6568,6 +6568,7 @@ export class InteractiveMode {
 				{ name: "/diff", desc: "Show git changes" },
 				{ name: "/index", desc: "Index codebase for semantic search" },
 				{ name: "/browser", desc: "Chrome extension status and control" },
+				{ name: "/app", desc: "Open Web Studio and lock TUI" },
 				{ name: "/interface", desc: "Open MoonCode Special OpenClaw OS Interface" },
 				{ name: "/videoedit", desc: "Open MoonCode Pro Video Studio (Browser)" },
 				{ name: "/photoedit", desc: "Open MoonCode Pro Photo Editor (Browser)" },

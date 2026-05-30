@@ -51,6 +51,7 @@ export const BUILTIN_SLASH_COMMANDS: ReadonlyArray<BuiltinSlashCommand> = [
 	{ name: "diff", description: "Show git changes" },
 	{ name: "index", description: "Index codebase for semantic search" },
 	{ name: "browser", description: "Chrome extension status and control" },
+	{ name: "app", description: "Open /app Web Studio and lock TUI" },
 	{ name: "interface", description: "Open MoonCode Special OpenClaw OS Interface" },
 	{ name: "videoedit", description: "Open MoonCode Pro Video Studio (Browser)" },
 	{ name: "photoedit", description: "Open MoonCode Pro Photo Editor (Browser)" },

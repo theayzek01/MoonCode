@@ -19,7 +19,7 @@ export class MoonCodeHeaderComponent extends Container {
 
 		// Row 1: title bar
 		const left = steel(" ◆ MoonCode");
-		const right = dim(" v2026-v23 · /help · /index · /browser · /ship ");
+		const right = dim(" v2026-v24 · /help · /index · /browser · /ship ");
 		const leftW = 12;
 		const rightW = right.replace(/\x1b\[[^m]*m/g, "").length;
 		const pad = Math.max(0, width - leftW - rightW);
