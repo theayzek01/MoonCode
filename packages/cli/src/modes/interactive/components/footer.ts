@@ -4,7 +4,14 @@ import type { EngineSession } from "../../../core/engine-session.js";
 import type { ReadonlyFooterDataProvider } from "../../../core/footer-data-provider.js";
 import { theme } from "../theme/theme.js";
 
-/** Single-row status bar. Signal only. */
+function shortenPath(filePath: string): string {
+	if (!filePath) return ".";
+	const parts = filePath.split(/[/\\]/);
+	if (parts.length <= 3) return filePath;
+	return `.../${parts.slice(-3).join("/")}`;
+}
+
+/** Double-row professional TUI footer with Status Bar & Browser Bar */
 export class FooterComponent implements Component {
 	private getExecutingToolNames?: () => string[];
 	private cachedEntryCount = -1;
@@ -54,40 +61,75 @@ export class FooterComponent implements Component {
 			}
 		}
 
-		const activeToolNames = this.getExecutingToolNames ? this.getExecutingToolNames() : [];
-		const branch = this.footerData.getGitBranch();
-		const contextUsage = this.session.getContextUsage();
-		const contextPercent = contextUsage?.percent !== null ? `${(contextUsage?.percent ?? 0).toFixed(0)}%` : "?";
+		// Current model name
 		const provider = state.model?.provider;
 		let modelName = state.model?.id || "no-model";
-
 		if (provider && modelName.toLowerCase().startsWith(`${provider.toLowerCase()}-`)) {
 			modelName = modelName.slice(provider.length + 1);
 		} else if (provider && modelName.toLowerCase().startsWith(`${provider.toLowerCase()}/`)) {
 			modelName = modelName.slice(provider.length + 1);
 		}
 
-		const phase = this.getPhase(activeToolNames);
+		// Color Definitions:
+		const steelBlueText = (str: string) => `\x1b[38;2;95;158;160m${str}\x1b[39m`;
+		const skyBlueText = (str: string) => `\x1b[38;2;135;206;235m${str}\x1b[39m`;
+		const sageGreenText = (str: string) => `\x1b[38;2;140;180;145m${str}\x1b[39m`;
+		const mutedGrayText = (str: string) => `\x1b[38;2;160;160;160m${str}\x1b[39m`;
+		const dimGrayText = (str: string) => `\x1b[38;2;110;110;110m${str}\x1b[39m`;
+		const darkGrayText = (str: string) => `\x1b[38;2;80;80;80m${str}\x1b[39m`;
+
+		// Background styles for Status Bar (slightly lighter than Pure Black body, e.g. #181d22)
+		const statusBarBg = (str: string) => `\x1b[48;2;24;29;34m${str}\x1b[49m`;
+		// Background styles for Browser Bar (Darkest bar at the bottom, e.g. #080a0c)
+		const browserBarBg = (str: string) => `\x1b[48;2;8;10;12m${str}\x1b[49m`;
+
+		// 1. STATUS BAR (Row 1)
+		const rawCwd = this.session.sessionManager?.getCwd() || ".";
+		const currentPath = ` ${shortenPath(rawCwd)}`;
+
+		const thinkingBadgeText = `think:${state.thinkingLevel || "low"}`;
+		const thinkingBadge = `\x1b[48;2;25;35;45m\x1b[38;2;95;158;160m[ ${thinkingBadgeText} ]\x1b[49m`;
+
+		const contextUsage = this.session.getContextUsage();
+		const contextPercent = contextUsage?.percent !== null ? `${(contextUsage?.percent ?? 0).toFixed(0)}%` : "0%";
+		const tokenUsage = `ctx:${contextPercent}`;
+
+		const rightParts = [
+			modelName,
+			thinkingBadge,
+			tokenUsage
+		];
+		const rightJoined = rightParts.join("  ");
+		const rightJoinedVisWidth = modelName.length + thinkingBadgeText.length + 4 + tokenUsage.length + 4; 
+
+		const leftVisWidth = currentPath.length;
+		const row1Padding = Math.max(0, width - leftVisWidth - rightJoinedVisWidth);
+		const statusBarLine = statusBarBg(mutedGrayText(currentPath) + " ".repeat(row1Padding) + dimGrayText(rightJoined) + " ");
+
+		// 2. BROWSER BAR (Row 2 - Darkest bar)
+		const globeIcon = " 🌐";
+		const browserTag = skyBlueText(" browser");
 		const hasBrowser = (this.session.getBrowserBridgeStatus?.().clients ?? 0) > 0;
-		const parts = [
-			theme.fg(hasBrowser ? "success" : "muted", hasBrowser ? "web:on" : "web:off"),
-			theme.fg(phase.color, phase.label),
-			branch ? theme.fg("muted", `git:${truncateToWidth(branch, 12, "...")}`) : undefined,
-			theme.fg("accent", "model:") + theme.fg("text", truncateToWidth(modelName, 24, "...")),
-			theme.fg("muted", "ctx:") + theme.fg("text", contextPercent),
-			this.cachedCostTotal > 0 ? theme.fg("success", `$${this.cachedCostTotal.toFixed(3)}`) : undefined,
-		].filter(Boolean);
+		const browserStatus = hasBrowser ? sageGreenText("connected") : dimGrayText("disconnected");
 
-		const lineText = ` ${parts.join(theme.fg("dim", " | "))}`;
-		const lineVisWidth = visibleWidth(lineText);
-		let renderedLine = lineText;
-		if (lineVisWidth < width) {
-			renderedLine = lineText + " ".repeat(width - lineVisWidth);
-		} else if (lineVisWidth > width) {
-			renderedLine = truncateToWidth(lineText, width);
-		}
+		const activeToolNames = this.getExecutingToolNames ? this.getExecutingToolNames() : [];
+		const toolCount = `tools:${activeToolNames.length || this.session.getActiveToolNames().length}`;
+		const costText = `cost:$${this.cachedCostTotal.toFixed(3)}`;
 
-		return [renderedLine];
+		const browserParts = [
+			browserStatus,
+			costText,
+			toolCount
+		];
+		const browserRight = browserParts.join(darkGrayText(" • "));
+		const browserRightVisWidth = (hasBrowser ? 9 : 12) + costText.length + toolCount.length + 6;
+
+		const browserLeft = `${globeIcon} ${browserTag}`;
+		const browserLeftVisWidth = 2 + 1 + 8;
+		const row2Padding = Math.max(0, width - browserLeftVisWidth - browserRightVisWidth);
+		const browserBarLine = browserBarBg(browserLeft + " ".repeat(row2Padding) + browserRight + " ");
+
+		return [statusBarLine, browserBarLine];
 	}
 
 	private getPhase(activeToolNames: string[]): { label: string; color: string } {
