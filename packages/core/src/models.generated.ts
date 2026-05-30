@@ -9657,13 +9657,13 @@ export const MODELS = {
 			reasoning: true,
 			input: ["text"],
 			cost: {
-				input: 0.27899999999999997,
+				input: 0.26,
 				output: 1.2,
 				cacheRead: 0,
 				cacheWrite: 0,
 			},
 			contextWindow: 204800,
-			maxTokens: 131072,
+			maxTokens: 4096,
 		} satisfies Model<"openai-completions">,
 		"mistralai/codestral-2508": {
 			id: "mistralai/codestral-2508",
@@ -11063,13 +11063,13 @@ export const MODELS = {
 			reasoning: true,
 			input: ["text"],
 			cost: {
-				input: 0.03,
+				input: 0.029,
 				output: 0.14,
 				cacheRead: 0,
 				cacheWrite: 0,
 			},
 			contextWindow: 131072,
-			maxTokens: 131072,
+			maxTokens: 4096,
 		} satisfies Model<"openai-completions">,
 		"openai/gpt-oss-20b:free": {
 			id: "openai/gpt-oss-20b:free",
@@ -11947,13 +11947,13 @@ export const MODELS = {
 			reasoning: true,
 			input: ["text", "image"],
 			cost: {
-				input: 0.13899999999999998,
+				input: 0.14,
 				output: 1,
-				cacheRead: 0,
+				cacheRead: 0.049999999999999996,
 				cacheWrite: 0,
 			},
 			contextWindow: 262144,
-			maxTokens: 4096,
+			maxTokens: 262144,
 		} satisfies Model<"openai-completions">,
 		"qwen/qwen3.5-397b-a17b": {
 			id: "qwen/qwen3.5-397b-a17b",

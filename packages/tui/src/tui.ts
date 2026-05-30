@@ -1138,26 +1138,7 @@ export class TUI extends Container {
 		// Content shrunk below the working area and no overlays - clear empty rows.
 		// Instead of a full redraw which pollutes scrollback, we just clear the extra lines.
 		if (this.clearOnShrink && newLines.length < this.maxLinesRendered && this.overlayStack.length === 0) {
-			const targetRow = Math.max(0, newLines.length - 1);
-			if (targetRow >= prevViewportTop) {
-				let buffer = "\x1b[?2026h";
-				const lineDiff = computeLineDiff(targetRow);
-				if (lineDiff > 0) buffer += `\x1b[${lineDiff}B`;
-				else if (lineDiff < 0) buffer += `\x1b[${-lineDiff}A`;
-				buffer += "\r\x1b[J"; // Clear from cursor to end of screen
-				buffer += "\x1b[?2026l";
-				this.terminal.write(buffer);
-				this.cursorRow = targetRow;
-				this.hardwareCursorRow = targetRow;
-				this.maxLinesRendered = newLines.length;
-				this.positionHardwareCursor(cursorPos, newLines.length);
-				this.previousLines = newLines;
-				this.previousWidth = width;
-				this.previousHeight = height;
-				this.previousViewportTop = prevViewportTop;
-				return;
-			}
-			// If target is above viewport, fallback to fullRender
+			// Fallback to fullRender to ensure all remaining content is drawn and empty rows are cleared
 			logRedraw(`clearOnShrink (maxLinesRendered=${this.maxLinesRendered})`);
 			fullRender(true);
 			return;

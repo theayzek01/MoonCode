@@ -16,6 +16,7 @@ export const defaultSelectListTheme: SelectListTheme = {
 };
 
 export const defaultMarkdownTheme: MarkdownTheme = {
+	tableDensity: "detailed",
 	heading: (text: string) => chalk.bold.cyan(text),
 	link: (text: string) => chalk.blue(text),
 	linkUrl: (text: string) => chalk.dim(text),
