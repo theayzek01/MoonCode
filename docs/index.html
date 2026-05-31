@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MoonAgent Docs</title>
+    <meta
+      name="description"
+      content="MoonAgent documentation: architecture, runtime, TUI, Browser Bridge, MCP, Blender workflow, and developer guides."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand-row">
+          <!-- Mobile Hamburger Button -->
+          <button class="hamburger-menu" id="hamburger-menu" aria-label="Open Menu" type="button">
+            <span class="hamburger-bar"></span>
+            <span class="hamburger-bar"></span>
+            <span class="hamburger-bar"></span>
+          </button>
+
+          <a href="#MOONAGENT_DEEP_DIVE.md" class="brand-link" aria-label="MoonAgent Docs home">
+            <span class="brand-text">MoonAgent</span>
+            <span class="brand-logo-container-custom">
+              <svg class="brand-logo-custom" version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1254 1254" preserveAspectRatio="xMidYMid meet">
+                <g transform="translate(0.000000,1254.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none">
+                  <path d="M6030 9429 c-122 -14 -318 -49 -430 -76 -984 -237 -1777 -949 -2125 -1908 -121 -334 -175 -659 -175 -1047 0 -519 115 -979 361 -1448 394 -750 1148 -1339 1989 -1552 282 -71 375 -82 715 -82 262 -1 318 2 443 21 261 41 522 115 737 210 92 41 224 108 193 99 -10 -3 -55 -17 -100 -30 -176 -53 -399 -92 -615 -108 -342 -25 -707 27 -1042 149 -354 128 -670 325 -938 586 -159 154 -260 275 -378 452 -561 837 -656 1916 -251 2855 95 218 250 473 409 670 106 132 343 362 469 458 340 255 727 428 1123 501 188 35 313 44 567 38 250 -5 402 -23 623 -76 44 -11 81 -18 83 -16 7 7 -199 98 -318 141 -218 80 -482 139 -729 164 -121 12 -503 11 -611 -1z"/>
+                  <path d="M6137 7566 c-50 -18 -62 -30 -86 -80 -25 -50 -26 -93 -6 -144 11 -25 163 -184 488 -509 l472 -473 -472 -472 c-481 -482 -503 -507 -503 -580 0 -41 34 -112 64 -131 45 -30 98 -40 146 -27 41 10 96 63 597 562 605 605 584 579 562 685 -7 48 -12 53 -553 596 -301 302 -559 555 -573 562 -41 22 -100 27 -142 11z"/>
+                  <path d="M7589 5485 c-40 -22 -62 -77 -57 -142 4 -44 11 -60 37 -86 l31 -32 665 -3 c734 -3 716 -4 755 60 39 64 17 173 -41 203 -41 22 -1351 21 -1390 0z"/>
+                </g>
+              </svg>
+            </span>
+            <span class="brand-sub">Docs <span style="font-size: 9px; opacity: 0.8; background: var(--surface-2); color: var(--text-muted); padding: 1px 4px; border-radius: 2px; margin-left: 4px; border: 1px solid var(--border); font-family: var(--font-mono); vertical-align: middle;">1.29-v2</span></span>
+          </a>
+
+          <nav class="topnav" aria-label="Primary">
+            <a href="#MOONAGENT_DEEP_DIVE.md" class="topnav-link topnav-docs" id="nav-docs-tab">Docs</a>
+            <a href="https://github.com/theayzek01/mooncode" class="topnav-link" target="_blank" rel="noreferrer">GitHub</a>
+            <a href="#ARCHITECTURE.md" class="topnav-link" id="nav-arch-tab">Architecture</a>
+            <a href="#PROJECT_STRUCTURE.md" class="topnav-link" id="nav-struct-tab">Structure</a>
+          </nav>
+        </div>
+
+        <div class="topbar-actions">
+          <label class="search-shell" aria-label="Search documentation">
+            <input id="doc-search" type="search" placeholder="Search documentation..." />
+            <span class="search-kbd">Ctrl K</span>
+          </label>
+
+          <!-- Bilingual Language Toggle Pill -->
+          <div class="lang-selector" id="lang-selector">
+            <button class="lang-btn" data-lang="tr" type="button">TR</button>
+            <button class="lang-btn active" data-lang="en" type="button">EN</button>
+          </div>
+
+          <!-- Theme Toggle Button (Moon / Sun) -->
+          <button class="theme-toggler" id="theme-toggler" aria-label="Toggle theme" type="button">
+            <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+            <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          </button>
+
+          <a href="https://github.com/theayzek01/mooncode/issues" class="action-btn ghost" target="_blank" rel="noreferrer" id="btn-feedback">Feedback</a>
+          <a href="https://github.com/theayzek01/mooncode" class="action-btn solid" target="_blank" rel="noreferrer" id="btn-learn">Learn</a>
+        </div>
+      </div>
+    </header>
+
+    <div class="docs-shell">
+      <aside class="left-sidebar" id="left-sidebar">
+        <div class="sidebar-inner">
+          <section class="sidebar-card">
+            <div class="sidebar-card-head">
+              <!-- Inline SVG Pointer Icon -->
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sidebar-icon"><path d="m12 14 4-4 4 4M4 20h16M4 14h6M4 8h10"/></svg>
+              <div>
+                <strong id="sidebar-card-1-title">Using MoonAgent</strong>
+                <span id="sidebar-card-1-desc">Terminal-first documentation and reference</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="sidebar-card">
+            <div class="sidebar-card-head">
+              <!-- Inline SVG Branch/Git Icon -->
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sidebar-icon"><path d="M18 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM6 20a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM6 14V6a3 3 0 0 1 6-3h0"/><path d="M6 9h12"/></svg>
+              <div>
+                <strong id="sidebar-card-2-title">Latest docs build</strong>
+                <span>launch/mooncode</span>
+              </div>
+            </div>
+          </section>
+
+          <nav class="sidebar-nav" aria-label="Documentation navigation">
+            <div class="sidebar-group">
+              <p class="sidebar-group-title" id="group-title-getting-started">Getting Started</p>
+              <a href="#INTRODUCTION.md" class="sidebar-link active">
+                <span class="file-icon-wrapper">
+                  <i data-lucide="info" class="sidebar-icon-lucide"></i>
+                </span>
+                <span class="link-label">Introduction</span>
+              </a>
+              <a href="#MOONAGENT_DEEP_DIVE.md" class="sidebar-link">
+                <span class="file-icon-wrapper">
+                  <i data-lucide="book-open" class="sidebar-icon-lucide"></i>
+                </span>
+                <span class="link-label">Deep Dive</span>
+              </a>
+              <a href="#ARCHITECTURE.md" class="sidebar-link">
+                <span class="file-icon-wrapper">
+                  <i data-lucide="layers" class="sidebar-icon-lucide"></i>
+                </span>
+                <span class="link-label">Architecture</span>
+              </a>
+              <a href="#PROJECT_STRUCTURE.md" class="sidebar-link">
+                <span class="file-icon-wrapper">
+                  <i data-lucide="folder-tree" class="sidebar-icon-lucide"></i>
+                </span>
+                <span class="link-label">Project Structure</span>
+              </a>
+            </div>
+
+            <div class="sidebar-group">
+              <p class="sidebar-group-title" id="group-title-core-guides">Core Guides</p>
+              <a href="#PHILOSOPHY.md" class="sidebar-link">
+                <span class="file-icon-wrapper">
+                  <i data-lucide="compass" class="sidebar-icon-lucide"></i>
+                </span>
+                <span class="link-label">Philosophy</span>
+              </a>
+              <a href="#AGENTS.md" class="sidebar-link">
+                <span class="file-icon-wrapper">
+                  <i data-lucide="terminal" class="sidebar-icon-lucide"></i>
+                </span>
+                <span class="link-label">Agent Instructions</span>
+              </a>
+              <a href="#QUALITY_GATE.md" class="sidebar-link">
+                <span class="file-icon-wrapper">
+                  <i data-lucide="shield-check" class="sidebar-icon-lucide"></i>
+                </span>
+                <span class="link-label">Quality Gate</span>
+              </a>
+              <a href="#BENCHMARKS.md" class="sidebar-link">
+                <span class="file-icon-wrapper">
+                  <i data-lucide="bar-chart-2" class="sidebar-icon-lucide"></i>
+                </span>
+                <span class="link-label">Benchmarks</span>
+              </a>
+            </div>
+
+            <div class="sidebar-group">
+              <p class="sidebar-group-title" id="group-title-integrations">Integrations</p>
+              <a href="#integrations/CODEX.md" class="sidebar-link">
+                <span class="file-icon-wrapper">
+                  <i data-lucide="cpu" class="sidebar-icon-lucide"></i>
+                </span>
+                <span class="link-label">Codex</span>
+              </a>
+              <a href="#integrations/GITHUB_CLI.md" class="sidebar-link">
+                <span class="file-icon-wrapper">
+                  <i data-lucide="terminal-square" class="sidebar-icon-lucide"></i>
+                </span>
+                <span class="link-label">Github CLI</span>
+              </a>
+              <a href="#integrations/ANTHROPIC.md" class="sidebar-link">
+                <span class="file-icon-wrapper">
+                  <i data-lucide="bot" class="sidebar-icon-lucide"></i>
+                </span>
+                <span class="link-label">Anthropic</span>
+              </a>
+              <a href="#integrations/ANTIGRAVITY.md" class="sidebar-link">
+                <span class="file-icon-wrapper">
+                  <i data-lucide="moon" class="sidebar-icon-lucide"></i>
+                </span>
+                <span class="link-label">Antigravity</span>
+              </a>
+              <a href="#integrations/BROWSER_CONTROL.md" class="sidebar-link">
+                <span class="file-icon-wrapper">
+                  <i data-lucide="globe" class="sidebar-icon-lucide"></i>
+                </span>
+                <span class="link-label">Browser Control</span>
+              </a>
+              <a href="#integrations/BLENDER_MCP.md" class="sidebar-link">
+                <span class="file-icon-wrapper">
+                  <i data-lucide="box" class="sidebar-icon-lucide"></i>
+                </span>
+                <span class="link-label">Blender MCP</span>
+              </a>
+            </div>
+          </nav>
+        </div>
+      </aside>
+
+      <main class="content-column">
+        <div class="content-inner">
+          <div class="doc-hero">
+            <p class="doc-kicker" id="doc-hero-kicker">Documentation</p>
+            <h1 id="page-title">MoonAgent Docs</h1>
+            <p id="page-summary" class="doc-summary">
+              Practical documentation for how MoonAgent works: architecture, runtime, TUI, Browser Bridge, MCP, Blender workflow, and developer surfaces.
+            </p>
+          </div>
+
+          <article id="doc-content" class="doc-content" aria-live="polite"></article>
+
+          <section class="doc-bottom-nav" id="doc-bottom-nav"></section>
+        </div>
+
+        <footer class="docs-footer">
+          <div class="footer-grid">
+            <div class="footer-brand">
+              <div class="footer-logo-row" style="display: flex; align-items: center; gap: 8px;">
+                <strong>MoonAgent</strong>
+                <span class="brand-logo-container-custom" style="width: 20px; height: 20px;">
+                  <svg class="brand-logo-custom" version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1254 1254" preserveAspectRatio="xMidYMid meet">
+                    <g transform="translate(0.000000,1254.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none">
+                      <path d="M6030 9429 c-122 -14 -318 -49 -430 -76 -984 -237 -1777 -949 -2125 -1908 -121 -334 -175 -659 -175 -1047 0 -519 115 -979 361 -1448 394 -750 1148 -1339 1989 -1552 282 -71 375 -82 715 -82 262 -1 318 2 443 21 261 41 522 115 737 210 92 41 224 108 193 99 -10 -3 -55 -17 -100 -30 -176 -53 -399 -92 -615 -108 -342 -25 -707 27 -1042 149 -354 128 -670 325 -938 586 -159 154 -260 275 -378 452 -561 837 -656 1916 -251 2855 95 218 250 473 409 670 106 132 343 362 469 458 340 255 727 428 1123 501 188 35 313 44 567 38 250 -5 402 -23 623 -76 44 -11 81 -18 83 -16 7 7 -199 98 -318 141 -218 80 -482 139 -729 164 -121 12 -503 11 -611 -1z"/>
+                      <path d="M6137 7566 c-50 -18 -62 -30 -86 -80 -25 -50 -26 -93 -6 -144 11 -25 163 -184 488 -509 l472 -473 -472 -472 c-481 -482 -503 -507 -503 -580 0 -41 34 -112 64 -131 45 -30 98 -40 146 -27 41 10 96 63 597 562 605 605 584 579 562 685 -7 48 -12 53 -553 596 -301 302 -559 555 -573 562 -41 22 -100 27 -142 11z"/>
+                      <path d="M7589 5485 c-40 -22 -62 -77 -57 -142 4 -44 11 -60 37 -86 l31 -32 665 -3 c734 -3 716 -4 755 60 39 64 17 173 -41 203 -41 22 -1351 21 -1390 0z"/>
+                    </g>
+                  </svg>
+                </span>
+              </div>
+              <p id="footer-desc">Minimal terminal coding agent with MCP, Browser Bridge, custom TUI, and staged Blender workflows.</p>
+            </div>
+
+            <div class="footer-column">
+              <h3 id="footer-col-1-title">Docs</h3>
+              <a href="#MOONAGENT_DEEP_DIVE.md">Deep Dive</a>
+              <a href="#ARCHITECTURE.md">Architecture</a>
+              <a href="#PROJECT_STRUCTURE.md">Project Structure</a>
+            </div>
+
+            <div class="footer-column">
+              <h3 id="footer-col-2-title">Resources</h3>
+              <a href="https://github.com/theayzek01/mooncode" target="_blank" rel="noreferrer">Repository</a>
+              <a href="https://github.com/theayzek01/mooncode/tree/launch/mooncode/packages/cli/browser-extension/chrome" target="_blank" rel="noreferrer">Browser Bridge</a>
+              <a href="https://github.com/theayzek01/mooncode/issues" target="_blank" rel="noreferrer">Issues</a>
+            </div>
+
+            <div class="footer-column">
+              <h3 id="footer-col-3-title">About</h3>
+              <a href="#PHILOSOPHY.md">Philosophy</a>
+              <a href="#QUALITY_GATE.md">Quality Gate</a>
+              <a href="#AGENTS.md">Agent Instructions</a>
+            </div>
+          </div>
+        </footer>
+      </main>
+
+      <aside class="right-rail">
+        <div class="rail-inner">
+          <section class="rail-card">
+            <h2 id="right-rail-title">On this page</h2>
+            <nav id="page-toc" class="page-toc" aria-label="On this page"></nav>
+          </section>
+
+          <section class="rail-card rail-actions">
+            <a id="edit-on-github" href="https://github.com/theayzek01/mooncode" target="_blank" rel="noreferrer">Edit this page on GitHub</a>
+            <button id="scroll-top" type="button">Scroll to top</button>
+          </section>
+        </div>
+      </aside>
+    </div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="./vendor/marked.min.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
