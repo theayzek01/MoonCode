@@ -1,0 +1,15 @@
+{
+  "name": "MoonCode-web-ui",
+  "version": "1.26-v2",
+  "type": "module",
+  "private": true,
+  "main": "src/server.ts",
+  "scripts": {
+    "clean": "echo 'nothing to clean'",
+    "dev": "tsx src/server.ts",
+    "start": "tsx src/server.ts",
+    "build": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

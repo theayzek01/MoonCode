@@ -1,0 +1,72 @@
+{
+  "name": "@openuidev/mooncode-os-plugin",
+  "version": "0.1.5",
+  "type": "module",
+  "description": "MoonCode plugin that turns agent responses into Generative UI and serves the mooncode-client at /plugins/mooncodeos.",
+  "keywords": [
+    "mooncode",
+    "mooncode web ui",
+    "mooncode-plugin",
+    "mooncode-os",
+    "openui",
+    "openui-lang",
+    "generative-ui",
+    "agent-ui"
+  ],
+  "license": "MIT",
+  "homepage": "https://openui.com/mooncode-os",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thesysdev/mooncode-os.git",
+    "directory": "packages/mooncode-plugin"
+  },
+  "main": "./dist/index.js",
+  "files": [
+    "dist",
+    "static",
+    "skills",
+    "prompts",
+    "mooncode.plugin.json",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && esbuild src/index.ts --bundle --platform=node --target=node22 --format=esm --outfile=dist/index.js --external:mooncode --external:mooncode/* --external:node:* --loader:.json=json --banner:js=\"import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);\"",
+    "bundle-ui": "cd ../mooncode-client && pnpm install --frozen-lockfile=false && pnpm build && shx rm -rf ../mooncode-plugin/static && shx cp -r out ../mooncode-plugin/static",
+    "prepack": "pnpm bundle-ui && pnpm build",
+    "open": "node ../../scripts/open-ui.mjs",
+    "lint:check": "eslint ./src",
+    "lint:fix": "eslint ./src --fix",
+    "format:check": "prettier --check ./src",
+    "format:fix": "prettier --write ./src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "ci": "pnpm lint:check && pnpm format:check && pnpm typecheck"
+  },
+  "dependencies": {
+    "@openuidev/lang-core": "^0.2.2"
+  },
+  "peerDependencies": {
+    "mooncode": ">=2026.4.12"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.15",
+    "esbuild": "^0.25.0",
+    "shx": "^0.3.4",
+    "mooncode": "*",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  },
+  "mooncode": {
+    "extensions": [
+      "./dist/index.js"
+    ],
+    "compat": {
+      "pluginApi": ">=2026.4.12",
+      "minGatewayVersion": "2026.4.12"
+    },
+    "build": {
+      "mooncodeVersion": "2026.4.12",
+      "pluginSdkVersion": "2026.4.12"
+    }
+  }
+}

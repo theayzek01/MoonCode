@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>MoonCode Bridge</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap');
+
+    :root {
+      --bg: #09090b;
+      --surface: #09090b;
+      --card: #121214;
+      --border: #1f1f23;
+      --accent: #27272a;
+      --primary: #ffffff;
+      --primary-hover: #e4e4e7;
+      --success: #10b981;
+      --danger: #ef4444;
+      --text: #fafafa;
+      --text-muted: #a1a1aa;
+      --pixel-border: #3f3f46;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Geist', -apple-system, system-ui, sans-serif;
+      transition: all 0.15s ease;
+    }
+
+    body {
+      width: 330px;
+      margin: 0;
+      padding: 16px;
+      background: var(--bg);
+      color: var(--text);
+      user-select: none;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo {
+      width: 28px;
+      height: 28px;
+      background: #0f1014;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 15px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+    }
+
+    .logo img,
+    .btn-icon,
+    .port-icon {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    .logo img {
+      width: 20px;
+      height: 20px;
+    }
+
+    .title-group h1 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+    }
+
+    .title-group p {
+      margin: 0;
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .badge-status {
+      font-size: 9px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-status.connected {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .badge-status.offline {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    .port-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 160px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+    }
+
+    .port-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+    }
+
+    .port-main {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .port-item span {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .port-badge {
+      padding: 2px 6px;
+      border-radius: 2px;
+      font-weight: 600;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.2px;
+    }
+
+    .port-badge.active {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+    }
+
+    .port-badge.scanning {
+      background: rgba(161, 161, 170, 0.1);
+      color: var(--text-muted);
+    }
+
+    .close-port-btn {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+      padding: 3px 8px;
+      font-size: 10px;
+      font-weight: 600;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+
+    .close-port-btn:hover {
+      background: var(--danger);
+      color: #ffffff;
+    }
+
+    .action-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    button.btn {
+      width: 100%;
+      border: none;
+      padding: 10px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #000000;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: var(--accent);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+    }
+
+    .btn-danger:hover {
+      background: var(--danger);
+      color: #ffffff;
+    }
+
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo-group">
+      <div class="logo"><img src="icons/Browser/15. Search.png" alt=""></div>
+      <div class="title-group">
+        <h1>MoonCode</h1>
+        <p>Tarayıcı Köprüsü</p>
+      </div>
+    </div>
+    <span id="overall-status" class="badge-status offline">Bağlantı Yok</span>
+  </div>
+
+  <div class="section-title">Aktif Portlar</div>
+  <div id="port-list" class="port-list">
+    <!-- Dinamik portlar -->
+  </div>
+
+  <div class="action-group">
+    <button class="btn btn-primary" id="reconnect-btn">
+      <img class="btn-icon" src="icons/Browser/5. Refresh.png" alt="">
+      Portları Yeniden Tara
+    </button>
+    <button class="btn btn-secondary" id="dashboard-btn">
+      <img class="btn-icon" src="icons/Computer Systems/8. Wifi Excellent.png" alt="">
+      Köprü Konsolunu Aç
+    </button>
+    <button class="btn btn-danger" id="close-all-btn">
+      <img class="btn-icon" src="icons/Browser/9. Close or Multiply.png" alt="">
+      Tüm Oturumları Kapat
+    </button>
+  </div>
+
+  <script src="icons.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

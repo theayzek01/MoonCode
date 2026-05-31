@@ -1,0 +1,17 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		"noEmit": true,
+		"paths": {
+			"@Mooncli/cli": ["./src/index.ts"],
+			"@Mooncli/cli/hooks": ["./src/core/hooks/index.ts"],
+			"@Mooncli/tui": ["../tui/src/index.ts"],
+			"@Mooncli/core": ["../ai/src/index.ts"],
+			"typebox": ["../../node_modules/typebox"]
+		},
+		"skipLibCheck": true
+	},
+	"include": ["examples/**/*.ts"],
+	"exclude": ["node_modules", "dist"]
+}
+

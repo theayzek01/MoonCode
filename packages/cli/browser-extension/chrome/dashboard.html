@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>MoonCode | Bridge Console</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap');
+
+    :root {
+      --bg: #000000;
+      --surface: #0a0a0a;
+      --border: #1a1a1a;
+      --accent: #ffffff;
+      --blue: #007aff;
+      --green: #34c759;
+      --red: #ff3b30;
+      --text: #ffffff;
+      --text-muted: #666666;
+      --pixel-border: #3f3f46;
+    }
+
+    * {
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .navbar {
+      padding: 24px 48px;
+      background: #050505;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo-box {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: #101014;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+    }
+
+    .logo-box img,
+    .stat-icon img,
+    .refresh-btn img,
+    .node-icon {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    .logo-box img {
+      width: 24px;
+      height: 24px;
+    }
+
+    .node-icon {
+      width: 22px;
+      height: 22px;
+    }
+
+    .logo-text h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .logo-text p {
+      margin: 0;
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+    }
+
+    .main {
+      max-width: 1200px;
+      margin: 60px auto;
+      padding: 0 48px;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      margin-bottom: 60px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 32px;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .stat-icon {
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    .stat-value {
+      font-size: 36px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 24px;
+    }
+
+    .icon-library {
+      margin-top: 48px;
+      border-top: 1px solid var(--border);
+      padding-top: 32px;
+    }
+
+    .library-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .library-title img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+    }
+
+    .icon-groups {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 18px;
+    }
+
+    .icon-group {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 18px;
+    }
+
+    .icon-group h2 {
+      margin: 0 0 12px;
+      font-size: 12px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+
+    .icon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+      gap: 10px;
+    }
+
+    .icon-tile {
+      width: 40px;
+      height: 40px;
+      border: 1px solid #222;
+      border-radius: 4px;
+      background: #080808;
+      display: grid;
+      place-items: center;
+    }
+
+    .icon-tile img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    .node-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 24px;
+      border-radius: 4px;
+      position: relative;
+    }
+
+    .node-card:hover {
+      border-color: #333;
+      transform: translateY(-2px);
+    }
+
+    .node-card.active {
+      border-color: #444;
+      background: #0d0d0d;
+      box-shadow: 0 0 20px rgba(52, 199, 89, 0.05);
+    }
+
+    .node-card.active::before {
+      content: '';
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 8px;
+      height: 8px;
+      background: var(--green);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--green);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .port-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .node-info {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+
+    .info-key { color: var(--text-muted); }
+    .info-val { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+
+    .caps {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .cap-tag {
+      font-size: 9px;
+      padding: 2px 8px;
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 2px;
+      color: #777;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .cap-tag img {
+      width: 13px;
+      height: 13px;
+      object-fit: contain;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    .refresh-btn {
+      background: #fff;
+      color: #000;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .refresh-btn:hover {
+      background: #ccc;
+    }
+
+    .terminate-btn {
+      margin-top: 16px;
+      width: 100%;
+      background: rgba(255, 59, 48, 0.08);
+      border: 1px solid rgba(255, 59, 48, 0.15);
+      color: var(--red);
+      padding: 10px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 11px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .terminate-btn:hover {
+      background: var(--red) !important;
+      color: #fff !important;
+      box-shadow: 0 4px 15px rgba(255, 59, 48, 0.3);
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .spinning { animation: spin 1s linear infinite; }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #000; }
+    ::-webkit-scrollbar-thumb { background: #222; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo-group">
+      <div class="logo-box"><img src="icons/Browser/15. Search.png" alt=""></div>
+      <div class="logo-text">
+        <h1>MOONCODE</h1>
+        <p>KOMUTA MERKEZİ</p>
+      </div>
+    </div>
+    <button class="refresh-btn" id="refresh-btn">
+      <img id="sync-icon" src="icons/Browser/5. Refresh.png" alt="">
+      Portları Tara
+    </button>
+  </nav>
+
+  <main class="main">
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon"><img src="icons/Computer Systems/8. Wifi Excellent.png" alt=""></div>
+        <span class="stat-label">Aktif Oturumlar</span>
+        <div class="stat-value" id="active-nodes">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><img src="icons/Social/1. Profile.png" alt=""></div>
+        <span class="stat-label">Toplam İstemci</span>
+        <div class="stat-value" id="total-clients">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><img src="icons/Computer Systems/12. Battery Full.png" alt=""></div>
+        <span class="stat-label">Sistem Yükü</span>
+        <div class="stat-value">2%</div>
+      </div>
+    </div>
+
+    <div class="grid" id="nodes-grid">
+      <!-- Injected -->
+    </div>
+
+    <section class="icon-library">
+      <div class="library-title">
+        <img src="icons/Paint/3. Color Picker.png" alt="">
+        Icon Library
+      </div>
+      <div class="icon-groups" id="icon-library"></div>
+    </section>
+  </main>
+
+  <script src="icons.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>
