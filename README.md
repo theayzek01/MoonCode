@@ -1,189 +1,258 @@
 <div align="center">
-  <img src="assets/MooncodeWhiteBanner.png" alt="MoonAgent banner" width="100%" />
+  <img src="assets/MooncodeWhiteBanner.png" alt="MoonCode banner" width="100%" />
+
+  <h1>MoonCode</h1>
+
   <p>
-    <strong>MoonAgent (1.29-v2)</strong><br />
-    Terminal odaklı, kendi kararlarını alabilen, "Browser Bridge" (İzole Tarayıcı) ve "Antigravity" zeka modelleriyle donatılmış efsanevi otonom kodlama asistanı.
+    Terminal-first coding agent. Small tokens, sharp edits, real tools.
   </p>
+
   <p>
-    <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white" alt="TypeScript" />
-    <img src="https://img.shields.io/badge/Node.js-339933?style=flat&logo=nodedotjs&logoColor=white" alt="Node.js" />
-    <img src="https://img.shields.io/badge/TUI-Custom-111827?style=flat" alt="Custom TUI" />
-    <img src="https://img.shields.io/badge/Browser-Bridge-0F766E?style=flat" alt="Browser Bridge" />
-    <img src="https://img.shields.io/badge/MCP-Blender%20Ready-2563EB?style=flat" alt="Blender MCP" />
-    <img src="https://img.shields.io/badge/Docs-GitHub%20Pages-1D4ED8?style=flat" alt="Docs Site" />
-    <img src="https://img.shields.io/badge/Antigravity-1.27--v2-8B5CF6?style=flat" alt="Antigravity 1.29-v2" />
+    <img src="https://img.shields.io/badge/version-1.29.2-2563eb?style=for-the-badge" alt="Version 1.29.2" />
+    <img src="https://img.shields.io/badge/Node.js-20+-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js 20+" />
+    <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+    <img src="https://img.shields.io/badge/MCP-ready-111827?style=for-the-badge" alt="MCP ready" />
   </p>
+
   <p>
-    <a href="https://theayzek01.github.io/MoonCode/"><strong>Dokümantasyon Sitesi</strong></a>
+    <a href="https://theayzek01.github.io/MoonCode/"><strong>Docs</strong></a>
     ·
-    <a href="docs/MOONAGENT_DEEP_DIVE.md"><strong>Derinlemesine İnceleme</strong></a>
+    <a href="docs/README.md"><strong>Docs index</strong></a>
     ·
     <a href="docs/integrations/BROWSER_CONTROL.md"><strong>Browser Bridge</strong></a>
     ·
-    <a href="docs/README.md"><strong>Docs İndeksi</strong></a>
+    <a href="docs/integrations/BLENDER_MCP.md"><strong>Blender MCP</strong></a>
   </p>
 </div>
 
 ---
 
-## MoonAgent Nedir?
+## What Is MoonCode?
 
-MoonAgent, ekrandaki gereksiz gürültüde boğulmadan gerçek işler başarmak isteyenler için tasarlanmış **terminal öncelikli** (terminal-first) bir otonom kodlama asistanıdır.
+MoonCode is a local terminal agent for people who want the assistant close to the repo, the shell, the browser, and external MCP tools.
 
-Standart LLM kılıfına sarılmış chatbotlardan ziyade, şu basit ideolojiyi takip eder:
+It is built around a simple loop:
 
-- Dar kapsamlı ama net analiz et
-- Yapılabilecek en doğru ve en küçük değişikliği yap
-- Gerçek bir terminal testi/komutu ile doğrula
-- Token kullanımını (maliyet ve hızı) kontrol altında tut
+- inspect only what matters
+- make small, reversible edits
+- run the real command that proves the change
+- keep token use under control
 
-MoonAgent, sadece gösterişli bir chatbot olmaya çalışmaz. Custom TUI (Terminal Arayüzü), İzole Tarayıcı Kontrolü (Isolated Browser), MCP entegrasyonları ve saatler süren uzun soluklu çalışma yeteneğiyle tam bir mühendislik ortamı sunar.
+MoonCode is not a landing-page chatbot wrapped around a shell. It is a working CLI with a custom TUI, Browser Bridge, MCP support, persistent sessions, and repo-aware workflows.
 
 ---
 
-## Geliştiriciler Neden MoonAgent Kullanıyor?
+## Highlights
 
 <table>
   <tr>
-    <td valign="top" width="33%">
-      <img src="packages/cli/browser-extension/chrome/icons/Browser/15.%20Search.png" width="16" height="16" alt="Search icon" />
-      <strong> Odaklı Repo Çalışması</strong><br />
-      Daha az okur, daha iyi arar. Projeyi bozacak geniş çaplı ve yıkıcı değişikliklerden kaçınır.
+    <td width="33%" valign="top">
+      <img src="packages/cli/browser-extension/chrome/icons/Browser/15.%20Search.png" width="40" height="40" alt="Search" /><br />
+      <strong>Repo-Aware Work</strong><br />
+      Reads narrowly, searches fast, and avoids wide rewrites when a surgical fix is enough.
     </td>
-    <td valign="top" width="33%">
-      <img src="packages/cli/browser-extension/chrome/icons/Computer%20Systems/1.%20Pointer.png" width="16" height="16" alt="Pointer icon" />
-      <strong> Gerçek Araç Orkestrasyonu</strong><br />
-      Terminal (Shell), Tarayıcı (Browser), Git, MCP ve lokal proje komutlarını tek bir oturumda mükemmel bir uyumla yönetir.
+    <td width="33%" valign="top">
+      <img src="packages/cli/browser-extension/chrome/icons/Computer%20Systems/1.%20Pointer.png" width="40" height="40" alt="Pointer" /><br />
+      <strong>Real Tool Control</strong><br />
+      Coordinates shell commands, file edits, git, browser automation, and MCP tools in one session.
     </td>
-    <td valign="top" width="33%">
-      <img src="packages/cli/browser-extension/chrome/icons/Browser/5.%20Refresh.png" width="16" height="16" alt="Refresh icon" />
-      <strong> Canlı Terminal İş Akışı</strong><br />
-      Statik, tek seferlik bir "prompt" kutusu yerine aktif, canlı bir TUI (Terminal User Interface) seansı üzerine kuruludur.
+    <td width="33%" valign="top">
+      <img src="packages/cli/browser-extension/chrome/icons/Browser/5.%20Refresh.png" width="40" height="40" alt="Refresh" /><br />
+      <strong>Live TUI</strong><br />
+      Keeps work visible while commands run, tools stream, and the agent moves through a task.
     </td>
   </tr>
   <tr>
-    <td valign="top" width="33%">
-      <img src="packages/cli/browser-extension/chrome/icons/Browser/7.%20Download.png" width="16" height="16" alt="Download icon" />
-      <strong> Doğrulama İşin Bir Parçasıdır</strong><br />
-      Kodu sadece yazıp bırakmaz; derler (build), test eder, hataları okur ve her şeyi bizzat terminal çıktısına bakarak düzeltir.
+    <td width="33%" valign="top">
+      <img src="packages/cli/browser-extension/chrome/icons/Browser/7.%20Download.png" width="40" height="40" alt="Download" /><br />
+      <strong>Build-Test-Fix Loop</strong><br />
+      Designed to run the command, read the failure, patch the cause, and verify again.
     </td>
-    <td valign="top" width="33%">
-      <img src="packages/cli/browser-extension/chrome/icons/Social/4.%20Chat.png" width="16" height="16" alt="Chat icon" />
-      <strong> Daha Az Laf, Daha Çok İş</strong><br />
-      Sadece gösteriş amaçlı uzun cümleler yerine, gerçek geliştirme sürecinde okunabilir kalması için optimize edilmiş kısa çıktılar verir.
+    <td width="33%" valign="top">
+      <img src="packages/cli/browser-extension/chrome/icons/Social/4.%20Chat.png" width="40" height="40" alt="Chat" /><br />
+      <strong>Short Output</strong><br />
+      Gives useful progress without flooding the terminal with filler.
     </td>
-    <td valign="top" width="33%">
-      <img src="packages/cli/browser-extension/chrome/icons/Computer%20Systems/15.%20Wait.png" width="16" height="16" alt="Wait icon" />
-      <strong> Uzun Çalışma Oturumları</strong><br />
-      Oturum sıkıştırma (session compaction), token disiplini ve adım adım çalışma (staged work) özellikleri sayesinde saatlerce çökmeden çalışır.
+    <td width="33%" valign="top">
+      <img src="packages/cli/browser-extension/chrome/icons/Computer%20Systems/15.%20Wait.png" width="40" height="40" alt="Wait" /><br />
+      <strong>Long Sessions</strong><br />
+      Uses compaction and staged work so big tasks can survive more than one prompt.
     </td>
   </tr>
 </table>
 
 ---
 
-## Rakiplerinden Farkı Ne?
+## Install
 
-| Alan | MoonAgent v1.29-v2 | Geleneksel CLI Ajanları (Cursor vs) |
-| --- | --- | --- |
-| **Düzenleme Stili** | Küçük, hedeflenmiş ve hatasız değişiklikler | Genellikle projeyi bozan geniş çaplı ve gürültülü yeniden yazımlar |
-| **Bağlam (Context)** | Tasarımı gereği kompakt ve verimli | Çabucak şişer ve pahalılaşır |
-| **Çalışma Yüzeyi** | TUI + Terminal + **İzole Tarayıcı** + MCP | Genellikle sadece shell veya sohbet arayüzü |
-| **Tarayıcı Hakimiyeti** | Kendi özel Chrome penceresi, **Sanal Fare (Virtual Mouse)** ve otonom test | Genelde eksik veya sahte (mock) API çağrıları |
-| **GitHub Entegrasyonu**| Kendi kendine commit atar, PR açar, inceleme (review) yapar | Sadece kod yazar, git işlemlerini insana bırakır |
-| **Oturum Modeli** | Kalıcı (Persistent) ve operasyonel | Genellikle unutkan (stateless) veya sığ hafıza |
+MoonCode is a monorepo. Install from the repository root, then install the CLI package globally.
 
-MoonAgent oldukça kararlı bir bakış açısına sahiptir: İşi pürüzsüz ve temiz bir şekilde bitirmeyi, "havalı" görünmeye tercih eder.
+### Windows CMD
 
----
-
-## Hızlı Başlangıç
-
-### Klonla ve Kur (Tek Hamlede Kurulum)
-
-Windows CMD (Komut İstemcisi) veya PowerShell'i açıp doğrudan aşağıdaki kodu yapıştırarak eskisini silip tamamen sıfırdan kurabilirsiniz:
+Use `npm.cmd` on Windows. It avoids PowerShell execution-policy issues with `npm.ps1`.
 
 ```cmd
-rmdir /s /q mooncode 2>nul & git clone https://github.com/theayzek01/mooncode.git && cd mooncode && npm install && npm run build && npm install -g ./packages/cli
+git clone https://github.com/theayzek01/mooncode.git
+cd mooncode
+npm.cmd install
+npm.cmd run build
+npm.cmd install -g .\packages\cli
+mooncode --version
 ```
 
-### Çalıştır
+### PowerShell
+
+```powershell
+git clone https://github.com/theayzek01/mooncode.git
+cd mooncode
+npm.cmd install
+npm.cmd run build
+npm.cmd install -g .\packages\cli
+mooncode --version
+```
+
+### macOS / Linux
 
 ```bash
-mooncode
+git clone https://github.com/theayzek01/mooncode.git
+cd mooncode
+npm install
+npm run build
+npm install -g ./packages/cli
+mooncode --version
 ```
 
-### Sık Kullanılan Geliştirici Komutları
+---
 
-| Komut | Amacı |
+## Update
+
+From an existing clone:
+
+```bash
+git pull
+npm install
+npm run build
+npm install -g ./packages/cli
+mooncode --version
+```
+
+On Windows, use the same commands with `npm.cmd`:
+
+```cmd
+git pull
+npm.cmd install
+npm.cmd run build
+npm.cmd install -g .\packages\cli
+mooncode --version
+```
+
+---
+
+## Fix A Broken Global Install
+
+If `mooncode` fails with:
+
+```text
+Cannot find module ...\node_modules\mooncode\dist\cli.js
+```
+
+the global command points to an old or half-installed package. Reinstall it from a successful build:
+
+```cmd
+cd %USERPROFILE%\mooncode
+npm.cmd install
+npm.cmd run build
+npm.cmd uninstall -g mooncode
+npm.cmd install -g .\packages\cli
+mooncode --version
+```
+
+If npm fails with:
+
+```text
+npm error Invalid tag name "^1.29-v2"
+```
+
+you are on a bad/stale checkout or lockfile where a display label was accidentally used as an npm version. A valid npm version looks like `1.29.2`, not `1.29-v2`.
+
+Fix it by pulling the latest repository and reinstalling:
+
+```cmd
+cd %USERPROFILE%\mooncode
+git pull
+npm.cmd cache verify
+npm.cmd install
+npm.cmd run build
+npm.cmd install -g .\packages\cli
+```
+
+If it still appears, search for the invalid string:
+
+```cmd
+findstr /s /n /i "1.29-v2" package.json package-lock.json packages\*.json
+```
+
+Replace dependency ranges like `^1.29-v2` with a valid version such as `*` for local workspaces or `^1.29.2` for published packages.
+
+---
+
+## Common Commands
+
+| Command | Purpose |
 | --- | --- |
-| `npm run build --workspace=packages/cli` | CLI paketini derler |
-| `npm run build --workspace=packages/engine` | Engine paketini derler |
-| `npm run test --workspace=packages/tui -- --runInBand` | TUI testlerini çalıştırır |
-| `npm run check:browser-smoke` | Tarayıcı köprüsü sağlığını ve güvenlik kontrollerini yapar |
-| `mooncode --version` | Yüklü olan CLI sürümünü gösterir |
+| `mooncode` | Start the interactive TUI |
+| `mooncode --version` | Print the installed CLI version |
+| `/help` | Show commands and shortcuts |
+| `/index` | Build a project map for sharper search |
+| `/browser` | Check Browser Bridge state |
+| `/mcp` | Inspect or restart MCP servers |
+| `/compact` | Compress conversation context |
+| `/ship` | Run the git shipping flow |
 
 ---
 
-## Temel Arayüz (TUI) Komutları
+## Browser Bridge And MCP
 
-Terminale girdiğinizde kullanabileceğiniz efsanevi özellikler:
+MoonCode can work beyond plain files when the tools are available.
 
-| Komut | Ne İşe Yarar? |
+| Capability | What It Does |
 | --- | --- |
-| `/help` | Komutları ve klavye kısayollarını gösterir |
-| `/index` | Çok daha hedeflenmiş aramalar için tüm kod tabanının haritasını çıkarır |
-| `/browser` | Tarayıcı köprüsünün bağlantısını ve durumunu kontrol eder |
-| `/mcp` | Bağlı MCP sunucularını kontrol eder ve yeniden başlatır |
-| `/compact` | Token maliyetini azaltmak için konuşma geçmişini (context) sıkıştırır |
-| `/ship` | Değişiklikleri Git iş akışı üzerinden çok daha hızlı Github'a yollar |
-| `/fix` | Tamamen otonom hata onarım modunu başlatır |
+| Browser Bridge | Opens and controls an isolated browser window for testing, screenshots, and web tasks |
+| MCP | Connects external tool servers such as Blender MCP |
+| GitHub tooling | Supports branch, commit, push, and review workflows through local git/GitHub tools |
+| Session memory | Keeps persistent sessions under the MoonCode config directory |
+
+For deeper setup notes, see:
+
+- [Browser Bridge](docs/integrations/BROWSER_CONTROL.md)
+- [Blender MCP](docs/integrations/BLENDER_MCP.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Project structure](docs/PROJECT_STRUCTURE.md)
 
 ---
 
-## Browser Bridge (İzole Tarayıcı) & MCP Mimarisi
+## MoonCode Compared
 
-MoonAgent, terminalin dışındaki dış dünyaya (tarayıcılar, araçlar, API'ler) müdahale etmeye başladığında asıl gücünü gösterir.
-
-### Browser Bridge (v1.29-v2 ile yenilendi!)
-
-- **Tamamen İzole Pencere:** Sen Chrome'da işlerine devam ederken MoonAgent kendine karanlık temalı, özel kenarlıklı bir popup pencere açarak sessizce işini yapar.
-- **Sanal Fare (Virtual Mouse):** Arka planda ne tıkladığını, formu nasıl doldurduğunu izleyebileceğin bir sanal imleç barındırır.
-- Görsel doğrulama (screenshot okuma) ve akıllı DOM-algılama teknolojisi.
-- Detaylar için: [BROWSER_CONTROL.md](docs/integrations/BROWSER_CONTROL.md)
-
-### MCP (Model Context Protocol)
-
-- Dış araç sunucularıyla (tool servers) ajanın yeteneklerini sınırların ötesine taşır.
-- Canlı uygulamalar, veritabanları veya özel çalışma zamanlarıyla iletişim kurar.
-- Hangi aracın ne zaman kullanılacağını anlayacak kadar zekidir.
+| Area | MoonCode | Typical CLI Agent |
+| --- | --- | --- |
+| Editing style | Smaller staged edits | Often larger one-shot rewrites |
+| Context use | Tries to stay compact | Can grow noisy quickly |
+| Work surface | Terminal, TUI, browser, MCP | Usually shell plus chat |
+| Verification | Build/test commands are part of the loop | Often left to the user |
+| Session model | Persistent local sessions | Often short-lived or stateless |
 
 ---
 
-## Detaylı Dokümantasyonlar
+## Requirements
 
-MoonAgent'ın efsanevi mimarisini daha derinlemesine öğrenmek istiyorsan buraya alalım:
-
-- [Dokümantasyon Web Sitesi](https://theayzek01.github.io/MoonCode/)
-- [Genel Sistem Özeti](docs/INTRODUCTION.md)
-- [Antigravity Modelleri](docs/integrations/ANTIGRAVITY.md)
-- [Anthropic (Thinking) Modelleri](docs/integrations/ANTHROPIC.md)
-- [Codex Entegrasyonu](docs/integrations/CODEX.md)
-- [GitHub Otonom İşlemleri](docs/integrations/GITHUB_CLI.md)
-- [Proje Mimarisi](docs/ARCHITECTURE.md)
-- [Proje Klasör Yapısı](docs/PROJECT_STRUCTURE.md)
+- Node.js 20 or newer
+- Git
+- npm
+- Optional: Blender with Blender MCP enabled
+- Optional: GitHub CLI for richer GitHub flows
 
 ---
 
-## Kimler İçin?
-
-- Gerçek anlamda tüm vaktini terminalde geçiren "Hardcore" geliştiriciler.
-- Gürültüden ve kalabalıktan uzak, temiz kodlama asistanı isteyen takımlar.
-- Context (Token) maliyetini israf etmek istemeyenler.
-- Hem tarayıcı testlerini yapıp hem de veritabanına sorgu atabilen entegre bir yapay zeka deneyimi arayanlar.
-
----
-
-## Lisans
+## License
 
 MIT
