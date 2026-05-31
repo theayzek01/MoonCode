@@ -1,0 +1,24 @@
+{
+	"extends": "./tsconfig.base.json",
+	"compilerOptions": {
+		"noEmit": true,
+		"paths": {
+			"*": ["../*"],
+			"moon-core": ["../packages/core/src/index.ts"],
+			"moon-core/oauth": ["../packages/core/src/oauth.ts"],
+			"moon-core/*": ["../packages/core/src/*.ts", "../packages/core/src/providers/*.ts"],
+			"moon-core/dist/*": ["../packages/core/src/*"],
+			"moon-engine": ["../packages/engine/src/index.ts"],
+			"moon-engine/*": ["../packages/engine/src/*"],
+			"mooncli": ["../packages/cli/src/index.ts"],
+			"mooncli/hooks": ["../packages/cli/src/core/hooks/index.ts"],
+			"mooncli/*": ["../packages/cli/src/*"],
+			"typebox": ["../node_modules/typebox"],
+			"moon-tui": ["../packages/tui/src/index.ts"],
+			"moon-tui/*": ["../packages/tui/src/*"]
+		}
+	},
+	"include": ["../packages/*/src/**/*"],
+	"exclude": ["../**/dist/**", "../**/*.test.ts", "../**/test/**", "../packages/cli/examples/**/*"]
+}
+
