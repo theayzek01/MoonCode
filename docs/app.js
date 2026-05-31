@@ -19,7 +19,7 @@ let currentLang = localStorage.getItem("mooncode-docs-lang") || "en";
 
 const docsOrder = [
   "INTRODUCTION.md",
-  "MOONAGENT_DEEP_DIVE.md",
+  "MOONCODE_DEEP_DIVE.md",
   "ARCHITECTURE.md",
   "PROJECT_STRUCTURE.md",
   "PHILOSOPHY.md",
@@ -51,16 +51,16 @@ const docsMeta = new Map([
     }
   ],
   [
-    "MOONAGENT_DEEP_DIVE.md",
+    "MOONCODE_DEEP_DIVE.md",
     {
       tr: {
-        title: "MoonAgent Derinlemesine Bakış",
-        summary: "MoonAgent'un nasıl yapılandırıldığı; çalışma zamanı, araçlar, TUI, MCP ve Browser Bridge bileşenlerinin nasıl çalıştığına dair eksiksiz referans kılavuzu.",
+        title: "MoonCode Derinlemesine Bakış",
+        summary: "MoonCode'un nasıl yapılandırıldığı; çalışma zamanı, araçlar, TUI, MCP ve Browser Bridge bileşenlerinin nasıl çalıştığına dair eksiksiz referans kılavuzu.",
         linkLabel: "Derinlemesine Bakış"
       },
       en: {
-        title: "MoonAgent Deep Dive",
-        summary: "The full reference for how MoonAgent is structured and how the runtime, tools, TUI, MCP, and Browser Bridge fit together.",
+        title: "MoonCode Deep Dive",
+        summary: "The full reference for how MoonCode is structured and how the runtime, tools, TUI, MCP, and Browser Bridge fit together.",
         linkLabel: "Deep Dive"
       }
     }
@@ -120,7 +120,7 @@ const docsMeta = new Map([
       },
       en: {
         title: "Agent Instructions",
-        summary: "How MoonAgent thinks about work quality, planning, and execution inside a coding session.",
+        summary: "How MoonCode thinks about work quality, planning, and execution inside a coding session.",
         linkLabel: "Agent Instructions"
       }
     }
@@ -145,12 +145,12 @@ const docsMeta = new Map([
     {
       tr: {
         title: "Benchmark Metrikleri",
-        summary: "MoonAgent'in modern rakiplerine karşı hız, performans ve yetenek analizleri.",
+        summary: "MoonCode'un modern rakiplerine karşı hız, performans ve yetenek analizleri.",
         linkLabel: "Benchmarks"
       },
       en: {
         title: "Benchmark Metrics",
-        summary: "Speed, performance, and capability analysis of MoonAgent against modern competitors.",
+        summary: "Speed, performance, and capability analysis of MoonCode against modern competitors.",
         linkLabel: "Benchmarks"
       }
     }
@@ -181,12 +181,12 @@ const docsMeta = new Map([
     {
       tr: {
         title: "Antigravity Entegrasyonu",
-        summary: "MoonAgent ekosisteminin Antigravity tarafındaki entegrasyonuna ve model uyumluluğuna dair teknik notlar.",
+        summary: "MoonCode ekosisteminin Antigravity tarafındaki entegrasyonuna ve model uyumluluğuna dair teknik notlar.",
         linkLabel: "Antigravity"
       },
       en: {
         title: "Antigravity",
-        summary: "Integration notes for the Antigravity side of the MoonAgent ecosystem.",
+        summary: "Integration notes for the Antigravity side of the MoonCode ecosystem.",
         linkLabel: "Antigravity"
       }
     }
@@ -196,12 +196,12 @@ const docsMeta = new Map([
     {
       tr: {
         title: "Browser Kontrol",
-        summary: "MoonAgent'un Browser Bridge ile tarayıcıları nasıl kontrol ettiği.",
+        summary: "MoonCode'un Browser Bridge ile tarayıcıları nasıl kontrol ettiği.",
         linkLabel: "Browser Kontrol"
       },
       en: {
         title: "Browser Control",
-        summary: "How MoonAgent controls browsers using Browser Bridge.",
+        summary: "How MoonCode controls browsers using Browser Bridge.",
         linkLabel: "Browser Control"
       }
     }
@@ -211,12 +211,12 @@ const docsMeta = new Map([
     {
       tr: {
         title: "Blender MCP",
-        summary: "MoonAgent'ın Blender ile MCP üzerinden nasıl haberleştiği ve nasıl kurulduğu.",
+        summary: "MoonCode'un Blender ile MCP üzerinden nasıl haberleştiği ve nasıl kurulduğu.",
         linkLabel: "Blender MCP"
       },
       en: {
         title: "Blender MCP",
-        summary: "How MoonAgent communicates with Blender via MCP and installation details.",
+        summary: "How MoonCode communicates with Blender via MCP and installation details.",
         linkLabel: "Blender MCP"
       }
     }
@@ -251,8 +251,8 @@ const uiTranslations = {
   },
   en: {
     searchPlaceholder: "Search documentation... (Ctrl K)",
-    usingTitle: "Using MoonAgent",
-    usingDesc: "Terminal-first documentation and reference",
+    usingTitle: "Using MoonCode",
+    usingDesc: "Terminal-first documentation and runtime reference",
     latestTitle: "Latest docs build",
     gettingStartedGroup: "Getting Started",
     coreGuidesGroup: "Core Guides",
@@ -376,9 +376,9 @@ function translateUi(lang) {
 function updatePageHeader(docPath) {
   const meta = docsMeta.get(docPath);
   const langMeta = meta ? meta[currentLang] : null;
-  pageTitle.textContent = langMeta?.title ?? "MoonAgent Docs";
+  pageTitle.textContent = langMeta?.title ?? "MoonCode Docs";
   pageSummary.textContent = langMeta?.summary ?? "";
-  document.title = `${langMeta?.title ?? "MoonAgent Docs"} - MoonAgent Docs`;
+  document.title = `${langMeta?.title ?? "MoonCode Docs"} - MoonCode Docs`;
   editOnGitHub.href = `https://github.com/theayzek01/mooncode/blob/launch/mooncode/docs/${docPath}`;
 }
 
