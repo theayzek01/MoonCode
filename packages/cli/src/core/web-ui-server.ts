@@ -12,17 +12,17 @@ const INDEX_HTML = `<!doctype html>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#050608" />
-  <meta name="description" content="MoonAgent; terminalde çalışan, Türkçe öncelikli kodlama ajanı." />
-  <title>MoonAgent — Terminal coding agent</title>
+  <meta name="description" content="MoonCode; terminalde çalışan, Türkçe öncelikli kodlama ajanı." />
+  <title>MoonCode — Terminal coding agent</title>
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
   <div class="grain" aria-hidden="true"></div>
   <header class="topbar" data-header>
-    <a class="brand" href="#top" aria-label="MoonAgent">
+    <a class="brand" href="#top" aria-label="MoonCode">
       <span class="mark"><img src="/assets/Mooncodewhitelogo.png" alt="" /></span>
-      <span class="word">MoonAgent</span>
-      <span class="version">1.26-v2</span>
+      <span class="word">MoonCode</span>
+      <span class="version">2026-v35</span>
     </a>
     <button class="menu" type="button" aria-expanded="false" aria-controls="nav">Menü</button>
     <nav id="nav" class="nav" aria-label="Ana menü">
@@ -37,9 +37,9 @@ const INDEX_HTML = `<!doctype html>
   <main id="top">
     <section class="hero shell">
       <div class="hero-copy">
-        <p class="label">MOONAGENT / LOCAL AGENT</p>
+        <p class="label">MOONCODE / LOCAL AGENT</p>
         <h1>Repo içinde sessiz, hızlı ve kontrollü çalışır.</h1>
-        <p class="lead">MoonAgent terminalden çalışan Türkçe öncelikli kodlama ajanı. Dosyaları seçerek okur, küçük patch üretir, sonucu doğrular ve gereksiz çıktı basmadan işi kapatır.</p>
+        <p class="lead">MoonCode terminalden çalışan Türkçe öncelikli kodlama ajanı. Dosyaları seçerek okur, küçük patch üretir, sonucu doğrular ve gereksiz çıktı basmadan işi kapatır.</p>
         <div class="actions">
           <a class="button primary" href="#kurulum">Kur</a>
           <a class="button ghost" href="#oturumlar">Canlı oturumları gör</a>
@@ -51,7 +51,7 @@ const INDEX_HTML = `<!doctype html>
         </div>
       </div>
 
-      <aside class="terminal" aria-label="MoonAgent terminal önizlemesi">
+      <aside class="terminal" aria-label="MoonCode terminal önizlemesi">
         <div class="terminal-head"><span></span><span></span><span></span><b>mooncode</b></div>
         <div class="terminal-body">
           <p><em>$</em> mooncode</p>
@@ -64,8 +64,8 @@ const INDEX_HTML = `<!doctype html>
       </aside>
     </section>
 
-    <section class="brand-strip shell" aria-label="MoonAgent logo">
-      <img src="/assets/MooncodeWhiteBanner.png" alt="MoonAgent" />
+    <section class="brand-strip shell" aria-label="MoonCode logo">
+      <img src="/assets/MooncodeWhiteBanner.png" alt="MoonCode" />
     </section>
 
     <section class="section shell" id="urun">
@@ -84,7 +84,7 @@ const INDEX_HTML = `<!doctype html>
     <section class="section shell split" id="akis">
       <div>
         <p class="label">AKIŞ</p>
-        <h2>MoonAgent önce bakar, sonra dokunur.</h2>
+        <h2>MoonCode önce bakar, sonra dokunur.</h2>
         <p class="body-text">Standart döngü basit: mevcut değişiklikleri koru, gereken dosyayı oku, en küçük güvenli düzenlemeyi yap ve mümkünse test/build ile doğrula.</p>
       </div>
       <div class="timeline">
@@ -130,7 +130,7 @@ mooncode</pre>
   </main>
 
   <footer class="footer shell">
-    <span>MoonAgent 1.26-v2</span>
+      <span>MoonCode 2026-v35</span>
     <a href="https://github.com/theayzek01/mooncode" target="_blank" rel="noreferrer">github.com/theayzek01/mooncode</a>
   </footer>
 
@@ -426,7 +426,7 @@ function renderEntry(entry) {
   if (entry.type === 'message' && entry.message) {
     const role = entry.message.role || 'system';
     const className = role === 'user' ? 'user' : role === 'assistant' ? 'assistant' : 'system';
-    const label = role === 'user' ? 'Kullanıcı' : role === 'assistant' ? 'MoonAgent' : role;
+    const label = role === 'user' ? 'Kullanıcı' : role === 'assistant' ? 'MoonCode' : role;
     const content = compact(textOf(entry.message.content || entry.message.text || entry.message));
     return '<div class="msg ' + className + '"><div class="role">' + escapeHtml(label) + '</div><pre>' + escapeHtml(content) + '</pre></div>';
   }
@@ -454,7 +454,7 @@ const APP_HTML = `<!doctype html>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MoonAgent — Web Studio</title>
+  <title>MoonCode — Web Studio</title>
   <link rel="stylesheet" href="/app.css" />
 </head>
 <body>
@@ -464,16 +464,19 @@ const APP_HTML = `<!doctype html>
         <div class="brand">
           <span class="logo-emoji">🌝</span>
           <div class="brand-text">
-            <h2>MoonAgent</h2>
+            <h2>MoonCode</h2>
             <span>Web Studio</span>
           </div>
         </div>
       </div>
       <div class="session-search">
-        <input type="text" id="search-input" placeholder="Oturumlarda ara..." />
+        <div class="search-wrapper">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" class="search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="search-input" placeholder="Oturumlarda ara..." />
+        </div>
       </div>
       <div class="sessions-list" id="sessions-list">
-        <!-- Oturumlar dinamik olarak buraya gelecek -->
+        <!-- JS ile dolacak -->
       </div>
     </aside>
 
@@ -484,25 +487,34 @@ const APP_HTML = `<!doctype html>
           <h3 id="active-session-name">Oturum Seçin</h3>
         </div>
         <div class="header-actions">
-          <button class="btn btn-secondary" id="btn-unlock-tui">TUI'a Dön</button>
+          <button class="btn btn-secondary" id="btn-unlock-tui">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" style="margin-right: 6px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            TUI'a Dön
+          </button>
         </div>
       </header>
 
       <div class="messages-viewport" id="messages-viewport">
-        <div class="welcome-screen">
-          <span class="moon-mascot">🌝</span>
-          <h1>Merhaba! Ben MoonAgent.</h1>
-          <p>Yandaki menüden canlı bir oturum seçebilir veya yeni bir sohbet başlatabilirsiniz.</p>
+        <!-- JS ile dolacak (messages-content wrapper ile sarmalanacak) -->
+        <div class="messages-content">
+          <div class="welcome-screen">
+            <span class="moon-mascot">🌝</span>
+            <h1>Merhaba! Ben MoonCode.</h1>
+            <p>Sol menüden canlı veya geçmiş bir oturum seçerek başlayın. Repo içerisindeki tüm akışı buradan izleyebilir ve yönlendirebilirsiniz.</p>
+          </div>
         </div>
       </div>
 
       <footer class="input-bar">
-        <form id="message-form" class="message-form">
-          <textarea id="message-input" placeholder="MoonAgent'a bir şeyler yaz... [Enter gönderir]" rows="1"></textarea>
-          <button type="submit" class="btn btn-primary" id="btn-send">
-            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-          </button>
-        </form>
+        <div class="input-container">
+          <form id="message-form" class="message-form">
+            <textarea id="message-input" placeholder="MoonCode'a bir şeyler yazın... [Enter ile gönderir, Shift+Enter yeni satır]" rows="1"></textarea>
+            <button type="submit" class="btn btn-primary" id="btn-send">
+              <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+          </form>
+          <div class="input-footer-text">MoonCode otonom bir geliştirme asistanıdır · v2026-v35</div>
+        </div>
       </footer>
     </main>
   </div>
@@ -511,8 +523,8 @@ const APP_HTML = `<!doctype html>
     <div class="modal-card">
       <span class="modal-icon">🔓</span>
       <h2>TUI Kilidi Açıldı!</h2>
-      <p>Terminalinize geri dönebilirsiniz. Bu tarayıcı sekmesini kapatabilirsiniz.</p>
-      <button class="btn btn-primary" onclick="document.getElementById('unlock-modal').style.display='none'">Tamam</button>
+      <p>Terminalinize güvenle geri dönebilirsiniz. Bu tarayıcı sekmesini kapatabilirsiniz.</p>
+      <button class="btn btn-primary" style="width: 100%; margin-top: 12px;" onclick="document.getElementById('unlock-modal').style.display='none'">Harika!</button>
     </div>
   </div>
 
@@ -521,23 +533,33 @@ const APP_HTML = `<!doctype html>
 </html>`;
 
 const APP_CSS = `:root {
-  --bg: #090a0f;
-  --surface: #141620;
-  --surface-hover: #1d212f;
-  --border: #24293a;
-  --border-light: rgba(255,255,255,0.06);
-  --fg: #f4f5f8;
-  --muted: #8d97a9;
-  --accent: #ff4766;
-  --accent-light: rgba(255,71,102,0.12);
+  --bg: #0d0f14;
+  --sidebar-bg: #090b0f;
+  --surface: #161922;
+  --surface-hover: #1f2330;
+  --surface-active: #242938;
+  --border: #222736;
+  --border-light: rgba(255,255,255,0.05);
+  --border-hover: #2e3449;
+  --fg: #f1f3f6;
+  --muted: #8e96a7;
+  --muted-dark: #586175;
+  --accent: #58cc02;
+  --accent-hover: #62e002;
+  --accent-rose: #ff4766;
   --green: #58cc02;
-  --green-light: rgba(88,204,2,0.15);
+  --green-light: rgba(88,204,2,0.12);
   --blue: #3b82f6;
+  --blue-light: rgba(59,130,246,0.12);
+  --yellow: #eab308;
+  --yellow-light: rgba(234,179,8,0.06);
   --radius-lg: 16px;
   --radius-md: 12px;
   --radius-sm: 8px;
-  --shadow: 0 12px 40px rgba(0,0,0,0.24);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  --radius-xs: 6px;
+  --shadow: 0 12px 40px rgba(0,0,0,0.3);
+  --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 body {
@@ -546,16 +568,19 @@ body {
   color: var(--fg);
   height: 100vh;
   overflow: hidden;
+  font-family: var(--font-body);
 }
 
 .app-layout {
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: 300px minmax(0, 1fr);
   height: 100vh;
+  width: 100vw;
+  overflow: hidden;
 }
 
 .sidebar {
-  background: #0d0e14;
+  background: var(--sidebar-bg);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -575,7 +600,7 @@ body {
 
 .logo-emoji {
   font-size: 32px;
-  animation: bounce 2s infinite ease-in-out;
+  animation: bounce 3s infinite ease-in-out;
 }
 
 @keyframes bounce {
@@ -586,35 +611,52 @@ body {
 .brand-text h2 {
   margin: 0;
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 750;
   letter-spacing: -0.02em;
 }
 
 .brand-text span {
   font-size: 12px;
   color: var(--accent);
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .session-search {
-  padding: 16px 24px;
+  padding: 16px 20px;
   border-bottom: 1px solid var(--border);
+}
+
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--muted-dark);
+  pointer-events: none;
 }
 
 .session-search input {
   width: 100%;
-  padding: 10px 14px;
+  padding: 10px 12px 10px 36px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: rgba(0,0,0,0.2);
   color: var(--fg);
   font-size: 14px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
 }
 
 .session-search input:focus {
   border-color: var(--accent);
+  background: rgba(0,0,0,0.3);
+  box-shadow: 0 0 0 2px rgba(88, 204, 2, 0.15);
 }
 
 .sessions-list {
@@ -627,12 +669,15 @@ body {
 }
 
 .session-card {
-  padding: 14px;
+  padding: 14px 16px;
   border-radius: var(--radius-md);
   border: 1px solid transparent;
-  background: transparent;
+  background: rgba(255,255,255,0.01);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .session-card:hover {
@@ -646,18 +691,36 @@ body {
   box-shadow: var(--shadow);
 }
 
+.session-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
 .session-card b {
-  display: block;
-  font-size: 14px;
-  margin-bottom: 4px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--fg);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.session-card span {
+.session-card-time {
+  font-size: 11px;
+  color: var(--muted-dark);
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+}
+
+.session-card-cwd {
   font-size: 12px;
   color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
 }
 
 .chat-container {
@@ -666,6 +729,7 @@ body {
   height: 100%;
   background: var(--bg);
   position: relative;
+  min-width: 0;
 }
 
 .chat-header {
@@ -675,8 +739,8 @@ body {
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--border);
-  background: rgba(9,10,15,0.7);
-  backdrop-filter: blur(12px);
+  background: rgba(13,15,20,0.8);
+  backdrop-filter: blur(16px);
   z-index: 10;
 }
 
@@ -684,40 +748,55 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
 }
 
 .status-indicator {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: var(--muted);
+  background: var(--muted-dark);
+  flex-shrink: 0;
 }
 
 .status-indicator.live {
-  background: var(--green);
-  box-shadow: 0 0 12px var(--green);
-  animation: pulse 1.6s infinite;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
   0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.2); opacity: 0.6; }
+  50% { transform: scale(1.15); opacity: 0.6; }
   100% { transform: scale(1); opacity: 1; }
 }
 
 .active-session-info h3 {
   margin: 0;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .messages-viewport {
   flex: 1;
   overflow-y: auto;
-  padding: 32px;
+  padding: 32px 16px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
+}
+
+.messages-content {
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  min-height: 100%;
 }
 
 .welcome-screen {
@@ -727,13 +806,15 @@ body {
   justify-content: center;
   margin: auto;
   text-align: center;
-  max-width: 420px;
+  max-width: 480px;
+  padding: 40px 20px;
 }
 
 .moon-mascot {
   font-size: 64px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   animation: float 4s infinite ease-in-out;
+  display: block;
 }
 
 @keyframes float {
@@ -742,38 +823,44 @@ body {
 }
 
 .welcome-screen h1 {
-  font-size: 24px;
-  margin: 0 0 12px;
-  font-weight: 700;
+  font-size: 26px;
+  margin: 0 0 16px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
 }
 
 .welcome-screen p {
   color: var(--muted);
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 15px;
+  line-height: 1.6;
   margin: 0;
 }
 
 .msg-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  max-width: 85%;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .msg-wrapper.user {
-  align-self: flex-end;
+  align-items: flex-end;
 }
 
 .msg-wrapper.assistant {
-  align-self: flex-start;
+  align-items: flex-start;
 }
 
 .msg-card {
   padding: 16px 20px;
   border-radius: var(--radius-lg);
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.6;
+  width: 100%;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  box-sizing: border-box;
 }
 
 .msg-wrapper.user .msg-card {
@@ -781,34 +868,40 @@ body {
   color: var(--fg);
   border: 1px solid var(--border);
   border-top-right-radius: 4px;
+  max-width: 80%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .msg-wrapper.assistant .msg-card {
-  background: var(--surface-hover);
+  background: transparent;
   color: var(--fg);
-  border: 1px solid var(--border);
-  border-top-left-radius: 4px;
+  border: none;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .msg-author {
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 750;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--muted);
+  color: var(--muted-dark);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  margin-bottom: 2px;
 }
 
 .msg-author-avatar {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   display: grid;
   place-items: center;
   font-size: 12px;
-  background: var(--border);
+  background: var(--surface);
+  border: 1px solid var(--border);
 }
 
 .msg-wrapper.user .msg-author {
@@ -816,119 +909,139 @@ body {
 }
 
 .thinking-card {
-  background: rgba(254, 240, 138, 0.05);
-  border: 1px solid rgba(254, 240, 138, 0.15);
+  background: var(--yellow-light);
+  border: 1px solid rgba(234, 179, 8, 0.15);
   border-radius: var(--radius-md);
-  margin-bottom: 8px;
+  margin: 8px 0;
   overflow: hidden;
+  width: 100%;
 }
 
 .thinking-header {
-  padding: 10px 14px;
+  padding: 12px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
   user-select: none;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
-  color: #fef08a;
-  background: rgba(254, 240, 138, 0.03);
+  color: var(--yellow);
+  transition: background 0.2s;
+}
+
+.thinking-header:hover {
+  background: rgba(234, 179, 8, 0.04);
 }
 
 .thinking-content {
-  padding: 14px;
-  font-size: 13px;
-  color: #eab308;
-  line-height: 1.5;
-  border-top: 1px solid rgba(254, 240, 138, 0.1);
+  padding: 16px;
+  font-size: 13.5px;
+  color: #d97706;
+  line-height: 1.6;
+  border-top: 1px solid rgba(234, 179, 8, 0.08);
   white-space: pre-wrap;
-  font-family: monospace;
+  font-family: var(--font-mono);
+  background: rgba(0, 0, 0, 0.15);
 }
 
 .tool-card {
-  background: rgba(59, 130, 246, 0.05);
-  border: 1px solid rgba(59, 130, 246, 0.15);
+  background: var(--blue-light);
+  border: 1px solid rgba(59, 130, 246, 0.18);
   border-radius: var(--radius-md);
-  margin-bottom: 8px;
+  margin: 8px 0;
   font-size: 13px;
+  width: 100%;
+  overflow: hidden;
 }
 
 .tool-header {
-  padding: 10px 14px;
+  padding: 12px 16px;
   font-weight: 600;
   color: #60a5fa;
   background: rgba(59, 130, 246, 0.03);
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
 }
 
 .tool-body {
-  padding: 12px;
+  padding: 14px;
   border-top: 1px solid rgba(59, 130, 246, 0.1);
+  background: rgba(0,0,0,0.2);
 }
 
 .tool-body pre {
   margin: 0;
   white-space: pre-wrap;
-  font-family: monospace;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: #93c5fd;
 }
 
 .tool-result-card {
-  background: rgba(16, 185, 129, 0.04);
-  border: 1px solid rgba(16, 185, 129, 0.12);
+  background: var(--green-light);
+  border: 1px solid rgba(88, 204, 2, 0.12);
   border-radius: var(--radius-md);
-  margin-bottom: 8px;
+  margin: 8px 0;
   font-size: 13px;
+  width: 100%;
+  overflow: hidden;
 }
 
 .tool-result-header {
-  padding: 8px 14px;
+  padding: 10px 16px;
   font-weight: 600;
   color: #34d399;
-  background: rgba(16, 185, 129, 0.03);
+  background: rgba(88, 204, 2, 0.03);
 }
 
 .tool-result-body {
-  padding: 12px;
-  border-top: 1px solid rgba(16, 185, 129, 0.08);
+  padding: 14px;
+  border-top: 1px solid rgba(88, 204, 2, 0.08);
+  background: rgba(0,0,0,0.2);
 }
 
 .tool-result-body pre {
   margin: 0;
   white-space: pre-wrap;
-  font-family: monospace;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: #a7f3d0;
 }
 
 .code-block {
   background: #090b10;
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  margin: 12px 0;
+  border-radius: var(--radius-md);
+  margin: 16px 0;
   overflow: hidden;
+  max-width: 100%;
 }
 
 .code-header {
-  padding: 6px 12px;
+  padding: 8px 16px;
   background: #141722;
   border-bottom: 1px solid var(--border);
-  font-family: monospace;
-  font-size: 11px;
+  font-family: var(--font-mono);
+  font-size: 12px;
   color: var(--muted);
-  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .code-block pre {
   margin: 0;
+  overflow: auto;
 }
 
 .code-block code {
   display: block;
-  padding: 14px;
+  padding: 16px;
   overflow-x: auto;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 13px;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
   line-height: 1.5;
   color: #e2e8f0;
 }
@@ -937,34 +1050,51 @@ body {
   background: rgba(255,255,255,0.06);
   padding: 2px 6px;
   border-radius: 4px;
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
   color: #fca5a5;
 }
 
+.copy-code-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  color: var(--muted);
+  font-size: 11px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.copy-code-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--fg);
+  border-color: var(--border-hover);
+}
+
 .table-container {
   overflow-x: auto;
-  margin: 14px 0;
-  border-radius: var(--radius-sm);
+  margin: 16px 0;
+  border-radius: var(--radius-md);
   border: 1px solid var(--border);
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 13.5px;
 }
 
 th {
   background: var(--surface);
-  padding: 10px 12px;
+  padding: 10px 14px;
   font-weight: 600;
   text-align: left;
   border-bottom: 2px solid var(--border);
 }
 
 td {
-  padding: 10px 12px;
+  padding: 10px 14px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -973,9 +1103,21 @@ tr:last-child td {
 }
 
 .input-bar {
-  padding: 20px 32px;
+  padding: 24px 16px;
   border-top: 1px solid var(--border);
-  background: var(--bg);
+  background: linear-gradient(180deg, transparent 0%, var(--bg) 20%);
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+}
+
+.input-container {
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .message-form {
@@ -984,14 +1126,16 @@ tr:last-child td {
   align-items: flex-end;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 28px;
-  padding: 8px 12px 8px 20px;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 24px;
+  padding: 10px 14px 10px 22px;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .message-form:focus-within {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(255, 71, 102, 0.15);
+  box-shadow: 0 0 0 3px rgba(88, 204, 2, 0.15);
+  background: var(--surface-hover);
 }
 
 .message-form textarea {
@@ -999,27 +1143,35 @@ tr:last-child td {
   background: transparent;
   border: none;
   color: var(--fg);
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.5;
   outline: none;
   resize: none;
-  padding: 8px 0;
-  max-height: 160px;
+  padding: 6px 0;
+  max-height: 180px;
   font-family: inherit;
+}
+
+.input-footer-text {
+  font-size: 11px;
+  color: var(--muted-dark);
+  text-align: center;
+  margin-top: 4px;
 }
 
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 20px;
-  border-radius: 999px;
-  font-size: 14px;
-  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13.5px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid transparent;
   outline: none;
+  user-select: none;
 }
 
 .btn:active {
@@ -1027,18 +1179,19 @@ tr:last-child td {
 }
 
 .btn-primary {
-  background: var(--green);
-  color: #fff;
-  border-bottom: 4px solid #48a602;
+  background: var(--accent);
+  color: #090a10;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(88, 204, 2, 0.2);
 }
 
 .btn-primary:hover {
-  background: #61df02;
-}
-
-.btn-primary:active {
-  border-bottom-width: 0px;
-  margin-top: 4px;
+  background: var(--accent-hover);
+  box-shadow: 0 4px 12px rgba(88, 204, 2, 0.35);
 }
 
 .btn-secondary {
@@ -1049,21 +1202,14 @@ tr:last-child td {
 
 .btn-secondary:hover {
   background: var(--surface-hover);
-}
-
-#btn-send {
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border-radius: 50%;
-  flex-shrink: 0;
+  border-color: var(--border-hover);
 }
 
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(8px);
+  background: rgba(5,5,8,0.85);
+  backdrop-filter: blur(12px);
   z-index: 100;
   display: none;
   align-items: center;
@@ -1075,11 +1221,11 @@ tr:last-child td {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 32px;
+  padding: 36px;
   text-align: center;
-  max-width: 400px;
+  max-width: 420px;
   width: 100%;
-  box-shadow: var(--shadow);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
   animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -1097,14 +1243,33 @@ tr:last-child td {
 .modal-card h2 {
   margin: 0 0 12px;
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 750;
 }
 
 .modal-card p {
   color: var(--muted);
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 14.5px;
+  line-height: 1.6;
   margin: 0 0 24px;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-hover);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-dark);
 }
 `;
 
@@ -1112,6 +1277,7 @@ const APP_CLIENT_JS = `const $ = (s) => document.querySelector(s);
 let activeSessionId = null;
 let currentSessionData = null;
 let pollTimer = null;
+let sessionsList = [];
 
 function escapeHtml(text) {
   if (!text) return "";
@@ -1124,7 +1290,16 @@ function parseMarkdown(text) {
   const codeBlocks = [];
   let html = text.replace(/\`\`\`(\\w*)\\n([\\s\\S]*?)\`\`\`/g, (match, lang, code) => {
     const id = \`__CODE_BLOCK_\${codeBlocks.length}__\`;
-    codeBlocks.push('<div class="code-block"><div class="code-header">' + escapeHtml(lang || "code") + '</div><pre><code>' + escapeHtml(code) + '</code></pre></div>');
+    const escapedCode = escapeHtml(code);
+    codeBlocks.push(
+      '<div class="code-block">' +
+        '<div class="code-header">' +
+          '<span>' + escapeHtml(lang || "code") + '</span>' +
+          '<button class="copy-code-btn" onclick="navigator.clipboard.writeText(decodeURIComponent(\\'' + encodeURIComponent(code) + '\\')).then(() => { this.innerText = \\'Kopyalandı\\'; setTimeout(() => this.innerText = \\'Kopyala\\', 1200); })">Kopyala</button>' +
+        '</div>' +
+        '<pre><code>' + escapedCode + '</code></pre>' +
+      '</div>'
+    );
     return id;
   });
 
@@ -1157,7 +1332,7 @@ function parseMarkdown(text) {
   html = html.replace(/\\*([^\\*]+)\\*/g, '<em>$1</em>');
   html = html.replace(/\`([^\`\\n]+)\`/g, '<code class="code-inline">$1</code>');
 
-  html = html.split("\\n\\n").map(p => '<p>' + p.replace(/\\n/g, '<br>') + '</p>').join("");
+  html = html.split("\\n").map(p => '<p>' + p.replace(/\\n/g, '<br>') + '</p>').join("");
 
   return html;
 }
@@ -1175,24 +1350,42 @@ async function loadSessions() {
   try {
     const res = await fetch("/api/sessions", { cache: "no-store" });
     const sessions = await res.json();
-    const listEl = $("#sessions-list");
-    if (!listEl) return;
-
-    let html = "";
-    sessions.forEach(s => {
-      const activeClass = s.id === activeSessionId ? "active" : "";
-      const dateStr = new Date(s.modified).toLocaleTimeString("tr-TR", { hour: '2-digit', minute: '2-digit' });
-      html += \`
-        <div class="session-card \${activeClass}" data-id="\${s.id}">
-          <b>\${escapeHtml(s.id)}</b>
-          <span>\${escapeHtml(s.cwd)} · \${dateStr}</span>
-        </div>
-      \`;
-    });
-    listEl.innerHTML = html;
+    sessionsList = sessions;
+    renderSessions();
   } catch (err) {
     console.error("Sessions load error:", err);
   }
+}
+
+function renderSessions() {
+  const query = ($("#search-input")?.value || "").toLowerCase().trim();
+  const listEl = $("#sessions-list");
+  if (!listEl) return;
+
+  const filtered = sessionsList.filter(s => {
+    return s.id.toLowerCase().includes(query) || (s.cwd || "").toLowerCase().includes(query);
+  });
+
+  if (filtered.length === 0) {
+    listEl.innerHTML = '<p class="muted pad" style="font-size:13px; text-align:center; padding:32px 16px;">Oturum bulunamadı.</p>';
+    return;
+  }
+
+  let html = "";
+  filtered.forEach(s => {
+    const activeClass = s.id === activeSessionId ? "active" : "";
+    const dateStr = new Date(s.modified).toLocaleTimeString("tr-TR", { hour: '2-digit', minute: '2-digit' });
+    html += \`
+      <div class="session-card \${activeClass}" data-id="\${s.id}">
+        <div class="session-card-header">
+          <b>\${escapeHtml(s.id)}</b>
+          <span class="session-card-time">\${dateStr}</span>
+        </div>
+        <span class="session-card-cwd">\${escapeHtml(s.cwd)}</span>
+      </div>
+    \`;
+  });
+  listEl.innerHTML = html;
 }
 
 async function loadSession(id, isPoll = false) {
@@ -1229,10 +1422,10 @@ async function loadSession(id, isPoll = false) {
             thinkingHtml += \`
               <div class="thinking-card">
                 <div class="thinking-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
-                  <span>💡 Düşünce Zinciri (Genişlet)</span>
+                  <span>💡 Düşünce Zinciri (Genişletmek için tıklayın)</span>
                   <span>▼</span>
                 </div>
-                <div class="thinking-content" style="display: none;">&nbsp;\${escapeHtml(part.thinking)}</div>
+                <div class="thinking-content" style="display: none;">\\\${escapeHtml(part.thinking)}</div>
               </div>
             \`;
           }
@@ -1241,17 +1434,17 @@ async function loadSession(id, isPoll = false) {
         if (msgHtml.trim() || thinkingHtml.trim()) {
           const wrapperClass = isUser ? "user" : "assistant";
           const avatar = isUser ? "👤" : "🌝";
-          const authorLabel = isUser ? "Kullanıcı" : "MoonAgent";
+          const authorLabel = isUser ? "Kullanıcı" : "MoonCode";
 
           html += \`
             <div class="msg-wrapper \${wrapperClass}">
               <div class="msg-author">
-                <span class="msg-author-avatar">\${avatar}</span>
-                <span>\${authorLabel}</span>
+                <span class="msg-author-avatar">\\\${avatar}</span>
+                <span>\\\${authorLabel}</span>
               </div>
-              \${thinkingHtml}
+              \\\${thinkingHtml}
               <div class="msg-card">
-                \${msgHtml}
+                \\\${msgHtml}
               </div>
             </div>
           \`;
@@ -1260,10 +1453,11 @@ async function loadSession(id, isPoll = false) {
         html += \`
           <div class="tool-card">
             <div class="tool-header">
-              <span>🛠️ Tool Çağrısı: <b>\${escapeHtml(entry.toolName)}</b></span>
+              <span>🛠️ Tool Çağrısı: <b>\\\${escapeHtml(entry.toolName)}</b></span>
+              <span>Aktif</span>
             </div>
             <div class="tool-body">
-              <pre><code>\${escapeHtml(JSON.stringify(entry.input || {}, null, 2))}</code></pre>
+              <pre><code>\\\${escapeHtml(JSON.stringify(entry.input || {}, null, 2))}</code></pre>
             </div>
           </div>
         \`;
@@ -1274,7 +1468,7 @@ async function loadSession(id, isPoll = false) {
               <span>✅ Tool Sonucu</span>
             </div>
             <div class="tool-result-body">
-              <pre><code>\${escapeHtml(textOf(entry.output || entry.result || entry))}</code></pre>
+              <pre><code>\\\${escapeHtml(textOf(entry.output || entry.result || entry))}</code></pre>
             </div>
           </div>
         \`;
@@ -1282,11 +1476,13 @@ async function loadSession(id, isPoll = false) {
     });
 
     const wasAtBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 60;
-    viewport.innerHTML = html || \`
-      <div class="welcome-screen">
-        <span class="moon-mascot">🌝</span>
-        <h1>Oturum Boş</h1>
-        <p>Henüz bu oturumda mesaj yok.</p>
+    viewport.innerHTML = html ? \`<div class="messages-content">\${html}</div>\` : \`
+      <div class="messages-content">
+        <div class="welcome-screen">
+          <span class="moon-mascot">🌝</span>
+          <h1>Oturum Boş</h1>
+          <p>Henüz bu oturumda kaydedilmiş bir mesaj yok. CLI üzerinden konuşma başlattığınızda burada anlık olarak akacaktır.</p>
+        </div>
       </div>
     \`;
 
@@ -1325,11 +1521,14 @@ $("#sessions-list").addEventListener("click", (e) => {
   const card = e.target.closest(".session-card");
   if (card) {
     activeSessionId = card.dataset.id;
-    $(".session-card.active")?.classList.remove("active");
+    const activeCard = $(".session-card.active");
+    if (activeCard) activeCard.classList.remove("active");
     card.classList.add("active");
     loadSession(activeSessionId);
   }
 });
+
+$("#search-input")?.addEventListener("input", renderSessions);
 
 $("#btn-unlock-tui").addEventListener("click", async () => {
   try {
@@ -1386,6 +1585,8 @@ $("#message-input").addEventListener("keydown", function(e) {
 
 init();
 `;
+
+
 
 const _webUiDir = dirname(fileURLToPath(import.meta.url));
 const VIDEOEDIT_HTML: string = readFileSync(join(_webUiDir, "videoedit.html"), "utf-8");
@@ -1501,11 +1702,184 @@ export const editorActionsListeners = new Set<
 
 export const webUiMessageListeners = new Set<(message: string) => void>();
 export const webUiUnlockListeners = new Set<() => void>();
+export const webUiAuthActionListeners = new Set<(action: any) => void | Promise<void>>();
 export let activeSessionId: string | null = null;
+let authPanelStateProvider: (() => unknown) | undefined;
+
+export function setAuthPanelStateProvider(provider: (() => unknown) | undefined): void {
+	authPanelStateProvider = provider;
+}
 
 export function setActiveSessionId(id: string | null): void {
 	activeSessionId = id;
 }
+
+const AUTH_PANEL_HTML = `<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MoonCode Kontrol Paneli</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --md-sys-color-primary: #6750a4;
+      --md-sys-color-on-primary: #fff;
+      --md-sys-color-primary-container: #eaddff;
+      --md-sys-color-secondary-container: #e8def8;
+      --md-sys-color-surface: #fffbfe;
+      --md-sys-color-surface-container: #f3edf7;
+      --md-sys-color-surface-container-high: #ece6f0;
+      --md-sys-color-outline: #79747e;
+      --md-sys-color-on-surface: #1d1b20;
+      --md-sys-color-on-surface-variant: #49454f;
+      --radius: 28px;
+      font-family: Roboto, Inter, "Segoe UI", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); }
+    .app { min-height: 100vh; display: grid; grid-template-columns: 280px 1fr; }
+    aside { background: var(--md-sys-color-surface-container); padding: 24px 16px; border-right: 1px solid #ddd7e3; }
+    .brand { display: flex; align-items: center; gap: 12px; padding: 8px 12px 24px; font-weight: 700; font-size: 22px; }
+    .mark { width: 38px; height: 38px; border-radius: 12px; background: var(--md-sys-color-primary); color: white; display: grid; place-items: center; }
+    nav button { width: 100%; border: 0; background: transparent; color: var(--md-sys-color-on-surface-variant); border-radius: 999px; padding: 14px 18px; text-align: left; font: inherit; cursor: pointer; }
+    nav button.active { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-surface); font-weight: 700; }
+    main { padding: 28px; max-width: 1320px; width: 100%; }
+    .top { display: flex; justify-content: space-between; gap: 16px; align-items: start; margin-bottom: 24px; }
+    h1 { font-size: clamp(28px, 4vw, 48px); line-height: 1; margin: 0 0 10px; letter-spacing: 0; }
+    .sub { color: var(--md-sys-color-on-surface-variant); margin: 0; max-width: 720px; }
+    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+    .card { background: var(--md-sys-color-surface-container); border-radius: var(--radius); padding: 22px; border: 1px solid #e2dce8; }
+    .hero { grid-column: span 8; min-height: 210px; background: linear-gradient(135deg, var(--md-sys-color-primary-container), #fef7ff); }
+    .side { grid-column: span 4; }
+    .full { grid-column: 1 / -1; }
+    .stat { display: grid; gap: 8px; }
+    .stat b { font-size: 34px; }
+    .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
+    .btn { border: 0; border-radius: 999px; padding: 12px 18px; font-weight: 700; cursor: pointer; background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
+    .btn.secondary { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-surface); }
+    .btn.ghost { background: transparent; color: var(--md-sys-color-primary); border: 1px solid var(--md-sys-color-outline); }
+    table { width: 100%; border-collapse: collapse; overflow: hidden; }
+    th, td { text-align: left; padding: 14px 10px; border-bottom: 1px solid #ded8e4; vertical-align: middle; }
+    th { color: var(--md-sys-color-on-surface-variant); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 7px 11px; border-radius: 999px; background: var(--md-sys-color-primary-container); font-size: 13px; }
+    .muted { color: var(--md-sys-color-on-surface-variant); }
+    .form { display: grid; gap: 12px; max-width: 720px; }
+    select, input { width: 100%; border: 1px solid var(--md-sys-color-outline); border-radius: 14px; padding: 14px; background: #fff; font: inherit; }
+    label { display: grid; gap: 6px; font-weight: 650; }
+    .hidden { display: none; }
+    .toast { position: fixed; right: 22px; bottom: 22px; background: #1d1b20; color: white; padding: 14px 18px; border-radius: 16px; opacity: 0; transform: translateY(12px); transition: .18s; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    @media (max-width: 860px) {
+      .app { grid-template-columns: 1fr; }
+      aside { position: sticky; top: 0; z-index: 5; border-right: 0; border-bottom: 1px solid #ddd7e3; }
+      nav { display: flex; overflow: auto; gap: 8px; }
+      nav button { white-space: nowrap; width: auto; }
+      .hero, .side { grid-column: 1 / -1; }
+      main { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="brand"><span class="mark">M</span><span>MoonCode</span></div>
+      <nav>
+        <button class="active" data-tab="overview">Kontrol</button>
+        <button data-tab="login">Login</button>
+        <button data-tab="accounts">Hesaplar</button>
+        <button data-tab="providers">Saglayicilar</button>
+      </nav>
+    </aside>
+    <main>
+      <section id="overview" class="tab">
+        <div class="top"><div><h1>Kontrol ve hesap paneli</h1><p class="sub">Local calisir. Hesap ekle, aktif hesabi degistir, son kullanim ve kota notlarini takip et.</p></div><button class="btn secondary" onclick="refresh()">Yenile</button></div>
+        <div class="grid">
+          <article class="card hero"><h2>Hizli giris</h2><p class="muted">MoonCode TUI icinden secim yapmak yerine bu panelden abonelik veya API anahtari akisini baslat.</p><div class="actions"><button class="btn" onclick="showTab('login')">Abonelik kullan</button><button class="btn secondary" onclick="showTab('login','api_key')">API anahtari kullan</button></div></article>
+          <article class="card side stat"><span class="muted">Kayitli hesap</span><b id="statAccounts">0</b><span id="statActive" class="pill">aktif yok</span></article>
+          <article class="card side stat"><span class="muted">Saglayici</span><b id="statProviders">0</b><span class="muted">model registry</span></article>
+          <article class="card side stat"><span class="muted">Kullanilabilir model</span><b id="statModels">0</b><span class="muted">auth ile acilan</span></article>
+        </div>
+      </section>
+      <section id="login" class="tab hidden">
+        <div class="top"><div><h1>Login</h1><p class="sub">Once yontem sec. Abonelik OAuth akislarini TUI baslatir; API key panelden direkt kaydedilir.</p></div></div>
+        <div class="card form">
+          <label>Yontem<select id="authType" onchange="renderProviderOptions()"><option value="oauth">Abonelik kullan</option><option value="api_key">API anahtari kullan</option></select></label>
+          <label>Saglayici<select id="provider"></select></label>
+          <label id="labelWrap">Hesap etiketi<input id="label" placeholder="Orn: OpenAI is hesabi" /></label>
+          <label id="keyWrap" class="hidden">API anahtari<input id="apiKey" type="password" autocomplete="off" placeholder="sk-..." /></label>
+          <div class="actions"><button class="btn" onclick="submitLogin()">Devam et</button><button class="btn ghost" onclick="refresh()">Durumu yenile</button></div>
+        </div>
+      </section>
+      <section id="accounts" class="tab hidden">
+        <div class="top"><div><h1>Hesaplar</h1><p class="sub">Aktif hesap provider credential olarak uygulanir. Son kullanim, kullanim sayisi ve kota notu burada tutulur.</p></div></div>
+        <article class="card full"><table><thead><tr><th>Aktif</th><th>Etiket</th><th>Provider</th><th>Tip</th><th>Son kullanim</th><th>Kullanim</th><th>Kota</th><th></th></tr></thead><tbody id="accountsTable"></tbody></table></article>
+      </section>
+      <section id="providers" class="tab hidden">
+        <div class="top"><div><h1>Saglayicilar</h1><p class="sub">Model registry ve auth durumu.</p></div></div>
+        <article class="card full"><table><thead><tr><th>Provider</th><th>Ad</th><th>OAuth</th><th>API key</th><th>Durum</th><th>Model</th></tr></thead><tbody id="providersTable"></tbody></table></article>
+      </section>
+    </main>
+  </div>
+  <div id="toast" class="toast"></div>
+  <script>
+    let state = { providers: [], accounts: [], models: { total: 0, available: 0 } };
+    const tabs = [...document.querySelectorAll('.tab')];
+    const nav = [...document.querySelectorAll('nav button')];
+    function showTab(id, authType) {
+      tabs.forEach(t => t.classList.toggle('hidden', t.id !== id));
+      nav.forEach(b => b.classList.toggle('active', b.dataset.tab === id));
+      if (authType) document.getElementById('authType').value = authType;
+      renderProviderOptions();
+    }
+    nav.forEach(b => b.onclick = () => showTab(b.dataset.tab));
+    function toast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2600); }
+    function fmt(ts) { return ts ? new Date(ts).toLocaleString() : 'hic'; }
+    async function action(payload) {
+      const res = await fetch('/api/auth-panel/action', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error || 'islem basarisiz');
+      toast(json.message || 'islem tamam');
+      await refresh();
+    }
+    function renderProviderOptions() {
+      const type = document.getElementById('authType').value;
+      document.getElementById('keyWrap').classList.toggle('hidden', type !== 'api_key');
+      const providers = state.providers.filter(p => type === 'oauth' ? p.supportsOAuth : p.supportsApiKey);
+      document.getElementById('provider').innerHTML = providers.map(p => '<option value="' + p.id + '">' + p.name + '</option>').join('');
+    }
+    async function submitLogin() {
+      const authType = document.getElementById('authType').value;
+      const providerId = document.getElementById('provider').value;
+      const label = document.getElementById('label').value;
+      const apiKey = document.getElementById('apiKey').value;
+      if (!providerId) return toast('Saglayici sec');
+      if (authType === 'api_key' && !apiKey.trim()) return toast('API anahtari gir');
+      await action({ action: authType === 'oauth' ? 'oauth_login' : 'save_api_key', providerId, label, apiKey });
+      document.getElementById('apiKey').value = '';
+    }
+    async function setActive(id) { await action({ action: 'set_active', accountId: id }); }
+    async function removeAccount(id) { if (confirm('Hesap kaldirilsin mi?')) await action({ action: 'remove_account', accountId: id }); }
+    function render() {
+      document.getElementById('statAccounts').textContent = state.accounts.length;
+      document.getElementById('statProviders').textContent = state.providers.length;
+      document.getElementById('statModels').textContent = state.models.available || 0;
+      const active = state.accounts.filter(a => a.active).map(a => a.provider + ': ' + a.label).join(', ');
+      document.getElementById('statActive').textContent = active || 'aktif yok';
+      renderProviderOptions();
+      document.getElementById('accountsTable').innerHTML = state.accounts.map(a => '<tr><td>' + (a.active ? '<span class="pill">aktif</span>' : '') + '</td><td><b>' + a.label + '</b><div class="muted">' + a.id + '</div></td><td>' + a.provider + '</td><td>' + a.type + '</td><td>' + fmt(a.lastUsedAt) + '</td><td>' + (a.useCount || 0) + '</td><td>' + (a.quotaLabel || 'not yok') + '</td><td><button class="btn secondary" onclick="setActive(\\'' + a.id + '\\')">Aktif yap</button> <button class="btn ghost" onclick="action({action:\\'next_account\\',providerId:\\'' + a.provider + '\\'})">Siradaki</button> <button class="btn ghost" onclick="removeAccount(\\'' + a.id + '\\')">Sil</button></td></tr>').join('') || '<tr><td colspan="8" class="muted">Hesap yok. Login sekmesinden ekle.</td></tr>';
+      document.getElementById('providersTable').innerHTML = state.providers.map(p => '<tr><td>' + p.id + '</td><td><b>' + p.name + '</b></td><td>' + (p.supportsOAuth ? 'var' : '-') + '</td><td>' + (p.supportsApiKey ? 'var' : '-') + '</td><td>' + (p.auth.configured ? '<span class="pill">configured</span>' : '<span class="muted">' + (p.auth.source || 'bos') + '</span>') + '</td><td>' + p.modelCount + '</td></tr>').join('');
+    }
+    async function refresh() {
+      const res = await fetch('/api/auth-panel');
+      state = await res.json();
+      render();
+    }
+    if (location.pathname === '/login') showTab('login');
+    refresh().catch(e => toast(e.message));
+  </script>
+</body>
+</html>`;
 
 export function startWebUiServer(options: { port?: number; staticRoot?: string } = {}) {
 	const requestedPort = options.port ?? Number(process.env.MOON_WEB_PORT || 3131);
@@ -1563,6 +1937,27 @@ export function startWebUiServer(options: { port?: number; staticRoot?: string }
 
 		if (url.pathname === "/api/active-session") {
 			return json(res, { activeSessionId });
+		}
+		if (url.pathname === "/api/auth-panel") {
+			return json(res, authPanelStateProvider ? authPanelStateProvider() : { providers: [], accounts: [], models: {} });
+		}
+		if (req.method === "POST" && url.pathname === "/api/auth-panel/action") {
+			let body = "";
+			req.on("data", (chunk) => {
+				body += chunk;
+			});
+			req.on("end", async () => {
+				try {
+					const data = JSON.parse(body || "{}");
+					for (const listener of webUiAuthActionListeners) {
+						await listener(data);
+					}
+					return json(res, { ok: true, message: "Panel islemi TUI'ya gonderildi." });
+				} catch (err: any) {
+					return json(res, { ok: false, error: err.message });
+				}
+			});
+			return;
 		}
 		if (req.method === "POST" && url.pathname === "/api/message") {
 			let body = "";
@@ -1632,6 +2027,11 @@ export function startWebUiServer(options: { port?: number; staticRoot?: string }
 			});
 			const timer = setInterval(() => res.write(`event: ping\ndata: ${Date.now()}\n\n`), 2000);
 			req.on("close", () => clearInterval(timer));
+			return;
+		}
+		if (url.pathname === "/panel" || url.pathname === "/login") {
+			res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+			res.end(AUTH_PANEL_HTML);
 			return;
 		}
 		if (serveAsset(res, url.pathname)) return;

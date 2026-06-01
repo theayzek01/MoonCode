@@ -122,7 +122,7 @@ export function searchIndex(index: CodebaseIndex, query: string, cwd: string, li
 }
 
 /** Eski index formatı için TF-IDF fallback */
-function legacySearch(index: any, query: string, _cwd: string, limit: number): SearchResult[] {
+function legacySearch(index: any, query: string, cwd: string, limit: number): SearchResult[] {
 	const queryTerms = tokenize(query);
 	const querySet = new Set(queryTerms);
 
@@ -130,7 +130,7 @@ function legacySearch(index: any, query: string, _cwd: string, limit: number): S
 		.map((chunk: any) => {
 			const contentLower = (chunk.content ?? "").toLowerCase();
 			let score = queryTerms.filter((t) => contentLower.includes(t)).length;
-			score += chunk.symbols?.filter((s: string) => querySet.has(s.toLowerCase())).length * 3 ?? 0;
+			score += (chunk.symbols?.filter((s: string) => querySet.has(s.toLowerCase())).length ?? 0) * 3;
 			return { chunk, score };
 		})
 		.filter((x: any) => x.score > 0)

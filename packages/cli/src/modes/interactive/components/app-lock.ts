@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Container, matchesKey, Spacer, Text } from "moon-tui";
+import { type Component, Container, matchesKey, Spacer, Text } from "moon-tui";
 import { theme } from "../theme/theme.js";
 import { DynamicBorder } from "./dynamic-border.js";
 
@@ -18,11 +18,11 @@ export class AppLockComponent extends Container {
 		this.addChild(new Spacer(1));
 
 		// Title
-		this.addChild(new Text(theme.fg("accent", theme.bold("  🔒 MOONAGENT WEB ARAYÜZÜ AKTİF")), 0, 0));
+		this.addChild(new Text(theme.fg("accent", theme.bold("  🔒 MOONCODE WEB ARAYÜZÜ AKTİF")), 0, 0));
 		this.addChild(new Spacer(1));
 
 		// Description
-		this.addChild(new Text("  TUI geçici olarak kilitlendi. MoonAgent'u tarayıcınızdan", 0, 0));
+		this.addChild(new Text("  TUI geçici olarak kilitlendi. MoonCode'u tarayıcınızdan", 0, 0));
 		this.addChild(new Text("  anlık olarak izleyebilir ve yeni mesajlar gönderebilirsiniz.", 0, 0));
 		this.addChild(new Spacer(1));
 

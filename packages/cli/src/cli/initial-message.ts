@@ -16,7 +16,7 @@ export function buildInitialMessage(): { text: string } {
 	const bold = chalk.bold;
 
 	const sysInfo = [
-		`${cyan("◆")} ${bold("SOFTWARE")}  MoonAgent Hyper-Engine ${bold("1.26-v2")}`,
+		`${cyan("◆")} ${bold("SOFTWARE")}  MoonCode Hyper-Engine ${bold("v2026-3")}`,
 		`${cyan("◆")} ${bold("HARDWARE")}  ${cpu} (${arch})`,
 		`${cyan("◆")} ${bold("RESOURCES")} ${totalMem} Unified Memory`,
 		`${cyan("◆")} ${bold("RUNTIME")}   ${platform} ${release}`,
@@ -25,7 +25,7 @@ export function buildInitialMessage(): { text: string } {
 	const divider = dim("─".repeat(50));
 
 	const introText = `
-   ${magenta.bold("MOONAGENT OS [READY]")}
+   ${magenta.bold("MOONCODE OS [READY]")}
    ${dim("Establishing Neural Bridge...")}
 
    ${sysInfo}

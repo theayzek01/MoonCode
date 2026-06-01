@@ -117,6 +117,8 @@ describe("buildSystemPrompt", () => {
 			expect(prompt).toContain("Inspect only what is needed");
 			expect(prompt).toContain("smallest correct change");
 			expect(prompt).toContain("Do not add boilerplate");
+			expect(prompt).toContain("Turbo coding mode");
+			expect(prompt).toContain("Prefer one targeted edit");
 		});
 
 		test("compact mode keeps the same discipline in shorter form", () => {
@@ -130,6 +132,8 @@ describe("buildSystemPrompt", () => {
 
 			expect(prompt).toContain("Inspect only what is needed");
 			expect(prompt).toContain("Make the smallest correct change");
+			expect(prompt).toContain("Turbo coding");
+			expect(prompt).toContain("Prefer edit over write");
 		});
 	});
 
@@ -156,6 +160,36 @@ describe("buildSystemPrompt", () => {
 			});
 
 			expect(prompt.match(/- Use dynamic_tool for summaries\./g)).toHaveLength(1);
+		});
+	});
+
+	describe("blender mode", () => {
+		test("adds production loop and quality gate when blender tools are selected", () => {
+			const prompt = buildSystemPrompt({
+				selectedTools: ["read", "blender_execute_blender_code"],
+				contextFiles: [],
+				skills: [],
+				cwd: process.cwd(),
+			});
+
+			expect(prompt).toContain("## Blender MCP Professional Mode");
+			expect(prompt).toContain("Production loop:");
+			expect(prompt).toContain("Quality gate:");
+			expect(prompt).toContain("Do not create random floating blocks");
+		});
+
+		test("adds compact quality guard when compact blender mode is selected", () => {
+			const prompt = buildSystemPrompt({
+				selectedTools: ["read", "blender_execute_blender_code"],
+				contextFiles: [],
+				skills: [],
+				cwd: process.cwd(),
+				compactMode: true,
+			});
+
+			expect(prompt).toContain("## Blender MCP Mode");
+			expect(prompt).toContain("Quality gate:");
+			expect(prompt).toContain("just recolored primitives");
 		});
 	});
 });

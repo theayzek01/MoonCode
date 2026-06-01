@@ -102,7 +102,7 @@ export class AssistantMessageComponent extends Container {
 		if (hasVisibleContent && this.contentContainer.children.length === 0) {
 			const dimGray = "\x1b[38;2;120;120;120m";
 			const reset = "\x1b[39m";
-			this.contentContainer.addChild(new Text(`${dimGray}moonagent ────${reset}`, 0, 0));
+			this.contentContainer.addChild(new Text(`${dimGray}mooncode ────${reset}`, 0, 0));
 		}
 
 		// Keep track of which content blocks we've rendered

@@ -3,46 +3,44 @@ function updateUI() {
     if (!response) return;
 
     const statusEl = document.getElementById("overall-status");
-    const listEl = document.getElementById("port-list");
+    const listEl   = document.getElementById("port-list");
+    const countEl  = document.getElementById("client-count");
 
     const activePorts = response.connections.filter(c => c.status === "connected");
-    
+    const total = response.totalClients || 0;
+
     statusEl.textContent = activePorts.length > 0 ? "Bağlı" : "Bağlantı Yok";
-    statusEl.className = `badge-status ${activePorts.length > 0 ? "connected" : "offline"}`;
+    statusEl.className = `badge ${activePorts.length > 0 ? "on" : "off"}`;
+    countEl.textContent = `${total} istemci`;
 
     listEl.innerHTML = "";
     response.connections.forEach(conn => {
-      const item = document.createElement("div");
-      item.className = "port-item";
-      
       const isActive = conn.status === "connected";
-      const statusBadge = isActive 
-        ? '<span class="port-badge active">Aktif</span>' 
-        : '<span class="port-badge scanning">Taranıyor</span>';
+      const row = document.createElement("div");
+      row.className = "port-row";
 
-      const closeBtn = isActive
-        ? `<button class="close-port-btn" data-port="${conn.port}">Sonlandır</button>`
-        : '';
-
-      const portIcon = isActive
+      const iconSrc = isActive
         ? "icons/Computer Systems/8. Wifi Excellent.png"
-        : "icons/Computer Systems/15. Wait.png";
+        : "icons/Computer Systems/11. No Wifi.png";
 
-      item.innerHTML = `
-        <span class="port-main"><img class="port-icon" src="${portIcon}" alt="">Port :${conn.port}</span>
-        <div style="display:flex;align-items:center;gap:8px;">
-          ${statusBadge}
-          ${closeBtn}
-        </div>
+      row.innerHTML = `
+        <img class="port-icon" src="${iconSrc}" alt="">
+        <span class="port-label">:${conn.port}</span>
+        <span class="port-badge ${isActive ? "active" : "scanning"}">${isActive ? "Aktif" : "Taranıyor"}</span>
+        ${isActive ? `<button class="close-btn" data-port="${conn.port}" title="Sonlandır">✕</button>` : ""}
       `;
-      listEl.appendChild(item);
+      listEl.appendChild(row);
     });
   });
 }
 
 document.getElementById("reconnect-btn").addEventListener("click", () => {
+  const icon = document.getElementById("refresh-icon");
+  icon.style.transform = "rotate(180deg)";
+  icon.style.transition = "transform 0.5s";
+  setTimeout(() => { icon.style.transform = ""; }, 550);
   chrome.runtime.sendMessage({ type: "reconnect_all" });
-  setTimeout(updateUI, 250);
+  setTimeout(updateUI, 300);
 });
 
 document.getElementById("dashboard-btn").addEventListener("click", () => {
@@ -52,21 +50,19 @@ document.getElementById("dashboard-btn").addEventListener("click", () => {
 document.getElementById("close-all-btn").addEventListener("click", () => {
   if (confirm("Tüm aktif MoonCode terminal oturumlarını kapatmak istediğinize emin misiniz?")) {
     chrome.runtime.sendMessage({ type: "close_all_sessions" });
-    setTimeout(updateUI, 250);
+    setTimeout(updateUI, 300);
   }
 });
 
-// Event delegation for individual close buttons
 document.getElementById("port-list").addEventListener("click", (e) => {
-  if (e.target.classList.contains("close-port-btn")) {
+  if (e.target.classList.contains("close-btn")) {
     const port = Number(e.target.getAttribute("data-port"));
-    if (confirm(`Port :${port} üzerindeki MoonCode terminal oturumunu sonlandırmak istediğinize emin misiniz?`)) {
+    if (confirm(`Port :${port} üzerindeki oturumu sonlandırmak istediğinize emin misiniz?`)) {
       chrome.runtime.sendMessage({ type: "close_port", port });
-      setTimeout(updateUI, 250);
+      setTimeout(updateUI, 300);
     }
   }
 });
 
-// Update UI every second when popup is open
-setInterval(updateUI, 750);
+setInterval(updateUI, 800);
 updateUI();

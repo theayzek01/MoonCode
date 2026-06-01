@@ -8,29 +8,6 @@ export interface ChangelogEntry {
 	content: string;
 }
 
-export function parseVersion(version: string): { major: number; minor: number; patch: number } {
-	// Match digits in the format like (\d+)[.-]v?(\d+)(?:[.-](\d+))? (e.g. 2026-v31, 2026.31.0, 0.72.2)
-	const match = version.match(/(\d+)[.-]v?(\d+)(?:[.-](\d+))?/);
-	if (match) {
-		return {
-			major: parseInt(match[1], 10),
-			minor: parseInt(match[2], 10),
-			patch: match[3] ? parseInt(match[3], 10) : 0,
-		};
-	}
-
-	const parts = version
-		.replace(/[^0-9.]/g, ".")
-		.split(".")
-		.map(Number)
-		.filter((n) => !Number.isNaN(n));
-	return {
-		major: parts[0] || 0,
-		minor: parts[1] || 0,
-		patch: parts[2] || 0,
-	};
-}
-
 /**
  * Parse changelog entries from CHANGELOG.md
  * Scans for ## lines and collects content until next ## or EOF
@@ -60,13 +37,12 @@ export function parseChangelog(changelogPath: string): ChangelogEntry[] {
 				}
 
 				// Try to parse version from this line
-				const versionMatch = line.match(/##\s+\[?([^\]\s]+)\]?/);
-				if (versionMatch && /\d/.test(versionMatch[1])) {
-					const parsed = parseVersion(versionMatch[1]);
+				const versionMatch = line.match(/##\s+\[?(\d+)\.(\d+)\.(\d+)\]?/);
+				if (versionMatch) {
 					currentVersion = {
-						major: parsed.major,
-						minor: parsed.minor,
-						patch: parsed.patch,
+						major: Number.parseInt(versionMatch[1], 10),
+						minor: Number.parseInt(versionMatch[2], 10),
+						patch: Number.parseInt(versionMatch[3], 10),
 					};
 					currentLines = [line];
 				} else {
@@ -98,10 +74,7 @@ export function parseChangelog(changelogPath: string): ChangelogEntry[] {
 /**
  * Compare versions. Returns: -1 if v1 < v2, 0 if v1 === v2, 1 if v1 > v2
  */
-export function compareVersions(
-	v1: ChangelogEntry | { major: number; minor: number; patch: number },
-	v2: ChangelogEntry | { major: number; minor: number; patch: number },
-): number {
+export function compareVersions(v1: ChangelogEntry, v2: ChangelogEntry): number {
 	if (v1.major !== v2.major) return v1.major - v2.major;
 	if (v1.minor !== v2.minor) return v1.minor - v2.minor;
 	return v1.patch - v2.patch;
@@ -111,7 +84,15 @@ export function compareVersions(
  * Get entries newer than lastVersion
  */
 export function getNewEntries(entries: ChangelogEntry[], lastVersion: string): ChangelogEntry[] {
-	const last = parseVersion(lastVersion);
+	// Parse lastVersion
+	const parts = lastVersion.split(".").map(Number);
+	const last: ChangelogEntry = {
+		major: parts[0] || 0,
+		minor: parts[1] || 0,
+		patch: parts[2] || 0,
+		content: "",
+	};
+
 	return entries.filter((entry) => compareVersions(entry, last) > 0);
 }
 

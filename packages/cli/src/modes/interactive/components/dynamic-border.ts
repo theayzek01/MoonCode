@@ -1,6 +1,5 @@
 // @ts-nocheck
 import type { Component } from "moon-tui";
-import { colorizeRGB } from "moon-tui";
 import { theme } from "../theme/theme.js";
 
 /**
@@ -11,6 +10,8 @@ import { theme } from "../theme/theme.js";
  * function when using DynamicBorder in components exported for extension use.
  */
 export class DynamicBorder implements Component {
+	private color: (str: string) => string;
+
 	constructor(color: (str: string) => string = (str) => theme.fg("border", str)) {
 		this.color = color;
 	}
@@ -20,7 +21,6 @@ export class DynamicBorder implements Component {
 	}
 
 	render(width: number): string[] {
-		const str = "━".repeat(Math.max(1, width));
-		return [colorizeRGB(str, 1.0, width)];
+		return [this.color("━".repeat(Math.max(1, width)))];
 	}
 }

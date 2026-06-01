@@ -33,22 +33,10 @@ const TOOL_LABEL: Record<string, string> = {
 	browser_page: "P Browser Page",
 };
 
-const BLENDER_ACCENT = "\x1b[38;2;88;196;255m";
-const BLENDER_SUCCESS = "\x1b[38;2;110;231;183m";
-const RESET_FG = "\x1b[39m";
-
 function toolColor(toolName: string, state: ToolFrameState): ThemeColor {
 	if (state === "error") return "error";
 	if (state === "cancelled") return "warning";
-	if (toolName.startsWith("blender_")) return state === "success" ? "success" : "borderAccent";
 	return TOOL_COLOR[toolName] ?? "toolTitle";
-}
-
-function toolLabel(toolName: string): string {
-	if (toolName.startsWith("blender_")) {
-		return `B ${toolName.replace(/^blender_/, "")}`;
-	}
-	return TOOL_LABEL[toolName] ?? toolName;
 }
 
 function stateLabel(state: ToolFrameState): string {
@@ -88,19 +76,19 @@ export function renderToolFrame(
 	if (width < 8) return contentLines;
 
 	const colorKey = toolColor(toolName, state);
-	const blenderTint = toolName.startsWith("blender_") && state !== "error" && state !== "cancelled";
-	const blenderColor = state === "success" ? BLENDER_SUCCESS : BLENDER_ACCENT;
-	const border = (text: string) => (blenderTint ? `${blenderColor}${text}${RESET_FG}` : theme.fg(colorKey, text));
+	const border = (text: string) => theme.fg(colorKey, text);
 	const muted = (text: string) => theme.fg("dim", text);
-	const label = toolLabel(toolName);
+	const label = TOOL_LABEL[toolName] ?? toolName;
 	const status = stateLabel(state);
 	const title = ` ${label} `;
 	const badge = `[${status}]`;
-	const minChromeWidth = 2 + visibleWidth(title) + visibleWidth(badge) + 1;
+	const titleWidth = visibleWidth(title);
+	const badgeWidth = visibleWidth(badge);
+	const minChromeWidth = 2 + titleWidth + badgeWidth + 1;
 	const fillWidth = Math.max(1, width - minChromeWidth);
 	const top =
 		border("+-") +
-		(blenderTint ? theme.bold(`${blenderColor}${title}${RESET_FG}`) : theme.bold(theme.fg(colorKey, title))) +
+		theme.bold(theme.fg(colorKey, title)) +
 		muted("-".repeat(fillWidth)) +
 		theme.bold(theme.fg(stateColor(state), badge)) +
 		border("+");
@@ -110,8 +98,8 @@ export function renderToolFrame(
 	const body = contentLines.length > 0 ? contentLines : [""];
 	const framed = body.map((line) => {
 		const bodyLine = visibleWidth(line) > innerWidth ? truncateToWidth(line, innerWidth) : line;
-		const rightPad = Math.max(0, innerWidth - visibleWidth(bodyLine));
-		return side + bodyLine + " ".repeat(rightPad) + side;
+		const pad = Math.max(0, innerWidth - visibleWidth(bodyLine));
+		return side + bodyLine + " ".repeat(pad) + side;
 	});
 
 	return [top, ...framed, bottom];

@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
-import { getEngineDir } from "../config.js";
+import { CONFIG_DIR_NAME, getEngineDir } from "../config.js";
 
 export interface MemorySignal {
 	timestamp: string;

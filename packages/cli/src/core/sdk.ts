@@ -142,7 +142,7 @@ function getAttributionHeaders(
 
 	if (model.provider === "openrouter" || model.baseUrl.includes("openrouter.ai")) {
 		return {
-			"HTTP-Referer": "https://github.com/theayzek01/MoonAgent",
+			"HTTP-Referer": "https://github.com/theayzek01/MoonCode",
 			"X-OpenRouter-Title": "Moon",
 			"X-OpenRouter-Categories": "cli-engine",
 		};
@@ -202,7 +202,6 @@ export async function createEngineSession(
 	}
 
 	const mcpTools = mcpManager ? await mcpManager.getAllTools() : [];
-	const mcpToolNames = mcpTools.map((tool) => tool.name);
 	const customTools = [...(options.customTools || [])];
 	for (const mcpTool of mcpTools) {
 		customTools.push({
@@ -279,16 +278,13 @@ export async function createEngineSession(
 		"git_ship",
 		"browser_tabs",
 		"browser_page",
-		...mcpToolNames,
 	];
 	const allowedToolNames = options.tools ?? (options.noTools === "all" ? [] : undefined);
 	const initialActiveToolNames: string[] = options.tools
 		? [...options.tools]
-		: options.noTools === "all"
+		: options.noTools
 			? []
-			: options.noTools === "builtin"
-				? [...mcpToolNames]
-				: defaultActiveToolNames;
+			: defaultActiveToolNames;
 
 	let engine: Engine;
 

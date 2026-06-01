@@ -223,7 +223,7 @@ export function getSelfUpdateCommand(packageName: string, npmCommand?: string[])
 export function getSelfUpdateUnavailableInstruction(packageName: string, npmCommand?: string[]): string {
 	const method = detectInstallMethod();
 	if (method === "bun-binary") {
-		return `Download from: https://github.com/theayzek01/MoonAgent/releases/latest`;
+		return `Download from: https://github.com/theayzek01/MoonCode/releases/latest`;
 	}
 	const command = getSelfUpdateCommandForMethod(method, packageName, npmCommand);
 	if (command) {
@@ -358,7 +358,7 @@ export const PACKAGE_NAME: string = pkg.name || "mooncode";
 export const APP_NAME: string = moonConfigName || "Moon";
 export const APP_TITLE: string = moonConfigName || "Moon";
 export const CONFIG_DIR_NAME: string = pkg.moonConfig?.configDir || ".moonagent";
-export const VERSION: string = "1.29-v2";
+export const VERSION: string = "2026-v35";
 
 export const ENV_AGENT_DIR = `${APP_NAME.toUpperCase()}_CODING_AGENT_DIR`;
 export const ENV_SESSION_DIR = `${APP_NAME.toUpperCase()}_CODING_AGENT_SESSION_DIR`;
@@ -369,7 +369,7 @@ export function expandTildePath(path: string): string {
 	return path;
 }
 
-const DEFAULT_SHARE_VIEWER_URL = "https://github.com/theayzek01/MoonAgent/session/";
+const DEFAULT_SHARE_VIEWER_URL = "https://github.com/theayzek01/MoonCode/session/";
 
 /** Get the share viewer URL for a gist ID */
 export function getShareViewerUrl(gistId: string): string {
@@ -378,7 +378,7 @@ export function getShareViewerUrl(gistId: string): string {
 }
 
 // =============================================================================
-// User Config Paths (~/.MoonAgent/engine/*)
+// User Config Paths (~/.MoonCode/engine/*)
 // =============================================================================
 
 /** Get the engine config directory (e.g., ~/.mooncode/engine/) */

@@ -8,7 +8,7 @@ const commandGroups = [
 		items: [
 			["install <source> [-l]", "Install an extension source and add it to settings"],
 			["remove <source> [-l]", "Remove an extension source from settings"],
-			["update [source|self|Moon]", "Update MoonAgent and installed extensions"],
+			["update [source|self|Moon]", "Update MoonCode and installed extensions"],
 			["doctor", "Diagnose install, PATH, version, and updates"],
 		],
 	},

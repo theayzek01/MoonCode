@@ -1,6 +1,6 @@
 const BASE_PORT = 3133;
 const MAX_PORT_OFFSET = 9; // Scan 3133 to 3142
-const VERSION = "2026-v31-browser";
+const VERSION = "2026-v35-browser";
 const HEARTBEAT_INTERVAL_MS = 20000;
 const RECONNECT_DELAY_MS = 2000;
 const COMMAND_TIMEOUT_MS = 12000;
@@ -13,26 +13,7 @@ let connections = new Map();
 let connectingPorts = new Set();
 const debuggerAttachedTabs = new Set();
 let heartbeatTimer = null;
-let agentWindowId = null;
 
-async function getAgentWindowId() {
-  if (agentWindowId !== null) {
-    try {
-      const win = await chrome.windows.get(agentWindowId);
-      if (win) return agentWindowId;
-    } catch {
-      agentWindowId = null;
-    }
-  }
-  const win = await chrome.windows.create({
-    type: "normal",
-    width: 1200,
-    height: 800,
-    state: "normal"
-  });
-  agentWindowId = win.id;
-  return agentWindowId;
-}
 // ── Init ──────────────────────────────────────────────────────────────────────
 chrome.runtime.onStartup.addListener(startDiscovery);
 chrome.runtime.onInstalled.addListener(() => {
@@ -157,7 +138,7 @@ function connectToPort(port) {
       extensionId: chrome.runtime.id || "N/A",
       version: VERSION,
       capabilities: ["tabs", "page", "debugger", "scroll", "smart_scroll", "mouse", "canvas_info", "canvas_draw",
-        "console_logs", "screenshot", "read_dom", "hover", "drag", "upload_file", "press_key", "get_elements", "evaluate", "clear_ui"]
+        "console_logs", "screenshot", "read_dom", "hover", "drag", "upload_file", "press_key", "get_elements", "evaluate", "clear_ui", "block_code", "canvas_design", "persistent_ui"]
     });
   };
 
@@ -261,33 +242,6 @@ async function executeCommand(action, args) {
 async function executeTabs(args) {
   const action = args.action;
 
-  if (action === "batch" || action === "parallel") {
-    const list = args.actions || [];
-    const isParallel = action === "parallel" || !!args.parallelMode;
-    const results = [];
-    if (isParallel) {
-      const promises = list.map(async (act) => {
-        try {
-          const subResult = await executeTabs(act);
-          return { ok: true, result: subResult };
-        } catch (err) {
-          return { ok: false, error: err?.message || String(err) };
-        }
-      });
-      return await Promise.all(promises);
-    } else {
-      for (const act of list) {
-        try {
-          const subResult = await executeTabs(act);
-          results.push({ ok: true, result: subResult });
-        } catch (err) {
-          results.push({ ok: false, error: err?.message || String(err) });
-        }
-      }
-      return results;
-    }
-  }
-
   if (action === "list") {
     const tabs = await chrome.tabs.query({});
     return tabs.slice(0, MAX_TABS_RETURNED).map(tabSummary);
@@ -333,34 +287,6 @@ async function executeTabs(args) {
 // ── Page ──────────────────────────────────────────────────────────────────────
 async function executePage(args) {
   const action = args.action;
-
-  if (action === "batch" || action === "parallel") {
-    const list = args.actions || [];
-    const isParallel = action === "parallel" || !!args.parallelMode;
-    const results = [];
-    if (isParallel) {
-      const promises = list.map(async (act) => {
-        try {
-          const subResult = await executePage({ ...act, tabId: act.tabId !== undefined ? act.tabId : args.tabId });
-          return { ok: true, result: subResult };
-        } catch (err) {
-          return { ok: false, error: err?.message || String(err) };
-        }
-      });
-      return await Promise.all(promises);
-    } else {
-      for (const act of list) {
-        try {
-          const subResult = await executePage({ ...act, tabId: act.tabId !== undefined ? act.tabId : args.tabId });
-          results.push({ ok: true, result: subResult });
-        } catch (err) {
-          results.push({ ok: false, error: err?.message || String(err) });
-        }
-      }
-      return results;
-    }
-  }
-
   const tab = args.tabId === undefined
     ? await getActiveTab()
     : await chrome.tabs.get(Number(args.tabId));
@@ -370,6 +296,12 @@ async function executePage(args) {
 
   // Only script actions need the document to be ready. Avoid blocking lightweight actions.
   if (!["wait", "mouse", "screenshot", "console_logs"].includes(action)) await waitForTabReady(tabId, 1200);
+
+  // Auto-inject persistent UI frame on every interactive action
+  const skipUIActions = ["wait", "screenshot", "console_logs", "read", "read_dom", "clear_ui"];
+  if (!skipUIActions.includes(action)) {
+    try { await injectPersistentUI(tabId, "MoonCode ▶ " + action); } catch { /* CSP pages - skip silently */ }
+  }
 
   if (action === "scroll") {
     const [result] = await chrome.scripting.executeScript({
@@ -940,7 +872,7 @@ async function executePage(args) {
     const [result] = await chrome.scripting.executeScript({
       target: { tabId },
       func: () => {
-        document.querySelectorAll(".moon-label,#mooncode-overlay,#moon-visual-cursor,#mooncode-banner,#mooncode-bar,#mooncode-style,#moon-style,#mooncode-neon-frame").forEach(el => el.remove());
+        document.querySelectorAll(".moon-label,.moon-element-glow,#mooncode-overlay,#mooncode-persist-frame,#moon-visual-cursor,#mooncode-banner,#mooncode-bar,#moon-style,#moon-block-overlay,#moon-design-canvas").forEach(el => el.remove());
         if (window.__mooncode_hide) clearTimeout(window.__mooncode_hide);
         if (window.__moon_labels_cleanup) clearTimeout(window.__moon_labels_cleanup);
         return { cleared: true };
@@ -983,6 +915,75 @@ async function executePage(args) {
       args: [args.key, args.modifiers || []]
     });
     return result?.result;
+  }
+
+
+  if (action === "block_code") {
+    // Open Scratch/TurboWarp or inject a block coding interface overlay
+    const target = args.target || 'turbowarp'; // 'scratch' | 'turbowarp' | 'overlay'
+    if (target === 'scratch') {
+      const tab = await chrome.tabs.create({ url: 'https://scratch.mit.edu/projects/editor/', active: true });
+      await waitForTabReady(tab.id, 8000);
+      return { opened: 'scratch', tabId: tab.id, url: tab.url };
+    }
+    if (target === 'turbowarp') {
+      const tab = await chrome.tabs.create({ url: 'https://turbowarp.org/', active: true });
+      await waitForTabReady(tab.id, 8000);
+      return { opened: 'turbowarp', tabId: tab.id, url: tab.url };
+    }
+    // overlay: inject a minimal block-drop overlay for demonstration / automation
+    await injectPersistentUI(tabId, 'MoonCode: Block Code Mode');
+    const [res] = await chrome.scripting.executeScript({
+      target: { tabId },
+      func: () => {
+        if (document.getElementById('moon-block-overlay')) return { exists: true };
+        const el = document.createElement('div');
+        el.id = 'moon-block-overlay';
+        el.style.cssText = [
+          'position:fixed','top:60px','right:20px','width:280px','max-height:80vh',
+          'background:rgba(10,10,20,0.92)','border:1px solid #38bdf8','border-radius:12px',
+          'z-index:2147483646','padding:16px','color:#f8fafc',
+          'font-family:system-ui,sans-serif','font-size:13px','overflow-y:auto',
+          'box-shadow:0 0 30px rgba(56,189,248,0.2)','backdrop-filter:blur(12px)'
+        ].join(';');
+        el.innerHTML = '<div style="font-weight:700;margin-bottom:12px;color:#38bdf8">🧩 Block Code</div>'
+          + '<div style="color:#94a3b8;font-size:11px">Use canvas_draw to drag blocks on Scratch/TurboWarp pages. Navigate with browser_tabs.</div>';
+        (document.body||document.documentElement).appendChild(el);
+        return { injected: true };
+      }
+    });
+    return { block_code: 'overlay', result: res?.result };
+  }
+
+  if (action === "canvas_design") {
+    // Inject a floating design canvas overlay with drag-drop shapes
+    await injectPersistentUI(tabId, 'MoonCode: Canvas Design Mode');
+    const [res] = await chrome.scripting.executeScript({
+      target: { tabId },
+      func: (mode) => {
+        const id = 'moon-design-canvas';
+        if (document.getElementById(id) && mode !== 'clear') return { exists: true };
+        if (mode === 'clear') { document.getElementById(id)?.remove(); return { cleared: true }; }
+        const el = document.createElement('div');
+        el.id = id;
+        el.style.cssText = [
+          'position:fixed','top:0','left:0','width:100vw','height:100vh',
+          'background:rgba(6,8,15,0.88)','z-index:2147483640',
+          'display:flex','align-items:center','justify-content:center',
+          'font-family:system-ui,sans-serif','backdrop-filter:blur(4px)'
+        ].join(';');
+        el.innerHTML = '<div style="text-align:center;color:#38bdf8">'
+          + '<div style="font-size:48px;margin-bottom:16px">🎨</div>'
+          + '<div style="font-size:20px;font-weight:700;margin-bottom:8px">Canvas Design Mode</div>'
+          + '<div style="font-size:13px;color:#94a3b8;max-width:360px">Use canvas_draw to draw. Use mouse action for shapes. Dismiss with clear_ui or canvas_design clear.</div>'
+          + '<button onclick="document.getElementById('' + id + '').remove()" style="margin-top:20px;padding:10px 24px;background:#38bdf8;color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer">Close</button>'
+          + '</div>';
+        (document.body||document.documentElement).appendChild(el);
+        return { injected: true };
+      },
+      args: [args.mode || 'open']
+    });
+    return { canvas_design: args.mode || 'open', result: res?.result };
   }
 
   if (action === "evaluate") {
@@ -1112,22 +1113,12 @@ async function captureScreenshot(tab, args = {}) {
     try {
       dataUrl = await captureScreenshotWithDebugger(tabId, format, quality);
     } catch (debuggerErr) {
-      console.warn(`Screenshot capture failed: ${innerErr.message || String(innerErr)}; debugger fallback failed: ${debuggerErr.message || String(debuggerErr)}.`);
-      dataUrl = ""; // Don't throw, proceed without screenshot
+      throw new Error(`Screenshot capture failed: ${innerErr.message || String(innerErr)}; debugger fallback failed: ${debuggerErr.message || String(debuggerErr)}. Make sure the browser window is active and not on an internal chrome:// page.`);
     }
   }
   
-  let mimeType = "";
-  let base64Data = "";
-  if (dataUrl) {
-    const match = /^data:([^;]+);base64,(.*)$/.exec(dataUrl);
-    if (match) {
-      mimeType = match[1];
-      base64Data = match[2];
-    } else {
-      console.warn("captureVisibleTab returned invalid image data");
-    }
-  }
+  const match = /^data:([^;]+);base64,(.*)$/.exec(dataUrl || "");
+  if (!match) throw new Error("captureVisibleTab returned invalid image data");
 
   let page = {};
   try {
@@ -1150,13 +1141,12 @@ async function captureScreenshot(tab, args = {}) {
     url: page.url || tab.url || "",
     viewport: page.viewport,
     scroll: page.scroll,
-    screenshot: base64Data ? {
-      mimeType: mimeType,
-      data: base64Data,
+    screenshot: {
+      mimeType: match[1],
+      data: match[2],
       format,
       capturedAt: new Date().toISOString()
-    } : null,
-    warning: !base64Data ? "Screenshot failed to capture, but page data is still available. Do not retry screenshot." : undefined
+    }
   };
 }
 
@@ -1166,18 +1156,11 @@ async function captureScreenshotWithDebugger(tabId, format, quality) {
   try {
     await chrome.debugger.attach(target, "1.3");
     attached = true;
-    const resultPromise = chrome.debugger.sendCommand(target, "Page.captureScreenshot", {
+    const result = await chrome.debugger.sendCommand(target, "Page.captureScreenshot", {
       format: format === "jpeg" ? "jpeg" : "png",
       quality: format === "jpeg" ? quality : undefined,
       fromSurface: true
     });
-    
-    // Add a strict 3000ms timeout to the debugger command
-    const result = await Promise.race([
-      resultPromise,
-      new Promise((_, reject) => setTimeout(() => reject(new Error("Debugger Page.captureScreenshot timed out")), 3000))
-    ]);
-    
     if (!result?.data) throw new Error("Page.captureScreenshot returned no data");
     return `data:image/${format};base64,${result.data}`;
   } finally {
@@ -1524,27 +1507,29 @@ async function detachDebugger(tabId) {
 }
 
 async function createTabResilient(url, active = true) {
-  const winId = await getAgentWindowId();
   try {
-    const tab = await chrome.tabs.create({ url, active, windowId: winId });
-    if (tab?.id) {
-      if (active) await chrome.windows.update(winId, { focused: true });
-      return tab;
-    }
+    const tab = await chrome.tabs.create({ url, active });
+    if (tab?.id) return tab;
   } catch {
-    // fallback
+    // Fall through to new-window fallback for sessions with no normal browser window.
   }
-  throw new Error(`Failed to open tab for ${url}`);
+
+  const win = await chrome.windows.create({ url, focused: active });
+  const tab = win?.tabs?.find(t => t?.id !== undefined);
+  if (!tab?.id) throw new Error(`Failed to open tab for ${url}`);
+  return tab;
 }
 
 async function getActiveTab() {
-  const winId = await getAgentWindowId();
-  const [focused] = await chrome.tabs.query({ windowId: winId, active: true });
+  const [focused] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
   if (focused?.id) return focused;
-  const tabs = await chrome.tabs.query({ windowId: winId });
+  const activeTabs = await chrome.tabs.query({ active: true });
+  const active = activeTabs.find(tab => tab.id !== undefined);
+  if (active?.id) return active;
+  const tabs = await chrome.tabs.query({});
   const fallback = tabs.find(tab => tab.id !== undefined);
   if (fallback?.id) return fallback;
-  throw new Error("No Chrome tab found in isolated window");
+  throw new Error("No Chrome tab found");
 }
 
 function requireTabId(args) {
@@ -1585,167 +1570,152 @@ function resolveSmartUrl(url) {
 // Overlay is injected once and reused; message updates in-place
 const overlayInjectedTabs = new Set();
 
-async function injectOverlay(tabId, message = "MoonCode Active Control") {
-  const arrowUrl = chrome.runtime.getURL("icons/Computer Systems/1. Pointer.png");
-  const handUrl  = chrome.runtime.getURL("icons/Computer Systems/2. Hand Pointer.png");
-  const typeUrl  = chrome.runtime.getURL("icons/Browser/14. Type.png");
-  const searchUrl = chrome.runtime.getURL("icons/Browser/15. Search.png");
-  const alertUrl = chrome.runtime.getURL("icons/Computer Systems/7. Alert.png");
+
+// ── Persistent UI + Overlay ────────────────────────────────────────────────────
+
+/**
+ * injectPersistentUI — mavi frame her zaman görünür, cursor ve helpers inject eder.
+ * clear_ui çağrılana kadar kalır.
+ */
+async function injectPersistentUI(tabId, message) {
+  const pointerUrl = chrome.runtime.getURL("icons/Computer Systems/1. Pointer.png");
+  const handUrl    = chrome.runtime.getURL("icons/Computer Systems/2. Hand Pointer.png");
+  const typeUrl    = chrome.runtime.getURL("icons/Computer Systems/3. Hand Hover.png");
+  const grabUrl    = chrome.runtime.getURL("icons/Computer Systems/4. Hand Grab.png");
+  const moveUrl    = chrome.runtime.getURL("icons/Computer Systems/5. Move.png");
 
   await chrome.scripting.executeScript({
     target: { tabId },
-    func: (msg, arrowUrl, handUrl, typeUrl, searchUrl, alertUrl) => {
-      const OVERLAY_ID = "mooncode-overlay";
-      const CURSOR_ID  = "moon-visual-cursor";
-      const BANNER_ID  = "mooncode-banner";
-      const FRAME_ID   = "mooncode-neon-frame";
+    func: (msg, pointerUrl, handUrl, typeUrl, grabUrl, moveUrl) => {
+      const FRAME_ID  = "mooncode-persist-frame";
+      const CURSOR_ID = "moon-visual-cursor";
+      const BANNER_ID = "mooncode-banner";
 
-      // ── Premium Glassmorphism Banner ──────────────────────────────────────
+      // ── Inject style ──
+      if (!document.getElementById("moon-style")) {
+        const s = document.createElement("style");
+        s.id = "moon-style";
+        s.textContent = [
+          "@keyframes moon-pulse{0%,100%{opacity:1}50%{opacity:.4}}",
+          "@keyframes moon-frame-glow{0%,100%{box-shadow:0 0 0 2px rgba(56,189,248,0.7),0 0 20px rgba(56,189,248,0.2)}50%{box-shadow:0 0 0 2px rgba(56,189,248,1),0 0 35px rgba(56,189,248,0.4)}}",
+        ].join("");
+        (document.head || document.documentElement).appendChild(s);
+      }
+
+      // ── Persistent outer frame (always visible while connected) ──
+      let frame = document.getElementById(FRAME_ID);
+      if (!frame) {
+        frame = document.createElement("div");
+        frame.id = FRAME_ID;
+        frame.style.cssText = [
+          "position:fixed",
+          "top:0","left:0","right:0","bottom:0",
+          "border:2px solid rgba(56,189,248,0.85)",
+          "border-radius:0",
+          "pointer-events:none",
+          "z-index:2147483645",
+          "animation:moon-frame-glow 3s ease-in-out infinite",
+          "transition:border-color 0.3s"
+        ].join(";");
+        (document.body || document.documentElement).appendChild(frame);
+      }
+
+      // ── Banner ──
       let banner = document.getElementById(BANNER_ID);
       if (!banner) {
         banner = document.createElement("div");
         banner.id = BANNER_ID;
-        banner.style.cssText = `
-          position: fixed;
-          top: 24px;
-          left: 50%;
-          transform: translateX(-50%) translateY(-20px);
-          background: rgba(15, 23, 42, 0.75);
-          color: #f8fafc;
-          padding: 10px 20px;
-          border-radius: 999px;
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-          font-size: 14px;
-          font-weight: 500;
-          letter-spacing: 0.3px;
-          z-index: 2147483647;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255,255,255,0.05) inset;
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          pointer-events: none;
-          opacity: 0;
-          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        `;
+        banner.style.cssText = [
+          "position:fixed",
+          "bottom:20px",
+          "left:50%",
+          "transform:translateX(-50%)",
+          "background:rgba(6,8,15,0.88)",
+          "color:#f8fafc",
+          "padding:8px 18px",
+          "border-radius:999px",
+          "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif",
+          "font-size:13px",
+          "font-weight:500",
+          "letter-spacing:0.3px",
+          "z-index:2147483647",
+          "border:1px solid rgba(56,189,248,0.4)",
+          "box-shadow:0 2px 16px rgba(0,0,0,0.4)",
+          "backdrop-filter:blur(12px)",
+          "-webkit-backdrop-filter:blur(12px)",
+          "display:flex",
+          "align-items:center",
+          "gap:10px",
+          "pointer-events:none",
+          "opacity:1",
+        ].join(";");
 
-        const icon = document.createElement("img");
-        icon.src = searchUrl;
-        icon.style.cssText = "width:18px;height:18px;object-fit:contain;image-rendering:pixelated;image-rendering:crisp-edges;animation:moon-pulse 2s steps(2,end) infinite;";
-        banner.appendChild(icon);
+        const pulse = document.createElement("div");
+        pulse.style.cssText = "width:7px;height:7px;background:#38bdf8;border-radius:50%;box-shadow:0 0 8px #38bdf8;animation:moon-pulse 2s ease-in-out infinite;flex-shrink:0";
+        banner.appendChild(pulse);
 
         const txt = document.createElement("span");
         txt.id = "mooncode-txt";
         banner.appendChild(txt);
 
-        if (!document.getElementById("moon-style")) {
-          const s = document.createElement("style");
-          s.id = "moon-style";
-          s.textContent = "@keyframes moon-pulse{0%,100%{opacity:1}50%{opacity:.4}} html { border: 4px solid #0f172a !important; box-sizing: border-box !important; }";
-          document.head.appendChild(s);
-        }
-
         (document.body || document.documentElement).appendChild(banner);
-        
-        // Trigger entrance animation
-        requestAnimationFrame(() => {
-          banner.style.transform = "translateX(-50%) translateY(0)";
-          banner.style.opacity = "1";
-        });
       }
+      if (msg) document.getElementById("mooncode-txt").textContent = msg;
 
-      document.getElementById("mooncode-txt").textContent = msg;
-
-      // Clear auto-hide if exists
-      if (window._moon_hide_timer) clearTimeout(window._moon_hide_timer);
-      window._moon_hide_timer = setTimeout(() => {
-         const b = document.getElementById(BANNER_ID);
-         if (b) {
-           b.style.transform = "translateX(-50%) translateY(-20px)";
-           b.style.opacity = "0";
-           setTimeout(() => b.remove(), 400);
-         }
-      }, 5000);
-
-      // ── Cursor ────────────────────────────────────────────────────────────
+      // ── Cursor overlay ──
       let cursor = document.getElementById(CURSOR_ID);
       if (!cursor) {
         cursor = document.createElement("img");
         cursor.id = CURSOR_ID;
-        cursor.src = arrowUrl;
+        cursor.src = pointerUrl;
         cursor.style.cssText = [
           "position:fixed",
-          `top:${window.innerHeight / 2}px`,
-          `left:${window.innerWidth / 2}px`,
-          "width:30px",
-          "height:30px",
-          "object-fit:contain",
+          "top:" + (window.innerHeight / 2) + "px",
+          "left:" + (window.innerWidth / 2) + "px",
+          "width:24px","height:24px",
           "image-rendering:pixelated",
-          "image-rendering:crisp-edges",
           "pointer-events:none",
           "z-index:2147483647",
-          "transition:top 0.18s steps(4,end),left 0.18s steps(4,end)",
-          "will-change:top,left"
+          "transition:top 0.3s cubic-bezier(.4,0,.2,1),left 0.3s cubic-bezier(.4,0,.2,1),opacity 0.2s",
+          "will-change:top,left",
+          "opacity:0.9"
         ].join(";");
         (document.body || document.documentElement).appendChild(cursor);
       }
 
-      window.__moon_move_cursor = (x, y, type = "arrow") => new Promise((resolve) => {
+      window.__moon_move_cursor = (x, y, type) => new Promise((resolve) => {
         const cur = document.getElementById(CURSOR_ID);
         if (!cur) { resolve(); return; }
-        cur.src = type === "hand" ? handUrl : type === "type" ? typeUrl : arrowUrl;
+        const srcMap = { hand: handUrl, hover: typeUrl, grab: grabUrl, move: moveUrl };
+        cur.src = srcMap[type] || pointerUrl;
         cur.style.top  = y + "px";
         cur.style.left = x + "px";
-        setTimeout(resolve, 380);
+        setTimeout(resolve, 320);
       });
 
       window.__moon_click_animation = (x, y) => {
         const ripple = document.createElement("div");
-        const clickIcon = document.createElement("img");
-        clickIcon.src = alertUrl;
-        clickIcon.style.cssText = `
-          position: fixed;
-          top: ${y}px;
-          left: ${x}px;
-          width: 22px;
-          height: 22px;
-          image-rendering: pixelated;
-          image-rendering: crisp-edges;
-          z-index: 2147483647;
-          pointer-events: none;
-          transform: translate(-50%, -50%) scale(.72);
-          opacity: .95;
-          transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-        `;
-        ripple.style.cssText = `
-          position: fixed;
-          top: ${y}px;
-          left: ${x}px;
-          width: 6px;
-          height: 6px;
-          background: #38bdf8;
-          border-radius: 50%;
-          z-index: 2147483647;
-          pointer-events: none;
-          transform: translate(-50%, -50%);
-          box-shadow: 0 0 12px #38bdf8, 0 0 24px #38bdf8;
-          transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        `;
+        ripple.style.cssText = [
+          "position:fixed",
+          "top:" + y + "px",
+          "left:" + x + "px",
+          "width:8px","height:8px",
+          "background:rgba(56,189,248,0.9)",
+          "border-radius:50%",
+          "z-index:2147483647",
+          "pointer-events:none",
+          "transform:translate(-50%,-50%)",
+          "box-shadow:0 0 0 0 rgba(56,189,248,0.6)",
+          "transition:all 0.45s cubic-bezier(0.16,1,0.3,1)"
+        ].join(";");
         (document.body || document.documentElement).appendChild(ripple);
-        (document.body || document.documentElement).appendChild(clickIcon);
         requestAnimationFrame(() => {
-          ripple.style.width = "48px";
-          ripple.style.height = "48px";
+          ripple.style.width = "52px";
+          ripple.style.height = "52px";
           ripple.style.opacity = "0";
-          clickIcon.style.transform = "translate(-50%, -50%) scale(1.3)";
-          clickIcon.style.opacity = "0";
+          ripple.style.boxShadow = "0 0 0 12px rgba(56,189,248,0)";
         });
-        setTimeout(() => {
-          ripple.remove();
-          clickIcon.remove();
-        }, 500);
+        setTimeout(() => ripple.remove(), 480);
       };
 
       window.__moon_highlight_element = (selector) => {
@@ -1754,28 +1724,30 @@ async function injectOverlay(tabId, message = "MoonCode Active Control") {
         const rect = el.getBoundingClientRect();
         const glow = document.createElement("div");
         glow.className = "moon-element-glow";
-        glow.style.cssText = `
-          position: fixed;
-          top: ${rect.top - 4}px;
-          left: ${rect.left - 4}px;
-          width: ${rect.width + 8}px;
-          height: ${rect.height + 8}px;
-          border: 2px solid #0ea5e9;
-          border-radius: 6px;
-          box-shadow: 0 0 15px rgba(14, 165, 233, 0.5);
-          z-index: 2147483646;
-          pointer-events: none;
-          opacity: 0;
-          transition: all 0.3s ease;
-        `;
+        glow.style.cssText = [
+          "position:fixed",
+          "top:" + (rect.top - 3) + "px",
+          "left:" + (rect.left - 3) + "px",
+          "width:" + (rect.width + 6) + "px",
+          "height:" + (rect.height + 6) + "px",
+          "border:2px solid #38bdf8",
+          "border-radius:5px",
+          "box-shadow:0 0 12px rgba(56,189,248,0.5)",
+          "z-index:2147483646",
+          "pointer-events:none",
+          "opacity:0",
+          "transition:opacity 0.2s ease"
+        ].join(";");
         (document.body || document.documentElement).appendChild(glow);
         requestAnimationFrame(() => glow.style.opacity = "1");
-        setTimeout(() => {
-          glow.style.opacity = "0";
-          setTimeout(() => glow.remove(), 300);
-        }, 1500);
+        setTimeout(() => { glow.style.opacity = "0"; setTimeout(() => glow.remove(), 250); }, 2000);
       };
     },
-    args: [message, arrowUrl, handUrl, typeUrl, searchUrl, alertUrl]
+    args: [message || "", pointerUrl, handUrl, typeUrl, grabUrl, moveUrl]
   });
+}
+
+// Legacy alias — kept for nav/knowledge ingest calls
+async function injectOverlay(tabId, message) {
+  return injectPersistentUI(tabId, message);
 }

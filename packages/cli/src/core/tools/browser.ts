@@ -19,26 +19,10 @@ const browserTabsSchema = Type.Object({
 		Type.Literal("focus"),
 		Type.Literal("reload"),
 		Type.Literal("navigate"),
-		Type.Literal("batch"),
-		Type.Literal("parallel"),
 	]),
 	tabId: Type.Optional(Type.Number({ description: "Chrome tab id for tab-specific actions" })),
 	url: Type.Optional(Type.String({ description: "URL for open/navigate actions" })),
 	active: Type.Optional(Type.Boolean({ description: "Whether a new tab should be active" })),
-	actions: Type.Optional(
-		Type.Array(
-			Type.Object({
-				action: Type.String({ description: "Sub-action name: list, active, open, close, focus, reload, navigate" }),
-				tabId: Type.Optional(Type.Number()),
-				url: Type.Optional(Type.String()),
-				active: Type.Optional(Type.Boolean()),
-			}),
-			{ description: "List of tab actions to run in batch/parallel mode" },
-		),
-	),
-	parallelMode: Type.Optional(
-		Type.Boolean({ description: "Whether to run actions in parallel instead of sequentially" }),
-	),
 });
 
 const browserPageSchema = Type.Object({
@@ -61,8 +45,8 @@ const browserPageSchema = Type.Object({
 		Type.Literal("screenshot"),
 		Type.Literal("wait"),
 		Type.Literal("clear_ui"),
-		Type.Literal("batch"),
-		Type.Literal("parallel"),
+		Type.Literal("block_code"),
+		Type.Literal("canvas_design"),
 	]),
 	tabId: Type.Optional(Type.Number({ description: "Chrome tab id. Defaults to active tab." })),
 	selector: Type.Optional(
@@ -99,6 +83,8 @@ const browserPageSchema = Type.Object({
 	modifiers: Type.Optional(Type.Array(Type.String(), { description: "Modifier keys: ctrl, shift, alt, meta" })),
 	script: Type.Optional(Type.String({ description: "JavaScript expression for evaluate action" })),
 	maxChars: Type.Optional(Type.Number({ description: "Maximum characters for read action" })),
+	target: Type.Optional(Type.String({ description: "Target for block_code: scratch | turbowarp | overlay" })),
+	mode: Type.Optional(Type.String({ description: "Mode for canvas_design: open | clear" })),
 	direction: Type.Optional(
 		Type.Union(
 			[
@@ -116,30 +102,6 @@ const browserPageSchema = Type.Object({
 	ms: Type.Optional(Type.Number({ description: "Milliseconds to wait (max 15000)" })),
 	format: Type.Optional(Type.Union([Type.Literal("png"), Type.Literal("jpeg")], { description: "Screenshot format" })),
 	quality: Type.Optional(Type.Number({ description: "JPEG screenshot quality, 1-100" })),
-	actions: Type.Optional(
-		Type.Array(
-			Type.Object({
-				action: Type.String({ description: "Sub-action name: click, type, wait, evaluate, read, etc." }),
-				selector: Type.Optional(Type.String()),
-				targetSelector: Type.Optional(Type.String()),
-				x: Type.Optional(Type.Number()),
-				y: Type.Optional(Type.Number()),
-				text: Type.Optional(Type.String()),
-				filePath: Type.Optional(Type.String()),
-				key: Type.Optional(Type.String()),
-				modifiers: Type.Optional(Type.Array(Type.String())),
-				script: Type.Optional(Type.String()),
-				ms: Type.Optional(Type.Number()),
-				direction: Type.Optional(Type.String()),
-				amount: Type.Optional(Type.Number()),
-				tabId: Type.Optional(Type.Number()),
-			}),
-			{ description: "List of page actions to run in batch/parallel mode" },
-		),
-	),
-	parallelMode: Type.Optional(
-		Type.Boolean({ description: "Whether to run actions in parallel instead of sequentially" }),
-	),
 });
 
 export type BrowserTabsToolInput = Static<typeof browserTabsSchema>;
@@ -179,8 +141,6 @@ const ACTION_ICON: Record<string, string> = {
 	focus: "🎯",
 	reload: "🔄",
 	navigate: "🧭",
-	batch: "📦",
-	parallel: "⚡",
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -250,15 +210,6 @@ function renderResult(
 // ─── Validation ────────────────────────────────────────────────────────────────
 
 function validateTabs(p: BrowserTabsToolInput): void {
-	if (p.action === "batch" || p.action === "parallel") {
-		if (!p.actions || p.actions.length === 0) {
-			throw new Error(`browser_tabs ${p.action} requires actions array`);
-		}
-		for (const act of p.actions) {
-			validateTabs(act as unknown as BrowserTabsToolInput);
-		}
-		return;
-	}
 	if ((p.action === "open" || p.action === "navigate") && !p.url)
 		throw new Error(`browser_tabs ${p.action} requires url`);
 	if (["close", "focus"].includes(p.action) && p.tabId === undefined)
@@ -266,15 +217,6 @@ function validateTabs(p: BrowserTabsToolInput): void {
 }
 
 function validatePage(p: BrowserPageToolInput): void {
-	if (p.action === "batch" || p.action === "parallel") {
-		if (!p.actions || p.actions.length === 0) {
-			throw new Error(`browser_page ${p.action} requires actions array`);
-		}
-		for (const act of p.actions) {
-			validatePage(act as unknown as BrowserPageToolInput);
-		}
-		return;
-	}
 	if (["click", "type", "hover", "upload_file"].includes(p.action) && !p.selector)
 		throw new Error(`browser_page ${p.action} requires selector`);
 	if (p.action === "type" && p.text === undefined) throw new Error("browser_page type requires text");
@@ -291,12 +233,6 @@ function validatePage(p: BrowserPageToolInput): void {
 }
 
 function normalizePageParams(p: BrowserPageToolInput): Record<string, unknown> {
-	if (p.action === "batch" || p.action === "parallel") {
-		const normalizedActions = (p.actions || []).map((act) =>
-			normalizePageParams(act as unknown as BrowserPageToolInput),
-		);
-		return { ...p, actions: normalizedActions };
-	}
 	if (p.action !== "upload_file") return p as Record<string, unknown>;
 	const rawPaths = p.filePaths?.length ? p.filePaths : p.filePath ? [p.filePath] : [];
 	const filePaths = rawPaths.map((fp) => resolve(fp));
@@ -312,7 +248,7 @@ export function createBrowserTabsToolDefinition(): ToolDefinition<typeof browser
 		name: "browser_tabs",
 		label: "browser_tabs",
 		description:
-			"Control Chrome tabs through the MoonAgent Chrome extension. Actions: list, active, open, close, focus, reload, navigate.",
+			"Control Chrome tabs through the MoonCode Chrome extension. Actions: list, active, open, close, focus, reload, navigate.",
 		promptSnippet: "Control connected Chrome tabs",
 		promptGuidelines: [
 			"Use browser_tabs to inspect or change Chrome tabs when the user asks for browser control.",
@@ -352,7 +288,7 @@ export function createBrowserPageToolDefinition(
 		name: "browser_page",
 		label: "browser_page",
 		description:
-			"Read or operate the current Chrome page through the MoonAgent Chrome extension. Actions: read, read_dom, click, type, hover, drag, mouse, canvas_info, canvas_draw, upload_file, press_key, get_elements, evaluate, scroll, console_logs, screenshot, wait, clear_ui.",
+			"Read or operate the current Chrome page through the MoonCode Chrome extension. Actions: read, read_dom, click, type, hover, drag, mouse, canvas_info, canvas_draw, upload_file, press_key, get_elements, evaluate, scroll, console_logs, screenshot, wait, clear_ui.",
 		promptSnippet: "Read or operate the connected Chrome page",
 		promptGuidelines: [
 			"Use browser_page read to get page title, URL, selection, and visible text.",
@@ -370,7 +306,7 @@ export function createBrowserPageToolDefinition(
 			"Use browser_page evaluate for short JavaScript expressions. Return serializable data.",
 			"Use browser_page console_logs to debug JavaScript errors or see page logs.",
 			"Use browser_page wait to pause between actions (ms, max 15000).",
-			"Use browser_page clear_ui to dismiss any MoonAgent visual overlays/labels on the page.",
+			"Use browser_page clear_ui to dismiss any MoonCode visual overlays/labels on the page.",
 			"Prefer small maxChars/maxElements to reduce token usage; only request more when needed.",
 		],
 		parameters: browserPageSchema,

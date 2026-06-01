@@ -17,7 +17,7 @@ afterEach(() => {
 });
 
 function createTempDir(): string {
-	const dir = mkdtempSync(join(tmpdir(), "MoonCode-stdout-clean-"));
+	const dir = mkdtempSync(join(tmpdir(), "Mooncli-stdout-clean-"));
 	tempDirs.push(dir);
 	return dir;
 }
@@ -26,7 +26,7 @@ async function runCli(args: string[]): Promise<{ stdout: string; stderr: string;
 	const tempRoot = createTempDir();
 	const engineDir = join(tempRoot, "engine");
 	const projectDir = join(tempRoot, "project");
-	const projectConfigDir = join(projectDir, ".mooncode");
+	const projectConfigDir = join(projectDir, ".Mooncli");
 	mkdirSync(engineDir, { recursive: true });
 	mkdirSync(projectConfigDir, { recursive: true });
 
@@ -88,7 +88,7 @@ describe("stdout cleanliness in non-interactive modes", () => {
 		expect(result.stdout).toBe("");
 		expect(result.stderr).toContain("changed 1 package in 471ms");
 		expect(result.stderr).toContain("found 0 vulnerabilities");
-		expect(result.stderr).toContain("Usage");
+		expect(result.stderr).toContain("Usage:");
 	});
 
 	it("keeps stdout empty for -p --help while routing startup chatter to stderr", async () => {
@@ -98,6 +98,6 @@ describe("stdout cleanliness in non-interactive modes", () => {
 		expect(result.stdout).toBe("");
 		expect(result.stderr).toContain("changed 1 package in 471ms");
 		expect(result.stderr).toContain("found 0 vulnerabilities");
-		expect(result.stderr).toContain("Usage");
+		expect(result.stderr).toContain("Usage:");
 	});
 });

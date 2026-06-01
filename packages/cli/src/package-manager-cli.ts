@@ -17,7 +17,7 @@ import {
 import { DefaultPackageManager } from "./core/package-manager.js";
 import { SettingsManager } from "./core/settings-manager.js";
 import { shouldUseWindowsShell } from "./utils/child-process.js";
-import { getLatestMoonAgentVersion, isNewerPackageVersion } from "./utils/version-check.js";
+import { getLatestMoonCodeVersion, isNewerPackageVersion } from "./utils/version-check.js";
 
 export type PackageCommand = "install" | "remove" | "update" | "list";
 
@@ -281,13 +281,13 @@ function updateTargetIncludesExtensions(target: UpdateTarget): boolean {
 }
 
 function printSelfUpdateUnavailable(npmCommand?: string[]): void {
-	console.error("hata: MoonAgent bu kurulumu paket yöneticisiyle otomatik güncelleyemiyor.");
+	console.error("hata: MoonCode bu kurulumu paket yöneticisiyle otomatik güncelleyemiyor.");
 	console.error(getSelfUpdateUnavailableInstruction(PACKAGE_NAME, npmCommand));
 
 	const entrypoint = process.argv[1];
 	if (entrypoint) {
 		console.error("");
-		console.error(`MoonAgent yürütülebilir dosyasının konumu: ${entrypoint}`);
+		console.error(`MoonCode yürütülebilir dosyasının konumu: ${entrypoint}`);
 	}
 }
 
@@ -302,7 +302,7 @@ async function shouldRunSelfUpdate(force: boolean): Promise<boolean> {
 
 	let latestVersion: string | undefined;
 	try {
-		latestVersion = await getLatestMoonAgentVersion(VERSION);
+		latestVersion = await getLatestMoonCodeVersion(VERSION);
 	} catch {
 		return true;
 	}
@@ -340,10 +340,10 @@ async function runGitHubSelfUpdate(npmCommand?: string[]): Promise<void> {
 	const [npmBin = "npm", ...npmArgs] = npmCommand ?? [];
 	const dir = await mkdtemp(join(tmpdir(), "mooncode-update-"));
 	try {
-		console.log(chalk.dim("MoonAgent GitHub'dan indiriliyor..."));
+		console.log(chalk.dim("MoonCode GitHub'dan indiriliyor..."));
 		await runCommand(
 			"git",
-			["clone", "--depth", "1", "https://github.com/theayzek01/MoonAgent.git", dir],
+			["clone", "--depth", "1", "https://github.com/theayzek01/MoonCode.git", dir],
 			"git clone",
 		);
 		await runCommand(npmBin, [...npmArgs, "install"], `${npmBin} install`, dir);

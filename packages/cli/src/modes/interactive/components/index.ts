@@ -33,4 +33,3 @@ export { TreeSelectorComponent } from "./tree-selector.js";
 export { UserMessageComponent } from "./user-message.js";
 export { UserMessageSelectorComponent } from "./user-message-selector.js";
 export { truncateToVisualLines, type VisualTruncateResult } from "./visual-truncate.js";
-export { WorkspacePanelComponent } from "./workspace-panel.js";

@@ -38,8 +38,10 @@ export const BUILTIN_SLASH_COMMANDS: ReadonlyArray<BuiltinSlashCommand> = [
 	{ name: "settings", description: "Open settings" },
 	{ name: "autothink", description: "Toggle automatic thinking level" },
 	{ name: "login", description: "Configure Provider API keys" },
+	{ name: "panel", description: "Open local account and control panel" },
 
 	// === Modes ===
+	{ name: "plan", description: "Toggle plan mode" },
 	{ name: "automation", description: "Toggle automation mode" },
 	{ name: "agentmode", description: "Toggle agent mode" },
 	{ name: "zen", description: "Toggle Zen mode (hide UI elements)" },
@@ -51,11 +53,10 @@ export const BUILTIN_SLASH_COMMANDS: ReadonlyArray<BuiltinSlashCommand> = [
 	{ name: "index", description: "Index codebase for semantic search" },
 	{ name: "browser", description: "Chrome extension status and control" },
 	{ name: "app", description: "Open /app Web Studio and lock TUI" },
-	{ name: "interface", description: "Open MoonAgent Special OpenClaw OS Interface" },
-	{ name: "videoedit", description: "Open MoonAgent Pro Video Studio (Browser)" },
-	{ name: "photoedit", description: "Open MoonAgent Pro Photo Editor (Browser)" },
+	{ name: "interface", description: "Open MoonCode Special OpenClaw OS Interface" },
+	{ name: "videoedit", description: "Open MoonCode Pro Video Studio (Browser)" },
+	{ name: "photoedit", description: "Open MoonCode Pro Photo Editor (Browser)" },
 	{ name: "mcp", description: "List connected MCP servers" },
-	{ name: "blendermcp", description: "Install & configure Blender MCP one-shot" },
 	{ name: "swarm", description: "Trigger Multi-Agent Swarm" },
 	{ name: "fix", description: "Run Autonomous Auto-Healer" },
 	{ name: "evolve", description: "Trigger Meta-Evolution (Self-Improvement Loop)" },
@@ -66,12 +67,12 @@ export const BUILTIN_SLASH_COMMANDS: ReadonlyArray<BuiltinSlashCommand> = [
 
 	// === Update & System ===
 	{ name: "status", description: "Show detailed diagnostics" },
-	{ name: "update", description: "Update MoonAgent to latest version" },
+	{ name: "update", description: "Update MoonCode to latest version" },
 	{ name: "ollama", description: "Ollama model management" },
 	{ name: "hotkeys", description: "List keyboard shortcuts" },
 	{ name: "changelog", description: "Show changelog" },
 	{ name: "reload", description: "Reload system components" },
-	{ name: "hub", description: "MoonAgent Dashboard and Project Hub" },
+	{ name: "hub", description: "MoonCode Dashboard and Project Hub" },
 	{ name: "metrics", description: "Show system metrics and token usage" },
 	{ name: "quit", description: `Quit ${APP_NAME}` },
 ];

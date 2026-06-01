@@ -41,6 +41,8 @@ export class ToolExecutionComponent extends Container {
 	};
 	private convertedImages: Map<number, { data: string; mimeType: string }> = new Map();
 	private hideComponent = false;
+	private lastArgsUpdateMs = 0;
+	private readonly argsRenderIntervalMs = 80;
 
 	constructor(
 		toolName: string,
@@ -146,6 +148,13 @@ export class ToolExecutionComponent extends Container {
 
 	updateArgs(args: any): void {
 		this.args = args;
+		if (!this.argsComplete) {
+			const now = Date.now();
+			if (now - this.lastArgsUpdateMs < this.argsRenderIntervalMs) {
+				return;
+			}
+			this.lastArgsUpdateMs = now;
+		}
 		this.updateDisplay();
 	}
 
@@ -358,43 +367,13 @@ export class ToolExecutionComponent extends Container {
 		return getRenderedTextOutput(this.result, this.showImages);
 	}
 
-	private summarizeArgs(): string {
-		if (this.toolName === "blender_execute_blender_code") {
-			const code = typeof this.args?.code === "string" ? this.args.code.trim() : "";
-			const lines = code ? code.split("\n").length : 0;
-			return `Blender Python payload${lines ? ` (${lines} lines)` : ""}`;
-		}
-
-		const raw = JSON.stringify(this.args, null, 2);
-		if (!raw) {
-			return "";
-		}
-		return raw.length > 800 ? `${raw.slice(0, 320)}\n... [args compacted] ...` : raw;
-	}
-
-	private summarizeOutput(output: string): string {
-		if (!output) {
-			return output;
-		}
-		if (this.toolName.startsWith("blender_")) {
-			const cleaned = output
-				.replace(/\n{3,}/g, "\n\n")
-				.replace(/^\s*Not:\s+Viewport ekran görüntüsü.*$/gim, "")
-				.trim();
-			return cleaned.length > 1800
-				? `${cleaned.slice(0, 500)}\n... [output compacted] ...\n${cleaned.slice(-900)}`
-				: cleaned;
-		}
-		return output;
-	}
-
 	private formatToolExecution(): string {
 		let text = theme.fg("toolTitle", theme.bold(this.toolName));
-		const content = this.summarizeArgs();
+		const content = JSON.stringify(this.args, null, 2);
 		if (content) {
 			text += `\n\n${content}`;
 		}
-		const output = this.summarizeOutput(this.getTextOutput());
+		const output = this.getTextOutput();
 		if (output) {
 			text += `\n${output}`;
 		}

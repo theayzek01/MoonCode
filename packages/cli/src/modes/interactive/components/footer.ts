@@ -11,45 +11,39 @@ function pad(n: number): string {
 }
 
 function steel(s: string): string {
-	return `\x1b[38;2;96;210;255m${s}\x1b[39m`;
+	return `\x1b[38;2;95;158;160m${s}\x1b[39m`;
 }
 function dim(s: string): string {
-	return `\x1b[38;2;104;110;124m${s}\x1b[39m`;
+	return `\x1b[38;2;90;90;90m${s}\x1b[39m`;
 }
 function muted(s: string): string {
-	return `\x1b[38;2;186;192;206m${s}\x1b[39m`;
+	return `\x1b[38;2;140;140;140m${s}\x1b[39m`;
 }
 function sage(s: string): string {
-	return `\x1b[38;2;102;220;148m${s}\x1b[39m`;
-}
-function coral(s: string): string {
-	return `\x1b[38;2;255;126;134m${s}\x1b[39m`;
+	return `\x1b[38;2;110;170;120m${s}\x1b[39m`;
 }
 function bg1(s: string): string {
-	return `\x1b[48;2;15;22;33m${s}\x1b[49m`;
+	return `\x1b[48;2;18;22;28m${s}\x1b[49m`;
 }
 function bg2(s: string): string {
-	return `\x1b[48;2;12;16;25m${s}\x1b[49m`;
+	return `\x1b[48;2;10;12;16m${s}\x1b[49m`;
 }
 
 function shortenPath(p: string): string {
 	if (!p) return ".";
 	const parts = p.split(/[/\\]/);
-	return parts.length <= 2 ? p : `.../${parts.slice(-2).join("/")}`;
+	return parts.length <= 2 ? p : `…/${parts.slice(-2).join("/")}`;
 }
 
 export class FooterComponent implements Component {
 	private getExecutingToolNames?: () => string[];
 	private costTotal = 0;
 	private lastEntryCount = -1;
-	private taskStartTime?: number;
-	private refreshTimer?: NodeJS.Timeout;
 
 	constructor(
 		private session: EngineSession,
-		_footerData: ReadonlyFooterDataProvider,
+		private _footerData: ReadonlyFooterDataProvider,
 		getExecutingToolNames?: () => string[],
-		private requestRender?: () => void,
 	) {
 		this.getExecutingToolNames = getExecutingToolNames;
 	}
@@ -62,106 +56,71 @@ export class FooterComponent implements Component {
 	invalidate(): void {
 		this.lastEntryCount = -1;
 	}
-	dispose(): void {
-		if (this.refreshTimer) {
-			clearInterval(this.refreshTimer);
-			this.refreshTimer = undefined;
-		}
-	}
+	dispose(): void {}
 
 	render(width: number): string[] {
 		const state = this.session.state;
 		const entries = this.session.sessionManager?.getEntries() ?? [];
 
+		// Recompute cost only when entries change
 		if (entries.length !== this.lastEntryCount) {
 			this.lastEntryCount = entries.length;
 			this.costTotal = 0;
-			for (const entry of entries) {
-				if (entry.type === "message" && entry.message.role === "assistant") {
-					const cost = entry.message.usage?.cost?.total;
-					if (typeof cost === "number" && Number.isFinite(cost)) this.costTotal += cost;
+			for (const e of entries) {
+				if (e.type === "message" && e.message.role === "assistant") {
+					const c = e.message.usage?.cost?.total;
+					if (typeof c === "number" && isFinite(c)) this.costTotal += c;
 				}
 			}
 		}
 
-		const activeTools = this.getExecutingToolNames?.() ?? [];
-		const isBashActive = (this.session as any).isBashRunning;
-		const isLongTaskActive =
-			activeTools.some((tool) => ["edit", "multiedit", "agent", "browser_page", "browser_tabs"].includes(tool)) ||
-			isBashActive;
-
-		if (isLongTaskActive && !this.taskStartTime) {
-			this.taskStartTime = Date.now();
-			if (!this.refreshTimer) {
-				this.refreshTimer = setInterval(() => this.requestRender?.(), 1000);
-				if (this.refreshTimer.unref) this.refreshTimer.unref();
-			}
-		}
-		if (!isLongTaskActive && this.taskStartTime) {
-			this.taskStartTime = undefined;
-			if (this.refreshTimer) {
-				clearInterval(this.refreshTimer);
-				this.refreshTimer = undefined;
-			}
-		}
-
-		let eta = "";
-		if (this.taskStartTime) {
-			const elapsedSec = Math.floor((Date.now() - this.taskStartTime) / 1000);
-			const remainingSec = Math.max(5, 240 - elapsedSec);
-			const mins = Math.floor(remainingSec / 60);
-			const secs = remainingSec % 60;
-			const timeLabel = mins > 0 ? `${mins} dk ${secs} sn` : `${secs} sn`;
-			const color =
-				remainingSec <= 60
-					? "\x1b[38;2;34;197;94m"
-					: remainingSec <= 180
-						? "\x1b[38;2;255;165;0m"
-						: "\x1b[38;2;255;76;92m";
-			eta = `${color}ETA ${timeLabel}\x1b[39m`;
-		}
-
+		// Model name (strip provider prefix)
 		const provider = state.model?.provider ?? "";
 		let model = state.model?.id ?? "no-model";
 		if (model.toLowerCase().startsWith(`${provider.toLowerCase()}-`)) model = model.slice(provider.length + 1);
 		else if (model.toLowerCase().startsWith(`${provider.toLowerCase()}/`)) model = model.slice(provider.length + 1);
 
+		// Context usage
 		const ctxUsage = this.session.getContextUsage?.();
 		const ctxPct = ctxUsage?.percent != null ? `${ctxUsage.percent.toFixed(0)}%` : "0%";
-		const thinkLevel = state.thinkingLevel ?? "low";
+
+		// Thinking level
+		const thinkLevel = state.thinkingLevel ?? "off";
+
+		// ── ROW 1: status bar ──────────────────────────────────────────────
 		const cwd = this.session.sessionManager?.getCwd() ?? ".";
 		const pathStr = ` ${shortenPath(cwd)} `;
+
 		const streaming = this.session.isStreaming;
 		const compacting = (this.session as any).isCompacting;
-		const phase = compacting ? steel("compact") : streaming ? coral("thinking") : dim("idle");
+		const phase = compacting ? steel("compact") : streaming ? steel("run") : dim("idle");
 
-		if (width < 55) {
-			const narrowDir = ` dir ${shortenPath(cwd).split("/").pop()} `;
-			const rightPart = eta || phase;
-			const gap = Math.max(1, width - vw(narrowDir) - vw(rightPart) - 1);
-			return [bg1(`${muted(narrowDir)}${pad(gap)}${rightPart} `)];
-		}
+		const right1Parts = [muted(model), dim(`think:${thinkLevel}`), dim(`ctx:${ctxPct}`), phase];
+		const right1 = right1Parts.join(dim("  ·  "));
 
-		const right1Parts =
-			width >= 85 ? [muted(model), dim(`think:${thinkLevel}`), dim(`ctx:${ctxPct}`), phase] : [muted(model), phase];
-		const right1 = right1Parts.join(dim("  |  "));
-		const pad1 = Math.max(1, width - vw(pathStr) - vw(right1) - 1);
-		const row1 = bg1(`${muted(pathStr) + pad(pad1) + right1} `);
+		const left1W = vw(pathStr);
+		const right1W = vw(right1);
+		const pad1 = Math.max(1, width - left1W - right1W - 1);
+		const row1 = bg1(muted(pathStr) + pad(pad1) + right1 + " ");
 
+		// ── ROW 2: browser bar ─────────────────────────────────────────────
 		const clients = (this.session as any).getBrowserBridgeStatus?.()?.clients ?? 0;
-		const browserStatus = clients > 0 ? sage("on connected") : dim("off disconnected");
+		const connected = clients > 0;
+		const browserStatus = connected ? sage("● connected") : dim("○ disconnected");
+
+		const activeTools = this.getExecutingToolNames?.() ?? [];
 		const toolNames = (this.session as any).getActiveToolNames?.() ?? [];
-		const hasBlender = toolNames.some((tool: string) => tool.startsWith("blender_"));
 		const toolCount = activeTools.length || toolNames.length;
-		const toolStr = hasBlender ? sage(`tools:${toolCount} + blender`) : dim(`tools:${toolCount}`);
+		const toolStr = dim(`tools:${toolCount}`);
 		const costStr = dim(`$${this.costTotal.toFixed(3)}`);
 
-		const left2 = steel(" browser ") + dim("| ") + browserStatus;
-		const right2Parts = [costStr, toolStr];
-		if (eta) right2Parts.unshift(eta);
-		const right2 = right2Parts.join(dim("  |  "));
-		const pad2 = Math.max(1, width - vw(left2) - vw(right2) - 1);
-		const row2 = bg2(`${left2 + pad(pad2) + right2} `);
+		const left2 = steel(" ⬡ browser ") + dim("│ ") + browserStatus;
+		const right2 = [costStr, toolStr].join(dim("  ·  "));
+
+		const left2W = vw(left2);
+		const right2W = vw(right2);
+		const pad2 = Math.max(1, width - left2W - right2W - 1);
+		const row2 = bg2(left2 + pad(pad2) + right2 + " ");
 
 		return [row1, row2];
 	}
