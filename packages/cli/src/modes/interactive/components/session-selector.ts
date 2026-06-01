@@ -157,7 +157,7 @@ class SessionSelectorHeader implements Component {
 		let hintLine1: string;
 		let hintLine2: string;
 		if (this.confirmingDeletePath !== null) {
-			const confirmHint = `Oturum silinsin mi? ${keyHint("tui.select.confirm", "onayla")} · ${keyHint("tui.select.cancel", "iptal")}`;
+			const confirmHint = `Delete this session? ${keyHint("tui.select.confirm", "confirm")} · ${keyHint("tui.select.cancel", "cancel")}`;
 			hintLine1 = theme.fg("error", truncateToWidth(confirmHint, width, "…"));
 			hintLine2 = "";
 		} else if (this.statusMessage) {
@@ -415,7 +415,7 @@ class SessionList implements Component, Focusable {
 				}
 			} else if (this.showCwd) {
 				// "All" scope - no sessions anywhere that match filter
-				emptyMessage = "  Oturum bulunamadı";
+				emptyMessage = "  Session bulunamadı";
 			} else {
 				// "Current folder" scope - hint to try "all"
 				emptyMessage = "  Mevcut klasörde oturum bulunamadı. Tümü için Tab'a basın.";
@@ -832,7 +832,7 @@ export class SessionSelectorComponent extends Container implements Focusable {
 				const showCwd = this.scope === "all";
 				this.sessionList.setSessions(sessions, showCwd);
 
-				const msg = result.method === "trash" ? "Oturum çöpe taşındı" : "Oturum silindi";
+				const msg = result.method === "trash" ? "Oturum çöpe taşındı" : "Session deleted";
 				this.header.setStatusMessage({ type: "info", message: msg }, 2000);
 				await this.refreshSessionsAfterMutation();
 			} else {
@@ -866,7 +866,7 @@ export class SessionSelectorComponent extends Container implements Focusable {
 			new Text(
 				theme.fg(
 					"muted",
-					`${keyText("tui.select.confirm")} kaydetmek için · ${keyText("tui.select.cancel")} iptal etmek için`,
+					`${keyText("tui.select.confirm")} kaydetmek için · ${keyText("tui.select.cancel")} cancel etmek için`,
 				),
 				1,
 				0,

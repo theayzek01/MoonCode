@@ -113,7 +113,7 @@ import { ExtensionEditorComponent } from "./components/extension-editor.js";
 import { ExtensionInputComponent } from "./components/extension-input.js";
 import { ExtensionSelectorComponent } from "./components/extension-selector.js";
 import { FooterComponent } from "./components/footer.js";
-import { MoonAgentIntroComponent } from "./components/intro.js";
+import { MoonCodeIntroComponent } from "./components/intro.js";
 import { keyHint, keyText, rawKeyHint } from "./components/keybinding-hints.js";
 import { LoginDialogComponent } from "./components/login-dialog.js";
 import { McpSelectorComponent } from "./components/mcp-selector.js";
@@ -439,6 +439,7 @@ export class InteractiveMode {
 	private webUiProcess: any = undefined;
 	private editorActionListenerRegistered = false;
 	private authPanelListenerRegistered = false;
+	private mcpPanelListenerRegistered = false;
 
 	// Extension UI state
 	private extensionSelector: ExtensionSelectorComponent | undefined = undefined;
@@ -681,7 +682,7 @@ export class InteractiveMode {
 		}
 		this.startupNoticesShown = true;
 
-		const introText = new MoonAgentIntroComponent(() => this.ui.requestRender());
+		const introText = new MoonCodeIntroComponent(() => this.ui.requestRender());
 		this.chatContainer.addChild(introText);
 		return;
 
@@ -2855,18 +2856,23 @@ export class InteractiveMode {
 					return;
 				}
 				if (text === "/mcp") {
-					this.handleMcpCommand();
+					await this.handleMcpCommand();
 					this.editor.setText("");
 					return;
 				}
-				if (text === "/blendermcp" || text.startsWith("/blendermcp ")) {
+				if (text === "/brain") {
 					this.editor.setText("");
-					await this.handleBlenderMcpCommand(text.slice("/blendermcp".length).trim());
+					await this.handleWebPanelRoute("/brain", "Brain panel");
 					return;
 				}
-				if (text === "/scratchmcp" || text.startsWith("/scratchmcp ")) {
+				if (text === "/clearbrain") {
 					this.editor.setText("");
-					await this.handleScratchMcpCommand(text.slice("/scratchmcp".length).trim());
+					await this.handleClearBrainCommand();
+					return;
+				}
+				if (text === "/session") {
+					this.editor.setText("");
+					await this.handleWebPanelRoute("/session", "Session panel");
 					return;
 				}
 				if (text === "/scoped-models") {
@@ -3555,9 +3561,9 @@ export class InteractiveMode {
 				}
 				if (event.aborted) {
 					if (event.reason === "manual") {
-						this.showError("Sıkıştırma iptal edildi");
+						this.showError("Sıkıştırma cancel edildi");
 					} else {
-						this.showStatus("Otomatik sıkıştırma iptal edildi");
+						this.showStatus("Otomatik sıkıştırma cancel edildi");
 					}
 				} else if (event.result) {
 					this.chatContainer.clear();
@@ -3893,7 +3899,7 @@ export class InteractiveMode {
 							if (message.stopReason === "aborted") {
 								const retryAttempt = this.session.retryAttempt;
 								errorMessage =
-									retryAttempt > 0 ? `${retryAttempt} denemeden sonra iptal edildi` : "Operation cancelled";
+									retryAttempt > 0 ? `${retryAttempt} denemeden sonra cancel edildi` : "Operation cancelled";
 							} else {
 								errorMessage = message.errorMessage || "Error";
 							}
@@ -4925,7 +4931,7 @@ export class InteractiveMode {
 		const initialFilterMode = this.settingsManager.getTreeFilterMode();
 
 		if (tree.length === 0) {
-			this.showStatus("Oturumda girdi yok");
+			this.showStatus("No input in this session");
 			return;
 		}
 
@@ -4992,7 +4998,7 @@ export class InteractiveMode {
 							this.ui,
 							(spinner) => theme.fg("accent", spinner),
 							(text) => theme.fg("muted", text),
-							`Dal özetleniyor... (iptal etmek için ${keyText("app.interrupt")})`,
+							`Dal özetleniyor... (cancel etmek için ${keyText("app.interrupt")})`,
 						);
 						this.statusContainer.addChild(summaryLoader);
 						this.ui.requestRender();
@@ -5006,12 +5012,12 @@ export class InteractiveMode {
 
 						if (result.aborted) {
 							// Summarization aborted - re-show tree selector with same selection
-							this.showStatus("Dal özetleme iptal edildi");
+							this.showStatus("Dal özetleme cancel edildi");
 							this.showTreeSelector(entryId);
 							return;
 						}
 						if (result.cancelled) {
-							this.showStatus("Gezinti iptal edildi");
+							this.showStatus("Gezinti cancel edildi");
 							return;
 						}
 
@@ -5100,13 +5106,13 @@ export class InteractiveMode {
 				return result;
 			}
 			this.renderCurrentSessionState();
-			this.showStatus("Oturuma devam ediliyor");
+			this.showStatus("Resuming session");
 			return result;
 		} catch (error: unknown) {
 			if (error instanceof MissingSessionCwdError) {
 				const selectedCwd = await this.promptForMissingSessionCwd(error);
 				if (!selectedCwd) {
-					this.showStatus("Devam etme iptal edildi");
+					this.showStatus("Devam etme cancel edildi");
 					return { cancelled: true };
 				}
 				const result = await this.runtimeHost.switchSession(sessionPath, {
@@ -5583,7 +5589,7 @@ export class InteractiveMode {
 			...(status.lastClientSeen ? [`Son baglanti: ${new Date(status.lastClientSeen).toLocaleString()}`] : []),
 			...(status.error ? [`Error: ${status.error}`] : []),
 			"",
-			"Kurulum:",
+			"Setup:",
 			"  1. Chrome > chrome://extensions",
 			"  2. Developer mode ac",
 			"  3. Load unpacked",
@@ -5749,7 +5755,7 @@ export class InteractiveMode {
 			}
 			if (action?.action === "set_active") {
 				const account = this.session.modelRegistry.authStorage.setActiveManagedAccount(String(action?.accountId || ""));
-				if (!account) throw new Error("Hesap bulunamadi.");
+				if (!account) throw new Error("Account not found.");
 				this.session.modelRegistry.refresh();
 				await this.updateAvailableProviderCount();
 				this.showStatus(`${account.provider} aktif hesap: ${account.label}`);
@@ -5765,11 +5771,11 @@ export class InteractiveMode {
 			}
 			if (action?.action === "remove_account") {
 				if (!this.session.modelRegistry.authStorage.removeManagedAccount(String(action?.accountId || ""))) {
-					throw new Error("Hesap bulunamadi.");
+					throw new Error("Account not found.");
 				}
 				this.session.modelRegistry.refresh();
 				await this.updateAvailableProviderCount();
-				this.showStatus("Hesap kaldirildi.");
+				this.showStatus("Account removed.");
 				return;
 			}
 			throw new Error("Bilinmeyen panel islemi.");
@@ -5784,7 +5790,7 @@ export class InteractiveMode {
 			clearTimeout(timer);
 			if (!res.ok) return false;
 			const text = await res.text();
-			return text.includes("MoonCode Kontrol Paneli") || text.includes("Kontrol ve hesap paneli");
+			return text.includes("MoonCode Control Panel") || text.includes("Choose how to sign in");
 		} catch {
 			return false;
 		}
@@ -5818,7 +5824,50 @@ export class InteractiveMode {
 				// Try next port.
 			}
 		}
-		throw new Error("MoonCode hesap paneli acilamadi. 3131-3140 portlarini kontrol edin.");
+		throw new Error("Could not open MoonCode account panel. Check ports 3131-3140.");
+	}
+
+	private async isWebPanelEndpointReady(url: string, marker: string): Promise<boolean> {
+		try {
+			const controller = new AbortController();
+			const timer = setTimeout(() => controller.abort(), 1200);
+			const res = await fetch(url, { signal: controller.signal });
+			clearTimeout(timer);
+			if (!res.ok) return false;
+			const text = await res.text();
+			return text.includes(marker);
+		} catch {
+			return false;
+		}
+	}
+
+	private async ensureWebPanelServer(server: any, route: "/mcp" | "/session" | "/brain", marker: string): Promise<string> {
+		if (route === "/mcp") this.registerMcpPanel(server);
+		const ports = this.getWebUiCandidatePorts();
+		if (this.webUiProcess?.url) {
+			const url = `${this.webUiProcess.url}${route}`;
+			if (await this.isWebPanelEndpointReady(url, marker)) return url;
+			try {
+				this.webUiProcess.server?.close?.();
+			} catch {}
+			this.webUiProcess = undefined;
+		}
+		for (const port of ports) {
+			try {
+				const candidate = server.startWebUiServer({ port });
+				await new Promise((resolve) => setTimeout(resolve, 160));
+				if (route === "/mcp") this.registerMcpPanel(server);
+				const url = `${candidate.url}${route}`;
+				if (await this.isWebPanelEndpointReady(url, marker)) {
+					this.webUiProcess = candidate;
+					return url;
+				}
+				try {
+					candidate.server?.close?.();
+				} catch {}
+			} catch {}
+		}
+		throw new Error(`Could not open ${route}. Check ports 3131-3140.`);
 	}
 
 	private async isEditorEndpointReady(url: string): Promise<boolean> {
@@ -5903,14 +5952,44 @@ export class InteractiveMode {
 		}
 	}
 
+	private async handleWebPanelRoute(route: "/mcp" | "/session" | "/brain", label: string): Promise<void> {
+		try {
+			const server = await import("../../core/web-ui-server.js");
+			const marker = route === "/mcp" ? "MCP Control" : "MoonCode";
+			const url = await this.ensureWebPanelServer(server, route, marker);
+			this.openEditorUrl(url);
+			this.showStatus(`${label} opened.`);
+		} catch (err: any) {
+			this.showError(`${label} error: ${err.message}`);
+		}
+	}
+
+	private async handleClearBrainCommand(): Promise<void> {
+		const targets = [
+			path.join(getEngineDir(), "memory-signals.json"),
+			path.join(getEngineDir(), "learning-experience.json"),
+			path.join(os.homedir(), ".Mooncli", "omega-memory.json"),
+		];
+		let removed = 0;
+		for (const file of targets) {
+			try {
+				if (fs.existsSync(file)) {
+					fs.rmSync(file, { force: true });
+					removed++;
+				}
+			} catch {}
+		}
+		this.showStatus(`Brain memory cleared. Removed ${removed} memory file(s).`);
+	}
+
 	private async handleAuthPanelCommand(route: "/panel" | "/login" = "/panel"): Promise<void> {
 		try {
 			const server = await import("../../core/web-ui-server.js");
 			const url = await this.ensureAuthPanelServer(server, route);
 			this.openEditorUrl(url);
-			this.showStatus(`MoonCode hesap paneli acildi: ${url}`);
+			this.showStatus(`MoonCode account panel opened: ${url}`);
 		} catch (err: any) {
-			this.showError(`Hesap paneli acma hatasi: ${err.message}`);
+			this.showError(`Account panel error: ${err.message}`);
 			if (route === "/login") {
 				this.showOAuthSelector("login");
 			}
@@ -6486,7 +6565,7 @@ export class InteractiveMode {
 		if (normalizedArgs === "off") {
 			this.settingsManager.setDiscordToken(undefined);
 			this.showStatus("Discord baglantisi kapatildi.");
-			this.showStatus("Oturum yenileniyor...");
+			this.showStatus("Refreshing session...");
 			await this.handleReloadCommand();
 			return;
 		}
@@ -6542,7 +6621,7 @@ export class InteractiveMode {
 
 				this.settingsManager.setDiscordToken(args);
 				this.showStatus(`Discord tokeni kaydedildi. (${botName} olarak baglanildi)`);
-				this.showStatus("Oturum yenileniyor...");
+				this.showStatus("Refreshing session...");
 				await this.handleReloadCommand();
 			} catch (err: any) {
 				this.showStatus(`Error: Gecersiz token veya baglanti sorunu (${err.message})`);
@@ -6880,7 +6959,7 @@ export class InteractiveMode {
 				{ name: "/new", desc: "Start a clean session" },
 				{ name: "/resume", desc: "Resume saved session" },
 				{ name: "/name", desc: "Rename session" },
-				{ name: "/session", desc: "Show session info and stats" },
+				{ name: "/session", desc: "Open session browser" },
 				{ name: "/context", desc: "Show context and token usage" },
 				{ name: "/compact", desc: "Compress session context" },
 				{ name: "/fork", desc: "Fork from a message" },
@@ -6897,6 +6976,8 @@ export class InteractiveMode {
 				{ name: "/settings", desc: "Open settings" },
 				{ name: "/autothink", desc: "Toggle automatic thinking level" },
 				{ name: "/login", desc: "Configure Provider API keys" },
+				{ name: "/brain", desc: "Open memory and reflex panel" },
+				{ name: "/clearbrain", desc: "Clear persisted memory signals" },
 			],
 			Modes: [
 				{ name: "/plan", desc: "Toggle plan mode" },
@@ -6914,7 +6995,7 @@ export class InteractiveMode {
 				{ name: "/interface", desc: "Open MoonCode Special OpenClaw OS Interface" },
 				{ name: "/videoedit", desc: "Open MoonCode Pro Video Studio (Browser)" },
 				{ name: "/photoedit", desc: "Open MoonCode Pro Photo Editor (Browser)" },
-				{ name: "/mcp", desc: "List connected MCP servers" },
+				{ name: "/mcp", desc: "Open MCP control panel" },
 				{ name: "/swarm", desc: "Trigger Multi-Agent Swarm" },
 				{ name: "/fix", desc: "Run Autonomous Auto-Healer" },
 				{ name: "/evolve", desc: "Trigger Meta-Evolution (Self-Improvement Loop)" },
@@ -7039,10 +7120,10 @@ export class InteractiveMode {
 		try {
 			if (outputPath?.endsWith(".jsonl")) {
 				const filePath = this.session.exportToJsonl(outputPath);
-				this.showStatus(`Oturum suraya aktarildi: ${filePath}`);
+				this.showStatus(`Session exported to: ${filePath}`);
 			} else {
 				const filePath = await this.session.exportToHtml(outputPath);
-				this.showStatus(`Oturum suraya aktarildi: ${filePath}`);
+				this.showStatus(`Session exported to: ${filePath}`);
 			}
 		} catch (error: unknown) {
 			this.showError(`Session export failed: ${error instanceof Error ? error.message : "Bilinmeyen hata"}`);
@@ -7083,7 +7164,7 @@ export class InteractiveMode {
 			`Mevcut oturum ${inputPath} ile değiştirilsin mi?`,
 		);
 		if (!confirmed) {
-			this.showStatus("Ice aktarma iptal edildi");
+			this.showStatus("Ice aktarma cancel edildi");
 			return;
 		}
 
@@ -7095,25 +7176,25 @@ export class InteractiveMode {
 			this.statusContainer.clear();
 			const result = await this.runtimeHost.importFromJsonl(inputPath);
 			if (result.cancelled) {
-				this.showStatus("Ice aktarma iptal edildi");
+				this.showStatus("Ice aktarma cancel edildi");
 				return;
 			}
 			this.renderCurrentSessionState();
-			this.showStatus(`Oturum suradan ice aktarildi: ${inputPath}`);
+			this.showStatus(`Session imported from: ${inputPath}`);
 		} catch (error: unknown) {
 			if (error instanceof MissingSessionCwdError) {
 				const selectedCwd = await this.promptForMissingSessionCwd(error);
 				if (!selectedCwd) {
-					this.showStatus("Ice aktarma iptal edildi");
+					this.showStatus("Ice aktarma cancel edildi");
 					return;
 				}
 				const result = await this.runtimeHost.importFromJsonl(inputPath, selectedCwd);
 				if (result.cancelled) {
-					this.showStatus("Ice aktarma iptal edildi");
+					this.showStatus("Ice aktarma cancel edildi");
 					return;
 				}
 				this.renderCurrentSessionState();
-				this.showStatus(`Oturum suradan ice aktarildi: ${inputPath}`);
+				this.showStatus(`Session imported from: ${inputPath}`);
 				return;
 			}
 			if (error instanceof SessionImportFileNotFoundError) {
@@ -7171,7 +7252,7 @@ export class InteractiveMode {
 		loader.onAbort = () => {
 			proc?.kill();
 			restoreEditor();
-			this.showStatus("Paylaşım iptal edildi");
+			this.showStatus("Paylaşım cancel edildi");
 		};
 
 		try {
@@ -7269,7 +7350,7 @@ export class InteractiveMode {
 			const currentName = this.sessionManager.getSessionName();
 			if (currentName) {
 				this.chatContainer.addChild(new Spacer(1));
-				this.chatContainer.addChild(new Text(theme.fg("dim", `Oturum ismi: ${currentName}`), 1, 0));
+				this.chatContainer.addChild(new Text(theme.fg("dim", `Session name: ${currentName}`), 1, 0));
 			} else {
 				this.showWarning("Kullanım: /name <isim>");
 			}
@@ -7279,7 +7360,7 @@ export class InteractiveMode {
 
 		this.session.setSessionName(name);
 		this.chatContainer.addChild(new Spacer(1));
-		this.chatContainer.addChild(new Text(theme.fg("dim", `Oturum ismi ayarlandı: ${name}`), 1, 0));
+		this.chatContainer.addChild(new Text(theme.fg("dim", `Session name ayarlandı: ${name}`), 1, 0));
 		this.ui.requestRender();
 	}
 
@@ -7287,7 +7368,7 @@ export class InteractiveMode {
 		const stats = this.session.getSessionStats();
 		const sessionName = this.sessionManager.getSessionName();
 
-		let info = `${theme.bold("Oturum Bilgisi")}\n\n`;
+		let info = `${theme.bold("Session Info")}\n\n`;
 		if (sessionName) {
 			info += `${theme.fg("dim", "İsim:")} ${sessionName}\n`;
 		}
@@ -7357,7 +7438,7 @@ export class InteractiveMode {
 			`${lbl("Proje")}${v(path.basename(cwd))}`,
 			`${lbl("Branch")}${v(branch || "—")}`,
 			sep,
-			theme.bold("  Oturum"),
+			theme.bold("  Session"),
 			`${lbl("  Mesajlar")}${v(`${stats.userMessages}u · ${stats.assistantMessages}a`)}`,
 			`${lbl("  Token")}${v(stats.tokens.total.toLocaleString())}`,
 			`${lbl("  Maliyet")}${v(stats.cost > 0 ? `$${stats.cost.toFixed(4)}` : "—")}`,
@@ -8007,8 +8088,8 @@ export class InteractiveMode {
 		}
 	}
 
-	private handleMcpCommand(): void {
-		this.showMcpSelector();
+	private async handleMcpCommand(): Promise<void> {
+		await this.handleWebPanelRoute("/mcp", "MCP control panel");
 	}
 
 	private getBlenderMcpConfig() {
@@ -8037,6 +8118,75 @@ export class InteractiveMode {
 		return await this.session.connectConfiguredMcpServers();
 	}
 
+	private buildMcpPanelState(): any {
+		const configured = this.settingsManager.getSettings().mcpServers || {};
+		const clients = this.session.mcpManager ? [...this.session.mcpManager.getClients().keys()] : [];
+		const servers = Object.entries(configured).map(([name, config]: [string, any]) => ({
+			name,
+			command: config.command,
+			args: config.args || [],
+			cwd: config.cwd,
+			connected: clients.includes(name),
+		}));
+		return {
+			servers,
+			clients,
+			tools: this.session.getActiveToolNames().filter((tool) => tool.includes("_")).length,
+			market: ["https://mcp.so/?tab=latest", "https://mcpmarket.com/search"],
+		};
+	}
+
+	private registerMcpPanel(server: any): void {
+		if (server?.setMcpPanelStateProvider) {
+			server.setMcpPanelStateProvider(() => this.buildMcpPanelState());
+		}
+		if (this.mcpPanelListenerRegistered || !server?.webUiMcpActionListeners) return;
+		this.mcpPanelListenerRegistered = true;
+		server.webUiMcpActionListeners.add(async (action: any) => {
+			const name = String(action?.name || "").trim();
+			if (action?.action === "connect_builtin") {
+				if (name === "blender") {
+					await this.activateMcpServer("blender", this.getBlenderMcpConfig());
+					return;
+				}
+				if (name === "scratch") {
+					const config = this.getScratchMcpConfig();
+					if (!fs.existsSync(config.args[0])) throw new Error(`Scratch MCP not found: ${config.args[0]}`);
+					await this.activateMcpServer("scratch", config);
+					return;
+				}
+				throw new Error("Unknown built-in MCP provider.");
+			}
+			if (action?.action === "connect") {
+				if (!name) throw new Error("Server name is required.");
+				await this.session.connectConfiguredMcpServers();
+				return;
+			}
+			if (action?.action === "restart") {
+				if (!this.session.mcpManager) throw new Error("MCP manager is not available.");
+				await this.session.mcpManager.restart();
+				return;
+			}
+			if (action?.action === "remove") {
+				if (!name) throw new Error("Server name is required.");
+				this.settingsManager.removeMcpServer(name);
+				await this.settingsManager.flush();
+				if (this.session.mcpManager) await this.session.mcpManager.restart();
+				return;
+			}
+			if (action?.action === "add_custom") {
+				if (!name) throw new Error("Server name is required.");
+				const config = action?.config;
+				if (!config?.command) throw new Error("MCP config must include a command.");
+				this.settingsManager.setMcpServer(name, config);
+				await this.settingsManager.flush();
+				await this.session.connectConfiguredMcpServers();
+				return;
+			}
+			throw new Error("Unknown MCP panel action.");
+		});
+	}
+
 	private async handleBlenderMcpCommand(arg: string): Promise<void> {
 		const action = arg.toLowerCase();
 		const config = this.getBlenderMcpConfig();
@@ -8052,7 +8202,7 @@ export class InteractiveMode {
 				this.showError(`Blender MCP hazirlanamadi: ${result.error?.message || result.stderr || "uvx komutu basarisiz"}`);
 				return;
 			}
-			this.showStatus("Blender MCP hazir. Baglanmak icin /blendermcp yaz.");
+			this.showStatus("Blender MCP is ready. Open /mcp to connect it from the control panel.");
 			return;
 		}
 

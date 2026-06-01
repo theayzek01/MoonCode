@@ -22,14 +22,14 @@ const INDEX_HTML = `<!doctype html>
     <a class="brand" href="#top" aria-label="MoonCode">
       <span class="mark"><img src="/assets/Mooncodewhitelogo.png" alt="" /></span>
       <span class="word">MoonCode</span>
-      <span class="version">2026-v35</span>
+      <span class="version">2026-v36</span>
     </a>
     <button class="menu" type="button" aria-expanded="false" aria-controls="nav">Menü</button>
     <nav id="nav" class="nav" aria-label="Ana menü">
       <a href="#urun">Ürün</a>
       <a href="#akis">Akış</a>
-      <a href="#oturumlar">Oturumlar</a>
-      <a href="#kurulum">Kurulum</a>
+      <a href="#oturumlar">Sessions</a>
+      <a href="#kurulum">Install</a>
       <a class="github" href="https://github.com/theayzek01/mooncode" target="_blank" rel="noreferrer">GitHub</a>
     </nav>
   </header>
@@ -41,7 +41,7 @@ const INDEX_HTML = `<!doctype html>
         <h1>Repo içinde sessiz, hızlı ve kontrollü çalışır.</h1>
         <p class="lead">MoonCode terminalden çalışan Türkçe öncelikli kodlama ajanı. Dosyaları seçerek okur, küçük patch üretir, sonucu doğrular ve gereksiz çıktı basmadan işi kapatır.</p>
         <div class="actions">
-          <a class="button primary" href="#kurulum">Kur</a>
+          <a class="button primary" href="#kurulum">Install</a>
           <a class="button ghost" href="#oturumlar">Canlı oturumları gör</a>
         </div>
         <div class="notes" aria-label="Öne çıkanlar">
@@ -104,7 +104,7 @@ const INDEX_HTML = `<!doctype html>
         <span id="session-status" class="pill">yükleniyor</span>
       </div>
       <div class="session-grid">
-        <aside class="session-list" id="sessions-list"><p class="muted pad">Oturumlar yükleniyor…</p></aside>
+        <aside class="session-list" id="sessions-list"><p class="muted pad">Sessions yükleniyor…</p></aside>
         <article class="chat-panel">
           <div class="chat-head"><b id="chat-title">Oturum seç</b><span>son 60 kayıt</span></div>
           <div id="chat" class="chat-empty">Soldan bir oturum seçince konuşma burada açılır.</div>
@@ -114,11 +114,11 @@ const INDEX_HTML = `<!doctype html>
 
     <section class="section shell install" id="kurulum">
       <div>
-        <p class="label">KURULUM</p>
+        <p class="label">INSTALL</p>
         <h2>Repo’dan çalıştır.</h2>
       </div>
       <div class="code-card">
-        <button id="copy-install" type="button">Kopyala</button>
+        <button id="copy-install" type="button">Copy</button>
         <pre id="install-code">git clone https://github.com/theayzek01/mooncode.git
 cd mooncode
 npm install
@@ -130,7 +130,7 @@ mooncode</pre>
   </main>
 
   <footer class="footer shell">
-      <span>MoonCode 2026-v35</span>
+      <span>MoonCode 2026-v36</span>
     <a href="https://github.com/theayzek01/mooncode" target="_blank" rel="noreferrer">github.com/theayzek01/mooncode</a>
   </footer>
 
@@ -339,7 +339,7 @@ if (installButton) {
     try {
       await navigator.clipboard.writeText(code.trim());
       const old = installButton.textContent;
-      installButton.textContent = 'Kopyalandı';
+      installButton.textContent = 'Copyndı';
       setTimeout(() => { installButton.textContent = old; }, 1300);
     } catch {
       installButton.textContent = 'Seçip kopyala';
@@ -472,7 +472,7 @@ const APP_HTML = `<!doctype html>
       <div class="session-search">
         <div class="search-wrapper">
           <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" class="search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <input type="text" id="search-input" placeholder="Oturumlarda ara..." />
+          <input type="text" id="search-input" placeholder="Sessionsda ara..." />
         </div>
       </div>
       <div class="sessions-list" id="sessions-list">
@@ -513,7 +513,7 @@ const APP_HTML = `<!doctype html>
               <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
             </button>
           </form>
-          <div class="input-footer-text">MoonCode otonom bir geliştirme asistanıdır · v2026-v35</div>
+          <div class="input-footer-text">MoonCode otonom bir geliştirme asistanıdır · v2026-v36</div>
         </div>
       </footer>
     </main>
@@ -1295,7 +1295,7 @@ function parseMarkdown(text) {
       '<div class="code-block">' +
         '<div class="code-header">' +
           '<span>' + escapeHtml(lang || "code") + '</span>' +
-          '<button class="copy-code-btn" onclick="navigator.clipboard.writeText(decodeURIComponent(\\'' + encodeURIComponent(code) + '\\')).then(() => { this.innerText = \\'Kopyalandı\\'; setTimeout(() => this.innerText = \\'Kopyala\\', 1200); })">Kopyala</button>' +
+          '<button class="copy-code-btn" onclick="navigator.clipboard.writeText(decodeURIComponent(\\'' + encodeURIComponent(code) + '\\')).then(() => { this.innerText = \\'Copyndı\\'; setTimeout(() => this.innerText = \\'Copy\\', 1200); })">Copy</button>' +
         '</div>' +
         '<pre><code>' + escapedCode + '</code></pre>' +
       '</div>'
@@ -1703,12 +1703,18 @@ export const editorActionsListeners = new Set<
 export const webUiMessageListeners = new Set<(message: string) => void>();
 export const webUiUnlockListeners = new Set<() => void>();
 export const webUiAuthActionListeners = new Set<(action: any) => void | Promise<void>>();
+export const webUiMcpActionListeners = new Set<(action: any) => void | Promise<void>>();
 export let activeSessionId: string | null = null;
 let authPanelStateProvider: (() => unknown) | undefined;
+let mcpPanelStateProvider: (() => unknown) | undefined;
 let authPanelOAuthEvent: any = null;
 
 export function setAuthPanelStateProvider(provider: (() => unknown) | undefined): void {
 	authPanelStateProvider = provider;
+}
+
+export function setMcpPanelStateProvider(provider: (() => unknown) | undefined): void {
+	mcpPanelStateProvider = provider;
 }
 
 export function setAuthPanelOAuthEvent(event: any): void {
@@ -1979,6 +1985,50 @@ const AUTH_PANEL_HTML = `<!doctype html>
 </body>
 </html>`;
 
+const MCP_PANEL_HTML = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MoonCode MCP Control</title>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    :root{color-scheme:dark;--bg:#020503;--panel:#07110b;--panel2:#0d1b12;--line:#1d412c;--fg:#eafff2;--muted:#8db29c;--green:#56f0a4;--green2:#19b96b;--red:#ff5667;font-family:Inter,Roboto,"Segoe UI",system-ui,sans-serif}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 18% 0,#123d26 0,transparent 34%),linear-gradient(180deg,#020503,#07100b 55%,#010302);color:var(--fg)}
+    .wrap{max-width:1320px;margin:0 auto;padding:30px}.hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:22px}.eyebrow{color:var(--green);font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:12px}
+    h1{font-size:clamp(34px,5vw,64px);line-height:.95;margin:8px 0 10px;letter-spacing:0}.sub{color:var(--muted);max-width:740px;margin:0}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}.card{background:linear-gradient(180deg,rgba(16,34,23,.92),rgba(6,13,9,.95));border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:0 24px 70px rgba(0,0,0,.34),inset 0 1px 0 rgba(110,255,178,.08)}
+    .wide{grid-column:span 8}.side{grid-column:span 4}.full{grid-column:1/-1}.toolbar{display:flex;gap:10px;flex-wrap:wrap}.btn{border:0;border-radius:999px;padding:12px 16px;font-weight:850;cursor:pointer;background:linear-gradient(135deg,var(--green),var(--green2));color:#021108;display:inline-flex;align-items:center;gap:8px}.btn.secondary{background:#12261a;color:var(--fg);border:1px solid var(--line)}.btn.danger{background:#301018;color:#ffdce1;border:1px solid #6b1f2d}
+    .server-grid,.market-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}.server,.market{border:1px solid var(--line);background:#07120c;border-radius:18px;padding:16px}.server h3,.market h3{margin:10px 0 6px}.status{display:inline-flex;padding:6px 10px;border-radius:999px;background:#102c1d;color:var(--green);font-size:12px;font-weight:800}.muted{color:var(--muted)}textarea,input{width:100%;background:#040906;color:var(--fg);border:1px solid var(--line);border-radius:14px;padding:12px;font:inherit}textarea{min-height:150px;resize:vertical}.row{display:grid;gap:10px;margin-top:12px}.toast{position:fixed;right:22px;bottom:22px;background:#102016;border:1px solid var(--line);border-radius:16px;padding:14px 16px;opacity:0;transform:translateY(10px);transition:.18s}.toast.show{opacity:1;transform:none}@media(max-width:860px){.wrap{padding:18px}.wide,.side{grid-column:1/-1}.hero{display:block}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div><div class="eyebrow">MCP Control</div><h1>Connect tools without terminal noise.</h1><p class="sub">Manage Blender, Scratch/TurboWarp, and custom MCP servers from one local panel. Install, connect, restart, and add configs without dumping setup logs into the TUI.</p></div>
+      <div class="toolbar"><button class="btn secondary" onclick="refresh()"><i data-lucide="refresh-cw"></i>Refresh</button><button class="btn" onclick="action({action:'restart'})"><i data-lucide="rotate-cw"></i>Restart manager</button></div>
+    </section>
+    <div class="grid">
+      <article class="card wide"><h2>Installed providers</h2><div id="servers" class="server-grid"></div></article>
+      <article class="card side"><h2>Runtime</h2><p class="muted" id="runtime">Loading...</p><div class="toolbar"><button class="btn" onclick="action({action:'connect_builtin',name:'blender'})"><i data-lucide="box"></i>Connect Blender</button><button class="btn" onclick="action({action:'connect_builtin',name:'scratch'})"><i data-lucide="blocks"></i>Connect Scratch</button></div></article>
+      <article class="card full"><h2>MCP Market</h2><p class="muted">Search public registries, review the server, then paste a trusted config below. MoonCode keeps install decisions explicit for security.</p><div class="market-grid">
+        <a class="market" href="https://mcp.so/?tab=latest" target="_blank" rel="noreferrer"><i data-lucide="store"></i><h3>MCP.so</h3><p class="muted">Large third-party MCP server directory.</p></a>
+        <a class="market" href="https://mcpmarket.com/search" target="_blank" rel="noreferrer"><i data-lucide="shopping-bag"></i><h3>MCP Market</h3><p class="muted">Browse categories and search MCP servers.</p></a>
+      </div></article>
+      <article class="card full"><h2>Add custom MCP</h2><div class="row"><input id="customName" placeholder="Server name, e.g. postgres" /><textarea id="customConfig" placeholder='{"command":"npx","args":["-y","@modelcontextprotocol/server-filesystem","C:\\\\Users\\\\ozenc"]}'></textarea><button class="btn" onclick="addCustom()"><i data-lucide="plus"></i>Add and connect</button></div></article>
+    </div>
+  </div>
+  <div id="toast" class="toast"></div>
+  <script>
+    let state={servers:[],clients:[],tools:0,error:null};
+    function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2400)}
+    async function action(payload){const res=await fetch('/api/mcp-panel/action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const json=await res.json();if(!json.ok)throw new Error(json.error||'Action failed');toast(json.message||'Done');await refresh()}
+    async function addCustom(){const name=document.getElementById('customName').value.trim();let config;try{config=JSON.parse(document.getElementById('customConfig').value)}catch{toast('Invalid JSON config');return}await action({action:'add_custom',name,config})}
+    async function refresh(){state=await fetch('/api/mcp-panel',{cache:'no-store'}).then(r=>r.json());document.getElementById('runtime').textContent=(state.clients.length||0)+' connected servers · '+(state.tools||0)+' MCP tools';document.getElementById('servers').innerHTML=state.servers.map(s=>'<div class="server"><span class="status">'+(s.connected?'connected':'ready')+'</span><h3>'+s.name+'</h3><p class="muted">'+s.command+' '+(s.args||[]).join(' ')+'</p><div class="toolbar"><button class="btn secondary" onclick="action({action:\\'connect\\',name:\\''+s.name+'\\'})"><i data-lucide="plug-zap"></i>Connect</button><button class="btn danger" onclick="action({action:\\'remove\\',name:\\''+s.name+'\\'})"><i data-lucide="trash-2"></i>Remove</button></div></div>').join('')||'<p class="muted">No MCP servers configured yet.</p>';if(window.lucide)lucide.createIcons()}
+    refresh();if(window.lucide)lucide.createIcons();
+  </script>
+</body>
+</html>`;
+
 export function startWebUiServer(options: { port?: number; staticRoot?: string } = {}) {
 	const requestedPort = options.port ?? Number(process.env.MOON_WEB_PORT || 3131);
 	const server = createServer((req, res) => {
@@ -2039,6 +2089,9 @@ export function startWebUiServer(options: { port?: number; staticRoot?: string }
 		if (url.pathname === "/api/auth-panel") {
 			return json(res, authPanelStateProvider ? authPanelStateProvider() : { providers: [], accounts: [], models: {} });
 		}
+		if (url.pathname === "/api/mcp-panel") {
+			return json(res, mcpPanelStateProvider ? mcpPanelStateProvider() : { servers: [], clients: [], tools: 0 });
+		}
 		if (url.pathname === "/api/auth-panel/oauth-event") {
 			const providerId = url.searchParams.get("providerId");
 			if (providerId && authPanelOAuthEvent?.providerId && authPanelOAuthEvent.providerId !== providerId) {
@@ -2069,6 +2122,24 @@ export function startWebUiServer(options: { port?: number; staticRoot?: string }
 						}
 					}
 					return json(res, { ok: true, message: data?.action === "oauth_login" ? "Preparing login in this panel." : "Done." });
+				} catch (err: any) {
+					return json(res, { ok: false, error: err.message });
+				}
+			});
+			return;
+		}
+		if (req.method === "POST" && url.pathname === "/api/mcp-panel/action") {
+			let body = "";
+			req.on("data", (chunk) => {
+				body += chunk;
+			});
+			req.on("end", async () => {
+				try {
+					const data = JSON.parse(body || "{}");
+					for (const listener of webUiMcpActionListeners) {
+						await listener(data);
+					}
+					return json(res, { ok: true, message: "MCP action complete." });
 				} catch (err: any) {
 					return json(res, { ok: false, error: err.message });
 				}
@@ -2148,6 +2219,16 @@ export function startWebUiServer(options: { port?: number; staticRoot?: string }
 		if (url.pathname === "/panel" || url.pathname === "/login") {
 			res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
 			res.end(AUTH_PANEL_HTML);
+			return;
+		}
+		if (url.pathname === "/mcp") {
+			res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+			res.end(MCP_PANEL_HTML);
+			return;
+		}
+		if (url.pathname === "/session" || url.pathname === "/brain") {
+			res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+			res.end(APP_HTML);
 			return;
 		}
 		if (serveAsset(res, url.pathname)) return;

@@ -41,7 +41,7 @@ function buildWordmark(width: number, tick: number): string {
 		[220, 44, 56],
 		[95, 16, 24],
 	];
-	const word = "MOONAGENT";
+	const word = "MOONCODE";
 	const phase = tick % 90;
 	return center(gradient(word, phase, palette), width);
 }
@@ -60,8 +60,8 @@ export function buildIntroLines(width: number, phase = 0): string[] {
 		width,
 	);
 	const wordmark = buildWordmark(width, phase);
-	const title = center(glow("Minimal agent. Strong taste. Small tokens. Sharp output."), width);
-	const sub = center(soft("Terminal coding agent with MCP, Browser Bridge, and DreamKernel reflexes"), width);
+	const title = center(glow("Fast coding agent. Clean tools. Quiet output."), width);
+	const sub = center(soft("MCP, Browser Bridge, sessions, and DreamKernel reflexes"), width);
 
 	return [
 		"",
@@ -71,14 +71,12 @@ export function buildIntroLines(width: number, phase = 0): string[] {
 		sub,
 		"",
 		rule,
-		center(dim("1.26-v2  |  github.com/theayzek01/MoonAgent"), width),
-		rule,
-		center(dim("/help  |  /index  |  /browser  |  /ship  |  Ctrl+C exit"), width),
+		center(dim("/help  |  /models  |  /mcp  |  /login  |  Ctrl+C exit"), width),
 		"",
 	];
 }
 
-export class MoonAgentIntroComponent implements Component {
+export class MoonCodeIntroComponent implements Component {
 	invalidate(): void {}
 
 	dispose(): void {}

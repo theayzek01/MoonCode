@@ -719,7 +719,7 @@ class TreeList implements Component {
 					if (textContent) {
 						result = theme.fg("success", "yardimci: ") + textContent;
 					} else if (msgWithContent.stopReason === "aborted") {
-						result = theme.fg("success", "yardimci: ") + theme.fg("muted", "(iptal edildi)");
+						result = theme.fg("success", "yardimci: ") + theme.fg("muted", "(cancel edildi)");
 					} else if (msgWithContent.errorMessage) {
 						const errMsg = normalize(msgWithContent.errorMessage).slice(0, 80);
 						result = theme.fg("success", "yardimci: ") + theme.fg("error", errMsg);
@@ -1107,7 +1107,7 @@ class LabelInput implements Component, Focusable {
 		lines.push(...this.input.render(availableWidth).map((line) => truncateToWidth(`${indent}${line}`, width)));
 		lines.push(
 			truncateToWidth(
-				`${indent}${keyHint("tui.select.confirm", "kaydet")}  ${keyHint("tui.select.cancel", "iptal")}`,
+				`${indent}${keyHint("tui.select.confirm", "kaydet")}  ${keyHint("tui.select.cancel", "cancel")}`,
 				width,
 			),
 		);
@@ -1177,7 +1177,7 @@ export class TreeSelectorComponent extends Container implements Focusable {
 
 		this.addChild(new Spacer(1));
 		this.addChild(new DynamicBorder());
-		this.addChild(new Text(theme.bold("  Oturum Ağacı"), 1, 0));
+		this.addChild(new Text(theme.bold("  Session Ağacı"), 1, 0));
 		const filterKeys = [
 			keyText("app.tree.filter.default"),
 			keyText("app.tree.filter.noTools"),

@@ -8,7 +8,7 @@
   </p>
 
   <p>
-    <img src="https://img.shields.io/badge/version-1.29.2-2563eb?style=for-the-badge" alt="Version 1.29.2" />
+    <img src="https://img.shields.io/badge/version-2026--v36-16a34a?style=for-the-badge" alt="Version 2026-v36" />
     <img src="https://img.shields.io/badge/Node.js-20+-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js 20+" />
     <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
     <img src="https://img.shields.io/badge/MCP-ready-111827?style=for-the-badge" alt="MCP ready" />
@@ -21,7 +21,7 @@
     ·
     <a href="docs/integrations/BROWSER_CONTROL.md"><strong>Browser Bridge</strong></a>
     ·
-    <a href="docs/integrations/BLENDER_MCP.md"><strong>Blender MCP</strong></a>
+    <a href="docs/integrations/BLENDER_MCP.md"><strong>MCP Control</strong></a>
   </p>
 </div>
 
@@ -38,7 +38,7 @@ It is built around a simple loop:
 - run the real command that proves the change
 - keep token use under control
 
-MoonCode is not a landing-page chatbot wrapped around a shell. It is a working CLI with a custom TUI, Browser Bridge, MCP support, persistent sessions, and repo-aware workflows.
+MoonCode is not a landing-page chatbot wrapped around a shell. It is a working CLI with a custom TUI, Browser Bridge, MCP control panel, persistent sessions, and repo-aware workflows.
 
 ---
 
@@ -80,6 +80,19 @@ MoonCode is not a landing-page chatbot wrapped around a shell. It is a working C
     </td>
   </tr>
 </table>
+
+---
+
+## Local Control Panels
+
+MoonCode keeps noisy setup and account work out of the main terminal:
+
+- `/login` opens a dark provider login panel with API key and subscription flows.
+- `/mcp` opens the MCP control panel for Blender, Scratch/TurboWarp, custom servers, and market links.
+- `/session` opens the local session browser.
+- `/brain` opens the memory/reflex view, and `/clearbrain` clears persisted memory signals.
+
+The old direct Blender/Scratch commands are folded into `/mcp` so tool setup is managed from one place.
 
 ---
 

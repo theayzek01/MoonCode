@@ -261,7 +261,7 @@ export class SettingsSelectorComponent extends Container {
 			},
 			{
 				id: "install-telemetry",
-				label: "Kurulum telemetrisi",
+				label: "Install telemetry",
 				description: "Güncellemelerden sonra anonim bir sürüm/güncelleme bildirimi gönder",
 				currentValue: config.enableInstallTelemetry ? "true" : "false",
 				values: ["true", "false"],

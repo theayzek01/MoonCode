@@ -8,15 +8,13 @@ export function buildInitialMessage(): { text: string } {
 
 	const text = [
 		"",
-		blue("                          MOONAGENT"),
+		blue("                          MOONCODE"),
 		"",
-		bright("Minimal agent. Strong taste. Small tokens. Sharp output."),
-		bright("Terminal coding agent with MCP, Browser Bridge, and tools."),
+		bright("Fast coding agent. Clean tools. Quiet output."),
+		bright("Terminal coding agent with MCP, Browser Bridge, and DreamKernel."),
 		"",
 		`      ${bar}`,
-		`      ${dim("1.26-v2  |  github.com/theayzek01/MoonAgent")}`,
-		`      ${bar}`,
-		`${dim("/help  |  /index  |  /browser  |  /ship  |  Ctrl+C")}`,
+		`${dim("/help  |  /models  |  /mcp  |  /login  |  Ctrl+C")}`,
 		"",
 	].join("\n");
 

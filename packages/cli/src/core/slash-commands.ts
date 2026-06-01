@@ -21,7 +21,7 @@ export const BUILTIN_SLASH_COMMANDS: ReadonlyArray<BuiltinSlashCommand> = [
 	{ name: "new", description: "Start a new session" },
 	{ name: "resume", description: "Resume another session" },
 	{ name: "name", description: "Rename session" },
-	{ name: "session", description: "Show session info and stats" },
+	{ name: "session", description: "Open session browser" },
 	{ name: "context", description: "Show context and token usage" },
 	{ name: "compact", description: "Compact session context" },
 	{ name: "fork", description: "Fork from a message" },
@@ -39,6 +39,8 @@ export const BUILTIN_SLASH_COMMANDS: ReadonlyArray<BuiltinSlashCommand> = [
 	{ name: "autothink", description: "Toggle automatic thinking level" },
 	{ name: "login", description: "Configure Provider API keys" },
 	{ name: "panel", description: "Open local account and control panel" },
+	{ name: "brain", description: "Open memory and reflex panel" },
+	{ name: "clearbrain", description: "Clear persisted memory signals" },
 
 	// === Modes ===
 	{ name: "plan", description: "Toggle plan mode" },
@@ -56,9 +58,7 @@ export const BUILTIN_SLASH_COMMANDS: ReadonlyArray<BuiltinSlashCommand> = [
 	{ name: "interface", description: "Open MoonCode Special OpenClaw OS Interface" },
 	{ name: "videoedit", description: "Open MoonCode Pro Video Studio (Browser)" },
 	{ name: "photoedit", description: "Open MoonCode Pro Photo Editor (Browser)" },
-	{ name: "mcp", description: "List connected MCP servers" },
-	{ name: "blendermcp", description: "Install or connect Blender MCP on demand" },
-	{ name: "scratchmcp", description: "Connect Scratch/TurboWarp MCP on demand" },
+	{ name: "mcp", description: "Open MCP control panel" },
 	{ name: "swarm", description: "Trigger Multi-Agent Swarm" },
 	{ name: "fix", description: "Run Autonomous Auto-Healer" },
 	{ name: "evolve", description: "Trigger Meta-Evolution (Self-Improvement Loop)" },
