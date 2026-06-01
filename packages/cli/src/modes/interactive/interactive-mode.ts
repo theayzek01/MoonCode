@@ -679,6 +679,7 @@ export class InteractiveMode {
 			return;
 		}
 		this.startupNoticesShown = true;
+		return;
 
 		// ASCII intro - tek seferlik açılış
 		if (!this.changelogMarkdown) {
