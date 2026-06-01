@@ -19,6 +19,7 @@ const browserTabsSchema = Type.Object({
 		Type.Literal("focus"),
 		Type.Literal("reload"),
 		Type.Literal("navigate"),
+		Type.Literal("cleanup"),
 	]),
 	tabId: Type.Optional(Type.Number({ description: "Chrome tab id for tab-specific actions" })),
 	url: Type.Optional(Type.String({ description: "URL for open/navigate actions" })),
@@ -252,6 +253,7 @@ export function createBrowserTabsToolDefinition(): ToolDefinition<typeof browser
 		promptSnippet: "Control connected Chrome tabs",
 		promptGuidelines: [
 			"Use browser_tabs to inspect or change Chrome tabs when the user asks for browser control.",
+			"After browser-heavy tasks, close temporary tabs you opened with browser_tabs cleanup or close unless the user wants them kept.",
 			"Use browser_page read before interacting with an unfamiliar page unless the user gave an exact target.",
 		],
 		parameters: browserTabsSchema,

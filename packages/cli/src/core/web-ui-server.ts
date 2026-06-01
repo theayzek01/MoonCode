@@ -22,7 +22,7 @@ const INDEX_HTML = `<!doctype html>
     <a class="brand" href="#top" aria-label="MoonCode">
       <span class="mark"><img src="/assets/Mooncodewhitelogo.png" alt="" /></span>
       <span class="word">MoonCode</span>
-      <span class="version">2026-v35</span>
+      <span class="version">2026-v36</span>
     </a>
     <button class="menu" type="button" aria-expanded="false" aria-controls="nav">Menü</button>
     <nav id="nav" class="nav" aria-label="Ana menü">
@@ -130,7 +130,7 @@ mooncode</pre>
   </main>
 
   <footer class="footer shell">
-      <span>MoonCode 2026-v35</span>
+      <span>MoonCode 2026-v36</span>
     <a href="https://github.com/theayzek01/mooncode" target="_blank" rel="noreferrer">github.com/theayzek01/mooncode</a>
   </footer>
 
@@ -513,7 +513,7 @@ const APP_HTML = `<!doctype html>
               <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
             </button>
           </form>
-          <div class="input-footer-text">MoonCode otonom bir geliştirme asistanıdır · v2026-v35</div>
+          <div class="input-footer-text">MoonCode otonom bir geliştirme asistanıdır · v2026-v36</div>
         </div>
       </footer>
     </main>
@@ -1703,11 +1703,17 @@ export const editorActionsListeners = new Set<
 export const webUiMessageListeners = new Set<(message: string) => void>();
 export const webUiUnlockListeners = new Set<() => void>();
 export const webUiAuthActionListeners = new Set<(action: any) => void | Promise<void>>();
+export const webUiMcpActionListeners = new Set<(action: any) => void | Promise<void>>();
 export let activeSessionId: string | null = null;
 let authPanelStateProvider: (() => unknown) | undefined;
+let mcpPanelStateProvider: (() => unknown) | undefined;
 
 export function setAuthPanelStateProvider(provider: (() => unknown) | undefined): void {
 	authPanelStateProvider = provider;
+}
+
+export function setMcpPanelStateProvider(provider: (() => unknown) | undefined): void {
+	mcpPanelStateProvider = provider;
 }
 
 export function setActiveSessionId(id: string | null): void {
@@ -1881,6 +1887,116 @@ const AUTH_PANEL_HTML = `<!doctype html>
 </body>
 </html>`;
 
+const MCP_PANEL_HTML = `<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MoonCode MCP Paneli</title>
+  <style>
+    :root { color-scheme: light; --primary:#6750a4; --on:#1d1b20; --muted:#625b71; --surface:#fffbfe; --card:#f3edf7; --line:#e4ddea; --ok:#146c2e; --bad:#b3261e; font-family: Inter, Roboto, "Segoe UI", system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--surface); color:var(--on); }
+    .app { min-height:100vh; display:grid; grid-template-columns:280px 1fr; }
+    aside { background:var(--card); border-right:1px solid var(--line); padding:24px 16px; }
+    .brand { display:flex; align-items:center; gap:12px; font-size:22px; font-weight:800; padding:8px 12px 24px; }
+    .mark { width:38px; height:38px; border-radius:13px; background:var(--primary); color:white; display:grid; place-items:center; }
+    nav button { width:100%; border:0; background:transparent; color:var(--muted); border-radius:999px; padding:14px 18px; text-align:left; font:inherit; cursor:pointer; }
+    nav button.active { background:#e8def8; color:var(--on); font-weight:750; }
+    main { width:100%; max-width:1280px; padding:30px; }
+    h1 { margin:0 0 10px; font-size:clamp(30px, 5vw, 54px); line-height:1; letter-spacing:0; }
+    h2 { margin:0 0 8px; }
+    .sub, .muted { color:var(--muted); }
+    .top { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; margin-bottom:24px; }
+    .grid { display:grid; grid-template-columns:repeat(12, 1fr); gap:16px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:28px; padding:22px; }
+    .hero { grid-column:span 8; background:linear-gradient(135deg,#eaddff,#fff7fb); min-height:210px; }
+    .side { grid-column:span 4; }
+    .full { grid-column:1 / -1; }
+    .provider { display:grid; grid-template-columns:1fr auto; gap:16px; align-items:center; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+    .btn { border:0; border-radius:999px; padding:11px 16px; font-weight:800; cursor:pointer; background:var(--primary); color:white; }
+    .btn.secondary { background:#e8def8; color:var(--on); }
+    .btn.ghost { background:transparent; color:var(--primary); border:1px solid #79747e; }
+    .btn.danger { background:#f9dedc; color:var(--bad); }
+    .pill { display:inline-flex; align-items:center; gap:8px; border-radius:999px; padding:7px 11px; background:#e8def8; font-size:13px; }
+    .pill.ok { color:var(--ok); background:#d7f8df; }
+    .pill.bad { color:var(--bad); background:#f9dedc; }
+    input { width:100%; border:1px solid #79747e; border-radius:16px; padding:13px 14px; font:inherit; background:white; }
+    label { display:grid; gap:7px; font-weight:700; margin-top:12px; }
+    code { background:#ede7f2; border-radius:8px; padding:2px 6px; }
+    .toast { position:fixed; right:22px; bottom:22px; background:#1d1b20; color:white; padding:14px 18px; border-radius:16px; opacity:0; transform:translateY(12px); transition:.18s; }
+    .toast.show { opacity:1; transform:translateY(0); }
+    @media(max-width:860px){ .app{grid-template-columns:1fr} aside{position:sticky;top:0;z-index:2;border-right:0;border-bottom:1px solid var(--line)} nav{display:flex;gap:8px;overflow:auto} nav button{width:auto;white-space:nowrap}.hero,.side{grid-column:1/-1} main{padding:18px} }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="brand"><span class="mark">M</span><span>MoonCode</span></div>
+      <nav>
+        <button class="active" data-tab="overview">MCP Kontrol</button>
+        <button data-tab="providers">Saglayicilar</button>
+        <button data-tab="settings">Ayarlar</button>
+      </nav>
+    </aside>
+    <main>
+      <section id="overview" class="tab">
+        <div class="top"><div><h1>MCP kontrol paneli</h1><p class="sub">Blender, Scratch/TurboWarp ve gelecek MCP sunucularini localden indir, baslat, durdur ve durumunu izle.</p></div><button class="btn secondary" onclick="refresh()">Yenile</button></div>
+        <div class="grid">
+          <article class="card hero"><h2>Tek yerden MCP</h2><p class="muted">Slash komutlarini ezberlemek yerine buradan indir, baglan, kapat. Baslangicta otomatik baglanti yok; sen baslatinca calisir.</p><div class="row"><button class="btn" onclick="doAction('start','blender')">Blender baslat</button><button class="btn secondary" onclick="doAction('start','scratch')">Scratch baslat</button></div></article>
+          <article class="card side"><span class="muted">Bagli sunucu</span><h2 id="connectedCount">0</h2><span class="pill" id="toolCount">0 tool</span></article>
+          <article class="card side"><span class="muted">Otomatik baslangic</span><h2>Kapali</h2><p class="muted">MCP sadece panelden baslar.</p></article>
+        </div>
+      </section>
+      <section id="providers" class="tab">
+        <div class="top"><div><h1>Saglayicilar</h1><p class="sub">Durum, komut ve hizli islemler.</p></div></div>
+        <div id="providerList" class="grid"></div>
+      </section>
+      <section id="settings" class="tab">
+        <div class="top"><div><h1>Ayarlar</h1><p class="sub">Path ve komutlari buradan degistir. Windows path bosluklari guvenli arg olarak saklanir.</p></div></div>
+        <article class="card full">
+          <label>Scratch MCP root<input id="scratchRoot" placeholder="C:\\Users\\ozenc\\OneDrive\\Desktop\\scmcp" /></label>
+          <label>Blender command<input id="blenderCommand" placeholder="cmd /c uvx blender-mcp" /></label>
+          <div class="row"><button class="btn" onclick="saveSettings()">Kaydet</button><button class="btn ghost" onclick="refresh()">Geri al</button></div>
+        </article>
+      </section>
+    </main>
+  </div>
+  <div id="toast" class="toast"></div>
+  <script>
+    let state = { providers: [], connected: [], tools: [] };
+    const tabs = [...document.querySelectorAll('.tab')];
+    const nav = [...document.querySelectorAll('nav button')];
+    function showTab(id){ tabs.forEach(t => t.hidden = t.id !== id); nav.forEach(b => b.classList.toggle('active', b.dataset.tab === id)); }
+    nav.forEach(b => b.onclick = () => showTab(b.dataset.tab));
+    function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2600); }
+    async function doAction(action, provider, extra={}) {
+      const res = await fetch('/api/mcp-panel/action', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action, provider, ...extra }) });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error || 'islem basarisiz');
+      toast(json.message || 'tamam');
+      await refresh();
+    }
+    async function saveSettings(){
+      await doAction('save_settings','scratch',{ scratchRoot: document.getElementById('scratchRoot').value, blenderCommand: document.getElementById('blenderCommand').value });
+    }
+    function render(){
+      document.getElementById('connectedCount').textContent = state.connected.length;
+      document.getElementById('toolCount').textContent = state.tools.length + ' tool';
+      document.getElementById('scratchRoot').value = state.settings?.scratchRoot || '';
+      document.getElementById('blenderCommand').value = state.settings?.blenderCommand || '';
+      document.getElementById('providerList').innerHTML = state.providers.map(p => {
+        const connected = state.connected.includes(p.id);
+        return '<article class="card full provider"><div><h2>'+p.name+' '+(connected?'<span class="pill ok">bagli</span>':'<span class="pill bad">kapali</span>')+'</h2><p class="muted">'+p.description+'</p><p><code>'+p.command+'</code></p><p class="muted">'+(p.note || '')+'</p></div><div class="row"><button class="btn secondary" onclick="doAction(\\'download\\',\\''+p.id+'\\')">Indir</button><button class="btn" onclick="doAction(\\'start\\',\\''+p.id+'\\')">Baslat</button><button class="btn danger" onclick="doAction(\\'stop\\',\\''+p.id+'\\')">Kapat</button></div></article>';
+      }).join('');
+    }
+    async function refresh(){ const res = await fetch('/api/mcp-panel'); state = await res.json(); render(); }
+    showTab('overview'); refresh().catch(e => toast(e.message));
+  </script>
+</body>
+</html>`;
+
 export function startWebUiServer(options: { port?: number; staticRoot?: string } = {}) {
 	const requestedPort = options.port ?? Number(process.env.MOON_WEB_PORT || 3131);
 	const server = createServer((req, res) => {
@@ -1941,6 +2057,9 @@ export function startWebUiServer(options: { port?: number; staticRoot?: string }
 		if (url.pathname === "/api/auth-panel") {
 			return json(res, authPanelStateProvider ? authPanelStateProvider() : { providers: [], accounts: [], models: {} });
 		}
+		if (url.pathname === "/api/mcp-panel") {
+			return json(res, mcpPanelStateProvider ? mcpPanelStateProvider() : { providers: [], connected: [], tools: [] });
+		}
 		if (req.method === "POST" && url.pathname === "/api/auth-panel/action") {
 			let body = "";
 			req.on("data", (chunk) => {
@@ -1953,6 +2072,24 @@ export function startWebUiServer(options: { port?: number; staticRoot?: string }
 						await listener(data);
 					}
 					return json(res, { ok: true, message: "Panel islemi TUI'ya gonderildi." });
+				} catch (err: any) {
+					return json(res, { ok: false, error: err.message });
+				}
+			});
+			return;
+		}
+		if (req.method === "POST" && url.pathname === "/api/mcp-panel/action") {
+			let body = "";
+			req.on("data", (chunk) => {
+				body += chunk;
+			});
+			req.on("end", async () => {
+				try {
+					const data = JSON.parse(body || "{}");
+					for (const listener of webUiMcpActionListeners) {
+						await listener(data);
+					}
+					return json(res, { ok: true, message: "MCP islemi uygulandi." });
 				} catch (err: any) {
 					return json(res, { ok: false, error: err.message });
 				}
@@ -2032,6 +2169,11 @@ export function startWebUiServer(options: { port?: number; staticRoot?: string }
 		if (url.pathname === "/panel" || url.pathname === "/login") {
 			res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
 			res.end(AUTH_PANEL_HTML);
+			return;
+		}
+		if (url.pathname === "/mcp") {
+			res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+			res.end(MCP_PANEL_HTML);
 			return;
 		}
 		if (serveAsset(res, url.pathname)) return;
