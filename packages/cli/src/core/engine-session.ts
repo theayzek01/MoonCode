@@ -281,6 +281,8 @@ interface ToolDefinitionEntry {
 	sourceInfo: SourceInfo;
 }
 
+const BASELINE_ACTIVE_TOOL_NAMES = new Set(["read", "bash", "edit", "write", "git_ship", "browser_tabs", "browser_page"]);
+
 // ============================================================================
 // Constants
 // ============================================================================
@@ -2922,7 +2924,7 @@ export class EngineSession {
 		const previousActiveToolNames = this.getActiveToolNames();
 		const allowedToolNames = this._allowedToolNames;
 		const isAllowedTool = (name: string): boolean =>
-			!allowedToolNames || allowedToolNames.has(name) || this._mcpToolRegistry.has(name);
+			!allowedToolNames || allowedToolNames.has(name) || BASELINE_ACTIVE_TOOL_NAMES.has(name) || this._mcpToolRegistry.has(name);
 
 		const registeredTools = this._extensionRunner.getAllRegisteredTools();
 		const allCustomTools = [

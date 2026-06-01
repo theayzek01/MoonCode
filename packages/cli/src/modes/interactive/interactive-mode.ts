@@ -1024,6 +1024,22 @@ export class InteractiveMode {
 					/\b(mp4|mov|mkv|webm|avi|m4v)\b/i.test(userInput) ||
 					lowerInput.includes("video") ||
 					lowerInput.includes("klip");
+				const scratchEditIntentTerms = [
+					"scratch projesini düzenle",
+					"scratch düzenle",
+					"turbowarp projesini düzenle",
+					"turbowarp düzenle",
+					"scratch edit",
+					"turbowarp edit",
+					"scratch projesi",
+					"turbowarp projesi",
+					"scratch'i aç",
+					"turbowarp'ı aç",
+					"scratch bagla",
+					"turbowarp bagla",
+					"scratch bağla",
+					"turbowarp bağla"
+				];
 				const isVideo =
 					videoEditIntentTerms.some((term) => lowerInput.includes(term)) ||
 					(hasVideoFileHint &&
@@ -1034,6 +1050,7 @@ export class InteractiveMode {
 						/\b(leke|cilt|yüz|goz|göz|portre|retouch|rötuş|arka plan|obje|nesne|upscale|netleştir|yumuşat|temizle|renk|lut|kontrast|parlaklık)\b/i.test(
 							userInput,
 						));
+				const isScratch = scratchEditIntentTerms.some((term) => lowerInput.includes(term));
 
 				if (isVideo) {
 					await this.handleVideoEditCommand();
@@ -1041,6 +1058,19 @@ export class InteractiveMode {
 				} else if (isPhoto) {
 					await this.handlePhotoEditCommand();
 					promptInput = `[Sistem: Kullanıcının mesajı profesyonel fotoğraf düzenleme/retouch niyeti taşıyor; MoonCode Photo Studio tarayıcıda otomatik açıldı. Komut yazmasını bekleme. Önce klasördeki uygun görsel dosyayı bul (png/jpg/webp vb.), sonra Photo Studio ve Browser Bridge üzerinden yükleme/işlem akışını yürüt. İstenen işlem örn. yüz lekesi temizleme, cilt yumuşatma, göz netleştirme, profesyonel portre, arka plan/obje kaldırma, LUT/curves/upscale/export olabilir. Gerekirse yalnızca eksik dosya yolu veya export hedefi sor.]\n\n${userInput}`;
+				} else if (isScratch) {
+					const scratchConfig = this.getScratchMcpConfig();
+					if (fs.existsSync(scratchConfig.args[0])) {
+						try {
+							this.showStatus("Scratch/TurboWarp MCP otomatik bağlanıyor...");
+							const tools = await this.activateMcpServer("scratch", scratchConfig);
+							const scratchTools = tools.filter((t) => t.startsWith("scratch_"));
+							this.showStatus(`Scratch MCP bağlandı. ${scratchTools.length || tools.length} araç aktif.`);
+						} catch (err) {
+							this.showWarning(`Scratch MCP otomatik bağlanamadı: ${err instanceof Error ? err.message : String(err)}`);
+						}
+					}
+					promptInput = `[Sistem: Kullanıcının talebi üzerine Scratch/TurboWarp MCP entegrasyonu (scratch_*) otomatik olarak bağlandı/aktif edildi. Lütfen projedeki sprite'ları, sahneleri, blokları, değişkenleri ve listeleri scratch_* araçları ile kontrol et ve düzenlemeleri yap. Chrome extension'ın yüklü ve aktif olduğundan emin olun.]\n\n${userInput}`;
 				}
 
 				await this.session.prompt(promptInput, { images });
@@ -1841,10 +1871,18 @@ export class InteractiveMode {
 	private async autoConnectDefaultMcpServers(): Promise<void> {
 		try {
 			const scratchConfig = this.getScratchMcpConfig();
+			const existingMcpServers = this.settingsManager.getMcpServers();
+			for (const name of Object.keys(existingMcpServers)) {
+				if (name.toLowerCase().startsWith("scratch") && name !== "scratch") {
+					this.settingsManager.removeMcpServer(name);
+				}
+			}
 			if (scratchConfig.args?.[0] && fs.existsSync(scratchConfig.args[0])) {
 				this.settingsManager.setMcpServer("scratch", scratchConfig);
 			}
-			this.settingsManager.setMcpServer("blender", this.getBlenderMcpConfig());
+			if (!existingMcpServers["blender"]) {
+				this.settingsManager.setMcpServer("blender", this.getBlenderMcpConfig());
+			}
 			await this.settingsManager.flush();
 			const tools = await this.session.connectConfiguredMcpServers();
 			const mcpToolCount = tools.filter((tool) => tool.startsWith("scratch_") || tool.startsWith("blender_")).length;
@@ -7950,8 +7988,8 @@ export class InteractiveMode {
 	private getBlenderMcpConfig() {
 		return {
 			command: "cmd",
-			args: ["/c", "uvx", "blender-mcp"],
-			env: { DISABLE_TELEMETRY: "true" },
+			args: ["/c", "uvx", "--python", "3.12", "blender-mcp"],
+			env: { DISABLE_TELEMETRY: "true", UV_PYTHON: "3.12" },
 			autoStart: false,
 		};
 	}
