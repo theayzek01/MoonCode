@@ -113,6 +113,7 @@ import { ExtensionEditorComponent } from "./components/extension-editor.js";
 import { ExtensionInputComponent } from "./components/extension-input.js";
 import { ExtensionSelectorComponent } from "./components/extension-selector.js";
 import { FooterComponent } from "./components/footer.js";
+import { MoonAgentIntroComponent } from "./components/intro.js";
 import { keyHint, keyText, rawKeyHint } from "./components/keybinding-hints.js";
 import { LoginDialogComponent } from "./components/login-dialog.js";
 import { McpSelectorComponent } from "./components/mcp-selector.js";
@@ -679,6 +680,9 @@ export class InteractiveMode {
 			return;
 		}
 		this.startupNoticesShown = true;
+
+		const introText = new MoonAgentIntroComponent(() => this.ui.requestRender());
+		this.chatContainer.addChild(introText);
 		return;
 
 		// ASCII intro - tek seferlik açılış
