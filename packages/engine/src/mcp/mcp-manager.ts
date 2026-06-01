@@ -79,7 +79,9 @@ class HeaderStdioMcpClient {
 		this.proc.stdout.on("data", (chunk) => this.read(chunk));
 		this.proc.stderr.on("data", (chunk) => {
 			const text = chunk.toString().trim();
-			if (text) console.error(`[MCP:${this.name}] ${text}`);
+			if (text && process.env.MOON_MCP_DEBUG === "1") {
+				console.error(`[MCP:${this.name}] ${text}`);
+			}
 		});
 		this.proc.on("exit", (code) => {
 			const error = new Error(`MCP server ${this.name} exited with code ${code}`);

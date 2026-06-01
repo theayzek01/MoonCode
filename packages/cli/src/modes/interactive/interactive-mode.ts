@@ -812,6 +812,7 @@ export class InteractiveMode {
 		// Start the UI before initializing extensions so session_start handlers can use interactive dialogs
 		this.ui.start();
 		this.isInitialized = true;
+		this.scheduleStartupViewportStabilization();
 
 		// Initialize extensions first so resources are shown before messages
 		await this.rebindCurrentSession();
@@ -836,6 +837,17 @@ export class InteractiveMode {
 
 		this.isInitialized = true;
 		this.initPromise = undefined;
+	}
+
+	private scheduleStartupViewportStabilization(): void {
+		const delays = [40, 120, 280, 650];
+		for (const delay of delays) {
+			setTimeout(() => {
+				if (!this.isInitialized) return;
+				this.ui.invalidate();
+				this.ui.requestRender(true);
+			}, delay).unref?.();
+		}
 	}
 
 	private toggleZenMode(): void {

@@ -36,10 +36,10 @@ function center(line: string, width: number): string {
 
 function buildWordmark(width: number, tick: number): string {
 	const palette: Array<[number, number, number]> = [
-		[255, 238, 238],
-		[255, 150, 150],
-		[220, 44, 56],
-		[95, 16, 24],
+		[255, 248, 248],
+		[255, 211, 211],
+		[246, 93, 105],
+		[170, 36, 50],
 	];
 	const word = "MOONCODE";
 	const phase = tick % 90;
@@ -50,7 +50,9 @@ export function buildIntroLines(width: number, phase = 0): string[] {
 	const dim = (s: string) => `\x1b[38;2;136;96;100m${s}\x1b[39m`;
 	const soft = (s: string) => `\x1b[38;2;255;190;190m${s}\x1b[39m`;
 	const glow = (s: string) => `\x1b[1m\x1b[38;2;255;238;238m${s}\x1b[39m\x1b[22m`;
-	const lineWidth = Math.max(24, Math.min(width - 8, 92));
+	const star = (s: string) => `\x1b[38;2;255;214;214m${s}\x1b[39m`;
+	const safeWidth = Math.max(24, Math.min(width, 104));
+	const lineWidth = Math.max(24, Math.min(safeWidth - 12, 78));
 	const rule = center(
 		gradient("=".repeat(lineWidth), phase / 2, [
 			[80, 18, 26],
@@ -62,11 +64,12 @@ export function buildIntroLines(width: number, phase = 0): string[] {
 	const wordmark = buildWordmark(width, phase);
 	const title = center(glow("Fast coding agent. Clean tools. Quiet output."), width);
 	const sub = center(soft("MCP, Browser Bridge, sessions, and DreamKernel reflexes"), width);
+	const stars = center(star("*     .        *        .      *"), width);
 
 	return [
 		"",
+		stars,
 		wordmark,
-		"",
 		title,
 		sub,
 		"",

@@ -347,7 +347,6 @@ export class TUI extends Container {
 	public onDebug?: () => void;
 	private renderRequested = false;
 	private renderTimer: NodeJS.Timeout | undefined;
-	private animInterval: NodeJS.Timeout | undefined;
 	private lastRenderAt = 0;
 	private readonly minRenderIntervalMs = resolveMinRenderIntervalMs();
 	private cursorRow = 0; // Logical cursor row (end of rendered content)
@@ -541,18 +540,11 @@ export class TUI extends Container {
 		this.stopped = false;
 		this.terminal.start(
 			(data) => this.handleInput(data),
-			() => this.requestRender(false),
+			() => this.requestRender(true),
 		);
 		this.terminal.hideCursor();
 		this.queryCellSize();
 		this.requestRender(true);
-
-		if (this.animInterval) clearInterval(this.animInterval);
-		this.animInterval = setInterval(() => {
-			if (!this.stopped) {
-				this.requestRender(false);
-			}
-		}, 30);
 	}
 
 	addInputListener(listener: InputListener): () => void {
@@ -581,10 +573,6 @@ export class TUI extends Container {
 		if (this.renderTimer) {
 			clearTimeout(this.renderTimer);
 			this.renderTimer = undefined;
-		}
-		if (this.animInterval) {
-			clearInterval(this.animInterval);
-			this.animInterval = undefined;
 		}
 		// Move cursor to the end of the content to prevent overwriting/artifacts on exit
 		if (this.previousLines.length > 0) {
@@ -1098,7 +1086,6 @@ export class TUI extends Container {
 				if (i > 0) buffer += "\r\n";
 				buffer += newLines[i];
 			}
-			buffer += "\x1b[J";
 			if (useSynchronizedOutput) buffer += "\x1b[?2026l";
 			this.terminal.write(buffer);
 			this.cursorRow = Math.max(0, newLines.length - 1);
@@ -1125,10 +1112,12 @@ export class TUI extends Container {
 			fs.appendFileSync(logPath, msg);
 		};
 
-		// First render - just output everything without clearing (assumes clean screen)
+		// First render must clear the viewport. Windows Terminal can report its
+		// final dimensions a moment after process start; assuming a clean screen
+		// leaves stale rows above the composer until the user resizes.
 		if (this.previousLines.length === 0 && !widthChanged && !heightChanged) {
 			logRedraw("first render");
-			fullRender(false);
+			fullRender(true);
 			return;
 		}
 
@@ -1336,7 +1325,14 @@ export class TUI extends Container {
 				buffer += `\x1b[${moveDown}B`;
 				finalCursorRow = newLines.length - 1;
 			}
-			buffer += "\r\x1b[J";
+			const extraLines = this.previousLines.length - newLines.length;
+			for (let i = newLines.length; i < this.previousLines.length; i++) {
+				buffer += "\r\n\x1b[2K";
+			}
+			// Move cursor back to end of new content
+			if (extraLines > 0) {
+				buffer += `\x1b[${extraLines}A`;
+			}
 		} else if (renderEnd < newLines.length - 1 && lastChanged < newLines.length - 1) {
 			// Content didn't shrink but we only rendered up to lastChanged.
 			// Verify the remaining lines below renderEnd match previous.
