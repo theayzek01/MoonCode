@@ -5503,19 +5503,46 @@ export class InteractiveMode {
 				},
 
 				onPrompt: async (prompt: { message: string; placeholder?: string }) => {
+					if (usePanel) {
+						options?.panelServer?.setAuthPanelOAuthEvent?.({
+							providerId,
+							providerName,
+							instructions: prompt.message,
+							status: "waiting_for_redirect",
+						});
+						return manualCodePromise;
+					}
 					return dialog.showPrompt(prompt.message, prompt.placeholder);
 				},
 
 				onProgress: (message: string) => {
+					if (usePanel) {
+						options?.panelServer?.setAuthPanelOAuthEvent?.({
+							providerId,
+							providerName,
+							instructions: message,
+							status: "progress",
+						});
+						return;
+					}
 					dialog.showProgress(message);
 				},
 				onInfo: (lines: string[]) => {
+					if (usePanel) {
+						options?.panelServer?.setAuthPanelOAuthEvent?.({
+							providerId,
+							providerName,
+							instructions: lines.join("\n"),
+							status: "info",
+						});
+						return;
+					}
 					dialog.showInfo(lines);
 				},
 
 				onManualCodeInput: () => manualCodePromise,
 
-				signal: dialog.signal,
+				signal: usePanel ? undefined : dialog.signal,
 			});
 
 			// Success
@@ -5703,8 +5730,7 @@ export class InteractiveMode {
 			if (action?.action === "oauth_login") {
 				const option = this.getLoginProviderOptions("oauth").find((provider) => provider.id === providerId);
 				if (!option) throw new Error("OAuth saglayici bulunamadi.");
-				this.showStatus(`${option.name} abonelik girisi panelden baslatildi.`);
-				await this.showLoginDialog(option.id, label || option.name);
+				await this.showLoginDialog(option.id, label || option.name, { panelServer: server });
 				return;
 			}
 			if (action?.action === "save_api_key") {

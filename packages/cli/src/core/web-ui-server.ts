@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { getSessionsDir } from "../config.js";
 
 const INDEX_HTML = `<!doctype html>
-<html lang="tr">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -450,7 +450,7 @@ if (sessionsEl) {
 }`;
 
 const APP_HTML = `<!doctype html>
-<html lang="tr">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -1724,54 +1724,61 @@ const AUTH_PANEL_HTML = `<!doctype html>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MoonCode Kontrol Paneli</title>
+  <title>MoonCode Control Panel</title>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <style>
     :root {
-      color-scheme: light;
-      --md-sys-color-primary: #6750a4;
-      --md-sys-color-on-primary: #fff;
-      --md-sys-color-primary-container: #eaddff;
-      --md-sys-color-secondary-container: #e8def8;
-      --md-sys-color-surface: #fffbfe;
-      --md-sys-color-surface-container: #f3edf7;
-      --md-sys-color-surface-container-high: #ece6f0;
-      --md-sys-color-outline: #79747e;
-      --md-sys-color-on-surface: #1d1b20;
-      --md-sys-color-on-surface-variant: #49454f;
+      color-scheme: dark;
+      --md-sys-color-primary: #55f0a6;
+      --md-sys-color-on-primary: #03130b;
+      --md-sys-color-primary-container: #0f3d2a;
+      --md-sys-color-secondary-container: #14261f;
+      --md-sys-color-surface: #050806;
+      --md-sys-color-surface-container: #0b110d;
+      --md-sys-color-surface-container-high: #111b15;
+      --md-sys-color-outline: #244537;
+      --md-sys-color-on-surface: #ecfff5;
+      --md-sys-color-on-surface-variant: #99b9aa;
       --radius: 18px;
       font-family: Roboto, Inter, "Segoe UI", system-ui, sans-serif;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; background: linear-gradient(180deg, #fffbfe, #f6f1fa); color: var(--md-sys-color-on-surface); }
+    body { margin: 0; background: radial-gradient(circle at top left, #123823 0, transparent 34%), linear-gradient(180deg, #030604, #07100b 54%, #020403); color: var(--md-sys-color-on-surface); }
     .app { min-height: 100vh; display: grid; grid-template-columns: 280px 1fr; }
-    aside { background: rgba(243, 237, 247, .86); backdrop-filter: blur(18px); padding: 24px 16px; border-right: 1px solid #ddd7e3; }
+    aside { background: rgba(7, 15, 10, .82); backdrop-filter: blur(18px); padding: 24px 16px; border-right: 1px solid #143323; }
     .brand { display: flex; align-items: center; gap: 12px; padding: 8px 12px 24px; font-weight: 700; font-size: 22px; }
-    .mark { width: 38px; height: 38px; border-radius: 12px; background: var(--md-sys-color-primary); color: white; display: grid; place-items: center; }
-    nav button { width: 100%; border: 0; background: transparent; color: var(--md-sys-color-on-surface-variant); border-radius: 999px; padding: 14px 18px; text-align: left; font: inherit; cursor: pointer; }
+    .mark { width: 38px; height: 38px; border-radius: 12px; background: linear-gradient(135deg,#55f0a6,#0e7a49); color: #03130b; display: grid; place-items: center; box-shadow: 0 0 35px rgba(85,240,166,.22); }
+    nav button { width: 100%; border: 0; background: transparent; color: var(--md-sys-color-on-surface-variant); border-radius: 999px; padding: 14px 18px; text-align: left; font: inherit; cursor: pointer; display: flex; align-items: center; gap: 10px; }
     nav button.active { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-surface); font-weight: 700; }
     main { padding: 28px; max-width: 1320px; width: 100%; }
     .top { display: flex; justify-content: space-between; gap: 16px; align-items: start; margin-bottom: 24px; }
     h1 { font-size: clamp(28px, 4vw, 48px); line-height: 1; margin: 0 0 10px; letter-spacing: 0; }
     .sub { color: var(--md-sys-color-on-surface-variant); margin: 0; max-width: 720px; }
     .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
-    .card { background: rgba(255,255,255,.74); border-radius: var(--radius); padding: 22px; border: 1px solid #e2dce8; box-shadow: 0 18px 45px rgba(55, 45, 80, .08); }
-    .hero { grid-column: span 8; min-height: 210px; background: linear-gradient(135deg, var(--md-sys-color-primary-container), #fef7ff); }
+    .card { background: linear-gradient(180deg, rgba(19, 33, 25, .9), rgba(7, 13, 9, .92)); border-radius: var(--radius); padding: 22px; border: 1px solid #1b4a32; box-shadow: 0 24px 60px rgba(0,0,0,.32), inset 0 1px 0 rgba(119,255,181,.08); }
+    .hero { grid-column: span 8; min-height: 210px; background: linear-gradient(135deg, rgba(25,91,57,.95), rgba(7,20,13,.96)); }
     .side { grid-column: span 4; }
     .full { grid-column: 1 / -1; }
     .stat { display: grid; gap: 8px; }
     .stat b { font-size: 34px; }
     .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
-    .btn { border: 0; border-radius: 999px; padding: 12px 18px; font-weight: 700; cursor: pointer; background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
+    .btn { border: 0; border-radius: 999px; padding: 12px 18px; font-weight: 800; cursor: pointer; background: linear-gradient(135deg,#55f0a6,#21b86d); color: var(--md-sys-color-on-primary); box-shadow: 0 12px 30px rgba(33,184,109,.18); transition: transform .18s ease, filter .18s ease; }
+    .btn:hover { transform: translateY(-1px); filter: brightness(1.08); }
     .btn.secondary { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-surface); }
     .btn.ghost { background: transparent; color: var(--md-sys-color-primary); border: 1px solid var(--md-sys-color-outline); }
     table { width: 100%; border-collapse: collapse; overflow: hidden; }
-    th, td { text-align: left; padding: 14px 10px; border-bottom: 1px solid #ded8e4; vertical-align: middle; }
+    th, td { text-align: left; padding: 14px 10px; border-bottom: 1px solid #183525; vertical-align: middle; }
     th { color: var(--md-sys-color-on-surface-variant); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
     .pill { display: inline-flex; align-items: center; gap: 8px; padding: 7px 11px; border-radius: 999px; background: var(--md-sys-color-primary-container); font-size: 13px; }
     .muted { color: var(--md-sys-color-on-surface-variant); }
     .form { display: grid; gap: 14px; max-width: 760px; }
-    select, input { width: 100%; border: 1px solid #c8c1cf; border-radius: 14px; padding: 14px; background: #fff; font: inherit; outline-color: var(--md-sys-color-primary); }
-    .oauth-box { display: none; gap: 10px; padding: 16px; border-radius: 18px; background: #f4edff; border: 1px solid #d8c9ff; }
+    select, input { width: 100%; border: 1px solid #244537; border-radius: 14px; padding: 14px; background: #07100b; color: var(--md-sys-color-on-surface); font: inherit; outline-color: var(--md-sys-color-primary); }
+    .choice-grid,.provider-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+    .choice,.provider-card{border:1px solid #1b4a32;background:rgba(8,18,12,.9);border-radius:22px;padding:20px;text-align:left;color:inherit;cursor:pointer;transition:.22s ease}
+    .choice:hover,.provider-card:hover{transform:translateY(-2px);border-color:#55f0a6;box-shadow:0 18px 45px rgba(33,184,109,.14)}
+    nav svg{width:18px;height:18px}.choice svg,.provider-card svg{width:28px;height:28px;color:#55f0a6;margin-bottom:16px}
+    .slide{animation:slideIn .28s ease both}@keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+    .oauth-box { display: none; gap: 10px; padding: 16px; border-radius: 18px; background: #0d2518; border: 1px solid #235b3e; }
     .oauth-box.show { display: grid; }
     .oauth-url { word-break: break-all; color: var(--md-sys-color-primary); font-size: 13px; }
     label { display: grid; gap: 6px; font-weight: 650; }
@@ -1780,7 +1787,7 @@ const AUTH_PANEL_HTML = `<!doctype html>
     .toast.show { opacity: 1; transform: translateY(0); }
     @media (max-width: 860px) {
       .app { grid-template-columns: 1fr; }
-      aside { position: sticky; top: 0; z-index: 5; border-right: 0; border-bottom: 1px solid #ddd7e3; }
+      aside { position: sticky; top: 0; z-index: 5; border-right: 0; border-bottom: 1px solid #143323; }
       nav { display: flex; overflow: auto; gap: 8px; }
       nav button { white-space: nowrap; width: auto; }
       .hero, .side { grid-column: 1 / -1; }
@@ -1793,40 +1800,48 @@ const AUTH_PANEL_HTML = `<!doctype html>
     <aside>
       <div class="brand"><span class="mark">M</span><span>MoonCode</span></div>
       <nav>
-        <button class="active" data-tab="overview">Kontrol</button>
-        <button data-tab="login">Login</button>
-        <button data-tab="accounts">Hesaplar</button>
-        <button data-tab="providers">Saglayicilar</button>
+        <button class="active" data-tab="overview"><i data-lucide="layout-dashboard"></i> Control</button>
+        <button data-tab="login"><i data-lucide="log-in"></i> Login</button>
+        <button data-tab="accounts"><i data-lucide="users"></i> Accounts</button>
+        <button data-tab="providers"><i data-lucide="plug"></i> Providers</button>
       </nav>
     </aside>
     <main>
       <section id="overview" class="tab">
-        <div class="top"><div><h1>Kontrol ve hesap paneli</h1><p class="sub">Local calisir. Hesap ekle, aktif hesabi degistir, son kullanim ve kota notlarini takip et.</p></div><button class="btn secondary" onclick="refresh()">Yenile</button></div>
+        <div class="top"><div><h1>Control panel</h1><p class="sub">Manage accounts, provider status, usage notes, and login flows from one local dashboard.</p></div><button class="btn secondary" onclick="refresh()">Refresh</button></div>
         <div class="grid">
-          <article class="card hero"><h2>Hizli giris</h2><p class="muted">MoonCode TUI icinden secim yapmak yerine bu panelden abonelik veya API anahtari akisini baslat.</p><div class="actions"><button class="btn" onclick="showTab('login')">Abonelik kullan</button><button class="btn secondary" onclick="showTab('login','api_key')">API anahtari kullan</button></div></article>
-          <article class="card side stat"><span class="muted">Kayitli hesap</span><b id="statAccounts">0</b><span id="statActive" class="pill">aktif yok</span></article>
-          <article class="card side stat"><span class="muted">Saglayici</span><b id="statProviders">0</b><span class="muted">model registry</span></article>
-          <article class="card side stat"><span class="muted">Kullanilabilir model</span><b id="statModels">0</b><span class="muted">auth ile acilan</span></article>
+          <article class="card hero"><h2>Fast login</h2><p class="muted">Start subscription or API-key login here. OAuth URLs stay inside this panel and open automatically.</p><div class="actions"><button class="btn" onclick="showTab('login')">Open login</button><button class="btn secondary" onclick="showTab('login','api_key')">Use API key</button></div></article>
+          <article class="card side stat"><span class="muted">Accounts</span><b id="statAccounts">0</b><span id="statActive" class="pill">none active</span></article>
+          <article class="card side stat"><span class="muted">Providers</span><b id="statProviders">0</b><span class="muted">registry</span></article>
+          <article class="card side stat"><span class="muted">Available models</span><b id="statModels">0</b><span class="muted">auth unlocked</span></article>
         </div>
       </section>
       <section id="login" class="tab hidden">
-        <div class="top"><div><h1>Login</h1><p class="sub">Abonelik giris linki terminale dusmez; bu panel linki yakalar ve tarayiciyi otomatik yonlendirir. API key panelden direkt kaydedilir.</p></div></div>
-        <div class="card form">
-          <label>Yontem<select id="authType" onchange="renderProviderOptions()"><option value="oauth">Abonelik kullan</option><option value="api_key">API anahtari kullan</option></select></label>
-          <label>Saglayici<select id="provider"></select></label>
-          <label id="labelWrap">Hesap etiketi<input id="label" placeholder="Orn: OpenAI is hesabi" /></label>
-          <label id="keyWrap" class="hidden">API anahtari<input id="apiKey" type="password" autocomplete="off" placeholder="sk-..." /></label>
-          <div id="oauthBox" class="oauth-box"><b>Giris linki hazirlaniyor</b><span id="oauthText" class="muted">Saglayicidan login URL bekleniyor...</span><a id="oauthLink" class="oauth-url" target="_blank" rel="noreferrer"></a></div>
-          <div class="actions"><button class="btn" onclick="submitLogin()">Giris yap</button><button class="btn ghost" onclick="refresh()">Durumu yenile</button></div>
+        <div class="top"><div><h1>Choose how to sign in</h1><p class="sub">Pick a method, then choose a provider. Subscription login opens the provider link automatically from this page.</p></div></div>
+        <div class="card form slide">
+          <div id="methodGrid" class="choice-grid">
+            <button class="choice" onclick="chooseAuth('api_key')"><i data-lucide="key-round"></i><h2>API key</h2><p class="muted">Paste and save a provider key.</p></button>
+            <button class="choice" onclick="chooseAuth('oauth')"><i data-lucide="badge-check"></i><h2>Subscription</h2><p class="muted">Claude, ChatGPT, Copilot and more.</p></button>
+          </div>
+          <input id="authType" type="hidden" value="oauth" />
+          <div id="providerStep" class="hidden slide">
+            <h2>Select provider</h2>
+            <div id="providerCards" class="provider-grid"></div>
+          </div>
+          <input id="provider" type="hidden" />
+          <label id="labelWrap" class="hidden">Account label<input id="label" placeholder="Example: Work account" /></label>
+          <label id="keyWrap" class="hidden">API key<input id="apiKey" type="password" autocomplete="off" placeholder="sk-..." /></label>
+          <div id="oauthBox" class="oauth-box"><b>Preparing login</b><span id="oauthText" class="muted">Waiting for the provider login URL...</span><a id="oauthLink" class="oauth-url" target="_blank" rel="noreferrer"></a></div>
+          <div class="actions"><button class="btn" onclick="submitLogin()">Sign in</button><button class="btn ghost" onclick="showTab('login')">Back</button></div>
         </div>
       </section>
       <section id="accounts" class="tab hidden">
-        <div class="top"><div><h1>Hesaplar</h1><p class="sub">Aktif hesap provider credential olarak uygulanir. Son kullanim, kullanim sayisi ve kota notu burada tutulur.</p></div></div>
-        <article class="card full"><table><thead><tr><th>Aktif</th><th>Etiket</th><th>Provider</th><th>Tip</th><th>Son kullanim</th><th>Kullanim</th><th>Kota</th><th></th></tr></thead><tbody id="accountsTable"></tbody></table></article>
+        <div class="top"><div><h1>Accounts</h1><p class="sub">The active account is applied as provider credentials. Last use, use count, and quota notes stay here.</p></div></div>
+        <article class="card full"><table><thead><tr><th>Active</th><th>Label</th><th>Provider</th><th>Type</th><th>Last used</th><th>Uses</th><th>Quota</th><th></th></tr></thead><tbody id="accountsTable"></tbody></table></article>
       </section>
       <section id="providers" class="tab hidden">
-        <div class="top"><div><h1>Saglayicilar</h1><p class="sub">Model registry ve auth durumu.</p></div></div>
-        <article class="card full"><table><thead><tr><th>Provider</th><th>Ad</th><th>OAuth</th><th>API key</th><th>Durum</th><th>Model</th></tr></thead><tbody id="providersTable"></tbody></table></article>
+        <div class="top"><div><h1>Providers</h1><p class="sub">Model registry and authentication status.</p></div></div>
+        <article class="card full"><table><thead><tr><th>Provider</th><th>Name</th><th>OAuth</th><th>API key</th><th>Status</th><th>Models</th></tr></thead><tbody id="providersTable"></tbody></table></article>
       </section>
     </main>
   </div>
@@ -1839,16 +1854,52 @@ const AUTH_PANEL_HTML = `<!doctype html>
       tabs.forEach(t => t.classList.toggle('hidden', t.id !== id));
       nav.forEach(b => b.classList.toggle('active', b.dataset.tab === id));
       if (authType) document.getElementById('authType').value = authType;
+      if (id === 'login' && !authType) {
+        document.getElementById('methodGrid').classList.remove('hidden');
+        document.getElementById('providerStep').classList.add('hidden');
+        document.getElementById('provider').value = '';
+        document.getElementById('labelWrap').classList.add('hidden');
+        document.getElementById('keyWrap').classList.add('hidden');
+        document.getElementById('oauthBox').classList.remove('show');
+      }
       renderProviderOptions();
+      if (window.lucide) lucide.createIcons();
     }
     nav.forEach(b => b.onclick = () => showTab(b.dataset.tab));
     function toast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2600); }
-    function fmt(ts) { return ts ? new Date(ts).toLocaleString() : 'hic'; }
+    function fmt(ts) { return ts ? new Date(ts).toLocaleString() : 'never'; }
+    function providerIcon(id) {
+      if (id.includes('anthropic')) return 'sparkles';
+      if (id.includes('antigravity')) return 'orbit';
+      if (id.includes('openai') || id.includes('chatgpt')) return 'bot';
+      if (id.includes('github')) return 'github';
+      if (id.includes('ollama')) return 'server';
+      return 'plug';
+    }
+    function prettyProvider(p) {
+      const id = p.id.toLowerCase();
+      if (id.includes('anthropic')) return 'Anthropic';
+      if (id.includes('antigravity')) return 'Antigravity';
+      if (id.includes('openai') || id.includes('chatgpt')) return 'ChatGPT';
+      if (id.includes('github')) return 'GitHub Copilot';
+      if (id.includes('ollama')) return 'Ollama';
+      return p.name;
+    }
+    function chooseAuth(type) {
+      document.getElementById('authType').value = type;
+      document.getElementById('provider').value = '';
+      document.getElementById('labelWrap').classList.add('hidden');
+      document.getElementById('keyWrap').classList.add('hidden');
+      document.getElementById('oauthBox').classList.remove('show');
+      document.getElementById('methodGrid').classList.add('hidden');
+      document.getElementById('providerStep').classList.remove('hidden');
+      renderProviderOptions();
+    }
     async function action(payload) {
       const res = await fetch('/api/auth-panel/action', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       const json = await res.json();
-      if (!json.ok) throw new Error(json.error || 'islem basarisiz');
-      toast(json.message || 'islem tamam');
+      if (!json.ok) throw new Error(json.error || 'action failed');
+      toast(json.message || 'Done');
       await refresh();
     }
     let oauthPollTimer = 0;
@@ -1858,16 +1909,21 @@ const AUTH_PANEL_HTML = `<!doctype html>
       const text = document.getElementById('oauthText');
       const link = document.getElementById('oauthLink');
       box.classList.add('show');
-      text.textContent = 'Login linki bekleniyor...';
+      text.textContent = 'Waiting for login URL...';
       link.textContent = '';
       link.removeAttribute('href');
       oauthPollTimer = setInterval(async () => {
         try {
           const res = await fetch('/api/auth-panel/oauth-event?providerId=' + encodeURIComponent(providerId) + '&t=' + Date.now());
           const event = await res.json();
+          if (event && event.error) {
+            clearInterval(oauthPollTimer);
+            text.textContent = event.error;
+            return;
+          }
           if (!event || !event.url) return;
           clearInterval(oauthPollTimer);
-          text.textContent = event.instructions || 'Tarayici login sayfasina yonlendiriliyor.';
+          text.textContent = event.instructions || 'Redirecting to provider login...';
           link.href = event.url;
           link.textContent = event.url;
           setTimeout(() => { window.location.href = event.url; }, 250);
@@ -1876,32 +1932,40 @@ const AUTH_PANEL_HTML = `<!doctype html>
     }
     function renderProviderOptions() {
       const type = document.getElementById('authType').value;
-      document.getElementById('keyWrap').classList.toggle('hidden', type !== 'api_key');
+      const hasProvider = Boolean(document.getElementById('provider').value);
+      document.getElementById('labelWrap').classList.toggle('hidden', !hasProvider);
+      document.getElementById('keyWrap').classList.toggle('hidden', type !== 'api_key' || !hasProvider);
       const providers = state.providers.filter(p => type === 'oauth' ? p.supportsOAuth : p.supportsApiKey);
-      document.getElementById('provider').innerHTML = providers.map(p => '<option value="' + p.id + '">' + p.name + '</option>').join('');
+      document.getElementById('providerCards').innerHTML = providers.map(p => '<button class="provider-card" onclick="selectProvider(\\'' + p.id + '\\')"><i data-lucide="' + providerIcon(p.id) + '"></i><h3>' + prettyProvider(p) + '</h3><p class="muted">' + p.id + '</p></button>').join('');
+      if (window.lucide) lucide.createIcons();
+    }
+    function selectProvider(id) {
+      document.getElementById('provider').value = id;
+      renderProviderOptions();
+      if (document.getElementById('authType').value === 'oauth') submitLogin();
     }
     async function submitLogin() {
       const authType = document.getElementById('authType').value;
       const providerId = document.getElementById('provider').value;
       const label = document.getElementById('label').value;
       const apiKey = document.getElementById('apiKey').value;
-      if (!providerId) return toast('Saglayici sec');
-      if (authType === 'api_key' && !apiKey.trim()) return toast('API anahtari gir');
+      if (!providerId) return toast('Select provider');
+      if (authType === 'api_key' && !apiKey.trim()) return toast('Enter API key');
       if (authType === 'oauth') pollOAuth(providerId);
       await action({ action: authType === 'oauth' ? 'oauth_login' : 'save_api_key', providerId, label, apiKey });
       document.getElementById('apiKey').value = '';
     }
     async function setActive(id) { await action({ action: 'set_active', accountId: id }); }
-    async function removeAccount(id) { if (confirm('Hesap kaldirilsin mi?')) await action({ action: 'remove_account', accountId: id }); }
+    async function removeAccount(id) { if (confirm('Remove this account?')) await action({ action: 'remove_account', accountId: id }); }
     function render() {
       document.getElementById('statAccounts').textContent = state.accounts.length;
       document.getElementById('statProviders').textContent = state.providers.length;
       document.getElementById('statModels').textContent = state.models.available || 0;
       const active = state.accounts.filter(a => a.active).map(a => a.provider + ': ' + a.label).join(', ');
-      document.getElementById('statActive').textContent = active || 'aktif yok';
+      document.getElementById('statActive').textContent = active || 'none active';
       renderProviderOptions();
-      document.getElementById('accountsTable').innerHTML = state.accounts.map(a => '<tr><td>' + (a.active ? '<span class="pill">aktif</span>' : '') + '</td><td><b>' + a.label + '</b><div class="muted">' + a.id + '</div></td><td>' + a.provider + '</td><td>' + a.type + '</td><td>' + fmt(a.lastUsedAt) + '</td><td>' + (a.useCount || 0) + '</td><td>' + (a.quotaLabel || 'not yok') + '</td><td><button class="btn secondary" onclick="setActive(\\'' + a.id + '\\')">Aktif yap</button> <button class="btn ghost" onclick="action({action:\\'next_account\\',providerId:\\'' + a.provider + '\\'})">Siradaki</button> <button class="btn ghost" onclick="removeAccount(\\'' + a.id + '\\')">Sil</button></td></tr>').join('') || '<tr><td colspan="8" class="muted">Hesap yok. Login sekmesinden ekle.</td></tr>';
-      document.getElementById('providersTable').innerHTML = state.providers.map(p => '<tr><td>' + p.id + '</td><td><b>' + p.name + '</b></td><td>' + (p.supportsOAuth ? 'var' : '-') + '</td><td>' + (p.supportsApiKey ? 'var' : '-') + '</td><td>' + (p.auth.configured ? '<span class="pill">configured</span>' : '<span class="muted">' + (p.auth.source || 'bos') + '</span>') + '</td><td>' + p.modelCount + '</td></tr>').join('');
+      document.getElementById('accountsTable').innerHTML = state.accounts.map(a => '<tr><td>' + (a.active ? '<span class="pill">active</span>' : '') + '</td><td><b>' + a.label + '</b><div class="muted">' + a.id + '</div></td><td>' + a.provider + '</td><td>' + a.type + '</td><td>' + fmt(a.lastUsedAt) + '</td><td>' + (a.useCount || 0) + '</td><td>' + (a.quotaLabel || 'no note') + '</td><td><button class="btn secondary" onclick="setActive(\\'' + a.id + '\\')">Make active</button> <button class="btn ghost" onclick="action({action:\\'next_account\\',providerId:\\'' + a.provider + '\\'})">Next</button> <button class="btn ghost" onclick="removeAccount(\\'' + a.id + '\\')">Remove</button></td></tr>').join('') || '<tr><td colspan="8" class="muted">No accounts yet. Add one from Login.</td></tr>';
+      document.getElementById('providersTable').innerHTML = state.providers.map(p => '<tr><td>' + p.id + '</td><td><b>' + p.name + '</b></td><td>' + (p.supportsOAuth ? 'yes' : '-') + '</td><td>' + (p.supportsApiKey ? 'yes' : '-') + '</td><td>' + (p.auth.configured ? '<span class="pill">configured</span>' : '<span class="muted">' + (p.auth.source || 'empty') + '</span>') + '</td><td>' + p.modelCount + '</td></tr>').join('');
     }
     async function refresh() {
       const res = await fetch('/api/auth-panel');
@@ -1909,6 +1973,7 @@ const AUTH_PANEL_HTML = `<!doctype html>
       render();
     }
     if (location.pathname === '/login') showTab('login');
+    if (window.lucide) lucide.createIcons();
     refresh().catch(e => toast(e.message));
   </script>
 </body>
@@ -1991,6 +2056,11 @@ export function startWebUiServer(options: { port?: number; staticRoot?: string }
 					const data = JSON.parse(body || "{}");
 					for (const listener of webUiAuthActionListeners) {
 						if (data?.action === "oauth_login") {
+							setAuthPanelOAuthEvent({
+								providerId: data.providerId,
+								status: "pending",
+								instructions: "Preparing provider login...",
+							});
 							Promise.resolve(listener(data)).catch((error) =>
 								setAuthPanelOAuthEvent({ providerId: data.providerId, error: error?.message || String(error) }),
 							);
@@ -1998,7 +2068,7 @@ export function startWebUiServer(options: { port?: number; staticRoot?: string }
 							await listener(data);
 						}
 					}
-					return json(res, { ok: true, message: data?.action === "oauth_login" ? "Login linki panelde hazirlaniyor." : "Panel islemi tamamlandi." });
+					return json(res, { ok: true, message: data?.action === "oauth_login" ? "Preparing login in this panel." : "Done." });
 				} catch (err: any) {
 					return json(res, { ok: false, error: err.message });
 				}
