@@ -88,7 +88,7 @@ export class ModelSelectorComponent extends Container implements Focusable {
 		this.addChild(new DynamicBorder());
 		this.addChild(new Spacer(1));
 
-		const titleText = theme.bold(theme.fg("accent", " ❯ MODEL SEÇİMİ"));
+		const titleText = theme.bold(theme.fg("accent", " MODEL SELECTOR"));
 		this.addChild(new Text(titleText, 0, 0));
 
 		if (this.scopedModels.length > 0) {
@@ -116,7 +116,7 @@ export class ModelSelectorComponent extends Container implements Focusable {
 		this.addChild(new DynamicBorder());
 
 		// Footer hints
-		const hints = `${keyHint("tui.select.up")}/${keyHint("tui.select.down")} seç • ${keyHint("tui.select.confirm")} onayla • ${keyHint("tui.select.cancel")} iptal`;
+		const hints = `${keyHint("tui.select.up")}/${keyHint("tui.select.down")} move | ${keyHint("tui.select.confirm")} select | ${keyHint("tui.select.cancel")} close`;
 		this.addChild(new Text(theme.fg("dim", ` ${hints}`), 0, 0));
 	}
 
@@ -162,10 +162,10 @@ export class ModelSelectorComponent extends Container implements Focusable {
 	}
 
 	private getScopeText(): string {
-		const allTag = this.scope === "all" ? theme.bg("accent", theme.fg("bg", " HEPSİ ")) : theme.fg("dim", " HEPSİ ");
+		const allTag = this.scope === "all" ? theme.bg("accent", theme.fg("bg", " ALL ")) : theme.fg("dim", " ALL ");
 		const scopedTag =
-			this.scope === "scoped" ? theme.bg("accent", theme.fg("bg", " KISITLI ")) : theme.fg("dim", " KISITLI ");
-		return `${theme.fg("dim", "Kapsam [TAB]: ")}${allTag} ${scopedTag}`;
+			this.scope === "scoped" ? theme.bg("accent", theme.fg("bg", " SCOPED ")) : theme.fg("dim", " SCOPED ");
+		return `${theme.fg("dim", "Scope [Tab]: ")}${allTag} ${scopedTag}`;
 	}
 
 	private filterModels(query: string): void {
@@ -180,19 +180,18 @@ export class ModelSelectorComponent extends Container implements Focusable {
 		this.listContainer.clear();
 
 		if (this.errorMessage) {
-			this.listContainer.addChild(new Text(theme.fg("error", ` ⚠ Error: ${this.errorMessage}`), 1, 0));
+			this.listContainer.addChild(new Text(theme.fg("error", "Error: " + this.errorMessage), 1, 0));
 			return;
 		}
 
 		if (this.filteredModels.length === 0) {
-			this.listContainer.addChild(new Text(theme.fg("dim", "   Sonuç bulunamadı..."), 1, 0));
+			this.listContainer.addChild(new Text(theme.fg("dim", "   No matching models."), 1, 0));
 			return;
 		}
 
 		const maxVisible = 10;
 		const startIndex = Math.max(0, Math.min(this.selectedIndex - 4, this.filteredModels.length - maxVisible));
 		const endIndex = Math.min(startIndex + maxVisible, this.filteredModels.length);
-
 		let lastProvider = "";
 
 		for (let i = startIndex; i < endIndex; i++) {
@@ -202,72 +201,62 @@ export class ModelSelectorComponent extends Container implements Focusable {
 
 			if (!this.searchInput.getValue() && item.provider !== lastProvider) {
 				const providerLabel = item.provider.toUpperCase();
-				this.listContainer.addChild(new Text(theme.bold(theme.fg("dim", ` ── ${providerLabel} ──`)), 1, 0));
+				this.listContainer.addChild(new Text(theme.bold(theme.fg("dim", " -- " + providerLabel + " --")), 1, 0));
 				lastProvider = item.provider;
 			}
 
 			const idStr = item.id;
-			const providerStr = `[${item.provider}]`;
-			const ctx = item.model.contextWindow ? `${Math.floor(item.model.contextWindow / 1024)}k` : "";
-			const ctxStr = ctx ? `(${ctx} ctx)` : "";
-
-			// Left column: ID, Right columns: provider and context aligned to the right!
-			const rightContent = `${providerStr} ${ctxStr}`;
-
-			// Calculate padding based on a fixed width
-			const targetWidth = 52;
-			const visibleLeft = idStr.length + 2;
+			const providerStr = "[" + item.provider + "]";
+			const ctx = item.model.contextWindow ? Math.floor(item.model.contextWindow / 1024) + "k" : "";
+			const ctxStr = ctx ? "(" + ctx + " ctx)" : "";
+			const rightContent = providerStr + " " + ctxStr;
+			const targetWidth = 58;
+			const visibleLeft = idStr.length + 3;
 			const visibleRight = rightContent.length;
-			const paddingNeeded = Math.max(2, targetWidth - visibleLeft - visibleRight);
-			const spacePadding = " ".repeat(paddingNeeded);
-
-			const reasoning = item.model.reasoning ? theme.fg("warning", " ⚛") : "  ";
-			const check = isCurrent ? theme.fg("success", " ●") : "  ";
+			const spacePadding = " ".repeat(Math.max(2, targetWidth - visibleLeft - visibleRight));
+			const reasoning = item.model.reasoning ? theme.fg("warning", " R") : "  ";
+			const check = isCurrent ? theme.fg("success", " *") : "  ";
 
 			let line = "";
 			if (isSelected) {
-				const highlightedId = theme.bold(theme.fg("accent", ` ❯ ${idStr}`));
+				const highlightedId = theme.bold(theme.fg("accent", " > " + idStr));
 				const highlightedInfo = theme.fg("dim", rightContent);
-				line = `${theme.bg("selectedBg", ` ${highlightedId}${spacePadding}${highlightedInfo} `)}${reasoning}${check}`;
+				line = theme.bg("selectedBg", " " + highlightedId + spacePadding + highlightedInfo + " ") + reasoning + check;
 			} else {
-				const dimId = theme.fg("text", `   ${idStr}`);
+				const dimId = theme.fg("text", "   " + idStr);
 				const dimInfo = theme.fg("dim", rightContent);
-				line = ` ${dimId}${spacePadding}${dimInfo} ${reasoning}${check}`;
+				line = " " + dimId + spacePadding + dimInfo + " " + reasoning + check;
 			}
 
 			this.listContainer.addChild(new Text(line, 0, 0));
 		}
 
-		// Selected Detail Panel
 		const selected = this.filteredModels[this.selectedIndex];
-		if (selected) {
-			this.listContainer.addChild(new Spacer(1));
-			const detailBox = new Container();
-			detailBox.addChild(
-				new Text(
-					theme.fg("accent", ` ┌─ BİLGİ: ${selected.model.name.toUpperCase()} ──────────────────────────`),
-					0,
-					0,
-				),
-			);
-			const ctx = selected.model.contextWindow
-				? `${Math.floor(selected.model.contextWindow / 1024)}k`
-				: "Bilinmiyor";
-			const info = ` │  Sağlayıcı : ${selected.provider.toUpperCase()}\n │  Bağlam    : ${ctx} tokens\n │  Zihin     : ${selected.model.reasoning ? "Aktif (DeepThink)" : "Standart Model"}`;
+		if (!selected) return;
 
-			const quotaStats = QuotaManager.getInstance().getStats();
-			const quotaColor = quotaStats.percent > 20 ? "success" : "error";
-			const remainingVal = Math.max(0, quotaStats.limit - quotaStats.spent);
-			const quotaLine = `\n │  Kota      : ${theme.fg(quotaColor, `${quotaStats.percent.toFixed(1)}%`)} (${theme.fg("dim", `$${remainingVal.toFixed(2)} kaldı`)})`;
-
-			detailBox.addChild(new Text(theme.fg("dim", info + quotaLine), 0, 0));
-			detailBox.addChild(
-				new Text(theme.fg("accent", ` └──────────────────────────────────────────────────────────`), 0, 0),
-			);
-			this.listContainer.addChild(detailBox);
-		}
+		this.listContainer.addChild(new Spacer(1));
+		const detailBox = new Container();
+		detailBox.addChild(new Text(theme.fg("accent", " +-- MODEL: " + selected.model.name.toUpperCase() + " --------------------------"), 0, 0));
+		const ctx = selected.model.contextWindow ? Math.floor(selected.model.contextWindow / 1024) + "k" : "Unknown";
+		const quotaStats = QuotaManager.getInstance().getStats();
+		const quotaColor = quotaStats.percent > 20 ? "success" : "error";
+		const remainingVal = Math.max(0, quotaStats.limit - quotaStats.spent);
+		const info =
+			" |  Provider : " +
+			selected.provider.toUpperCase() +
+			"\n |  Context  : " +
+			ctx +
+			" tokens\n |  Reason   : " +
+			(selected.model.reasoning ? "Enabled" : "Standard") +
+			"\n |  Quota    : " +
+			theme.fg(quotaColor, quotaStats.percent.toFixed(1) + "%") +
+			" (" +
+			theme.fg("dim", "$" + remainingVal.toFixed(2) + " left") +
+			")";
+		detailBox.addChild(new Text(theme.fg("dim", info), 0, 0));
+		detailBox.addChild(new Text(theme.fg("accent", " +----------------------------------------------------------"), 0, 0));
+		this.listContainer.addChild(detailBox);
 	}
-
 	handleInput(keyData: string): void {
 		const kb = getKeybindings();
 

@@ -8131,7 +8131,7 @@ export class InteractiveMode {
 	}
 
 	private buildMcpPanelState(): any {
-		const configured = this.settingsManager.getSettings().mcpServers || {};
+		const configured = this.settingsManager.getMcpServers();
 		const clients = this.session.mcpManager ? [...this.session.mcpManager.getClients().keys()] : [];
 		const servers = Object.entries(configured).map(([name, config]: [string, any]) => ({
 			name,
