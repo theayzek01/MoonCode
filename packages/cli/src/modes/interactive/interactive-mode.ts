@@ -1833,8 +1833,29 @@ export class InteractiveMode {
 
 		const extensionRunner = this.session.extensionRunner;
 		this.setupExtensionShortcuts(extensionRunner);
+		void this.autoConnectDefaultMcpServers();
 		this.showLoadedResources({ force: false, showDiagnosticsWhenQuiet: true });
 		this.showStartupNoticesIfNeeded();
+	}
+
+	private async autoConnectDefaultMcpServers(): Promise<void> {
+		try {
+			const scratchConfig = this.getScratchMcpConfig();
+			if (scratchConfig.args?.[0] && fs.existsSync(scratchConfig.args[0])) {
+				this.settingsManager.setMcpServer("scratch", scratchConfig);
+			}
+			this.settingsManager.setMcpServer("blender", this.getBlenderMcpConfig());
+			await this.settingsManager.flush();
+			const tools = await this.session.connectConfiguredMcpServers();
+			const mcpToolCount = tools.filter((tool) => tool.startsWith("scratch_") || tool.startsWith("blender_")).length;
+			if (mcpToolCount > 0) {
+				this.showStatus(`MCP otomatik baglandi. ${mcpToolCount} tool aktif.`);
+			}
+			this.footer.setSession(this.session);
+			this.ui.requestRender();
+		} catch (error) {
+			this.showWarning(`MCP otomatik baglanamadi: ${error instanceof Error ? error.message : String(error)}`);
+		}
 	}
 
 	private applyRuntimeSettings(): void {
@@ -5350,7 +5371,7 @@ export class InteractiveMode {
 		}
 	}
 
-	private async showLoginDialog(providerId: string, providerName: string): Promise<void> {
+	private async showLoginDialog(providerId: string, providerName: string, options?: { panelServer?: any }): Promise<void> {
 		const providerInfo = this.session.modelRegistry.authStorage
 			.getOAuthProviders()
 			.find((provider) => provider.id === providerId);
@@ -5369,11 +5390,13 @@ export class InteractiveMode {
 			providerName,
 		);
 
-		// Show dialog in editor container
-		this.editorContainer.clear();
-		this.editorContainer.addChild(dialog);
-		this.ui.setFocus(dialog);
-		this.ui.requestRender();
+		const usePanel = Boolean(options?.panelServer);
+		if (!usePanel) {
+			this.editorContainer.clear();
+			this.editorContainer.addChild(dialog);
+			this.ui.setFocus(dialog);
+			this.ui.requestRender();
+		}
 
 		// Promise for manual code input (racing with callback server)
 		let manualCodeResolve: ((code: string) => void) | undefined;
@@ -5385,6 +5408,7 @@ export class InteractiveMode {
 
 		// Restore editor helper
 		const restoreEditor = () => {
+			if (usePanel) return;
 			this.editorContainer.clear();
 			this.editorContainer.addChild(this.editor);
 			this.ui.setFocus(this.editor);
@@ -5394,9 +5418,30 @@ export class InteractiveMode {
 		try {
 			await this.session.modelRegistry.authStorage.login(providerId as OAuthProviderId, {
 				onAuth: (info: { url: string; instructions?: string }) => {
-					dialog.showAuth(info.url, info.instructions);
+					if (options?.panelServer?.setAuthPanelOAuthEvent) {
+						options.panelServer.setAuthPanelOAuthEvent({
+							providerId,
+							providerName,
+							url: info.url,
+							instructions: info.instructions,
+							status: "auth_url",
+						});
+					}
+					if (!usePanel) {
+						dialog.showAuth(info.url, info.instructions);
+					}
 
 					if (usesCallbackServer) {
+						if (usePanel) {
+							options?.panelServer?.setAuthPanelOAuthEvent?.({
+								providerId,
+								providerName,
+								url: info.url,
+								instructions: info.instructions || "Tarayicida girisi tamamla; gerekirse yonlendirme URL'sini TUI'ya yapistir.",
+								status: "auth_url",
+							});
+							return;
+						}
 						// Show input for manual paste, racing with callback
 						dialog
 							.showManualInput("Yönlendirme URL'sini aşağıya yapıştırın veya tarayıcıda girişi tamamlayın:")

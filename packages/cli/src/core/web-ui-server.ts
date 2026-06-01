@@ -1705,9 +1705,14 @@ export const webUiUnlockListeners = new Set<() => void>();
 export const webUiAuthActionListeners = new Set<(action: any) => void | Promise<void>>();
 export let activeSessionId: string | null = null;
 let authPanelStateProvider: (() => unknown) | undefined;
+let authPanelOAuthEvent: any = null;
 
 export function setAuthPanelStateProvider(provider: (() => unknown) | undefined): void {
 	authPanelStateProvider = provider;
+}
+
+export function setAuthPanelOAuthEvent(event: any): void {
+	authPanelOAuthEvent = { ...event, createdAt: Date.now() };
 }
 
 export function setActiveSessionId(id: string | null): void {
@@ -1733,13 +1738,13 @@ const AUTH_PANEL_HTML = `<!doctype html>
       --md-sys-color-outline: #79747e;
       --md-sys-color-on-surface: #1d1b20;
       --md-sys-color-on-surface-variant: #49454f;
-      --radius: 28px;
+      --radius: 18px;
       font-family: Roboto, Inter, "Segoe UI", system-ui, sans-serif;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); }
+    body { margin: 0; background: linear-gradient(180deg, #fffbfe, #f6f1fa); color: var(--md-sys-color-on-surface); }
     .app { min-height: 100vh; display: grid; grid-template-columns: 280px 1fr; }
-    aside { background: var(--md-sys-color-surface-container); padding: 24px 16px; border-right: 1px solid #ddd7e3; }
+    aside { background: rgba(243, 237, 247, .86); backdrop-filter: blur(18px); padding: 24px 16px; border-right: 1px solid #ddd7e3; }
     .brand { display: flex; align-items: center; gap: 12px; padding: 8px 12px 24px; font-weight: 700; font-size: 22px; }
     .mark { width: 38px; height: 38px; border-radius: 12px; background: var(--md-sys-color-primary); color: white; display: grid; place-items: center; }
     nav button { width: 100%; border: 0; background: transparent; color: var(--md-sys-color-on-surface-variant); border-radius: 999px; padding: 14px 18px; text-align: left; font: inherit; cursor: pointer; }
@@ -1749,7 +1754,7 @@ const AUTH_PANEL_HTML = `<!doctype html>
     h1 { font-size: clamp(28px, 4vw, 48px); line-height: 1; margin: 0 0 10px; letter-spacing: 0; }
     .sub { color: var(--md-sys-color-on-surface-variant); margin: 0; max-width: 720px; }
     .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
-    .card { background: var(--md-sys-color-surface-container); border-radius: var(--radius); padding: 22px; border: 1px solid #e2dce8; }
+    .card { background: rgba(255,255,255,.74); border-radius: var(--radius); padding: 22px; border: 1px solid #e2dce8; box-shadow: 0 18px 45px rgba(55, 45, 80, .08); }
     .hero { grid-column: span 8; min-height: 210px; background: linear-gradient(135deg, var(--md-sys-color-primary-container), #fef7ff); }
     .side { grid-column: span 4; }
     .full { grid-column: 1 / -1; }
@@ -1764,8 +1769,11 @@ const AUTH_PANEL_HTML = `<!doctype html>
     th { color: var(--md-sys-color-on-surface-variant); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
     .pill { display: inline-flex; align-items: center; gap: 8px; padding: 7px 11px; border-radius: 999px; background: var(--md-sys-color-primary-container); font-size: 13px; }
     .muted { color: var(--md-sys-color-on-surface-variant); }
-    .form { display: grid; gap: 12px; max-width: 720px; }
-    select, input { width: 100%; border: 1px solid var(--md-sys-color-outline); border-radius: 14px; padding: 14px; background: #fff; font: inherit; }
+    .form { display: grid; gap: 14px; max-width: 760px; }
+    select, input { width: 100%; border: 1px solid #c8c1cf; border-radius: 14px; padding: 14px; background: #fff; font: inherit; outline-color: var(--md-sys-color-primary); }
+    .oauth-box { display: none; gap: 10px; padding: 16px; border-radius: 18px; background: #f4edff; border: 1px solid #d8c9ff; }
+    .oauth-box.show { display: grid; }
+    .oauth-url { word-break: break-all; color: var(--md-sys-color-primary); font-size: 13px; }
     label { display: grid; gap: 6px; font-weight: 650; }
     .hidden { display: none; }
     .toast { position: fixed; right: 22px; bottom: 22px; background: #1d1b20; color: white; padding: 14px 18px; border-radius: 16px; opacity: 0; transform: translateY(12px); transition: .18s; }
@@ -1802,13 +1810,14 @@ const AUTH_PANEL_HTML = `<!doctype html>
         </div>
       </section>
       <section id="login" class="tab hidden">
-        <div class="top"><div><h1>Login</h1><p class="sub">Once yontem sec. Abonelik OAuth akislarini TUI baslatir; API key panelden direkt kaydedilir.</p></div></div>
+        <div class="top"><div><h1>Login</h1><p class="sub">Abonelik giris linki terminale dusmez; bu panel linki yakalar ve tarayiciyi otomatik yonlendirir. API key panelden direkt kaydedilir.</p></div></div>
         <div class="card form">
           <label>Yontem<select id="authType" onchange="renderProviderOptions()"><option value="oauth">Abonelik kullan</option><option value="api_key">API anahtari kullan</option></select></label>
           <label>Saglayici<select id="provider"></select></label>
           <label id="labelWrap">Hesap etiketi<input id="label" placeholder="Orn: OpenAI is hesabi" /></label>
           <label id="keyWrap" class="hidden">API anahtari<input id="apiKey" type="password" autocomplete="off" placeholder="sk-..." /></label>
-          <div class="actions"><button class="btn" onclick="submitLogin()">Devam et</button><button class="btn ghost" onclick="refresh()">Durumu yenile</button></div>
+          <div id="oauthBox" class="oauth-box"><b>Giris linki hazirlaniyor</b><span id="oauthText" class="muted">Saglayicidan login URL bekleniyor...</span><a id="oauthLink" class="oauth-url" target="_blank" rel="noreferrer"></a></div>
+          <div class="actions"><button class="btn" onclick="submitLogin()">Giris yap</button><button class="btn ghost" onclick="refresh()">Durumu yenile</button></div>
         </div>
       </section>
       <section id="accounts" class="tab hidden">
@@ -1842,6 +1851,29 @@ const AUTH_PANEL_HTML = `<!doctype html>
       toast(json.message || 'islem tamam');
       await refresh();
     }
+    let oauthPollTimer = 0;
+    async function pollOAuth(providerId) {
+      clearInterval(oauthPollTimer);
+      const box = document.getElementById('oauthBox');
+      const text = document.getElementById('oauthText');
+      const link = document.getElementById('oauthLink');
+      box.classList.add('show');
+      text.textContent = 'Login linki bekleniyor...';
+      link.textContent = '';
+      link.removeAttribute('href');
+      oauthPollTimer = setInterval(async () => {
+        try {
+          const res = await fetch('/api/auth-panel/oauth-event?providerId=' + encodeURIComponent(providerId) + '&t=' + Date.now());
+          const event = await res.json();
+          if (!event || !event.url) return;
+          clearInterval(oauthPollTimer);
+          text.textContent = event.instructions || 'Tarayici login sayfasina yonlendiriliyor.';
+          link.href = event.url;
+          link.textContent = event.url;
+          setTimeout(() => { window.location.href = event.url; }, 250);
+        } catch (_) {}
+      }, 700);
+    }
     function renderProviderOptions() {
       const type = document.getElementById('authType').value;
       document.getElementById('keyWrap').classList.toggle('hidden', type !== 'api_key');
@@ -1855,6 +1887,7 @@ const AUTH_PANEL_HTML = `<!doctype html>
       const apiKey = document.getElementById('apiKey').value;
       if (!providerId) return toast('Saglayici sec');
       if (authType === 'api_key' && !apiKey.trim()) return toast('API anahtari gir');
+      if (authType === 'oauth') pollOAuth(providerId);
       await action({ action: authType === 'oauth' ? 'oauth_login' : 'save_api_key', providerId, label, apiKey });
       document.getElementById('apiKey').value = '';
     }
@@ -1941,6 +1974,13 @@ export function startWebUiServer(options: { port?: number; staticRoot?: string }
 		if (url.pathname === "/api/auth-panel") {
 			return json(res, authPanelStateProvider ? authPanelStateProvider() : { providers: [], accounts: [], models: {} });
 		}
+		if (url.pathname === "/api/auth-panel/oauth-event") {
+			const providerId = url.searchParams.get("providerId");
+			if (providerId && authPanelOAuthEvent?.providerId && authPanelOAuthEvent.providerId !== providerId) {
+				return json(res, {});
+			}
+			return json(res, authPanelOAuthEvent || {});
+		}
 		if (req.method === "POST" && url.pathname === "/api/auth-panel/action") {
 			let body = "";
 			req.on("data", (chunk) => {
@@ -1950,9 +1990,15 @@ export function startWebUiServer(options: { port?: number; staticRoot?: string }
 				try {
 					const data = JSON.parse(body || "{}");
 					for (const listener of webUiAuthActionListeners) {
-						await listener(data);
+						if (data?.action === "oauth_login") {
+							Promise.resolve(listener(data)).catch((error) =>
+								setAuthPanelOAuthEvent({ providerId: data.providerId, error: error?.message || String(error) }),
+							);
+						} else {
+							await listener(data);
+						}
 					}
-					return json(res, { ok: true, message: "Panel islemi TUI'ya gonderildi." });
+					return json(res, { ok: true, message: data?.action === "oauth_login" ? "Login linki panelde hazirlaniyor." : "Panel islemi tamamlandi." });
 				} catch (err: any) {
 					return json(res, { ok: false, error: err.message });
 				}

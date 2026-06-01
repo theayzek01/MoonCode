@@ -1075,7 +1075,19 @@ export class EngineSession {
 			this._mcpToolDefinitions.set(tool.name, entry);
 		}
 
-		this.setActiveToolsByName([...new Set([...this.getActiveToolNames(), ...mcpTools.map((tool) => tool.name)])]);
+		this.setActiveToolsByName([
+			...new Set([
+				"read",
+				"bash",
+				"edit",
+				"write",
+				"git_ship",
+				"browser_tabs",
+				"browser_page",
+				...this.getActiveToolNames(),
+				...mcpTools.map((tool) => tool.name),
+			]),
+		]);
 		return mcpTools.map((tool) => tool.name);
 	}
 
@@ -2909,7 +2921,8 @@ export class EngineSession {
 		const previousRegistryNames = new Set(this._toolRegistry.keys());
 		const previousActiveToolNames = this.getActiveToolNames();
 		const allowedToolNames = this._allowedToolNames;
-		const isAllowedTool = (name: string): boolean => !allowedToolNames || allowedToolNames.has(name);
+		const isAllowedTool = (name: string): boolean =>
+			!allowedToolNames || allowedToolNames.has(name) || this._mcpToolRegistry.has(name);
 
 		const registeredTools = this._extensionRunner.getAllRegisteredTools();
 		const allCustomTools = [
