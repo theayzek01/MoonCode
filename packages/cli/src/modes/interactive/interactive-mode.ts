@@ -2795,6 +2795,16 @@ export class InteractiveMode {
 					this.editor.setText("");
 					return;
 				}
+				if (text === "/blendermcp" || text.startsWith("/blendermcp ")) {
+					this.editor.setText("");
+					await this.handleBlenderMcpCommand(text.slice("/blendermcp".length).trim());
+					return;
+				}
+				if (text === "/scratchmcp" || text.startsWith("/scratchmcp ")) {
+					this.editor.setText("");
+					await this.handleScratchMcpCommand(text.slice("/scratchmcp".length).trim());
+					return;
+				}
 				if (text === "/scoped-models") {
 					this.editor.setText("");
 					await this.showModelsSelector();
@@ -7885,6 +7895,93 @@ export class InteractiveMode {
 
 	private handleMcpCommand(): void {
 		this.showMcpSelector();
+	}
+
+	private getBlenderMcpConfig() {
+		return {
+			command: "cmd",
+			args: ["/c", "uvx", "blender-mcp"],
+			env: { DISABLE_TELEMETRY: "true" },
+			autoStart: false,
+		};
+	}
+
+	private getScratchMcpConfig() {
+		const scratchRoot = process.env.MOON_SCRATCH_MCP_ROOT || "C:\\Users\\ozenc\\OneDrive\\Desktop\\scmcp";
+		return {
+			command: "node",
+			args: [path.join(scratchRoot, "server", "scratch-mcp.js")],
+			cwd: scratchRoot,
+			env: { DISABLE_TELEMETRY: "true" },
+			autoStart: false,
+		};
+	}
+
+	private async activateMcpServer(name: string, config: { command: string; args?: string[]; cwd?: string; env?: Record<string, string> }) {
+		this.settingsManager.setMcpServer(name, config);
+		await this.settingsManager.flush();
+		return await this.session.connectConfiguredMcpServers();
+	}
+
+	private async handleBlenderMcpCommand(arg: string): Promise<void> {
+		const action = arg.toLowerCase();
+		const config = this.getBlenderMcpConfig();
+
+		if (action === "download" || action === "dowland" || action === "install") {
+			this.showStatus("Blender MCP indiriliyor/hazirlanıyor... (uvx blender-mcp)");
+			const result = spawnSync(config.command, [...config.args, "--help"], {
+				encoding: "utf-8",
+				timeout: 120_000,
+				windowsHide: true,
+			});
+			if (result.error || result.status !== 0) {
+				this.showError(`Blender MCP hazirlanamadi: ${result.error?.message || result.stderr || "uvx komutu basarisiz"}`);
+				return;
+			}
+			this.showStatus("Blender MCP hazir. Baglanmak icin /blendermcp yaz.");
+			return;
+		}
+
+		this.showStatus("Blender MCP baglanıyor...");
+		try {
+			const tools = await this.activateMcpServer("blender", config);
+			const blenderTools = tools.filter((tool) => tool.startsWith("blender_"));
+			this.showStatus(
+				`Blender MCP baglandi. ${blenderTools.length || tools.length} tool aktif. Blender acikken /mcp ile durumunu gorebilirsin.`,
+			);
+		} catch (error) {
+			this.showError(`Blender MCP baglanamadi: ${error instanceof Error ? error.message : String(error)}`);
+		}
+	}
+
+	private async handleScratchMcpCommand(arg: string): Promise<void> {
+		const action = arg.toLowerCase();
+		const config = this.getScratchMcpConfig();
+		const scriptPath = config.args[0];
+		const extensionPath = path.join(config.cwd, "extension");
+
+		if (action === "status") {
+			this.showStatus(
+				`Scratch MCP script: ${scriptPath}\nChrome extension klasoru: ${extensionPath}\nExtension ayrica Chrome'a yuklenmeli.`,
+			);
+			return;
+		}
+
+		if (!fs.existsSync(scriptPath)) {
+			this.showError(`Scratch MCP bulunamadi: ${scriptPath}`);
+			return;
+		}
+
+		this.showStatus("Scratch/TurboWarp MCP baglanıyor...");
+		try {
+			const tools = await this.activateMcpServer("scratch", config);
+			const scratchTools = tools.filter((tool) => tool.startsWith("scratch_"));
+			this.showStatus(
+				`Scratch MCP baglandi. ${scratchTools.length || tools.length} tool aktif. Chrome extension'i su klasorden yukle: ${extensionPath}`,
+			);
+		} catch (error) {
+			this.showError(`Scratch MCP baglanamadi: ${error instanceof Error ? error.message : String(error)}`);
+		}
 	}
 
 	private showMcpSelector(): void {

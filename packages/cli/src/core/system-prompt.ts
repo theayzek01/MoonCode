@@ -88,7 +88,9 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 	const contextFiles = providedContextFiles ?? [];
 	const skills = providedSkills ?? [];
 	const hasBlenderTools = (selectedTools ?? []).some((name) => name.startsWith("blender_"));
+	const hasScratchTools = (selectedTools ?? []).some((name) => name.startsWith("scratch_"));
 	const blenderSection = hasBlenderTools ? buildBlenderSystemPrompt(compactMode) : "";
+	const scratchSection = hasScratchTools ? buildScratchSystemPrompt(compactMode) : "";
 
 	if (customPrompt) {
 		let prompt = customPrompt;
@@ -107,6 +109,10 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 
 		if (blenderSection) {
 			prompt += blenderSection;
+		}
+
+		if (scratchSection) {
+			prompt += scratchSection;
 		}
 
 		prompt += defaultUiSection;
@@ -241,6 +247,10 @@ ${guidelinesList.map((g) => `- ${g}`).join("\n")}`;
 		prompt += blenderSection;
 	}
 
+	if (scratchSection) {
+		prompt += scratchSection;
+	}
+
 	// Append project context files
 	if (contextFiles.length > 0) {
 		prompt += "\n\n# Project Context\n\n";
@@ -334,6 +344,33 @@ Quality gate:
 After tool work, inspect the result once, summarize concrete scene changes, and tell the user where to look in Blender.`;
 }
 
+/** Scratch/TurboWarp MCP system prompt addition */
+function buildScratchSystemPrompt(compact?: boolean): string {
+	if (compact) {
+		return `
+
+## Scratch/TurboWarp MCP Mode
+- Scratch MCP tools are active. Use the ` + "`scratch_*`" + ` tools for live Scratch/TurboWarp project work.
+- Inspect page status before edits. If the page/VM is not connected, tell the user to open Scratch or TurboWarp and load the Chrome extension.
+- Prefer small verified edits: snapshot -> target/assets/variables/blocks -> change -> snapshot/status.
+- Keep projects understandable: clear target names, simple block structure, no duplicated junk blocks, and no destructive deletes without intent.`;
+	}
+
+	return `
+
+## Scratch/TurboWarp MCP Professional Mode
+Scratch MCP tools are active. You can inspect and edit the user's live Scratch/TurboWarp project through the ` + "`scratch_*`" + ` tools.
+
+Operating posture:
+- Start with ` + "`scratch_page_status`" + ` and ` + "`scratch_project_snapshot`" + ` when project state matters.
+- Keep the Chrome extension requirement in mind: if the VM is unavailable, ask the user to open Scratch/TurboWarp and load the extension folder.
+- Make edits in clear passes: choose target, inspect assets/variables/lists/blocks, perform the smallest change, then re-check state.
+- Preserve project structure. Avoid random block creation, duplicate sprites, or destructive target/asset deletion unless the user explicitly asked.
+- For games and animations, prioritize playable behavior, readable variable names, organized targets, and testable start/stop flow.
+
+After tool work, summarize the concrete project changes and any Scratch/TurboWarp page state issue.`;
+}
+
 /** Robotics mode system prompt addition */
 function buildRoboticsSystemPrompt(functions?: RoboticsFunction[]): string {
 	let section = `
@@ -387,6 +424,7 @@ function buildCompactSystemPrompt(options: BuildSystemPromptOptions): string {
 
 	const tools = selectedTools || ["read", "bash", "edit", "write"];
 	const hasBlenderTools = tools.some((name) => name.startsWith("blender_"));
+	const hasScratchTools = tools.some((name) => name.startsWith("scratch_"));
 	const visibleTools = tools.filter((n) => !!toolSnippets?.[n]);
 	const toolsList =
 		visibleTools.length > 0
@@ -434,6 +472,7 @@ function buildCompactSystemPrompt(options: BuildSystemPromptOptions): string {
 	let out = lines.join("\n");
 
 	if (hasBlenderTools) out += buildBlenderSystemPrompt(true);
+	if (hasScratchTools) out += buildScratchSystemPrompt(true);
 	if (appendSystemPrompt) out += "\n\n" + appendSystemPrompt;
 	if (affectivePrompt) out += "\n\n" + affectivePrompt;
 

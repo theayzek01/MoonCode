@@ -190,10 +190,12 @@ export async function createEngineSession(
 	// Initialize MCP if configured
 	let mcpManager = options.mcpManager;
 	const mcpConfigs = settingsManager.getMcpServers();
-	const mcpServerConfigs = Object.entries(mcpConfigs).map(([name, config]) => ({
-		name,
-		...config,
-	}));
+	const mcpServerConfigs = Object.entries(mcpConfigs)
+		.filter(([, config]) => config.autoStart !== false)
+		.map(([name, config]) => ({
+			name,
+			...config,
+		}));
 
 	if (!mcpManager && mcpServerConfigs.length > 0) {
 		const { McpManager } = await import("moon-engine");

@@ -1027,6 +1027,51 @@ export class EngineSession {
 		this.engine.state.systemPrompt = this._baseSystemPrompt;
 	}
 
+	async connectConfiguredMcpServers(): Promise<string[]> {
+		const mcpConfigs = this.settingsManager.getMcpServers();
+		const mcpServerConfigs = Object.entries(mcpConfigs).map(([name, config]) => ({
+			name,
+			...config,
+		}));
+
+		if (this._mcpManager) {
+			await this._mcpManager.dispose();
+			this._mcpManager = undefined;
+		}
+
+		for (const name of Array.from(this._toolRegistry.keys())) {
+			if (name.includes("_")) {
+				const serverName = name.slice(0, name.indexOf("_"));
+				if (mcpConfigs[serverName]) {
+					this._toolRegistry.delete(name);
+					this._toolDefinitions.delete(name);
+				}
+			}
+		}
+
+		if (mcpServerConfigs.length === 0) {
+			this.setActiveToolsByName(this.getActiveToolNames());
+			return [];
+		}
+
+		const { McpManager } = await import("moon-engine");
+		this._mcpManager = new McpManager(mcpServerConfigs);
+		await this._mcpManager.initialize();
+
+		const mcpTools = await this._mcpManager.getAllTools();
+		for (const tool of mcpTools) {
+			const definition = createToolDefinitionFromEngineTool(tool);
+			this._toolRegistry.set(tool.name, tool as any);
+			this._toolDefinitions.set(tool.name, {
+				definition,
+				sourceInfo: createSyntheticSourceInfo(`<mcp:${tool.name}>`, { source: "mcp" }),
+			});
+		}
+
+		this.setActiveToolsByName([...new Set([...this.getActiveToolNames(), ...mcpTools.map((tool) => tool.name)])]);
+		return mcpTools.map((tool) => tool.name);
+	}
+
 	/** Whether compaction or branch summarization is currently running */
 	get isCompacting(): boolean {
 		return (
