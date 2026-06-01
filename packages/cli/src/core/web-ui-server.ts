@@ -1,10 +1,10 @@
 // @ts-nocheck
-import { createReadStream, existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { createReadStream, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { createServer, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
 import { dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { getSessionsDir } from "../config.js";
+import { getEngineDir, getSessionsDir } from "../config.js";
 
 const INDEX_HTML = `<!doctype html>
 <html lang="en">
@@ -2029,6 +2029,54 @@ const MCP_PANEL_HTML = `<!doctype html>
 </body>
 </html>`;
 
+function getBrainFiles() {
+	return {
+		memorySignals: join(getEngineDir(), "memory-signals.json"),
+		learning: join(getEngineDir(), "learning-experience.json"),
+	};
+}
+
+function readJsonFileSafe(file: string): unknown {
+	if (!existsSync(file)) return [];
+	try {
+		return JSON.parse(readFileSync(file, "utf-8"));
+	} catch {
+		return [];
+	}
+}
+
+const BRAIN_PANEL_HTML = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MoonCode Brain</title>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    :root{color-scheme:dark;--bg:#020503;--panel:#07110b;--line:#1d412c;--fg:#eafff2;--muted:#8db29c;--green:#56f0a4;--red:#ff5667;font-family:Inter,Roboto,"Segoe UI",system-ui,sans-serif}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top left,#143f29,transparent 35%),linear-gradient(180deg,#020503,#07100b);color:var(--fg)}.wrap{max-width:1180px;margin:0 auto;padding:32px}h1{font-size:clamp(36px,6vw,72px);line-height:.92;margin:8px 0}.sub{color:var(--muted);max-width:760px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.card{background:linear-gradient(180deg,rgba(16,34,23,.92),rgba(6,13,9,.95));border:1px solid var(--line);border-radius:22px;padding:20px}.full{grid-column:1/-1}.btn{border:0;border-radius:999px;padding:12px 16px;font-weight:850;cursor:pointer;background:linear-gradient(135deg,var(--green),#18b96a);color:#021108;display:inline-flex;gap:8px;align-items:center}.btn.danger{background:#301018;color:#ffdce1;border:1px solid #6b1f2d}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}textarea{width:100%;min-height:360px;background:#040906;color:var(--fg);border:1px solid var(--line);border-radius:16px;padding:14px;font:13px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}.muted{color:var(--muted)}@media(max-width:860px){.grid{grid-template-columns:1fr}.wrap{padding:18px}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <p class="muted">DreamKernel / Memory</p>
+    <h1>Brain control</h1>
+    <p class="sub">Review, edit, or clear persisted memory signals and learned task traces. This keeps long sessions lighter without touching project files.</p>
+    <div class="toolbar"><button class="btn" onclick="save()"><i data-lucide="save"></i>Save changes</button><button class="btn danger" onclick="clearBrain()"><i data-lucide="trash-2"></i>Clear brain</button><button class="btn" onclick="load()"><i data-lucide="refresh-cw"></i>Refresh</button></div>
+    <section class="grid">
+      <article class="card"><h2>Memory signals</h2><p class="muted" id="memoryPath"></p><textarea id="memory"></textarea></article>
+      <article class="card"><h2>Learning traces</h2><p class="muted" id="learningPath"></p><textarea id="learning"></textarea></article>
+    </section>
+  </main>
+  <script>
+    async function load(){const s=await fetch('/api/brain-panel',{cache:'no-store'}).then(r=>r.json());memory.value=JSON.stringify(s.memorySignals,null,2);learning.value=JSON.stringify(s.learning,null,2);memoryPath.textContent=s.files.memorySignals;learningPath.textContent=s.files.learning;if(window.lucide)lucide.createIcons()}
+    async function save(){let payload;try{payload={memorySignals:JSON.parse(memory.value||'[]'),learning:JSON.parse(learning.value||'[]')}}catch{alert('Invalid JSON');return}await fetch('/api/brain-panel/action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save',...payload})});await load()}
+    async function clearBrain(){if(!confirm('Clear all persisted brain memory?'))return;await fetch('/api/brain-panel/action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'clear'})});await load()}
+    load();
+  </script>
+</body>
+</html>`;
+
 export function startWebUiServer(options: { port?: number; staticRoot?: string } = {}) {
 	const requestedPort = options.port ?? Number(process.env.MOON_WEB_PORT || 3131);
 	const server = createServer((req, res) => {
@@ -2092,6 +2140,14 @@ export function startWebUiServer(options: { port?: number; staticRoot?: string }
 		if (url.pathname === "/api/mcp-panel") {
 			return json(res, mcpPanelStateProvider ? mcpPanelStateProvider() : { servers: [], clients: [], tools: 0 });
 		}
+		if (url.pathname === "/api/brain-panel") {
+			const files = getBrainFiles();
+			return json(res, {
+				files,
+				memorySignals: readJsonFileSafe(files.memorySignals),
+				learning: readJsonFileSafe(files.learning),
+			});
+		}
 		if (url.pathname === "/api/auth-panel/oauth-event") {
 			const providerId = url.searchParams.get("providerId");
 			if (providerId && authPanelOAuthEvent?.providerId && authPanelOAuthEvent.providerId !== providerId) {
@@ -2140,6 +2196,32 @@ export function startWebUiServer(options: { port?: number; staticRoot?: string }
 						await listener(data);
 					}
 					return json(res, { ok: true, message: "MCP action complete." });
+				} catch (err: any) {
+					return json(res, { ok: false, error: err.message });
+				}
+			});
+			return;
+		}
+		if (req.method === "POST" && url.pathname === "/api/brain-panel/action") {
+			let body = "";
+			req.on("data", (chunk) => {
+				body += chunk;
+			});
+			req.on("end", async () => {
+				try {
+					const data = JSON.parse(body || "{}");
+					const files = getBrainFiles();
+					mkdirSync(dirname(files.memorySignals), { recursive: true });
+					if (data?.action === "clear") {
+						for (const file of Object.values(files)) rmSync(file, { force: true });
+						return json(res, { ok: true });
+					}
+					if (data?.action === "save") {
+						writeFileSync(files.memorySignals, `${JSON.stringify(data.memorySignals ?? [], null, 2)}\n`, "utf-8");
+						writeFileSync(files.learning, `${JSON.stringify(data.learning ?? [], null, 2)}\n`, "utf-8");
+						return json(res, { ok: true });
+					}
+					return json(res, { ok: false, error: "Unknown brain action." });
 				} catch (err: any) {
 					return json(res, { ok: false, error: err.message });
 				}
@@ -2226,9 +2308,14 @@ export function startWebUiServer(options: { port?: number; staticRoot?: string }
 			res.end(MCP_PANEL_HTML);
 			return;
 		}
-		if (url.pathname === "/session" || url.pathname === "/brain") {
+		if (url.pathname === "/session") {
 			res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
 			res.end(APP_HTML);
+			return;
+		}
+		if (url.pathname === "/brain") {
+			res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+			res.end(BRAIN_PANEL_HTML);
 			return;
 		}
 		if (serveAsset(res, url.pathname)) return;
