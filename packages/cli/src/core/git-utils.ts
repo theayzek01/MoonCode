@@ -130,7 +130,7 @@ export async function createPR(
 		headers: {
 			Authorization: `Bearer ${token}`,
 			Accept: "application/vnd.github+json",
-			"User-Agent": "MoonAgent-git-ship",
+			"User-Agent": "MoonCode-git-ship",
 		},
 		body: JSON.stringify({ title, body, head: branch, base: defaultBase }),
 	});
@@ -144,7 +144,7 @@ export async function createPR(
 }
 
 export function safeBranchName(input?: string): string {
-	const raw = input?.trim() || `MoonAgent/${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}`;
+	const raw = input?.trim() || `MoonCode/${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}`;
 	const normalized = raw
 		.toLowerCase()
 		.replace(/[^a-z0-9._/-]+/g, "-")
@@ -163,7 +163,7 @@ export async function shipChanges(
 	cwd: string,
 	options: { message?: string; branchName?: string; pr?: boolean } = {},
 ): Promise<ShipResult> {
-	const message = options.message || "chore: update via MoonAgent";
+	const message = options.message || "chore: update via MoonCode";
 	const branch = safeBranchName(options.branchName || message);
 	await createBranch(cwd, branch);
 	const commit = await commitAll(cwd, message);
@@ -171,7 +171,7 @@ export async function shipChanges(
 	await pushBranch(cwd, branch);
 	let prUrl: string | undefined;
 	if (options.pr !== false) {
-		const body = [`Automated MoonAgent ship.`, "", "```", diffStat || commit, "```"].join("\n");
+		const body = [`Automated MoonCode ship.`, "", "```", diffStat || commit, "```"].join("\n");
 		prUrl = await createPR(cwd, message, body, branch).catch((err) => `Could not create PR: ${err.message}`);
 	}
 	return { ok: true, message: commit || "Ship complete.", branch, prUrl, diffStat };

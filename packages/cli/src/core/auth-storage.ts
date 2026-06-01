@@ -3,7 +3,7 @@
  * Credential storage for API keys and OAuth tokens.
  * Handles loading, saving, and refreshing credentials from auth.json.
  *
- * Uses file locking to prevent race conditions when multiple MoonAgent instances
+ * Uses file locking to prevent race conditions when multiple MoonCode instances
  * try to refresh tokens simultaneously.
  */
 
@@ -33,6 +33,24 @@ export type OAuthCredential = {
 export type AuthCredential = ApiKeyCredential | OAuthCredential;
 
 export type AuthStorageData = Record<string, AuthCredential>;
+
+export type ManagedAuthAccount = {
+	id: string;
+	provider: string;
+	label: string;
+	type: "oauth" | "api_key";
+	credential: AuthCredential;
+	createdAt: number;
+	lastUsedAt?: number;
+	useCount?: number;
+	quotaLabel?: string;
+	active?: boolean;
+};
+
+type AuthAccountsFile = {
+	accounts: ManagedAuthAccount[];
+	activeByProvider: Record<string, string>;
+};
 
 export type AuthStatus = {
 	configured: boolean;
@@ -195,6 +213,7 @@ export class AuthStorage {
 	private fallbackResolver?: (provider: string) => string | undefined;
 	private loadError: Error | null = null;
 	private errors: Error[] = [];
+	private accountsPath = join(getEngineDir(), "auth-accounts.json");
 
 	private constructor(private storage: AuthStorageBackend) {
 		this.reload();
@@ -212,6 +231,154 @@ export class AuthStorage {
 		const storage = new InMemoryAuthStorageBackend();
 		storage.withLock(() => ({ result: undefined, next: JSON.stringify(data, null, 2) }));
 		return AuthStorage.fromStorage(storage);
+	}
+
+	private readAccountsFile(): AuthAccountsFile {
+		try {
+			if (!existsSync(this.accountsPath)) {
+				return { accounts: [], activeByProvider: {} };
+			}
+			const parsed = JSON.parse(readFileSync(this.accountsPath, "utf-8")) as Partial<AuthAccountsFile>;
+			return {
+				accounts: Array.isArray(parsed.accounts) ? (parsed.accounts as ManagedAuthAccount[]) : [],
+				activeByProvider:
+					parsed.activeByProvider && typeof parsed.activeByProvider === "object"
+						? (parsed.activeByProvider as Record<string, string>)
+						: {},
+			};
+		} catch (error) {
+			this.recordError(error);
+			return { accounts: [], activeByProvider: {} };
+		}
+	}
+
+	private writeAccountsFile(file: AuthAccountsFile): void {
+		try {
+			const dir = dirname(this.accountsPath);
+			if (!existsSync(dir)) {
+				mkdirSync(dir, { recursive: true, mode: 0o700 });
+			}
+			writeFileSync(this.accountsPath, JSON.stringify(file, null, 2), "utf-8");
+			chmodSync(this.accountsPath, 0o600);
+		} catch (error) {
+			this.recordError(error);
+		}
+	}
+
+	private createAccountId(provider: string): string {
+		return `${provider}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+	}
+
+	private defaultAccountLabel(provider: string, type: "oauth" | "api_key"): string {
+		return `${provider} ${type === "oauth" ? "abonelik" : "api key"} ${new Date().toLocaleString()}`;
+	}
+
+	upsertManagedAccount(
+		provider: string,
+		credential: AuthCredential,
+		options: { label?: string; activate?: boolean; quotaLabel?: string } = {},
+	): ManagedAuthAccount {
+		const file = this.readAccountsFile();
+		const now = Date.now();
+		const existingIndex = file.accounts.findIndex(
+			(account) =>
+				account.provider === provider &&
+				account.type === credential.type &&
+				JSON.stringify(account.credential) === JSON.stringify(credential),
+		);
+		const account: ManagedAuthAccount =
+			existingIndex >= 0
+				? {
+						...file.accounts[existingIndex],
+						label: options.label?.trim() || file.accounts[existingIndex].label,
+						credential,
+						quotaLabel: options.quotaLabel ?? file.accounts[existingIndex].quotaLabel,
+					}
+				: {
+						id: this.createAccountId(provider),
+						provider,
+						label: options.label?.trim() || this.defaultAccountLabel(provider, credential.type),
+						type: credential.type,
+						credential,
+						createdAt: now,
+						useCount: 0,
+						quotaLabel: options.quotaLabel,
+					};
+		if (existingIndex >= 0) {
+			file.accounts[existingIndex] = account;
+		} else {
+			file.accounts.push(account);
+		}
+		if (options.activate ?? true) {
+			file.activeByProvider[provider] = account.id;
+			this.data[provider] = credential;
+			this.persistProviderChange(provider, credential);
+		}
+		this.writeAccountsFile(file);
+		return { ...account, active: file.activeByProvider[provider] === account.id };
+	}
+
+	listManagedAccounts(): ManagedAuthAccount[] {
+		const file = this.readAccountsFile();
+		return file.accounts.map((account) => ({
+			...account,
+			active: file.activeByProvider[account.provider] === account.id,
+		}));
+	}
+
+	setActiveManagedAccount(accountId: string): ManagedAuthAccount | undefined {
+		const file = this.readAccountsFile();
+		const account = file.accounts.find((item) => item.id === accountId);
+		if (!account) {
+			return undefined;
+		}
+		file.activeByProvider[account.provider] = account.id;
+		this.data[account.provider] = account.credential;
+		this.persistProviderChange(account.provider, account.credential);
+		this.writeAccountsFile(file);
+		return { ...account, active: true };
+	}
+
+	activateNextManagedAccount(provider: string): ManagedAuthAccount | undefined {
+		const file = this.readAccountsFile();
+		const providerAccounts = file.accounts.filter((account) => account.provider === provider);
+		if (providerAccounts.length === 0) return undefined;
+		const activeId = file.activeByProvider[provider];
+		const activeIndex = providerAccounts.findIndex((account) => account.id === activeId);
+		const next = providerAccounts[(activeIndex + 1 + providerAccounts.length) % providerAccounts.length];
+		if (!next || next.id === activeId) return undefined;
+		file.activeByProvider[provider] = next.id;
+		this.data[provider] = next.credential;
+		this.persistProviderChange(provider, next.credential);
+		this.writeAccountsFile(file);
+		return { ...next, active: true };
+	}
+
+	removeManagedAccount(accountId: string): boolean {
+		const file = this.readAccountsFile();
+		const account = file.accounts.find((item) => item.id === accountId);
+		if (!account) return false;
+		file.accounts = file.accounts.filter((item) => item.id !== accountId);
+		if (file.activeByProvider[account.provider] === accountId) {
+			delete file.activeByProvider[account.provider];
+			this.remove(account.provider);
+		}
+		this.writeAccountsFile(file);
+		return true;
+	}
+
+	private markManagedAccountUsed(provider: string): void {
+		const file = this.readAccountsFile();
+		const activeId = file.activeByProvider[provider];
+		if (!activeId) return;
+		const index = file.accounts.findIndex((account) => account.id === activeId);
+		if (index < 0) return;
+		file.accounts[index] = {
+			...file.accounts[index],
+			lastUsedAt: Date.now(),
+			useCount: (file.accounts[index].useCount ?? 0) + 1,
+		};
+		this.writeAccountsFile(file);
 	}
 
 	/**
@@ -301,6 +468,7 @@ export class AuthStorage {
 	set(provider: string, credential: AuthCredential): void {
 		this.data[provider] = credential;
 		this.persistProviderChange(provider, credential);
+		this.upsertManagedAccount(provider, credential, { activate: true });
 	}
 
 	/**
@@ -384,7 +552,8 @@ export class AuthStorage {
 		}
 
 		const credentials = await provider.login(callbacks);
-		this.set(providerId, { type: "oauth", ...credentials });
+		const credential: AuthCredential = { type: "oauth", ...credentials };
+		this.set(providerId, credential);
 	}
 
 	/**
@@ -396,7 +565,7 @@ export class AuthStorage {
 
 	/**
 	 * Refresh OAuth token with backend locking to prevent race conditions.
-	 * Multiple MoonAgent instances may try to refresh simultaneously when tokens expire.
+	 * Multiple MoonCode instances may try to refresh simultaneously when tokens expire.
 	 */
 	private async refreshOAuthTokenWithLock(
 		providerId: OAuthProviderId,
@@ -457,12 +626,14 @@ export class AuthStorage {
 		// Runtime override takes highest priority
 		const runtimeKey = this.runtimeOverrides.get(providerId);
 		if (runtimeKey) {
+			this.markManagedAccountUsed(providerId);
 			return runtimeKey;
 		}
 
 		const cred = this.data[providerId];
 
 		if (cred?.type === "api_key") {
+			this.markManagedAccountUsed(providerId);
 			return resolveConfigValue(cred.key);
 		}
 
@@ -481,6 +652,7 @@ export class AuthStorage {
 				try {
 					const result = await this.refreshOAuthTokenWithLock(providerId);
 					if (result) {
+						this.markManagedAccountUsed(providerId);
 						return result.apiKey;
 					}
 				} catch (error) {
@@ -506,11 +678,16 @@ export class AuthStorage {
 
 		// Fall back to environment variable
 		const envKey = getEnvApiKey(providerId);
-		if (envKey) return envKey;
+		if (envKey) {
+			this.markManagedAccountUsed(providerId);
+			return envKey;
+		}
 
 		// Fall back to custom resolver (e.g., models.json custom providers)
 		if (options?.includeFallback !== false) {
-			return this.fallbackResolver?.(providerId) ?? undefined;
+			const fallback = this.fallbackResolver?.(providerId) ?? undefined;
+			if (fallback) this.markManagedAccountUsed(providerId);
+			return fallback;
 		}
 
 		return undefined;

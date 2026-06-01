@@ -1,6 +1,6 @@
 // @ts-nocheck
 /**
- * MoonAgent Ω Kernel (Omega Kernel)
+ * MoonCode Ω Kernel (Omega Kernel)
  * Core mathematical engine for verified repo transformations.
  */
 
@@ -412,7 +412,7 @@ export class OmegaKernel {
 			verificationResults: verification ? [verification] : [],
 			riskLevel: contract?.riskLevel || "low",
 			rollbackPlan: "git checkout -- <files>",
-			modelContributors: ["MoonAgent Ω Kernel"],
+			modelContributors: ["MoonCode Ω Kernel"],
 			timestamp: Date.now(),
 			verificationStatus: verification ? (verification.status === "passed" ? "verified" : "failed") : "not_run",
 		};

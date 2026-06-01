@@ -157,6 +157,8 @@ export interface McpServerConfig {
 	command: string;
 	args?: string[];
 	env?: Record<string, string>;
+	cwd?: string;
+	autoStart?: boolean;
 }
 
 /** Deep merge settings: project/overrides take precedence, nested objects merge recursively */
@@ -918,6 +920,26 @@ export class SettingsManager {
 
 	getMcpServers(): Record<string, McpServerConfig> {
 		return this.settings.mcpServers || {};
+	}
+
+	setMcpServer(name: string, config: McpServerConfig): void {
+		this.globalSettings.mcpServers = {
+			...(this.globalSettings.mcpServers ?? {}),
+			[name]: structuredClone(config),
+		};
+		this.markModified("mcpServers");
+		this.save();
+	}
+
+	removeMcpServer(name: string): void {
+		if (!this.globalSettings.mcpServers?.[name]) {
+			return;
+		}
+		const nextServers = { ...this.globalSettings.mcpServers };
+		delete nextServers[name];
+		this.globalSettings.mcpServers = Object.keys(nextServers).length > 0 ? nextServers : undefined;
+		this.markModified("mcpServers");
+		this.save();
 	}
 
 	setEnableInstallTelemetry(enabled: boolean): void {

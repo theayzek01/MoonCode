@@ -1,5 +1,5 @@
 /**
- * MoonAgent Design System Module
+ * MoonCode Design System Module
  *
  * Inspired by Open Design (nexu-io/open-design) but built lightweight
  * for a CLI-first agent. Provides:

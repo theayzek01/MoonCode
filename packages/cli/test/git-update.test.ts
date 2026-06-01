@@ -315,14 +315,14 @@ describe("DefaultPackageManager git update", () => {
 			const gitHost = "github.com";
 			const gitPath = "test/extension";
 			const hash = createHash("sha256").update(`git-${gitHost}-${gitPath}`).digest("hex").slice(0, 8);
-			const cachedDir = join(tmpdir(), "MoonCode-extensions", `git-${gitHost}`, hash, gitPath);
-			const extensionFile = join(cachedDir, "MoonCode-extensions", "session-breakdown.ts");
+			const cachedDir = join(tmpdir(), "Mooncli-extensions", `git-${gitHost}`, hash, gitPath);
+			const extensionFile = join(cachedDir, "Mooncli-extensions", "session-breakdown.ts");
 
 			rmSync(cachedDir, { recursive: true, force: true });
-			mkdirSync(join(cachedDir, "MoonCode-extensions"), { recursive: true });
+			mkdirSync(join(cachedDir, "Mooncli-extensions"), { recursive: true });
 			writeFileSync(
 				join(cachedDir, "package.json"),
-				JSON.stringify({ MoonCode: { extensions: ["./MoonCode-extensions"] } }, null, 2),
+				JSON.stringify({ Mooncli: { extensions: ["./Mooncli-extensions"] } }, null, 2),
 			);
 			writeFileSync(extensionFile, "// stale");
 
@@ -355,21 +355,21 @@ describe("DefaultPackageManager git update", () => {
 			expect(executedCommands).toContain(
 				"git fetch --prune --no-tags origin +refs/heads/main:refs/remotes/origin/main",
 			);
-			expect(getFileContent(cachedDir, "MoonCode-extensions/session-breakdown.ts")).toBe("// fresh");
+			expect(getFileContent(cachedDir, "Mooncli-extensions/session-breakdown.ts")).toBe("// fresh");
 		});
 
 		it("should not refresh pinned temporary git sources", async () => {
 			const gitHost = "github.com";
 			const gitPath = "test/extension";
 			const hash = createHash("sha256").update(`git-${gitHost}-${gitPath}`).digest("hex").slice(0, 8);
-			const cachedDir = join(tmpdir(), "MoonCode-extensions", `git-${gitHost}`, hash, gitPath);
-			const extensionFile = join(cachedDir, "MoonCode-extensions", "session-breakdown.ts");
+			const cachedDir = join(tmpdir(), "Mooncli-extensions", `git-${gitHost}`, hash, gitPath);
+			const extensionFile = join(cachedDir, "Mooncli-extensions", "session-breakdown.ts");
 
 			rmSync(cachedDir, { recursive: true, force: true });
-			mkdirSync(join(cachedDir, "MoonCode-extensions"), { recursive: true });
+			mkdirSync(join(cachedDir, "Mooncli-extensions"), { recursive: true });
 			writeFileSync(
 				join(cachedDir, "package.json"),
-				JSON.stringify({ MoonCode: { extensions: ["./MoonCode-extensions"] } }, null, 2),
+				JSON.stringify({ Mooncli: { extensions: ["./Mooncli-extensions"] } }, null, 2),
 			);
 			writeFileSync(extensionFile, "// pinned");
 
@@ -384,7 +384,7 @@ describe("DefaultPackageManager git update", () => {
 			await packageManager.resolveExtensionSources([`${gitSource}@main`], { temporary: true });
 
 			expect(executedCommands).toEqual([]);
-			expect(getFileContent(cachedDir, "MoonCode-extensions/session-breakdown.ts")).toBe("// pinned");
+			expect(getFileContent(cachedDir, "Mooncli-extensions/session-breakdown.ts")).toBe("// pinned");
 		});
 	});
 
@@ -396,7 +396,7 @@ describe("DefaultPackageManager git update", () => {
 			createCommit(remoteDir, "extension.ts", "// v2", "Second commit");
 
 			// The project-scope install path should not exist before or after update
-			const projectGitDir = join(tempDir, ".mooncode", "git", "github.com", "test", "extension");
+			const projectGitDir = join(tempDir, ".Mooncli", "git", "github.com", "test", "extension");
 			expect(existsSync(projectGitDir)).toBe(false);
 
 			await packageManager.update(gitSource);

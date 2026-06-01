@@ -4,6 +4,10 @@ export interface TokenOptimizeResult {
 	reductionChars: number;
 }
 
+export interface PromptCapsuleResult extends TokenOptimizeResult {
+	capsuleApplied: boolean;
+}
+
 const REPEATED_WHITESPACE = /[ \t]{3,}/g;
 const REPEATED_BLANK_LINES = /\n{3,}/g;
 const TRAILING_WHITESPACE = /[ \t]+$/gm;
@@ -18,6 +22,9 @@ const STACK_TRACE_LINE = /^\s*at\s+.+(?:\(|file:|[A-Za-z]:\\|\/).*/;
 const JSONISH_BLOCK = /^\s*[[{][\s\S]*[\]}]\s*$/;
 // Repeated log lines (e.g. "[INFO] processing file X" × 100)
 const REPEATED_LOG_LINE_THRESHOLD = 5;
+const CAPSULE_MIN_CHARS = 12_000;
+const CAPSULE_MAX_RAW_CHARS = 6_000;
+const CAPSULE_MAX_LINES = 80;
 // Note: TOOL_OUTPUT_BLOCK is created fresh per call (global regex with lastIndex would cause bugs across repeated calls)
 
 // Trim long tool output blocks — head/tail strategy
@@ -103,6 +110,115 @@ export function optimizePromptText(text: string): TokenOptimizeResult {
 		optimizedText: normalized,
 		wasOptimized: true,
 		reductionChars: Math.max(0, originalLength - normalized.length),
+	};
+}
+
+function uniqueLimited(items: string[], limit: number): string[] {
+	const seen = new Set<string>();
+	const out: string[] = [];
+	for (const item of items) {
+		const normalized = item.trim();
+		if (!normalized || seen.has(normalized)) continue;
+		seen.add(normalized);
+		out.push(normalized);
+		if (out.length >= limit) break;
+	}
+	return out;
+}
+
+function extractPathHints(text: string): string[] {
+	const pathLike =
+		/(?:[A-Za-z]:\\[^\s"'`<>|]+|\.{0,2}\/[^\s"'`<>|]+|[\w.-]+\/[\w./-]+\.[A-Za-z0-9]{1,8}|[\w.-]+\\[\w.\\-]+\.[A-Za-z0-9]{1,8})/g;
+	return uniqueLimited(text.match(pathLike) ?? [], 32);
+}
+
+function extractCommandHints(text: string): string[] {
+	const lines = text.split("\n");
+	return uniqueLimited(
+		lines
+			.map((line) => line.trim())
+			.filter((line) => /^(?:[$>]\s*)?(?:npm|pnpm|yarn|bun|node|python|pytest|vitest|cargo|go|git|rg|grep|tsc|eslint|blender)\b/i.test(line))
+			.map((line) => line.replace(/^[$>]\s*/, "")),
+		24,
+	);
+}
+
+function extractErrorHints(text: string): string[] {
+	const lines = text.split("\n");
+	return uniqueLimited(
+		lines.filter((line) => /\b(error|exception|failed|failure|traceback|timeout|eacces|enoent|cannot find|expected|received)\b/i.test(line)),
+		24,
+	);
+}
+
+function summarizeCodeFences(text: string): string[] {
+	const summaries: string[] = [];
+	const fenceRe = /```([A-Za-z0-9_+.-]*)\n([\s\S]*?)```/g;
+	let match: RegExpExecArray | null;
+	while ((match = fenceRe.exec(text)) && summaries.length < 16) {
+		const lang = match[1] || "text";
+		const body = match[2] ?? "";
+		const lines = body.split("\n");
+		const firstSignal = lines.find((line) => line.trim().length > 0)?.trim() ?? "";
+		summaries.push(`${lang}: ${lines.length} lines, ${body.length} chars${firstSignal ? `, starts: ${firstSignal.slice(0, 120)}` : ""}`);
+	}
+	return summaries;
+}
+
+function summarizeLongPrompt(text: string): string {
+	const normalized = optimizePromptText(text).optimizedText;
+	const lines = normalized.split("\n");
+	const head = lines.slice(0, Math.min(30, lines.length)).join("\n");
+	const tail = lines.slice(-Math.min(30, lines.length)).join("\n");
+	const pathHints = extractPathHints(normalized);
+	const commandHints = extractCommandHints(normalized);
+	const errorHints = extractErrorHints(normalized);
+	const codeFences = summarizeCodeFences(normalized);
+
+	const capsule = [
+		"[MoonCode Capsule/Razor]",
+		`Original: ${text.length} chars, ${text.split("\n").length} lines. Compressed before model input to reduce repeated/log-heavy context.`,
+		pathHints.length ? `Paths:\n- ${pathHints.join("\n- ")}` : "",
+		commandHints.length ? `Commands:\n- ${commandHints.join("\n- ")}` : "",
+		errorHints.length ? `Errors/signals:\n- ${errorHints.join("\n- ")}` : "",
+		codeFences.length ? `Code fences:\n- ${codeFences.join("\n- ")}` : "",
+		"Head:",
+		head,
+		"Tail:",
+		tail,
+	]
+		.filter(Boolean)
+		.join("\n");
+
+	const rawTail =
+		normalized.length > CAPSULE_MAX_RAW_CHARS
+			? normalized.slice(-CAPSULE_MAX_RAW_CHARS)
+			: normalized;
+	const trimmedRawTail = rawTail.split("\n").slice(-CAPSULE_MAX_LINES).join("\n");
+	return `${capsule}\n\n[Recent raw tail preserved]\n${trimmedRawTail}`;
+}
+
+export function optimizePromptForIntentCapsule(text: string): PromptCapsuleResult {
+	const base = optimizePromptText(text);
+	const optimized = base.optimizedText;
+	const shouldCapsule =
+		optimized.length > CAPSULE_MIN_CHARS ||
+		optimized.split("\n").length > 260 ||
+		/```[\s\S]{8000,}```/.test(optimized);
+
+	if (!shouldCapsule) {
+		return { ...base, capsuleApplied: false };
+	}
+
+	const capsule = summarizeLongPrompt(optimized).trim();
+	if (capsule.length >= optimized.length) {
+		return { ...base, capsuleApplied: false };
+	}
+	return {
+		optimizedText: capsule,
+		wasOptimized: true,
+		reductionChars: Math.max(0, text.length - capsule.length),
+		capsuleApplied: true,
 	};
 }
 

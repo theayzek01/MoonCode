@@ -441,7 +441,7 @@ export async function main(args: string[], options?: MainOptions) {
 
 	if (args[0] === "browser-bridge") {
 		const status = startBrowserBridgeServer({ keepAlive: true });
-		console.log(`MoonAgent Browser Bridge listening on ws://127.0.0.1:${status.port}/ws`);
+		console.log(`MoonCode Browser Bridge listening on ws://127.0.0.1:${status.port}/ws`);
 		console.log(`Health: http://127.0.0.1:${status.port}/health`);
 		process.on("SIGINT", () => process.exit(0));
 		await new Promise(() => {});
@@ -485,7 +485,7 @@ export async function main(args: string[], options?: MainOptions) {
 	if (args[0] === "service") {
 		const action = args[1];
 		if (!action || !["start", "stop", "restart", "status", "logs"].includes(action)) {
-			console.log("Usage: moonagent service <start|stop|restart|status|logs>");
+			console.log("Usage: mooncode service <start|stop|restart|status|logs>");
 			return;
 		}
 
@@ -555,12 +555,12 @@ export async function main(args: string[], options?: MainOptions) {
 			const runningStatus = await checkRunning();
 			if (runningStatus) {
 				console.log(
-					chalk.yellow(`MoonAgent Service is already running on port 3133 (Clients: ${runningStatus.clients}).`),
+					chalk.yellow(`MoonCode Service is already running on port 3133 (Clients: ${runningStatus.clients}).`),
 				);
 				return;
 			}
 
-			console.log("Starting MoonAgent background service daemon...");
+			console.log("Starting MoonCode background service daemon...");
 			const { spawn } = await import("node:child_process");
 			const cliEntry = process.argv[1];
 
@@ -597,7 +597,7 @@ export async function main(args: string[], options?: MainOptions) {
 			}
 
 			if (success) {
-				console.log(chalk.green(`✓ MoonAgent Service started successfully.`));
+				console.log(chalk.green(`✓ MoonCode Service started successfully.`));
 				console.log(`Logs: ${serviceLogPath}`);
 				console.log(`Dashboard: http://127.0.0.1:3131`);
 			} else {
@@ -609,14 +609,14 @@ export async function main(args: string[], options?: MainOptions) {
 		if (action === "stop") {
 			const isRunning = await checkRunning();
 			if (!isRunning) {
-				console.log(chalk.yellow("MoonAgent Service is not running."));
+				console.log(chalk.yellow("MoonCode Service is not running."));
 				return;
 			}
 
-			console.log("Stopping MoonAgent Service...");
+			console.log("Stopping MoonCode Service...");
 			const stopped = await postToShutdown();
 			if (stopped) {
-				console.log(chalk.green("✓ MoonAgent Service stopped successfully."));
+				console.log(chalk.green("✓ MoonCode Service stopped successfully."));
 			} else {
 				console.log(chalk.red("✗ Failed to stop service."));
 			}
@@ -626,12 +626,12 @@ export async function main(args: string[], options?: MainOptions) {
 		if (action === "restart") {
 			const isRunning = await checkRunning();
 			if (isRunning) {
-				console.log("Stopping MoonAgent Service...");
+				console.log("Stopping MoonCode Service...");
 				await postToShutdown();
 				await new Promise((r) => setTimeout(r, 1000));
 			}
 
-			console.log("Starting MoonAgent background service daemon...");
+			console.log("Starting MoonCode background service daemon...");
 			const { spawn } = await import("node:child_process");
 			const cliEntry = process.argv[1];
 			const isWin = process.platform === "win32";
@@ -667,7 +667,7 @@ export async function main(args: string[], options?: MainOptions) {
 			}
 
 			if (success) {
-				console.log(chalk.green(`✓ MoonAgent Service restarted successfully.`));
+				console.log(chalk.green(`✓ MoonCode Service restarted successfully.`));
 				console.log(`Logs: ${serviceLogPath}`);
 				console.log(`Dashboard: http://127.0.0.1:3131`);
 			} else {
@@ -679,13 +679,13 @@ export async function main(args: string[], options?: MainOptions) {
 		if (action === "status") {
 			const runningStatus = await checkRunning();
 			if (runningStatus) {
-				console.log(chalk.green("● MoonAgent Service: RUNNING"));
+				console.log(chalk.green("● MoonCode Service: RUNNING"));
 				console.log(`  Bridge Port:  3133`);
 				console.log(`  Web Port:     3131`);
 				console.log(`  Clients:      ${runningStatus.clients}`);
 				console.log(`  Dashboard:    http://127.0.0.1:3131`);
 			} else {
-				console.log(chalk.red("○ MoonAgent Service: STOPPED"));
+				console.log(chalk.red("○ MoonCode Service: STOPPED"));
 			}
 			return;
 		}
@@ -765,8 +765,8 @@ export async function main(args: string[], options?: MainOptions) {
 		if (existsSync(localMemoryFile)) rmSync(localMemoryFile, { force: true });
 		if (existsSync(localProfileFile)) rmSync(localProfileFile, { force: true });
 
-		console.log(`Cleared MoonAgent session memory: ${sessionsDir}`);
-		console.log(`Cleared MoonAgent global and local memory signals/profiles/lessons`);
+		console.log(`Cleared MoonCode session memory: ${sessionsDir}`);
+		console.log(`Cleared MoonCode global and local memory signals/profiles/lessons`);
 		process.exit(0);
 	}
 

@@ -3,8 +3,8 @@
  * Print mode (single-shot): Send prompts, output result, exit.
  *
  * Used for:
- * - `MoonAgent -p "prompt"` - text output
- * - `MoonAgent --mode json "prompt"` - JSON event stream
+ * - `MoonCode -p "prompt"` - text output
+ * - `MoonCode --mode json "prompt"` - JSON event stream
  */
 
 import type { AssistantMessage, ImageContent } from "moon-core";

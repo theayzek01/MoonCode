@@ -92,10 +92,10 @@ import { getChangelogPath, getNewEntries, parseChangelog } from "../../utils/cha
 import { copyToClipboard } from "../../utils/clipboard.js";
 import { extensionForImageMimeType, readClipboardImage } from "../../utils/clipboard-image.js";
 import { parseGitUrl } from "../../utils/git.js";
-import { getMoonAgentUserEngine } from "../../utils/moon-user-engine.js";
+import { getMoonCodeUserEngine } from "../../utils/moon-user-engine.js";
 import { killTrackedDetachedChildren } from "../../utils/shell.js";
 import { ensureTool, getToolPath } from "../../utils/tools-manager.js";
-import { checkForNewMoonAgentVersion } from "../../utils/version-check.js";
+import { checkForNewMoonCodeVersion } from "../../utils/version-check.js";
 import { AppLockComponent } from "./components/app-lock.js";
 import { ArminComponent } from "./components/armin.js";
 import { AssistantMessageComponent } from "./components/assistant-message.js";
@@ -113,13 +113,12 @@ import { ExtensionEditorComponent } from "./components/extension-editor.js";
 import { ExtensionInputComponent } from "./components/extension-input.js";
 import { ExtensionSelectorComponent } from "./components/extension-selector.js";
 import { FooterComponent } from "./components/footer.js";
-import { MoonAgentIntroComponent } from "./components/intro.js";
 import { keyHint, keyText, rawKeyHint } from "./components/keybinding-hints.js";
 import { LoginDialogComponent } from "./components/login-dialog.js";
 import { McpSelectorComponent } from "./components/mcp-selector.js";
 import { MetricsChartComponent } from "./components/metrics-chart.js";
 import { ModelSelectorComponent } from "./components/model-selector.js";
-import { MoonAgentHeaderComponent } from "./components/mooncode-header.js";
+import { MoonCodeHeaderComponent } from "./components/mooncode-header.js";
 import { type AuthSelectorProvider, OAuthSelectorComponent } from "./components/oauth-selector.js";
 import { RoadmapComponent, type RoadmapStep } from "./components/roadmap.js";
 import { ScopedModelsSelectorComponent } from "./components/scoped-models-selector.js";
@@ -130,7 +129,7 @@ import { ToolExecutionComponent } from "./components/tool-execution.js";
 import { TreeSelectorComponent } from "./components/tree-selector.js";
 import { UserMessageComponent } from "./components/user-message.js";
 import { UserMessageSelectorComponent } from "./components/user-message-selector.js";
-import { WorkspacePanelComponent } from "./components/workspace-panel.js";
+// WorkspacePanelComponent removed — right panel disabled
 import {
 	getAvailableThemes,
 	getAvailableThemesWithPaths,
@@ -157,26 +156,51 @@ function isExpandable(obj: unknown): obj is Expandable {
 	return typeof obj === "object" && obj !== null && "setExpanded" in obj && typeof obj.setExpanded === "function";
 }
 
+function isChatMessageComponent(child: any): boolean {
+	if (!child || typeof child !== "object") return false;
+	const name = child.constructor?.name;
+	return (
+		name === "UserMessageComponent" ||
+		name === "AssistantMessageComponent" ||
+		name === "CustomMessageComponent" ||
+		name === "BranchSummaryMessageComponent" ||
+		name === "CompactionSummaryMessageComponent" ||
+		name === "SkillInvocationMessageComponent" ||
+		name === "ToolExecutionComponent" ||
+		name === "BashExecutionComponent"
+	);
+}
+
 class VirtualizedChatContainer extends Container {
 	private cachedHeight?: number;
+	private chatItemCount = 0;
+	private prunedChatItemCount = 0;
 	staticOverhead = 10;
-	scrollOffset = 0;
-	private preserveScrollOnNextChild = false;
-
-	override invalidate(): void {
-		super.invalidate();
-		this.cachedHeight = undefined;
-		this.cachedLines = undefined;
-	}
+	staticMaxChildren = 900;
+	staticPruneToChildren = 650;
 
 	override addChild(child: Component): void {
-		this.preserveScrollOnNextChild = this.scrollOffset > 0;
 		super.addChild(child);
+		if (isChatMessageComponent(child)) {
+			this.chatItemCount++;
+		}
+		this.pruneOldChildrenForTuiSpeed();
 	}
 
-	override clear(): void {
-		super.clear();
-		this.scrollOffset = 0;
+	private pruneOldChildrenForTuiSpeed(): void {
+		if (this.children.length <= this.staticMaxChildren) {
+			return;
+		}
+		const removeCount = Math.max(0, this.children.length - this.staticPruneToChildren);
+		let removedChatItems = 0;
+		for (let i = 0; i < removeCount; i++) {
+			if (isChatMessageComponent(this.children[i])) {
+				removedChatItems++;
+			}
+		}
+		this.children.splice(0, removeCount);
+		this.prunedChatItemCount += removedChatItems;
+		this.cachedLines = undefined;
 	}
 
 	override render(width: number): string[] {
@@ -192,22 +216,45 @@ class VirtualizedChatContainer extends Container {
 			return this.cachedLines;
 		}
 
-		const allLines: string[] = [];
-		for (const child of this.children) {
-			if (!child) continue;
-			allLines.push(...(child.render(width) || []));
+		let lines: string[] = [];
+		if (this.children.length === 0) {
+			lines = super.render(width) || [];
+		} else {
+			let hiddenChildren = 0;
+			for (let i = this.children.length - 1; i >= 0; i--) {
+				const child = this.children[i];
+				if (!child) continue;
+				const childLines = child.render(width) || [];
+				if (lines.length === 0 && childLines.length > maxVisible) {
+					lines.unshift(...childLines.slice(-maxVisible));
+					hiddenChildren = i;
+					break;
+				}
+				if (lines.length + childLines.length > maxVisible) {
+					hiddenChildren = i + 1;
+					break;
+				}
+				lines.unshift(...childLines);
+			}
+			if (hiddenChildren > 0) {
+				let visibleChatItemsCount = 0;
+				for (let i = hiddenChildren; i < this.children.length; i++) {
+					if (isChatMessageComponent(this.children[i])) {
+						visibleChatItemsCount++;
+					}
+				}
+				const activeChatItemsCount = Math.max(0, this.chatItemCount - this.prunedChatItemCount);
+				const hiddenChatItemsCount = Math.max(0, activeChatItemsCount - visibleChatItemsCount);
+				if (hiddenChatItemsCount > 0) {
+					lines.unshift(
+						theme.fg(
+							"dim",
+							`… ${hiddenChatItemsCount} older chat item(s) hidden for terminal speed. Full session context is still preserved.`,
+						),
+					);
+				}
+			}
 		}
-
-		const maxOffset = Math.max(0, allLines.length - maxVisible);
-		if (this.preserveScrollOnNextChild && maxOffset > 0) {
-			this.scrollOffset = Math.min(maxOffset, this.scrollOffset + 1);
-			this.preserveScrollOnNextChild = false;
-		}
-		this.scrollOffset = Math.max(0, Math.min(this.scrollOffset, maxOffset));
-
-		const end = allLines.length - this.scrollOffset;
-		const start = Math.max(0, end - maxVisible);
-		const lines = allLines.slice(start, end);
 
 		// Fill remaining space so composer stays pinned to bottom
 		while (lines.length < maxVisible) lines.unshift("");
@@ -313,8 +360,7 @@ export class InteractiveMode {
 	private editorContainer: Container;
 	private footer: FooterComponent;
 	private footerDataProvider: FooterDataProvider;
-	private workspacePanel: WorkspacePanelComponent;
-	private workspacePanelContainer: Container;
+	// workspacePanel removed
 	// Stored so the same manager can be injected into custom editors, selectors, and extension UI.
 	private keybindings: KeybindingsManager;
 	private version: string;
@@ -363,6 +409,9 @@ export class InteractiveMode {
 	// Track if editor is in bash mode (text starts with !)
 	private isBashMode = false;
 
+	// Plan Mode: read-only analiz modu (write/edit/bash tool'lari devre disi)
+	private isPlanMode = false;
+
 	// Track current bash execution component
 	private bashComponent: BashExecutionComponent | undefined = undefined;
 
@@ -388,6 +437,7 @@ export class InteractiveMode {
 	private shutdownRequested = false;
 	private webUiProcess: any = undefined;
 	private editorActionListenerRegistered = false;
+	private authPanelListenerRegistered = false;
 
 	// Extension UI state
 	private extensionSelector: ExtensionSelectorComponent | undefined = undefined;
@@ -469,27 +519,17 @@ export class InteractiveMode {
 		this.editorContainer = new Container();
 		this.editorContainer.addChild(this.editor as Component);
 		this.footerDataProvider = new FooterDataProvider(this.sessionManager.getCwd());
-		this.footer = new FooterComponent(
-			this.session,
-			this.footerDataProvider,
-			() => {
-				const active = Array.from(this.pendingTools.values()).map((comp) => comp.getToolName());
-				if (this.bashComponent) {
-					active.push("bash");
-				}
-				return active;
-			},
-			() => this.ui.requestRender(),
-		);
+		this.footer = new FooterComponent(this.session, this.footerDataProvider, () => {
+			const active = Array.from(this.pendingTools.values()).map((comp) => comp.getToolName());
+			if (this.bashComponent) {
+				active.push("bash");
+			}
+			return active;
+		});
 		this.footer.setAutoCompactEnabled(this.session.autoCompactionEnabled);
 
 		// Load hide thinking block setting
 		this.hideThinkingBlock = this.settingsManager.getHideThinkingBlock();
-
-		this.workspacePanel = new WorkspacePanelComponent(this.session);
-		this.workspacePanelContainer = new Container();
-		this.workspacePanelContainer.addChild(this.workspacePanel);
-		this.workspacePanelContainer.setStyle({ width: 28, minWidth: 28, border: "left" });
 
 		// Register themes from resource loader and initialize
 		setRegisteredThemes(this.session.resourceLoader.getThemes().themes);
@@ -641,9 +681,6 @@ export class InteractiveMode {
 		this.startupNoticesShown = true;
 
 		// ASCII intro - tek seferlik açılış
-		const introText = new MoonAgentIntroComponent(() => this.ui.requestRender());
-		this.chatContainer.addChild(introText);
-
 		if (!this.changelogMarkdown) {
 			return;
 		}
@@ -737,9 +774,7 @@ export class InteractiveMode {
 				hint("app.tools.expand", "yardim"),
 			].join(theme.fg("dim", " • "));
 
-			this.builtInHeader = new MoonAgentHeaderComponent(this.session, this.footerDataProvider, () =>
-				this.ui.requestRender(),
-			);
+			this.builtInHeader = new MoonCodeHeaderComponent(this.session, this.footerDataProvider);
 
 			// Setup UI layout
 			this.headerContainer.addChild(this.builtInHeader);
@@ -814,8 +849,6 @@ export class InteractiveMode {
 		this.mainLayout.addChild(this.chatAndPendingContainer);
 		if (this.currentSteps.length > 0 && !this.isZenMode) {
 			this.mainLayout.addChild(this.roadmap);
-		} else if (!this.isZenMode && this.ui.terminal.columns >= 132 && this.ui.terminal.rows >= 34) {
-			this.mainLayout.addChild(this.workspacePanelContainer);
 		}
 
 		this.ui.addChild(this.mainLayout);
@@ -855,7 +888,7 @@ export class InteractiveMode {
 		await this.init();
 
 		// Start version check asynchronously
-		checkForNewMoonAgentVersion(this.version).then((newVersion) => {
+		checkForNewMoonCodeVersion(this.version).then((newVersion) => {
 			if (newVersion) {
 				this.showNewVersionNotification(newVersion);
 			}
@@ -999,10 +1032,10 @@ export class InteractiveMode {
 
 				if (isVideo) {
 					await this.handleVideoEditCommand();
-					promptInput = `[Sistem: Kullanıcının talebi üzerine MoonAgent Video Studio tarayıcıda otomatik olarak açıldı. Lütfen kullanıcıya video düzenleme konusunda nasıl yardımcı olabileceğini sor ve rehberlik et. Dosya konumları, kesme/cut, efektler, keyframe, altyazı vb. işlemler yapabileceğini ve Browser Bridge üzerinden tarayıcı sekmesini kontrol edebildiğini belirt.]\n\n${userInput}`;
+					promptInput = `[Sistem: Kullanıcının talebi üzerine MoonCode Video Studio tarayıcıda otomatik olarak açıldı. Lütfen kullanıcıya video düzenleme konusunda nasıl yardımcı olabileceğini sor ve rehberlik et. Dosya konumları, kesme/cut, efektler, keyframe, altyazı vb. işlemler yapabileceğini ve Browser Bridge üzerinden tarayıcı sekmesini kontrol edebildiğini belirt.]\n\n${userInput}`;
 				} else if (isPhoto) {
 					await this.handlePhotoEditCommand();
-					promptInput = `[Sistem: Kullanıcının mesajı profesyonel fotoğraf düzenleme/retouch niyeti taşıyor; MoonAgent Photo Studio tarayıcıda otomatik açıldı. Komut yazmasını bekleme. Önce klasördeki uygun görsel dosyayı bul (png/jpg/webp vb.), sonra Photo Studio ve Browser Bridge üzerinden yükleme/işlem akışını yürüt. İstenen işlem örn. yüz lekesi temizleme, cilt yumuşatma, göz netleştirme, profesyonel portre, arka plan/obje kaldırma, LUT/curves/upscale/export olabilir. Gerekirse yalnızca eksik dosya yolu veya export hedefi sor.]\n\n${userInput}`;
+					promptInput = `[Sistem: Kullanıcının mesajı profesyonel fotoğraf düzenleme/retouch niyeti taşıyor; MoonCode Photo Studio tarayıcıda otomatik açıldı. Komut yazmasını bekleme. Önce klasördeki uygun görsel dosyayı bul (png/jpg/webp vb.), sonra Photo Studio ve Browser Bridge üzerinden yükleme/işlem akışını yürüt. İstenen işlem örn. yüz lekesi temizleme, cilt yumuşatma, göz netleştirme, profesyonel portre, arka plan/obje kaldırma, LUT/curves/upscale/export olabilir. Gerekirse yalnızca eksik dosya yolu veya export hedefi sor.]\n\n${userInput}`;
 				}
 
 				await this.session.prompt(promptInput, { images });
@@ -1118,10 +1151,10 @@ export class InteractiveMode {
 			return;
 		}
 
-		void fetch(`https://github.com/theayzek01/MoonAgent/api/report-install?version=${encodeURIComponent(version)}`, {
+		void fetch(`https://github.com/theayzek01/MoonCode/api/report-install?version=${encodeURIComponent(version)}`, {
 			method: "POST",
 			headers: {
-				"User-Engine": getMoonAgentUserEngine(version),
+				"User-Engine": getMoonCodeUserEngine(version),
 			},
 			signal: AbortSignal.timeout(5000),
 		})
@@ -2598,28 +2631,6 @@ export class InteractiveMode {
 	// =========================================================================
 
 	private setupKeyHandlers(): void {
-		this.defaultEditor.onScrollUp = (byLine: boolean) => {
-			const maxVisible = Math.max(
-				10,
-				Math.min((process.stdout.rows || 40) - this.chatContainer.staticOverhead, 300),
-			);
-			const amount = byLine ? 1 : Math.max(1, Math.floor(maxVisible / 2));
-			this.chatContainer.scrollOffset += amount;
-			this.chatContainer.invalidate();
-			this.ui.requestRender();
-		};
-
-		this.defaultEditor.onScrollDown = (byLine: boolean) => {
-			const maxVisible = Math.max(
-				10,
-				Math.min((process.stdout.rows || 40) - this.chatContainer.staticOverhead, 300),
-			);
-			const amount = byLine ? 1 : Math.max(1, Math.floor(maxVisible / 2));
-			this.chatContainer.scrollOffset = Math.max(0, this.chatContainer.scrollOffset - amount);
-			this.chatContainer.invalidate();
-			this.ui.requestRender();
-		};
-
 		// Set up handlers on defaultEditor - they use this.editor for text access
 		// so they work correctly regardless of which editor is active
 		this.defaultEditor.onEscape = () => {
@@ -2784,9 +2795,14 @@ export class InteractiveMode {
 					this.editor.setText("");
 					return;
 				}
-				if (text === "/blendermcp") {
+				if (text === "/blendermcp" || text.startsWith("/blendermcp ")) {
 					this.editor.setText("");
-					await this.handleBlenderMcpCommand();
+					await this.handleBlenderMcpCommand(text.slice("/blendermcp".length).trim());
+					return;
+				}
+				if (text === "/scratchmcp" || text.startsWith("/scratchmcp ")) {
+					this.editor.setText("");
+					await this.handleScratchMcpCommand(text.slice("/scratchmcp".length).trim());
 					return;
 				}
 				if (text === "/scoped-models") {
@@ -2873,8 +2889,13 @@ export class InteractiveMode {
 					return;
 				}
 				if (text === "/login") {
-					this.showOAuthSelector("login");
 					this.editor.setText("");
+					await this.handleAuthPanelCommand("/login");
+					return;
+				}
+				if (text === "/panel") {
+					this.editor.setText("");
+					await this.handleAuthPanelCommand("/panel");
 					return;
 				}
 				if (text === "/logout") {
@@ -3049,6 +3070,12 @@ export class InteractiveMode {
 				if (text === "/hub") {
 					this.handleHubCommand();
 					this.editor.setText("");
+					return;
+				}
+				if (text === "/plan" || text.startsWith("/plan ")) {
+					const arg = text.startsWith("/plan ") ? text.slice(6).trim() : "";
+					this.editor.setText("");
+					this.handlePlanCommand(arg);
 					return;
 				}
 				if (text === "/autothink" || text.startsWith("/autothink ")) {
@@ -3312,41 +3339,6 @@ export class InteractiveMode {
 							component.setArgsComplete();
 						}
 					}
-					// Self-Prompt Automation Engine
-					const messageText = this.streamingMessage.content.find((c) => c.type === "text")?.text || "";
-					const selfPromptMatch = messageText.match(/\[SELF_PROMPT:\s*([\s\S]+?)\]/);
-					if (selfPromptMatch?.[1]) {
-						const rawVal = selfPromptMatch[1].trim();
-						let delayMs = 1000; // Default 1s delay
-						let promptText = rawVal;
-
-						const configMatch = rawVal.match(/^ms\s*=\s*(\d+)\s*,\s*prompt\s*=\s*([\s\S]+)$/i);
-						if (configMatch) {
-							delayMs = Math.max(10, parseInt(configMatch[1], 10));
-							promptText = configMatch[2].trim();
-						}
-
-						setTimeout(() => {
-							(async () => {
-								try {
-									const selfPromptText = new Text(
-										`\x1b[38;2;95;158;160m ◆ MoonAgent Otonom Tetikleme ➔\x1b[39m ${promptText}`,
-										1,
-										0,
-									);
-									this.chatContainer.addChild(selfPromptText);
-									this.ui.requestRender();
-
-									if (this.defaultEditor.onSubmit) {
-										await this.defaultEditor.onSubmit(promptText);
-									}
-								} catch (err) {
-									this.showError(`Otonom işlem hatası: ${err instanceof Error ? err.message : String(err)}`);
-								}
-							})();
-						}, delayMs);
-					}
-
 					this.streamingComponent = undefined;
 					this.streamingMessage = undefined;
 					this.footer.invalidate();
@@ -4215,7 +4207,7 @@ export class InteractiveMode {
 			theme.fg("muted", `Yeni sürüm ${newVersion} mevcut. Güncellemek için şunu çalıştırın: `) + action;
 		const changelogUrl = theme.fg(
 			"accent",
-			"https://github.com/theayzek01/MoonAgent/blob/main/packages/cli/CHANGELOG.md",
+			"https://github.com/theayzek01/MoonCode/blob/main/packages/cli/CHANGELOG.md",
 		);
 		const changelogLine = theme.fg("muted", "Değişiklik Günlüğü: ") + changelogUrl;
 
@@ -5512,7 +5504,7 @@ export class InteractiveMode {
 				"┌────────────────────────────────────────────────────────┐",
 				"│         ✦  M O O N C O D E   O S   I N T E R F A C E ✦  │",
 				"├────────────────────────────────────────────────────────┤",
-				"│  Entegre Geliştirici Arayüzü: MoonAgent OS              │",
+				"│  Entegre Geliştirici Arayüzü: MoonCode OS              │",
 				"│  Yerel Adres: http://127.0.0.1:3131                    │",
 				"│                                                        │",
 				"│  Özellikler:                                           │",
@@ -5523,7 +5515,7 @@ export class InteractiveMode {
 				`│  Browser Bridge Durumu: ${bridgeStatusText.padEnd(31)}│`,
 				"└────────────────────────────────────────────────────────┘",
 				"",
-				"🚀 Yerel MoonAgent OS varsayılan tarayıcınızda başlatılıyor...",
+				"🚀 Yerel MoonCode OS varsayılan tarayıcınızda başlatılıyor...",
 			].join("\n");
 
 			this.chatContainer.addChild(new Text(interfaceWelcome, 1, 0));
@@ -5537,7 +5529,7 @@ export class InteractiveMode {
 				spawnSync("xdg-open", [url], { stdio: "ignore" });
 			}
 		} catch (err: any) {
-			this.showError(`MoonAgent OS açma hatası: ${err.message}`);
+			this.showError(`MoonCode OS açma hatası: ${err.message}`);
 		}
 	}
 
@@ -5551,7 +5543,7 @@ export class InteractiveMode {
 			const compactState = JSON.stringify(payload.state || {}, null, 2).slice(0, 4000);
 			const compactParams = JSON.stringify(payload.params || {}, null, 2).slice(0, 2000);
 			const prompt = [
-				`[Sistem: MoonAgent ${editorName} tarayıcı arayüzünden profesyonel edit aksiyonu geldi.]`,
+				`[Sistem: MoonCode ${editorName} tarayıcı arayüzünden profesyonel edit aksiyonu geldi.]`,
 				`Editör: ${data.type}`,
 				`Aksiyon: ${data.action}`,
 				`Parametreler: ${compactParams}`,
@@ -5568,6 +5560,153 @@ export class InteractiveMode {
 		});
 	}
 
+	private buildAuthPanelState(): any {
+		const authStorage = this.session.modelRegistry.authStorage;
+		const oauthProviders = authStorage.getOAuthProviders();
+		const oauthIds = new Set(oauthProviders.map((provider: any) => provider.id));
+		const providerIds = new Set<string>([
+			...this.session.modelRegistry.getAll().map((model: Model<any>) => model.provider),
+			...oauthProviders.map((provider: any) => provider.id),
+		]);
+		const providers = [...providerIds]
+			.map((providerId) => {
+				const oauthProvider = oauthProviders.find((provider: any) => provider.id === providerId);
+				const models = this.session.modelRegistry.getAll().filter((model: Model<any>) => model.provider === providerId);
+				return {
+					id: providerId,
+					name: this.session.modelRegistry.getProviderDisplayName(providerId),
+					supportsOAuth: oauthIds.has(providerId),
+					supportsApiKey: isApiKeyLoginProvider(providerId, oauthIds),
+					auth: this.session.modelRegistry.getProviderAuthStatus(providerId),
+					modelCount: models.length,
+					oauthName: oauthProvider?.name,
+				};
+			})
+			.sort((a, b) => a.name.localeCompare(b.name));
+
+		return {
+			providers,
+			accounts: authStorage.listManagedAccounts(),
+			models: {
+				total: this.session.modelRegistry.getAll().length,
+				available: this.session.modelRegistry.getAvailable().length,
+				current: this.session.model
+					? {
+							id: this.session.model.id,
+							name: this.session.model.name,
+							provider: this.session.model.provider,
+						}
+					: null,
+			},
+			authPath: getAuthPath(),
+			now: Date.now(),
+		};
+	}
+
+	private registerAuthPanel(server: any): void {
+		if (server?.setAuthPanelStateProvider) {
+			server.setAuthPanelStateProvider(() => this.buildAuthPanelState());
+		}
+		if (this.authPanelListenerRegistered || !server?.webUiAuthActionListeners) return;
+		this.authPanelListenerRegistered = true;
+		server.webUiAuthActionListeners.add(async (action: any) => {
+			const providerId = String(action?.providerId || "");
+			const label = typeof action?.label === "string" ? action.label.trim() : undefined;
+			if (action?.action === "oauth_login") {
+				const option = this.getLoginProviderOptions("oauth").find((provider) => provider.id === providerId);
+				if (!option) throw new Error("OAuth saglayici bulunamadi.");
+				this.showStatus(`${option.name} abonelik girisi panelden baslatildi.`);
+				await this.showLoginDialog(option.id, label || option.name);
+				return;
+			}
+			if (action?.action === "save_api_key") {
+				const option = this.getLoginProviderOptions("api_key").find((provider) => provider.id === providerId);
+				if (!option) throw new Error("API key saglayici bulunamadi.");
+				const apiKey = String(action?.apiKey || "").trim();
+				if (!apiKey) throw new Error("API anahtari bos olamaz.");
+				const previousModel = this.session.model;
+				this.session.modelRegistry.authStorage.upsertManagedAccount(option.id, { type: "api_key", key: apiKey }, {
+					label: label || option.name,
+					activate: true,
+				});
+				this.session.modelRegistry.refresh();
+				await this.completeProviderAuthentication(option.id, option.name, "api_key", previousModel);
+				return;
+			}
+			if (action?.action === "set_active") {
+				const account = this.session.modelRegistry.authStorage.setActiveManagedAccount(String(action?.accountId || ""));
+				if (!account) throw new Error("Hesap bulunamadi.");
+				this.session.modelRegistry.refresh();
+				await this.updateAvailableProviderCount();
+				this.showStatus(`${account.provider} aktif hesap: ${account.label}`);
+				return;
+			}
+			if (action?.action === "next_account") {
+				const account = this.session.modelRegistry.authStorage.activateNextManagedAccount(providerId);
+				if (!account) throw new Error("Siradaki hesap bulunamadi.");
+				this.session.modelRegistry.refresh();
+				await this.updateAvailableProviderCount();
+				this.showStatus(`${account.provider} siradaki aktif hesap: ${account.label}`);
+				return;
+			}
+			if (action?.action === "remove_account") {
+				if (!this.session.modelRegistry.authStorage.removeManagedAccount(String(action?.accountId || ""))) {
+					throw new Error("Hesap bulunamadi.");
+				}
+				this.session.modelRegistry.refresh();
+				await this.updateAvailableProviderCount();
+				this.showStatus("Hesap kaldirildi.");
+				return;
+			}
+			throw new Error("Bilinmeyen panel islemi.");
+		});
+	}
+
+	private async isAuthPanelEndpointReady(url: string): Promise<boolean> {
+		try {
+			const controller = new AbortController();
+			const timer = setTimeout(() => controller.abort(), 1200);
+			const res = await fetch(url, { signal: controller.signal });
+			clearTimeout(timer);
+			if (!res.ok) return false;
+			const text = await res.text();
+			return text.includes("MoonCode Kontrol Paneli") || text.includes("Kontrol ve hesap paneli");
+		} catch {
+			return false;
+		}
+	}
+
+	private async ensureAuthPanelServer(server: any, route: "/panel" | "/login"): Promise<string> {
+		this.registerAuthPanel(server);
+		const ports = this.getWebUiCandidatePorts();
+		if (this.webUiProcess?.url) {
+			const url = `${this.webUiProcess.url}${route}`;
+			if (await this.isAuthPanelEndpointReady(url)) return url;
+			try {
+				this.webUiProcess.server?.close?.();
+			} catch {}
+			this.webUiProcess = undefined;
+		}
+		for (const port of ports) {
+			try {
+				const candidate = server.startWebUiServer({ port });
+				await new Promise((resolve) => setTimeout(resolve, 160));
+				this.registerAuthPanel(server);
+				const url = `${candidate.url}${route}`;
+				if (await this.isAuthPanelEndpointReady(url)) {
+					this.webUiProcess = candidate;
+					return url;
+				}
+				try {
+					candidate.server?.close?.();
+				} catch {}
+			} catch {
+				// Try next port.
+			}
+		}
+		throw new Error("MoonCode hesap paneli acilamadi. 3131-3140 portlarini kontrol edin.");
+	}
+
 	private async isEditorEndpointReady(url: string): Promise<boolean> {
 		try {
 			const controller = new AbortController();
@@ -5577,18 +5716,39 @@ export class InteractiveMode {
 			if (!res.ok) return false;
 			const text = await res.text();
 			return (
-				text.includes("MoonAgent Video Studio") ||
-				text.includes("MoonAgent Photo Studio") ||
-				text.includes("MoonAgent AI Video Studio") ||
-				text.includes("MoonAgent AI Photo Studio")
+				text.includes("MoonCode Video Studio") ||
+				text.includes("MoonCode Photo Studio") ||
+				text.includes("MoonCode AI Video Studio") ||
+				text.includes("MoonCode AI Photo Studio")
 			);
 		} catch {
 			return false;
 		}
 	}
 
+	private async isAppEndpointReady(url: string): Promise<boolean> {
+		try {
+			const controller = new AbortController();
+			const timer = setTimeout(() => controller.abort(), 1200);
+			const res = await fetch(url, { signal: controller.signal });
+			clearTimeout(timer);
+			if (!res.ok) return false;
+			const text = await res.text();
+			return text.includes("MoonCode — Web Studio") || text.includes('id="message-form"');
+		} catch {
+			return false;
+		}
+	}
+
+	private getWebUiCandidatePorts(): number[] {
+		const bridgePort = Number(process.env.MOON_BROWSER_BRIDGE_PORT || 3133);
+		return [3131, 3132, 3133, 3134, 3135, 3136, 3137, 3138, 3139, 3140].filter(
+			(candidatePort) => candidatePort !== bridgePort,
+		);
+	}
+
 	private async ensureEditorServer(server: any, route: "/videoedit" | "/photoedit"): Promise<string> {
-		const ports = [3131, 3132, 3133, 3134, 3135, 3136, 3137, 3138, 3139, 3140];
+		const ports = this.getWebUiCandidatePorts();
 
 		if (this.webUiProcess?.url) {
 			const url = `${this.webUiProcess.url}${route}`;
@@ -5616,7 +5776,7 @@ export class InteractiveMode {
 			}
 		}
 
-		throw new Error(`${route} için çalışan MoonAgent Web UI bulunamadı. 3131-3140 portlarını kontrol edin.`);
+		throw new Error(`${route} için çalışan MoonCode Web UI bulunamadı. 3131-3140 portlarını kontrol edin.`);
 	}
 
 	private openEditorUrl(url: string): void {
@@ -5626,6 +5786,20 @@ export class InteractiveMode {
 			spawnSync("open", [url], { stdio: "ignore" });
 		} else {
 			spawnSync("xdg-open", [url], { stdio: "ignore" });
+		}
+	}
+
+	private async handleAuthPanelCommand(route: "/panel" | "/login" = "/panel"): Promise<void> {
+		try {
+			const server = await import("../../core/web-ui-server.js");
+			const url = await this.ensureAuthPanelServer(server, route);
+			this.openEditorUrl(url);
+			this.showStatus(`MoonCode hesap paneli acildi: ${url}`);
+		} catch (err: any) {
+			this.showError(`Hesap paneli acma hatasi: ${err.message}`);
+			if (route === "/login") {
+				this.showOAuthSelector("login");
+			}
 		}
 	}
 
@@ -5645,7 +5819,7 @@ export class InteractiveMode {
 				"┌────────────────────────────────────────────────────────┐",
 				"│       ✦  M O O N C O D E   V I D E O   S T U D I O  ✦  │",
 				"├────────────────────────────────────────────────────────┤",
-				"│  MoonAgent Pro Video Editor / Yapay Zeka Stüdyosu       │",
+				"│  MoonCode Pro Video Editor / Yapay Zeka Stüdyosu       │",
 				`│  Yerel Adres: ${url.padEnd(40)}│`,
 				"│                                                        │",
 				"│  Özellikler:                                           │",
@@ -5658,14 +5832,14 @@ export class InteractiveMode {
 				`│  Browser Bridge Durumu: ${bridgeStatusText.padEnd(31)}│`,
 				"└────────────────────────────────────────────────────────┘",
 				"",
-				"🚀 MoonAgent Video Studio varsayılan tarayıcınızda başlatılıyor...",
+				"🚀 MoonCode Video Studio varsayılan tarayıcınızda başlatılıyor...",
 			].join("\n");
 
 			this.chatContainer.addChild(new Text(videoWelcome, 1, 0));
 			this.ui.requestRender();
 			this.openEditorUrl(url);
 		} catch (err: any) {
-			this.showError(`MoonAgent Video Studio açma hatası: ${err.message}`);
+			this.showError(`MoonCode Video Studio açma hatası: ${err.message}`);
 		}
 	}
 
@@ -5685,7 +5859,7 @@ export class InteractiveMode {
 				"┌────────────────────────────────────────────────────────┐",
 				"│       ✦  M O O N C O D E   P H O T O   S T U D I O  ✦  │",
 				"├────────────────────────────────────────────────────────┤",
-				"│  MoonAgent Pro Professional Photo/Graphic Suite         │",
+				"│  MoonCode Pro Professional Photo/Graphic Suite         │",
 				`│  Yerel Adres: ${url.padEnd(40)}│`,
 				"│                                                        │",
 				"│  Özellikler:                                           │",
@@ -5698,14 +5872,14 @@ export class InteractiveMode {
 				`│  Browser Bridge Durumu: ${bridgeStatusText.padEnd(31)}│`,
 				"└────────────────────────────────────────────────────────┘",
 				"",
-				"🚀 MoonAgent Photo Studio varsayılan tarayıcınızda başlatılıyor...",
+				"🚀 MoonCode Photo Studio varsayılan tarayıcınızda başlatılıyor...",
 			].join("\n");
 
 			this.chatContainer.addChild(new Text(photoWelcome, 1, 0));
 			this.ui.requestRender();
 			this.openEditorUrl(url);
 		} catch (err: any) {
-			this.showError(`MoonAgent Photo Studio açma hatası: ${err.message}`);
+			this.showError(`MoonCode Photo Studio açma hatası: ${err.message}`);
 		}
 	}
 
@@ -5717,7 +5891,7 @@ export class InteractiveMode {
 			// Set active session ID for the web app to load
 			server.setActiveSessionId(this.session.id);
 
-			let cleanup: (() => void) | undefined;
+			let cleanup;
 
 			// Web arayüzünden gelen mesajları canlı olarak motora besleyen dinleyici
 			const messageListener = (msg) => {
@@ -5775,11 +5949,11 @@ export class InteractiveMode {
 	}
 
 	private async ensureAppServer(server) {
-		const ports = [3131, 3132, 3133, 3134, 3135, 3136, 3137, 3138, 3139, 3140];
+		const ports = this.getWebUiCandidatePorts();
 
 		if (this.webUiProcess?.url) {
 			const url = `${this.webUiProcess.url}/app`;
-			if (await this.isEditorEndpointReady(url)) return url;
+			if (await this.isAppEndpointReady(url)) return url;
 			try {
 				this.webUiProcess.server?.close?.();
 			} catch {}
@@ -5787,11 +5961,16 @@ export class InteractiveMode {
 		}
 
 		for (const port of ports) {
+			const url = `http://127.0.0.1:${port}/app`;
+			if (await this.isAppEndpointReady(url)) return url;
+		}
+
+		for (const port of ports) {
 			try {
 				const candidate = server.startWebUiServer({ port });
 				await new Promise((resolve) => setTimeout(resolve, 180));
 				const url = `${candidate.url}/app`;
-				if (await this.isEditorEndpointReady(url)) {
+				if (await this.isAppEndpointReady(url)) {
 					this.webUiProcess = candidate;
 					return url;
 				}
@@ -5803,7 +5982,7 @@ export class InteractiveMode {
 			}
 		}
 
-		throw new Error("Çalışan MoonAgent Web UI sunucusu bulunamadı. 3131-3140 portlarını kontrol edin.");
+		throw new Error("Çalışan MoonCode Web UI sunucusu bulunamadı. Web UI portlarını kontrol edin.");
 	}
 
 	private handleMoodCommand(args: string): void {
@@ -5964,7 +6143,7 @@ export class InteractiveMode {
 	private renderAgentsHelp(): string {
 		return [
 			"Agent Sistemi",
-			"MoonAgent kod islerini kucuk bir yazilim sirketi gibi organize eder.",
+			"MoonCode kod islerini kucuk bir yazilim sirketi gibi organize eder.",
 			"Patron kapsami belirler; Mimar, Backend, Frontend, QA, Security ve Integrator kendi alanindan kontrol eder.",
 			"",
 			"Komutlar:",
@@ -6465,7 +6644,7 @@ export class InteractiveMode {
 		try {
 			if (!cmd || cmd === "status") this.showStatus(await git.getGitStatus(cwd));
 			else if (cmd === "commit")
-				this.showStatus(await git.commitAll(cwd, rest.join(" ") || "chore: update via MoonAgent"));
+				this.showStatus(await git.commitAll(cwd, rest.join(" ") || "chore: update via MoonCode"));
 			else if (cmd === "branch")
 				this.showStatus(`Branch: ${await git.createBranch(cwd, rest.join("-") || "mooncode/update")}`);
 			else if (cmd === "push") this.showStatus(await git.pushBranch(cwd));
@@ -6515,147 +6694,6 @@ export class InteractiveMode {
 			} else this.showStatus("Kullanım: /ollama models | /ollama pull <model>");
 		} catch (err: any) {
 			this.showError(`Ollama hata: ${err.message}`);
-		}
-	}
-
-	private async handleBlenderMcpCommand(): Promise<void> {
-		const { execSync } = await import("node:child_process");
-		const fs = await import("node:fs");
-		const path = await import("node:path");
-		const os = await import("node:os");
-
-		const step = (msg: string) => this.showStatus(msg);
-		const ok = (msg: string) => this.showStatus(`✓ ${msg}`);
-		const fail = (msg: string) => this.showError(`✗ ${msg}`);
-
-		try {
-			// ── 1. Python check ────────────────────────────────────────────
-			step("Blender MCP kurulumu başlatılıyor...");
-			let pythonCmd = "python";
-			try {
-				execSync("python --version", { stdio: "pipe" });
-			} catch {
-				try {
-					execSync("python3 --version", { stdio: "pipe" });
-					pythonCmd = "python3";
-				} catch {
-					fail("Python bulunamadı. https://www.python.org/downloads/ adresinden kurun.");
-					return;
-				}
-			}
-			ok(`Python bulundu (${pythonCmd})`);
-
-			// ── 2. uv check / install ─────────────────────────────────────
-			let uvAvailable = false;
-			try {
-				execSync("uv --version", { stdio: "pipe" });
-				uvAvailable = true;
-				ok("uv bulundu");
-			} catch {
-				step("uv kuruluyor...");
-				try {
-					execSync(`${pythonCmd} -m pip install uv --quiet`, { stdio: "pipe" });
-					uvAvailable = true;
-					ok("uv kuruldu");
-				} catch {
-					step("uv pip kurulumu başarısız, devam ediliyor...");
-				}
-			}
-
-			// ── 3. Clone / update blender-mcp repo ───────────────────────
-			const installDir = path.join(os.homedir(), ".mooncode", "blender-mcp");
-			step(`Blender MCP indiriliyor → ${installDir}`);
-
-			if (fs.existsSync(installDir)) {
-				try {
-					execSync("git pull --quiet", { cwd: installDir, stdio: "pipe" });
-					ok("Blender MCP güncellendi");
-				} catch {
-					step("Güncelleme atlandı (git pull başarısız)");
-				}
-			} else {
-				fs.mkdirSync(path.join(os.homedir(), ".mooncode"), { recursive: true });
-				execSync(`git clone --depth=1 --quiet https://github.com/ahujasid/blender-mcp.git ${installDir}`, {
-					stdio: "pipe",
-				});
-				ok("Blender MCP klonlandı");
-			}
-
-			// ── 4. Install Python deps ────────────────────────────────────
-			step("Python bağımlılıkları kuruluyor...");
-			if (uvAvailable) {
-				try {
-					execSync("uv pip install mcp blender-mcp --quiet", { stdio: "pipe" });
-					ok("Bağımlılıklar kuruldu (uv)");
-				} catch {
-					execSync(`${pythonCmd} -m pip install mcp --quiet`, { stdio: "pipe" });
-					ok("Bağımlılıklar kuruldu (pip)");
-				}
-			} else {
-				execSync(`${pythonCmd} -m pip install mcp --quiet`, { stdio: "pipe" });
-				ok("Bağımlılıklar kuruldu (pip)");
-			}
-
-			// ── 5. Locate the addon file ──────────────────────────────────
-			const addonSrc = path.join(installDir, "addon", "blender_mcp_addon.py");
-			const addonAlt = path.join(installDir, "blender_mcp_addon.py");
-			const addonPath = fs.existsSync(addonSrc) ? addonSrc : fs.existsSync(addonAlt) ? addonAlt : null;
-
-			// ── 6. Write/update mooncode settings.json ───────────────────
-			step("MoonCode MCP ayarları yazılıyor...");
-			const settingsPath = path.join(os.homedir(), ".mooncode", "settings.json");
-			let settings: Record<string, any> = {};
-			if (fs.existsSync(settingsPath)) {
-				try {
-					settings = JSON.parse(fs.readFileSync(settingsPath, "utf-8"));
-				} catch {
-					settings = {};
-				}
-			}
-
-			const serverScript = path.join(installDir, "src", "blender_mcp", "server.py");
-			const serverAlt = path.join(installDir, "server.py");
-			const serverPath = fs.existsSync(serverScript) ? serverScript : serverAlt;
-
-			if (!settings.mcpServers) settings.mcpServers = {};
-			settings.mcpServers.blender = {
-				command: pythonCmd,
-				args: [serverPath],
-				env: {},
-			};
-			fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2), "utf-8");
-			ok("MCP sunucu kaydı eklendi → settings.json");
-
-			// ── 7. Final instructions ─────────────────────────────────────
-			const lines = [
-				"",
-				"┌─────────────────────────────────────────────────────┐",
-				"│  Blender MCP Kurulumu Tamamlandı                    │",
-				"└─────────────────────────────────────────────────────┘",
-				"",
-				"Sonraki adımlar:",
-				"",
-				"  1. Blender'ı aç",
-				"  2. Sağdaki N panelini aç  →  [ N ] tuşuna bas",
-				"  3. 'MoonAgent MCP' sekmesini seç",
-				addonPath
-					? `  4. Addon: Edit > Preferences > Addons > Install`
-					: "  4. Addon dosyası bulunamadı — repoyu kontrol et",
-				addonPath ? `     → ${addonPath}` : "",
-				"  5. MCP panelinden sunucuyu başlat",
-				"",
-				"  6. Tekrar bu terminale dön ve /reload yaz",
-				"     → MoonCode Blender'a bağlanır.",
-				"",
-				addonPath ? `Addon yolu: ${addonPath}` : "",
-			]
-				.filter((l) => l !== undefined)
-				.join("\n");
-
-			this.chatContainer.addChild(new Text(lines, 1, 0));
-			this.ui.requestRender();
-		} catch (err: any) {
-			fail(`Kurulum hatası: ${err.message}`);
 		}
 	}
 
@@ -6721,7 +6759,7 @@ export class InteractiveMode {
 	}
 
 	private handleHelpCommand(): void {
-		let info = `\n${theme.bold(theme.fg("accent", "╭─ MoonAgent Premium Grouped Commands ──────────────────────╮"))}\n`;
+		let info = `\n${theme.bold(theme.fg("accent", "╭─ MoonCode Premium Grouped Commands ──────────────────────╮"))}\n`;
 
 		const categories = {
 			"Session & Context": [
@@ -6747,6 +6785,7 @@ export class InteractiveMode {
 				{ name: "/login", desc: "Configure Provider API keys" },
 			],
 			Modes: [
+				{ name: "/plan", desc: "Toggle plan mode" },
 				{ name: "/automation", desc: "Toggle automation mode" },
 				{ name: "/agentmode", desc: "Toggle agent mode" },
 				{ name: "/zen", desc: "Toggle Zen mode (hide UI elements)" },
@@ -6758,9 +6797,9 @@ export class InteractiveMode {
 				{ name: "/index", desc: "Index codebase for semantic search" },
 				{ name: "/browser", desc: "Chrome extension status and control" },
 				{ name: "/app", desc: "Open Web Studio and lock TUI" },
-				{ name: "/interface", desc: "Open MoonAgent Special OpenClaw OS Interface" },
-				{ name: "/videoedit", desc: "Open MoonAgent Pro Video Studio (Browser)" },
-				{ name: "/photoedit", desc: "Open MoonAgent Pro Photo Editor (Browser)" },
+				{ name: "/interface", desc: "Open MoonCode Special OpenClaw OS Interface" },
+				{ name: "/videoedit", desc: "Open MoonCode Pro Video Studio (Browser)" },
+				{ name: "/photoedit", desc: "Open MoonCode Pro Photo Editor (Browser)" },
 				{ name: "/mcp", desc: "List connected MCP servers" },
 				{ name: "/swarm", desc: "Trigger Multi-Agent Swarm" },
 				{ name: "/fix", desc: "Run Autonomous Auto-Healer" },
@@ -6769,10 +6808,10 @@ export class InteractiveMode {
 			"Diagnostics & System": [
 				{ name: "/status", desc: "Show detailed runtime diagnostics panel" },
 				{ name: "/metrics", desc: "Show system metrics and token usage" },
-				{ name: "/update", desc: "Update MoonAgent to latest version" },
+				{ name: "/update", desc: "Update MoonCode to latest version" },
 				{ name: "/reload", desc: "Reload system components" },
 				{ name: "/hotkeys", desc: "List keyboard shortcuts" },
-				{ name: "/quit", desc: "Quit MoonAgent" },
+				{ name: "/quit", desc: "Quit MoonCode" },
 			],
 		};
 
@@ -6808,7 +6847,7 @@ export class InteractiveMode {
 			}
 		}
 
-		let info = `\n${theme.bold(theme.fg("accent", "✦ MOONAGENT CONTROL CENTER"))}\n\n`;
+		let info = `\n${theme.bold(theme.fg("accent", "✦ MOONCODE CONTROL CENTER"))}\n\n`;
 
 		info += `  ${theme.bold(theme.fg("success", "■ AGENT"))}\n`;
 		info += `    Apex Mode:          ${theme.fg("accent", "Active")}\n`;
@@ -7168,7 +7207,7 @@ export class InteractiveMode {
 	}
 
 	// -------------------------------------------------------------------------
-	// /hub — MoonAgent Dashboard
+	// /hub — MoonCode Dashboard
 	// -------------------------------------------------------------------------
 	private handleHubCommand(): void {
 		const stats = this.session.getSessionStats();
@@ -7198,7 +7237,7 @@ export class InteractiveMode {
 		const badge = (txt: string, c = "accent") => theme.bold(theme.fg(c as any, `[ ${txt} ]`));
 
 		const info = [
-			theme.bold(theme.fg("accent", "◆ MOONAGENT HUB")),
+			theme.bold(theme.fg("accent", "◆ MOONCODE HUB")),
 			sep,
 			`${lbl("Model")}${v(model ? `${model.provider}/${model.id}` : "—")}`,
 			`${lbl("Proje")}${v(path.basename(cwd))}`,
@@ -7216,8 +7255,9 @@ export class InteractiveMode {
 			sep,
 			theme.bold("  Koruma"),
 			`${lbl("  Shadow-Git")}${shadowCount > 0 ? badge(`${shadowCount} snapshot`, "accent") : badge("Aktif", "success")}`,
+			`${lbl("  Plan Modu")}${this.isPlanMode ? badge("AÇIK", "warning") : theme.fg("dim", "kapalı")}`,
 			sep,
-			theme.fg("dim", "  Komutlar: /rewind  /context  /session  /diff  /compact"),
+			theme.fg("dim", "  Komutlar: /rewind  /context  /session  /diff  /plan  /compact"),
 		].join("\n");
 
 		this.chatContainer.addChild(new Spacer(1));
@@ -7260,6 +7300,59 @@ export class InteractiveMode {
 
 		this.chatContainer.addChild(new Spacer(1));
 		this.chatContainer.addChild(new Text(info, 1, 0));
+		this.ui.requestRender();
+	}
+
+	// -------------------------------------------------------------------------
+	// /plan — Read-only analiz modu (Claude Code Plan Mode benzeri)
+	// -------------------------------------------------------------------------
+	private handlePlanCommand(arg: string): void {
+		const enable = arg === "on" ? true : arg === "off" ? false : !this.isPlanMode;
+
+		if (enable === this.isPlanMode) {
+			this.showStatus(
+				this.isPlanMode
+					? "Plan modu zaten aktif. /plan off ile kapat."
+					: "Plan modu zaten kapali. /plan on ile ac.",
+			);
+			return;
+		}
+
+		this.isPlanMode = enable;
+
+		if (enable) {
+			// Plan mode: write, edit, bash toollarini kaldir
+			this.session.setActiveToolsByName(["read", "grep", "find", "ls", "browser_tabs", "browser_page"]);
+			const msg =
+				`${theme.bold(theme.fg("accent", "Plan Modu Aktif"))}\n\n` +
+				`${theme.fg("dim", "Dosya yazma ve bash devre disi. Web erisimi sadece Browser Bridge uzerinden.")}\n` +
+				`${theme.fg("dim", "Onay vermeden hicbir degisiklik yapilmayacak.")}\n\n` +
+				`${theme.fg("muted", "/plan off ile normal moda don.")}\n`;
+			this.chatContainer.addChild(new Spacer(1));
+			this.chatContainer.addChild(new Text(msg, 1, 0));
+			this.showStatus("[PLAN] Plan modu aktif - model sadece okuyabilir");
+		} else {
+			// Normal moda don: tum toollar geri
+			this.session.setActiveToolsByName([
+				"read",
+				"bash",
+				"edit",
+				"write",
+				"grep",
+				"find",
+				"ls",
+				"git_ship",
+				"browser_tabs",
+				"browser_page",
+			]);
+			const msg =
+				`${theme.bold(theme.fg("success", "Normal Mod"))}\n\n` +
+				`${theme.fg("dim", "Tum toollar yeniden aktif. Dosya yazma, bash, git_ship ve Browser Bridge kullanilabilir.")}\n`;
+			this.chatContainer.addChild(new Spacer(1));
+			this.chatContainer.addChild(new Text(msg, 1, 0));
+			this.showStatus("Plan modu kapandi - tum toollar aktif");
+		}
+		this.footer.invalidate();
 		this.ui.requestRender();
 	}
 
@@ -7804,6 +7897,93 @@ export class InteractiveMode {
 		this.showMcpSelector();
 	}
 
+	private getBlenderMcpConfig() {
+		return {
+			command: "cmd",
+			args: ["/c", "uvx", "blender-mcp"],
+			env: { DISABLE_TELEMETRY: "true" },
+			autoStart: false,
+		};
+	}
+
+	private getScratchMcpConfig() {
+		const scratchRoot = process.env.MOON_SCRATCH_MCP_ROOT || "C:\\Users\\ozenc\\OneDrive\\Desktop\\scmcp";
+		return {
+			command: "node",
+			args: [path.join(scratchRoot, "server", "scratch-mcp.js")],
+			cwd: scratchRoot,
+			env: { DISABLE_TELEMETRY: "true" },
+			autoStart: false,
+		};
+	}
+
+	private async activateMcpServer(name: string, config: { command: string; args?: string[]; cwd?: string; env?: Record<string, string> }) {
+		this.settingsManager.setMcpServer(name, config);
+		await this.settingsManager.flush();
+		return await this.session.connectConfiguredMcpServers();
+	}
+
+	private async handleBlenderMcpCommand(arg: string): Promise<void> {
+		const action = arg.toLowerCase();
+		const config = this.getBlenderMcpConfig();
+
+		if (action === "download" || action === "dowland" || action === "install") {
+			this.showStatus("Blender MCP indiriliyor/hazirlanıyor... (uvx blender-mcp)");
+			const result = spawnSync(config.command, [...config.args, "--help"], {
+				encoding: "utf-8",
+				timeout: 120_000,
+				windowsHide: true,
+			});
+			if (result.error || result.status !== 0) {
+				this.showError(`Blender MCP hazirlanamadi: ${result.error?.message || result.stderr || "uvx komutu basarisiz"}`);
+				return;
+			}
+			this.showStatus("Blender MCP hazir. Baglanmak icin /blendermcp yaz.");
+			return;
+		}
+
+		this.showStatus("Blender MCP baglanıyor...");
+		try {
+			const tools = await this.activateMcpServer("blender", config);
+			const blenderTools = tools.filter((tool) => tool.startsWith("blender_"));
+			this.showStatus(
+				`Blender MCP baglandi. ${blenderTools.length || tools.length} tool aktif. Blender acikken /mcp ile durumunu gorebilirsin.`,
+			);
+		} catch (error) {
+			this.showError(`Blender MCP baglanamadi: ${error instanceof Error ? error.message : String(error)}`);
+		}
+	}
+
+	private async handleScratchMcpCommand(arg: string): Promise<void> {
+		const action = arg.toLowerCase();
+		const config = this.getScratchMcpConfig();
+		const scriptPath = config.args[0];
+		const extensionPath = path.join(config.cwd, "extension");
+
+		if (action === "status") {
+			this.showStatus(
+				`Scratch MCP script: ${scriptPath}\nChrome extension klasoru: ${extensionPath}\nExtension ayrica Chrome'a yuklenmeli.`,
+			);
+			return;
+		}
+
+		if (!fs.existsSync(scriptPath)) {
+			this.showError(`Scratch MCP bulunamadi: ${scriptPath}`);
+			return;
+		}
+
+		this.showStatus("Scratch/TurboWarp MCP baglanıyor...");
+		try {
+			const tools = await this.activateMcpServer("scratch", config);
+			const scratchTools = tools.filter((tool) => tool.startsWith("scratch_"));
+			this.showStatus(
+				`Scratch MCP baglandi. ${scratchTools.length || tools.length} tool aktif. Chrome extension'i su klasorden yukle: ${extensionPath}`,
+			);
+		} catch (error) {
+			this.showError(`Scratch MCP baglanamadi: ${error instanceof Error ? error.message : String(error)}`);
+		}
+	}
+
 	private showMcpSelector(): void {
 		const mcpManager = this.session.mcpManager;
 		let statusMessage = "";
@@ -7852,9 +8032,7 @@ export class InteractiveMode {
 						if (mcpManager) {
 							this.showStatus("MCP Manager yeniden başlatılıyor...");
 							await mcpManager.restart();
-							const toolNames = await this.session.refreshMcpTools();
-							const toolSummary = toolNames.length ? ` ${toolNames.length} tool aktif edildi.` : "";
-							this.showStatus(`MCP Manager başarıyla yeniden başlatıldı.${toolSummary}`);
+							this.showStatus("MCP Manager başarıyla yeniden başlatıldı.");
 						}
 						return;
 					}

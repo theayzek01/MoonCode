@@ -1,6 +1,6 @@
 // @ts-nocheck
 /**
- * TUI config selector for `MoonAgent config` command
+ * TUI config selector for `MoonCode config` command
  */
 
 import { ProcessTerminal, TUI } from "moon-tui";

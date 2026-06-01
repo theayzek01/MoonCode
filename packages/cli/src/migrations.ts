@@ -10,8 +10,8 @@ import { CONFIG_DIR_NAME, getBinDir, getEngineDir } from "./config.js";
 import { migrateKeybindingsConfig } from "./core/keybindings.js";
 
 const MIGRATION_GUIDE_URL =
-	"https://github.com/badlogic/MoonAgent-mono/blob/main/packages/cli/CHANGELOG.md#extensions-migration";
-const EXTENSIONS_DOC_URL = "https://github.com/badlogic/MoonAgent-mono/blob/main/packages/cli/docs/extensions.md";
+	"https://github.com/badlogic/MoonCode-mono/blob/main/packages/cli/CHANGELOG.md#extensions-migration";
+const EXTENSIONS_DOC_URL = "https://github.com/badlogic/MoonCode-mono/blob/main/packages/cli/docs/extensions.md";
 
 /**
  * Migrate legacy oauth.json and settings.json apiKeys to auth.json.
@@ -73,13 +73,13 @@ export function migrateAuthToAuthJson(): string[] {
 }
 
 /**
- * Migrate sessions from ~/.MoonAgent/engine/*.jsonl to proper session directories.
+ * Migrate sessions from ~/.MoonCode/engine/*.jsonl to proper session directories.
  *
- * Bug in v0.30.0: Sessions were saved to ~/.MoonAgent/engine/ instead of
- * ~/.MoonAgent/engine/sessions/<encoded-cwd>/. This migration moves them
+ * Bug in v0.30.0: Sessions were saved to ~/.MoonCode/engine/ instead of
+ * ~/.MoonCode/engine/sessions/<encoded-cwd>/. This migration moves them
  * to the correct location based on the cwd in their session header.
  *
- * See: https://github.com/badlogic/MoonAgent-mono/issues/320
+ * See: https://github.com/badlogic/MoonCode-mono/issues/320
  */
 export function migrateSessionsFromEngineRoot(): void {
 	const engineDir = getEngineDir();
@@ -217,7 +217,7 @@ function migrateToolsToBin(): void {
 
 /**
  * Check for deprecated hooks/ and tools/ directories.
- * Note: tools/ may contain fd/rg binaries extracted by MoonAgent, so only warn if it has other files.
+ * Note: tools/ may contain fd/rg binaries extracted by MoonCode, so only warn if it has other files.
  */
 function checkDeprecatedExtensionDirs(baseDir: string, label: string): string[] {
 	const hooksDir = join(baseDir, "hooks");

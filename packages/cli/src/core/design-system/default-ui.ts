@@ -3,12 +3,12 @@ export const DEFAULT_UI_STYLE_GUIDELINE =
 
 export const DEFAULT_UI_DESIGN_SYSTEM_PROMPT = `## Default UI Design System
 
-Applies to every UI/frontend/component/dashboard/site MoonAgent creates or modifies unless the user explicitly asks for a different visual style.
+Applies to every UI/frontend/component/dashboard/site MoonCode creates or modifies unless the user explicitly asks for a different visual style.
 
 Priority:
 1. User's explicit visual style request wins.
 2. Existing project design system/component conventions win.
-3. MoonAgent default applies: plain, stable, responsive, minimal UI.
+3. MoonCode default applies: plain, stable, responsive, minimal UI.
 
 Visual language:
 - Use the project's existing palette, spacing, typography, and components first.

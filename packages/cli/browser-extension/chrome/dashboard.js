@@ -1,104 +1,71 @@
-function renderIconLibrary() {
-  const root = document.getElementById("icon-library");
-  const icons = window.MOON_ICON_LIBRARY || [];
-  if (!root || root.dataset.ready === "1" || icons.length === 0) return;
+const HIGHLIGHT_CAPS = new Set(["evaluate","canvas_draw","canvas_design","block_code","screenshot","persistent_ui"]);
 
-  const groups = icons.reduce((acc, icon) => {
-    (acc[icon.category] ||= []).push(icon);
-    return acc;
-  }, {});
-
-  root.innerHTML = Object.entries(groups).map(([category, items]) => `
-    <article class="icon-group">
-      <h2>${category}</h2>
-      <div class="icon-grid">
-        ${items.map(icon => `<span class="icon-tile" title="${icon.name}"><img src="${icon.path}" alt=""></span>`).join("")}
-      </div>
-    </article>
-  `).join("");
-  root.dataset.ready = "1";
+function timeSince(ts) {
+  if (!ts) return "—";
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return `${s}s önce`;
+  if (s < 3600) return `${Math.floor(s / 60)}dk önce`;
+  return `${Math.floor(s / 3600)}sa önce`;
 }
 
 function refresh() {
   chrome.runtime.sendMessage({ type: "get_status" }, (response) => {
     if (!response) return;
 
-    const grid = document.getElementById("nodes-grid");
+    const grid         = document.getElementById("nodes-grid");
     const activeNodesEl = document.getElementById("active-nodes");
     const totalClientsEl = document.getElementById("total-clients");
-    
-    const activeConns = response.connections.filter(c => c.status === "connected");
-    activeNodesEl.textContent = activeConns.length;
-    totalClientsEl.textContent = response.totalClients || 0;
-    
-    grid.innerHTML = "";
 
+    const activeConns = response.connections.filter(c => c.status === "connected");
+    activeNodesEl.textContent  = activeConns.length;
+    totalClientsEl.textContent = response.totalClients || 0;
+
+    if (response.connections.every(c => c.status !== "connected")) {
+      grid.innerHTML = `
+        <div class="empty">
+          <img src="icons/Computer Systems/11. No Wifi.png" alt="">
+          <h3>Bağlı oturum yok</h3>
+          <p>MoonCode CLI'ı başlatın ve eklentiyi Chrome'a yükleyin.<br>Bağlantı kurulunca kartlar buraya gelir.</p>
+        </div>`;
+      return;
+    }
+
+    grid.innerHTML = "";
     response.connections.forEach(conn => {
       const isActive = conn.status === "connected";
-      const card = document.createElement("div");
-      card.className = `node-card ${isActive ? 'active' : ''}`;
-      
       const info = conn.info || {};
-      const version = info.version || "---";
-      const capabilities = info.capabilities || [];
+      const caps = info.capabilities || [];
+      const status = isActive ? "AKTİF" : (conn.status === "connecting" ? "BAĞLANIYOR" : "TARANIYOR");
 
-      const capIcons = {
-        tabs: "icons/Browser/10. New Tab or Add.png",
-        page: "icons/Browser/6. Home.png",
-        debugger: "icons/Computer Systems/1. Pointer.png",
-        scroll: "icons/Browser/4. Arrow Down.png",
-        smart_scroll: "icons/Browser/3. Arrow Up.png",
-        mouse: "icons/Computer Systems/2. Hand Pointer.png",
-        canvas_info: "icons/Paint/8. Rect Select.png",
-        canvas_draw: "icons/Paint/1. Pen.png",
-        console_logs: "icons/Computer Systems/7. Alert.png",
-        screenshot: "icons/Social/8. Camera.png",
-        read_dom: "icons/Browser/15. Search.png",
-        hover: "icons/Computer Systems/3. Hand Hover.png",
-        drag: "icons/Computer Systems/4. Hand Grab.png",
-        upload_file: "icons/Browser/7. Download.png",
-        press_key: "icons/Computer Systems/1. Pointer.png",
-        get_elements: "icons/Paint/10. Circ Select.png",
-        evaluate: "icons/Video/1. Play.png",
-        clear_ui: "icons/Paint/2. Eraser.png"
-      };
+      const card = document.createElement("div");
+      card.className = `node-card${isActive ? " active" : ""}`;
 
-      let capHtml = "";
-      if (isActive && capabilities.length > 0) {
-        capHtml = `
-          <div class="caps">
-            ${capabilities.map(cap => `<span class="cap-tag"><img src="${capIcons[cap] || 'icons/Browser/15. Search.png'}" alt="">${cap}</span>`).join('')}
-          </div>
-        `;
-      }
+      const capHtml = isActive && caps.length > 0
+        ? `<div class="caps">${caps.slice(0, 12).map(c =>
+            `<span class="cap-tag${HIGHLIGHT_CAPS.has(c) ? " highlight" : ""}">${c}</span>`
+          ).join("")}</div>`
+        : "";
 
-      const statusText = isActive ? "AKTİF" : (conn.status === "connecting" ? "BAĞLANIYOR" : "TARANIYOR");
-
-      const terminateBtnHtml = isActive
-        ? `<button class="terminate-btn" data-port="${conn.port}">Oturumu Sonlandır</button>`
-        : '';
+      const terminateHtml = isActive
+        ? `<button class="terminate-btn" data-port="${conn.port}">
+             <img src="icons/Browser/9. Close or Multiply.png" alt="">
+             Oturumu Sonlandır
+           </button>`
+        : "";
 
       card.innerHTML = `
-        <div class="card-header">
-          <img class="node-icon" src="${isActive ? 'icons/Computer Systems/8. Wifi Excellent.png' : 'icons/Computer Systems/11. No Wifi.png'}" alt="">
+        <div class="status-dot ${isActive ? "active" : "offline"}"></div>
+        <div class="card-head">
+          <img class="card-icon" src="icons/Computer Systems/${isActive ? "8. Wifi Excellent.png" : "11. No Wifi.png"}" alt="">
           <span class="port-id">:${conn.port}</span>
+          <span class="card-status-text ${isActive ? "active" : "offline"}">${status}</span>
         </div>
-        <div class="node-info">
-          <div class="info-row">
-            <span class="info-key">DURUM</span>
-            <span class="info-val" style="color: ${isActive ? 'var(--green)' : 'var(--red)'}">${statusText}</span>
-          </div>
-          <div class="info-row">
-            <span class="info-key">SÜRÜM</span>
-            <span class="info-val">${version}</span>
-          </div>
-          <div class="info-row">
-            <span class="info-key">TİP</span>
-            <span class="info-val">BRIDGE_NODE</span>
-          </div>
-        </div>
+        <div class="info-row"><span class="info-key">Sürüm</span><span class="info-val">${info.version || "—"}</span></div>
+        <div class="info-row"><span class="info-key">Extension ID</span><span class="info-val" style="font-size:10px">${(info.extensionId || "—").slice(0, 16)}…</span></div>
+        <div class="info-row"><span class="info-key">Son Görülme</span><span class="info-val">${timeSince(info.connectedAt)}</span></div>
+        <div class="info-row"><span class="info-key">Yetenek</span><span class="info-val">${caps.length}</span></div>
         ${capHtml}
-        ${terminateBtnHtml}
+        ${terminateHtml}
       `;
       grid.appendChild(card);
     });
@@ -109,23 +76,26 @@ document.getElementById("refresh-btn").addEventListener("click", () => {
   const icon = document.getElementById("sync-icon");
   icon.classList.add("spinning");
   chrome.runtime.sendMessage({ type: "reconnect_all" });
-  setTimeout(() => {
-    icon.classList.remove("spinning");
-    refresh();
-  }, 800);
+  setTimeout(() => { icon.classList.remove("spinning"); refresh(); }, 750);
 });
 
-// Event delegation for individual terminate buttons in dashboard grid
+document.getElementById("close-all-btn").addEventListener("click", () => {
+  if (confirm("Tüm aktif MoonCode terminal oturumlarını kapatmak istediğinize emin misiniz?")) {
+    chrome.runtime.sendMessage({ type: "close_all_sessions" });
+    setTimeout(refresh, 300);
+  }
+});
+
 document.getElementById("nodes-grid").addEventListener("click", (e) => {
-  if (e.target.classList.contains("terminate-btn")) {
-    const port = Number(e.target.getAttribute("data-port"));
-    if (confirm(`Port :${port} üzerindeki MoonCode terminal oturumunu sonlandırmak istediğinize emin misiniz?`)) {
+  const btn = e.target.closest(".terminate-btn");
+  if (btn) {
+    const port = Number(btn.getAttribute("data-port"));
+    if (confirm(`Port :${port} üzerindeki oturumu sonlandırmak istediğinize emin misiniz?`)) {
       chrome.runtime.sendMessage({ type: "close_port", port });
-      setTimeout(refresh, 250);
+      setTimeout(refresh, 300);
     }
   }
 });
 
-renderIconLibrary();
 setInterval(refresh, 1500);
 refresh();

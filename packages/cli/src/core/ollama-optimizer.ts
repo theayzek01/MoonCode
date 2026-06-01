@@ -6,7 +6,7 @@ const PROFILE_VALUES = {
 		MOON_OLLAMA_MODE: "turbo",
 		MOON_OLLAMA_NUM_CTX: "8192", // 4K→8K: 4K ile gerçek kod analizi imkansız
 		MOON_OLLAMA_NUM_BATCH: "1024", // daha büyük batch = prefill hızlanır
-		MOON_OLLAMA_LOW_VRAM: "false",
+		MOON_OLLAMA_LOW_VRAM: "true",
 		MOON_OLLAMA_KEEP_ALIVE: "1h", // 30m→1h: model yeniden yükleme gecikti
 	},
 	balanced: {

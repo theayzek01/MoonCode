@@ -64,6 +64,7 @@ class WriteCallRenderComponent extends Text {
 }
 
 const WRITE_PARTIAL_FULL_HIGHLIGHT_LINES = 50;
+const WRITE_DIFF_MAX_BYTES = 96 * 1024;
 
 function highlightSingleLine(line: string, lang: string): string {
 	const highlighted = highlightCode(line, lang);
@@ -169,6 +170,22 @@ function formatWriteCall(
 	return text;
 }
 
+function formatStreamingWriteCall(
+	args: { path?: string; file_path?: string; content?: string } | undefined,
+	theme: typeof import("../../modes/interactive/theme/theme.js").theme,
+): string {
+	const rawPath = str(args?.file_path ?? args?.path);
+	const fileContent = str(args?.content);
+	const path = rawPath !== null ? shortenPath(rawPath) : null;
+	const invalidArg = invalidArgText(theme);
+	let text = `${theme.fg("toolTitle", theme.bold("write"))} ${path === null ? invalidArg : path ? theme.fg("accent", path) : theme.fg("toolOutput", "...")}`;
+	if (fileContent) {
+		const lines = fileContent.split("\n").length;
+		text += theme.fg("muted", `\n\nstreaming content... ${fileContent.length} chars, ${lines} lines`);
+	}
+	return text;
+}
+
 function formatWriteResult(
 	result: { content: Array<{ type: string; text?: string; data?: string; mimeType?: string }>; isError?: boolean },
 	theme: typeof import("../../modes/interactive/theme/theme.js").theme,
@@ -234,12 +251,16 @@ export function createWriteToolDefinition(
 									await ops.writeFile(absolutePath, content);
 									if (aborted) return;
 									signal?.removeEventListener("abort", onAbort);
-									const diff = createPatch(path, before, content, "before", "after");
+									const diff =
+										Buffer.byteLength(before, "utf-8") + Buffer.byteLength(content, "utf-8") <=
+										WRITE_DIFF_MAX_BYTES
+											? createPatch(path, before, content, "before", "after")
+											: undefined;
 									resolve({
 										content: [
 											{ type: "text", text: `Successfully wrote ${content.length} bytes to ${path}` },
 										],
-										details: { diff },
+										details: diff ? { diff } : undefined,
 									});
 								} catch (error: any) {
 									signal?.removeEventListener("abort", onAbort);
@@ -256,10 +277,13 @@ export function createWriteToolDefinition(
 			const fileContent = str(renderArgs?.content);
 			const component =
 				(context.lastComponent as WriteCallRenderComponent | undefined) ?? new WriteCallRenderComponent();
+			if (!context.argsComplete) {
+				component.cache = undefined;
+				component.setText(formatStreamingWriteCall(renderArgs, theme));
+				return component;
+			}
 			if (fileContent !== null) {
-				component.cache = context.argsComplete
-					? rebuildWriteHighlightCacheFull(rawPath, fileContent)
-					: updateWriteHighlightCacheIncremental(component.cache, rawPath, fileContent);
+				component.cache = rebuildWriteHighlightCacheFull(rawPath, fileContent);
 			} else {
 				component.cache = undefined;
 			}

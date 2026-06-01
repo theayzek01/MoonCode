@@ -32,6 +32,7 @@ import {
 	type AffectiveMode,
 	appraiseAssistantOutcome,
 	appraiseUserInput,
+	buildAffectiveSystemPrompt,
 	inferAssistantAffectiveOutcome,
 	type NormalizedAffectiveSettings,
 	renderAffectiveExplanation,
@@ -52,6 +53,7 @@ import {
 	shouldCompact,
 } from "./compaction/index.js";
 import { DEFAULT_THINKING_LEVEL } from "./defaults.js";
+import { buildDesignPrompt, shouldInjectDefaultUiDesignPrompt } from "./design-system/index.js";
 import { exportSessionToHtml, type ToolHtmlRenderer } from "./export-html/index.js";
 import { createToolHtmlRenderer } from "./export-html/tool-renderer.js";
 import {
@@ -96,7 +98,7 @@ import type { SettingsManager } from "./settings-manager.js";
 import type { SlashCommandInfo } from "./slash-commands.js";
 import { createSyntheticSourceInfo, type SourceInfo } from "./source-info.js";
 import { type BuildSystemPromptOptions, buildSystemPrompt, type RoboticsFunction } from "./system-prompt.js";
-import { optimizePromptText } from "./token-optimizer.js";
+import { optimizePromptForIntentCapsule, optimizePromptText } from "./token-optimizer.js";
 import { type BashOperations, createLocalBashOperations } from "./tools/bash.js";
 import { createAllToolDefinitions } from "./tools/index.js";
 import {
@@ -108,7 +110,7 @@ import {
 } from "./tools/robotics-vision.js";
 import { createToolDefinitionFromEngineTool } from "./tools/tool-definition-wrapper.js";
 
-function _buildAutomationSystemPrompt(requireConfirmation: boolean): string {
+function buildAutomationSystemPrompt(requireConfirmation: boolean): string {
 	return `## Automation Mode Active
 - You may coordinate multi-step app/browser/terminal workflows on behalf of the user.
 - Be serious and logical: inspect current state, choose the smartest low-risk path, act, then verify.
@@ -116,6 +118,23 @@ function _buildAutomationSystemPrompt(requireConfirmation: boolean): string {
 - For huge projects, use index/search first, read narrow files only, and compact before context becomes expensive.
 - Do not send messages, make purchases, delete data, publish, or impersonate the user in external services without explicit task intent${requireConfirmation ? " and confirmation for high-impact actions" : ""}.
 - Keep a concise action log in final output.`;
+}
+
+function thinkingRank(level: ThinkingLevel): number {
+	switch (level) {
+		case "xhigh":
+			return 5;
+		case "high":
+			return 4;
+		case "medium":
+			return 3;
+		case "low":
+			return 2;
+		case "minimal":
+			return 1;
+		default:
+			return 0;
+	}
 }
 
 // ============================================================================
@@ -268,6 +287,31 @@ interface ToolDefinitionEntry {
 
 /** Standard thinking levels */
 const THINKING_LEVELS: ThinkingLevel[] = ["off", "minimal", "low", "medium", "high"];
+const OVERCLOCK_AUTO_ESCALATION_THRESHOLD = 0.82;
+
+function isExecutionRequest(text: string): boolean {
+	return /\b(build|test|lint|format|commit|push|publish|write|add|change|update|delete|surum|version|yaz|ekle|degistir|duzelt|sil|rename|fix|repair)\b/i.test(
+		text,
+	);
+}
+
+export function resolveFastAutoThinkingLevel(text: string): ThinkingLevel {
+	const normalized = text.toLowerCase();
+	const forceDeepPattern = /\b(xhigh|deepthink|ultra\s*think|maximum\s+reasoning|max\s+reasoning)\b/i;
+	const detailedPattern =
+		/\b(detayli|detayl|kapsamli|kapsaml|mimari|analiz|security|guvenlik|refactor|tasarla|neden|tum proje|apex|swarm|evolve)\b/i;
+
+	if (forceDeepPattern.test(normalized)) {
+		return "high";
+	}
+	if (detailedPattern.test(normalized)) {
+		return "medium";
+	}
+	if (isExecutionRequest(normalized)) {
+		return "low";
+	}
+	return "minimal";
+}
 
 // ============================================================================
 // EngineSession Class
@@ -677,7 +721,7 @@ export class EngineSession {
 
 				this.sessionManager.appendCustomMessageEntry(
 					"system_announcement",
-					[{ type: "text", text: `✦ MoonAgent dynamic router restored original model: **${targetModel.name}**.` }],
+					[{ type: "text", text: `✦ MoonCode dynamic router restored original model: **${targetModel.name}**.` }],
 					true,
 				);
 			}
@@ -884,7 +928,7 @@ export class EngineSession {
 	 */
 	dispose(): void {
 		this._extensionRunner.invalidate(
-			"This extension ctx is stale after session replacement or reload. Do not use a captured MoonAgent or command ctx after ctx.newSession(), ctx.fork(), ctx.switchSession(), or ctx.reload(). For newSession, fork, and switchSession, move post-replacement work into withSession and use the ctx passed to withSession. For reload, do not use the old ctx after await ctx.reload().",
+			"This extension ctx is stale after session replacement or reload. Do not use a captured MoonCode or command ctx after ctx.newSession(), ctx.fork(), ctx.switchSession(), or ctx.reload(). For newSession, fork, and switchSession, move post-replacement work into withSession and use the ctx passed to withSession. For reload, do not use the old ctx after await ctx.reload().",
 		);
 		this._disconnectFromEngine();
 		this._mcpManager?.dispose();
@@ -960,33 +1004,6 @@ export class EngineSession {
 		return this._toolDefinitions.get(name)?.definition;
 	}
 
-	async refreshMcpTools(): Promise<string[]> {
-		if (!this._mcpManager) {
-			return [];
-		}
-
-		const mcpTools = await this._mcpManager.getAllTools();
-		const mcpToolNames = mcpTools.map((tool) => tool.name);
-		const existing = new Set(this._customTools.map((tool) => tool.name));
-		for (const mcpTool of mcpTools) {
-			if (existing.has(mcpTool.name)) {
-				continue;
-			}
-			this._customTools.push({
-				name: mcpTool.name,
-				description: mcpTool.description,
-				parameters: mcpTool.parameters,
-				execute: mcpTool.execute,
-			});
-		}
-
-		this._refreshToolRegistry({
-			activeToolNames: [...this.getActiveToolNames(), ...mcpToolNames],
-			includeAllExtensionTools: true,
-		});
-		return mcpToolNames;
-	}
-
 	/**
 	 * Set active tools by name.
 	 * Only tools in the registry can be enabled. Unknown tool names are ignored.
@@ -1008,6 +1025,51 @@ export class EngineSession {
 		// Rebuild base system prompt with new tool set
 		this._baseSystemPrompt = this._rebuildSystemPrompt(validToolNames);
 		this.engine.state.systemPrompt = this._baseSystemPrompt;
+	}
+
+	async connectConfiguredMcpServers(): Promise<string[]> {
+		const mcpConfigs = this.settingsManager.getMcpServers();
+		const mcpServerConfigs = Object.entries(mcpConfigs).map(([name, config]) => ({
+			name,
+			...config,
+		}));
+
+		if (this._mcpManager) {
+			await this._mcpManager.dispose();
+			this._mcpManager = undefined;
+		}
+
+		for (const name of Array.from(this._toolRegistry.keys())) {
+			if (name.includes("_")) {
+				const serverName = name.slice(0, name.indexOf("_"));
+				if (mcpConfigs[serverName]) {
+					this._toolRegistry.delete(name);
+					this._toolDefinitions.delete(name);
+				}
+			}
+		}
+
+		if (mcpServerConfigs.length === 0) {
+			this.setActiveToolsByName(this.getActiveToolNames());
+			return [];
+		}
+
+		const { McpManager } = await import("moon-engine");
+		this._mcpManager = new McpManager(mcpServerConfigs);
+		await this._mcpManager.initialize();
+
+		const mcpTools = await this._mcpManager.getAllTools();
+		for (const tool of mcpTools) {
+			const definition = createToolDefinitionFromEngineTool(tool);
+			this._toolRegistry.set(tool.name, tool as any);
+			this._toolDefinitions.set(tool.name, {
+				definition,
+				sourceInfo: createSyntheticSourceInfo(`<mcp:${tool.name}>`, { source: "mcp" }),
+			});
+		}
+
+		this.setActiveToolsByName([...new Set([...this.getActiveToolNames(), ...mcpTools.map((tool) => tool.name)])]);
+		return mcpTools.map((tool) => tool.name);
 	}
 
 	/** Whether compaction or branch summarization is currently running */
@@ -1142,6 +1204,11 @@ export class EngineSession {
 		const loadedContextFiles = this._resourceLoader.getEnginesFiles().enginesFiles;
 
 		const agents = this.settingsManager.getAgentsSettings();
+		const affectiveSettings = this.settingsManager.getAffectiveSettings();
+		const affectivePrompt = affectiveSettings.enabled ? buildAffectiveSystemPrompt(affectiveSettings) : undefined;
+		const automationPrompt = this.settingsManager.getAutomationEnabled()
+			? buildAutomationSystemPrompt(this.settingsManager.getAutomationRequireConfirmation())
+			: undefined;
 
 		// Robotics settings inject
 		const roboticsEnabled = this.settingsManager.getRoboticsEnabled();
@@ -1175,7 +1242,7 @@ export class EngineSession {
 			toolSnippets,
 			promptGuidelines,
 			agents,
-			affectivePrompt: undefined,
+			affectivePrompt: [affectivePrompt, automationPrompt].filter(Boolean).join("\n\n") || undefined,
 			roboticsEnabled,
 			roboticsFunctions,
 			compactMode: compactPrompt,
@@ -1198,87 +1265,32 @@ export class EngineSession {
 		}
 	}
 
-	private _buildTurnSystemPrompt(_userText: string): string {
-		const userText = _userText.trim();
-		const hasBlenderTools = this.getActiveToolNames().some((name) => name.startsWith("blender_"));
-		const looksLikeBlenderRequest =
-			hasBlenderTools &&
-			/\b(blender|blender mcp|3d|mesh|material|shader|render|eevee|cycles|camera|modifier|rig|scene|bpy)\b/i.test(
-				userText,
-			);
-
-		if (!looksLikeBlenderRequest) {
+	private _buildTurnSystemPrompt(userText: string): string {
+		if (this._baseSystemPromptOptions?.designMode) {
 			return this._baseSystemPrompt;
 		}
-
-		const blenderIntent = this._detectBlenderIntent(userText);
-
-		return `${this._baseSystemPrompt}
-
-# Blender Request Focus
-You are a senior Blender MCP 3D modeling agent.
-
-Intent mode: ${blenderIntent}
-
-- Quality is more important than object count. Keep scenes intentional, readable, and optimized.
-- Preserve the current scene's identity unless the user clearly asks for a redesign or mood change.
-- If the request sounds like a fix, cleanup, polish, retouch, adjust, or improve request, stay narrow and local. Do not restyle the whole scene.
-- Do not read a generic "improve" request as permission to change time of day, mood, story, or overall visual direction.
-- Work in phases: design analysis, safe scene setup, base forms, secondary detail, materials, camera/light, quality control.
-- Use small safe MCP execution blocks. Avoid giant single-pass Blender scripts when the task is substantial.
-- Keep each step watchable and recoverable. Partial progress should stay useful even if the turn stops early.
-- Prefer deterministic placement, clear object names, organized collections, and lightweight preview-friendly scenes.
-- Prefer repairing and refining existing scene elements before creating new ones.
-- Do not invent extra props, panels, stars, glows, or set dressing unless the user explicitly asked for them.
-- When camera or composition matters, verify through the actual active camera framing before reporting success.
-- If verification contradicts the plan, trust verification and correct the scene before summarizing.
-- Keep user-facing output compact: summarize the step, do the Blender action, verify, then continue.
-- After each major Blender step, verify and continue from a valid scene state.
-${this._buildBlenderIntentRules(blenderIntent)}`;
+		if (!shouldInjectDefaultUiDesignPrompt(userText)) {
+			return this._baseSystemPrompt;
+		}
+		return `${this._baseSystemPrompt}${buildDesignPrompt({ projectRoot: this._cwd, userContext: userText })}`;
 	}
 
-	private _detectBlenderIntent(userText: string): "retouch" | "art-direction" | "rebuild" {
-		if (
-			/\b(remake|rebuild|redo|sıfırdan|sifirdan|baştan|bastan|yeniden yap|tamamen değiştir|tamamen degistir)\b/i.test(
-				userText,
-			)
-		) {
-			return "rebuild";
-		}
-		if (
-			/\b(art direction|mood|atmosphere|theme|style pass|stylize|stil değiştir|stil degistir|sinematik|cinematic|gece modu|gündüz|gunduz)\b/i.test(
-				userText,
-			)
-		) {
-			return "art-direction";
-		}
-		return "retouch";
-	}
-
-	private _buildBlenderIntentRules(intent: "retouch" | "art-direction" | "rebuild"): string {
-		if (intent === "rebuild") {
-			return `- Rebuild mode: you may restructure scene elements substantially, but still inspect first, keep naming clean, and verify in small phases.
-- Even in rebuild mode, avoid chaotic overbuilding; replace deliberately rather than spraying new geometry everywhere.`;
-		}
-
-		if (intent === "art-direction") {
-			return `- Art-direction mode: you may change mood, lighting, palette, and composition, but only after inspecting the current scene and preserving the primary subject.
-- Keep the style shift coherent and intentional. Do not stack unrelated effects or decorative clutter.`;
-		}
-
-		return `- Retouch mode: default to minimal scene edits. Prefer cleanup, polish, framing, light balance, material tuning, and naming over new geometry.
-- In retouch mode, adding new props or changing scene mood requires explicit user intent, not inference.`;
-	}
-
-	private _determineActiveToolsForPrompt(_text: string): string[] {
-		const activeToolNames = this.getActiveToolNames();
-		if (activeToolNames.length > 0) {
-			return activeToolNames;
-		}
-
-		return this._baseToolsOverride
+	private _determineActiveToolsForPrompt(text: string): string[] {
+		const lower = text.trim().toLowerCase();
+		const defaultTools = this._baseToolsOverride
 			? Object.keys(this._baseToolsOverride)
 			: ["read", "bash", "edit", "write", "git_ship", "browser_tabs", "browser_page"];
+
+		const hasCodingKeywords =
+			lower.length > 50 ||
+			/read|cat|view|edit|write|replace|modify|update|change|create|delete|remove|make|file|folder|dir|directory|find|grep|search|rg|bash|run|exec|cmd|command|git|ship|commit|push|pr|branch|diff|status|browser|tab|page|click|open|chrome|url|website|site|test|build|compile|npm|pnpm|yarn|bun|node/i.test(
+				lower,
+			);
+
+		if (!hasCodingKeywords) {
+			return ["read"];
+		}
+		return defaultTools;
 	}
 
 	// =========================================================================
@@ -1443,7 +1455,7 @@ ${this._buildBlenderIntentRules(blenderIntent)}`;
 
 	/**
 	 * Send a prompt to the engine.
-	 * - Handles extension commands (registered via MoonAgent.registerCommand) immediately, even during streaming
+	 * - Handles extension commands (registered via MoonCode.registerCommand) immediately, even during streaming
 	 * - Expands file-based prompt templates by default
 	 * - During streaming, queues via steer() or followUp() based on streamingBehavior option
 	 * - Validates model and API key before sending (when not streaming)
@@ -1464,11 +1476,13 @@ ${this._buildBlenderIntentRules(blenderIntent)}`;
 					this.model.id.includes("flash") ||
 					this.model.id.includes("mini") ||
 					this.model.id.includes("3.2"));
+			const explicitDeepRequest = resolveFastAutoThinkingLevel(text) === "high";
 			const requiresHighIntelligence =
-				router.entropy > 0.45 ||
-				contract.effortMode === "S2" ||
-				contract.effortMode === "S3" ||
-				contract.effortMode === "S4";
+				!isExecutionRequest(text) &&
+				(router.entropy > OVERCLOCK_AUTO_ESCALATION_THRESHOLD ||
+					contract.effortMode === "S3" ||
+					contract.effortMode === "S4" ||
+					explicitDeepRequest);
 
 			if (isCheapModel && requiresHighIntelligence) {
 				const smartConfig = this.settingsManager.getSmartModel();
@@ -1480,7 +1494,7 @@ ${this._buildBlenderIntentRules(blenderIntent)}`;
 						const previousModel = this.model;
 						this.engine.state.model = smartModel;
 						this.sessionManager.appendModelChange(smartModel.provider, smartModel.id);
-						this.setThinkingLevel("high");
+						this.setThinkingLevel(explicitDeepRequest ? "medium" : "low", { persistDefault: false });
 
 						await this._emitModelSelect(smartModel, previousModel, "set");
 
@@ -1490,7 +1504,7 @@ ${this._buildBlenderIntentRules(blenderIntent)}`;
 							content: [
 								{
 									type: "text",
-									text: `MoonAgent switched to ${smartModel.name} for this task.`,
+									text: `MoonCode switched to ${smartModel.name} for this task.`,
 								},
 							],
 							display: true,
@@ -1501,7 +1515,7 @@ ${this._buildBlenderIntentRules(blenderIntent)}`;
 			}
 		}
 
-		const optimized = optimizePromptText(text);
+		const optimized = optimizePromptForIntentCapsule(text);
 		if (optimized.wasOptimized) {
 			text = optimized.optimizedText;
 		}
@@ -1514,7 +1528,7 @@ ${this._buildBlenderIntentRules(blenderIntent)}`;
 
 		try {
 			// Handle extension commands first (execute immediately, even during streaming)
-			// Extension commands manage their own Provider interaction via MoonAgent.sendMessage()
+			// Extension commands manage their own Provider interaction via MoonCode.sendMessage()
 			if (expandPromptTemplates && text.startsWith("/")) {
 				const handled = await this._tryExecuteExtensionCommand(text);
 				if (handled) {
@@ -1549,7 +1563,8 @@ ${this._buildBlenderIntentRules(blenderIntent)}`;
 				expandedText = this._expandSkillCommand(expandedText);
 				expandedText = expandPromptTemplate(expandedText, [...this.promptTemplates]);
 			}
-			expandedText = optimizePromptText(expandedText).optimizedText;
+			expandedText = optimizePromptForIntentCapsule(expandedText).optimizedText;
+			this._applyFastThinkingGuard(expandedText);
 			this._applyAutoThinkingLevel(expandedText);
 
 			// If streaming, queue via steer() or followUp() based on option
@@ -2161,20 +2176,7 @@ ${this._buildBlenderIntentRules(blenderIntent)}`;
 			return undefined;
 		}
 
-		const normalized = text.toLowerCase();
-		const detailedPattern =
-			/\b(xhigh|detayl[ıi]|kapsaml[ıi]|mimari|analiz|debug|hata ay[ıi]kla|security|g[üu]venlik|refactor|tasarla|plan|neden|t[üu]m proje|performans|optimi[sz]e|apex|deepthink|core|mcp|swarm|evolve|tui)\b/i;
-		const executionPattern =
-			/\b(build|test|lint|format|commit|push|publish|s[üu]r[üu]m|version|yaz|ekle|de[ğg]i[şs]tir|d[üu]zelt|sil|rename|fix|repair)\b/i;
-
-		if (detailedPattern.test(normalized)) {
-			// S3 - S4 level triggers
-			return "xhigh";
-		}
-		if (executionPattern.test(normalized)) {
-			return "medium";
-		}
-		return "low";
+		return resolveFastAutoThinkingLevel(text);
 	}
 
 	private _applyAutoThinkingLevel(text: string): void {
@@ -2183,6 +2185,16 @@ ${this._buildBlenderIntentRules(blenderIntent)}`;
 			return;
 		}
 		this.setThinkingLevel(level, { persistDefault: false });
+	}
+
+	private _applyFastThinkingGuard(text: string): void {
+		if (!this.supportsThinking()) {
+			return;
+		}
+		const fastLevel = resolveFastAutoThinkingLevel(text);
+		if (thinkingRank(this.thinkingLevel) > thinkingRank(fastLevel)) {
+			this.setThinkingLevel(fastLevel, { persistDefault: false });
+		}
 	}
 
 	/**

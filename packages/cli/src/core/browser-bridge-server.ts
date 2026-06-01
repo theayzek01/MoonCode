@@ -47,6 +47,7 @@ interface BrowserBridgeClient {
 }
 
 const DEFAULT_PORT = 3133;
+const DEFAULT_WEB_UI_PORT = 3131;
 const MAX_FRAME_BYTES = 10 * 1024 * 1024;
 // Maximum per-client buffer size before we disconnect (prevents memory exhaustion)
 const MAX_BUFFER_BYTES = 20 * 1024 * 1024;
@@ -234,7 +235,7 @@ export function startBrowserBridgeServer(options: { port?: number; keepAlive?: b
 						);
 					}
 				} else {
-					startupError = `Port ${p} is already in use by a non-MoonAgent process or unresponsive server.`;
+					startupError = `Port ${p} is already in use by a non-MoonCode process or unresponsive server.`;
 					console.error(`[Moon Bridge Error] ${startupError}`);
 				}
 			} else {
@@ -254,10 +255,12 @@ export function startBrowserBridgeServer(options: { port?: number; keepAlive?: b
 			if (!options.keepAlive) {
 				server.unref();
 			}
-			// Automatically start Web UI server on port 3131 in master mode
+			// Automatically start Web UI server in master mode, but never on the browser bridge port.
 			import("./web-ui-server.js")
 				.then((webUi) => {
-					webUi.startWebUiServer({ port: 3131 });
+					const webPort = Number(process.env.MOON_WEB_PORT || DEFAULT_WEB_UI_PORT);
+					if (webPort === p) return;
+					webUi.startWebUiServer({ port: webPort });
 				})
 				.catch((err) => {
 					console.error(`[Moon Web UI Auto-Start Error] ${err.message}`);

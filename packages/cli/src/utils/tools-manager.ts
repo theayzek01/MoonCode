@@ -203,14 +203,7 @@ async function downloadTool(tool: "fd" | "rg"): Promise<string> {
 				throw new Error(`Failed to extract ${assetName}: ${errMsg}`);
 			}
 		} else if (assetName.endsWith(".zip")) {
-			if (platform() === "win32") {
-				const extractResult = spawnSync("tar", ["-xf", archivePath, "-C", extractDir], { stdio: "pipe" });
-				if (extractResult.error || extractResult.status !== 0) {
-					await extractZip(archivePath, { dir: extractDir });
-				}
-			} else {
-				await extractZip(archivePath, { dir: extractDir });
-			}
+			await extractZip(archivePath, { dir: extractDir });
 		} else {
 			throw new Error(`Unsupported archive format: ${assetName}`);
 		}

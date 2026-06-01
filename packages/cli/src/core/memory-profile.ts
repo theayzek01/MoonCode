@@ -128,7 +128,7 @@ export class MemoryProfile {
 	 * Builds an opt-in prompt section for explicit coding preferences.
 	 */
 	public getPromptInjection(): string {
-		let injection = `MoonAgent developer profile:\n`;
+		let injection = `MoonCode developer profile:\n`;
 		injection += `Use only the explicit preferences below.\n\n`;
 
 		if (this.profile.forbiddenPatterns.length > 0) {

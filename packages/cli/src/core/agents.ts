@@ -201,7 +201,7 @@ export function renderCodingAgentsWorkspace(
 	const verbosity = normalizeVerbosity(settings?.verbosity);
 	const status = enabled ? (mode === "always" ? "always" : "auto") : "off";
 	const lines: string[] = [
-		bold("MoonAgent workspace", colorEnabled),
+		bold("MoonCode workspace", colorEnabled),
 		dim("minimal company mode", colorEnabled),
 		"",
 		row("status", ansi256(enabled ? 82 : 203, status, colorEnabled), colorEnabled),

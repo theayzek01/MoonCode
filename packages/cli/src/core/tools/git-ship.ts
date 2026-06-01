@@ -42,13 +42,13 @@ export function createGitShipToolDefinition(cwd: string): ToolDefinition<typeof 
 			let text = "";
 			if (action === "status") text = await getGitStatus(cwd);
 			else if (action === "branch")
-				text = `Branch: ${await createBranch(cwd, input.branchName || "MoonAgent/update")}`;
-			else if (action === "commit") text = await commitAll(cwd, input.message || "chore: update via MoonAgent");
+				text = `Branch: ${await createBranch(cwd, input.branchName || "MoonCode/update")}`;
+			else if (action === "commit") text = await commitAll(cwd, input.message || "chore: update via MoonCode");
 			else if (action === "push") text = await pushBranch(cwd, input.branchName);
 			else if (action === "pr")
 				text = await createPR(
 					cwd,
-					input.message || "MoonAgent changes",
+					input.message || "MoonCode changes",
 					await getDiffSummary(cwd),
 					input.branchName,
 				);
