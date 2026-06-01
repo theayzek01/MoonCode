@@ -386,6 +386,8 @@ export class EngineSession {
 	// Tool registry for extension getTools/setTools
 	private _toolRegistry: Map<string, EngineTool> = new Map();
 	private _toolDefinitions: Map<string, ToolDefinitionEntry> = new Map();
+	private _mcpToolRegistry: Map<string, EngineTool> = new Map();
+	private _mcpToolDefinitions: Map<string, ToolDefinitionEntry> = new Map();
 	private _toolPromptSnippets: Map<string, string> = new Map();
 	private _toolPromptGuidelines: Map<string, string[]> = new Map();
 
@@ -1045,6 +1047,8 @@ export class EngineSession {
 				if (mcpConfigs[serverName]) {
 					this._toolRegistry.delete(name);
 					this._toolDefinitions.delete(name);
+					this._mcpToolRegistry.delete(name);
+					this._mcpToolDefinitions.delete(name);
 				}
 			}
 		}
@@ -1061,11 +1065,14 @@ export class EngineSession {
 		const mcpTools = await this._mcpManager.getAllTools();
 		for (const tool of mcpTools) {
 			const definition = createToolDefinitionFromEngineTool(tool);
-			this._toolRegistry.set(tool.name, tool as any);
-			this._toolDefinitions.set(tool.name, {
+			const entry = {
 				definition,
 				sourceInfo: createSyntheticSourceInfo(`<mcp:${tool.name}>`, { source: "mcp" }),
-			});
+			};
+			this._toolRegistry.set(tool.name, tool as any);
+			this._toolDefinitions.set(tool.name, entry);
+			this._mcpToolRegistry.set(tool.name, tool as any);
+			this._mcpToolDefinitions.set(tool.name, entry);
 		}
 
 		this.setActiveToolsByName([...new Set([...this.getActiveToolNames(), ...mcpTools.map((tool) => tool.name)])]);
@@ -2929,6 +2936,11 @@ export class EngineSession {
 				sourceInfo: tool.sourceInfo,
 			});
 		}
+		for (const [name, entry] of this._mcpToolDefinitions) {
+			if (isAllowedTool(name)) {
+				definitionRegistry.set(name, entry);
+			}
+		}
 		this._toolDefinitions = definitionRegistry;
 		this._toolPromptSnippets = new Map(
 			Array.from(definitionRegistry.values())
@@ -2962,6 +2974,11 @@ export class EngineSession {
 		for (const tool of wrappedExtensionTools as EngineTool[]) {
 			toolRegistry.set(tool.name, tool);
 		}
+		for (const [name, tool] of this._mcpToolRegistry) {
+			if (isAllowedTool(name)) {
+				toolRegistry.set(name, tool);
+			}
+		}
 		this._toolRegistry = toolRegistry;
 
 		const nextActiveToolNames = (
@@ -2983,6 +3000,11 @@ export class EngineSession {
 				if (!previousRegistryNames.has(toolName)) {
 					nextActiveToolNames.push(toolName);
 				}
+			}
+		}
+		for (const toolName of this._mcpToolRegistry.keys()) {
+			if (isAllowedTool(toolName)) {
+				nextActiveToolNames.push(toolName);
 			}
 		}
 
