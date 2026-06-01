@@ -1276,21 +1276,11 @@ export class EngineSession {
 	}
 
 	private _determineActiveToolsForPrompt(text: string): string[] {
-		const lower = text.trim().toLowerCase();
 		const defaultTools = this._baseToolsOverride
 			? Object.keys(this._baseToolsOverride)
 			: ["read", "bash", "edit", "write", "git_ship", "browser_tabs", "browser_page"];
 
-		const hasCodingKeywords =
-			lower.length > 50 ||
-			/read|cat|view|edit|write|replace|modify|update|change|create|delete|remove|make|file|folder|dir|directory|find|grep|search|rg|bash|run|exec|cmd|command|git|ship|commit|push|pr|branch|diff|status|browser|tab|page|click|open|chrome|url|website|site|test|build|compile|npm|pnpm|yarn|bun|node/i.test(
-				lower,
-			);
-
-		if (!hasCodingKeywords) {
-			return ["read"];
-		}
-		return defaultTools;
+		return [...new Set([...defaultTools, ...this.getActiveToolNames()])];
 	}
 
 	// =========================================================================

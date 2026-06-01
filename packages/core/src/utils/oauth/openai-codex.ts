@@ -41,6 +41,19 @@ type JwtPayload = {
 	[key: string]: unknown;
 };
 
+async function ensureOAuthRuntime(): Promise<void> {
+	if (typeof process === "undefined" || !(process.versions?.node || process.versions?.bun)) {
+		throw new Error("OpenAI Codex OAuth is only available in Node.js environments");
+	}
+	if (!_randomBytes) {
+		const crypto = await import("node:crypto");
+		_randomBytes = crypto.randomBytes;
+	}
+	if (!_http) {
+		_http = await import("node:http");
+	}
+}
+
 function createState(): string {
 	if (!_randomBytes) {
 		throw new Error("OpenAI Codex OAuth is only available in Node.js environments");
@@ -306,6 +319,7 @@ export async function loginOpenAICodex(options: {
 	onManualCodeInput?: () => Promise<string>;
 	originator?: string;
 }): Promise<OAuthCredentials> {
+	await ensureOAuthRuntime();
 	const { verifier, state, url } = await createAuthorizationFlow(options.originator);
 	const server = await startLocalOAuthServer(state);
 

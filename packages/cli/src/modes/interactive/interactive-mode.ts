@@ -5345,7 +5345,11 @@ export class InteractiveMode {
 		}
 	}
 
-	private async showLoginDialog(providerId: string, providerName: string): Promise<void> {
+	private async showLoginDialog(
+		providerId: string,
+		providerName: string,
+		options?: { panelServer?: any },
+	): Promise<void> {
 		const providerInfo = this.session.modelRegistry.authStorage
 			.getOAuthProviders()
 			.find((provider) => provider.id === providerId);
@@ -5364,11 +5368,15 @@ export class InteractiveMode {
 			providerName,
 		);
 
-		// Show dialog in editor container
-		this.editorContainer.clear();
-		this.editorContainer.addChild(dialog);
-		this.ui.setFocus(dialog);
-		this.ui.requestRender();
+		const usePanel = Boolean(options?.panelServer);
+		let panelAuthUrl: string | undefined;
+		let panelAuthInstructions: string | undefined;
+		if (!usePanel) {
+			this.editorContainer.clear();
+			this.editorContainer.addChild(dialog);
+			this.ui.setFocus(dialog);
+			this.ui.requestRender();
+		}
 
 		// Promise for manual code input (racing with callback server)
 		let manualCodeResolve: ((code: string) => void) | undefined;
@@ -5380,6 +5388,7 @@ export class InteractiveMode {
 
 		// Restore editor helper
 		const restoreEditor = () => {
+			if (usePanel) return;
 			this.editorContainer.clear();
 			this.editorContainer.addChild(this.editor);
 			this.ui.setFocus(this.editor);
@@ -5389,9 +5398,35 @@ export class InteractiveMode {
 		try {
 			await this.session.modelRegistry.authStorage.login(providerId as OAuthProviderId, {
 				onAuth: (info: { url: string; instructions?: string }) => {
-					dialog.showAuth(info.url, info.instructions);
+					panelAuthUrl = info.url;
+					panelAuthInstructions = info.instructions;
+					if (options?.panelServer?.setAuthPanelOAuthEvent) {
+						options.panelServer.setAuthPanelOAuthEvent({
+							providerId,
+							providerName,
+							url: info.url,
+							instructions: info.instructions,
+							status: "auth_url",
+						});
+					}
+					if (!usePanel) {
+						dialog.showAuth(info.url, info.instructions);
+					}
 
 					if (usesCallbackServer) {
+						if (usePanel) {
+							panelAuthInstructions =
+								info.instructions ||
+								"Tarayicida girisi tamamla; gerekirse yonlendirme URL'sini TUI'ya yapistir.";
+							options?.panelServer?.setAuthPanelOAuthEvent?.({
+								providerId,
+								providerName,
+								url: panelAuthUrl,
+								instructions: panelAuthInstructions,
+								status: "auth_url",
+							});
+							return;
+						}
 						// Show input for manual paste, racing with callback
 						dialog
 							.showManualInput("Yönlendirme URL'sini aşağıya yapıştırın veya tarayıcıda girişi tamamlayın:")
@@ -5415,27 +5450,73 @@ export class InteractiveMode {
 				},
 
 				onPrompt: async (prompt: { message: string; placeholder?: string }) => {
+					if (usePanel) {
+						options?.panelServer?.setAuthPanelOAuthEvent?.({
+							providerId,
+							providerName,
+							url: panelAuthUrl,
+							instructions: prompt.message,
+							status: "waiting_for_redirect",
+						});
+						return manualCodePromise;
+					}
 					return dialog.showPrompt(prompt.message, prompt.placeholder);
 				},
 
 				onProgress: (message: string) => {
+					if (usePanel) {
+						options?.panelServer?.setAuthPanelOAuthEvent?.({
+							providerId,
+							providerName,
+							url: panelAuthUrl,
+							instructions: message,
+							status: "progress",
+						});
+						return;
+					}
 					dialog.showProgress(message);
 				},
 				onInfo: (lines: string[]) => {
+					if (usePanel) {
+						options?.panelServer?.setAuthPanelOAuthEvent?.({
+							providerId,
+							providerName,
+							url: panelAuthUrl,
+							instructions: lines.join("\n"),
+							status: "info",
+						});
+						return;
+					}
 					dialog.showInfo(lines);
 				},
 
 				onManualCodeInput: () => manualCodePromise,
 
-				signal: dialog.signal,
+				signal: usePanel ? undefined : dialog.signal,
 			});
 
 			// Success
+			if (usePanel) {
+				options?.panelServer?.setAuthPanelOAuthEvent?.({
+					providerId,
+					providerName,
+					status: "success",
+					instructions: `${providerName} login completed.`,
+				});
+			}
 			restoreEditor();
 			await this.completeProviderAuthentication(providerId, providerName, "oauth", previousModel);
 		} catch (error: unknown) {
 			restoreEditor();
 			const errorMsg = error instanceof Error ? error.message : String(error);
+			if (usePanel) {
+				options?.panelServer?.setAuthPanelOAuthEvent?.({
+					providerId,
+					providerName,
+					error: errorMsg,
+					status: "error",
+				});
+			}
 			if (errorMsg !== "Login cancelled") {
 				this.showError(`Giriş başarısız: ${providerName}: ${errorMsg}`);
 			}
@@ -5616,7 +5697,7 @@ export class InteractiveMode {
 				const option = this.getLoginProviderOptions("oauth").find((provider) => provider.id === providerId);
 				if (!option) throw new Error("OAuth saglayici bulunamadi.");
 				this.showStatus(`${option.name} abonelik girisi panelden baslatildi.`);
-				await this.showLoginDialog(option.id, label || option.name);
+				await this.showLoginDialog(option.id, label || option.name, { panelServer: server });
 				return;
 			}
 			if (action?.action === "save_api_key") {

@@ -1705,9 +1705,14 @@ export const webUiUnlockListeners = new Set<() => void>();
 export const webUiAuthActionListeners = new Set<(action: any) => void | Promise<void>>();
 export let activeSessionId: string | null = null;
 let authPanelStateProvider: (() => unknown) | undefined;
+let authPanelOAuthEvent: any = null;
 
 export function setAuthPanelStateProvider(provider: (() => unknown) | undefined): void {
 	authPanelStateProvider = provider;
+}
+
+export function setAuthPanelOAuthEvent(event: any): void {
+	authPanelOAuthEvent = { ...event, createdAt: Date.now() };
 }
 
 export function setActiveSessionId(id: string | null): void {
@@ -1766,6 +1771,9 @@ const AUTH_PANEL_HTML = `<!doctype html>
     .muted { color: var(--md-sys-color-on-surface-variant); }
     .form { display: grid; gap: 12px; max-width: 720px; }
     select, input { width: 100%; border: 1px solid var(--md-sys-color-outline); border-radius: 14px; padding: 14px; background: #fff; font: inherit; }
+    .oauth-box { display: none; gap: 8px; padding: 14px; border-radius: 16px; background: var(--md-sys-color-primary-container); border: 1px solid var(--md-sys-color-outline); }
+    .oauth-box.show { display: grid; }
+    .oauth-url { word-break: break-all; color: var(--md-sys-color-primary); font-size: 13px; }
     label { display: grid; gap: 6px; font-weight: 650; }
     .hidden { display: none; }
     .toast { position: fixed; right: 22px; bottom: 22px; background: #1d1b20; color: white; padding: 14px 18px; border-radius: 16px; opacity: 0; transform: translateY(12px); transition: .18s; }
@@ -1808,6 +1816,7 @@ const AUTH_PANEL_HTML = `<!doctype html>
           <label>Saglayici<select id="provider"></select></label>
           <label id="labelWrap">Hesap etiketi<input id="label" placeholder="Orn: OpenAI is hesabi" /></label>
           <label id="keyWrap" class="hidden">API anahtari<input id="apiKey" type="password" autocomplete="off" placeholder="sk-..." /></label>
+          <div id="oauthBox" class="oauth-box"><b>Login hazirlaniyor</b><span id="oauthText" class="muted">Provider login URL bekleniyor...</span><a id="oauthLink" class="oauth-url" target="_blank" rel="noreferrer"></a></div>
           <div class="actions"><button class="btn" onclick="submitLogin()">Devam et</button><button class="btn ghost" onclick="refresh()">Durumu yenile</button></div>
         </div>
       </section>
@@ -1848,6 +1857,34 @@ const AUTH_PANEL_HTML = `<!doctype html>
       const providers = state.providers.filter(p => type === 'oauth' ? p.supportsOAuth : p.supportsApiKey);
       document.getElementById('provider').innerHTML = providers.map(p => '<option value="' + p.id + '">' + p.name + '</option>').join('');
     }
+    let oauthPollTimer = 0;
+    async function pollOAuth(providerId) {
+      clearInterval(oauthPollTimer);
+      const box = document.getElementById('oauthBox');
+      const text = document.getElementById('oauthText');
+      const link = document.getElementById('oauthLink');
+      box.classList.add('show');
+      text.textContent = 'Login URL bekleniyor...';
+      link.textContent = '';
+      link.removeAttribute('href');
+      oauthPollTimer = setInterval(async () => {
+        try {
+          const res = await fetch('/api/auth-panel/oauth-event?providerId=' + encodeURIComponent(providerId) + '&t=' + Date.now());
+          const event = await res.json();
+          if (event && event.error) {
+            clearInterval(oauthPollTimer);
+            text.textContent = event.error;
+            return;
+          }
+          if (!event || !event.url) return;
+          clearInterval(oauthPollTimer);
+          text.textContent = event.instructions || 'Provider login aciliyor...';
+          link.href = event.url;
+          link.textContent = event.url;
+          setTimeout(() => { window.location.href = event.url; }, 250);
+        } catch (_) {}
+      }, 700);
+    }
     async function submitLogin() {
       const authType = document.getElementById('authType').value;
       const providerId = document.getElementById('provider').value;
@@ -1855,8 +1892,19 @@ const AUTH_PANEL_HTML = `<!doctype html>
       const apiKey = document.getElementById('apiKey').value;
       if (!providerId) return toast('Saglayici sec');
       if (authType === 'api_key' && !apiKey.trim()) return toast('API anahtari gir');
-      await action({ action: authType === 'oauth' ? 'oauth_login' : 'save_api_key', providerId, label, apiKey });
-      document.getElementById('apiKey').value = '';
+      if (authType === 'oauth') pollOAuth(providerId);
+      try {
+        await action({ action: authType === 'oauth' ? 'oauth_login' : 'save_api_key', providerId, label, apiKey });
+        document.getElementById('apiKey').value = '';
+      } catch (error) {
+        clearInterval(oauthPollTimer);
+        const message = error && error.message ? error.message : String(error);
+        if (authType === 'oauth') {
+          document.getElementById('oauthBox').classList.add('show');
+          document.getElementById('oauthText').textContent = message;
+        }
+        toast(message);
+      }
     }
     async function setActive(id) { await action({ action: 'set_active', accountId: id }); }
     async function removeAccount(id) { if (confirm('Hesap kaldirilsin mi?')) await action({ action: 'remove_account', accountId: id }); }
@@ -1941,6 +1989,13 @@ export function startWebUiServer(options: { port?: number; staticRoot?: string }
 		if (url.pathname === "/api/auth-panel") {
 			return json(res, authPanelStateProvider ? authPanelStateProvider() : { providers: [], accounts: [], models: {} });
 		}
+		if (url.pathname === "/api/auth-panel/oauth-event") {
+			const providerId = url.searchParams.get("providerId");
+			if (providerId && authPanelOAuthEvent?.providerId && authPanelOAuthEvent.providerId !== providerId) {
+				return json(res, {});
+			}
+			return json(res, authPanelOAuthEvent || {});
+		}
 		if (req.method === "POST" && url.pathname === "/api/auth-panel/action") {
 			let body = "";
 			req.on("data", (chunk) => {
@@ -1949,10 +2004,34 @@ export function startWebUiServer(options: { port?: number; staticRoot?: string }
 			req.on("end", async () => {
 				try {
 					const data = JSON.parse(body || "{}");
-					for (const listener of webUiAuthActionListeners) {
-						await listener(data);
+					if (data?.action === "oauth_login" && webUiAuthActionListeners.size === 0) {
+						setAuthPanelOAuthEvent({
+							providerId: data.providerId,
+							error: "Auth panel is not connected to the running TUI session. Reopen /login from MoonCode.",
+						});
+						return json(res, {
+							ok: false,
+							error: "Auth panel is not connected to the running TUI session. Reopen /login from MoonCode.",
+						});
 					}
-					return json(res, { ok: true, message: "Panel islemi TUI'ya gonderildi." });
+					for (const listener of webUiAuthActionListeners) {
+						if (data?.action === "oauth_login") {
+							setAuthPanelOAuthEvent({
+								providerId: data.providerId,
+								status: "pending",
+								instructions: "Provider login hazirlaniyor...",
+							});
+							Promise.resolve(listener(data)).catch((error) =>
+								setAuthPanelOAuthEvent({ providerId: data.providerId, error: error?.message || String(error) }),
+							);
+						} else {
+							await listener(data);
+						}
+					}
+					return json(res, {
+						ok: true,
+						message: data?.action === "oauth_login" ? "Login panelde hazirlaniyor." : "Panel islemi TUI'ya gonderildi.",
+					});
 				} catch (err: any) {
 					return json(res, { ok: false, error: err.message });
 				}
