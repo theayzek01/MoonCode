@@ -1,6 +1,6 @@
 const BASE_PORT = 3133;
 const MAX_PORT_OFFSET = 9; // Scan 3133 to 3142
-const VERSION = "2026-v36-browser";
+const VERSION = "2026-v35-browser";
 const HEARTBEAT_INTERVAL_MS = 20000;
 const RECONNECT_DELAY_MS = 2000;
 const COMMAND_TIMEOUT_MS = 12000;
@@ -246,19 +246,6 @@ async function executeTabs(args) {
     const tabs = await chrome.tabs.query({});
     return tabs.slice(0, MAX_TABS_RETURNED).map(tabSummary);
   }
-  if (action === "cleanup") {
-    const tabs = await chrome.tabs.query({});
-    const protectedPrefixes = ["chrome://", "edge://", "about:", chrome.runtime.getURL("")];
-    const candidates = tabs.filter(tab =>
-      tab.id !== undefined &&
-      !tab.pinned &&
-      !tab.active &&
-      !protectedPrefixes.some(prefix => String(tab.url || "").startsWith(prefix))
-    );
-    const ids = candidates.map(tab => tab.id);
-    if (ids.length > 0) await chrome.tabs.remove(ids);
-    return { closed: ids.length, keptActive: true, keptPinned: true };
-  }
   if (action === "active") {
     return tabSummary(await getActiveTab());
   }
@@ -311,7 +298,7 @@ async function executePage(args) {
   if (!["wait", "mouse", "screenshot", "console_logs"].includes(action)) await waitForTabReady(tabId, 1200);
 
   // Auto-inject persistent UI frame on every interactive action
-  const skipUIActions = ["wait", "screenshot", "console_logs", "clear_ui"];
+  const skipUIActions = ["wait", "screenshot", "console_logs", "read", "read_dom", "clear_ui"];
   if (!skipUIActions.includes(action)) {
     try { await injectPersistentUI(tabId, "MoonCode ▶ " + action); } catch { /* CSP pages - skip silently */ }
   }

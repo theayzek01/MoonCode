@@ -57,6 +57,7 @@ export const BUILTIN_SLASH_COMMANDS: ReadonlyArray<BuiltinSlashCommand> = [
 	{ name: "videoedit", description: "Open MoonCode Pro Video Studio (Browser)" },
 	{ name: "photoedit", description: "Open MoonCode Pro Photo Editor (Browser)" },
 	{ name: "mcp", description: "List connected MCP servers" },
+	{ name: "blendermcp", description: "Install or connect Blender MCP on demand" },
 	{ name: "scratchmcp", description: "Connect Scratch/TurboWarp MCP on demand" },
 	{ name: "swarm", description: "Trigger Multi-Agent Swarm" },
 	{ name: "fix", description: "Run Autonomous Auto-Healer" },

@@ -1034,7 +1034,6 @@ export class EngineSession {
 			...config,
 		}));
 
-		const previousMcpServerNames = this._mcpManager ? Array.from(this._mcpManager.getClients().keys()) : [];
 		if (this._mcpManager) {
 			await this._mcpManager.dispose();
 			this._mcpManager = undefined;
@@ -1043,7 +1042,7 @@ export class EngineSession {
 		for (const name of Array.from(this._toolRegistry.keys())) {
 			if (name.includes("_")) {
 				const serverName = name.slice(0, name.indexOf("_"));
-				if (mcpConfigs[serverName] || previousMcpServerNames.includes(serverName)) {
+				if (mcpConfigs[serverName]) {
 					this._toolRegistry.delete(name);
 					this._toolDefinitions.delete(name);
 				}

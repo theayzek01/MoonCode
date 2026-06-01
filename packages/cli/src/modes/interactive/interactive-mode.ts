@@ -438,7 +438,6 @@ export class InteractiveMode {
 	private webUiProcess: any = undefined;
 	private editorActionListenerRegistered = false;
 	private authPanelListenerRegistered = false;
-	private mcpPanelListenerRegistered = false;
 
 	// Extension UI state
 	private extensionSelector: ExtensionSelectorComponent | undefined = undefined;
@@ -2794,6 +2793,11 @@ export class InteractiveMode {
 				if (text === "/mcp") {
 					this.handleMcpCommand();
 					this.editor.setText("");
+					return;
+				}
+				if (text === "/blendermcp" || text.startsWith("/blendermcp ")) {
+					this.editor.setText("");
+					await this.handleBlenderMcpCommand(text.slice("/blendermcp".length).trim());
 					return;
 				}
 				if (text === "/scratchmcp" || text.startsWith("/scratchmcp ")) {
@@ -7890,135 +7894,7 @@ export class InteractiveMode {
 	}
 
 	private handleMcpCommand(): void {
-		void this.handleMcpPanelCommand();
-	}
-
-	private buildMcpPanelState(): any {
-		const scratchRoot = process.env.MOON_SCRATCH_MCP_ROOT || "C:\\Users\\ozenc\\OneDrive\\Desktop\\scmcp";
-		const configs = this.settingsManager.getMcpServers();
-		const clients = this.session.mcpManager ? Array.from(this.session.mcpManager.getClients().keys()) : [];
-		const tools = this.session.getActiveToolNames().filter((name) => name.startsWith("blender_") || name.startsWith("scratch_"));
-		return {
-			connected: clients,
-			tools,
-			settings: {
-				scratchRoot,
-				blenderCommand: "cmd /c uvx blender-mcp",
-			},
-			configs,
-			providers: [
-				{
-					id: "blender",
-					name: "Blender MCP",
-					description: "Canli Blender sahnesi icin inspect, execute ve asset duzenleme araclari.",
-					command: "cmd /c uvx blender-mcp",
-					note: "Blender acik olmali. Ilk calistirma uvx ile indirir.",
-				},
-				{
-					id: "scratch",
-					name: "Scratch/TurboWarp MCP",
-					description: "SCMCP uzerinden Scratch/TurboWarp hedefleri, assetleri, degiskenleri ve bloklari.",
-					command: `node ${path.join(scratchRoot, "server", "scratch-mcp.js")}`,
-					note: `Chrome extension ayrica yuklenmeli: ${path.join(scratchRoot, "extension")}`,
-				},
-			],
-		};
-	}
-
-	private registerMcpPanel(server: any): void {
-		if (server?.setMcpPanelStateProvider) {
-			server.setMcpPanelStateProvider(() => this.buildMcpPanelState());
-		}
-		if (this.mcpPanelListenerRegistered || !server?.webUiMcpActionListeners) return;
-		this.mcpPanelListenerRegistered = true;
-		server.webUiMcpActionListeners.add(async (action: any) => {
-			const provider = String(action?.provider || "");
-			if (action?.action === "download") {
-				if (provider === "blender") {
-					await this.handleBlenderMcpCommand("download");
-					return;
-				}
-				if (provider === "scratch") {
-					const config = this.getScratchMcpConfig();
-					if (!fs.existsSync(config.args[0])) throw new Error(`Scratch MCP bulunamadi: ${config.args[0]}`);
-					this.showStatus(`Scratch MCP hazir: ${config.args[0]}`);
-					return;
-				}
-			}
-			if (action?.action === "start") {
-				if (provider === "blender") return await this.handleBlenderMcpCommand("");
-				if (provider === "scratch") return await this.handleScratchMcpCommand("");
-			}
-			if (action?.action === "stop") {
-				if (provider !== "blender" && provider !== "scratch") throw new Error("Bilinmeyen MCP provider.");
-				this.settingsManager.removeMcpServer(provider);
-				await this.settingsManager.flush();
-				await this.session.connectConfiguredMcpServers();
-				this.showStatus(`${provider} MCP kapatildi.`);
-				return;
-			}
-			if (action?.action === "save_settings") {
-				if (typeof action?.scratchRoot === "string" && action.scratchRoot.trim()) {
-					process.env.MOON_SCRATCH_MCP_ROOT = action.scratchRoot.trim();
-				}
-				this.showStatus("MCP panel ayarlari bu oturum icin guncellendi.");
-				return;
-			}
-			throw new Error("Bilinmeyen MCP panel islemi.");
-		});
-	}
-
-	private async isMcpPanelEndpointReady(url: string): Promise<boolean> {
-		try {
-			const controller = new AbortController();
-			const timer = setTimeout(() => controller.abort(), 1200);
-			const res = await fetch(url, { signal: controller.signal });
-			clearTimeout(timer);
-			if (!res.ok) return false;
-			const text = await res.text();
-			return text.includes("MoonCode MCP Paneli") || text.includes("MCP kontrol paneli");
-		} catch {
-			return false;
-		}
-	}
-
-	private async ensureMcpPanelServer(server: any): Promise<string> {
-		this.registerMcpPanel(server);
-		const ports = this.getWebUiCandidatePorts();
-		if (this.webUiProcess?.url) {
-			const url = `${this.webUiProcess.url}/mcp`;
-			if (await this.isMcpPanelEndpointReady(url)) return url;
-		}
-		for (const port of ports) {
-			try {
-				const candidate = server.startWebUiServer({ port });
-				await new Promise((resolve) => setTimeout(resolve, 160));
-				this.registerMcpPanel(server);
-				const url = `${candidate.url}/mcp`;
-				if (await this.isMcpPanelEndpointReady(url)) {
-					this.webUiProcess = candidate;
-					return url;
-				}
-				try {
-					candidate.server?.close?.();
-				} catch {}
-			} catch {
-				// Try next port.
-			}
-		}
-		throw new Error("MoonCode MCP paneli acilamadi. 3131-3140 portlarini kontrol edin.");
-	}
-
-	private async handleMcpPanelCommand(): Promise<void> {
-		try {
-			const server = await import("../../core/web-ui-server.js");
-			const url = await this.ensureMcpPanelServer(server);
-			this.openEditorUrl(url);
-			this.showStatus(`MoonCode MCP paneli acildi: ${url}`);
-		} catch (err: any) {
-			this.showError(`MCP paneli acma hatasi: ${err.message}`);
-			this.showMcpSelector();
-		}
+		this.showMcpSelector();
 	}
 
 	private getBlenderMcpConfig() {
@@ -8062,7 +7938,7 @@ export class InteractiveMode {
 				this.showError(`Blender MCP hazirlanamadi: ${result.error?.message || result.stderr || "uvx komutu basarisiz"}`);
 				return;
 			}
-			this.showStatus("Blender MCP hazir. Baglanmak ve yonetmek icin /mcp yaz.");
+			this.showStatus("Blender MCP hazir. Baglanmak icin /blendermcp yaz.");
 			return;
 		}
 
