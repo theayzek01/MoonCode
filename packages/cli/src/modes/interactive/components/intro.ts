@@ -36,10 +36,10 @@ function center(line: string, width: number): string {
 
 function buildWordmark(width: number, tick: number): string {
 	const palette: Array<[number, number, number]> = [
-		[218, 235, 255],
-		[129, 191, 255],
-		[71, 127, 214],
-		[31, 56, 108],
+		[255, 238, 238],
+		[255, 150, 150],
+		[220, 44, 56],
+		[95, 16, 24],
 	];
 	const word = "MOONAGENT";
 	const phase = tick % 90;
@@ -47,21 +47,21 @@ function buildWordmark(width: number, tick: number): string {
 }
 
 export function buildIntroLines(width: number, phase = 0): string[] {
-	const dim = (s: string) => `\x1b[38;2;112;122;138m${s}\x1b[39m`;
-	const soft = (s: string) => `\x1b[38;2;194;219;248m${s}\x1b[39m`;
-	const glow = (s: string) => `\x1b[1m\x1b[38;2;232;242;255m${s}\x1b[39m\x1b[22m`;
+	const dim = (s: string) => `\x1b[38;2;136;96;100m${s}\x1b[39m`;
+	const soft = (s: string) => `\x1b[38;2;255;190;190m${s}\x1b[39m`;
+	const glow = (s: string) => `\x1b[1m\x1b[38;2;255;238;238m${s}\x1b[39m\x1b[22m`;
 	const lineWidth = Math.max(24, Math.min(width - 8, 92));
 	const rule = center(
 		gradient("=".repeat(lineWidth), phase / 2, [
-			[29, 45, 86],
-			[70, 121, 208],
-			[163, 215, 255],
+			[80, 18, 26],
+			[210, 42, 54],
+			[255, 175, 175],
 		]),
 		width,
 	);
 	const wordmark = buildWordmark(width, phase);
 	const title = center(glow("Minimal agent. Strong taste. Small tokens. Sharp output."), width);
-	const sub = center(soft("Terminal coding agent with MCP, Browser Bridge, and Blender workflows"), width);
+	const sub = center(soft("Terminal coding agent with MCP, Browser Bridge, and DreamKernel reflexes"), width);
 
 	return [
 		"",

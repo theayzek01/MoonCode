@@ -169,7 +169,7 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 	const hasBrowserTabs = tools.includes("browser_tabs");
 	const hasBrowserPage = tools.includes("browser_page");
 	const hasBrowser = hasBrowserTabs || hasBrowserPage;
-	const hasCodebaseIndex = tools.includes("codebase_index");
+	const hasDreamKernel = tools.includes("dream_kernel");
 
 	addGuideline("Always show file paths clearly; include relevant paths when explaining code or diffs.");
 	addGuideline(DEFAULT_UI_STYLE_GUIDELINE);
@@ -193,8 +193,8 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 		}
 	}
 
-	if (hasCodebaseIndex) {
-		addGuideline("Use `codebase_index` only when normal search is stale, weak, or clearly insufficient.");
+	if (hasDreamKernel) {
+		addGuideline("Use `dream_kernel` to compile repeated failures into compact reflex behavior; do not use RAG-style retrieval as a substitute for source verification.");
 	}
 
 	for (const guideline of promptGuidelines ?? []) {
@@ -432,10 +432,10 @@ function buildCompactSystemPrompt(options: BuildSystemPromptOptions): string {
 			: "read, bash, edit, write";
 
 	const hasBrowser = tools.includes("browser_tabs") || tools.includes("browser_page");
-	const hasSemanticSearch = tools.includes("semantic_search");
+	const hasDreamKernel = tools.includes("dream_kernel");
 	const browserLine = hasBrowser ? "\n- Browser bridge available when connected." : "";
-	const searchLine = hasSemanticSearch
-		? "\n- semantic_search finds candidates only. Always verify against source files."
+	const dreamKernelLine = hasDreamKernel
+		? "\n- DreamKernel is active: learn behavior from task traces; verify source files instead of trusting retrieved text."
 		: "";
 
 	// Brain.md distilled: uncertainty-reduction engine, minimal token footprint.
@@ -459,7 +459,7 @@ function buildCompactSystemPrompt(options: BuildSystemPromptOptions): string {
 		"- MoonCode Capsule/Razor blocks are compressed noisy input. Route from their Paths/Commands/Errors, then verify source files before edits.",
 		"- Preserve user changes. Ask before destructive ops. Mask secrets.",
 		"- Short answers. No filler, no motivation, no over-explaining.",
-		`- Match user language: Turkish in -> Turkish out. Casual -> casual.${browserLine}${searchLine}`,
+		`- Match user language: Turkish in -> Turkish out. Casual -> casual.${browserLine}${dreamKernelLine}`,
 		"",
 		"## Workflow",
 		"Inspect minimum -> hypothesis -> smallest change -> verify -> report.",

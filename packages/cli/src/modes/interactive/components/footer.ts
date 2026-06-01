@@ -11,7 +11,7 @@ function pad(n: number): string {
 }
 
 function steel(s: string): string {
-	return `\x1b[38;2;95;158;160m${s}\x1b[39m`;
+	return `\x1b[38;2;232;72;78m${s}\x1b[39m`;
 }
 function dim(s: string): string {
 	return `\x1b[38;2;90;90;90m${s}\x1b[39m`;
@@ -22,11 +22,25 @@ function muted(s: string): string {
 function sage(s: string): string {
 	return `\x1b[38;2;110;170;120m${s}\x1b[39m`;
 }
+function ember(s: string): string {
+	return `\x1b[38;2;255;128;128m${s}\x1b[39m`;
+}
+function pulse(text: string, phase: number): string {
+	let out = "";
+	for (let i = 0; i < text.length; i++) {
+		const wave = (Math.sin((i + phase) / 3) + 1) / 2;
+		const r = 170 + Math.round(wave * 85);
+		const g = 38 + Math.round(wave * 88);
+		const b = 46 + Math.round(wave * 64);
+		out += `\x1b[38;2;${r};${g};${b}m${text[i]}`;
+	}
+	return `${out}\x1b[39m`;
+}
 function bg1(s: string): string {
-	return `\x1b[48;2;18;22;28m${s}\x1b[49m`;
+	return `\x1b[48;2;25;15;17m${s}\x1b[49m`;
 }
 function bg2(s: string): string {
-	return `\x1b[48;2;10;12;16m${s}\x1b[49m`;
+	return `\x1b[48;2;14;8;10m${s}\x1b[49m`;
 }
 
 function shortenPath(p: string): string {
@@ -61,6 +75,7 @@ export class FooterComponent implements Component {
 	render(width: number): string[] {
 		const state = this.session.state;
 		const entries = this.session.sessionManager?.getEntries() ?? [];
+		const phaseTick = Math.floor(Date.now() / 140);
 
 		// Recompute cost only when entries change
 		if (entries.length !== this.lastEntryCount) {
@@ -93,7 +108,7 @@ export class FooterComponent implements Component {
 
 		const streaming = this.session.isStreaming;
 		const compacting = (this.session as any).isCompacting;
-		const phase = compacting ? steel("compact") : streaming ? steel("run") : dim("idle");
+		const phase = compacting ? pulse("compact", phaseTick) : streaming ? pulse("run", phaseTick) : dim("idle");
 
 		const right1Parts = [muted(model), dim(`think:${thinkLevel}`), dim(`ctx:${ctxPct}`), phase];
 		const right1 = right1Parts.join(dim("  ·  "));
@@ -111,10 +126,11 @@ export class FooterComponent implements Component {
 		const activeTools = this.getExecutingToolNames?.() ?? [];
 		const toolNames = (this.session as any).getActiveToolNames?.() ?? [];
 		const toolCount = activeTools.length || toolNames.length;
-		const toolStr = dim(`tools:${toolCount}`);
+		const toolStr = toolCount > 7 ? ember(`tools:${toolCount}`) : dim(`tools:${toolCount}`);
 		const costStr = dim(`$${this.costTotal.toFixed(3)}`);
 
-		const left2 = steel(" ⬡ browser ") + dim("│ ") + browserStatus;
+		const live = streaming || compacting ? pulse("▰▱▱", phaseTick) : dim("▱▱▱");
+		const left2 = steel(" ◆ browser ") + dim("| ") + browserStatus + dim("  ") + live;
 		const right2 = [costStr, toolStr].join(dim("  ·  "));
 
 		const left2W = vw(left2);

@@ -23,6 +23,7 @@ export {
 	createCodebaseIndexTool,
 	createCodebaseIndexToolDefinition,
 } from "./codebase_index.js";
+export { createDreamKernelTool, createDreamKernelToolDefinition } from "./dream_kernel.js";
 export {
 	createDiscordGetChannelsTool,
 	createDiscordListGuildsTool,
@@ -105,6 +106,7 @@ import {
 	createBrowserTabsToolDefinition,
 } from "./browser.js";
 import { createCodebaseIndexTool, createCodebaseIndexToolDefinition } from "./codebase_index.js";
+import { createDreamKernelTool, createDreamKernelToolDefinition } from "./dream_kernel.js";
 import {
 	createDiscordGetChannelsTool,
 	createDiscordListGuildsTool,
@@ -132,6 +134,7 @@ export type ToolName =
 	| "grep"
 	| "find"
 	| "ls"
+	| "dream_kernel"
 	| "semantic_search"
 	| "codebase_index"
 	| "git_ship"
@@ -149,8 +152,7 @@ export const allToolNames: Set<ToolName> = new Set([
 	"grep",
 	"find",
 	"ls",
-	"semantic_search",
-	"codebase_index",
+	"dream_kernel",
 	"git_ship",
 	"browser_tabs",
 	"browser_page",
@@ -189,10 +191,11 @@ export function createToolDefinition(toolName: ToolName, cwd: string, options?: 
 			return createFindToolDefinition(cwd, options?.find);
 		case "ls":
 			return createLsToolDefinition(cwd, options?.ls);
+		case "dream_kernel":
+			return createDreamKernelToolDefinition();
 		case "semantic_search":
-			return createSemanticSearchToolDefinition(cwd);
 		case "codebase_index":
-			return createCodebaseIndexToolDefinition(cwd);
+			return createDreamKernelToolDefinition();
 		case "git_ship":
 			return createGitShipToolDefinition(cwd);
 		case "browser_tabs":
@@ -225,10 +228,11 @@ export function createTool(toolName: ToolName, cwd: string, options?: ToolsOptio
 			return createFindTool(cwd, options?.find);
 		case "ls":
 			return createLsTool(cwd, options?.ls);
+		case "dream_kernel":
+			return createDreamKernelTool();
 		case "semantic_search":
-			return createSemanticSearchTool(cwd);
 		case "codebase_index":
-			return createCodebaseIndexTool(cwd);
+			return createDreamKernelTool();
 		case "git_ship":
 			return createGitShipTool(cwd);
 		case "browser_tabs":
@@ -254,7 +258,7 @@ export function createCodingToolDefinitions(cwd: string, options?: ToolsOptions)
 		createBashToolDefinition(cwd, options?.bash),
 		createEditToolDefinition(cwd, options?.edit),
 		createWriteToolDefinition(cwd, options?.write),
-		createCodebaseIndexToolDefinition(cwd),
+		createDreamKernelToolDefinition(),
 	];
 }
 
@@ -264,7 +268,7 @@ export function createReadOnlyToolDefinitions(cwd: string, options?: ToolsOption
 		createGrepToolDefinition(cwd, options?.grep),
 		createFindToolDefinition(cwd, options?.find),
 		createLsToolDefinition(cwd, options?.ls),
-		createSemanticSearchToolDefinition(cwd),
+		createDreamKernelToolDefinition(),
 	];
 }
 
@@ -277,8 +281,9 @@ export function createAllToolDefinitions(cwd: string, options?: ToolsOptions): R
 		grep: createGrepToolDefinition(cwd, options?.grep),
 		find: createFindToolDefinition(cwd, options?.find),
 		ls: createLsToolDefinition(cwd, options?.ls),
-		semantic_search: createSemanticSearchToolDefinition(cwd),
-		codebase_index: createCodebaseIndexToolDefinition(cwd),
+		dream_kernel: createDreamKernelToolDefinition(),
+		semantic_search: createDreamKernelToolDefinition(),
+		codebase_index: createDreamKernelToolDefinition(),
 		git_ship: createGitShipToolDefinition(cwd),
 		browser_tabs: createBrowserTabsToolDefinition(),
 		browser_page: createBrowserPageToolDefinition(),
@@ -301,7 +306,7 @@ export function createReadOnlyTools(cwd: string, options?: ToolsOptions): Tool[]
 		createGrepTool(cwd, options?.grep),
 		createFindTool(cwd, options?.find),
 		createLsTool(cwd, options?.ls),
-		createSemanticSearchTool(cwd),
+		createDreamKernelTool(),
 	];
 }
 
@@ -314,7 +319,9 @@ export function createAllTools(cwd: string, options?: ToolsOptions): Record<Tool
 		grep: createGrepTool(cwd, options?.grep),
 		find: createFindTool(cwd, options?.find),
 		ls: createLsTool(cwd, options?.ls),
-		semantic_search: createSemanticSearchTool(cwd),
+		dream_kernel: createDreamKernelTool(),
+		semantic_search: createDreamKernelTool(),
+		codebase_index: createDreamKernelTool(),
 		git_ship: createGitShipTool(cwd),
 		browser_tabs: createBrowserTabsTool(),
 		browser_page: createBrowserPageTool(options?.getModelVisionSupport),

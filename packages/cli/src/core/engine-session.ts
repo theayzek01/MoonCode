@@ -281,7 +281,16 @@ interface ToolDefinitionEntry {
 	sourceInfo: SourceInfo;
 }
 
-const BASELINE_ACTIVE_TOOL_NAMES = new Set(["read", "bash", "edit", "write", "git_ship", "browser_tabs", "browser_page"]);
+const BASELINE_ACTIVE_TOOL_NAMES = new Set([
+	"read",
+	"bash",
+	"edit",
+	"write",
+	"dream_kernel",
+	"git_ship",
+	"browser_tabs",
+	"browser_page",
+]);
 
 // ============================================================================
 // Constants
@@ -1083,6 +1092,7 @@ export class EngineSession {
 				"bash",
 				"edit",
 				"write",
+				"dream_kernel",
 				"git_ship",
 				"browser_tabs",
 				"browser_page",

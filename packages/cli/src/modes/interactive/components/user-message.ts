@@ -37,8 +37,8 @@ export class UserMessageComponent extends Container {
 		const child = this.children[1] || this.children[0];
 		const childLines = child ? child.render(width - 6) : [];
 
-		const steelBlueStripe = `\x1b[38;2;95;158;160m┃\x1b[39m`;
-		const userMessageBgCode = `\x1b[48;2;28;34;39m`; // #1c2227 background
+		const steelBlueStripe = `\x1b[38;2;232;72;78m┃\x1b[39m`;
+		const userMessageBgCode = `\x1b[48;2;34;20;23m`; // #1c2227 background
 		const textWhiteCode = `\x1b[38;2;255;255;255m`;
 		const resetCode = `\x1b[0m`;
 
