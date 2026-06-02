@@ -3,8 +3,6 @@ name: Deploy MoonCode site
 on:
   push:
     branches:
-      - main
-      - master
       - launch/mooncode
     paths:
       - README.md
