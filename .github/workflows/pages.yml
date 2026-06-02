@@ -33,7 +33,7 @@ jobs:
       - name: Prepare site artifact
         run: |
           mkdir -p .site
-          cp -r tools/sites/moonclisite/* .site/
+          cp -r docs/* .site/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
