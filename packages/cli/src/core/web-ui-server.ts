@@ -15,137 +15,132 @@ import { dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { getEngineDir, getSessionsDir } from "../config.js";
 
-const INDEX_HTML = `<!doctype html>
+const INDEX_HTML = `
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#050608" />
-  <meta name="description" content="MoonCode; terminalde çalışan, Türkçe öncelikli kodlama ajanı." />
-  <title>MoonCode — Terminal coding agent</title>
+  <title>MoonCode Premium Dashboard</title>
   <link rel="stylesheet" href="/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="grain" aria-hidden="true"></div>
-  <header class="topbar" data-header>
-    <a class="brand" href="#top" aria-label="MoonCode">
-      <span class="mark"><img src="/assets/Mooncodewhitelogo.png" alt="" /></span>
-      <span class="word">MoonCode</span>
-      <span class="version">2026-v36</span>
-    </a>
-    <button class="menu" type="button" aria-expanded="false" aria-controls="nav">Menü</button>
-    <nav id="nav" class="nav" aria-label="Ana menü">
-      <a href="#urun">Ürün</a>
-      <a href="#akis">Akış</a>
-      <a href="#oturumlar">Sessions</a>
-      <a href="#kurulum">Install</a>
-      <a class="github" href="https://github.com/theayzek01/mooncode" target="_blank" rel="noreferrer">GitHub</a>
-    </nav>
-  </header>
-
-  <main id="top">
-    <section class="hero shell">
-      <div class="hero-copy">
-        <p class="label">MOONCODE / LOCAL AGENT</p>
-        <h1>Repo içinde sessiz, hızlı ve kontrollü çalışır.</h1>
-        <p class="lead">MoonCode terminalden çalışan Türkçe öncelikli kodlama ajanı. Dosyaları seçerek okur, küçük patch üretir, sonucu doğrular ve gereksiz çıktı basmadan işi kapatır.</p>
-        <div class="actions">
-          <a class="button primary" href="#kurulum">Install</a>
-          <a class="button ghost" href="#oturumlar">Canlı oturumları gör</a>
-        </div>
-        <div class="notes" aria-label="Öne çıkanlar">
-          <span>/index gerektiğinde</span>
-          <span>browser bridge</span>
-          <span>minimal patch</span>
-        </div>
+  <div id="app">
+    <header class="topbar">
+      <div class="logo">
+        <div class="logo-circle"></div>
+        <b>MoonCode</b>
+        <span class="version-tag">2026-pre18</span>
       </div>
+      <nav class="nav-links">
+        <button id="tab-sessions" class="nav-btn">Session History</button>
+        <button id="tab-designer" class="nav-btn active">Theme Designer</button>
+      </nav>
+    </header>
 
-      <aside class="terminal" aria-label="MoonCode terminal önizlemesi">
-        <div class="terminal-head"><span></span><span></span><span></span><b>mooncode</b></div>
-        <div class="terminal-body">
-          <p><em>$</em> mooncode</p>
-          <p class="muted">workspace: C:/Users/ozenc/OneDrive/Desktop/mooncode</p>
-          <div class="run"><span>inspect</span><strong>package graph, git state</strong><i>ok</i></div>
-          <div class="run"><span>index</span><strong>only when context is needed</strong><i>ready</i></div>
-          <div class="run"><span>patch</span><strong>exact replacements, user changes safe</strong><i>done</i></div>
-          <pre id="terminal-note">özet: incelendi → düzenlendi → doğrulandı</pre>
-        </div>
-      </aside>
-    </section>
+    <div id="sessions-view" class="tab-content">
+      <div class="workspace-grid">
+        <aside class="sidebar">
+          <div class="sidebar-header">
+            <h2>Active Sessions</h2>
+            <p class="hint">Select the session you want to inspect</p>
+          </div>
+          <div id="sessions"></div>
+        </aside>
 
-    <section class="brand-strip shell" aria-label="MoonCode logo">
-      <img src="/assets/MooncodeWhiteBanner.png" alt="MoonCode" />
-    </section>
+        <main class="chat-area">
+          <div id="chat" class="panel empty">Please select a session from the left panel.</div>
+        </main>
 
-    <section class="section shell" id="urun">
-      <div class="section-title">
-        <p class="label">ÜRÜN</p>
-        <h2>Gösteriş değil, çalışma disiplini.</h2>
+        <section class="stats-panel">
+          <h2>Telemetry and Statistics</h2>
+          <pre id="stats">-</pre>
+        </section>
       </div>
-      <div class="cards four">
-        <article class="card"><b>Seçici bağlam</b><p>Tüm projeyi modele doldurmak yerine ilgili dosyaları ve sembolleri hedefler.</p></article>
-        <article class="card"><b>Türkçe akış</b><p>Komutlar, raporlar ve hata açıklamaları doğal Türkçe geliştirici diliyle gelir.</p></article>
-        <article class="card"><b>Browser kontrolü</b><p>Bağlı Chrome sekmesini okuyabilir, tıklayabilir, form doldurabilir ve UI doğrulayabilir.</p></article>
-        <article class="card"><b>Az gürültü</b><p>Terminali şişiren uzun dökümler yerine kısa plan, patch ve sonuç raporu verir.</p></article>
-      </div>
-    </section>
+    </div>
 
-    <section class="section shell split" id="akis">
-      <div>
-        <p class="label">AKIŞ</p>
-        <h2>MoonCode önce bakar, sonra dokunur.</h2>
-        <p class="body-text">Standart döngü basit: mevcut değişiklikleri koru, gereken dosyayı oku, en küçük güvenli düzenlemeyi yap ve mümkünse test/build ile doğrula.</p>
-      </div>
-      <div class="timeline">
-        <div><span>01</span><b>Inspect</b><p>Git durumu, dosya yapısı ve ilgili kaynaklar.</p></div>
-        <div><span>02</span><b>Patch</b><p>Nokta atışı düzenleme; rastgele refactor yok.</p></div>
-        <div><span>03</span><b>Verify</b><p>Komut, tarayıcı veya statik kontrol ile kanıt.</p></div>
-        <div><span>04</span><b>Report</b><p>Kısa, net, kullanılabilir sonuç.</p></div>
-      </div>
-    </section>
+    <div id="designer-view" class="tab-content active">
+      <div class="designer-grid">
+        <aside class="designer-controls card">
+          <h3>Preset Styles</h3>
+          <div class="preset-buttons">
+            <button class="preset-btn active" data-preset="brutalist">Neo Brutalist</button>
+            <button class="preset-btn" data-preset="minimalist">Zen Minimalist</button>
+            <button class="preset-btn" data-preset="editorial">High Editorial</button>
+            <button class="preset-btn" data-preset="softwarm">Soft Warm</button>
+            <button class="preset-btn" data-preset="techutility">Tech Utility</button>
+          </div>
 
-    <section class="section shell sessions" id="oturumlar">
-      <div class="section-title row">
-        <div>
-          <p class="label">DASHBOARD</p>
-          <h2>Yerel oturum arşivi.</h2>
-        </div>
-        <span id="session-status" class="pill">yükleniyor</span>
-      </div>
-      <div class="session-grid">
-        <aside class="session-list" id="sessions-list"><p class="muted pad">Sessions yükleniyor…</p></aside>
-        <article class="chat-panel">
-          <div class="chat-head"><b id="chat-title">Oturum seç</b><span>son 60 kayıt</span></div>
-          <div id="chat" class="chat-empty">Soldan bir oturum seçince konuşma burada açılır.</div>
-        </article>
-      </div>
-    </section>
+          <h3 style="margin-top: 24px;">Fine HSL Controls</h3>
+          <div class="slider-group">
+            <div class="slider-label"><span>Hue</span><span id="hue-val">160°</span></div>
+            <input type="range" id="hue" min="0" max="360" value="160" class="slider" />
+          </div>
+          <div class="slider-group">
+            <div class="slider-label"><span>Saturation</span><span id="sat-val">60%</span></div>
+            <input type="range" id="sat" min="0" max="100" value="60" class="slider" />
+          </div>
+          <div class="slider-group">
+            <div class="slider-label"><span>Lightness</span><span id="light-val">50%</span></div>
+            <input type="range" id="light" min="10" max="90" value="50" class="slider" />
+          </div>
 
-    <section class="section shell install" id="kurulum">
-      <div>
-        <p class="label">INSTALL</p>
-        <h2>Repo’dan çalıştır.</h2>
-      </div>
-      <div class="code-card">
-        <button id="copy-install" type="button">Copy</button>
-        <pre id="install-code">git clone https://github.com/theayzek01/mooncode.git
-cd mooncode
-npm install
-npm run build
-cd packages/cli && npm link
-mooncode</pre>
-      </div>
-    </section>
-  </main>
+          <div class="color-palette-preview">
+            <h4>Generated Color Palette</h4>
+            <div class="palette-swatches">
+              <div class="swatch bg" title="Background">bg</div>
+              <div class="swatch panel" title="Panel">pnl</div>
+              <div class="swatch primary" title="Primary Accent">pri</div>
+              <div class="swatch secondary" title="Secondary Accent">sec</div>
+              <div class="swatch border" title="Border / Divider">bor</div>
+            </div>
+          </div>
+        </aside>
 
-  <footer class="footer shell">
-      <span>MoonCode 2026-v36</span>
-    <a href="https://github.com/theayzek01/mooncode" target="_blank" rel="noreferrer">github.com/theayzek01/mooncode</a>
-  </footer>
+        <main class="designer-preview card">
+          <div class="preview-header">
+            <h3>Live Component Preview</h3>
+            <span class="preview-badge">Interactive Panel</span>
+          </div>
 
+          <div class="preview-container" id="preview-frame">
+            <div class="preview-card">
+              <span class="p-badge">Featured Component</span>
+              <h2 class="p-title">MoonCode Design System</h2>
+              <p class="p-text">This preview shows the generated HSL variables being applied to components in real time. Drag the sliders or select a preset to see the palette update instantly.</p>
+
+              <div class="p-alert">
+                <span class="p-alert-icon">✦</span>
+                <span class="p-alert-text">Theme color values synchronized successfully.</span>
+              </div>
+
+              <div class="p-actions">
+                <button class="p-btn primary">Interact</button>
+                <button class="p-btn secondary">Dismiss</button>
+              </div>
+            </div>
+          </div>
+        </main>
+
+        <section class="designer-export card">
+          <h3>MoonCode AI Prompt</h3>
+          <p class="hint">Copy this prompt into MoonCode to ask it to apply the selected design across your project.</p>
+          <div class="code-container">
+            <button class="copy-btn" id="copy-theme-btn">Copy Prompt</button>
+            <textarea id="prompt-code" readonly style="width: 100%; height: 280px; background: #000000; color: #10b981; border: 1px solid var(--line); border-radius: 8px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; resize: none; outline: none;"></textarea>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
   <script src="/app.js"></script>
 </body>
-</html>`;
+</html>
+
+`;
 
 const STYLE_CSS = `:root {
   color-scheme: dark;
@@ -359,7 +354,7 @@ if (installButton) {
 const terminalLines = [
   'özet: incelendi → düzenlendi → doğrulandı',
   'kural: user changes korunur, destructive işlem sorulur',
-  'browser: aktif sekme okunur, UI sonucu kontrol edilir',
+  'browser: the active tab is read and the UI result is checked',
   'index: sadece gerektiğinde repo haritası çıkarılır'
 ];
 let terminalIndex = 0;
@@ -2252,8 +2247,8 @@ export function startWebUiServer(options: { port?: number; staticRoot?: string }
 						return json(res, { ok: true });
 					}
 					if (data?.action === "save") {
-						writeFileSync(files.memorySignals, `${JSON.stringify(data.memorySignals ?? [], null, 2)}\n`, "utf-8");
-						writeFileSync(files.learning, `${JSON.stringify(data.learning ?? [], null, 2)}\n`, "utf-8");
+						writeFileSync(files.memorySignals, `${JSON.stringify(data.memorySignals || [], null, 2)}\n`, "utf-8");
+						writeFileSync(files.learning, `${JSON.stringify(data.learning || [], null, 2)}\n`, "utf-8");
 						return json(res, { ok: true });
 					}
 					return json(res, { ok: false, error: "Unknown brain action." });

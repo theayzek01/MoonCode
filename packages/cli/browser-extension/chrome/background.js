@@ -13,6 +13,7 @@ let connections = new Map();
 let connectingPorts = new Set();
 const debuggerAttachedTabs = new Set();
 let heartbeatTimer = null;
+let discoveryRetryTimer = null;
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 chrome.runtime.onStartup.addListener(startDiscovery);
@@ -99,10 +100,22 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 // ── Discovery & Connection ──────────────────────────────────────────────────
 function startDiscovery() {
+  if (discoveryRetryTimer) {
+    clearTimeout(discoveryRetryTimer);
+    discoveryRetryTimer = null;
+  }
   for (let i = 0; i <= MAX_PORT_OFFSET; i++) {
     connectToPort(BASE_PORT + i);
   }
   startHeartbeat();
+}
+
+function scheduleDiscoveryRetry(delayMs = RECONNECT_DELAY_MS) {
+  if (discoveryRetryTimer || connections.size > 0 || connectingPorts.size > 0) return;
+  discoveryRetryTimer = setTimeout(() => {
+    discoveryRetryTimer = null;
+    startDiscovery();
+  }, delayMs);
 }
 
 function connectToPort(port) {
@@ -150,12 +163,14 @@ function connectToPort(port) {
     const activeCount = Array.from(connections.values()).filter(c => c.info).length;
     if (activeCount === 0) {
       setTimeout(() => connectToPort(port), RECONNECT_DELAY_MS);
+      scheduleDiscoveryRetry(RECONNECT_DELAY_MS);
     }
   };
 
   socket.onerror = () => {
     connectingPorts.delete(port);
     updateBadge();
+    scheduleDiscoveryRetry(RECONNECT_DELAY_MS);
   };
 
   socket.onmessage = async (event) => {
@@ -976,8 +991,9 @@ async function executePage(args) {
           + '<div style="font-size:48px;margin-bottom:16px">🎨</div>'
           + '<div style="font-size:20px;font-weight:700;margin-bottom:8px">Canvas Design Mode</div>'
           + '<div style="font-size:13px;color:#94a3b8;max-width:360px">Use canvas_draw to draw. Use mouse action for shapes. Dismiss with clear_ui or canvas_design clear.</div>'
-          + '<button onclick="document.getElementById('' + id + '').remove()" style="margin-top:20px;padding:10px 24px;background:#38bdf8;color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer">Close</button>'
+          + '<button data-moon-close style="margin-top:20px;padding:10px 24px;background:#38bdf8;color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer">Close</button>'
           + '</div>';
+        el.querySelector('[data-moon-close]')?.addEventListener('click', () => el.remove());
         (document.body||document.documentElement).appendChild(el);
         return { injected: true };
       },

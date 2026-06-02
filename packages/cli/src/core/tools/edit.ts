@@ -24,6 +24,8 @@ import { resolveToCwd } from "./path-utils.js";
 import { assertNoPersonaLeak } from "./persona-guard.js";
 import { invalidArgText, shortenPath, str } from "./render-utils.js";
 import { wrapToolDefinition } from "./tool-definition-wrapper.js";
+import { appendAuditEvent } from "../security/audit.js";
+import { evaluateFilePath } from "../security/policy.js";
 
 type EditPreview = EditDiffResult | EditDiffError;
 
@@ -312,6 +314,18 @@ export function createEditToolDefinition(
 		async execute(_toolCallId, input: EditToolInput, signal?: AbortSignal, _onUpdate?, _ctx?) {
 			const { path, edits } = validateEditInput(input);
 			const absolutePath = resolveToCwd(path, cwd);
+			const policy = evaluateFilePath(absolutePath, cwd);
+			appendAuditEvent({
+				actor: "tool",
+				action: "edit",
+				status: policy.allowed ? "success" : "blocked",
+				target: absolutePath,
+				message: policy.reason,
+				meta: { cwd, mode: policy.mode, edits: edits.length },
+			});
+			if (!policy.allowed) {
+				throw new Error(`Policy blocked file edit${policy.reason ? `: ${policy.reason}` : ""}.`);
+			}
 
 			return withFileMutationQueue(
 				absolutePath,
@@ -398,6 +412,13 @@ export function createEditToolDefinition(
 								}
 
 								const diffResult = generateDiffString(baseContent, newContent);
+								appendAuditEvent({
+									actor: "tool",
+									action: "edit",
+									status: "success",
+									target: absolutePath,
+									meta: { cwd, mode: policy.mode, edits: edits.length },
+								});
 								resolve({
 									content: [
 										{
@@ -414,6 +435,14 @@ export function createEditToolDefinition(
 								}
 
 								if (!aborted) {
+									appendAuditEvent({
+										actor: "tool",
+										action: "edit",
+										status: "failure",
+										target: absolutePath,
+										message: error instanceof Error ? error.message : String(error),
+										meta: { cwd, mode: policy.mode, edits: edits.length },
+									});
 									reject(error instanceof Error ? error : new Error(String(error)));
 								}
 							}

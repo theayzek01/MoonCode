@@ -77,7 +77,12 @@ import type {
 import { FooterDataProvider, type ReadonlyFooterDataProvider } from "../../core/footer-data-provider.js";
 import { type AppKeybinding, KeybindingsManager } from "../../core/keybindings.js";
 import { createCompactionSummaryMessage } from "../../core/messages.js";
-import { defaultModelPerProvider, findExactModelReferenceMatch, resolveModelScope } from "../../core/model-resolver.js";
+import {
+	defaultModelPerProvider,
+	findExactModelReferenceMatch,
+	normalizeProviderId,
+	resolveModelScope,
+} from "../../core/model-resolver.js";
 import { OmegaKernel } from "../../core/omega-kernel.js";
 import { DefaultPackageManager } from "../../core/package-manager.js";
 import { BUILT_IN_PROVIDER_DISPLAY_NAMES } from "../../core/provider-display-names.js";
@@ -151,6 +156,10 @@ import {
 /** Interface for components that can be expanded/collapsed */
 interface Expandable {
 	setExpanded(expanded: boolean): void;
+}
+
+function canonicalProviderId(providerId: string): string {
+	return normalizeProviderId(providerId) ?? providerId;
 }
 
 function isExpandable(obj: unknown): obj is Expandable {
@@ -1874,7 +1883,7 @@ export class InteractiveMode {
 					this.settingsManager.removeMcpServer(name);
 				}
 			}
-			if (scratchConfig.args?.[0] && fs.existsSync(scratchConfig.args[0])) {
+			if (scratchConfig) {
 				this.settingsManager.setMcpServer("scratch", scratchConfig);
 			}
 			if (!existingMcpServers.blender) {
@@ -1889,7 +1898,7 @@ export class InteractiveMode {
 			this.footer.setSession(this.session);
 			this.ui.requestRender();
 		} catch (error) {
-			this.showWarning(`MCP otomatik baglanamadi: ${error instanceof Error ? error.message : String(error)}`);
+			this.showWarning(`MCP otomatik bağlanamadı: ${error instanceof Error ? error.message : String(error)}`);
 		}
 	}
 
@@ -3956,13 +3965,8 @@ export class InteractiveMode {
 			populateHistory: true,
 		});
 
-		// Show compaction info if session was compacted
-		const allEntries = this.sessionManager.getEntries();
-		const compactionCount = allEntries.filter((e) => e.type === "compaction").length;
-		if (compactionCount > 0) {
-			const times = compactionCount === 1 ? "1 time" : `${compactionCount} times`;
-			this.showStatus(`Oturum ${times} kez sikistirildi`);
-		}
+		// Compaction is already represented inline in the chat history.
+		// Avoid adding an extra status line so the session feels quieter and more corporate.
 	}
 
 	async getUserInput(): Promise<{ text: string; images?: ImageContent[] }> {
@@ -5361,13 +5365,13 @@ export class InteractiveMode {
 		let selectionError: string | undefined;
 		if (isUnknownModel(previousModel)) {
 			const availableModels = this.session.modelRegistry.getAvailable();
-			const providerModels = availableModels.filter((model) => model.provider === providerId);
-			if (!hasDefaultModelProvider(providerId)) {
+			const providerModels = availableModels.filter((model) => model.provider === canonicalProviderId(providerId));
+			if (!hasDefaultModelProvider(canonicalProviderId(providerId))) {
 				selectionError = `${actionLabel}, ancak "${providerId}" sağlayıcısı için varsayılan model yapılandırılmamış. Model seçmek için /models komutunu kullanın.`;
 			} else if (providerModels.length === 0) {
 				selectionError = `${actionLabel}, ancak bu sağlayıcı için kullanılabilir model yok. Model seçmek için /models komutunu kullanın.`;
 			} else {
-				const defaultModelId = defaultModelPerProvider[providerId];
+				const defaultModelId = defaultModelPerProvider[canonicalProviderId(providerId)];
 				selectedModel = providerModels.find((model) => model.id === defaultModelId);
 				if (!selectedModel) {
 					selectionError = `${actionLabel}, ancak varsayılan model "${defaultModelId}" mevcut değil. Model seçmek için /models komutunu kullanın.`;
@@ -5434,6 +5438,7 @@ export class InteractiveMode {
 	}
 
 	private async showApiKeyLoginDialog(providerId: string, providerName: string): Promise<void> {
+		const resolvedProviderId = canonicalProviderId(providerId);
 		const previousModel = this.session.model;
 
 		const dialog = new LoginDialogComponent(
@@ -5463,10 +5468,10 @@ export class InteractiveMode {
 				throw new Error("API anahtarı boş olamaz.");
 			}
 
-			this.session.modelRegistry.authStorage.set(providerId, { type: "api_key", key: apiKey });
+			this.session.modelRegistry.authStorage.set(resolvedProviderId, { type: "api_key", key: apiKey });
 
 			restoreEditor();
-			await this.completeProviderAuthentication(providerId, providerName, "api_key", previousModel);
+			await this.completeProviderAuthentication(resolvedProviderId, providerName, "api_key", previousModel);
 		} catch (error: unknown) {
 			restoreEditor();
 			const errorMsg = error instanceof Error ? error.message : String(error);
@@ -5481,9 +5486,10 @@ export class InteractiveMode {
 		providerName: string,
 		options?: { panelServer?: any },
 	): Promise<void> {
+		const resolvedProviderId = canonicalProviderId(providerId);
 		const providerInfo = this.session.modelRegistry.authStorage
 			.getOAuthProviders()
-			.find((provider) => provider.id === providerId);
+			.find((provider) => provider.id === resolvedProviderId);
 		const previousModel = this.session.model;
 
 		// Providers that use callback servers (can paste redirect URL)
@@ -5492,7 +5498,7 @@ export class InteractiveMode {
 		// Create login dialog component
 		const dialog = new LoginDialogComponent(
 			this.ui,
-			providerId,
+			resolvedProviderId,
 			(_success, _message) => {
 				// Completion handled below
 			},
@@ -5527,13 +5533,13 @@ export class InteractiveMode {
 		};
 
 		try {
-			await this.session.modelRegistry.authStorage.login(providerId as OAuthProviderId, {
+			await this.session.modelRegistry.authStorage.login(resolvedProviderId as OAuthProviderId, {
 				onAuth: (info: { url: string; instructions?: string }) => {
 					panelAuthUrl = info.url;
 					panelAuthInstructions = info.instructions;
 					if (options?.panelServer?.setAuthPanelOAuthEvent) {
 						options.panelServer.setAuthPanelOAuthEvent({
-							providerId,
+							providerId: resolvedProviderId,
 							providerName,
 							url: info.url,
 							instructions: info.instructions,
@@ -5550,7 +5556,7 @@ export class InteractiveMode {
 								info.instructions ||
 								"Tarayicida girisi tamamla; gerekirse yonlendirme URL'sini TUI'ya yapistir.";
 							options?.panelServer?.setAuthPanelOAuthEvent?.({
-								providerId,
+								providerId: resolvedProviderId,
 								providerName,
 								url: panelAuthUrl,
 								instructions: panelAuthInstructions,
@@ -5573,7 +5579,7 @@ export class InteractiveMode {
 									manualCodeReject = undefined;
 								}
 							});
-					} else if (providerId === "github-copilot") {
+					} else if (resolvedProviderId === "github-copilot") {
 						// GitHub Copilot polls after onAuth
 						dialog.showWaiting("Tarayıcı kimlik doğrulaması bekleniyor...");
 					}
@@ -5583,7 +5589,7 @@ export class InteractiveMode {
 				onPrompt: async (prompt: { message: string; placeholder?: string }) => {
 					if (usePanel) {
 						options?.panelServer?.setAuthPanelOAuthEvent?.({
-							providerId,
+							providerId: resolvedProviderId,
 							providerName,
 							url: panelAuthUrl,
 							instructions: prompt.message,
@@ -5597,7 +5603,7 @@ export class InteractiveMode {
 				onProgress: (message: string) => {
 					if (usePanel) {
 						options?.panelServer?.setAuthPanelOAuthEvent?.({
-							providerId,
+							providerId: resolvedProviderId,
 							providerName,
 							url: panelAuthUrl,
 							instructions: message,
@@ -5610,7 +5616,7 @@ export class InteractiveMode {
 				onInfo: (lines: string[]) => {
 					if (usePanel) {
 						options?.panelServer?.setAuthPanelOAuthEvent?.({
-							providerId,
+							providerId: resolvedProviderId,
 							providerName,
 							url: panelAuthUrl,
 							instructions: lines.join("\n"),
@@ -5629,20 +5635,20 @@ export class InteractiveMode {
 			// Success
 			if (usePanel) {
 				options?.panelServer?.setAuthPanelOAuthEvent?.({
-					providerId,
+					providerId: resolvedProviderId,
 					providerName,
 					status: "success",
 					instructions: `${providerName} login completed.`,
 				});
 			}
 			restoreEditor();
-			await this.completeProviderAuthentication(providerId, providerName, "oauth", previousModel);
+			await this.completeProviderAuthentication(resolvedProviderId, providerName, "oauth", previousModel);
 		} catch (error: unknown) {
 			restoreEditor();
 			const errorMsg = error instanceof Error ? error.message : String(error);
 			if (usePanel) {
 				options?.panelServer?.setAuthPanelOAuthEvent?.({
-					providerId,
+					providerId: resolvedProviderId,
 					providerName,
 					error: errorMsg,
 					status: "error",
@@ -5850,7 +5856,7 @@ export class InteractiveMode {
 		if (this.authPanelListenerRegistered || !server?.webUiAuthActionListeners) return;
 		this.authPanelListenerRegistered = true;
 		server.webUiAuthActionListeners.add(async (action: any) => {
-			const providerId = String(action?.providerId || "");
+			const providerId = canonicalProviderId(String(action?.providerId || ""));
 			const label = typeof action?.label === "string" ? action.label.trim() : undefined;
 			if (action?.action === "oauth_login") {
 				const option = this.getLoginProviderOptions("oauth").find((provider) => provider.id === providerId);
@@ -8218,15 +8224,22 @@ export class InteractiveMode {
 
 	private getBlenderMcpConfig() {
 		return {
-			command: "cmd",
-			args: ["/c", "uvx", "--python", "3.12", "blender-mcp"],
+			command: "uvx",
+			args: ["--python", "3.12", "blender-mcp"],
 			env: { DISABLE_TELEMETRY: "true", UV_PYTHON: "3.12" },
 			autoStart: false,
 		};
 	}
 
 	private getScratchMcpConfig() {
-		const scratchRoot = process.env.MOON_SCRATCH_MCP_ROOT || "C:\\Users\\ozenc\\OneDrive\\Desktop\\scmcp";
+		const candidateRoots = [
+			process.env.MOON_SCRATCH_MCP_ROOT,
+			path.join(process.cwd(), "scmcp"),
+			path.join(os.homedir(), "scmcp"),
+			path.join(getPackageDir(), "..", "..", "scmcp"),
+		].filter((root): root is string => typeof root === "string" && root.length > 0);
+		const scratchRoot = candidateRoots.find((root) => fs.existsSync(path.join(root, "server", "scratch-mcp.js")));
+		if (!scratchRoot) return undefined;
 		return {
 			command: "node",
 			args: [path.join(scratchRoot, "server", "scratch-mcp.js")],
@@ -8278,7 +8291,11 @@ export class InteractiveMode {
 				}
 				if (name === "scratch") {
 					const config = this.getScratchMcpConfig();
-					if (!fs.existsSync(config.args[0])) throw new Error(`Scratch MCP not found: ${config.args[0]}`);
+					if (!config) {
+						throw new Error(
+							"Scratch MCP not configured. Set MOON_SCRATCH_MCP_ROOT or place a scmcp folder next to the repo with server/scratch-mcp.js.",
+						);
+					}
 					await this.activateMcpServer("scratch", config);
 					return;
 				}

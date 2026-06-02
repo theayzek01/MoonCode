@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { performance } from "node:perf_hooks";
 import type { TUI } from "../tui.js";
 import { Text } from "./text.js";
 
@@ -10,7 +11,7 @@ export interface LoaderIndicatorOptions {
 }
 
 const DEFAULT_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
-const DEFAULT_INTERVAL_MS = 80;
+const DEFAULT_INTERVAL_MS = 60;
 
 /**
  * Loader component that updates with an optional spinning animation.
@@ -20,6 +21,7 @@ export class Loader extends Text {
 	private intervalMs = DEFAULT_INTERVAL_MS;
 	private currentFrame = 0;
 	private intervalId: NodeJS.Timeout | null = null;
+	private lastFrameAt = 0;
 	private ui: TUI | null = null;
 	private renderIndicatorVerbatim = false;
 
@@ -46,7 +48,7 @@ export class Loader extends Text {
 
 	stop(): void {
 		if (this.intervalId) {
-			clearInterval(this.intervalId);
+			clearTimeout(this.intervalId);
 			this.intervalId = null;
 		}
 	}
@@ -69,10 +71,21 @@ export class Loader extends Text {
 		if (this.frames.length <= 1) {
 			return;
 		}
-		this.intervalId = setInterval(() => {
+		this.lastFrameAt = performance.now();
+		const tick = () => {
+			this.intervalId = null;
 			this.currentFrame = (this.currentFrame + 1) % this.frames.length;
 			this.updateDisplay();
-		}, this.intervalMs);
+			if (this.frames.length <= 1) {
+				return;
+			}
+			const now = performance.now();
+			const elapsed = now - this.lastFrameAt;
+			this.lastFrameAt = now;
+			const delay = Math.max(0, this.intervalMs - elapsed);
+			this.intervalId = setTimeout(tick, delay);
+		};
+		this.intervalId = setTimeout(tick, this.intervalMs);
 	}
 
 	private updateDisplay(): void {

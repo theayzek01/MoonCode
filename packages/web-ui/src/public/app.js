@@ -1,4 +1,4 @@
-const PRESETS = {
+﻿const PRESETS = {
   brutalist: {
     hue: 35, sat: 95, light: 55,
     css: (h, s, l) => `/*
@@ -144,12 +144,12 @@ async function loadSession(id){
       const contentStr = textOf(e.message.content || e.message.text || e.message);
       if (role === 'tool') {
         return `<div class="msg system-msg">
-          <div class="role">Araç Sonucu</div>
+          <div class="role">Tool Result</div>
           <pre>${escapeHtml(contentStr)}</pre>
         </div>`;
       }
       const roleClass = role === 'user' ? 'user-msg' : 'assistant-msg';
-      const roleName = role === 'user' ? 'Kullanıcı' : 'MoonCode';
+      const roleName = role === 'user' ? 'User' : 'MoonCode';
       return `<div class="msg ${roleClass}">
         <div class="role">${roleName}</div>
         <pre>${escapeHtml(contentStr)}</pre>
@@ -157,7 +157,7 @@ async function loadSession(id){
     }
     if (e.type === 'toolCall') {
       return `<div class="msg system-msg">
-        <div class="role">Araç Çalıştırıldı: ${e.toolName}</div>
+        <div class="role">Tool Executed: ${e.toolName}</div>
         <pre>${escapeHtml(JSON.stringify(e.input, null, 2))}</pre>
       </div>`;
     }
@@ -198,28 +198,28 @@ function generatePrompt(preset, h, s, l, code) {
 
   const lines = [
     '======================================================================',
-    'MOONCODE DETAYLI TEMA UYGULAMA VE REFAKTÖR YÖNERGESİ (PREMIUM TASARIM SİSTEMİ)',
+    'MOONCODE DETAILED THEME APPLICATION AND REFACTORING BRIEF',
     '======================================================================',
     '',
-    'Hey MoonCode! Aşağıdaki renk kodlarını, HSL matrisini ve gelişmiş tasarım kurallarını baz alarak projemizin hem TUI (Terminal User Interface) hem de Web UI (Dashboard) arayüzlerini baştan aşağı yenilemeni istiyorum.',
+    'Hey MoonCode! Using the color palette, HSL matrix, and design rules below, refresh both the TUI (Terminal User Interface) and Web UI (Dashboard) across the project.',
     '',
-    'Seçilen Stil Şablonu: ' + preset.toUpperCase(),
-    'HSL Ayarları: Hue: ' + h + '°, Saturation: ' + s + '%, Lightness: ' + l + '%',
+    'Selected Style Preset: ' + preset.toUpperCase(),
+    'HSL Settings: Hue: ' + h + '°, Saturation: ' + s + '%, Lightness: ' + l + '%',
     '',
-    '[BİRİNCİL RENK PALETİ VE DEĞİŞKENLER]',
-    '- Arka Plan (Background): ' + bg,
-    '- Panel Rengi (Card/Surface): ' + panel,
-    '- Birincil Vurgu Rengi (Primary Accent): ' + primary,
-    '- İkincil Panel (Secondary BG): ' + secBg,
-    '- Kenarlık Çizgisi (Border/Divider): ' + border,
-    '- Yazı Rengi (Foreground): ' + fg,
-    '- İkincil Yazı Rengi (Muted Text): ' + muted,
-    '- Köşe Yumuşatma Çapı (Border Radius): ' + radius,
+    '[PRIMARY PALETTE AND VARIABLES]',
+    '- Background: ' + bg,
+    '- Card / Surface: ' + panel,
+    '- Primary Accent: ' + primary,
+    '- Secondary Background: ' + secBg,
+    '- Border / Divider: ' + border,
+    '- Foreground: ' + fg,
+    '- Muted Text: ' + muted,
+    '- Border Radius: ' + radius,
     '',
     '----------------------------------------------------------------------',
-    'ADIM 1: WEB ARAYÜZÜ (WEB CLIENT & NEXTJS & TAILWIND) ENTEGRASYONU',
+    'STEP 1: WEB UI INTEGRATION (WEB CLIENT & NEXTJS & TAILWIND)',
     '----------------------------------------------------------------------',
-    '1. Global CSS veya Tailwind Config dosyasına yukarıdaki renk değişkenlerini entegre et. CSS değişken tanımları şu şekilde olmalıdır:',
+    '1. Add the variables below to the global CSS or Tailwind config. The CSS variable map should look like this:',
     ':root {',
     '  --background: ' + bg + ';',
     '  --card: ' + panel + ';',
@@ -241,31 +241,30 @@ function generatePrompt(preset, h, s, l, code) {
     '  --radius: ' + radius + ';',
     '}',
     '',
-    '2. Arayüz elemanlarını (Sidebar, Chat Window, Settings Panels) bu renklerle eşleştir.',
-    '   - Tüm kartlar ve ana sohbet kutusu background-color: var(--card) ve border: 1px solid var(--border) ile sınırlandırılmalıdır.',
-    '   - Butonların hover efektlerinde var(--primary) renginin %10 daha koyu veya parlak versiyonunu kullan.',
-    '   - Aktif menü öğelerinin soluna veya altına 3px kalınlığında var(--primary) çizgisi ekle.',
+    '2. Map the interface elements (Sidebar, Chat Window, Settings Panels) to these colors.',
+    '   - All cards and the main chat panel should use background-color: var(--card) and border: 1px solid var(--border).',
+    '   - Use a slightly darker or brighter variation of var(--primary) for button hover states.',
+    '   - Add a 3px var(--primary) indicator to the left or bottom edge of active menu items.',
     '',
     '----------------------------------------------------------------------',
-    'ADIM 2: TUI (TERMINAL USER INTERFACE) GÖRSEL UYUMU',
+    'STEP 2: TUI VISUAL ALIGNMENT',
     '----------------------------------------------------------------------',
-    '1. Terminal ekranındaki monospace çizimlerin ve çerçevelerin renklerini güncelle.',
-    '2. TUI Footer (Alt durum çubuğu) bileşeninde (packages/cli/src/modes/interactive/components/footer.ts) yer alan durum etiketlerini ve model isimlerini bu birincil vurgu rengine göre boya.',
-    '3. Giriş satırındaki (input editor) cursor ve komut tamamlama (autocomplete) yazı renklerini bu temayla uyumlu hale getir.',
+    '1. Update the colors of monospace surfaces and borders in the terminal UI.',
+    '2. In the TUI footer component (packages/cli/src/modes/interactive/components/footer.ts), color status labels and model names using the primary accent.',
+    '3. Align the cursor and autocomplete colors in the input editor with this theme.',
     '',
     '----------------------------------------------------------------------',
-    'ADIM 3: PREMIUM DETAYLAR VE MİKRO-ETKİLEŞİMLER',
+    'STEP 3: PREMIUM DETAILS AND MICRO-INTERACTIONS',
     '----------------------------------------------------------------------',
-    "- Yazı tiplerini başlıklar için 'Outfit' veya 'Plus Jakarta Sans', kod blokları için ise 'JetBrains Mono' olarak ayarla.",
-    '- Kaydırma çubuklarını (Scrollbar) son derece ince (6px) yap. Kaydırma çubuğu thumb rengi var(--border) ile uyumlu olmalı, arka planı ise şeffaf kalmalıdır.',
-    '- Tüm input alanlarına focus olunduğunda 2px genişliğinde var(--ring) outline/shadow efekti uygula.',
+    "- Set heading fonts to 'Outfit' or 'Plus Jakarta Sans', and code blocks to 'JetBrains Mono'.",
+    '- Keep scrollbars very thin (6px). The thumb should match var(--border) and the track should remain transparent.',
+    '- Apply a 2px var(--ring) outline/shadow effect whenever an input receives focus.',
     '',
-    'Lütfen tüm bu değişiklikleri ilgili dosyalara (CSS, Tailwind dosyaları, CLI TUI dosyaları) en az kod değişikliğiyle ve mevcut çalışma mantığını bozmadan, son derece temiz ve profesyonel bir şekilde uygula. İşlem bittiğinde hangi dosyaları güncellediğini liste halinde bildir.',
+    'Apply these changes to the relevant files (CSS, Tailwind files, CLI TUI files) with the smallest possible code surface and without breaking the current flow. When finished, list the files you updated.',
   ];
 
   return lines.join(nl);
 }
-
 function updateTheme() {
   const h = $('#hue').value;
   const s = $('#sat').value;
@@ -330,7 +329,7 @@ document.querySelectorAll('.preset-btn').forEach(btn => {
 $('#copy-theme-btn').onclick = () => {
   navigator.clipboard.writeText($('#prompt-code').value);
   const originalText = $('#copy-theme-btn').textContent;
-  $('#copy-theme-btn').textContent = 'Kopyalandı!';
+  $('#copy-theme-btn').textContent = 'Copied!';
   setTimeout(() => {
     $('#copy-theme-btn').textContent = originalText;
   }, 1500);

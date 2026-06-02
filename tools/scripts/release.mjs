@@ -43,8 +43,12 @@ function run(cmd, options = {}) {
 }
 
 function getVersion() {
-	const pkg = JSON.parse(readFileSync("packages/ai/package.json", "utf-8"));
+	const pkg = JSON.parse(readFileSync("package.json", "utf-8"));
 	return pkg.version;
+}
+
+function getCurrentBranch() {
+	return run("git branch --show-current", { silent: true }).trim() || "main";
 }
 
 function compareVersions(a, b) {
@@ -189,7 +193,8 @@ console.log();
 
 // 8. Push
 console.log("Pushing to remote...");
-run("git push origin main");
+const branch = getCurrentBranch();
+run(`git push origin ${branch}`);
 run(`git push origin v${version}`);
 console.log();
 

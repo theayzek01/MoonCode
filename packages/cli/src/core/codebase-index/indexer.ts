@@ -1,11 +1,11 @@
 // @ts-nocheck
 
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readdirSync, readFileSync, type Stats, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { basename, extname, join, relative, resolve } from "node:path";
+import * as ts from "typescript";
 import { getEngineDir } from "../../config.js";
 
-// Desteklenen dosya uzantıları
 const CODE_EXTENSIONS = new Set([
 	".ts",
 	".tsx",
@@ -72,40 +72,39 @@ const IGNORE_DIRS = new Set([
 ]);
 
 const IGNORE_FILES = new Set(["package-lock.json", "yarn.lock", "pnpm-lock.yaml", ".DS_Store", "thumbs.db"]);
-
-// Chunk sabitleri
-const CHUNK_SIZE = 50; // satır - daha büyük chunk = daha az chunk = daha küçük index
+const CHUNK_SIZE = 50;
 const CHUNK_OVERLAP = 5;
 const MAX_FILE_SIZE = 512 * 1024;
-const MAX_FILES = 5000;
+const MAX_FILES = 8000;
+const SCHEMA_VERSION = 2;
 
-/** Disk'te saklanan hafif chunk - content YOK, sadece metadata + BM25 term frekansları */
 export interface CodeChunk {
 	filePath: string;
 	startLine: number;
 	endLine: number;
-	/** Çıkarılan sembol isimleri (fonksiyon, class, interface vs.) */
 	symbols: string[];
-	/** BM25 için term→frekans haritası (content saklanmıyor, token tasarrufu) */
 	tf: Record<string, number>;
-	/** Chunk'taki toplam token sayısı (BM25 dl parametresi) */
 	termCount: number;
 }
 
+export interface DependencyEdge {
+	from: string;
+	to: string;
+	type: "import" | "require" | "dynamic-import";
+}
+
 export interface CodebaseIndex {
+	schemaVersion: number;
 	projectHash: string;
 	timestamp: number;
 	fileCount: number;
 	chunkCount: number;
 	chunks: CodeChunk[];
+	dependencyEdges: DependencyEdge[];
 	fileTimestamps: Record<string, number>;
-	/** IDF tablosu: term → log((N - df + 0.5) / (df + 0.5)) */
 	idf: Record<string, number>;
-	/** Ortalama chunk term sayısı (BM25 avgdl) */
 	avgTermCount: number;
 }
-
-// ─── Tokenizer ────────────────────────────────────────────────────────────────
 
 const STOP_WORDS = new Set([
 	"the",
@@ -162,99 +161,39 @@ export function tokenize(text: string): string[] {
 		.toLowerCase()
 		.replace(/[^a-z0-9_]/g, " ")
 		.split(/\s+/)
-		.filter((t) => t.length > 1 && !STOP_WORDS.has(t));
+		.filter((token) => token.length > 1 && !STOP_WORDS.has(token));
 
-	// camelCase + snake_case expand
 	const expanded: string[] = [];
-	for (const t of raw) {
-		expanded.push(t);
-		const camel = t
-			.replace(/([a-z])([A-Z])/g, "$1 $2")
-			.toLowerCase()
-			.split(" ");
+	for (const token of raw) {
+		expanded.push(token);
+		const camel = token.replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase().split(" ");
 		if (camel.length > 1) expanded.push(...camel);
-		const snake = t.split("_").filter(Boolean);
+		const snake = token.split("_").filter(Boolean);
 		if (snake.length > 1) expanded.push(...snake);
 	}
-	return [...new Set(expanded)].filter((t) => t.length > 1 && !STOP_WORDS.has(t));
+	return [...new Set(expanded)].filter((token) => token.length > 1 && !STOP_WORDS.has(token));
 }
 
 function buildTF(tokens: string[]): { tf: Record<string, number>; termCount: number } {
 	const tf: Record<string, number> = {};
-	for (const t of tokens) {
-		tf[t] = (tf[t] ?? 0) + 1;
-	}
+	for (const token of tokens) tf[token] = (tf[token] ?? 0) + 1;
 	return { tf, termCount: tokens.length };
 }
 
-// ─── Symbol extraction ────────────────────────────────────────────────────────
-
-function extractSymbols(content: string, ext: string): string[] {
-	const symbols: string[] = [];
-	const lines = content.split("\n");
-
-	for (const line of lines) {
-		const trimmed = line.trim();
-
-		if ([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"].includes(ext)) {
-			const fnMatch = trimmed.match(/(?:export\s+)?(?:async\s+)?function\s+(\w+)/);
-			if (fnMatch) symbols.push(fnMatch[1]);
-			const classMatch = trimmed.match(/(?:export\s+)?class\s+(\w+)/);
-			if (classMatch) symbols.push(classMatch[1]);
-			const ifMatch = trimmed.match(/(?:export\s+)?(?:interface|type)\s+(\w+)/);
-			if (ifMatch) symbols.push(ifMatch[1]);
-			const constMatch = trimmed.match(/(?:export\s+)?(?:const|let|var)\s+(\w+)/);
-			if (constMatch) symbols.push(constMatch[1]);
-			const methodMatch = trimmed.match(/^\s*(?:async\s+)?(\w+)\s*\(/);
-			if (
-				methodMatch &&
-				!["if", "for", "while", "switch", "catch", "return", "new", "throw"].includes(methodMatch[1])
-			) {
-				symbols.push(methodMatch[1]);
-			}
-		}
-
-		if (ext === ".py") {
-			const pyFnMatch = trimmed.match(/^(?:async\s+)?def\s+(\w+)/);
-			if (pyFnMatch) symbols.push(pyFnMatch[1]);
-			const pyClassMatch = trimmed.match(/^class\s+(\w+)/);
-			if (pyClassMatch) symbols.push(pyClassMatch[1]);
-		}
-
-		if (ext === ".go") {
-			const goFnMatch = trimmed.match(/^func\s+(?:\(\w+\s+\*?\w+\)\s+)?(\w+)/);
-			if (goFnMatch) symbols.push(goFnMatch[1]);
-			const goTypeMatch = trimmed.match(/^type\s+(\w+)/);
-			if (goTypeMatch) symbols.push(goTypeMatch[1]);
-		}
-
-		if (ext === ".rs") {
-			const rsFnMatch = trimmed.match(/^(?:pub\s+)?(?:async\s+)?fn\s+(\w+)/);
-			if (rsFnMatch) symbols.push(rsFnMatch[1]);
-			const rsStructMatch = trimmed.match(/^(?:pub\s+)?struct\s+(\w+)/);
-			if (rsStructMatch) symbols.push(rsStructMatch[1]);
-		}
-	}
-
-	return [...new Set(symbols)];
-}
-
-// ─── Gitignore ────────────────────────────────────────────────────────────────
-
 function loadGitignorePatterns(cwd: string): string[] {
-	const gitignorePath = join(cwd, ".gitignore");
-	if (!existsSync(gitignorePath)) return [];
+	const path = join(cwd, ".gitignore");
+	if (!existsSync(path)) return [];
 	try {
-		return readFileSync(gitignorePath, "utf-8")
+		return readFileSync(path, "utf-8")
 			.split("\n")
-			.map((l) => l.trim())
-			.filter((l) => l && !l.startsWith("#"));
+			.map((line) => line.trim())
+			.filter((line) => line && !line.startsWith("#"));
 	} catch {
 		return [];
 	}
 }
 
-function shouldIgnorePath(relativePath: string, gitignorePatterns: string[]): boolean {
+function shouldIgnorePath(relativePath: string, patterns: string[]): boolean {
 	const parts = relativePath.split(/[/\\]/);
 	for (const part of parts) {
 		if (IGNORE_DIRS.has(part)) return true;
@@ -262,7 +201,7 @@ function shouldIgnorePath(relativePath: string, gitignorePatterns: string[]): bo
 	const fileName = basename(relativePath);
 	if (IGNORE_FILES.has(fileName)) return true;
 	if (fileName.startsWith(".")) return true;
-	for (const pattern of gitignorePatterns) {
+	for (const pattern of patterns) {
 		const clean = pattern.replace(/\/$/, "");
 		if (parts.includes(clean)) return true;
 		if (fileName === clean) return true;
@@ -270,12 +209,10 @@ function shouldIgnorePath(relativePath: string, gitignorePatterns: string[]): bo
 	return false;
 }
 
-// ─── File collection ──────────────────────────────────────────────────────────
-
-function collectFiles(cwd: string, gitignorePatterns: string[]): string[] {
+function collectFiles(cwd: string, patterns: string[]): string[] {
 	const files: string[] = [];
 
-	function walk(dir: string) {
+	function walk(dir: string): void {
 		if (files.length >= MAX_FILES) return;
 		let entries: string[];
 		try {
@@ -287,11 +224,10 @@ function collectFiles(cwd: string, gitignorePatterns: string[]): string[] {
 		for (const entry of entries) {
 			if (files.length >= MAX_FILES) return;
 			const fullPath = join(dir, entry);
-			const rel = relative(cwd, fullPath);
+			const relPath = relative(cwd, fullPath);
+			if (shouldIgnorePath(relPath, patterns)) continue;
 
-			if (shouldIgnorePath(rel, gitignorePatterns)) continue;
-
-			let stat: Stats;
+			let stat;
 			try {
 				stat = statSync(fullPath);
 			} catch {
@@ -300,13 +236,14 @@ function collectFiles(cwd: string, gitignorePatterns: string[]): string[] {
 
 			if (stat.isDirectory()) {
 				walk(fullPath);
-			} else if (stat.isFile()) {
-				if (stat.size > MAX_FILE_SIZE) continue;
-				const ext = extname(entry).toLowerCase();
-				if (!ext && !["dockerfile", "makefile", "rakefile", "gemfile"].includes(entry.toLowerCase())) continue;
-				if (ext && !CODE_EXTENSIONS.has(ext)) continue;
-				files.push(fullPath);
+				continue;
 			}
+
+			if (!stat.isFile() || stat.size > MAX_FILE_SIZE) continue;
+			const ext = extname(entry).toLowerCase();
+			if (!ext && !["dockerfile", "makefile", "rakefile", "gemfile"].includes(entry.toLowerCase())) continue;
+			if (ext && !CODE_EXTENSIONS.has(ext)) continue;
+			files.push(fullPath);
 		}
 	}
 
@@ -314,37 +251,132 @@ function collectFiles(cwd: string, gitignorePatterns: string[]): string[] {
 	return files;
 }
 
-// ─── Chunking (content'siz - sadece TF vektörü) ──────────────────────────────
+function addUnique(list: string[], seen: Set<string>, value: string | undefined): void {
+	if (!value) return;
+	const trimmed = value.trim();
+	if (!trimmed || seen.has(trimmed)) return;
+	seen.add(trimmed);
+	list.push(trimmed);
+}
 
-function chunkFile(filePath: string, cwd: string): CodeChunk[] {
+function extractTypeScriptFacts(content: string, filePath: string): { symbols: string[]; dependencies: DependencyEdge[] } {
+	const symbols: string[] = [];
+	const seen = new Set<string>();
+	const dependencies: DependencyEdge[] = [];
+	const sourceFile = ts.createSourceFile(filePath, content, ts.ScriptTarget.Latest, true);
+
+	const visit = (node: ts.Node): void => {
+		if (ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node) || ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node)) {
+			addUnique(symbols, seen, node.name?.text);
+		} else if (ts.isEnumDeclaration(node)) {
+			addUnique(symbols, seen, node.name.text);
+		} else if (ts.isVariableStatement(node)) {
+			for (const decl of node.declarationList.declarations) {
+				if (ts.isIdentifier(decl.name)) addUnique(symbols, seen, decl.name.text);
+			}
+		} else if (ts.isMethodDeclaration(node) || ts.isMethodSignature(node)) {
+			if (node.name && ts.isIdentifier(node.name)) addUnique(symbols, seen, node.name.text);
+		} else if (ts.isImportDeclaration(node)) {
+			if (ts.isStringLiteral(node.moduleSpecifier)) {
+				dependencies.push({ from: filePath, to: node.moduleSpecifier.text, type: "import" });
+			}
+			const clause = node.importClause;
+			if (clause?.name) addUnique(symbols, seen, clause.name.text);
+			if (clause?.namedBindings && ts.isNamedImports(clause.namedBindings)) {
+				for (const element of clause.namedBindings.elements) {
+					addUnique(symbols, seen, element.name.text);
+				}
+			}
+		} else if (ts.isCallExpression(node)) {
+			const callee = node.expression.getText(sourceFile);
+			const arg = node.arguments[0];
+			if (callee === "require" && arg && ts.isStringLiteral(arg)) {
+				dependencies.push({ from: filePath, to: arg.text, type: "require" });
+			}
+		}
+
+		if (ts.isCallExpression(node) && node.expression.kind === ts.SyntaxKind.ImportKeyword) {
+			const arg = node.arguments[0];
+			if (arg && ts.isStringLiteral(arg)) {
+				dependencies.push({ from: filePath, to: arg.text, type: "dynamic-import" });
+			}
+		}
+
+		ts.forEachChild(node, visit);
+	};
+
+	visit(sourceFile);
+	return { symbols, dependencies };
+}
+
+function extractFallbackSymbols(content: string, ext: string): string[] {
+	const symbols: string[] = [];
+	const lines = content.split("\n");
+
+	for (const line of lines) {
+		const trimmed = line.trim();
+		if (ext === ".py") {
+			const fnMatch = trimmed.match(/^(?:async\s+)?def\s+(\w+)/);
+			if (fnMatch) symbols.push(fnMatch[1]);
+			const classMatch = trimmed.match(/^class\s+(\w+)/);
+			if (classMatch) symbols.push(classMatch[1]);
+		} else if (ext === ".go") {
+			const fnMatch = trimmed.match(/^func\s+(?:\(\w+\s+\*?\w+\)\s+)?(\w+)/);
+			if (fnMatch) symbols.push(fnMatch[1]);
+			const typeMatch = trimmed.match(/^type\s+(\w+)/);
+			if (typeMatch) symbols.push(typeMatch[1]);
+		} else if (ext === ".rs") {
+			const fnMatch = trimmed.match(/^(?:pub\s+)?(?:async\s+)?fn\s+(\w+)/);
+			if (fnMatch) symbols.push(fnMatch[1]);
+			const structMatch = trimmed.match(/^(?:pub\s+)?struct\s+(\w+)/);
+			if (structMatch) symbols.push(structMatch[1]);
+		}
+	}
+
+	return [...new Set(symbols)];
+}
+
+function extractSymbolsAndDependencies(content: string, filePath: string): { symbols: string[]; dependencies: DependencyEdge[] } {
+	const ext = extname(filePath).toLowerCase();
+	if ([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".vue", ".svelte", ".astro"].includes(ext)) {
+		const facts = extractTypeScriptFacts(content, filePath);
+		return {
+			symbols: [...new Set([...facts.symbols, ...extractFallbackSymbols(content, ext)])],
+			dependencies: facts.dependencies,
+		};
+	}
+	return { symbols: extractFallbackSymbols(content, ext), dependencies: [] };
+}
+
+function chunkFile(filePath: string, cwd: string): { chunks: CodeChunk[]; dependencies: DependencyEdge[] } {
 	let content: string;
 	try {
 		content = readFileSync(filePath, "utf-8");
 	} catch {
-		return [];
+		return { chunks: [], dependencies: [] };
 	}
 
 	const lines = content.split("\n");
-	if (lines.length === 0) return [];
+	if (lines.length === 0) return { chunks: [], dependencies: [] };
 
-	const ext = extname(filePath).toLowerCase();
 	const relPath = relative(cwd, filePath).replace(/\\/g, "/");
+	const ext = extname(filePath).toLowerCase();
+	const facts = extractSymbolsAndDependencies(content, filePath);
 	const chunks: CodeChunk[] = [];
 
 	const makeChunk = (start: number, end: number): CodeChunk => {
-		const chunkLines = lines.slice(start, end);
-		const chunkContent = chunkLines.join("\n");
-		const symbols = extractSymbols(chunkContent, ext);
-		const tokens = tokenize(chunkContent);
-		// symbol'leri token olarak da ekle - arama doğruluğunu artırır
-		for (const sym of symbols) tokens.push(sym.toLowerCase());
-		const { tf, termCount } = buildTF(tokens);
-		return { filePath: relPath, startLine: start + 1, endLine: end, symbols, tf, termCount };
+		const chunkText = lines.slice(start, end).join("\n");
+		const chunkTokens = tokenize(chunkText);
+		for (const symbol of facts.symbols) chunkTokens.push(symbol.toLowerCase());
+		const imports = facts.dependencies.map((edge) => edge.to.toLowerCase().replace(/[^a-z0-9_]/g, " "));
+		for (const dep of imports) chunkTokens.push(...tokenize(dep));
+		const { tf, termCount } = buildTF(chunkTokens);
+		return { filePath: relPath, startLine: start + 1, endLine: end, symbols: facts.symbols, tf, termCount };
 	};
 
 	if (lines.length <= CHUNK_SIZE * 1.5) {
 		chunks.push(makeChunk(0, lines.length));
-		return chunks;
+		return { chunks, dependencies: facts.dependencies };
 	}
 
 	for (let i = 0; i < lines.length; i += CHUNK_SIZE - CHUNK_OVERLAP) {
@@ -354,28 +386,24 @@ function chunkFile(filePath: string, cwd: string): CodeChunk[] {
 		if (end >= lines.length) break;
 	}
 
-	return chunks;
+	return { chunks, dependencies: facts.dependencies };
 }
 
-// ─── IDF computation ──────────────────────────────────────────────────────────
-
 function buildIDF(chunks: CodeChunk[]): Record<string, number> {
-	const N = chunks.length;
-	const df: Record<string, number> = {};
+	const total = chunks.length;
+	const documentFrequency: Record<string, number> = {};
 	for (const chunk of chunks) {
 		for (const term of Object.keys(chunk.tf)) {
-			df[term] = (df[term] ?? 0) + 1;
+			documentFrequency[term] = (documentFrequency[term] ?? 0) + 1;
 		}
 	}
+
 	const idf: Record<string, number> = {};
-	for (const [term, freq] of Object.entries(df)) {
-		// BM25 IDF formülü
-		idf[term] = Math.log((N - freq + 0.5) / (freq + 0.5) + 1);
+	for (const [term, frequency] of Object.entries(documentFrequency)) {
+		idf[term] = Math.log((total - frequency + 0.5) / (frequency + 0.5) + 1);
 	}
 	return idf;
 }
-
-// ─── Index paths ──────────────────────────────────────────────────────────────
 
 function getProjectHash(cwd: string): string {
 	return createHash("md5").update(resolve(cwd)).digest("hex").slice(0, 12);
@@ -387,67 +415,67 @@ function getIndexPath(cwd: string): string {
 	return join(indexDir, `${getProjectHash(cwd)}.json`);
 }
 
-// ─── Public API ───────────────────────────────────────────────────────────────
-
 export function loadCachedIndex(cwd: string): CodebaseIndex | null {
 	const indexPath = getIndexPath(cwd);
 	if (!existsSync(indexPath)) return null;
 	try {
-		const raw = readFileSync(indexPath, "utf-8");
-		return JSON.parse(raw) as CodebaseIndex;
+		return JSON.parse(readFileSync(indexPath, "utf-8")) as CodebaseIndex;
 	} catch {
 		return null;
 	}
 }
 
-/** Incremental build: sadece değişen dosyaları yeniden indexle */
 export function buildIndex(cwd: string, force = false): CodebaseIndex {
-	const gitignorePatterns = loadGitignorePatterns(cwd);
-	const files = collectFiles(cwd, gitignorePatterns);
+	const patterns = loadGitignorePatterns(cwd);
+	const files = collectFiles(cwd, patterns);
 	const projectHash = getProjectHash(cwd);
-
 	const cached = force ? null : loadCachedIndex(cwd);
-	const oldTimestamps = cached?.fileTimestamps ?? {};
-	const oldChunksByFile = new Map<string, CodeChunk[]>();
+	const cachedTimestamps = cached?.fileTimestamps ?? {};
+	const cachedChunksByFile = new Map<string, CodeChunk[]>();
+	const dependencyEdges: DependencyEdge[] = [];
 
 	if (cached) {
 		for (const chunk of cached.chunks) {
-			const existing = oldChunksByFile.get(chunk.filePath) ?? [];
-			existing.push(chunk);
-			oldChunksByFile.set(chunk.filePath, existing);
+			const list = cachedChunksByFile.get(chunk.filePath) ?? [];
+			list.push(chunk);
+			cachedChunksByFile.set(chunk.filePath, list);
 		}
 	}
 
 	const newTimestamps: Record<string, number> = {};
-	const allChunks: CodeChunk[] = [];
+	const chunks: CodeChunk[] = [];
 
 	for (const file of files) {
 		const relPath = relative(cwd, file).replace(/\\/g, "/");
-		let mtime: number;
+		let mtimeMs = 0;
 		try {
-			mtime = statSync(file).mtimeMs;
+			mtimeMs = statSync(file).mtimeMs;
 		} catch {
 			continue;
 		}
-		newTimestamps[relPath] = mtime;
+		newTimestamps[relPath] = mtimeMs;
 
-		if (!force && oldTimestamps[relPath] === mtime && oldChunksByFile.has(relPath)) {
-			allChunks.push(...oldChunksByFile.get(relPath)!);
-		} else {
-			allChunks.push(...chunkFile(file, cwd));
+		if (!force && cachedTimestamps[relPath] === mtimeMs && cachedChunksByFile.has(relPath)) {
+			chunks.push(...(cachedChunksByFile.get(relPath) ?? []));
+			continue;
 		}
+
+		const result = chunkFile(file, cwd);
+		chunks.push(...result.chunks);
+		dependencyEdges.push(...result.dependencies);
 	}
 
-	// IDF ve avgdl hesapla
-	const idf = buildIDF(allChunks);
-	const avgTermCount = allChunks.length > 0 ? allChunks.reduce((s, c) => s + c.termCount, 0) / allChunks.length : 1;
+	const idf = buildIDF(chunks);
+	const avgTermCount = chunks.length > 0 ? chunks.reduce((sum, chunk) => sum + chunk.termCount, 0) / chunks.length : 1;
 
 	const index: CodebaseIndex = {
+		schemaVersion: SCHEMA_VERSION,
 		projectHash,
 		timestamp: Date.now(),
 		fileCount: files.length,
-		chunkCount: allChunks.length,
-		chunks: allChunks,
+		chunkCount: chunks.length,
+		chunks,
+		dependencyEdges,
 		fileTimestamps: newTimestamps,
 		idf,
 		avgTermCount,
@@ -456,7 +484,7 @@ export function buildIndex(cwd: string, force = false): CodebaseIndex {
 	try {
 		writeFileSync(getIndexPath(cwd), JSON.stringify(index), "utf-8");
 	} catch {
-		// sessizce geç
+		// best-effort cache
 	}
 
 	return index;
@@ -464,7 +492,7 @@ export function buildIndex(cwd: string, force = false): CodebaseIndex {
 
 export function getIndexStats(
 	cwd: string,
-): { indexed: boolean; fileCount: number; chunkCount: number; ageMs: number } | null {
+): { indexed: boolean; fileCount: number; chunkCount: number; ageMs: number; schemaVersion?: number } | null {
 	const cached = loadCachedIndex(cwd);
 	if (!cached) return null;
 	return {
@@ -472,5 +500,6 @@ export function getIndexStats(
 		fileCount: cached.fileCount,
 		chunkCount: cached.chunkCount,
 		ageMs: Date.now() - cached.timestamp,
+		schemaVersion: cached.schemaVersion,
 	};
 }

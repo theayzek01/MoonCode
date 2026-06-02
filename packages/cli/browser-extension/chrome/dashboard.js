@@ -1,4 +1,6 @@
 const HIGHLIGHT_CAPS = new Set(["evaluate","canvas_draw","canvas_design","block_code","screenshot","persistent_ui"]);
+const manifest = chrome.runtime.getManifest();
+const EXTENSION_VERSION = manifest.version_name || manifest.version || "dev";
 
 function timeSince(ts) {
   if (!ts) return "—";
@@ -15,7 +17,9 @@ function refresh() {
     const grid         = document.getElementById("nodes-grid");
     const activeNodesEl = document.getElementById("active-nodes");
     const totalClientsEl = document.getElementById("total-clients");
+    const versionEl = document.getElementById("dashboard-version");
 
+    if (versionEl) versionEl.textContent = EXTENSION_VERSION;
     const activeConns = response.connections.filter(c => c.status === "connected");
     activeNodesEl.textContent  = activeConns.length;
     totalClientsEl.textContent = response.totalClients || 0;

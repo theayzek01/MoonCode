@@ -34,6 +34,22 @@ export type AuthCredential = ApiKeyCredential | OAuthCredential;
 
 export type AuthStorageData = Record<string, AuthCredential>;
 
+const AUTH_PROVIDER_ALIASES: Record<string, string> = {
+	codex: "openai-codex",
+};
+
+function normalizeAuthProviderId(provider: string): string {
+	return AUTH_PROVIDER_ALIASES[provider.toLowerCase()] ?? provider;
+}
+
+function normalizeAuthStorageData(data: AuthStorageData): AuthStorageData {
+	const normalized: AuthStorageData = {};
+	for (const [provider, credential] of Object.entries(data)) {
+		normalized[normalizeAuthProviderId(provider)] = credential;
+	}
+	return normalized;
+}
+
 export type ManagedAuthAccount = {
 	id: string;
 	provider: string;
@@ -239,12 +255,24 @@ export class AuthStorage {
 				return { accounts: [], activeByProvider: {} };
 			}
 			const parsed = JSON.parse(readFileSync(this.accountsPath, "utf-8")) as Partial<AuthAccountsFile>;
+			const accounts = Array.isArray(parsed.accounts)
+				? (parsed.accounts as ManagedAuthAccount[]).map((account) => ({
+						...account,
+						provider: normalizeAuthProviderId(account.provider),
+					}))
+				: [];
+			const activeByProvider =
+				parsed.activeByProvider && typeof parsed.activeByProvider === "object"
+					? Object.fromEntries(
+							Object.entries(parsed.activeByProvider as Record<string, string>).map(([provider, accountId]) => [
+								normalizeAuthProviderId(provider),
+								accountId,
+							]),
+						)
+					: {};
 			return {
-				accounts: Array.isArray(parsed.accounts) ? (parsed.accounts as ManagedAuthAccount[]) : [],
-				activeByProvider:
-					parsed.activeByProvider && typeof parsed.activeByProvider === "object"
-						? (parsed.activeByProvider as Record<string, string>)
-						: {},
+				accounts,
+				activeByProvider,
 			};
 		} catch (error) {
 			this.recordError(error);
@@ -332,24 +360,26 @@ export class AuthStorage {
 		if (!account) {
 			return undefined;
 		}
-		file.activeByProvider[account.provider] = account.id;
-		this.data[account.provider] = account.credential;
-		this.persistProviderChange(account.provider, account.credential);
+		const provider = normalizeAuthProviderId(account.provider);
+		file.activeByProvider[provider] = account.id;
+		this.data[provider] = account.credential;
+		this.persistProviderChange(provider, account.credential);
 		this.writeAccountsFile(file);
 		return { ...account, active: true };
 	}
 
 	activateNextManagedAccount(provider: string): ManagedAuthAccount | undefined {
+		const normalizedProvider = normalizeAuthProviderId(provider);
 		const file = this.readAccountsFile();
-		const providerAccounts = file.accounts.filter((account) => account.provider === provider);
+		const providerAccounts = file.accounts.filter((account) => account.provider === normalizedProvider);
 		if (providerAccounts.length === 0) return undefined;
-		const activeId = file.activeByProvider[provider];
+		const activeId = file.activeByProvider[normalizedProvider];
 		const activeIndex = providerAccounts.findIndex((account) => account.id === activeId);
 		const next = providerAccounts[(activeIndex + 1 + providerAccounts.length) % providerAccounts.length];
 		if (!next || next.id === activeId) return undefined;
-		file.activeByProvider[provider] = next.id;
-		this.data[provider] = next.credential;
-		this.persistProviderChange(provider, next.credential);
+		file.activeByProvider[normalizedProvider] = next.id;
+		this.data[normalizedProvider] = next.credential;
+		this.persistProviderChange(normalizedProvider, next.credential);
 		this.writeAccountsFile(file);
 		return { ...next, active: true };
 	}
@@ -368,8 +398,9 @@ export class AuthStorage {
 	}
 
 	private markManagedAccountUsed(provider: string): void {
+		const normalizedProvider = normalizeAuthProviderId(provider);
 		const file = this.readAccountsFile();
-		const activeId = file.activeByProvider[provider];
+		const activeId = file.activeByProvider[normalizedProvider];
 		if (!activeId) return;
 		const index = file.accounts.findIndex((account) => account.id === activeId);
 		if (index < 0) return;
@@ -386,14 +417,14 @@ export class AuthStorage {
 	 * Used for CLI --api-key flag.
 	 */
 	setRuntimeApiKey(provider: string, apiKey: string): void {
-		this.runtimeOverrides.set(provider, apiKey);
+		this.runtimeOverrides.set(normalizeAuthProviderId(provider), apiKey);
 	}
 
 	/**
 	 * Remove a runtime API key override.
 	 */
 	removeRuntimeApiKey(provider: string): void {
-		this.runtimeOverrides.delete(provider);
+		this.runtimeOverrides.delete(normalizeAuthProviderId(provider));
 	}
 
 	/**
@@ -413,7 +444,7 @@ export class AuthStorage {
 		if (!content) {
 			return {};
 		}
-		return JSON.parse(content) as AuthStorageData;
+		return normalizeAuthStorageData(JSON.parse(content) as AuthStorageData);
 	}
 
 	/**
@@ -435,6 +466,7 @@ export class AuthStorage {
 	}
 
 	private persistProviderChange(provider: string, credential: AuthCredential | undefined): void {
+		const normalizedProvider = normalizeAuthProviderId(provider);
 		if (this.loadError) {
 			return;
 		}
@@ -444,9 +476,9 @@ export class AuthStorage {
 				const currentData = this.parseStorageData(current);
 				const merged: AuthStorageData = { ...currentData };
 				if (credential) {
-					merged[provider] = credential;
+					merged[normalizedProvider] = credential;
 				} else {
-					delete merged[provider];
+					delete merged[normalizedProvider];
 				}
 				return { result: undefined, next: JSON.stringify(merged, null, 2) };
 			});
@@ -459,24 +491,26 @@ export class AuthStorage {
 	 * Get credential for a provider.
 	 */
 	get(provider: string): AuthCredential | undefined {
-		return this.data[provider] ?? undefined;
+		return this.data[normalizeAuthProviderId(provider)] ?? undefined;
 	}
 
 	/**
 	 * Set credential for a provider.
 	 */
 	set(provider: string, credential: AuthCredential): void {
-		this.data[provider] = credential;
-		this.persistProviderChange(provider, credential);
-		this.upsertManagedAccount(provider, credential, { activate: true });
+		const normalizedProvider = normalizeAuthProviderId(provider);
+		this.data[normalizedProvider] = credential;
+		this.persistProviderChange(normalizedProvider, credential);
+		this.upsertManagedAccount(normalizedProvider, credential, { activate: true });
 	}
 
 	/**
 	 * Remove credential for a provider.
 	 */
 	remove(provider: string): void {
-		delete this.data[provider];
-		this.persistProviderChange(provider, undefined);
+		const normalizedProvider = normalizeAuthProviderId(provider);
+		delete this.data[normalizedProvider];
+		this.persistProviderChange(normalizedProvider, undefined);
 	}
 
 	/**
@@ -490,7 +524,7 @@ export class AuthStorage {
 	 * Check if credentials exist for a provider in auth.json.
 	 */
 	has(provider: string): boolean {
-		return provider in this.data;
+		return normalizeAuthProviderId(provider) in this.data;
 	}
 
 	/**
@@ -498,10 +532,11 @@ export class AuthStorage {
 	 * Unlike getApiKey(), this doesn't refresh OAuth tokens.
 	 */
 	hasAuth(provider: string): boolean {
-		if (this.runtimeOverrides.has(provider)) return true;
-		if (this.data[provider]) return true;
-		if (getEnvApiKey(provider)) return true;
-		if (this.fallbackResolver?.(provider)) return true;
+		const normalizedProvider = normalizeAuthProviderId(provider);
+		if (this.runtimeOverrides.has(normalizedProvider)) return true;
+		if (this.data[normalizedProvider]) return true;
+		if (getEnvApiKey(normalizedProvider)) return true;
+		if (this.fallbackResolver?.(normalizedProvider)) return true;
 		return false;
 	}
 
@@ -509,20 +544,21 @@ export class AuthStorage {
 	 * Return auth status without exposing credential values or refreshing tokens.
 	 */
 	getAuthStatus(provider: string): AuthStatus {
-		if (this.data[provider]) {
+		const normalizedProvider = normalizeAuthProviderId(provider);
+		if (this.data[normalizedProvider]) {
 			return { configured: true, source: "stored" };
 		}
 
-		if (this.runtimeOverrides.has(provider)) {
+		if (this.runtimeOverrides.has(normalizedProvider)) {
 			return { configured: false, source: "runtime", label: "--api-key" };
 		}
 
-		const envKeys = findEnvKeys(provider);
+		const envKeys = findEnvKeys(normalizedProvider);
 		if (envKeys?.[0]) {
 			return { configured: false, source: "environment", label: envKeys[0] };
 		}
 
-		if (this.fallbackResolver?.(provider)) {
+		if (this.fallbackResolver?.(normalizedProvider)) {
 			return { configured: false, source: "fallback", label: "custom provider config" };
 		}
 
@@ -546,21 +582,22 @@ export class AuthStorage {
 	 * Login to an OAuth provider.
 	 */
 	async login(providerId: OAuthProviderId, callbacks: OAuthLoginCallbacks): Promise<void> {
-		const provider = getOAuthProvider(providerId);
+		const normalizedProviderId = normalizeAuthProviderId(providerId);
+		const provider = getOAuthProvider(normalizedProviderId);
 		if (!provider) {
 			throw new Error(`Unknown OAuth provider: ${providerId}`);
 		}
 
 		const credentials = await provider.login(callbacks);
 		const credential: AuthCredential = { type: "oauth", ...credentials };
-		this.set(providerId, credential);
+		this.set(normalizedProviderId, credential);
 	}
 
 	/**
 	 * Logout from a provider.
 	 */
 	logout(provider: string): void {
-		this.remove(provider);
+		this.remove(normalizeAuthProviderId(provider));
 	}
 
 	/**
@@ -570,7 +607,8 @@ export class AuthStorage {
 	private async refreshOAuthTokenWithLock(
 		providerId: OAuthProviderId,
 	): Promise<{ apiKey: string; newCredentials: OAuthCredentials } | null> {
-		const provider = getOAuthProvider(providerId);
+		const normalizedProviderId = normalizeAuthProviderId(providerId);
+		const provider = getOAuthProvider(normalizedProviderId);
 		if (!provider) {
 			return null;
 		}
@@ -580,7 +618,7 @@ export class AuthStorage {
 			this.data = currentData;
 			this.loadError = null;
 
-			const cred = currentData[providerId];
+			const cred = currentData[normalizedProviderId];
 			if (cred?.type !== "oauth") {
 				return { result: null };
 			}
@@ -596,14 +634,14 @@ export class AuthStorage {
 				}
 			}
 
-			const refreshed = await getOAuthApiKey(providerId, oauthCreds);
+			const refreshed = await getOAuthApiKey(normalizedProviderId, oauthCreds);
 			if (!refreshed) {
 				return { result: null };
 			}
 
 			const merged: AuthStorageData = {
 				...currentData,
-				[providerId]: { type: "oauth", ...refreshed.newCredentials },
+				[normalizedProviderId]: { type: "oauth", ...refreshed.newCredentials },
 			};
 			this.data = merged;
 			this.loadError = null;
@@ -623,22 +661,23 @@ export class AuthStorage {
 	 * 5. Fallback resolver (models.json custom providers)
 	 */
 	async getApiKey(providerId: string, options?: { includeFallback?: boolean }): Promise<string | undefined> {
+		const normalizedProviderId = normalizeAuthProviderId(providerId);
 		// Runtime override takes highest priority
-		const runtimeKey = this.runtimeOverrides.get(providerId);
+		const runtimeKey = this.runtimeOverrides.get(normalizedProviderId);
 		if (runtimeKey) {
-			this.markManagedAccountUsed(providerId);
+			this.markManagedAccountUsed(normalizedProviderId);
 			return runtimeKey;
 		}
 
-		const cred = this.data[providerId];
+		const cred = this.data[normalizedProviderId];
 
 		if (cred?.type === "api_key") {
-			this.markManagedAccountUsed(providerId);
+			this.markManagedAccountUsed(normalizedProviderId);
 			return resolveConfigValue(cred.key);
 		}
 
 		if (cred?.type === "oauth") {
-			const provider = getOAuthProvider(providerId);
+			const provider = getOAuthProvider(normalizedProviderId);
 			if (!provider) {
 				// Unknown OAuth provider, can't get API key
 				return undefined;
@@ -650,16 +689,16 @@ export class AuthStorage {
 			if (needsRefresh) {
 				// Use locked refresh to prevent race conditions
 				try {
-					const result = await this.refreshOAuthTokenWithLock(providerId);
+					const result = await this.refreshOAuthTokenWithLock(normalizedProviderId);
 					if (result) {
-						this.markManagedAccountUsed(providerId);
+						this.markManagedAccountUsed(normalizedProviderId);
 						return result.apiKey;
 					}
 				} catch (error) {
 					this.recordError(error);
 					// Refresh failed - re-read file to check if another instance succeeded
 					this.reload();
-					const updatedCred = this.data[providerId];
+					const updatedCred = this.data[normalizedProviderId];
 
 					if (updatedCred?.type === "oauth" && Date.now() < updatedCred.expires) {
 						// Another instance refreshed successfully, use those credentials
@@ -672,21 +711,22 @@ export class AuthStorage {
 				}
 			} else {
 				// Token not expired, use current access token
+				this.markManagedAccountUsed(normalizedProviderId);
 				return provider.getApiKey(cred);
 			}
 		}
 
 		// Fall back to environment variable
-		const envKey = getEnvApiKey(providerId);
+		const envKey = getEnvApiKey(normalizedProviderId);
 		if (envKey) {
-			this.markManagedAccountUsed(providerId);
+			this.markManagedAccountUsed(normalizedProviderId);
 			return envKey;
 		}
 
 		// Fall back to custom resolver (e.g., models.json custom providers)
 		if (options?.includeFallback !== false) {
-			const fallback = this.fallbackResolver?.(providerId) ?? undefined;
-			if (fallback) this.markManagedAccountUsed(providerId);
+			const fallback = this.fallbackResolver?.(normalizedProviderId) ?? undefined;
+			if (fallback) this.markManagedAccountUsed(normalizedProviderId);
 			return fallback;
 		}
 

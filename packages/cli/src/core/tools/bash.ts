@@ -19,6 +19,8 @@ import {
 	untrackDetachedChildPid,
 } from "../../utils/shell.js";
 import type { ToolDefinition, ToolRenderResultOptions } from "../extensions/types.js";
+import { appendAuditEvent } from "../security/audit.js";
+import { evaluateBashCommand } from "../security/policy.js";
 import { getTextOutput, invalidArgText, str } from "./render-utils.js";
 import { wrapToolDefinition } from "./tool-definition-wrapper.js";
 import { DEFAULT_MAX_BYTES, DEFAULT_MAX_LINES, formatSize, type TruncationResult, truncateTail } from "./truncate.js";
@@ -345,6 +347,20 @@ export function createBashToolDefinition(
 					}
 				};
 
+				const policy = evaluateBashCommand(spawnContext.command, cwd);
+				appendAuditEvent({
+					actor: "tool",
+					action: "bash",
+					status: policy.allowed ? "success" : "blocked",
+					target: spawnContext.command,
+					message: policy.reason,
+					meta: { cwd, mode: policy.mode },
+				});
+				if (!policy.allowed) {
+					reject(new Error(`Policy blocked bash command${policy.reason ? `: ${policy.reason}` : ""}`));
+					return;
+				}
+
 				ops.exec(spawnContext.command, spawnContext.cwd, {
 					onData: handleData,
 					signal,
@@ -380,9 +396,24 @@ export function createBashToolDefinition(
 							}
 						}
 						if (exitCode !== 0 && exitCode !== null) {
+							appendAuditEvent({
+								actor: "tool",
+								action: "bash",
+								status: "failure",
+								target: spawnContext.command,
+								message: `Exit code ${exitCode}`,
+								meta: { cwd, mode: policy.mode },
+							});
 							outputText += `\n\nCommand exited with code ${exitCode}`;
 							reject(new Error(outputText));
 						} else {
+							appendAuditEvent({
+								actor: "tool",
+								action: "bash",
+								status: "success",
+								target: spawnContext.command,
+								meta: { cwd, mode: policy.mode },
+							});
 							resolve({ content: [{ type: "text", text: outputText }], details });
 						}
 					})
@@ -399,8 +430,24 @@ export function createBashToolDefinition(
 							const timeoutSecs = err.message.split(":")[1];
 							if (output) output += "\n\n";
 							output += `Command timed out after ${timeoutSecs} seconds`;
+							appendAuditEvent({
+								actor: "tool",
+								action: "bash",
+								status: "failure",
+								target: spawnContext.command,
+								message: `Timeout after ${timeoutSecs} seconds`,
+								meta: { cwd, mode: policy.mode },
+							});
 							reject(new Error(output));
 						} else {
+							appendAuditEvent({
+								actor: "tool",
+								action: "bash",
+								status: "failure",
+								target: spawnContext.command,
+								message: err.message,
+								meta: { cwd, mode: policy.mode },
+							});
 							reject(err);
 						}
 					});

@@ -53,7 +53,7 @@ echo %APP_NAME% setup.bat
 echo.
 echo Usage:
 echo   setup.bat install   Install %APP_NAME% and add it to PATH
-echo   setup.bat repair    Rebuild the launcher and fix PATH
+echo   setup.bat repair    Rebuild the launcher and repair PATH
 echo   setup.bat update    Reinstall using the current release folder
 echo   setup.bat remove    Remove the local install and PATH entry
 echo.
@@ -61,7 +61,7 @@ echo Quick start:
 echo   setup.bat install ^&^& mooncode
 echo.
 echo Notes:
-echo   - Run this from the extracted release folder or the repo root.
+echo   - Run this from an extracted release folder or the repo root.
 echo   - Install places a launcher in %%LOCALAPPDATA%%\MoonCode\bin.
 echo   - The launcher adds mooncode, moon, and mooncli to PATH for the current user.
 goto end
@@ -106,12 +106,14 @@ goto :eof
   echo @echo off
   echo setlocal
   echo set "MOONCODE_HOME=%INSTALL_DIR%"
-  echo if exist "%%MOONCODE_HOME%%\MoonCode.exe" ^
-  echo ^  "%%MOONCODE_HOME%%\MoonCode.exe" %%*
-  echo if errorlevel 1 exit /b %%errorlevel%%
-  echo if exist "%%MOONCODE_HOME%%\packages\cli\dist\cli.js" ^
-  echo ^  node "%%MOONCODE_HOME%%\packages\cli\dist\cli.js" %%*
-  echo if errorlevel 1 exit /b %%errorlevel%%
+  echo if exist "%%MOONCODE_HOME%%\MoonCode.exe" ^(
+  echo   "%%MOONCODE_HOME%%\MoonCode.exe" %%*
+  echo   exit /b %%errorlevel%%
+  echo ^)
+  echo if exist "%%MOONCODE_HOME%%\packages\cli\dist\cli.js" ^(
+  echo   node "%%MOONCODE_HOME%%\packages\cli\dist\cli.js" %%*
+  echo   exit /b %%errorlevel%%
+  echo ^)
   echo echo MoonCode is not installed.
   echo echo Run setup.bat repair or setup.bat install.
   echo exit /b 1
@@ -132,6 +134,9 @@ if exist "%ROOT%README.md" (
 )
 if exist "%ROOT%CHANGELOG.md" (
   xcopy "%ROOT%CHANGELOG.md" "%INSTALL_DIR%\" /Y /Q >nul
+)
+if exist "%ROOT%packages\cli\CHANGELOG.md" (
+  xcopy "%ROOT%packages\cli\CHANGELOG.md" "%INSTALL_DIR%\" /Y /Q >nul
 )
 if exist "%ROOT%dist" (
   xcopy "%ROOT%dist" "%INSTALL_DIR%\dist\" /E /I /Y /Q >nul

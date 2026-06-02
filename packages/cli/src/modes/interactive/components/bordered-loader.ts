@@ -17,7 +17,7 @@ export class BorderedLoader extends Container {
 		this.cancellable = options?.cancellable ?? true;
 		const borderColor = (s: string) => theme.fg("borderMuted", s);
 		this.addChild(new DynamicBorder(borderColor));
-		const indicator = { frames: MINIMAL_FRAMES, intervalMs: 180 };
+		const indicator = { frames: MINIMAL_FRAMES, intervalMs: 60 };
 		if (this.cancellable) {
 			this.loader = new CancellableLoader(
 				tui,

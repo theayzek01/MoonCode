@@ -120,9 +120,9 @@ function resolveMinRenderIntervalMs(): number {
 	if (Number.isFinite(configured) && configured >= 0) {
 		return Math.min(configured, 250);
 	}
-	// Windows conhost/cmd is noticeably slower at processing dense ANSI diffs.
-	// A 30 FPS cap keeps input responsive without making modern terminals feel slow.
-	return 16;
+	// Keep the default cadence close to a 60 FPS animation budget while still
+	// allowing terminals to breathe under heavy output bursts.
+	return 12;
 }
 
 /**
@@ -616,7 +616,7 @@ export class TUI extends Container {
 				this.renderTimer = undefined;
 			}
 			this.renderRequested = true;
-			process.nextTick(() => {
+			setImmediate(() => {
 				if (this.stopped || !this.renderRequested) {
 					return;
 				}
@@ -628,7 +628,7 @@ export class TUI extends Container {
 		}
 		if (this.renderRequested) return;
 		this.renderRequested = true;
-		process.nextTick(() => this.scheduleRender());
+		setImmediate(() => this.scheduleRender());
 	}
 
 	private scheduleRender(): void {
@@ -1091,8 +1091,9 @@ export class TUI extends Container {
 			if (useSynchronizedOutput) buffer += "\x1b[?2026h";
 
 			if (clear) {
-				// Clear screen and move to home (1,1). On Windows, use a more aggressive sequence.
-				buffer += process.platform === "win32" ? "\x1b[H\x1b[2J\x1b[3J" : "\x1b[2J\x1b[H";
+				// Clear the visible screen and move to home (1,1) while preserving scrollback.
+				// Keeping scrollback intact makes resize/refresh transitions feel much less jarring.
+				buffer += "\x1b[2J\x1b[H";
 			}
 			for (let i = 0; i < newLines.length; i++) {
 				if (i > 0) buffer += "\r\n";

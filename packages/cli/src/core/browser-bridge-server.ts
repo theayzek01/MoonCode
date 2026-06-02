@@ -331,13 +331,13 @@ async function executeLocalBrowserCommand(
 ): Promise<unknown> {
 	let client = getLatestClient();
 	if (!client) {
-		launchBrowserForBridge();
-		const connectTimeoutMs = Number(process.env.MOON_BROWSER_CONNECT_TIMEOUT_MS || 4000);
+		await launchBrowserForBridge();
+		const connectTimeoutMs = Number(process.env.MOON_BROWSER_CONNECT_TIMEOUT_MS || 12000);
 		client = await waitForLatestClient(Math.max(500, Math.min(connectTimeoutMs, 15000)));
 	}
 	if (!client) {
 		throw new Error(
-			`No browser extension connected. I tried opening the browser. Load packages/cli/browser-extension/chrome once, then retry. Bridge: ws://127.0.0.1:${port}/ws`,
+			`No browser extension connected. I tried opening Chrome/Edge for you. Load packages/cli/browser-extension/chrome in a Chromium browser once, then retry. Bridge: ws://127.0.0.1:${port}/ws`,
 		);
 	}
 
@@ -432,7 +432,7 @@ async function waitForLatestClient(timeoutMs: number): Promise<BrowserBridgeClie
 }
 
 let lastBrowserLaunchAt = 0;
-function launchBrowserForBridge(): void {
+async function launchBrowserForBridge(): Promise<void> {
 	const now = Date.now();
 	if (now - lastBrowserLaunchAt < 10_000) return;
 	lastBrowserLaunchAt = now;
@@ -446,7 +446,20 @@ function launchBrowserForBridge(): void {
 				shell: candidate.shell ?? false,
 			});
 			child.unref();
-			return;
+			const launched = await new Promise<boolean>((resolve) => {
+				let finished = false;
+				const finish = (value: boolean) => {
+					if (finished) return;
+					finished = true;
+					resolve(value);
+				};
+				child.once("error", () => finish(false));
+				child.once("exit", (code) => finish(code === 0 || code === null || code === undefined));
+				setTimeout(() => finish(true), 250);
+			});
+			if (launched) {
+				return;
+			}
 		} catch {
 			// Try next browser/open command.
 		}
@@ -458,7 +471,6 @@ function getBrowserLaunchCandidates(url: string): Array<{ command: string; args:
 	if (custom) return [{ command: custom, args: [url], shell: true }];
 	if (platform() === "win32") {
 		return [
-			{ command: "cmd", args: ["/c", "start", "", url], shell: false },
 			{ command: "chrome", args: [url], shell: true },
 			{ command: "msedge", args: [url], shell: true },
 		];

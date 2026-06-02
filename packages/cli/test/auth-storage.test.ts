@@ -449,6 +449,24 @@ describe("AuthStorage", () => {
 			expect(JSON.stringify(authStorage.getAuthStatus("openai"))).not.toContain("secret-access-token");
 			expect(JSON.stringify(authStorage.getAuthStatus("openai"))).not.toContain("secret-refresh-token");
 		});
+
+		test("normalizes codex alias to openai-codex for lookups and persistence", async () => {
+			writeAuthJson({
+				codex: { type: "api_key", key: "codex-key" },
+			});
+
+			authStorage = AuthStorage.create(authJsonPath);
+
+			expect(await authStorage.getApiKey("openai-codex")).toBe("codex-key");
+			expect(authStorage.hasAuth("openai-codex")).toBe(true);
+			expect(authStorage.getAuthStatus("openai-codex")).toEqual({ configured: true, source: "stored" });
+
+			authStorage.set("openai-codex", { type: "api_key", key: "updated-codex-key" });
+
+			const saved = JSON.parse(readFileSync(authJsonPath, "utf-8")) as Record<string, { key: string }>;
+			expect(saved["openai-codex"]?.key).toBe("updated-codex-key");
+			expect(saved.codex).toBeUndefined();
+		});
 	});
 
 	describe("runtime overrides", () => {

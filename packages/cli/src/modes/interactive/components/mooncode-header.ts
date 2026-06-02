@@ -22,13 +22,13 @@ function bg(r: number, g: number, b: number, value: string): string {
 }
 
 const color = {
-	primary: (value: string) => rgb(255, 255, 255, value), // Glowing white
-	secondary: (value: string) => rgb(220, 220, 220, value), // Silver-white
-	text: (value: string) => rgb(229, 229, 229, value), // Off-white
-	muted: (value: string) => rgb(150, 150, 150, value), // Ash gray
-	dim: (value: string) => rgb(90, 90, 90, value), // Dark gray
-	panel: (value: string) => bg(8, 8, 8, value), // Pitch black
-	panelAlt: (value: string) => bg(18, 18, 18, value), // Slate dark
+	primary: (value: string) => rgb(255, 255, 255, value),
+	secondary: (value: string) => rgb(220, 220, 220, value),
+	text: (value: string) => rgb(229, 229, 229, value),
+	muted: (value: string) => rgb(150, 150, 150, value),
+	dim: (value: string) => rgb(90, 90, 90, value),
+	panel: (value: string) => bg(8, 8, 8, value),
+	panelAlt: (value: string) => bg(18, 18, 18, value),
 };
 
 function fitText(value: string, maxWidth: number): string {
@@ -48,19 +48,25 @@ function shortenPath(value: string): string {
 function compactModel(session: EngineSession): string {
 	const provider = session.state.model?.provider ?? "";
 	const id = session.state.model?.id ?? "no-model";
-	const prefix = provider ? `${provider}/` : "";
-	return id.toLowerCase().startsWith(prefix.toLowerCase()) ? id.slice(prefix.length) : id;
+	if (!provider) return id;
+	const prefixedDash = `${provider}-`;
+	const prefixedSlash = `${provider}/`;
+	if (id.toLowerCase().startsWith(prefixedDash.toLowerCase())) return id.slice(prefixedDash.length);
+	if (id.toLowerCase().startsWith(prefixedSlash.toLowerCase())) return id.slice(prefixedSlash.length);
+	return id;
 }
 
 function renderRule(width: number): string {
-	return color.dim(` ${"─".repeat(Math.max(0, width - 2))} `);
+	return color.dim(` ${"-".repeat(Math.max(0, width - 2))} `);
 }
 
 function renderStatusLine(left: string, right: string, width: number, painter: (value: string) => string): string {
-	const leftWidth = widthOf(left);
-	const rightWidth = widthOf(right);
-	const gap = Math.max(1, width - leftWidth - rightWidth);
-	return painter(left + pad(gap) + right);
+	const safeWidth = Math.max(1, width);
+	const fittedRight = fitText(right, Math.max(0, safeWidth - 8));
+	const rightWidth = widthOf(fittedRight);
+	const fittedLeft = fitText(left, Math.max(0, safeWidth - rightWidth - 1));
+	const gap = Math.max(1, safeWidth - widthOf(fittedLeft) - rightWidth);
+	return painter(fittedLeft + pad(gap) + fittedRight);
 }
 
 export class MoonCodeHeaderComponent implements Component {
@@ -107,23 +113,22 @@ export class MoonCodeHeaderComponent implements Component {
 		const extensionStatuses = [...(this.footerData.getExtensionStatuses?.() ?? new Map()).values()];
 
 		if (safeWidth < 72) {
-			const left = color.primary(" mooncode ") + color.muted(fitText(cwd, Math.max(8, safeWidth - 36)));
+			const left = color.primary(" MoonCode ") + color.muted(fitText(cwd, Math.max(8, safeWidth - 36)));
 			const right = color.secondary(mode);
 			return [renderStatusLine(left, right, safeWidth, color.panel)];
 		}
 
-		const logo = color.primary(" moon") + color.secondary("code ");
+		const logo = color.primary(" MoonCode ");
+		const version = color.muted(`v${VERSION}`);
 		const title = color.text("open tui console");
-		const right = [color.muted(`v${VERSION}`), color.muted(branchLabel), color.secondary(mode)].join(
-			color.dim("  |  "),
-		);
-		const top = renderStatusLine(`${logo}${title}`, right, safeWidth, color.panel);
+		const right = [color.muted("Theayzek01"), color.muted(branchLabel), color.secondary(mode)].join(color.dim("  |  "));
+		const top = renderStatusLine(`${logo}${color.dim("  |  ")}${version}${color.dim("  |  ")}${title}`, right, safeWidth, color.panel);
 
 		const left = color.muted(` ${fitText(cwd, Math.max(12, Math.floor(safeWidth * 0.38)))}`);
 		const mid = [color.text(model), color.muted(`think:${thinking}`), color.muted(ctxLabel)].join(color.dim("  /  "));
 		const right2 = color.muted(`providers:${providers}  /  browser:${browserClients}  /  mcp:${mcpClients}`);
 		const budget = safeWidth - widthOf(left) - widthOf(right2) - 4;
-		const center = fitText(mid, Math.max(10, budget));
+		const center = fitText(mid, Math.max(12, budget));
 		const second = renderStatusLine(`${left}  ${center}`, right2, safeWidth, color.panelAlt);
 
 		if (!this.expanded && extensionStatuses.length === 0) {

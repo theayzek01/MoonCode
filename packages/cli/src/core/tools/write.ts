@@ -10,6 +10,8 @@ import { type Static, Type } from "typebox";
 import { keyHint } from "../../modes/interactive/components/keybinding-hints.js";
 import { getLanguageFromPath, highlightCode } from "../../modes/interactive/theme/theme.js";
 import type { ToolDefinition, ToolRenderResultOptions } from "../extensions/types.js";
+import { appendAuditEvent } from "../security/audit.js";
+import { evaluateFilePath } from "../security/policy.js";
 import { withFileMutationQueue } from "./file-mutation-queue.js";
 import { resolveToCwd } from "./path-utils.js";
 import { assertNoPersonaLeak } from "./persona-guard.js";
@@ -225,6 +227,21 @@ export function createWriteToolDefinition(
 		) {
 			const absolutePath = resolveToCwd(path, cwd);
 			const dir = dirname(absolutePath);
+			const policy = evaluateFilePath(absolutePath, cwd);
+			appendAuditEvent({
+				actor: "tool",
+				action: "write",
+				status: policy.allowed ? "success" : "blocked",
+				target: absolutePath,
+				message: policy.reason,
+				meta: { cwd, mode: policy.mode },
+			});
+			if (!policy.allowed) {
+				return {
+					content: [{ type: "text", text: `Policy blocked file write${policy.reason ? `: ${policy.reason}` : ""}.` }],
+					details: undefined,
+				};
+			}
 			return withFileMutationQueue(
 				absolutePath,
 				() =>
@@ -254,8 +271,15 @@ export function createWriteToolDefinition(
 									const diff =
 										Buffer.byteLength(before, "utf-8") + Buffer.byteLength(content, "utf-8") <=
 										WRITE_DIFF_MAX_BYTES
-											? createPatch(path, before, content, "before", "after")
-											: undefined;
+										? createPatch(path, before, content, "before", "after")
+										: undefined;
+									appendAuditEvent({
+										actor: "tool",
+										action: "write",
+										status: "success",
+										target: absolutePath,
+										meta: { cwd, mode: policy.mode, bytes: content.length },
+									});
 									resolve({
 										content: [
 											{ type: "text", text: `Successfully wrote ${content.length} bytes to ${path}` },

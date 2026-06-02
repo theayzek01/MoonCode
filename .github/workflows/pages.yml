@@ -1,15 +1,16 @@
-name: docs-pages
+name: Deploy MoonCode site
 
 on:
   push:
     branches:
+      - main
+      - master
       - launch/mooncode
     paths:
-      - docs/**
-      - .github/workflows/pages.yml
       - README.md
-      - assets/**
-      - packages/cli/browser-extension/chrome/icons/**
+      - docs/**
+      - tools/sites/moonclisite/**
+      - .github/workflows/pages.yml
   workflow_dispatch:
 
 permissions:
@@ -30,13 +31,11 @@ jobs:
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
-      - name: Prepare static artifact
+      - name: Prepare site artifact
         run: |
           mkdir -p .site
-          cp -r docs/* .site/
+          cp -r tools/sites/moonclisite/* .site/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

@@ -1,118 +1,246 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr" data-language="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moon | The Unconstrained Engineering Intelligence</title>
-    <meta name="description" content="Mooncli is a high-performance, terminal-based engineering engine for sovereign developers. Telepathic context, zero friction, and unconstrained power.">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#09090b">
+  <title>MoonCode | Terminal-first engineering</title>
+  <meta
+    name="description"
+    content="MoonCode is a terminal-first engineering assistant for fast code changes, browser automation, MCP integrations, and cross-platform release workflows."
+  >
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <nav>
-        <div class="nav-container">
-            <div class="logo">
-                <img src="../assets/Moon-cli-logo.png" alt="Moon Logo">
-                <span>Moon</span>
-            </div>
-            <div class="nav-links">
-                <a href="#features">Arsenal</a>
-                <a href="#install">Install</a>
-                <a href="https://github.com/theayzek01/hodeuscli" class="btn-secondary">GitHub</a>
-            </div>
-        </div>
-    </nav>
+  <a class="skip-link" href="#main" data-i18n="skip">İçeriğe geç</a>
 
-    <header class="hero">
-        <div class="hero-content">
-            <div class="badge">Version 12.05.2026-v2 Available</div>
-            <h1>The Unconstrained <span class="gradient-text">Intelligence</span></h1>
-            <p>Sovereign engineering. Telepathic context. Zero friction. Moon is not a chatbot—it's a self-healing developer swarm that lives in your terminal.</p>
-            <div class="hero-actions">
-                <a href="#install" class="btn-primary">Get Started</a>
-                <a href="https://github.com/theayzek01/hodeuscli" class="btn-secondary">View Source</a>
-            </div>
-        </div>
-        <div class="hero-visual">
-            <div class="banner-frame">
-                <img src="../assets/Moon-cli-banner.png" alt="Moon Interface">
-            </div>
-            <div class="glow"></div>
-        </div>
-    </header>
+  <header class="site-header">
+    <div class="shell header-shell">
+      <a class="brand" href="#top" aria-label="MoonCode">
+        <span class="brand-mark">M</span>
+        <span class="brand-text">MoonCode</span>
+      </a>
 
-    <section id="features" class="features">
-        <div class="container">
-            <div class="section-header">
-                <h2>Built for the Bold</h2>
-                <p>Moon eliminates the boundary between thought and execution.</p>
-            </div>
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="icon">🔍</div>
-                    <h3>AST Scalpel</h3>
-                    <p>Surgically extracts only necessary symbols. Brutal token optimization for maximum cost efficiency.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">🦋</div>
-                    <h3>Swarm Intelligence</h3>
-                    <p>Spawns 5 parallel threads to read, grep, and code simultaneously. Speed that leaves others in the dust.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">🌑</div>
-                    <h3>Lunar Zen UI</h3>
-                    <p>A floating, pastel timeline of execution. No red error text, no clutter. Just pure focus.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">👻</div>
-                    <h3>Ghost Environment</h3>
-                    <p>Silently spins up Docker containers for dependencies. Tests its own code and auto-heals mistakes.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">🌉</div>
-                    <h3>Visual Bridge</h3>
-                    <p>Extracts live CSS and DOM directly from your active Chrome tab. Design-to-code in seconds.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">🧠</div>
-                    <h3>God-Mode Memory</h3>
-                    <p>Clones your coding style and habits. Moon perfectly mimics your will across every file.</p>
-                </div>
-            </div>
+      <button class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="site-nav">
+        <span class="menu-toggle-label" data-i18n="menu">Menü</span>
+      </button>
+
+      <nav class="site-nav" id="site-nav">
+        <a href="#overview" data-i18n="nav.overview">Genel Bakış</a>
+        <a href="#capabilities" data-i18n="nav.capabilities">Yetenekler</a>
+        <a href="#install" data-i18n="nav.install">Kurulum</a>
+        <a href="#docs" data-i18n="nav.docs">Dokümanlar</a>
+        <a href="https://github.com/theayzek01/MoonCode" target="_blank" rel="noreferrer" data-i18n="nav.github">GitHub</a>
+      </nav>
+
+      <div class="header-actions">
+        <div class="lang-switch" role="group" aria-label="Language switcher">
+          <button class="lang-btn is-active" type="button" data-lang="tr">TR</button>
+          <button class="lang-btn" type="button" data-lang="en">EN</button>
         </div>
+        <a class="btn btn-ghost" href="https://github.com/theayzek01/MoonCode/releases" target="_blank" rel="noreferrer" data-i18n="header.releases">
+          Yayınlar
+        </a>
+        <a class="btn btn-primary" href="#install" data-i18n="header.cta">Başlayın</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero shell" id="top">
+      <div class="hero-copy">
+        <p class="eyebrow" data-i18n="hero.eyebrow">Terminal öncelikli mühendislik</p>
+        <h1 data-i18n="hero.title">MoonCode, kodu okuyup işi bitiren yerel geliştirme yardımcısıdır.</h1>
+        <p class="lead" data-i18n="hero.lead">
+          MoonCode workspace bağlamını anlar, tarayıcıyı kontrol eder, MCP sunucularıyla konuşur ve release akışını düzenli tutar. Ağır pazarlama dili yerine çalışan bir üretim aracı sunar.
+        </p>
+
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#install" data-i18n="hero.primary">Kurulumu gör</a>
+          <a class="btn btn-ghost" href="https://github.com/theayzek01/MoonCode" target="_blank" rel="noreferrer" data-i18n="hero.secondary">Kaynağı aç</a>
+        </div>
+
+        <div class="hero-points" aria-label="Highlights">
+          <span data-i18n="hero.point1">Workspace-aware search</span>
+          <span data-i18n="hero.point2">Browser bridge</span>
+          <span data-i18n="hero.point3">MCP connectors</span>
+          <span data-i18n="hero.point4">Windows, macOS, Linux</span>
+        </div>
+      </div>
+
+      <div class="hero-panel" aria-label="Status preview">
+        <div class="status-card">
+          <div class="status-card-head">
+            <span data-i18n="status.title">System status</span>
+            <span class="status-dot"></span>
+          </div>
+          <div class="status-grid">
+            <div>
+              <span class="status-label" data-i18n="status.workspace">Workspace</span>
+              <strong data-i18n="status.workspaceValue">Indexed and searchable</strong>
+            </div>
+            <div>
+              <span class="status-label" data-i18n="status.browser">Browser bridge</span>
+              <strong data-i18n="status.browserValue">Extension-ready</strong>
+            </div>
+            <div>
+              <span class="status-label" data-i18n="status.release">Release flow</span>
+              <strong data-i18n="status.releaseValue">Cross-platform</strong>
+            </div>
+            <div>
+              <span class="status-label" data-i18n="status.language">Language</span>
+              <strong data-i18n="status.languageValue">TR / EN</strong>
+            </div>
+          </div>
+
+          <div class="terminal">
+            <div class="terminal-line"><span class="prompt">$</span> mooncode /browser</div>
+            <div class="terminal-line"><span class="prompt">$</span> mooncode /mcp</div>
+            <div class="terminal-line terminal-line-ok" data-i18n="terminal.ok">Ready: browser bridge, MCP adapters, audit log.</div>
+            <div class="terminal-line terminal-line-muted" data-i18n="terminal.note">No broken images, no fixed-width layout traps.</div>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <section id="install" class="cta">
-        <div class="container">
-            <div class="terminal-box">
-                <div class="terminal-header">
-                    <div class="dots">
-                        <span></span><span></span><span></span>
-                    </div>
-                    <div class="title">Terminal — moon</div>
-                </div>
-                <div class="terminal-body" id="terminal-body">
-                    <!-- Dynamic session will be injected here -->
-                    <div class="line cursor"></div>
-                </div>
-            </div>
-            <h2>Ignite your workflow.</h2>
-            <p>Join the sovereign developer movement.</p>
-            <a href="https://github.com/theayzek01/hodeuscli" class="btn-primary">Download Moon</a>
-        </div>
+    <section class="metrics shell" id="overview">
+      <article class="metric-card">
+        <span class="metric-value">01</span>
+        <h2 data-i18n="metric1.title">Less friction</h2>
+        <p data-i18n="metric1.body">Minimal prompts, surgical edits, and narrow tool calls keep the assistant focused on work.</p>
+      </article>
+      <article class="metric-card">
+        <span class="metric-value">02</span>
+        <h2 data-i18n="metric2.title">More context</h2>
+        <p data-i18n="metric2.body">Workspace indexing and semantic search surface the right files, lines, and symbols faster.</p>
+      </article>
+      <article class="metric-card">
+        <span class="metric-value">03</span>
+        <h2 data-i18n="metric3.title">Safer automation</h2>
+        <p data-i18n="metric3.body">Policy, audit, and approval gates protect destructive actions without blocking normal flow.</p>
+      </article>
+      <article class="metric-card">
+        <span class="metric-value">04</span>
+        <h2 data-i18n="metric4.title">Real releases</h2>
+        <p data-i18n="metric4.body">The same codebase ships on Windows, macOS, and Linux with release notes and binaries.</p>
+      </article>
     </section>
 
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-logo">Moon</div>
-                <p>© 2026 Mooncli Engine. Built for the bold.</p>
-            </div>
-        </div>
-    </footer>
+    <section class="docs-layout shell" id="capabilities">
+      <aside class="sidebar-panel">
+        <div class="panel-title" data-i18n="sidebar.title">Quick links</div>
+        <a href="#why" class="sidebar-link active" data-i18n="sidebar.link1">Neden MoonCode?</a>
+        <a href="#workflow" class="sidebar-link" data-i18n="sidebar.link2">Çalışma akışı</a>
+        <a href="#platforms" class="sidebar-link" data-i18n="sidebar.link3">Platform desteği</a>
+        <a href="#mcp" class="sidebar-link" data-i18n="sidebar.link4">MCP ve browser</a>
+        <a href="#mobile" class="sidebar-link" data-i18n="sidebar.link5">Mobil deneyim</a>
+      </aside>
 
-    <script src="script.js"></script>
+      <article class="content-panel" id="docs">
+        <p class="section-kicker" data-i18n="content.kicker">Dokümantasyon özeti</p>
+        <h2 id="why" data-i18n="content.title1">Neden bu sürüm daha iyi?</h2>
+        <p data-i18n="content.body1">
+          Eski site düzeni masaüstü ağırlıklıydı, bazı resimler yüklenmiyordu ve İngilizce görünümde bozuk karakterler oluşuyordu. Yeni sürüm bunları temizler: gerçek içerik, düzgün encoding ve kırılmayan responsive yerleşim.
+        </p>
+
+        <div class="feature-list">
+          <article class="feature-item">
+            <h3 data-i18n="feature1.title">Responsive layout</h3>
+            <p data-i18n="feature1.body">Header, kartlar ve içerik blokları küçük ekranlarda tek kolona düşer; menü ve butonlar taşmaz.</p>
+          </article>
+          <article class="feature-item">
+            <h3 data-i18n="feature2.title">Clean language toggle</h3>
+            <p data-i18n="feature2.body">TR / EN metinler tek sözlük üzerinden yönetilir, böylece çeviri bozulunca sayfa dağılmaz.</p>
+          </article>
+          <article class="feature-item">
+            <h3 data-i18n="feature3.title">No broken assets</h3>
+            <p data-i18n="feature3.body">Site, bulunmayan logo/banner görsellerine bağımlı değildir; yükleme sadece bu HTML, CSS ve JS ile çalışır.</p>
+          </article>
+        </div>
+
+        <h2 id="workflow" data-i18n="content.title2">Çalışma akışı</h2>
+        <p data-i18n="content.body2">
+          MoonCode terminalde kalır, ancak browser bridge, MCP, session yönetimi ve release araçlarıyla etrafındaki işleri de kontrol eder. Bu yüzden sadece bir sohbet kutusu gibi davranmaz.
+        </p>
+
+        <div class="callout">
+          <strong data-i18n="callout.title">Kısa kullanım notu</strong>
+          <p data-i18n="callout.body">Tarayıcı eklentisi yüklü değilse browser köprüsü uyarı verir; release için ise Windows, macOS ve Linux paketleri aynı kod tabanından üretilir.</p>
+        </div>
+
+        <h2 id="mcp" data-i18n="content.title3">MCP, browser ve release güvenliği</h2>
+        <p data-i18n="content.body3">
+          Browser bridge artık daha sabırlı ve daha net hata verir. MCP adaptörleri ise sabit tek platform varsayımlarından kurtulup farklı makinelerde daha tutarlı çalışacak şekilde toparlanır.
+        </p>
+      </article>
+
+      <aside class="toc-panel">
+        <div class="panel-title" data-i18n="toc.title">Bu sayfada</div>
+        <a href="#why" data-i18n="toc.link1">Neden MoonCode?</a>
+        <a href="#workflow" data-i18n="toc.link2">Çalışma akışı</a>
+        <a href="#install" data-i18n="toc.link3">Kurulum</a>
+        <a href="#platforms" data-i18n="toc.link4">Platformlar</a>
+        <a href="#mobile" data-i18n="toc.link5">Mobil deneyim</a>
+      </aside>
+    </section>
+
+    <section class="shell install-section" id="install">
+      <div class="install-copy">
+        <p class="section-kicker" data-i18n="install.kicker">Kurulum ve yayın</p>
+        <h2 data-i18n="install.title">Tek repo, üç platform, tek yayın çizgisi.</h2>
+        <p data-i18n="install.body">
+          Kurulum yolunu sade tuttuk: repo klonla, bağımlılıkları yükle, derle ve başlat. Release tarafında da macOS, Linux ve Windows paketleri aynı akıştan çıkar.
+        </p>
+      </div>
+
+      <div class="install-grid" id="platforms">
+        <article class="install-card">
+          <h3 data-i18n="install.card1.title">Başlangıç</h3>
+          <pre><code>git clone https://github.com/theayzek01/MoonCode.git
+cd MoonCode
+npm install
+npm run build
+npm run start</code></pre>
+        </article>
+        <article class="install-card">
+          <h3 data-i18n="install.card2.title">Windows yardımı</h3>
+          <p data-i18n="install.card2.body">`setup.bat` yönetici yetkisiyle daha sağlam kurulum, launcher onarımı ve PATH düzeni sağlar.</p>
+        </article>
+        <article class="install-card">
+          <h3 data-i18n="install.card3.title">Yayınlar</h3>
+          <p data-i18n="install.card3.body">Release sayfasından macOS, Linux ve Windows paketlerini indir; eski sürümler yerine yalnızca güncel yayınları kullan.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="shell mobile-section" id="mobile">
+      <div class="mobile-copy">
+        <p class="section-kicker" data-i18n="mobile.kicker">Mobil deneyim</p>
+        <h2 data-i18n="mobile.title">Telefon ekranında da düzen bozulmaz.</h2>
+        <p data-i18n="mobile.body">
+          Menü daralır, bloklar alt alta iner ve içerik okunur kalır. Yatay kaydırma, kesilmiş başlıklar ve taşan butonlar bu sürümde hedef dışı.
+        </p>
+      </div>
+
+      <div class="mobile-checks">
+        <div class="check-item" data-i18n="mobile.check1">Büyük metinler satıra sığacak şekilde ölçeklenir.</div>
+        <div class="check-item" data-i18n="mobile.check2">Butonlar ve sekmeler küçük ekranlarda sarılır.</div>
+        <div class="check-item" data-i18n="mobile.check3">Yan paneller mobilde tek kolon olur.</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-shell">
+      <div>
+        <strong>MoonCode</strong>
+        <p data-i18n="footer.body">Terminal-first engineering, now with cleaner docs and a mobile-safe layout.</p>
+      </div>
+      <a class="btn btn-ghost" href="#top" data-i18n="footer.back">Yukarı çık</a>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
 </body>
 </html>

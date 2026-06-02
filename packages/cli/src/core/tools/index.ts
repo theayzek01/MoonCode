@@ -19,10 +19,7 @@ export {
 	createBrowserTabsTool,
 	createBrowserTabsToolDefinition,
 } from "./browser.js";
-export {
-	createCodebaseIndexTool,
-	createCodebaseIndexToolDefinition,
-} from "./codebase_index.js";
+export { createCodebaseIndexTool, createCodebaseIndexToolDefinition } from "./codebase_index.js";
 export {
 	createDiscordGetChannelsTool,
 	createDiscordListGuildsTool,
@@ -73,10 +70,7 @@ export {
 	type ReadToolInput,
 	type ReadToolOptions,
 } from "./read.js";
-export {
-	createSemanticSearchTool,
-	createSemanticSearchToolDefinition,
-} from "./semantic_search.js";
+export { createSemanticSearchTool, createSemanticSearchToolDefinition } from "./semantic_search.js";
 export {
 	DEFAULT_MAX_BYTES,
 	DEFAULT_MAX_LINES,
@@ -141,6 +135,7 @@ export type ToolName =
 	| "discord_get_channels"
 	| "discord_send_message"
 	| "discord_manage_channel";
+
 export const allToolNames: Set<ToolName> = new Set([
 	"read",
 	"bash",
@@ -203,7 +198,7 @@ export function createToolDefinition(toolName: ToolName, cwd: string, options?: 
 		case "discord_get_channels":
 		case "discord_send_message":
 		case "discord_manage_channel":
-			return createDiscordToolDefinitions(options?.discord).find((d) => d.name === toolName)!;
+			return createDiscordToolDefinitions(options?.discord).find((definition) => definition.name === toolName)!;
 		default:
 			throw new Error(`Unknown tool name: ${toolName}`);
 	}
@@ -287,12 +282,7 @@ export function createAllToolDefinitions(cwd: string, options?: ToolsOptions): R
 }
 
 export function createCodingTools(cwd: string, options?: ToolsOptions): Tool[] {
-	return [
-		createReadTool(cwd, options?.read),
-		createBashTool(cwd, options?.bash),
-		createEditTool(cwd, options?.edit),
-		createWriteTool(cwd, options?.write),
-	];
+	return [createReadTool(cwd, options?.read), createBashTool(cwd, options?.bash), createEditTool(cwd, options?.edit), createWriteTool(cwd, options?.write)];
 }
 
 export function createReadOnlyTools(cwd: string, options?: ToolsOptions): Tool[] {
@@ -315,6 +305,7 @@ export function createAllTools(cwd: string, options?: ToolsOptions): Record<Tool
 		find: createFindTool(cwd, options?.find),
 		ls: createLsTool(cwd, options?.ls),
 		semantic_search: createSemanticSearchTool(cwd),
+		codebase_index: createCodebaseIndexTool(cwd),
 		git_ship: createGitShipTool(cwd),
 		browser_tabs: createBrowserTabsTool(),
 		browser_page: createBrowserPageTool(options?.getModelVisionSupport),

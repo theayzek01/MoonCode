@@ -1,25 +1,27 @@
 # MoonCode
 
-Terminal için yerel kod asistanı.
+Local coding assistant for the terminal.
 
-MoonCode; terminal odaklı çalışma, kalıcı oturumlar, Browser Bridge ve MCP desteğini tek yerde toplar. Hızlı, sade ve yerel kullanım için tasarlanmıştır.
+MoonCode brings terminal-first workflows, persistent sessions, Browser Bridge, and MCP support into one place. It is designed to be fast, quiet, and local by default.
 
-Windows kurulumu için release paketindeki `setup.bat` dosyasını çalıştırabilirsin:
+Live docs site: [https://theayzek01.github.io/MoonCode/](https://theayzek01.github.io/MoonCode/)
+
+For Windows installs from a release bundle, run `setup.bat`:
 
 ```bat
 setup.bat install
 ```
 
-## Özellikler
+## Features
 
-- Terminal tabanlı akış
-- Kalıcı oturum desteği
+- Terminal-based workflow
+- Persistent sessions
 - Browser Bridge
-- MCP desteği
-- TUI arayüz
-- Yerel çalışma
+- MCP support
+- TUI interface
+- Local-first operation
 
-## Başlangıç
+## Getting Started
 
 ```bash
 npm install
@@ -27,27 +29,34 @@ npm run build
 mooncode
 ```
 
-## Temel Komutlar
+## Documentation
 
-- `/help` kısa yardım
-- `/brain` bağlam ve öneriler
-- `/autothink` otomatik düşünme
-- `/browser` tarayıcı durumu
-- `/mcp` MCP yönetimi
-- `/doctor` sistem özeti
+- Live site: [theayzek01.github.io/MoonCode](https://theayzek01.github.io/MoonCode/)
+- Repo: [github.com/theayzek01/MoonCode](https://github.com/theayzek01/MoonCode)
+- Browser Bridge extension: [`packages/cli/browser-extension/chrome`](packages/cli/browser-extension/chrome)
+- Deep dive notes: [`docs/MOONCODE_DEEP_DIVE.md`](docs/MOONCODE_DEEP_DIVE.md)
 
-## Geliştirme
+## Core Commands
+
+- `/help` for quick help
+- `/brain` for context and suggestions
+- `/autothink` to toggle automatic thinking
+- `/browser` for browser status
+- `/mcp` for MCP management
+- `/doctor` for a system summary
+
+## Development
 
 ```bash
 npm run check:ci
 npm test
 ```
 
-## Gereksinimler
+## Requirements
 
 - Node.js 20+
 - Git
 
-## Lisans
+## License
 
 MIT

@@ -5,8 +5,8 @@ import { getMarkdownTheme, theme } from "../theme/theme.js";
 import { keyText } from "./keybinding-hints.js";
 
 /**
- * Component that renders a compaction message with collapsed/expanded state.
- * Uses same background color as custom messages for visual consistency.
+ * Compact, corporate-style summary shown after context compaction.
+ * Kept intentionally quiet so it reads like a system note, not a warning.
  */
 export class CompactionSummaryMessageComponent extends Box {
 	private expanded = false;
@@ -34,27 +34,28 @@ export class CompactionSummaryMessageComponent extends Box {
 		this.clear();
 
 		const tokenStr = this.message.tokensBefore.toLocaleString();
-		const label = theme.fg("customMessageLabel", `\x1b[1m[sıkıştırma]\x1b[22m`);
+		const label = theme.fg("customMessageLabel", `\x1b[1m[context summary]\x1b[22m`);
 		this.addChild(new Text(label, 0, 0));
 		this.addChild(new Spacer(1));
 
 		if (this.expanded) {
-			const header = `**${tokenStr} tokenden sıkıştırıldı**\n\n`;
+			const header = `**Context condensed from ${tokenStr} tokens**\n\n`;
 			this.addChild(
 				new Markdown(header + this.message.summary, 0, 0, this.markdownTheme, {
 					color: (text: string) => theme.fg("customMessageText", text),
 				}),
 			);
-		} else {
-			this.addChild(
-				new Text(
-					theme.fg("customMessageText", `${tokenStr} tokenden sıkıştırıldı (`) +
-						theme.fg("dim", keyText("app.tools.expand")) +
-						theme.fg("customMessageText", " expandmek için)"),
-					0,
-					0,
-				),
-			);
+			return;
 		}
+
+		this.addChild(
+			new Text(
+				theme.fg("customMessageText", `Context condensed from ${tokenStr} tokens (`) +
+					theme.fg("dim", keyText("app.tools.expand")) +
+					theme.fg("customMessageText", " to review)"),
+				0,
+				0,
+			),
+		);
 	}
 }
