@@ -57,6 +57,9 @@ echo   setup.bat repair    Rebuild the launcher and fix PATH
 echo   setup.bat update    Reinstall using the current release folder
 echo   setup.bat remove    Remove the local install and PATH entry
 echo.
+echo Quick start:
+echo   setup.bat install ^&^& mooncode
+echo.
 echo Notes:
 echo   - Run this from the extracted release folder or the repo root.
 echo   - Install places a launcher in %%LOCALAPPDATA%%\MoonCode\bin.
