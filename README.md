@@ -4,6 +4,12 @@ Terminal için yerel kod asistanı.
 
 MoonCode; terminal odaklı çalışma, kalıcı oturumlar, Browser Bridge ve MCP desteğini tek yerde toplar. Hızlı, sade ve yerel kullanım için tasarlanmıştır.
 
+Windows kurulumu için release paketindeki `setup.bat` dosyasını çalıştırabilirsin. Kurulum:
+
+```bat
+setup.bat install
+```
+
 ## Özellikler
 
 - Terminal tabanlı akış
