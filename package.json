@@ -13,6 +13,7 @@
   "scripts": {
     "clean": "npm run clean --workspaces",
     "build": "npm run build --workspace=packages/tui && npm run build --workspace=packages/core && npm run build --workspace=packages/engine && npm run build --workspace=packages/cli",
+    "setup": "node tools/scripts/install-update.mjs",
     "dev": "concurrently --names \"core,engine,cli,tui\" --prefix-colors \"cyan,yellow,red,magenta\" \"cd packages/core && npm run dev\" \"cd packages/engine && npm run dev\" \"cd packages/cli && npm run dev\" \"cd packages/tui && npm run dev\"",
     "dev:tsc": "cd packages/core && npm run dev:tsc",
     "check": "biome check --write --error-on-warnings . && tsc --noEmit -p configs/tsconfig.release.json && npm run check:browser-smoke",

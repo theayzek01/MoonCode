@@ -1275,7 +1275,7 @@ export class EngineSession {
 		return `${this._baseSystemPrompt}${buildDesignPrompt({ projectRoot: this._cwd, userContext: userText })}`;
 	}
 
-	private _determineActiveToolsForPrompt(text: string): string[] {
+	private _determineActiveToolsForPrompt(_text: string): string[] {
 		const defaultTools = this._baseToolsOverride
 			? Object.keys(this._baseToolsOverride)
 			: ["read", "bash", "edit", "write", "git_ship", "browser_tabs", "browser_page"];

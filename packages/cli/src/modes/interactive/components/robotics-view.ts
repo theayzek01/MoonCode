@@ -112,7 +112,7 @@ export class RoboticsView {
 	}
 
 	/**
-	 * Görev planını steps steps göster.
+	 * Görev planını göster.
 	 */
 	static renderTaskPlan(actions: PlannedAction[], durationMs?: number): string {
 		if (actions.length === 0) {
@@ -218,7 +218,7 @@ export class RoboticsView {
 	 * Error mesajı formatla.
 	 */
 	static renderError(message: string): string {
-		return `${C.red}${ROBOT_ICON} Robotics Errorsı: ${message}${C.reset}`;
+		return `${C.red}${ROBOT_ICON} Robotics Hatası: ${message}${C.reset}`;
 	}
 
 	/**

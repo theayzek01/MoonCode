@@ -64,7 +64,7 @@
     "build": "npm run generate-models && tsc -p tsconfig.build.json",
     "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
     "dev:tsc": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
-    "test": "vitest --run",
+    "test": "vitest run",
     "prepublishOnly": "npm run clean && npm run build"
   },
   "dependencies": {

@@ -1150,7 +1150,12 @@ export class TUI extends Container {
 
 		// Content shrunk below the working area and no overlays - clear empty rows.
 		// Instead of a full redraw which pollutes scrollback, we just clear the extra lines.
-		if (this.clearOnShrink && newLines.length < this.maxLinesRendered && this.overlayStack.length === 0) {
+		if (
+			this.clearOnShrink &&
+			newLines.length < this.maxLinesRendered &&
+			this.overlayStack.length === 0 &&
+			!(heightChanged && isTermuxSession())
+		) {
 			// Fallback to fullRender to ensure all remaining content is drawn and empty rows are cleared
 			logRedraw(`clearOnShrink (maxLinesRendered=${this.maxLinesRendered})`);
 			fullRender(true);

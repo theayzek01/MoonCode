@@ -1,44 +1,39 @@
-// @ts-nocheck
-import os from "node:os";
+import * as os from "node:os";
 import chalk from "chalk";
 
+function getDisplayName(): string {
+	const envName = process.env.MOONCODE_USER_NAME || process.env.USERNAME || process.env.USER || os.userInfo().username;
+	return envName?.trim() || "arkadaş";
+}
+
+function getGreeting(): string {
+	const hour = new Date().getHours();
+	if (hour >= 5 && hour < 11) return "Günaydın";
+	if (hour >= 11 && hour < 17) return "Tünaydın";
+	if (hour >= 17 && hour < 22) return "İyi akşamlar";
+	return "İyi geceler";
+}
+
 export function buildInitialMessage(): { text: string } {
-	const platform = os.platform();
-	const arch = os.arch();
-	const release = os.release();
-	const cpu = os.cpus()[0]?.model || "Unknown CPU";
-	const totalMem = `${Math.round(os.totalmem() / (1024 * 1024 * 1024))}GB`;
+	const blue = chalk.hex("#7ab7ff");
+	const dim = chalk.hex("#6f7a8f");
+	const bright = chalk.hex("#e9eef8").bold;
+	const bar = blue("=".repeat(52));
 
-	const cyan = chalk.hex("#05D5FF");
-	const magenta = chalk.hex("#FF0099");
-	const amber = chalk.hex("#FFB86C");
-	const dim = chalk.gray;
-	const bold = chalk.bold;
+	const text = [
+		"",
+		blue("                          MOONCODE"),
+		"",
+		bright(`${getGreeting()}, ${getDisplayName()}.`),
+		dim("MoonCode hazır. Düşünüyorum, kontrol ediyorum, kısa info önerileri sunuyorum."),
+		"",
+		bright("Fast coding agent. Clean tools. Quiet output."),
+		bright("Terminal coding agent with MCP, Browser Bridge, and DreamKernel."),
+		"",
+		`      ${bar}`,
+		`${dim("/help  |  /brain  |  /autothink  |  /mcp  |  /login")}`,
+		"",
+	].join("\n");
 
-	const sysInfo = [
-		`${cyan("◆")} ${bold("SOFTWARE")}  MoonCode Hyper-Engine ${bold("v2026-3")}`,
-		`${cyan("◆")} ${bold("HARDWARE")}  ${cpu} (${arch})`,
-		`${cyan("◆")} ${bold("RESOURCES")} ${totalMem} Unified Memory`,
-		`${cyan("◆")} ${bold("RUNTIME")}   ${platform} ${release}`,
-	].join("\n   ");
-
-	const divider = dim("─".repeat(50));
-
-	const introText = `
-   ${magenta.bold("MOONCODE OS [READY]")}
-   ${dim("Establishing Neural Bridge...")}
-
-   ${sysInfo}
-
-   ${divider}
-   ${magenta("●")} ${bold("CORE OBJECTIVES")}
-   ${dim("1. Multi-Agent Coordination")}
-   ${dim("2. Autonomous Problem Solving")}
-   ${dim("3. Semantic Codebase Intelligence")}
-
-   ${amber("»")} ${bold("HYPER-INTELLIGENCE MODE ACTIVE")}
-   ${dim("Type")} ${cyan("/")} ${dim("for command pallete • Press")} ${cyan("Ctrl+Space")} ${dim("for autocomplete")}
-	`;
-
-	return { text: introText };
+	return { text };
 }
