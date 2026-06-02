@@ -32,11 +32,23 @@ describe("EngineSession prompt characterization", () => {
 
 		harness.setResponses([fauxAssistantMessage("hello")]);
 
-		await harness.session.prompt("hi");
+		await harness.session.prompt("Please say hello to the user.");
 
 		expect(harness.session.messages.map((message) => message.role)).toEqual(["user", "assistant"]);
-		expect(getMessageText(harness.session.messages[0]!)).toBe("hi");
+		expect(getMessageText(harness.session.messages[0]!)).toBe("Please say hello to the user.");
 		expect(harness.getPendingResponseCount()).toBe(0);
+	});
+
+	it("answers quick greetings locally without calling the provider", async () => {
+		const harness = await createHarness();
+		harnesses.push(harness);
+
+		await harness.session.prompt("naber");
+
+		expect(harness.getPendingResponseCount()).toBe(0);
+		expect(harness.session.messages.map((message) => message.role)).toEqual(["user", "assistant"]);
+		expect(getMessageText(harness.session.messages[0]!)).toBe("naber");
+		expect(getMessageText(harness.session.messages[1]!)).toBe("İyiyim, hazırım. Ne yapalım?");
 	});
 
 	it("handles a tool call turn and waits for the follow-up Provider response", async () => {
@@ -309,15 +321,15 @@ describe("EngineSession prompt characterization", () => {
 		harnesses.push(harness);
 		harness.session.engine.state.model = undefined as unknown as Model<any>;
 
-		await expect(harness.session.prompt("hi")).rejects.toThrow("No model selected.");
+		await expect(harness.session.prompt("Please summarize this repository.")).rejects.toThrow(/Model secilmedi/i);
 	});
 
 	it("throws when prompting without configured auth", async () => {
 		const harness = await createHarness({ withConfiguredAuth: false });
 		harnesses.push(harness);
 
-		await expect(harness.session.prompt("hi")).rejects.toThrow(
-			`No API key found for ${harness.getModel().provider}.`,
+		await expect(harness.session.prompt("Please summarize this repository.")).rejects.toThrow(
+			new RegExp(`${harness.getModel().provider} icin API anahtari bulunamadi`, "i"),
 		);
 	});
 });

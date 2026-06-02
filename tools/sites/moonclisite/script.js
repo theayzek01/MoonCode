@@ -73,16 +73,16 @@ const translations = {
     "toc.link4": "Platformlar",
     "toc.link5": "Mobil deneyim",
     "install.kicker": "Kurulum ve yayın",
-    "install.title": "Tek repo, üç platform, tek yayın çizgisi.",
+    "install.title": "Tek MoonAgent paketi, üç platform, tek kurulum çizgisi.",
     "install.body":
-      "Kurulum yolunu sade tuttuk: repo klonla, bağımlılıkları yükle, derle ve başlat. Release tarafında da macOS, Linux ve Windows paketleri aynı akıştan çıkar.",
+      "Release paketleri MoonAgent/ altında açılır; içindeki MoonCode klasörü ve platforma özel setup scriptiyle kurulum tek akışta tamamlanır.",
     "install.card1.title": "Başlangıç",
-    "install.card2.title": "Windows yardımı",
+    "install.card2.title": "Windows kurulumu",
     "install.card2.body":
-      "`setup.bat` yönetici yetkisiyle daha sağlam kurulum, launcher onarımı ve PATH düzeni sağlar.",
+      "`setup.bat` MoonAgent release paketini yerelde kurar, launcher'ı onarır ve PATH'i düzenler.",
     "install.card3.title": "Yayınlar",
     "install.card3.body":
-      "Release sayfasından macOS, Linux ve Windows paketlerini indir; eski sürümler yerine yalnızca güncel yayınları kullan.",
+      "Release sayfasından macOS, Linux ve Windows paketlerini indir; her biri kendi setup scriptiyle birlikte gelir.",
     "mobile.kicker": "Mobil deneyim",
     "mobile.title": "Telefon ekranında da düzen bozulmaz.",
     "mobile.body":
@@ -172,16 +172,16 @@ const translations = {
     "toc.link4": "Platforms",
     "toc.link5": "Mobile experience",
     "install.kicker": "Install and release",
-    "install.title": "One repo, three platforms, one release line.",
+    "install.title": "One MoonAgent bundle, three platforms, one install line.",
     "install.body":
-      "The setup path stays simple: clone the repo, install dependencies, build, and run. Releases come out of the same pipeline for macOS, Linux, and Windows.",
+      "Release bundles unpack under MoonAgent/; the nested MoonCode folder and platform-specific setup script finish the install in one flow.",
     "install.card1.title": "Getting started",
-    "install.card2.title": "Windows helper",
+    "install.card2.title": "Windows install",
     "install.card2.body":
-      "`setup.bat` gives you a stronger install path, launcher repair, and PATH setup with admin privileges.",
+      "`setup.bat` installs the MoonAgent release bundle locally, repairs the launcher, and adjusts PATH.",
     "install.card3.title": "Releases",
     "install.card3.body":
-      "Grab macOS, Linux, and Windows packages from the Releases page, and prefer the latest release instead of older archives.",
+      "Grab macOS, Linux, and Windows packages from the Releases page, and each one includes its own setup script.",
     "mobile.kicker": "Mobile experience",
     "mobile.title": "The layout stays intact on a phone.",
     "mobile.body":

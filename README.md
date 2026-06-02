@@ -6,10 +6,36 @@ MoonCode brings terminal-first workflows, persistent sessions, Browser Bridge, a
 
 Live docs site: [https://theayzek01.github.io/MoonCode/](https://theayzek01.github.io/MoonCode/)
 
-For Windows installs from a release bundle, run `setup.bat`:
+## Release Bundle
+
+Release archives unpack to this layout:
+
+```text
+MoonAgent/
+  setup.bat
+  setup.sh
+  setup.ps1
+  MoonCode/
+```
+
+From a release bundle, run the platform-specific setup script:
 
 ```bat
 setup.bat install
+```
+
+```bash
+bash setup.sh install
+```
+
+```powershell
+.\setup.ps1 install
+```
+
+For a source checkout, you can still use:
+
+```bash
+npm run setup
 ```
 
 ## Features

@@ -33,7 +33,7 @@ const INDEX_HTML = `
       <div class="logo">
         <div class="logo-circle"></div>
         <b>MoonCode</b>
-        <span class="version-tag">2026-pre18</span>
+        <span class="version-tag">2026-v38</span>
       </div>
       <nav class="nav-links">
         <button id="tab-sessions" class="nav-btn">Session History</button>
@@ -517,7 +517,7 @@ const APP_HTML = `<!doctype html>
               <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
             </button>
           </form>
-          <div class="input-footer-text">MoonCode otonom bir geliştirme asistanıdır · v2026-v36</div>
+          <div class="input-footer-text">MoonCode otonom bir geliştirme asistanıdır · v2026-v38</div>
         </div>
       </footer>
     </main>
@@ -1737,61 +1737,61 @@ const AUTH_PANEL_HTML = `<!doctype html>
   <style>
     :root {
       color-scheme: dark;
-      --md-sys-color-primary: #5ae7a6;
-      --md-sys-color-on-primary: #05110b;
-      --md-sys-color-primary-container: #103624;
-      --md-sys-color-secondary-container: #111815;
-      --md-sys-color-surface: #030504;
-      --md-sys-color-surface-container: #07100b;
-      --md-sys-color-surface-container-high: #0c1410;
-      --md-sys-color-outline: #1e3a2d;
-      --md-sys-color-on-surface: #edf6ef;
-      --md-sys-color-on-surface-variant: #8ea398;
+      --md-sys-color-primary: #dbe6f7;
+      --md-sys-color-on-primary: #0b111a;
+      --md-sys-color-primary-container: #131824;
+      --md-sys-color-secondary-container: #101318;
+      --md-sys-color-surface: #050608;
+      --md-sys-color-surface-container: #0e1116;
+      --md-sys-color-surface-container-high: #151a21;
+      --md-sys-color-outline: #262c35;
+      --md-sys-color-on-surface: #f3f5f8;
+      --md-sys-color-on-surface-variant: #9aa3b0;
       --radius: 18px;
       font-family: Inter, "Segoe UI", system-ui, sans-serif;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; background: radial-gradient(circle at top left, rgba(86,232,166,.09) 0, transparent 30%), linear-gradient(180deg, #010201, #050805 56%, #020403); color: var(--md-sys-color-on-surface); }
+    body { margin: 0; background: radial-gradient(circle at top left, rgba(219,230,247,.09) 0, transparent 30%), linear-gradient(180deg, #050608, #090b10 56%, #060709); color: var(--md-sys-color-on-surface); }
     .app { min-height: 100vh; display: grid; grid-template-columns: 280px 1fr; }
-    aside { background: rgba(6, 10, 8, .88); backdrop-filter: blur(18px); padding: 24px 16px; border-right: 1px solid #11241a; }
+    aside { background: rgba(8, 10, 13, .92); backdrop-filter: blur(18px); padding: 24px 16px; border-right: 1px solid #232833; }
     .brand { display: flex; align-items: center; gap: 12px; padding: 8px 12px 24px; font-weight: 700; font-size: 22px; }
-    .mark { width: 38px; height: 38px; border-radius: 12px; background: linear-gradient(135deg,#5ae7a6,#0d7b4a); color: #05110b; display: grid; place-items: center; box-shadow: 0 0 28px rgba(90,231,166,.16); }
+    .mark { width: 38px; height: 38px; border-radius: 12px; background: linear-gradient(135deg,#202631,#11141a); color: var(--md-sys-color-on-surface); display: grid; place-items: center; border: 1px solid #2a313d; box-shadow: 0 0 28px rgba(0,0,0,.24); }
     nav button { width: 100%; border: 0; background: transparent; color: var(--md-sys-color-on-surface-variant); border-radius: 999px; padding: 14px 18px; text-align: left; font: inherit; cursor: pointer; display: flex; align-items: center; gap: 10px; }
-    nav button.active { background: rgba(90,231,166,.08); color: var(--md-sys-color-on-surface); font-weight: 700; }
+    nav button.active { background: rgba(219,230,247,.08); color: var(--md-sys-color-on-surface); font-weight: 700; }
     main { padding: 28px; max-width: 1320px; width: 100%; }
     .top { display: flex; justify-content: space-between; gap: 16px; align-items: start; margin-bottom: 24px; }
     h1 { font-size: clamp(28px, 4vw, 48px); line-height: 1; margin: 0 0 10px; letter-spacing: 0; }
     .sub { color: var(--md-sys-color-on-surface-variant); margin: 0; max-width: 720px; }
     .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
-    .card { background: linear-gradient(180deg, rgba(10, 17, 13, .96), rgba(4, 8, 6, .98)); border-radius: var(--radius); padding: 22px; border: 1px solid #173122; box-shadow: 0 20px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.03); }
-    .hero { grid-column: span 8; min-height: 210px; background: linear-gradient(135deg, rgba(10,18,13,.98), rgba(4,7,5,.98)); }
+    .card { background: linear-gradient(180deg, rgba(18, 21, 28, .96), rgba(10, 12, 16, .98)); border-radius: var(--radius); padding: 22px; border: 1px solid #252c37; box-shadow: 0 20px 50px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.03); }
+    .hero { grid-column: span 8; min-height: 210px; background: linear-gradient(135deg, rgba(18,21,28,.98), rgba(10,12,16,.98)); }
     .side { grid-column: span 4; }
     .full { grid-column: 1 / -1; }
     .stat { display: grid; gap: 8px; }
     .stat b { font-size: 34px; }
     .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
-    .btn { border: 0; border-radius: 999px; padding: 12px 18px; font-weight: 800; cursor: pointer; background: linear-gradient(135deg,#5ae7a6,#1db46f); color: var(--md-sys-color-on-primary); box-shadow: 0 12px 30px rgba(29,180,111,.18); transition: transform .18s ease, filter .18s ease; }
+    .btn { border: 0; border-radius: 999px; padding: 12px 18px; font-weight: 800; cursor: pointer; background: linear-gradient(135deg,#edf2f8,#cfd7e3); color: var(--md-sys-color-on-primary); box-shadow: 0 12px 30px rgba(0,0,0,.18); transition: transform .18s ease, filter .18s ease; }
     .btn:hover { transform: translateY(-1px); filter: brightness(1.08); }
-    .btn.secondary { background: rgba(255,255,255,.03); color: var(--md-sys-color-on-surface); border: 1px solid #18291f; }
-    .btn.ghost { background: transparent; color: var(--md-sys-color-primary); border: 1px solid #233d2e; }
+    .btn.secondary { background: rgba(255,255,255,.03); color: var(--md-sys-color-on-surface); border: 1px solid #2a313d; }
+    .btn.ghost { background: transparent; color: var(--md-sys-color-primary); border: 1px solid #2a313d; }
     table { width: 100%; border-collapse: collapse; overflow: hidden; }
-    th, td { text-align: left; padding: 14px 10px; border-bottom: 1px solid #15261d; vertical-align: middle; }
+    th, td { text-align: left; padding: 14px 10px; border-bottom: 1px solid #202631; vertical-align: middle; }
     th { color: var(--md-sys-color-on-surface-variant); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
-    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 7px 11px; border-radius: 999px; background: rgba(90,231,166,.09); font-size: 13px; }
+    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 7px 11px; border-radius: 999px; background: rgba(219,230,247,.09); font-size: 13px; }
     .muted { color: var(--md-sys-color-on-surface-variant); }
     .form { display: grid; gap: 14px; max-width: 760px; }
-    select, input { width: 100%; border: 1px solid #22382d; border-radius: 14px; padding: 14px; background: #050906; color: var(--md-sys-color-on-surface); font: inherit; outline-color: var(--md-sys-color-primary); }
+    select, input { width: 100%; border: 1px solid #2a313d; border-radius: 14px; padding: 14px; background: #07090d; color: var(--md-sys-color-on-surface); font: inherit; outline-color: var(--md-sys-color-primary); }
     .choice-grid,.provider-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
-    .choice,.provider-card{border:1px solid #183022;background:rgba(4,10,7,.96);border-radius:22px;padding:20px;text-align:left;color:inherit;cursor:pointer;transition:.22s ease;min-height:188px}
-    .choice:hover,.provider-card:hover{transform:translateY(-2px);border-color:#5ae7a6;box-shadow:0 18px 45px rgba(29,180,111,.12)}
-    nav svg{width:18px;height:18px}.choice svg,.provider-card svg{width:28px;height:28px;color:#5ae7a6;margin-bottom:16px}
+    .choice,.provider-card{border:1px solid #252c37;background:rgba(10,12,16,.96);border-radius:22px;padding:20px;text-align:left;color:inherit;cursor:pointer;transition:.22s ease;min-height:188px}
+    .choice:hover,.provider-card:hover{transform:translateY(-2px);border-color:#dbe6f7;box-shadow:0 18px 45px rgba(0,0,0,.18)}
+    nav svg{width:18px;height:18px}.choice svg,.provider-card svg{width:28px;height:28px;color:#dbe6f7;margin-bottom:16px}
     .slide{animation:slideIn .28s ease both}@keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-    .oauth-box { display: none; gap: 10px; padding: 16px; border-radius: 18px; background: #050907; border: 1px solid #214033; }
+    .oauth-box { display: none; gap: 10px; padding: 16px; border-radius: 18px; background: #090b10; border: 1px solid #252c37; }
     .oauth-box.show { display: grid; }
     .oauth-url { word-break: break-all; color: var(--md-sys-color-primary); font-size: 13px; }
     label { display: grid; gap: 6px; font-weight: 650; }
     .hidden { display: none; }
-    .toast { position: fixed; right: 22px; bottom: 22px; background: #1d1b20; color: white; padding: 14px 18px; border-radius: 16px; opacity: 0; transform: translateY(12px); transition: .18s; }
+    .toast { position: fixed; right: 22px; bottom: 22px; background: #141821; color: white; padding: 14px 18px; border-radius: 16px; opacity: 0; transform: translateY(12px); transition: .18s; border: 1px solid #2a313d; }
     .toast.show { opacity: 1; transform: translateY(0); }
     @media (max-width: 860px) {
       .app { grid-template-columns: 1fr; }
@@ -1806,7 +1806,7 @@ const AUTH_PANEL_HTML = `<!doctype html>
 <body>
   <div class="app">
     <aside>
-      <div class="brand"><span class="mark">M</span><span>MoonCode</span></div>
+      <div class="brand"><span class="mark">☾</span><span>MoonCode</span></div>
       <nav>
         <button class="active" data-tab="overview"><i data-lucide="layout-dashboard"></i> Control</button>
         <button data-tab="login"><i data-lucide="log-in"></i> Login</button>
@@ -2007,18 +2007,18 @@ const MCP_PANEL_HTML = `<!doctype html>
   <title>MoonCode MCP Control</title>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <style>
-    :root{color-scheme:dark;--bg:#020503;--panel:#07110b;--panel2:#0d1b12;--line:#1d412c;--fg:#eafff2;--muted:#8db29c;--green:#56f0a4;--green2:#19b96b;--red:#ff5667;font-family:Inter,Roboto,"Segoe UI",system-ui,sans-serif}
-    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 18% 0,#123d26 0,transparent 34%),linear-gradient(180deg,#020503,#07100b 55%,#010302);color:var(--fg)}
-    .wrap{max-width:1320px;margin:0 auto;padding:30px}.hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:22px}.eyebrow{color:var(--green);font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:12px}
-    h1{font-size:clamp(34px,5vw,64px);line-height:.95;margin:8px 0 10px;letter-spacing:0}.sub{color:var(--muted);max-width:740px;margin:0}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}.card{background:linear-gradient(180deg,rgba(16,34,23,.92),rgba(6,13,9,.95));border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:0 24px 70px rgba(0,0,0,.34),inset 0 1px 0 rgba(110,255,178,.08)}
-    .wide{grid-column:span 8}.side{grid-column:span 4}.full{grid-column:1/-1}.toolbar{display:flex;gap:10px;flex-wrap:wrap}.btn{border:0;border-radius:999px;padding:12px 16px;font-weight:850;cursor:pointer;background:linear-gradient(135deg,var(--green),var(--green2));color:#021108;display:inline-flex;align-items:center;gap:8px}.btn.secondary{background:#12261a;color:var(--fg);border:1px solid var(--line)}.btn.danger{background:#301018;color:#ffdce1;border:1px solid #6b1f2d}
-    .server-grid,.market-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}.server,.market{border:1px solid var(--line);background:#07120c;border-radius:18px;padding:16px}.server h3,.market h3{margin:10px 0 6px}.status{display:inline-flex;padding:6px 10px;border-radius:999px;background:#102c1d;color:var(--green);font-size:12px;font-weight:800}.muted{color:var(--muted)}textarea,input{width:100%;background:#040906;color:var(--fg);border:1px solid var(--line);border-radius:14px;padding:12px;font:inherit}textarea{min-height:150px;resize:vertical}.row{display:grid;gap:10px;margin-top:12px}.toast{position:fixed;right:22px;bottom:22px;background:#102016;border:1px solid var(--line);border-radius:16px;padding:14px 16px;opacity:0;transform:translateY(10px);transition:.18s}.toast.show{opacity:1;transform:none}@media(max-width:860px){.wrap{padding:18px}.wide,.side{grid-column:1/-1}.hero{display:block}}
+    :root{color-scheme:dark;--bg:#050608;--panel:#0e1116;--panel2:#131822;--line:#252c37;--fg:#f3f5f8;--muted:#9aa3b0;--blue:#dbe6f7;--blue2:#b9c8dc;--red:#ff5667;font-family:Inter,Roboto,"Segoe UI",system-ui,sans-serif}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 18% 0,rgba(219,230,247,.09) 0,transparent 34%),linear-gradient(180deg,#050608,#090b10 55%,#060709);color:var(--fg)}
+    .wrap{max-width:1320px;margin:0 auto;padding:30px}.hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:22px}.eyebrow{color:var(--blue);font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:12px}
+    h1{font-size:clamp(34px,5vw,64px);line-height:.95;margin:8px 0 10px;letter-spacing:0}.sub{color:var(--muted);max-width:740px;margin:0}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}.card{background:linear-gradient(180deg,rgba(18,21,28,.96),rgba(10,12,16,.98));border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:0 24px 70px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.03)}
+    .wide{grid-column:span 8}.side{grid-column:span 4}.full{grid-column:1/-1}.toolbar{display:flex;gap:10px;flex-wrap:wrap}.btn{border:0;border-radius:999px;padding:12px 16px;font-weight:850;cursor:pointer;background:linear-gradient(135deg,#edf2f8,#cfd7e3);color:#0b111a;display:inline-flex;align-items:center;gap:8px}.btn.secondary{background:#121722;color:var(--fg);border:1px solid var(--line)}.btn.danger{background:#301018;color:#ffdce1;border:1px solid #6b1f2d}
+    .server-grid,.market-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}.server,.market{border:1px solid var(--line);background:#0f1319;border-radius:18px;padding:16px}.server h3,.market h3{margin:10px 0 6px}.status{display:inline-flex;padding:6px 10px;border-radius:999px;background:rgba(219,230,247,.09);color:var(--blue);font-size:12px;font-weight:800}.muted{color:var(--muted)}textarea,input{width:100%;background:#07090d;color:var(--fg);border:1px solid var(--line);border-radius:14px;padding:12px;font:inherit}textarea{min-height:150px;resize:vertical}.row{display:grid;gap:10px;margin-top:12px}.toast{position:fixed;right:22px;bottom:22px;background:#141821;border:1px solid var(--line);border-radius:16px;padding:14px 16px;opacity:0;transform:translateY(10px);transition:.18s}.toast.show{opacity:1;transform:none}@media(max-width:860px){.wrap{padding:18px}.wide,.side{grid-column:1/-1}.hero{display:block}}
   </style>
 </head>
 <body>
   <div class="wrap">
     <section class="hero">
-      <div><div class="eyebrow">MCP Control</div><h1>Connect tools without terminal noise.</h1><p class="sub">Manage Blender, Scratch/TurboWarp, and custom MCP servers from one local panel. Install, connect, restart, and add configs without dumping setup logs into the TUI.</p></div>
+      <div><div class="eyebrow">MoonCode | MCP Control</div><h1>Connect tools without terminal noise.</h1><p class="sub">Manage Blender, Scratch/TurboWarp, and custom MCP servers from one local panel. Install, connect, restart, and add configs without dumping setup logs into the TUI.</p></div>
       <div class="toolbar"><button class="btn secondary" onclick="refresh()"><i data-lucide="refresh-cw"></i>Refresh</button><button class="btn" onclick="action({action:'restart'})"><i data-lucide="rotate-cw"></i>Restart manager</button></div>
     </section>
     <div class="grid">
@@ -2037,7 +2037,30 @@ const MCP_PANEL_HTML = `<!doctype html>
     function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2400)}
     async function action(payload){const res=await fetch('/api/mcp-panel/action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const json=await res.json();if(!json.ok)throw new Error(json.error||'Action failed');toast(json.message||'Done');await refresh()}
     async function addCustom(){const name=document.getElementById('customName').value.trim();let config;try{config=JSON.parse(document.getElementById('customConfig').value)}catch{toast('Invalid JSON config');return}await action({action:'add_custom',name,config})}
-    async function refresh(){state=await fetch('/api/mcp-panel',{cache:'no-store'}).then(r=>r.json());document.getElementById('runtime').textContent=(state.clients.length||0)+' connected servers · '+(state.tools||0)+' MCP tools';document.getElementById('servers').innerHTML=state.servers.map(s=>'<div class="server"><span class="status">'+(s.connected?'connected':'ready')+'</span><h3>'+s.name+'</h3><p class="muted">'+s.command+' '+(s.args||[]).join(' ')+'</p><div class="toolbar"><button class="btn secondary" onclick="action({action:\\'connect\\',name:\\''+s.name+'\\'})"><i data-lucide="plug-zap"></i>Connect</button><button class="btn danger" onclick="action({action:\\'remove\\',name:\\''+s.name+'\\'})"><i data-lucide="trash-2"></i>Remove</button></div></div>').join('')||'<p class="muted">No MCP servers configured yet.</p>';if(window.lucide)lucide.createIcons()}
+    async function refresh(){
+      state = await fetch('/api/mcp-panel', { cache: 'no-store' }).then((r) => r.json());
+      document.getElementById('runtime').textContent = (state.clients.length || 0) + ' connected servers | ' + (state.tools || 0) + ' MCP tools';
+      document.getElementById('servers').innerHTML =
+        state.servers
+          .map(
+            (s) =>
+              '<div class="server"><span class="status">' +
+              (s.connected ? 'connected' : 'ready') +
+              '</span><h3>' +
+              s.name +
+              '</h3><p class="muted">' +
+              s.command +
+              ' ' +
+              (s.args || []).join(' ') +
+              '</p><div class="toolbar"><button class="btn secondary" onclick="action({action:\'connect\',name:\'' +
+              s.name +
+              '\'})"><i data-lucide="plug-zap"></i>Connect</button><button class="btn danger" onclick="action({action:\'remove\',name:\'' +
+              s.name +
+              '\'})"><i data-lucide="trash-2"></i>Remove</button></div></div>',
+          )
+          .join('') || '<p class="muted">No MCP servers configured yet.</p>';
+      if (window.lucide) lucide.createIcons();
+    }
     refresh();if(window.lucide)lucide.createIcons();
   </script>
 </body>
@@ -2073,7 +2096,7 @@ const BRAIN_PANEL_HTML = `<!doctype html>
 </head>
 <body>
   <main class="wrap">
-    <p class="muted">DreamKernel / Memory</p>
+    <p class="muted">Live workspace / Memory</p>
     <h1>Brain control</h1>
     <p class="sub">Review, edit, or clear persisted memory signals and learned task traces. This keeps long sessions lighter without touching project files.</p>
     <div class="toolbar"><button class="btn" onclick="save()"><i data-lucide="save"></i>Save changes</button><button class="btn danger" onclick="clearBrain()"><i data-lucide="trash-2"></i>Clear brain</button><button class="btn" onclick="load()"><i data-lucide="refresh-cw"></i>Refresh</button></div>

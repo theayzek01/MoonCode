@@ -62,7 +62,7 @@ import {
 } from "../../config.js";
 import { renderCodingAgentsWorkspace } from "../../core/agents.js";
 import { addXp } from "../../core/dev-level.js";
-import { type EngineSession, type EngineSessionEvent, parseSkillBlock } from "../../core/engine-session.js";
+import { isQuickChatPrompt, type EngineSession, type EngineSessionEvent, parseSkillBlock } from "../../core/engine-session.js";
 import { type EngineSessionRuntime, SessionImportFileNotFoundError } from "../../core/engine-session-runtime.js";
 import type {
 	AutocompleteProviderFactory,
@@ -1893,7 +1893,7 @@ export class InteractiveMode {
 			const tools = await this.session.connectConfiguredMcpServers();
 			const mcpToolCount = tools.filter((tool) => tool.startsWith("scratch_") || tool.startsWith("blender_")).length;
 			if (mcpToolCount > 0) {
-				this.showStatus(`MCP otomatik baglandi. ${mcpToolCount} tool aktif.`);
+				this.showStatus(`MCP hazır. ${mcpToolCount} araç bağlı.`);
 			}
 			this.footer.setSession(this.session);
 			this.ui.requestRender();
@@ -3228,12 +3228,16 @@ export class InteractiveMode {
 				// First, move any pending bash components to chat
 				this.flushPendingBashComponents();
 
-				// Initialize task in Omega Kernel
-				const kernel = OmegaKernel.getInstance();
-				await kernel.initializeTask(text, this.sessionManager.getCwd());
+				const { cleanedText, images } = this.parseAndExtractImages(text);
+				const isQuickChat = isQuickChatPrompt(cleanedText, images);
+
+				// Initialize task in Omega Kernel only for real agent work.
+				if (!isQuickChat) {
+					const kernel = OmegaKernel.getInstance();
+					await kernel.initializeTask(text, this.sessionManager.getCwd());
+				}
 
 				if (this.onInputCallback) {
-					const { cleanedText, images } = this.parseAndExtractImages(text);
 					this.onInputCallback(cleanedText, images);
 				}
 				this.editor.addToHistory?.(text);

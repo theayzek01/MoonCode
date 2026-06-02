@@ -65,8 +65,10 @@ export class ProcessTerminal implements Terminal {
 	private wasRaw = false;
 	private inputHandler?: (data: string) => void;
 	private resizeHandler?: () => void;
+	private resizeDispatchTimer?: ReturnType<typeof setTimeout>;
 	private _kittyProtocolActive = false;
 	private _modifyOtherKeysActive = false;
+	private useAlternateScreen = process.env.PI_TUI_ALT_SCREEN !== "0";
 	private stdinBuffer?: StdinBuffer;
 	private stdinDataHandler?: (data: string) => void;
 	private progressInterval?: ReturnType<typeof setInterval>;
@@ -91,7 +93,15 @@ export class ProcessTerminal implements Terminal {
 
 	start(onInput: (data: string) => void, onResize: () => void): void {
 		this.inputHandler = onInput;
-		this.resizeHandler = onResize;
+		this.resizeHandler = () => {
+			if (this.resizeDispatchTimer) {
+				clearTimeout(this.resizeDispatchTimer);
+			}
+			this.resizeDispatchTimer = setTimeout(() => {
+				this.resizeDispatchTimer = undefined;
+				onResize();
+			}, 16);
+		};
 
 		// Save previous state and enable raw mode
 		this.wasRaw = process.stdin.isRaw || false;
@@ -103,6 +113,12 @@ export class ProcessTerminal implements Terminal {
 
 		// Enable bracketed paste mode - terminal will wrap pastes in \x1b[200~ ... \x1b[201~
 		process.stdout.write("\x1b[?2004h");
+
+		// Keep MoonCode in the terminal's alternate screen so mouse wheel
+		// scrolling does not reveal accumulated scrollback frames.
+		if (this.useAlternateScreen) {
+			process.stdout.write("\x1b[?1049h\x1b[2J\x1b[H");
+		}
 
 		// Set up resize handler immediately
 		process.stdout.on("resize", this.resizeHandler);
@@ -285,6 +301,12 @@ export class ProcessTerminal implements Terminal {
 		// Disable bracketed paste mode
 		process.stdout.write("\x1b[?2004l");
 
+		// Return to the main screen buffer so the shell scrollback remains intact
+		// once MoonCode exits.
+		if (this.useAlternateScreen) {
+			process.stdout.write("\x1b[?1049l");
+		}
+
 		// Disable Kitty keyboard protocol if not already done by drainInput()
 		if (this._kittyProtocolActive) {
 			process.stdout.write("\x1b[<u");
@@ -311,6 +333,10 @@ export class ProcessTerminal implements Terminal {
 		if (this.resizeHandler) {
 			process.stdout.removeListener("resize", this.resizeHandler);
 			this.resizeHandler = undefined;
+		}
+		if (this.resizeDispatchTimer) {
+			clearTimeout(this.resizeDispatchTimer);
+			this.resizeDispatchTimer = undefined;
 		}
 
 		// Pause stdin to prevent any buffered input (e.g., Ctrl+D) from being

@@ -2,6 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MoonCode</title>
   <style>
     :root {
@@ -17,9 +18,10 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; min-height: 100%; }
 
     body {
-      width: 360px;
+      min-width: 300px;
       max-width: 100vw;
       min-height: 100vh;
       background: var(--bg);
@@ -27,13 +29,15 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
       font-size: 13px;
       user-select: none;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: auto;
     }
 
     .shell {
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      width: 100%;
     }
 
     .header {
@@ -264,6 +268,26 @@
     }
 
     .version { color: inherit; }
+
+    @media (max-width: 340px) {
+      .header,
+      .status-note,
+      .section-label,
+      .actions,
+      .footer {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+      .header-title {
+        font-size: 14px;
+      }
+
+      .btn {
+        font-size: 11px;
+        padding: 8px 10px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -279,7 +303,7 @@
 
     <div id="status-note" class="status-note">Köprü açık olduğunda burada aktif portlar görünür.</div>
 
-    <div class="section-label">Port Durumu</div>
+    <div class="section-label">Port durumu</div>
     <div id="port-list" class="port-list"></div>
 
     <div class="divider" style="margin-top:10px;"></div>
@@ -301,7 +325,7 @@
 
     <div class="divider"></div>
     <div class="footer">
-      <span class="version" id="extension-version">2026-v35</span>
+      <span class="version" id="extension-version">2026-v38</span>
       <span class="version" id="client-count">0 istemci</span>
     </div>
   </div>

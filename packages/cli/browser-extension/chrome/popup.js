@@ -3,12 +3,6 @@ const EXTENSION_VERSION = manifest.version_name || manifest.version || "dev";
 const PORT_START = 3133;
 const PORT_COUNT = 10;
 
-const HIGHLIGHT_STATUS = {
-  connected: "active",
-  connecting: "connecting",
-  scanning: "scanning",
-};
-
 function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -25,9 +19,7 @@ function setStatus(statusEl, noteEl, text, kind, note) {
 }
 
 function emptyState(text) {
-  return `
-    <div class="empty-state">${escapeHtml(text)}</div>
-  `;
+  return `<div class="empty-state">${escapeHtml(text)}</div>`;
 }
 
 function renderPortRow(conn) {
@@ -45,7 +37,7 @@ function renderPortRow(conn) {
       <img class="port-icon" src="${iconSrc}" alt="">
       <span class="port-label">:${escapeHtml(conn.port)}</span>
       <span class="port-badge ${badgeClass}">${badgeText}</span>
-      ${isActive ? `<button class="close-btn" data-port="${escapeHtml(conn.port)}" title="Sonlandır">✕</button>` : ""}
+      ${isActive ? `<button class="close-btn" data-port="${escapeHtml(conn.port)}" title="Sonlandır">×</button>` : ""}
     </div>
   `;
 }
@@ -103,7 +95,7 @@ function updateUI() {
         noteEl,
         "Bağlantı Yok",
         "off",
-        "MoonCode CLI veya browser-bridge çalışmadığı için aktif port görünmüyor.",
+        "MoonCode CLI veya browser bridge çalışmadığı için aktif port görünmüyor.",
       );
     }
 

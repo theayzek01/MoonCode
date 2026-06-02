@@ -3,20 +3,10 @@ setlocal EnableExtensions EnableDelayedExpansion
 
 set "APP_NAME=MoonCode"
 set "ROOT=%~dp0"
-set "APPDATA_DIR=%LOCALAPPDATA%\MoonCode"
-set "INSTALL_DIR=%APPDATA_DIR%\app"
+set "APPDATA_DIR=%LOCALAPPDATA%\MoonAgent"
+set "INSTALL_DIR=%APPDATA_DIR%\app\MoonCode"
 set "BIN_DIR=%APPDATA_DIR%\bin"
 set "LAUNCHER=%BIN_DIR%\mooncode.cmd"
-set "NPM_BIN_DIR="
-
-for /f "delims=" %%I in ('npm config get prefix 2^>nul') do set "NPM_PREFIX=%%I"
-if defined NPM_PREFIX (
-  if exist "%NPM_PREFIX%\npm.cmd" (
-    set "NPM_BIN_DIR=%NPM_PREFIX%"
-  ) else if exist "%NPM_PREFIX%\bin\npm.cmd" (
-    set "NPM_BIN_DIR=%NPM_PREFIX%\bin"
-  )
-)
 
 if "%~1"=="" goto menu
 if /I "%~1"=="install" goto install
@@ -54,15 +44,21 @@ echo.
 echo Usage:
 echo   setup.bat install   Install %APP_NAME% and add it to PATH
 echo   setup.bat repair    Rebuild the launcher and repair PATH
-echo   setup.bat update    Reinstall using the current release folder
+echo   setup.bat update    Reinstall using the current source or release folder
 echo   setup.bat remove    Remove the local install and PATH entry
 echo.
 echo Quick start:
 echo   setup.bat install ^&^& mooncode
 echo.
+echo Layout:
+echo   MoonAgent\setup.bat
+echo   MoonAgent\setup.sh
+echo   MoonAgent\setup.ps1
+echo   MoonAgent\MoonCode\...
+echo.
 echo Notes:
-echo   - Run this from an extracted release folder or the repo root.
-echo   - Install places a launcher in %%LOCALAPPDATA%%\MoonCode\bin.
+echo   - Run this from an extracted MoonAgent release folder or the repo root.
+echo   - Install places a launcher in %%LOCALAPPDATA%%\MoonAgent\bin.
 echo   - The launcher adds mooncode, moon, and mooncli to PATH for the current user.
 goto end
 
@@ -71,12 +67,16 @@ if exist "%ROOT%packages\cli\package.json" (
   set "SOURCE_MODE=source"
   goto :eof
 )
-if exist "%ROOT%MoonCode.exe" (
-  set "SOURCE_MODE=binary"
+if exist "%ROOT%MoonCode\package.json" (
+  set "SOURCE_MODE=release"
   goto :eof
 )
-if exist "%ROOT%dist\cli.js" (
-  set "SOURCE_MODE=dist"
+if exist "%ROOT%MoonCode\MoonCode.exe" (
+  set "SOURCE_MODE=release"
+  goto :eof
+)
+if exist "%ROOT%MoonCode\dist\cli.js" (
+  set "SOURCE_MODE=release"
   goto :eof
 )
 set "SOURCE_MODE=unknown"
@@ -84,12 +84,13 @@ goto :eof
 
 :ensure_app_dirs
 if not exist "%APPDATA_DIR%" mkdir "%APPDATA_DIR%" >nul 2>&1
+if not exist "%APPDATA_DIR%\app" mkdir "%APPDATA_DIR%\app" >nul 2>&1
 if not exist "%BIN_DIR%" mkdir "%BIN_DIR%" >nul 2>&1
 goto :eof
 
 :ensure_path
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-  "$target = $env:LOCALAPPDATA + '\MoonCode\bin';" ^
+  "$target = $env:LOCALAPPDATA + '\MoonAgent\bin';" ^
   "$path = [Environment]::GetEnvironmentVariable('Path','User');" ^
   "if (-not $path) { $path = '' }" ^
   "$segments = $path -split ';' | Where-Object { $_ -and $_.Trim() };" ^
@@ -97,8 +98,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "  $newPath = ($segments + $target) -join ';';" ^
   "  [Environment]::SetEnvironmentVariable('Path', $newPath, 'User');" ^
   "  $env:Path = $env:Path + ';' + $target;" ^
-  "  Write-Host 'PATH updated for current user.';" ^
-  "} else { Write-Host 'PATH already contains MoonCode.'; }"
+  "  Write-Host 'PATH updated for current user.'" ^
+  "} else { Write-Host 'PATH already contains MoonAgent.' }"
 goto :eof
 
 :write_launcher
@@ -110,8 +111,8 @@ goto :eof
   echo   "%%MOONCODE_HOME%%\MoonCode.exe" %%*
   echo   exit /b %%errorlevel%%
   echo ^)
-  echo if exist "%%MOONCODE_HOME%%\packages\cli\dist\cli.js" ^(
-  echo   node "%%MOONCODE_HOME%%\packages\cli\dist\cli.js" %%*
+  echo if exist "%%MOONCODE_HOME%%\dist\cli.js" ^(
+  echo   node "%%MOONCODE_HOME%%\dist\cli.js" %%*
   echo   exit /b %%errorlevel%%
   echo ^)
   echo echo MoonCode is not installed.
@@ -122,37 +123,54 @@ copy /y "%LAUNCHER%" "%BIN_DIR%\moon.cmd" >nul
 copy /y "%LAUNCHER%" "%BIN_DIR%\mooncli.cmd" >nul
 goto :eof
 
-:copy_release_payload
-if exist "%ROOT%MoonCode.exe" (
-  xcopy "%ROOT%MoonCode.exe" "%INSTALL_DIR%\" /Y /Q >nul
+:copy_tree
+set "SRC=%~1"
+set "DST=%~2"
+if exist "%SRC%" (
+  if not exist "%DST%" mkdir "%DST%" >nul 2>&1
+  xcopy "%SRC%\*" "%DST%\" /E /I /Y /Q >nul
 )
-if exist "%ROOT%package.json" (
-  xcopy "%ROOT%package.json" "%INSTALL_DIR%\" /Y /Q >nul
+goto :eof
+
+:copy_source_payload
+if exist "%ROOT%packages\cli\package.json" (
+  copy /y "%ROOT%packages\cli\package.json" "%INSTALL_DIR%\" >nul
 )
-if exist "%ROOT%README.md" (
-  xcopy "%ROOT%README.md" "%INSTALL_DIR%\" /Y /Q >nul
-)
-if exist "%ROOT%CHANGELOG.md" (
-  xcopy "%ROOT%CHANGELOG.md" "%INSTALL_DIR%\" /Y /Q >nul
+if exist "%ROOT%packages\cli\README.md" (
+  copy /y "%ROOT%packages\cli\README.md" "%INSTALL_DIR%\" >nul
 )
 if exist "%ROOT%packages\cli\CHANGELOG.md" (
-  xcopy "%ROOT%packages\cli\CHANGELOG.md" "%INSTALL_DIR%\" /Y /Q >nul
+  copy /y "%ROOT%packages\cli\CHANGELOG.md" "%INSTALL_DIR%\" >nul
 )
-if exist "%ROOT%dist" (
-  xcopy "%ROOT%dist" "%INSTALL_DIR%\dist\" /E /I /Y /Q >nul
+call :copy_tree "%ROOT%packages\cli\dist" "%INSTALL_DIR%\dist"
+call :copy_tree "%ROOT%packages\cli\dist\theme" "%INSTALL_DIR%\theme"
+call :copy_tree "%ROOT%packages\cli\dist\assets" "%INSTALL_DIR%\assets"
+call :copy_tree "%ROOT%packages\cli\dist\export-html" "%INSTALL_DIR%\export-html"
+call :copy_tree "%ROOT%packages\cli\docs" "%INSTALL_DIR%\docs"
+call :copy_tree "%ROOT%packages\cli\examples" "%INSTALL_DIR%\examples"
+call :copy_tree "%ROOT%packages\cli\browser-extension" "%INSTALL_DIR%\browser-extension"
+goto :eof
+
+:copy_release_payload
+if exist "%ROOT%MoonCode\package.json" (
+  copy /y "%ROOT%MoonCode\package.json" "%INSTALL_DIR%\" >nul
 )
-if exist "%ROOT%docs" (
-  xcopy "%ROOT%docs" "%INSTALL_DIR%\docs\" /E /I /Y /Q >nul
+if exist "%ROOT%MoonCode\README.md" (
+  copy /y "%ROOT%MoonCode\README.md" "%INSTALL_DIR%\" >nul
 )
-if exist "%ROOT%examples" (
-  xcopy "%ROOT%examples" "%INSTALL_DIR%\examples\" /E /I /Y /Q >nul
+if exist "%ROOT%MoonCode\CHANGELOG.md" (
+  copy /y "%ROOT%MoonCode\CHANGELOG.md" "%INSTALL_DIR%\" >nul
 )
-if exist "%ROOT%browser-extension" (
-  xcopy "%ROOT%browser-extension" "%INSTALL_DIR%\browser-extension\" /E /I /Y /Q >nul
+if exist "%ROOT%MoonCode\MoonCode.exe" (
+  copy /y "%ROOT%MoonCode\MoonCode.exe" "%INSTALL_DIR%\" >nul
 )
-if exist "%ROOT%theme" (
-  xcopy "%ROOT%theme" "%INSTALL_DIR%\theme\" /E /I /Y /Q >nul
-)
+call :copy_tree "%ROOT%MoonCode\dist" "%INSTALL_DIR%\dist"
+call :copy_tree "%ROOT%MoonCode\theme" "%INSTALL_DIR%\theme"
+call :copy_tree "%ROOT%MoonCode\assets" "%INSTALL_DIR%\assets"
+call :copy_tree "%ROOT%MoonCode\export-html" "%INSTALL_DIR%\export-html"
+call :copy_tree "%ROOT%MoonCode\docs" "%INSTALL_DIR%\docs"
+call :copy_tree "%ROOT%MoonCode\examples" "%INSTALL_DIR%\examples"
+call :copy_tree "%ROOT%MoonCode\browser-extension" "%INSTALL_DIR%\browser-extension"
 goto :eof
 
 :install
@@ -160,7 +178,7 @@ call :ensure_source
 if /I "%SOURCE_MODE%"=="unknown" (
   echo.
   echo Could not detect a MoonCode release folder or repository checkout.
-  echo Run this from the extracted release files or the repo root.
+  echo Run this from the extracted MoonAgent release files or the repo root.
   exit /b 1
 )
 
@@ -176,8 +194,9 @@ if /I "%SOURCE_MODE%"=="source" (
   )
   call npm run build
   if errorlevel 1 exit /b 1
-  call npm install -g "%ROOT%packages\cli"
-  if errorlevel 1 exit /b 1
+  if exist "%INSTALL_DIR%" rmdir /s /q "%INSTALL_DIR%" >nul 2>&1
+  mkdir "%INSTALL_DIR%" >nul 2>&1
+  call :copy_source_payload
 ) else (
   echo.
   echo Installing from release files...
@@ -217,13 +236,15 @@ if /I "%SOURCE_MODE%"=="source" (
   if errorlevel 1 exit /b 1
   call npm run build
   if errorlevel 1 exit /b 1
-  call npm install -g "%ROOT%packages\cli"
-  if errorlevel 1 exit /b 1
+  if exist "%INSTALL_DIR%" rmdir /s /q "%INSTALL_DIR%" >nul 2>&1
+  mkdir "%INSTALL_DIR%" >nul 2>&1
+  call :copy_source_payload
 ) else (
   echo.
   echo Refreshing release install...
-  call :install
-  goto end
+  if exist "%INSTALL_DIR%" rmdir /s /q "%INSTALL_DIR%" >nul 2>&1
+  mkdir "%INSTALL_DIR%" >nul 2>&1
+  call :copy_release_payload
 )
 call :repair
 goto end
@@ -232,7 +253,7 @@ goto end
 echo.
 echo Removing MoonCode...
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-  "$target = $env:LOCALAPPDATA + '\MoonCode\bin';" ^
+  "$target = $env:LOCALAPPDATA + '\MoonAgent\bin';" ^
   "$path = [Environment]::GetEnvironmentVariable('Path','User');" ^
   "if ($path) {" ^
   "  $segments = $path -split ';' | Where-Object { $_ -and $_.Trim() -and $_.Trim() -ne $target };" ^
@@ -241,7 +262,6 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "Write-Host 'PATH cleaned.'"
 if exist "%INSTALL_DIR%" rmdir /s /q "%INSTALL_DIR%" >nul 2>&1
 if exist "%BIN_DIR%" rmdir /s /q "%BIN_DIR%" >nul 2>&1
-call npm uninstall -g mooncode mooncli moon
 echo.
 echo Removed. Close and reopen terminals for PATH changes.
 goto end

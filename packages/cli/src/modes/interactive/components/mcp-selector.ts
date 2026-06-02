@@ -10,7 +10,7 @@ export type McpSelectorOption = {
 };
 
 /**
- * Component that renders the MCP interactive selector menu
+ * Component that renders the MCP interactive selector menu.
  */
 export class McpSelectorComponent extends Container implements Focusable {
 	private searchInput: Input;
@@ -27,7 +27,7 @@ export class McpSelectorComponent extends Container implements Focusable {
 	private listContainer: Container;
 	private allOptions: McpSelectorOption[];
 	private filteredOptions: McpSelectorOption[];
-	private selectedIndex: number = 0;
+	private selectedIndex = 0;
 	private onSelectCallback: (optionId: string) => void;
 	private onCancelCallback: () => void;
 	private mcpStatusMessage: string;
@@ -49,8 +49,9 @@ export class McpSelectorComponent extends Container implements Focusable {
 		this.addChild(new DynamicBorder());
 		this.addChild(new Spacer(1));
 
-		this.addChild(new TruncatedText(theme.fg("accent", theme.bold("Model Bağlam Protokolü (MCP) Menüsü:")), 1, 0));
-		this.addChild(new TruncatedText(theme.fg("muted", this.mcpStatusMessage), 1, 0));
+		this.addChild(new TruncatedText(theme.fg("accent", theme.bold("MoonCode")) + theme.fg("muted", " | MCP Control"), 1, 0));
+		this.addChild(new TruncatedText(theme.fg("muted", "Connect, restart, and search MCP servers from one calm panel."), 1, 0));
+		this.addChild(new TruncatedText(theme.fg("dim", this.mcpStatusMessage), 1, 0));
 		this.addChild(new Spacer(1));
 
 		this.searchInput = new Input();
@@ -95,17 +96,9 @@ export class McpSelectorComponent extends Container implements Focusable {
 			if (!option) continue;
 
 			const isSelected = i === this.selectedIndex;
-
-			let line = "";
-			if (isSelected) {
-				const prefix = theme.fg("accent", "→ ");
-				const text = theme.fg("accent", option.name);
-				line = prefix + text + theme.fg("muted", ` - ${option.description}`);
-			} else {
-				const text = `  ${theme.fg("text", option.name)}`;
-				line = text + theme.fg("muted", ` - ${option.description}`);
-			}
-
+			const prefix = isSelected ? theme.fg("accent", "> ") : "  ";
+			const name = isSelected ? theme.fg("accent", option.name) : theme.fg("text", option.name);
+			const line = `${prefix}${name}${theme.fg("muted", ` - ${option.description}`)}`;
 			this.listContainer.addChild(new TruncatedText(line, 1, 0));
 		}
 
@@ -115,7 +108,7 @@ export class McpSelectorComponent extends Container implements Focusable {
 		}
 
 		if (this.filteredOptions.length === 0) {
-			this.listContainer.addChild(new TruncatedText(theme.fg("muted", `  Seçenek bulunamadı`), 1, 0));
+			this.listContainer.addChild(new TruncatedText(theme.fg("muted", "  No matching MCP servers."), 1, 0));
 		}
 	}
 

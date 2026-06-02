@@ -4,10 +4,12 @@
 # Mirrors .github/workflows/build-binaries.yml
 #
 # Usage:
-#   ./scripts/build-binaries.sh [--skip-deps] [--platform <platform>]
+#   ./tools/scripts/build-binaries.sh [--skip-deps] [--platform <platform>]
 #
 # Options:
 #   --skip-deps         Skip installing cross-platform dependencies
+#   --skip-install      Skip npm install/ci and reuse the current node_modules tree
+#   --skip-build        Skip the monorepo build step and reuse the current dist outputs
 #   --platform <name>   Build only for specified platform (darwin-arm64, darwin-x64, linux-x64, linux-arm64, windows-x64)
 #
 # Output:
@@ -20,15 +22,25 @@
 
 set -euo pipefail
 
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 
 SKIP_DEPS=false
+SKIP_INSTALL=false
+SKIP_BUILD=false
 PLATFORM=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
         --skip-deps)
             SKIP_DEPS=true
+            shift
+            ;;
+        --skip-install)
+            SKIP_INSTALL=true
+            shift
+            ;;
+        --skip-build)
+            SKIP_BUILD=true
             shift
             ;;
         --platform)
@@ -42,7 +54,6 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Validate platform if specified
 if [[ -n "$PLATFORM" ]]; then
     case "$PLATFORM" in
         darwin-arm64|darwin-x64|linux-x64|linux-arm64|windows-x64)
@@ -56,14 +67,17 @@ if [[ -n "$PLATFORM" ]]; then
 fi
 
 echo "==> Installing dependencies..."
-npm ci
+if [[ "$SKIP_INSTALL" == "true" ]]; then
+    echo "==> Skipping dependency install (--skip-install)"
+elif [[ -d node_modules ]]; then
+    echo "==> Existing node_modules detected; using npm install for a local refresh."
+    npm install
+else
+    npm ci
+fi
 
 if [[ "$SKIP_DEPS" == "false" ]]; then
     echo "==> Installing cross-platform native bindings..."
-    # npm ci only installs optional deps for the current platform
-    # We need all platform bindings for bun cross-compilation
-    # Use --force to bypass platform checks (os/cpu restrictions in package.json)
-    # Install all in one command to avoid npm removing packages from previous installs
     npm install --no-save --force \
         @mariozechner/clipboard-darwin-arm64@0.3.0 \
         @mariozechner/clipboard-darwin-x64@0.3.0 \
@@ -83,17 +97,24 @@ else
     echo "==> Skipping cross-platform native bindings (--skip-deps)"
 fi
 
-echo "==> Building all packages..."
-npm run build
+if [[ "$SKIP_BUILD" == "true" ]]; then
+    echo "==> Skipping monorepo build (--skip-build)"
+else
+    echo "==> Building all packages..."
+    npm run build
+fi
 
 echo "==> Building binaries..."
+if ! command -v bun >/dev/null 2>&1; then
+    echo "ERROR: Bun is required to compile release binaries."
+    echo "Install Bun or run this script in the GitHub Actions release environment."
+    exit 1
+fi
 cd packages/cli
 
-# Clean previous builds
 rm -rf binaries
-mkdir -p binaries/{darwin-arm64,darwin-x64,linux-x64,linux-arm64,windows-x64}
+mkdir -p binaries/{darwin-arm64,darwin-x64,linux-x64,linux-arm64,windows-x64}/MoonAgent/MoonCode
 
-# Determine which platforms to build
 if [[ -n "$PLATFORM" ]]; then
     PLATFORMS=("$PLATFORM")
 else
@@ -102,14 +123,10 @@ fi
 
 for platform in "${PLATFORMS[@]}"; do
     echo "Building for $platform..."
-    # Externalize koffi to avoid embedding all 18 platform .node files (~74MB)
-    # into every binary. Koffi is only used on Windows for VT input and the
-    # call site has a try/catch fallback. For Windows builds, we copy the
-    # appropriate .node file alongside the binary below.
     if [[ "$platform" == "windows-x64" ]]; then
-        bun build --compile --external koffi --target=bun-$platform ./dist/bun/cli.js --outfile binaries/$platform/MoonCode.exe
+        bun build --compile --external koffi --target=bun-$platform ./dist/bun/cli.js --outfile binaries/$platform/MoonAgent/MoonCode/MoonCode.exe
     else
-        bun build --compile --external koffi --target=bun-$platform ./dist/bun/cli.js --outfile binaries/$platform/MoonCode
+        bun build --compile --external koffi --target=bun-$platform ./dist/bun/cli.js --outfile binaries/$platform/MoonAgent/MoonCode/MoonCode
     fi
 done
 
@@ -125,54 +142,57 @@ copy_if_exists() {
     fi
 }
 
-# Copy shared files to each platform directory
 for platform in "${PLATFORMS[@]}"; do
-    cp package.json binaries/$platform/
-    cp README.md binaries/$platform/
-    cp CHANGELOG.md binaries/$platform/
-    cp setup.bat binaries/$platform/
+    mkdir -p binaries/$platform/MoonAgent/MoonCode
+    cp ../../setup.bat binaries/$platform/MoonAgent/
+    cp ../../setup.sh binaries/$platform/MoonAgent/
+    cp ../../setup.ps1 binaries/$platform/MoonAgent/
 
-    copy_if_exists "../../node_modules/@silvia-odwyer/photon-node/photon_rs_bg.wasm" "binaries/$platform/"
-    mkdir -p binaries/$platform/theme
-    cp dist/modes/interactive/theme/*.json binaries/$platform/theme/
-    mkdir -p binaries/$platform/assets
-    cp dist/modes/interactive/assets/* binaries/$platform/assets/
-    copy_if_exists "dist/core/export-html" "binaries/$platform/"
-    copy_if_exists "docs" "binaries/$platform/"
-    copy_if_exists "examples" "binaries/$platform/"
+    cp package.json binaries/$platform/MoonAgent/MoonCode/
+    cp README.md binaries/$platform/MoonAgent/MoonCode/
+    cp CHANGELOG.md binaries/$platform/MoonAgent/MoonCode/
 
-    # Copy koffi native module for Windows (needed for VT input support)
+    copy_if_exists "../../node_modules/@silvia-odwyer/photon-node/photon_rs_bg.wasm" "binaries/$platform/MoonAgent/MoonCode/"
+    mkdir -p binaries/$platform/MoonAgent/MoonCode/theme
+    cp dist/modes/interactive/theme/*.json binaries/$platform/MoonAgent/MoonCode/theme/
+    mkdir -p binaries/$platform/MoonAgent/MoonCode/assets
+    cp dist/modes/interactive/assets/* binaries/$platform/MoonAgent/MoonCode/assets/
+    copy_if_exists "dist/core/export-html" "binaries/$platform/MoonAgent/MoonCode/"
+    copy_if_exists "docs" "binaries/$platform/MoonAgent/MoonCode/"
+    copy_if_exists "examples" "binaries/$platform/MoonAgent/MoonCode/"
+    copy_if_exists "browser-extension" "binaries/$platform/MoonAgent/MoonCode/"
+
     if [[ "$platform" == "windows-x64" ]]; then
-        mkdir -p binaries/$platform/node_modules/koffi/build/koffi/win32_x64
-        copy_if_exists "../../node_modules/koffi/index.js" "binaries/$platform/node_modules/koffi/"
-        copy_if_exists "../../node_modules/koffi/package.json" "binaries/$platform/node_modules/koffi/"
-        copy_if_exists "../../node_modules/koffi/build/koffi/win32_x64/koffi.node" "binaries/$platform/node_modules/koffi/build/koffi/win32_x64/"
+        mkdir -p binaries/$platform/MoonAgent/MoonCode/node_modules/koffi/build/koffi/win32_x64
+        copy_if_exists "../../node_modules/koffi/index.js" "binaries/$platform/MoonAgent/MoonCode/node_modules/koffi/"
+        copy_if_exists "../../node_modules/koffi/package.json" "binaries/$platform/MoonAgent/MoonCode/node_modules/koffi/"
+        copy_if_exists "../../node_modules/koffi/build/koffi/win32_x64/koffi.node" "binaries/$platform/MoonAgent/MoonCode/node_modules/koffi/build/koffi/win32_x64/"
     fi
 done
 
-# Create archives
+chmod +x ../../setup.sh || true
+
 cd binaries
 
 for platform in "${PLATFORMS[@]}"; do
     if [[ "$platform" == "windows-x64" ]]; then
-        # Windows (zip)
         echo "Creating MoonCode-$platform.zip..."
-        (cd $platform && zip -r ../MoonCode-$platform.zip .)
+        (cd "$platform" && zip -r "../MoonCode-$platform.zip" MoonAgent)
     else
-        # Unix platforms (tar.gz) - use wrapper directory for mise compatibility
         echo "Creating MoonCode-$platform.tar.gz..."
-        mv $platform MoonCode && tar -czf MoonCode-$platform.tar.gz MoonCode && mv MoonCode $platform
+        (cd "$platform" && tar -czf "../MoonCode-$platform.tar.gz" MoonAgent)
     fi
 done
 
-# Extract archives for easy local testing
 echo "==> Extracting archives for testing..."
 for platform in "${PLATFORMS[@]}"; do
-    rm -rf $platform
+    rm -rf "$platform/MoonAgent"
     if [[ "$platform" == "windows-x64" ]]; then
-        mkdir -p $platform && (cd $platform && unzip -q ../MoonCode-$platform.zip)
+        mkdir -p "$platform"
+        (cd "$platform" && unzip -q "../MoonCode-$platform.zip")
     else
-        tar -xzf MoonCode-$platform.tar.gz && mv MoonCode $platform
+        mkdir -p "$platform"
+        tar -xzf "MoonCode-$platform.tar.gz" -C "$platform"
     fi
 done
 
@@ -183,5 +203,5 @@ ls -lh *.tar.gz *.zip 2>/dev/null || true
 echo ""
 echo "Extracted directories for testing:"
 for platform in "${PLATFORMS[@]}"; do
-    echo "  binaries/$platform/MoonCode"
+    echo "  binaries/$platform/MoonAgent/MoonCode"
 done

@@ -164,6 +164,85 @@ export function parseSkillBlock(text: string): ParsedSkillBlock | null {
 	};
 }
 
+const QUICK_CHAT_MAX_CHARS = 48;
+
+function normalizeQuickChatText(text: string): string {
+	return text
+		.normalize("NFD")
+		.replace(/\p{Diacritic}/gu, "")
+		.toLowerCase()
+		.replace(/[^\p{L}\p{N}\s']/gu, " ")
+		.replace(/\s+/g, " ")
+		.trim();
+}
+
+export function isQuickChatPrompt(text: string, images?: ImageContent[]): boolean {
+	if (images?.length) return false;
+
+	const trimmed = text.trim();
+	if (!trimmed) return false;
+	if (trimmed.length > QUICK_CHAT_MAX_CHARS) return false;
+	if (trimmed.startsWith("/") || trimmed.startsWith("!")) return false;
+	if (/[\n\r`{}[\]<>|=]/.test(trimmed)) return false;
+
+	const normalized = normalizeQuickChatText(trimmed);
+	if (!normalized) return false;
+
+	const quickChatPatterns = [
+		/^(selam|merhaba|hello|hi|hey|yo|sup)$/,
+		/^(naber|ne haber|nasilsin|iyi misin|napiyorsun|ne yapiyorsun|whats up|how are you)$/,
+		/^(tesekkur(ler)?|sag ol(un)?|thank you|thanks)$/,
+	];
+
+	return quickChatPatterns.some((pattern) => pattern.test(normalized));
+}
+
+function buildQuickChatReply(text: string): string {
+	const normalized = normalizeQuickChatText(text);
+
+	if (/^(tesekkur(ler)?|sag ol(un)?|thank you|thanks)$/.test(normalized)) {
+		return "Her zaman.";
+	}
+
+	if (/^(naber|ne haber|nasilsin|iyi misin|napiyorsun|ne yapiyorsun|whats up|how are you)$/.test(normalized)) {
+		return "İyiyim, hazırım. Ne yapalım?";
+	}
+
+	return "Hazırım. Ne yapalım?";
+}
+
+function createQuickChatUserMessage(text: string, images?: ImageContent[]): Message {
+	const content: (TextContent | ImageContent)[] = [{ type: "text", text }];
+	if (images?.length) {
+		content.push(...images);
+	}
+	return {
+		role: "user",
+		content,
+		timestamp: Date.now(),
+	};
+}
+
+function createQuickChatAssistantMessage(text: string, model: Model<any> | undefined): AssistantMessage {
+	return {
+		role: "assistant",
+		content: [{ type: "text", text }],
+		api: model?.api ?? "mooncode",
+		provider: model?.provider ?? "mooncode",
+		model: model?.id ?? "mooncode",
+		usage: {
+			input: 0,
+			output: 0,
+			cacheRead: 0,
+			cacheWrite: 0,
+			totalTokens: 0,
+			cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
+		},
+		stopReason: "stop",
+		timestamp: Date.now(),
+	};
+}
+
 /** Session-specific events that extend the core EngineEvent */
 export type EngineSessionEvent =
 	| EngineEvent
@@ -1554,6 +1633,21 @@ export class EngineSession {
 				expandedText = expandPromptTemplate(expandedText, [...this.promptTemplates]);
 			}
 			expandedText = optimizePromptForIntentCapsule(expandedText).optimizedText;
+			if (this._pendingNextTurnMessages.length === 0 && isQuickChatPrompt(expandedText, currentImages)) {
+				const userMessage = createQuickChatUserMessage(expandedText, currentImages);
+				const assistantMessage = createQuickChatAssistantMessage(buildQuickChatReply(expandedText), this.model);
+
+				this.engine.state.messages = [...this.engine.state.messages, userMessage, assistantMessage];
+				this.sessionManager.appendMessage(userMessage);
+				this.sessionManager.appendMessage(assistantMessage);
+
+				this._emit({ type: "message_start", message: userMessage });
+				this._emit({ type: "message_end", message: userMessage });
+				this._emit({ type: "message_start", message: assistantMessage });
+				this._emit({ type: "message_end", message: assistantMessage });
+				preflightResult?.(true);
+				return;
+			}
 			this._applyFastThinkingGuard(expandedText);
 			this._applyAutoThinkingLevel(expandedText);
 

@@ -50,11 +50,11 @@ function getGreeting(): string {
 
 function buildWordmark(width: number, tick: number): string {
 	const palette: Array<[number, number, number]> = [
-		[255, 255, 255], // Glowing white (Full Moon)
-		[220, 220, 220], // Light silver ash
-		[160, 160, 160], // Soft gray
-		[100, 100, 100], // Lunar shadow gray
-		[40, 40, 40], // Deep crater gray
+		[255, 255, 255],
+		[220, 220, 220],
+		[160, 160, 160],
+		[100, 100, 100],
+		[40, 40, 40],
 	];
 	const word = "MOONCODE";
 	const phase = tick % 90;
@@ -65,28 +65,21 @@ export function buildIntroLines(width: number, phase = 0): string[] {
 	const dim = (s: string) => `\x1b[38;2;100;100;100m${s}\x1b[39m`;
 	const soft = (s: string) => `\x1b[38;2;180;180;180m${s}\x1b[39m`;
 	const glow = (s: string) => `\x1b[1m\x1b[38;2;255;255;255m${s}\x1b[39m\x1b[22m`;
-	const _star = (s: string) => `\x1b[38;2;200;200;200m${s}\x1b[39m`;
 	const safeWidth = Math.max(24, Math.min(width, 104));
 	const lineWidth = Math.max(24, Math.min(safeWidth - 12, 78));
 	const rule = center(
 		gradient("─".repeat(lineWidth), phase / 2, [
-			[30, 30, 30], // Dark crater charcoal
-			[160, 160, 160], // Medium silver gray
-			[255, 255, 255], // Glowing white
+			[30, 30, 30],
+			[160, 160, 160],
+			[255, 255, 255],
 		]),
 		width,
 	);
 	const wordmark = buildWordmark(width, phase);
 	const greeting = center(glow(`${getGreeting()}, ${getDisplayName()}.`), width);
-	const intro = center(
-		soft("MoonCode hazır. Düşünüyorum, kontrol ediyorum, küçük ve faydalı öneriler veriyorum."),
-		width,
-	);
-	const title = center(glow("Fast coding agent. Clean tools. Quiet output."), width);
-	const sub = center(soft("MCP, Browser Bridge, sessions, and DreamKernel reflexes"), width);
 	const tip = center(dim("İpucu: /brain, /autothink, /mcp, /doctor"), width);
 
-	return ["", wordmark, greeting, intro, title, sub, "", rule, tip, ""];
+	return ["", wordmark, greeting, "", rule, tip, ""];
 }
 
 export class MoonCodeIntroComponent implements Component {

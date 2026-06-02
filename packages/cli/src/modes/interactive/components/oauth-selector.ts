@@ -11,12 +11,12 @@ export type AuthSelectorProvider = {
 };
 
 /**
- * Component that renders an auth provider selector
+ * Component that renders an auth provider selector.
+ * Styled to match the MoonCode control panels.
  */
 export class OAuthSelectorComponent extends Container implements Focusable {
 	private searchInput: Input;
 
-	// Focusable implementation - propagate to search input for IME cursor positioning
 	private _focused = false;
 	get focused(): boolean {
 		return this._focused;
@@ -29,7 +29,7 @@ export class OAuthSelectorComponent extends Container implements Focusable {
 	private listContainer: Container;
 	private allProviders: AuthSelectorProvider[];
 	private filteredProviders: AuthSelectorProvider[];
-	private selectedIndex: number = 0;
+	private selectedIndex = 0;
 	private mode: "login" | "logout";
 	private authStorage: AuthStorage;
 	private getAuthStatus: (providerId: string) => AuthStatus;
@@ -54,13 +54,18 @@ export class OAuthSelectorComponent extends Container implements Focusable {
 		this.onSelectCallback = onSelect;
 		this.onCancelCallback = onCancel;
 
-		// Add top border
 		this.addChild(new DynamicBorder());
 		this.addChild(new Spacer(1));
-
-		// Add title
-		const title = mode === "login" ? "Yapılandırmak için sağlayıcı seçin:" : "Çıkış yapmak için sağlayıcı seçin:";
-		this.addChild(new TruncatedText(theme.fg("accent", theme.bold(title)), 1, 0));
+		this.addChild(new TruncatedText(theme.fg("accent", theme.bold("MoonCode")) + theme.fg("muted", " | Login"), 1, 0));
+		this.addChild(
+			new TruncatedText(
+				theme.fg("muted", mode === "login"
+					? "Choose a provider, then complete OAuth or API-key login in one clean flow."
+					: "Choose a provider to remove its stored MoonCode credentials."),
+				1,
+				0,
+			),
+		);
 		this.addChild(new Spacer(1));
 
 		this.searchInput = new Input();
@@ -73,16 +78,11 @@ export class OAuthSelectorComponent extends Container implements Focusable {
 		this.addChild(this.searchInput);
 		this.addChild(new Spacer(1));
 
-		// Create list container
 		this.listContainer = new Container();
 		this.addChild(this.listContainer);
-
 		this.addChild(new Spacer(1));
-
-		// Add bottom border
 		this.addChild(new DynamicBorder());
 
-		// Initial render
 		this.filterProviders("");
 	}
 
@@ -109,18 +109,10 @@ export class OAuthSelectorComponent extends Container implements Focusable {
 			if (!provider) continue;
 
 			const isSelected = i === this.selectedIndex;
-
 			const statusIndicator = this.formatStatusIndicator(provider);
-			let line = "";
-			if (isSelected) {
-				const prefix = theme.fg("accent", "→ ");
-				const text = theme.fg("accent", provider.name);
-				line = prefix + text + statusIndicator;
-			} else {
-				const text = `  ${theme.fg("text", provider.name)}`;
-				line = text + statusIndicator;
-			}
-
+			const prefix = isSelected ? theme.fg("accent", "> ") : "  ";
+			const name = isSelected ? theme.fg("accent", provider.name) : theme.fg("text", provider.name);
+			const line = `${prefix}${name}${statusIndicator}`;
 			this.listContainer.addChild(new TruncatedText(line, 1, 0));
 		}
 
@@ -129,71 +121,61 @@ export class OAuthSelectorComponent extends Container implements Focusable {
 			this.listContainer.addChild(new TruncatedText(scrollInfo, 1, 0));
 		}
 
-		// Show "no providers" if empty
 		if (this.filteredProviders.length === 0) {
 			const message =
 				this.allProviders.length === 0
 					? this.mode === "login"
-						? "Kullanılabilir sağlayıcı yok"
-						: "Giriş yapmış sağlayıcı yok. Önce /login kullanın."
-					: "Eşleşen sağlayıcı yok";
+						? "Available providers: none"
+						: "No signed-in providers. Use /login first."
+					: "No matching providers";
 			this.listContainer.addChild(new TruncatedText(theme.fg("muted", `  ${message}`), 1, 0));
 		}
 	}
 
 	private formatStatusIndicator(provider: AuthSelectorProvider): string {
 		const credential = this.authStorage.get(provider.id);
-		if (credential?.type === provider.authType) return theme.fg("success", " ✓ yapılandırıldı");
+		if (credential?.type === provider.authType) return theme.fg("success", " [configured]");
 		if (credential) {
-			const label = credential.type === "oauth" ? "abonelik yapılandırıldı" : "API anahtarı yapılandırıldı";
-			return theme.fg("muted", " • ") + theme.fg("warning", label);
+			const label = credential.type === "oauth" ? "subscription configured" : "API key configured";
+			return theme.fg("muted", " [") + theme.fg("warning", label) + theme.fg("muted", "]");
 		}
-		if (provider.authType !== "api_key") return theme.fg("muted", " • yapılandırılmamış");
+		if (provider.authType !== "api_key") return theme.fg("muted", " [unconfigured]");
 
 		const status = this.getAuthStatus(provider.id);
 		switch (status.source) {
 			case "environment":
-				return theme.fg("success", ` ✓ ortam: ${status.label ?? "API anahtarı"}`);
+				return theme.fg("success", ` [env: ${status.label ?? "API key"}]`);
 			case "runtime":
-				return theme.fg("success", " ✓ çalışma zamanı API anahtarı");
+				return theme.fg("success", " [runtime API key]");
 			case "fallback":
-				return theme.fg("success", " ✓ özel API anahtarı");
+				return theme.fg("success", " [custom API key]");
 			case "models_json_key":
-				return theme.fg("success", " ✓ models.json'daki anahtar");
+				return theme.fg("success", " [models.json key]");
 			case "models_json_command":
-				return theme.fg("success", " ✓ models.json'daki komut");
+				return theme.fg("success", " [models.json command]");
 			default:
-				return theme.fg("muted", " • yapılandırılmamış");
+				return theme.fg("muted", " [unconfigured]");
 		}
 	}
 
 	handleInput(keyData: string): void {
 		const kb = getKeybindings();
-		// Up arrow
 		if (kb.matches(keyData, "tui.select.up")) {
 			if (this.filteredProviders.length === 0) return;
 			this.selectedIndex = Math.max(0, this.selectedIndex - 1);
 			this.updateList();
-		}
-		// Down arrow
-		else if (kb.matches(keyData, "tui.select.down")) {
+		} else if (kb.matches(keyData, "tui.select.down")) {
 			if (this.filteredProviders.length === 0) return;
 			this.selectedIndex = Math.min(this.filteredProviders.length - 1, this.selectedIndex + 1);
 			this.updateList();
-		}
-		// Enter
-		else if (kb.matches(keyData, "tui.select.confirm")) {
+		} else if (kb.matches(keyData, "tui.select.confirm")) {
 			const selectedProvider = this.filteredProviders[this.selectedIndex];
 			if (selectedProvider) {
 				this.onSelectCallback(selectedProvider.id);
 			}
-		}
-		// Escape or Ctrl+C
-		else if (kb.matches(keyData, "tui.select.cancel")) {
+		} else if (kb.matches(keyData, "tui.select.cancel")) {
 			this.onCancelCallback();
-		}
-		// Pass everything else to search input
-		else {
+		} else {
 			this.searchInput.handleInput(keyData);
 			this.filterProviders(this.searchInput.getValue());
 		}

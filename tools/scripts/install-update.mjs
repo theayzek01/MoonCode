@@ -4,36 +4,21 @@ import { join } from "node:path";
 
 const root = process.cwd();
 const isWindows = process.platform === "win32";
-const npm = isWindows ? "npm.cmd" : "npm";
+const scriptName = isWindows ? "setup.bat" : "setup.sh";
+const scriptPath = join(root, scriptName);
 
-function run(command, args, options = {}) {
-	const label = [command, ...args].join(" ");
-	console.log(`\n> ${label}`);
-	const result = spawnSync(command, args, {
-		cwd: root,
-		stdio: "inherit",
-		shell: false,
-		...options,
-	});
-	if (result.status !== 0) {
-		process.exit(result.status ?? 1);
-	}
-}
-
-if (!existsSync(join(root, "package.json")) || !existsSync(join(root, "packages", "cli", "package.json"))) {
-	console.error("Run this from the MoonCode repository root.");
+if (!existsSync(scriptPath)) {
+	console.error(`Could not find ${scriptName} in the current repository root.`);
 	process.exit(1);
 }
 
-if (existsSync(join(root, ".git"))) {
-	run("git", ["fetch", "--all", "--prune"]);
-	run("git", ["checkout", "launch/mooncode"]);
-	run("git", ["pull", "--ff-only", "origin", "launch/mooncode"]);
-}
+const command = isWindows ? "cmd" : "bash";
+const args = isWindows ? ["/c", scriptPath, "install"] : [scriptPath, "install"];
 
-run(npm, ["install"]);
-run(npm, ["run", "build"]);
-run(npm, ["install", "-g", isWindows ? ".\\packages\\cli" : "./packages/cli"]);
-run("mooncode", ["--version"], { shell: isWindows });
+const result = spawnSync(command, args, {
+	cwd: root,
+	stdio: "inherit",
+	shell: false,
+});
 
-console.log("\nMoonCode is ready. Start it with: mooncode");
+process.exit(result.status ?? 1);
