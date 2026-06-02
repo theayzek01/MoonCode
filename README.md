@@ -2,28 +2,18 @@
 
 Terminal için yerel kod asistanı.
 
-<p align="center">
-  <img src="packages/cli/src/modes/interactive/assets/logo.png" alt="MoonCode" width="96" />
-</p>
+MoonCode; terminal odaklı çalışma, kalıcı oturumlar, Browser Bridge ve MCP desteğini tek yerde toplar. Hızlı, sade ve yerel kullanım için tasarlanmıştır.
 
-<p align="center">
-  <img src="packages/cli/browser-extension/chrome/icon.png" alt="Browser Bridge" width="40" />
-  <img src="packages/cli/browser-extension/chrome/icons/Browser/15.%20Search.png" alt="Search" width="40" />
-  <img src="packages/cli/browser-extension/chrome/icons/Computer%20Systems/1.%20Pointer.png" alt="Pointer" width="40" />
-  <img src="packages/cli/browser-extension/chrome/icons/Browser/5.%20Refresh.png" alt="Refresh" width="40" />
-  <img src="packages/cli/browser-extension/chrome/icons/Browser/7.%20Download.png" alt="Download" width="40" />
-  <img src="packages/cli/browser-extension/chrome/icons/Social/4.%20Chat.png" alt="Chat" width="40" />
-</p>
+## Özellikler
 
-## Kısa Bakış
-
-- Terminal odaklı çalışma
-- Kalıcı oturumlar
+- Terminal tabanlı akış
+- Kalıcı oturum desteği
 - Browser Bridge
 - MCP desteği
-- TUI arayüzü
+- TUI arayüz
+- Yerel çalışma
 
-## Başlatma
+## Başlangıç
 
 ```bash
 npm install
@@ -33,8 +23,8 @@ mooncode
 
 ## Temel Komutlar
 
-- `/help` yardım
-- `/brain` bellek ve öneriler
+- `/help` kısa yardım
+- `/brain` bağlam ve öneriler
 - `/autothink` otomatik düşünme
 - `/browser` tarayıcı durumu
 - `/mcp` MCP yönetimi
@@ -47,18 +37,10 @@ npm run check:ci
 npm test
 ```
 
-## Browser Bridge
+## Gereksinimler
 
-Chrome eklentisi:
-
-- [`packages/cli/browser-extension/chrome`](packages/cli/browser-extension/chrome)
-
-Kurulum notları:
-
-- `mooncode browser-bridge` çalıştır
-- Chrome'da `chrome://extensions` aç
-- Developer mode'u aç
-- `Load unpacked` ile eklentiyi yükle
+- Node.js 20+
+- Git
 
 ## Lisans
 

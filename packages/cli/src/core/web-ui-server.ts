@@ -1,13 +1,22 @@
 // @ts-nocheck
-import { createReadStream, existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import {
+	createReadStream,
+	existsSync,
+	mkdirSync,
+	readdirSync,
+	readFileSync,
+	rmSync,
+	statSync,
+	writeFileSync,
+} from "node:fs";
 import { createServer, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
 import { dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { getSessionsDir } from "../config.js";
+import { getEngineDir, getSessionsDir } from "../config.js";
 
 const INDEX_HTML = `<!doctype html>
-<html lang="tr">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -22,14 +31,14 @@ const INDEX_HTML = `<!doctype html>
     <a class="brand" href="#top" aria-label="MoonCode">
       <span class="mark"><img src="/assets/Mooncodewhitelogo.png" alt="" /></span>
       <span class="word">MoonCode</span>
-      <span class="version">2026-v35</span>
+      <span class="version">2026-v36</span>
     </a>
     <button class="menu" type="button" aria-expanded="false" aria-controls="nav">Menü</button>
     <nav id="nav" class="nav" aria-label="Ana menü">
       <a href="#urun">Ürün</a>
       <a href="#akis">Akış</a>
-      <a href="#oturumlar">Oturumlar</a>
-      <a href="#kurulum">Kurulum</a>
+      <a href="#oturumlar">Sessions</a>
+      <a href="#kurulum">Install</a>
       <a class="github" href="https://github.com/theayzek01/mooncode" target="_blank" rel="noreferrer">GitHub</a>
     </nav>
   </header>
@@ -41,7 +50,7 @@ const INDEX_HTML = `<!doctype html>
         <h1>Repo içinde sessiz, hızlı ve kontrollü çalışır.</h1>
         <p class="lead">MoonCode terminalden çalışan Türkçe öncelikli kodlama ajanı. Dosyaları seçerek okur, küçük patch üretir, sonucu doğrular ve gereksiz çıktı basmadan işi kapatır.</p>
         <div class="actions">
-          <a class="button primary" href="#kurulum">Kur</a>
+          <a class="button primary" href="#kurulum">Install</a>
           <a class="button ghost" href="#oturumlar">Canlı oturumları gör</a>
         </div>
         <div class="notes" aria-label="Öne çıkanlar">
@@ -104,7 +113,7 @@ const INDEX_HTML = `<!doctype html>
         <span id="session-status" class="pill">yükleniyor</span>
       </div>
       <div class="session-grid">
-        <aside class="session-list" id="sessions-list"><p class="muted pad">Oturumlar yükleniyor…</p></aside>
+        <aside class="session-list" id="sessions-list"><p class="muted pad">Sessions yükleniyor…</p></aside>
         <article class="chat-panel">
           <div class="chat-head"><b id="chat-title">Oturum seç</b><span>son 60 kayıt</span></div>
           <div id="chat" class="chat-empty">Soldan bir oturum seçince konuşma burada açılır.</div>
@@ -114,11 +123,11 @@ const INDEX_HTML = `<!doctype html>
 
     <section class="section shell install" id="kurulum">
       <div>
-        <p class="label">KURULUM</p>
+        <p class="label">INSTALL</p>
         <h2>Repo’dan çalıştır.</h2>
       </div>
       <div class="code-card">
-        <button id="copy-install" type="button">Kopyala</button>
+        <button id="copy-install" type="button">Copy</button>
         <pre id="install-code">git clone https://github.com/theayzek01/mooncode.git
 cd mooncode
 npm install
@@ -130,7 +139,7 @@ mooncode</pre>
   </main>
 
   <footer class="footer shell">
-      <span>MoonCode 2026-v35</span>
+      <span>MoonCode 2026-v36</span>
     <a href="https://github.com/theayzek01/mooncode" target="_blank" rel="noreferrer">github.com/theayzek01/mooncode</a>
   </footer>
 
@@ -339,7 +348,7 @@ if (installButton) {
     try {
       await navigator.clipboard.writeText(code.trim());
       const old = installButton.textContent;
-      installButton.textContent = 'Kopyalandı';
+      installButton.textContent = 'Copyndı';
       setTimeout(() => { installButton.textContent = old; }, 1300);
     } catch {
       installButton.textContent = 'Seçip kopyala';
@@ -450,7 +459,7 @@ if (sessionsEl) {
 }`;
 
 const APP_HTML = `<!doctype html>
-<html lang="tr">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -472,7 +481,7 @@ const APP_HTML = `<!doctype html>
       <div class="session-search">
         <div class="search-wrapper">
           <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" class="search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <input type="text" id="search-input" placeholder="Oturumlarda ara..." />
+          <input type="text" id="search-input" placeholder="Sessionsda ara..." />
         </div>
       </div>
       <div class="sessions-list" id="sessions-list">
@@ -513,7 +522,7 @@ const APP_HTML = `<!doctype html>
               <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
             </button>
           </form>
-          <div class="input-footer-text">MoonCode otonom bir geliştirme asistanıdır · v2026-v35</div>
+          <div class="input-footer-text">MoonCode otonom bir geliştirme asistanıdır · v2026-v36</div>
         </div>
       </footer>
     </main>
@@ -1295,7 +1304,7 @@ function parseMarkdown(text) {
       '<div class="code-block">' +
         '<div class="code-header">' +
           '<span>' + escapeHtml(lang || "code") + '</span>' +
-          '<button class="copy-code-btn" onclick="navigator.clipboard.writeText(decodeURIComponent(\\'' + encodeURIComponent(code) + '\\')).then(() => { this.innerText = \\'Kopyalandı\\'; setTimeout(() => this.innerText = \\'Kopyala\\', 1200); })">Kopyala</button>' +
+          '<button class="copy-code-btn" onclick="navigator.clipboard.writeText(decodeURIComponent(\\'' + encodeURIComponent(code) + '\\')).then(() => { this.innerText = \\'Copyndı\\'; setTimeout(() => this.innerText = \\'Copy\\', 1200); })">Copy</button>' +
         '</div>' +
         '<pre><code>' + escapedCode + '</code></pre>' +
       '</div>'
@@ -1586,8 +1595,6 @@ $("#message-input").addEventListener("keydown", function(e) {
 init();
 `;
 
-
-
 const _webUiDir = dirname(fileURLToPath(import.meta.url));
 const VIDEOEDIT_HTML: string = readFileSync(join(_webUiDir, "videoedit.html"), "utf-8");
 const PHOTOEDIT_HTML: string = readFileSync(join(_webUiDir, "photoedit.html"), "utf-8");
@@ -1703,12 +1710,18 @@ export const editorActionsListeners = new Set<
 export const webUiMessageListeners = new Set<(message: string) => void>();
 export const webUiUnlockListeners = new Set<() => void>();
 export const webUiAuthActionListeners = new Set<(action: any) => void | Promise<void>>();
+export const webUiMcpActionListeners = new Set<(action: any) => void | Promise<void>>();
 export let activeSessionId: string | null = null;
 let authPanelStateProvider: (() => unknown) | undefined;
+let mcpPanelStateProvider: (() => unknown) | undefined;
 let authPanelOAuthEvent: any = null;
 
 export function setAuthPanelStateProvider(provider: (() => unknown) | undefined): void {
 	authPanelStateProvider = provider;
+}
+
+export function setMcpPanelStateProvider(provider: (() => unknown) | undefined): void {
+	mcpPanelStateProvider = provider;
 }
 
 export function setAuthPanelOAuthEvent(event: any): void {
@@ -1724,54 +1737,61 @@ const AUTH_PANEL_HTML = `<!doctype html>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MoonCode Kontrol Paneli</title>
+  <title>MoonCode Control Panel</title>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <style>
     :root {
-      color-scheme: light;
-      --md-sys-color-primary: #6750a4;
-      --md-sys-color-on-primary: #fff;
-      --md-sys-color-primary-container: #eaddff;
-      --md-sys-color-secondary-container: #e8def8;
-      --md-sys-color-surface: #fffbfe;
-      --md-sys-color-surface-container: #f3edf7;
-      --md-sys-color-surface-container-high: #ece6f0;
-      --md-sys-color-outline: #79747e;
-      --md-sys-color-on-surface: #1d1b20;
-      --md-sys-color-on-surface-variant: #49454f;
-      --radius: 28px;
-      font-family: Roboto, Inter, "Segoe UI", system-ui, sans-serif;
+      color-scheme: dark;
+      --md-sys-color-primary: #5ae7a6;
+      --md-sys-color-on-primary: #05110b;
+      --md-sys-color-primary-container: #103624;
+      --md-sys-color-secondary-container: #111815;
+      --md-sys-color-surface: #030504;
+      --md-sys-color-surface-container: #07100b;
+      --md-sys-color-surface-container-high: #0c1410;
+      --md-sys-color-outline: #1e3a2d;
+      --md-sys-color-on-surface: #edf6ef;
+      --md-sys-color-on-surface-variant: #8ea398;
+      --radius: 18px;
+      font-family: Inter, "Segoe UI", system-ui, sans-serif;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); }
+    body { margin: 0; background: radial-gradient(circle at top left, rgba(86,232,166,.09) 0, transparent 30%), linear-gradient(180deg, #010201, #050805 56%, #020403); color: var(--md-sys-color-on-surface); }
     .app { min-height: 100vh; display: grid; grid-template-columns: 280px 1fr; }
-    aside { background: var(--md-sys-color-surface-container); padding: 24px 16px; border-right: 1px solid #ddd7e3; }
+    aside { background: rgba(6, 10, 8, .88); backdrop-filter: blur(18px); padding: 24px 16px; border-right: 1px solid #11241a; }
     .brand { display: flex; align-items: center; gap: 12px; padding: 8px 12px 24px; font-weight: 700; font-size: 22px; }
-    .mark { width: 38px; height: 38px; border-radius: 12px; background: var(--md-sys-color-primary); color: white; display: grid; place-items: center; }
-    nav button { width: 100%; border: 0; background: transparent; color: var(--md-sys-color-on-surface-variant); border-radius: 999px; padding: 14px 18px; text-align: left; font: inherit; cursor: pointer; }
-    nav button.active { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-surface); font-weight: 700; }
+    .mark { width: 38px; height: 38px; border-radius: 12px; background: linear-gradient(135deg,#5ae7a6,#0d7b4a); color: #05110b; display: grid; place-items: center; box-shadow: 0 0 28px rgba(90,231,166,.16); }
+    nav button { width: 100%; border: 0; background: transparent; color: var(--md-sys-color-on-surface-variant); border-radius: 999px; padding: 14px 18px; text-align: left; font: inherit; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+    nav button.active { background: rgba(90,231,166,.08); color: var(--md-sys-color-on-surface); font-weight: 700; }
     main { padding: 28px; max-width: 1320px; width: 100%; }
     .top { display: flex; justify-content: space-between; gap: 16px; align-items: start; margin-bottom: 24px; }
     h1 { font-size: clamp(28px, 4vw, 48px); line-height: 1; margin: 0 0 10px; letter-spacing: 0; }
     .sub { color: var(--md-sys-color-on-surface-variant); margin: 0; max-width: 720px; }
     .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
-    .card { background: var(--md-sys-color-surface-container); border-radius: var(--radius); padding: 22px; border: 1px solid #e2dce8; }
-    .hero { grid-column: span 8; min-height: 210px; background: linear-gradient(135deg, var(--md-sys-color-primary-container), #fef7ff); }
+    .card { background: linear-gradient(180deg, rgba(10, 17, 13, .96), rgba(4, 8, 6, .98)); border-radius: var(--radius); padding: 22px; border: 1px solid #173122; box-shadow: 0 20px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.03); }
+    .hero { grid-column: span 8; min-height: 210px; background: linear-gradient(135deg, rgba(10,18,13,.98), rgba(4,7,5,.98)); }
     .side { grid-column: span 4; }
     .full { grid-column: 1 / -1; }
     .stat { display: grid; gap: 8px; }
     .stat b { font-size: 34px; }
     .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
-    .btn { border: 0; border-radius: 999px; padding: 12px 18px; font-weight: 700; cursor: pointer; background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
-    .btn.secondary { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-surface); }
-    .btn.ghost { background: transparent; color: var(--md-sys-color-primary); border: 1px solid var(--md-sys-color-outline); }
+    .btn { border: 0; border-radius: 999px; padding: 12px 18px; font-weight: 800; cursor: pointer; background: linear-gradient(135deg,#5ae7a6,#1db46f); color: var(--md-sys-color-on-primary); box-shadow: 0 12px 30px rgba(29,180,111,.18); transition: transform .18s ease, filter .18s ease; }
+    .btn:hover { transform: translateY(-1px); filter: brightness(1.08); }
+    .btn.secondary { background: rgba(255,255,255,.03); color: var(--md-sys-color-on-surface); border: 1px solid #18291f; }
+    .btn.ghost { background: transparent; color: var(--md-sys-color-primary); border: 1px solid #233d2e; }
     table { width: 100%; border-collapse: collapse; overflow: hidden; }
-    th, td { text-align: left; padding: 14px 10px; border-bottom: 1px solid #ded8e4; vertical-align: middle; }
+    th, td { text-align: left; padding: 14px 10px; border-bottom: 1px solid #15261d; vertical-align: middle; }
     th { color: var(--md-sys-color-on-surface-variant); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
-    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 7px 11px; border-radius: 999px; background: var(--md-sys-color-primary-container); font-size: 13px; }
+    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 7px 11px; border-radius: 999px; background: rgba(90,231,166,.09); font-size: 13px; }
     .muted { color: var(--md-sys-color-on-surface-variant); }
-    .form { display: grid; gap: 12px; max-width: 720px; }
-    select, input { width: 100%; border: 1px solid var(--md-sys-color-outline); border-radius: 14px; padding: 14px; background: #fff; font: inherit; }
-    .oauth-box { display: none; gap: 8px; padding: 14px; border-radius: 16px; background: var(--md-sys-color-primary-container); border: 1px solid var(--md-sys-color-outline); }
+    .form { display: grid; gap: 14px; max-width: 760px; }
+    select, input { width: 100%; border: 1px solid #22382d; border-radius: 14px; padding: 14px; background: #050906; color: var(--md-sys-color-on-surface); font: inherit; outline-color: var(--md-sys-color-primary); }
+    .choice-grid,.provider-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+    .choice,.provider-card{border:1px solid #183022;background:rgba(4,10,7,.96);border-radius:22px;padding:20px;text-align:left;color:inherit;cursor:pointer;transition:.22s ease;min-height:188px}
+    .choice:hover,.provider-card:hover{transform:translateY(-2px);border-color:#5ae7a6;box-shadow:0 18px 45px rgba(29,180,111,.12)}
+    nav svg{width:18px;height:18px}.choice svg,.provider-card svg{width:28px;height:28px;color:#5ae7a6;margin-bottom:16px}
+    .slide{animation:slideIn .28s ease both}@keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+    .oauth-box { display: none; gap: 10px; padding: 16px; border-radius: 18px; background: #050907; border: 1px solid #214033; }
     .oauth-box.show { display: grid; }
     .oauth-url { word-break: break-all; color: var(--md-sys-color-primary); font-size: 13px; }
     label { display: grid; gap: 6px; font-weight: 650; }
@@ -1780,7 +1800,7 @@ const AUTH_PANEL_HTML = `<!doctype html>
     .toast.show { opacity: 1; transform: translateY(0); }
     @media (max-width: 860px) {
       .app { grid-template-columns: 1fr; }
-      aside { position: sticky; top: 0; z-index: 5; border-right: 0; border-bottom: 1px solid #ddd7e3; }
+      aside { position: sticky; top: 0; z-index: 5; border-right: 0; border-bottom: 1px solid #143323; }
       nav { display: flex; overflow: auto; gap: 8px; }
       nav button { white-space: nowrap; width: auto; }
       .hero, .side { grid-column: 1 / -1; }
@@ -1793,40 +1813,50 @@ const AUTH_PANEL_HTML = `<!doctype html>
     <aside>
       <div class="brand"><span class="mark">M</span><span>MoonCode</span></div>
       <nav>
-        <button class="active" data-tab="overview">Kontrol</button>
-        <button data-tab="login">Login</button>
-        <button data-tab="accounts">Hesaplar</button>
-        <button data-tab="providers">Saglayicilar</button>
+        <button class="active" data-tab="overview"><i data-lucide="layout-dashboard"></i> Control</button>
+        <button data-tab="login"><i data-lucide="log-in"></i> Login</button>
+        <button data-tab="accounts"><i data-lucide="users"></i> Accounts</button>
+        <button data-tab="providers"><i data-lucide="plug"></i> Providers</button>
       </nav>
     </aside>
     <main>
       <section id="overview" class="tab">
-        <div class="top"><div><h1>Kontrol ve hesap paneli</h1><p class="sub">Local calisir. Hesap ekle, aktif hesabi degistir, son kullanim ve kota notlarini takip et.</p></div><button class="btn secondary" onclick="refresh()">Yenile</button></div>
+        <div class="top"><div><h1>Control panel</h1><p class="sub">Manage accounts, provider status, usage notes, and login flows from one local dashboard.</p></div><button class="btn secondary" onclick="refresh()">Refresh</button></div>
         <div class="grid">
-          <article class="card hero"><h2>Hizli giris</h2><p class="muted">MoonCode TUI icinden secim yapmak yerine bu panelden abonelik veya API anahtari akisini baslat.</p><div class="actions"><button class="btn" onclick="showTab('login')">Abonelik kullan</button><button class="btn secondary" onclick="showTab('login','api_key')">API anahtari kullan</button></div></article>
-          <article class="card side stat"><span class="muted">Kayitli hesap</span><b id="statAccounts">0</b><span id="statActive" class="pill">aktif yok</span></article>
-          <article class="card side stat"><span class="muted">Saglayici</span><b id="statProviders">0</b><span class="muted">model registry</span></article>
-          <article class="card side stat"><span class="muted">Kullanilabilir model</span><b id="statModels">0</b><span class="muted">auth ile acilan</span></article>
+          <article class="card hero"><h2>Fast login</h2><p class="muted">Start subscription or API-key login here. OAuth URLs stay inside this panel and open automatically.</p><div class="actions"><button class="btn" onclick="showTab('login')">Open login</button><button class="btn secondary" onclick="showTab('login','api_key')">Use API key</button></div></article>
+          <article class="card side stat"><span class="muted">Accounts</span><b id="statAccounts">0</b><span id="statActive" class="pill">none active</span></article>
+          <article class="card side stat"><span class="muted">Providers</span><b id="statProviders">0</b><span class="muted">registry</span></article>
+          <article class="card side stat"><span class="muted">Available models</span><b id="statModels">0</b><span class="muted">auth unlocked</span></article>
         </div>
       </section>
       <section id="login" class="tab hidden">
-        <div class="top"><div><h1>Login</h1><p class="sub">Once yontem sec. Abonelik OAuth akislarini TUI baslatir; API key panelden direkt kaydedilir.</p></div></div>
-        <div class="card form">
-          <label>Yontem<select id="authType" onchange="renderProviderOptions()"><option value="oauth">Abonelik kullan</option><option value="api_key">API anahtari kullan</option></select></label>
-          <label>Saglayici<select id="provider"></select></label>
-          <label id="labelWrap">Hesap etiketi<input id="label" placeholder="Orn: OpenAI is hesabi" /></label>
-          <label id="keyWrap" class="hidden">API anahtari<input id="apiKey" type="password" autocomplete="off" placeholder="sk-..." /></label>
-          <div id="oauthBox" class="oauth-box"><b>Login hazirlaniyor</b><span id="oauthText" class="muted">Provider login URL bekleniyor...</span><a id="oauthLink" class="oauth-url" target="_blank" rel="noreferrer"></a></div>
-          <div class="actions"><button class="btn" onclick="submitLogin()">Devam et</button><button class="btn ghost" onclick="refresh()">Durumu yenile</button></div>
+        <div class="top"><div><h1>Sign in</h1><p class="sub">Choose a provider, then complete either OAuth or API-key login. Everything stays inside this panel.</p></div></div>
+        <div class="card form slide">
+          <div class="muted">Two ways in. Pick one, choose a provider, finish in one place.</div>
+          <div id="methodGrid" class="choice-grid">
+            <button class="choice" onclick="chooseAuth('api_key')"><i data-lucide="key-round"></i><h2>API key</h2><p class="muted">Add a key, label it, save it locally.</p></button>
+            <button class="choice" onclick="chooseAuth('oauth')"><i data-lucide="badge-check"></i><h2>Subscription</h2><p class="muted">Open the provider flow and return here.</p></button>
+          </div>
+          <input id="authType" type="hidden" value="oauth" />
+          <div id="providerStep" class="hidden slide">
+            <h2>Provider</h2>
+            <p class="muted">Pick the account source you want MoonCode to use.</p>
+            <div id="providerCards" class="provider-grid"></div>
+          </div>
+          <input id="provider" type="hidden" />
+          <label id="labelWrap" class="hidden">Account label<input id="label" placeholder="Work, personal, or test" /></label>
+          <label id="keyWrap" class="hidden">API key<input id="apiKey" type="password" autocomplete="off" placeholder="sk-..." /></label>
+          <div id="oauthBox" class="oauth-box"><b>Login link</b><span id="oauthText" class="muted">Waiting for the provider URL.</span><a id="oauthLink" class="oauth-url" target="_blank" rel="noreferrer"></a></div>
+          <div class="actions"><button class="btn" onclick="submitLogin()">Continue</button><button class="btn ghost" onclick="showTab('login')">Back</button></div>
         </div>
       </section>
       <section id="accounts" class="tab hidden">
-        <div class="top"><div><h1>Hesaplar</h1><p class="sub">Aktif hesap provider credential olarak uygulanir. Son kullanim, kullanim sayisi ve kota notu burada tutulur.</p></div></div>
-        <article class="card full"><table><thead><tr><th>Aktif</th><th>Etiket</th><th>Provider</th><th>Tip</th><th>Son kullanim</th><th>Kullanim</th><th>Kota</th><th></th></tr></thead><tbody id="accountsTable"></tbody></table></article>
+        <div class="top"><div><h1>Accounts</h1><p class="sub">The active account is applied as provider credentials. Last use, use count, and quota notes stay here.</p></div></div>
+        <article class="card full"><table><thead><tr><th>Active</th><th>Label</th><th>Provider</th><th>Type</th><th>Last used</th><th>Uses</th><th>Quota</th><th></th></tr></thead><tbody id="accountsTable"></tbody></table></article>
       </section>
       <section id="providers" class="tab hidden">
-        <div class="top"><div><h1>Saglayicilar</h1><p class="sub">Model registry ve auth durumu.</p></div></div>
-        <article class="card full"><table><thead><tr><th>Provider</th><th>Ad</th><th>OAuth</th><th>API key</th><th>Durum</th><th>Model</th></tr></thead><tbody id="providersTable"></tbody></table></article>
+        <div class="top"><div><h1>Providers</h1><p class="sub">Model registry and authentication status.</p></div></div>
+        <article class="card full"><table><thead><tr><th>Provider</th><th>Name</th><th>OAuth</th><th>API key</th><th>Status</th><th>Models</th></tr></thead><tbody id="providersTable"></tbody></table></article>
       </section>
     </main>
   </div>
@@ -1839,23 +1869,53 @@ const AUTH_PANEL_HTML = `<!doctype html>
       tabs.forEach(t => t.classList.toggle('hidden', t.id !== id));
       nav.forEach(b => b.classList.toggle('active', b.dataset.tab === id));
       if (authType) document.getElementById('authType').value = authType;
+      if (id === 'login' && !authType) {
+        document.getElementById('methodGrid').classList.remove('hidden');
+        document.getElementById('providerStep').classList.add('hidden');
+        document.getElementById('provider').value = '';
+        document.getElementById('labelWrap').classList.add('hidden');
+        document.getElementById('keyWrap').classList.add('hidden');
+        document.getElementById('oauthBox').classList.remove('show');
+      }
       renderProviderOptions();
+      if (window.lucide) lucide.createIcons();
     }
     nav.forEach(b => b.onclick = () => showTab(b.dataset.tab));
     function toast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2600); }
-    function fmt(ts) { return ts ? new Date(ts).toLocaleString() : 'hic'; }
+    function fmt(ts) { return ts ? new Date(ts).toLocaleString() : 'never'; }
+    function providerIcon(id) {
+      if (id.includes('anthropic')) return 'sparkles';
+      if (id.includes('antigravity')) return 'orbit';
+      if (id.includes('openai') || id.includes('chatgpt')) return 'bot';
+      if (id.includes('github')) return 'github';
+      if (id.includes('ollama')) return 'server';
+      return 'plug';
+    }
+    function prettyProvider(p) {
+      const id = p.id.toLowerCase();
+      if (id.includes('anthropic')) return 'Anthropic';
+      if (id.includes('antigravity')) return 'Antigravity';
+      if (id.includes('openai') || id.includes('chatgpt')) return 'ChatGPT';
+      if (id.includes('github')) return 'GitHub Copilot';
+      if (id.includes('ollama')) return 'Ollama';
+      return p.name;
+    }
+    function chooseAuth(type) {
+      document.getElementById('authType').value = type;
+      document.getElementById('provider').value = '';
+      document.getElementById('labelWrap').classList.add('hidden');
+      document.getElementById('keyWrap').classList.add('hidden');
+      document.getElementById('oauthBox').classList.remove('show');
+      document.getElementById('methodGrid').classList.add('hidden');
+      document.getElementById('providerStep').classList.remove('hidden');
+      renderProviderOptions();
+    }
     async function action(payload) {
       const res = await fetch('/api/auth-panel/action', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       const json = await res.json();
-      if (!json.ok) throw new Error(json.error || 'islem basarisiz');
-      toast(json.message || 'islem tamam');
+      if (!json.ok) throw new Error(json.error || 'action failed');
+      toast(json.message || 'Done');
       await refresh();
-    }
-    function renderProviderOptions() {
-      const type = document.getElementById('authType').value;
-      document.getElementById('keyWrap').classList.toggle('hidden', type !== 'api_key');
-      const providers = state.providers.filter(p => type === 'oauth' ? p.supportsOAuth : p.supportsApiKey);
-      document.getElementById('provider').innerHTML = providers.map(p => '<option value="' + p.id + '">' + p.name + '</option>').join('');
     }
     let oauthPollTimer = 0;
     async function pollOAuth(providerId) {
@@ -1864,7 +1924,7 @@ const AUTH_PANEL_HTML = `<!doctype html>
       const text = document.getElementById('oauthText');
       const link = document.getElementById('oauthLink');
       box.classList.add('show');
-      text.textContent = 'Login URL bekleniyor...';
+      text.textContent = 'Waiting for login URL...';
       link.textContent = '';
       link.removeAttribute('href');
       oauthPollTimer = setInterval(async () => {
@@ -1878,20 +1938,34 @@ const AUTH_PANEL_HTML = `<!doctype html>
           }
           if (!event || !event.url) return;
           clearInterval(oauthPollTimer);
-          text.textContent = event.instructions || 'Provider login aciliyor...';
+          text.textContent = event.instructions || 'Redirecting to provider login...';
           link.href = event.url;
           link.textContent = event.url;
           setTimeout(() => { window.location.href = event.url; }, 250);
         } catch (_) {}
       }, 700);
     }
+    function renderProviderOptions() {
+      const type = document.getElementById('authType').value;
+      const hasProvider = Boolean(document.getElementById('provider').value);
+      document.getElementById('labelWrap').classList.toggle('hidden', !hasProvider);
+      document.getElementById('keyWrap').classList.toggle('hidden', type !== 'api_key' || !hasProvider);
+      const providers = state.providers.filter(p => type === 'oauth' ? p.supportsOAuth : p.supportsApiKey);
+      document.getElementById('providerCards').innerHTML = providers.map(p => '<button class="provider-card" onclick="selectProvider(\\'' + p.id + '\\')"><i data-lucide="' + providerIcon(p.id) + '"></i><h3>' + prettyProvider(p) + '</h3><p class="muted">' + p.id + '</p></button>').join('');
+      if (window.lucide) lucide.createIcons();
+    }
+    function selectProvider(id) {
+      document.getElementById('provider').value = id;
+      renderProviderOptions();
+      if (document.getElementById('authType').value === 'oauth') submitLogin();
+    }
     async function submitLogin() {
       const authType = document.getElementById('authType').value;
       const providerId = document.getElementById('provider').value;
       const label = document.getElementById('label').value;
       const apiKey = document.getElementById('apiKey').value;
-      if (!providerId) return toast('Saglayici sec');
-      if (authType === 'api_key' && !apiKey.trim()) return toast('API anahtari gir');
+      if (!providerId) return toast('Select provider');
+      if (authType === 'api_key' && !apiKey.trim()) return toast('Enter API key');
       if (authType === 'oauth') pollOAuth(providerId);
       try {
         await action({ action: authType === 'oauth' ? 'oauth_login' : 'save_api_key', providerId, label, apiKey });
@@ -1907,16 +1981,16 @@ const AUTH_PANEL_HTML = `<!doctype html>
       }
     }
     async function setActive(id) { await action({ action: 'set_active', accountId: id }); }
-    async function removeAccount(id) { if (confirm('Hesap kaldirilsin mi?')) await action({ action: 'remove_account', accountId: id }); }
+    async function removeAccount(id) { if (confirm('Remove this account?')) await action({ action: 'remove_account', accountId: id }); }
     function render() {
       document.getElementById('statAccounts').textContent = state.accounts.length;
       document.getElementById('statProviders').textContent = state.providers.length;
       document.getElementById('statModels').textContent = state.models.available || 0;
       const active = state.accounts.filter(a => a.active).map(a => a.provider + ': ' + a.label).join(', ');
-      document.getElementById('statActive').textContent = active || 'aktif yok';
+      document.getElementById('statActive').textContent = active || 'none active';
       renderProviderOptions();
-      document.getElementById('accountsTable').innerHTML = state.accounts.map(a => '<tr><td>' + (a.active ? '<span class="pill">aktif</span>' : '') + '</td><td><b>' + a.label + '</b><div class="muted">' + a.id + '</div></td><td>' + a.provider + '</td><td>' + a.type + '</td><td>' + fmt(a.lastUsedAt) + '</td><td>' + (a.useCount || 0) + '</td><td>' + (a.quotaLabel || 'not yok') + '</td><td><button class="btn secondary" onclick="setActive(\\'' + a.id + '\\')">Aktif yap</button> <button class="btn ghost" onclick="action({action:\\'next_account\\',providerId:\\'' + a.provider + '\\'})">Siradaki</button> <button class="btn ghost" onclick="removeAccount(\\'' + a.id + '\\')">Sil</button></td></tr>').join('') || '<tr><td colspan="8" class="muted">Hesap yok. Login sekmesinden ekle.</td></tr>';
-      document.getElementById('providersTable').innerHTML = state.providers.map(p => '<tr><td>' + p.id + '</td><td><b>' + p.name + '</b></td><td>' + (p.supportsOAuth ? 'var' : '-') + '</td><td>' + (p.supportsApiKey ? 'var' : '-') + '</td><td>' + (p.auth.configured ? '<span class="pill">configured</span>' : '<span class="muted">' + (p.auth.source || 'bos') + '</span>') + '</td><td>' + p.modelCount + '</td></tr>').join('');
+      document.getElementById('accountsTable').innerHTML = state.accounts.map(a => '<tr><td>' + (a.active ? '<span class="pill">active</span>' : '') + '</td><td><b>' + a.label + '</b><div class="muted">' + a.id + '</div></td><td>' + a.provider + '</td><td>' + a.type + '</td><td>' + fmt(a.lastUsedAt) + '</td><td>' + (a.useCount || 0) + '</td><td>' + (a.quotaLabel || 'no note') + '</td><td><button class="btn secondary" onclick="setActive(\\'' + a.id + '\\')">Make active</button> <button class="btn ghost" onclick="action({action:\\'next_account\\',providerId:\\'' + a.provider + '\\'})">Next</button> <button class="btn ghost" onclick="removeAccount(\\'' + a.id + '\\')">Remove</button></td></tr>').join('') || '<tr><td colspan="8" class="muted">No accounts yet. Add one from Login.</td></tr>';
+      document.getElementById('providersTable').innerHTML = state.providers.map(p => '<tr><td>' + p.id + '</td><td><b>' + p.name + '</b></td><td>' + (p.supportsOAuth ? 'yes' : '-') + '</td><td>' + (p.supportsApiKey ? 'yes' : '-') + '</td><td>' + (p.auth.configured ? '<span class="pill">configured</span>' : '<span class="muted">' + (p.auth.source || 'empty') + '</span>') + '</td><td>' + p.modelCount + '</td></tr>').join('');
     }
     async function refresh() {
       const res = await fetch('/api/auth-panel');
@@ -1924,7 +1998,100 @@ const AUTH_PANEL_HTML = `<!doctype html>
       render();
     }
     if (location.pathname === '/login') showTab('login');
+    if (window.lucide) lucide.createIcons();
     refresh().catch(e => toast(e.message));
+  </script>
+</body>
+</html>`;
+
+const MCP_PANEL_HTML = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MoonCode MCP Control</title>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    :root{color-scheme:dark;--bg:#020503;--panel:#07110b;--panel2:#0d1b12;--line:#1d412c;--fg:#eafff2;--muted:#8db29c;--green:#56f0a4;--green2:#19b96b;--red:#ff5667;font-family:Inter,Roboto,"Segoe UI",system-ui,sans-serif}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 18% 0,#123d26 0,transparent 34%),linear-gradient(180deg,#020503,#07100b 55%,#010302);color:var(--fg)}
+    .wrap{max-width:1320px;margin:0 auto;padding:30px}.hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:22px}.eyebrow{color:var(--green);font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:12px}
+    h1{font-size:clamp(34px,5vw,64px);line-height:.95;margin:8px 0 10px;letter-spacing:0}.sub{color:var(--muted);max-width:740px;margin:0}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}.card{background:linear-gradient(180deg,rgba(16,34,23,.92),rgba(6,13,9,.95));border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:0 24px 70px rgba(0,0,0,.34),inset 0 1px 0 rgba(110,255,178,.08)}
+    .wide{grid-column:span 8}.side{grid-column:span 4}.full{grid-column:1/-1}.toolbar{display:flex;gap:10px;flex-wrap:wrap}.btn{border:0;border-radius:999px;padding:12px 16px;font-weight:850;cursor:pointer;background:linear-gradient(135deg,var(--green),var(--green2));color:#021108;display:inline-flex;align-items:center;gap:8px}.btn.secondary{background:#12261a;color:var(--fg);border:1px solid var(--line)}.btn.danger{background:#301018;color:#ffdce1;border:1px solid #6b1f2d}
+    .server-grid,.market-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}.server,.market{border:1px solid var(--line);background:#07120c;border-radius:18px;padding:16px}.server h3,.market h3{margin:10px 0 6px}.status{display:inline-flex;padding:6px 10px;border-radius:999px;background:#102c1d;color:var(--green);font-size:12px;font-weight:800}.muted{color:var(--muted)}textarea,input{width:100%;background:#040906;color:var(--fg);border:1px solid var(--line);border-radius:14px;padding:12px;font:inherit}textarea{min-height:150px;resize:vertical}.row{display:grid;gap:10px;margin-top:12px}.toast{position:fixed;right:22px;bottom:22px;background:#102016;border:1px solid var(--line);border-radius:16px;padding:14px 16px;opacity:0;transform:translateY(10px);transition:.18s}.toast.show{opacity:1;transform:none}@media(max-width:860px){.wrap{padding:18px}.wide,.side{grid-column:1/-1}.hero{display:block}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div><div class="eyebrow">MCP Control</div><h1>Connect tools without terminal noise.</h1><p class="sub">Manage Blender, Scratch/TurboWarp, and custom MCP servers from one local panel. Install, connect, restart, and add configs without dumping setup logs into the TUI.</p></div>
+      <div class="toolbar"><button class="btn secondary" onclick="refresh()"><i data-lucide="refresh-cw"></i>Refresh</button><button class="btn" onclick="action({action:'restart'})"><i data-lucide="rotate-cw"></i>Restart manager</button></div>
+    </section>
+    <div class="grid">
+      <article class="card wide"><h2>Installed providers</h2><div id="servers" class="server-grid"></div></article>
+      <article class="card side"><h2>Runtime</h2><p class="muted" id="runtime">Loading...</p><div class="toolbar"><button class="btn" onclick="action({action:'connect_builtin',name:'blender'})"><i data-lucide="box"></i>Connect Blender</button><button class="btn" onclick="action({action:'connect_builtin',name:'scratch'})"><i data-lucide="blocks"></i>Connect Scratch</button></div></article>
+      <article class="card full"><h2>MCP Market</h2><p class="muted">Search public registries, review the server, then paste a trusted config below. MoonCode keeps install decisions explicit for security.</p><div class="market-grid">
+        <a class="market" href="https://mcp.so/?tab=latest" target="_blank" rel="noreferrer"><i data-lucide="store"></i><h3>MCP.so</h3><p class="muted">Large third-party MCP server directory.</p></a>
+        <a class="market" href="https://mcpmarket.com/search" target="_blank" rel="noreferrer"><i data-lucide="shopping-bag"></i><h3>MCP Market</h3><p class="muted">Browse categories and search MCP servers.</p></a>
+      </div></article>
+      <article class="card full"><h2>Add custom MCP</h2><div class="row"><input id="customName" placeholder="Server name, e.g. postgres" /><textarea id="customConfig" placeholder='{"command":"npx","args":["-y","@modelcontextprotocol/server-filesystem","C:\\\\Users\\\\ozenc"]}'></textarea><button class="btn" onclick="addCustom()"><i data-lucide="plus"></i>Add and connect</button></div></article>
+    </div>
+  </div>
+  <div id="toast" class="toast"></div>
+  <script>
+    let state={servers:[],clients:[],tools:0,error:null};
+    function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2400)}
+    async function action(payload){const res=await fetch('/api/mcp-panel/action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const json=await res.json();if(!json.ok)throw new Error(json.error||'Action failed');toast(json.message||'Done');await refresh()}
+    async function addCustom(){const name=document.getElementById('customName').value.trim();let config;try{config=JSON.parse(document.getElementById('customConfig').value)}catch{toast('Invalid JSON config');return}await action({action:'add_custom',name,config})}
+    async function refresh(){state=await fetch('/api/mcp-panel',{cache:'no-store'}).then(r=>r.json());document.getElementById('runtime').textContent=(state.clients.length||0)+' connected servers · '+(state.tools||0)+' MCP tools';document.getElementById('servers').innerHTML=state.servers.map(s=>'<div class="server"><span class="status">'+(s.connected?'connected':'ready')+'</span><h3>'+s.name+'</h3><p class="muted">'+s.command+' '+(s.args||[]).join(' ')+'</p><div class="toolbar"><button class="btn secondary" onclick="action({action:\\'connect\\',name:\\''+s.name+'\\'})"><i data-lucide="plug-zap"></i>Connect</button><button class="btn danger" onclick="action({action:\\'remove\\',name:\\''+s.name+'\\'})"><i data-lucide="trash-2"></i>Remove</button></div></div>').join('')||'<p class="muted">No MCP servers configured yet.</p>';if(window.lucide)lucide.createIcons()}
+    refresh();if(window.lucide)lucide.createIcons();
+  </script>
+</body>
+</html>`;
+
+function getBrainFiles() {
+	return {
+		memorySignals: join(getEngineDir(), "memory-signals.json"),
+		learning: join(getEngineDir(), "learning-experience.json"),
+	};
+}
+
+function readJsonFileSafe(file: string): unknown {
+	if (!existsSync(file)) return [];
+	try {
+		return JSON.parse(readFileSync(file, "utf-8"));
+	} catch {
+		return [];
+	}
+}
+
+const BRAIN_PANEL_HTML = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MoonCode Brain</title>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    :root{color-scheme:dark;--bg:#020503;--panel:#07110b;--line:#1d412c;--fg:#eafff2;--muted:#8db29c;--green:#56f0a4;--red:#ff5667;font-family:Inter,Roboto,"Segoe UI",system-ui,sans-serif}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top left,#143f29,transparent 35%),linear-gradient(180deg,#020503,#07100b);color:var(--fg)}.wrap{max-width:1180px;margin:0 auto;padding:32px}h1{font-size:clamp(36px,6vw,72px);line-height:.92;margin:8px 0}.sub{color:var(--muted);max-width:760px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.card{background:linear-gradient(180deg,rgba(16,34,23,.92),rgba(6,13,9,.95));border:1px solid var(--line);border-radius:22px;padding:20px}.full{grid-column:1/-1}.btn{border:0;border-radius:999px;padding:12px 16px;font-weight:850;cursor:pointer;background:linear-gradient(135deg,var(--green),#18b96a);color:#021108;display:inline-flex;gap:8px;align-items:center}.btn.danger{background:#301018;color:#ffdce1;border:1px solid #6b1f2d}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}textarea{width:100%;min-height:360px;background:#040906;color:var(--fg);border:1px solid var(--line);border-radius:16px;padding:14px;font:13px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}.muted{color:var(--muted)}@media(max-width:860px){.grid{grid-template-columns:1fr}.wrap{padding:18px}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <p class="muted">DreamKernel / Memory</p>
+    <h1>Brain control</h1>
+    <p class="sub">Review, edit, or clear persisted memory signals and learned task traces. This keeps long sessions lighter without touching project files.</p>
+    <div class="toolbar"><button class="btn" onclick="save()"><i data-lucide="save"></i>Save changes</button><button class="btn danger" onclick="clearBrain()"><i data-lucide="trash-2"></i>Clear brain</button><button class="btn" onclick="load()"><i data-lucide="refresh-cw"></i>Refresh</button></div>
+    <section class="grid">
+      <article class="card"><h2>Memory signals</h2><p class="muted" id="memoryPath"></p><textarea id="memory"></textarea></article>
+      <article class="card"><h2>Learning traces</h2><p class="muted" id="learningPath"></p><textarea id="learning"></textarea></article>
+    </section>
+  </main>
+  <script>
+    async function load(){const s=await fetch('/api/brain-panel',{cache:'no-store'}).then(r=>r.json());memory.value=JSON.stringify(s.memorySignals,null,2);learning.value=JSON.stringify(s.learning,null,2);memoryPath.textContent=s.files.memorySignals;learningPath.textContent=s.files.learning;if(window.lucide)lucide.createIcons()}
+    async function save(){let payload;try{payload={memorySignals:JSON.parse(memory.value||'[]'),learning:JSON.parse(learning.value||'[]')}}catch{alert('Invalid JSON');return}await fetch('/api/brain-panel/action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save',...payload})});await load()}
+    async function clearBrain(){if(!confirm('Clear all persisted brain memory?'))return;await fetch('/api/brain-panel/action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'clear'})});await load()}
+    load();
   </script>
 </body>
 </html>`;
@@ -1987,7 +2154,21 @@ export function startWebUiServer(options: { port?: number; staticRoot?: string }
 			return json(res, { activeSessionId });
 		}
 		if (url.pathname === "/api/auth-panel") {
-			return json(res, authPanelStateProvider ? authPanelStateProvider() : { providers: [], accounts: [], models: {} });
+			return json(
+				res,
+				authPanelStateProvider ? authPanelStateProvider() : { providers: [], accounts: [], models: {} },
+			);
+		}
+		if (url.pathname === "/api/mcp-panel") {
+			return json(res, mcpPanelStateProvider ? mcpPanelStateProvider() : { servers: [], clients: [], tools: 0 });
+		}
+		if (url.pathname === "/api/brain-panel") {
+			const files = getBrainFiles();
+			return json(res, {
+				files,
+				memorySignals: readJsonFileSafe(files.memorySignals),
+				learning: readJsonFileSafe(files.learning),
+			});
 		}
 		if (url.pathname === "/api/auth-panel/oauth-event") {
 			const providerId = url.searchParams.get("providerId");
@@ -2019,7 +2200,7 @@ export function startWebUiServer(options: { port?: number; staticRoot?: string }
 							setAuthPanelOAuthEvent({
 								providerId: data.providerId,
 								status: "pending",
-								instructions: "Provider login hazirlaniyor...",
+								instructions: "Preparing provider login...",
 							});
 							Promise.resolve(listener(data)).catch((error) =>
 								setAuthPanelOAuthEvent({ providerId: data.providerId, error: error?.message || String(error) }),
@@ -2030,8 +2211,52 @@ export function startWebUiServer(options: { port?: number; staticRoot?: string }
 					}
 					return json(res, {
 						ok: true,
-						message: data?.action === "oauth_login" ? "Login panelde hazirlaniyor." : "Panel islemi TUI'ya gonderildi.",
+						message: data?.action === "oauth_login" ? "Preparing login in this panel." : "Done.",
 					});
+				} catch (err: any) {
+					return json(res, { ok: false, error: err.message });
+				}
+			});
+			return;
+		}
+		if (req.method === "POST" && url.pathname === "/api/mcp-panel/action") {
+			let body = "";
+			req.on("data", (chunk) => {
+				body += chunk;
+			});
+			req.on("end", async () => {
+				try {
+					const data = JSON.parse(body || "{}");
+					for (const listener of webUiMcpActionListeners) {
+						await listener(data);
+					}
+					return json(res, { ok: true, message: "MCP action complete." });
+				} catch (err: any) {
+					return json(res, { ok: false, error: err.message });
+				}
+			});
+			return;
+		}
+		if (req.method === "POST" && url.pathname === "/api/brain-panel/action") {
+			let body = "";
+			req.on("data", (chunk) => {
+				body += chunk;
+			});
+			req.on("end", async () => {
+				try {
+					const data = JSON.parse(body || "{}");
+					const files = getBrainFiles();
+					mkdirSync(dirname(files.memorySignals), { recursive: true });
+					if (data?.action === "clear") {
+						for (const file of Object.values(files)) rmSync(file, { force: true });
+						return json(res, { ok: true });
+					}
+					if (data?.action === "save") {
+						writeFileSync(files.memorySignals, `${JSON.stringify(data.memorySignals ?? [], null, 2)}\n`, "utf-8");
+						writeFileSync(files.learning, `${JSON.stringify(data.learning ?? [], null, 2)}\n`, "utf-8");
+						return json(res, { ok: true });
+					}
+					return json(res, { ok: false, error: "Unknown brain action." });
 				} catch (err: any) {
 					return json(res, { ok: false, error: err.message });
 				}
@@ -2111,6 +2336,21 @@ export function startWebUiServer(options: { port?: number; staticRoot?: string }
 		if (url.pathname === "/panel" || url.pathname === "/login") {
 			res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
 			res.end(AUTH_PANEL_HTML);
+			return;
+		}
+		if (url.pathname === "/mcp") {
+			res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+			res.end(MCP_PANEL_HTML);
+			return;
+		}
+		if (url.pathname === "/session") {
+			res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+			res.end(APP_HTML);
+			return;
+		}
+		if (url.pathname === "/brain") {
+			res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+			res.end(BRAIN_PANEL_HTML);
 			return;
 		}
 		if (serveAsset(res, url.pathname)) return;
