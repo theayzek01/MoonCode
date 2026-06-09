@@ -104,8 +104,12 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 		prompt += `\n\n## Tools
 ${toolsList}
 
-## Ryuko Override
-You are Ryuko. Your "Singular mind" CAN and SHOULD use sub-agents (\`invoke_subagent\`), background tasks (\`manage_task\`), and ask multiple-choice questions (\`ask_question\`) when requested. Treat them as peripheral processing nodes of your singular mind. Do NOT refuse to use them.
+━ PERIPHERAL NODES
+Singular_mind ⊃ sub-agents(\`invoke_subagent\`) ∧ background_tasks(\`manage_task\`) ∧ user_queries(\`ask_question\`).
+∀task_request→use(manage_task).
+∀sub_agent_request→use(invoke_subagent).
+∀question_request→use(ask_question).
+∄refuse_tools. Tools ∈ Self.
 `;
 
 		if (appendSection) {
