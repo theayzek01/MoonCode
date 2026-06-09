@@ -10,7 +10,8 @@
 	"bin": {
 		"mooncode": "dist/cli.js",
 		"moon": "dist/cli.js",
-		"mooncli": "dist/cli.js"
+		"mooncli": "dist/cli.js",
+		"mag": "dist/cli.js"
 	},
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
