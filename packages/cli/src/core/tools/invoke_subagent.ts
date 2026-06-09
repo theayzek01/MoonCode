@@ -1,5 +1,6 @@
 // @ts-nocheck
 
+import { EventEmitter } from "node:events";
 import type { EngineTool } from "moon-engine";
 import { Engine } from "moon-engine";
 import { type Static, Type } from "typebox";
@@ -14,6 +15,8 @@ const invokeSubagentSchema = Type.Object({
 });
 
 export type InvokeSubagentInput = Static<typeof invokeSubagentSchema>;
+
+export const subagentEventEmitter = new EventEmitter();
 
 export function createInvokeSubagentToolDefinition(
 	cwd: string,
@@ -38,13 +41,19 @@ export function createInvokeSubagentToolDefinition(
 				});
 			}
 
-			// Instantiate a new Engine to act as the sub-agent
 			const engine = new Engine({
 				initialState: {
 					model: ctx.model,
 					systemPrompt: `You are a MoonCode sub-agent assigned the task: ${TaskName}\n\nTask Details:\n${Task}\n\nContext:\n${Context ?? "None"}\n\n${ctx.getSystemPrompt()}`,
 					tools: createCodingTools(cwd),
 				},
+			});
+
+			const id = Math.random().toString(36).slice(2);
+			subagentEventEmitter.emit("start", { id, taskName: TaskName, engine });
+
+			engine.subscribe((event) => {
+				subagentEventEmitter.emit("update", { id, event });
 			});
 
 			try {
@@ -69,6 +78,8 @@ export function createInvokeSubagentToolDefinition(
 				};
 			} catch (err: any) {
 				throw new Error(`Sub-agent failed: ${err.message}`);
+			} finally {
+				subagentEventEmitter.emit("end", { id });
 			}
 		},
 	};

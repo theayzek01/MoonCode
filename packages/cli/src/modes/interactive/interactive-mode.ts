@@ -135,6 +135,9 @@ import { type TaskItem, TaskPanelComponent } from "./components/task-panel.js";
 import { taskEventEmitter } from "../../core/tools/task.js";
 import { ToolExecutionComponent } from "./components/tool-execution.js";
 import { TreeSelectorComponent } from "./components/tree-selector.js";
+import { SubagentStatusComponent } from "./components/subagent-status.js";
+import { SubagentOverlayComponent } from "./components/subagent-overlay.js";
+import { subagentEventEmitter } from "../../core/tools/invoke_subagent.js";
 import { UserMessageComponent } from "./components/user-message.js";
 import { UserMessageSelectorComponent } from "./components/user-message-selector.js";
 import { parseWizardBlock, WizardSelectorComponent } from "./components/wizard-selector.js";
@@ -467,6 +470,8 @@ export class InteractiveMode {
 	private isTaskMode = true;
 	private taskPanel: TaskPanelComponent | undefined = undefined;
 
+	private subagentStatus: SubagentStatusComponent | undefined = undefined;
+
 	// Convenience accessors
 	private get session(): EngineSession {
 		return this.runtimeHost.session;
@@ -779,6 +784,61 @@ export class InteractiveMode {
 			this.ui.requestRender();
 		});
 
+		this.subagentStatus = new SubagentStatusComponent(() => {
+			if (!this.subagentStatus?.active) return;
+			// Subagent status click handler
+			// the engine and taskName should be captured from the 'start' event
+		});
+
+		let activeSubagent: { id: string; engine: any; taskName: string } | null = null;
+
+		subagentEventEmitter.on("start", (payload: any) => {
+			activeSubagent = { id: payload.id, engine: payload.engine, taskName: payload.taskName };
+			this.subagentStatus?.setStatus(true, payload.taskName);
+			
+			// Override onClick to show overlay
+			if (this.subagentStatus) {
+				this.subagentStatus.onClick = () => {
+					if (!activeSubagent) return false;
+					
+					const overlay = new SubagentOverlayComponent(
+						activeSubagent.taskName,
+						activeSubagent.engine,
+						() => {
+							this.ui.hideOverlay();
+							this.editor.focus();
+							this.ui.requestRender();
+						}
+					);
+					
+					this.ui.showOverlay(overlay, { 
+						width: "90%",
+						height: "90%",
+						title: "Sub-agent View"
+					});
+					return true;
+				};
+			}
+			
+			this.ui.requestRender();
+		});
+
+		subagentEventEmitter.on("update", (payload: any) => {
+			if (activeSubagent?.id === payload.id) {
+				// We don't necessarily need to do anything here if the overlay handles its own render loop, 
+				// but let's request a render just in case the overlay is open.
+				this.ui.requestRender();
+			}
+		});
+
+		subagentEventEmitter.on("end", (payload: any) => {
+			if (activeSubagent?.id === payload.id) {
+				activeSubagent = null;
+				this.subagentStatus?.setStatus(false);
+				this.ui.requestRender();
+			}
+		});
+
 		// Main chat layout container
 		this.chatAndPendingContainer = new Container();
 		this.chatAndPendingContainer.addChild(this.chatContainer);
@@ -869,6 +929,7 @@ export class InteractiveMode {
 
 		this.ui.addChild(this.mainLayout);
 		if (!this.isZenMode) {
+			if (this.subagentStatus) this.ui.addChild(this.subagentStatus);
 			this.ui.addChild(this.statusContainer);
 		}
 		this.renderWidgets();
