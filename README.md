@@ -135,6 +135,24 @@ mooncode
       Varsayılan olarak yerel, kontrollü ve sessiz bir deneyim.
     </td>
   </tr>
+  <tr>
+    <td align="center" width="72">
+      <img src="https://api.iconify.design/mdi:robot-outline.svg?color=white" width="30" height="30" alt="Sub-agents" />
+    </td>
+    <td>
+      <strong>Gelişmiş Alt Ajanlar (Sub-agents)</strong><br/>
+      Bağımsız ve paralel çalışabilen, TUI üzerinden izlenebilir (Ctrl+O) görev yöneticisi alt ajanlar.
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="72">
+      <img src="https://api.iconify.design/mdi:toolbox-outline.svg?color=white" width="30" height="30" alt="Advanced Tools" />
+    </td>
+    <td>
+      <strong>Genişletilmiş Tool Seti</strong><br/>
+      bash (Terminal komutları), edit/read/write (Gelişmiş dosya işlemleri), codebase_index (Proje içi akıllı arama) ve tarayıcı araçları (browser_tabs, browser_page).
+    </td>
+  </tr>
 </table>
 
 ---

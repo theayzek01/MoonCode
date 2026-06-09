@@ -1,7 +1,7 @@
 {
   "name": "MoonCode-extension-custom-provider-anthropic",
   "private": true,
-  "version": "26.2.1",
+  "version": "26.2.2",
   "type": "module",
   "scripts": {
     "clean": "echo 'nothing to clean'",
