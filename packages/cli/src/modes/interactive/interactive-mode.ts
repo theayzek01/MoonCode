@@ -132,6 +132,7 @@ import { SessionSelectorComponent } from "./components/session-selector.js";
 import { SettingsSelectorComponent } from "./components/settings-selector.js";
 import { SkillInvocationMessageComponent } from "./components/skill-invocation-message.js";
 import { type TaskItem, TaskPanelComponent } from "./components/task-panel.js";
+import { taskEventEmitter } from "../../core/tools/task.js";
 import { ToolExecutionComponent } from "./components/tool-execution.js";
 import { TreeSelectorComponent } from "./components/tree-selector.js";
 import { UserMessageComponent } from "./components/user-message.js";
@@ -217,7 +218,6 @@ class VirtualizedChatContainer extends Container {
 
 	override render(width: number): string[] {
 		const terminalHeight = process.stdout.rows || 40;
-		const maxVisible = Math.max(10, Math.min(terminalHeight - this.staticOverhead, 300));
 
 		if (
 			this.enableCaching &&
@@ -232,44 +232,21 @@ class VirtualizedChatContainer extends Container {
 		if (this.children.length === 0) {
 			lines = super.render(width) || [];
 		} else {
-			let hiddenChildren = 0;
-			for (let i = this.children.length - 1; i >= 0; i--) {
+			for (let i = 0; i < this.children.length; i++) {
 				const child = this.children[i];
 				if (!child) continue;
 				const childLines = child.render(width) || [];
-				if (lines.length === 0 && childLines.length > maxVisible) {
-					lines.unshift(...childLines.slice(-maxVisible));
-					hiddenChildren = i;
-					break;
-				}
-				if (lines.length + childLines.length > maxVisible) {
-					hiddenChildren = i + 1;
-					break;
-				}
-				lines.unshift(...childLines);
-			}
-			if (hiddenChildren > 0) {
-				let visibleChatItemsCount = 0;
-				for (let i = hiddenChildren; i < this.children.length; i++) {
-					if (isChatMessageComponent(this.children[i])) {
-						visibleChatItemsCount++;
-					}
-				}
-				const activeChatItemsCount = Math.max(0, this.chatItemCount - this.prunedChatItemCount);
-				const hiddenChatItemsCount = Math.max(0, activeChatItemsCount - visibleChatItemsCount);
-				if (hiddenChatItemsCount > 0) {
-					lines.unshift(
-						theme.fg(
-							"dim",
-							`… ${hiddenChatItemsCount} older chat item(s) hidden for terminal speed. Full session context is still preserved.`,
-						),
-					);
-				}
+				lines.push(...childLines);
 			}
 		}
 
-		// Fill remaining space so composer stays pinned to bottom
-		while (lines.length < maxVisible) lines.unshift("");
+		// Calculate how many lines we need to fill the terminal height
+		const fillLines = terminalHeight - this.staticOverhead - lines.length;
+		if (fillLines > 0) {
+			for (let i = 0; i < fillLines; i++) {
+				lines.unshift(""); // Pad top so new messages appear at bottom
+			}
+		}
 
 		if (this.enableCaching) {
 			this.cachedWidth = width;
@@ -784,6 +761,23 @@ export class InteractiveMode {
 
 		this.roadmap = new RoadmapComponent();
 		this.taskPanel = new TaskPanelComponent(() => this.ui.requestRender());
+
+		// Hook up task tool events to the task panel
+		taskEventEmitter.on("manage", (payload: any) => {
+			if (!this.taskPanel) return;
+			if (payload.action === "add") {
+				this.taskPanel.addTask({
+					id: payload.id,
+					label: payload.label,
+					status: payload.status,
+				});
+			} else if (payload.action === "update") {
+				this.taskPanel.updateTask(payload.id, payload.status);
+			} else if (payload.action === "clear") {
+				this.taskPanel.clearTasks();
+			}
+			this.ui.requestRender();
+		});
 
 		// Main chat layout container
 		this.chatAndPendingContainer = new Container();

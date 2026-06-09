@@ -98,6 +98,7 @@ export {
 import type { EngineTool } from "moon-engine";
 import type { ToolDefinition } from "../extensions/types.js";
 import { createAskQuestionTool, createAskQuestionToolDefinition } from "./ask_question.js";
+import { createTaskTool, createTaskToolDefinition } from "./task.js";
 import { type BashToolOptions, createBashTool, createBashToolDefinition } from "./bash.js";
 import {
 	createBrowserPageTool,
@@ -274,6 +275,7 @@ export function createCodingToolDefinitions(cwd: string, options?: ToolsOptions)
 		createBrowserPageToolDefinition(),
 		createAskQuestionToolDefinition(),
 		createInvokeSubagentToolDefinition(cwd),
+		createTaskToolDefinition(),
 	];
 }
 
@@ -318,6 +320,7 @@ export function createCodingTools(cwd: string, options?: ToolsOptions): Tool[] {
 		createBrowserPageTool(options?.getModelVisionSupport),
 		createAskQuestionTool(),
 		createInvokeSubagentTool(cwd),
+		createTaskTool(),
 	];
 }
 

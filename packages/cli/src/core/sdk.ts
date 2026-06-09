@@ -282,6 +282,7 @@ export async function createEngineSession(
 		"browser_page",
 		"ask_question",
 		"invoke_subagent",
+		"manage_task",
 	];
 	const allowedToolNames = options.tools ?? (options.noTools === "all" ? [] : undefined);
 	const initialActiveToolNames: string[] = options.tools
