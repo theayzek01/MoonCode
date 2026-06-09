@@ -1,6 +1,6 @@
 {
 	"name": "moon-engine",
-	"version": "1.29.0",
+	"version": "26.2.0",
 	"description": "General-purpose state management engine",
 	"type": "module",
 	"main": "./dist/index.js",
@@ -13,13 +13,13 @@
 		"clean": "shx rm -rf dist",
 		"build": "tsc -p tsconfig.build.json",
 		"dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
-    "test": "vitest run",
+		"test": "vitest run",
 		"prepublishOnly": "npm run clean && npm run build"
 	},
 	"dependencies": {
 		"@modelcontextprotocol/sdk": "^1.29.0",
 		"typebox": "^1.1.24",
-		"moon-core": "^1.29.0"
+		"moon-core": "^26.2.0"
 	},
 	"keywords": [
 		"engine",
