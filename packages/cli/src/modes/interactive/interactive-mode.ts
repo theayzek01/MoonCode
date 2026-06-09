@@ -127,16 +127,16 @@ import { ModelSelectorComponent } from "./components/model-selector.js";
 import { MoonCodeHeaderComponent } from "./components/mooncode-header.js";
 import { type AuthSelectorProvider, OAuthSelectorComponent } from "./components/oauth-selector.js";
 import { RoadmapComponent, type RoadmapStep } from "./components/roadmap.js";
-import { TaskPanelComponent, type TaskItem } from "./components/task-panel.js";
-import { parseWizardBlock, WizardSelectorComponent } from "./components/wizard-selector.js";
 import { ScopedModelsSelectorComponent } from "./components/scoped-models-selector.js";
 import { SessionSelectorComponent } from "./components/session-selector.js";
 import { SettingsSelectorComponent } from "./components/settings-selector.js";
 import { SkillInvocationMessageComponent } from "./components/skill-invocation-message.js";
+import { type TaskItem, TaskPanelComponent } from "./components/task-panel.js";
 import { ToolExecutionComponent } from "./components/tool-execution.js";
 import { TreeSelectorComponent } from "./components/tree-selector.js";
 import { UserMessageComponent } from "./components/user-message.js";
 import { UserMessageSelectorComponent } from "./components/user-message-selector.js";
+import { parseWizardBlock, WizardSelectorComponent } from "./components/wizard-selector.js";
 // WorkspacePanelComponent removed — right panel disabled
 import {
 	getAvailableThemes,
@@ -2424,9 +2424,7 @@ export class InteractiveMode {
 				this.hideWizardSelector();
 				// Feed answers back as user message
 				if (result.completed) {
-					const answersText = steps
-						.map((step, i) => `${step.title}: ${result.answers[i] ?? "—"}`)
-						.join("\n");
+					const answersText = steps.map((step, i) => `${step.title}: ${result.answers[i] ?? "—"}`).join("\n");
 					this.editor.setText(answersText);
 					this.ui.setFocus(this.editor);
 				}

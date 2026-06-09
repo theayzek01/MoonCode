@@ -23,7 +23,8 @@ describe("optimizePromptText", () => {
 		const repeated = Array.from({ length: 500 }, (_, i) => {
 			return `ERROR ${words[i % words.length]}_${words[(i + 3) % words.length]} failed at src/app/module-${i}.ts npm run test expected value_${words[i % words.length]} received value_${words[(i + 1) % words.length]} stack=/workspace/src/app/module-${i}.ts:${i}:1`;
 		}).join("\n");
-		const code = "```ts\n" + Array.from({ length: 220 }, (_, i) => `export const value${i} = ${i};`).join("\n") + "\n```";
+		const code =
+			"```ts\n" + Array.from({ length: 220 }, (_, i) => `export const value${i} = ${i};`).join("\n") + "\n```";
 		const input = `Fix this and keep going.\n${repeated}\n${code}`;
 		const result = optimizePromptForIntentCapsule(input);
 

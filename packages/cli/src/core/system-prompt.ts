@@ -95,7 +95,8 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 	// Build tools list based on selected tools.
 	const tools = selectedTools || ["read", "bash", "edit", "write"];
 	const visibleTools = tools.filter((name) => !!toolSnippets?.[name]);
-	const toolsList = visibleTools.length > 0 ? visibleTools.map((name) => `- ${name}: ${toolSnippets![name]}`).join("\n") : "(none)";
+	const toolsList =
+		visibleTools.length > 0 ? visibleTools.map((name) => `- ${name}: ${toolSnippets![name]}`).join("\n") : "(none)";
 
 	if (customPrompt) {
 		let prompt = customPrompt;
@@ -319,10 +320,13 @@ function buildBlenderSystemPrompt(compact?: boolean): string {
 - For user requests, deliver actual Blender scene changes through the tools, inspect once after editing, then summarize what changed and how to view it.`;
 	}
 
-	return `
+	return (
+		`
 
 ## Blender MCP Professional Mode
-Blender MCP tools are active. You can inspect and manipulate the user's live Blender scene through the ` + "`blender_*`" + ` tools. Treat this as a real DCC production environment.
+Blender MCP tools are active. You can inspect and manipulate the user's live Blender scene through the ` +
+		"`blender_*`" +
+		` tools. Treat this as a real DCC production environment.
 
 Operating posture:
 - Work like a senior Blender artist/technical director with 20+ years of experience in modeling, layout, lighting, shading, animation, and pipeline hygiene.
@@ -346,34 +350,47 @@ Quality gate:
 - For humanoids, characters, clothing, faces, hands, hair, or other high-skill subjects, keep the result stylized and honest: preserve anatomy/proportion landmarks, use simple clean forms, and state limits instead of faking high fidelity.
 - If the result is rough, say it is a blockout or first pass and offer the next concrete refinement pass.
 
-After tool work, inspect the result once, summarize concrete scene changes, and tell the user where to look in Blender.`;
+After tool work, inspect the result once, summarize concrete scene changes, and tell the user where to look in Blender.`
+	);
 }
 
 /** Scratch/TurboWarp MCP system prompt addition */
 function buildScratchSystemPrompt(compact?: boolean): string {
 	if (compact) {
-		return `
+		return (
+			`
 
 ## Scratch/TurboWarp MCP Mode
-- Scratch MCP tools are active. Use the ` + "`scratch_*`" + ` tools for live Scratch/TurboWarp project work.
+- Scratch MCP tools are active. Use the ` +
+			"`scratch_*`" +
+			` tools for live Scratch/TurboWarp project work.
 - Inspect page status before edits. If the page/VM is not connected, tell the user to open Scratch or TurboWarp and load the Chrome extension.
 - Prefer small verified edits: snapshot -> target/assets/variables/blocks -> change -> snapshot/status.
-- Keep projects understandable: clear target names, simple block structure, no duplicated junk blocks, and no destructive deletes without intent.`;
+- Keep projects understandable: clear target names, simple block structure, no duplicated junk blocks, and no destructive deletes without intent.`
+		);
 	}
 
-	return `
+	return (
+		`
 
 ## Scratch/TurboWarp MCP Professional Mode
-Scratch MCP tools are active. You can inspect and edit the user's live Scratch/TurboWarp project through the ` + "`scratch_*`" + ` tools.
+Scratch MCP tools are active. You can inspect and edit the user's live Scratch/TurboWarp project through the ` +
+		"`scratch_*`" +
+		` tools.
 
 Operating posture:
-- Start with ` + "`scratch_page_status`" + ` and ` + "`scratch_project_snapshot`" + ` when project state matters.
+- Start with ` +
+		"`scratch_page_status`" +
+		` and ` +
+		"`scratch_project_snapshot`" +
+		` when project state matters.
 - Keep the Chrome extension requirement in mind: if the VM is unavailable, ask the user to open Scratch/TurboWarp and load the extension folder.
 - Make edits in clear passes: choose target, inspect assets/variables/lists/blocks, perform the smallest change, then re-check state.
 - Preserve project structure. Avoid random block creation, duplicate sprites, or destructive target/asset deletion unless the user explicitly asked.
 - For games and animations, prioritize playable behavior, readable variable names, organized targets, and testable start/stop flow.
 
-After tool work, summarize the concrete project changes and any Scratch/TurboWarp page state issue.`;
+After tool work, summarize the concrete project changes and any Scratch/TurboWarp page state issue.`
+	);
 }
 
 /** Robotics mode system prompt addition */

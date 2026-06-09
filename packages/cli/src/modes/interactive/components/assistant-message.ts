@@ -106,7 +106,7 @@ export class AssistantMessageComponent extends Container {
 
 			if (content.type === "text" && content.text.trim()) {
 				let text = content.text.trim();
-				
+
 				// Transform Ryuko protocol strings to be completely hidden in UI
 				text = text.replace(/§\[(.*?)\]§/g, "");
 				text = text.replace(/∄asistan, ∃AGI\./g, "");

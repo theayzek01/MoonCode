@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
+import { type ChildProcessWithoutNullStreams, spawn } from "node:child_process";
 import type { EngineTool } from "../types.js";
 
 export interface McpServerConfig {
@@ -277,7 +277,9 @@ export class McpManager {
 								if (c.type === "image") {
 									const data = c.data ?? c.base64 ?? c.source;
 									const mimeType = c.mimeType ?? c.mime_type ?? c.mediaType ?? "image/png";
-									const safeMimeType = /^image\/(png|jpe?g|gif|webp)$/i.test(mimeType) ? mimeType : "image/png";
+									const safeMimeType = /^image\/(png|jpe?g|gif|webp)$/i.test(mimeType)
+										? mimeType
+										: "image/png";
 									if (data) {
 										return { type: "image", data, mimeType: safeMimeType };
 									}

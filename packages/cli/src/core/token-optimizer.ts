@@ -23,27 +23,31 @@ const JSONISH_BLOCK = /^\s*[[{][\s\S]*[\]}]\s*$/;
 const LOG_TIMESTAMP = /\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?/g;
 
 const REPEATED_LOG_LINE_THRESHOLD = 4; // more aggressive: was 5
-const CAPSULE_MIN_CHARS = 8_000;       // was 12_000 — compress earlier
-const CAPSULE_MAX_RAW_CHARS = 4_000;   // was 6_000
-const CAPSULE_MAX_LINES = 60;          // was 80
+const CAPSULE_MIN_CHARS = 8_000; // was 12_000 — compress earlier
+const CAPSULE_MAX_RAW_CHARS = 4_000; // was 6_000
+const CAPSULE_MAX_LINES = 60; // was 80
 
 // ── Tool block trimming ────────────────────────────────────────────────────────
 function trimLongToolBlock(block: string): string {
 	const lines = block.split("\n");
 	if (lines.length <= 30) return block; // was 40
-	const HEAD = 15;  // was 20
-	const TAIL = 8;   // was 10
+	const HEAD = 15; // was 20
+	const TAIL = 8; // was 10
 	const trimmed = lines.length - HEAD - TAIL;
 	return `${lines.slice(0, HEAD).join("\n")}\n...[${trimmed} lines trimmed]...\n${lines.slice(-TAIL).join("\n")}`;
 }
 
 // ── Stack trace trimming ───────────────────────────────────────────────────────
-function trimStackTraces(text: string, maxFrames = 5): string { // was 8
+function trimStackTraces(text: string, maxFrames = 5): string {
+	// was 8
 	const lines = text.split("\n");
 	let frames = 0;
 	return lines
 		.filter((line) => {
-			if (!STACK_TRACE_LINE.test(line)) { frames = 0; return true; }
+			if (!STACK_TRACE_LINE.test(line)) {
+				frames = 0;
+				return true;
+			}
 			return ++frames <= maxFrames;
 		})
 		.join("\n");
@@ -52,11 +56,16 @@ function trimStackTraces(text: string, maxFrames = 5): string { // was 8
 // ── JSON compaction ────────────────────────────────────────────────────────────
 function compactJsonish(text: string): string {
 	if (!JSONISH_BLOCK.test(text) || text.length > 200_000) return text;
-	try { return JSON.stringify(JSON.parse(text)); } catch { return text; }
+	try {
+		return JSON.stringify(JSON.parse(text));
+	} catch {
+		return text;
+	}
 }
 
 // ── Long line trimming ─────────────────────────────────────────────────────────
-function trimLongLines(text: string, maxLen = 400): string { // was 500
+function trimLongLines(text: string, maxLen = 400): string {
+	// was 500
 	return text
 		.split("\n")
 		.map((line) => {
@@ -76,7 +85,7 @@ function stripCommentsFromCodeBlock(code: string, lang: string): string {
 	if (["js", "javascript", "ts", "typescript", "tsx", "jsx", "go", "java", "c", "cpp", "cs", "css"].includes(l)) {
 		return code
 			.replace(/([^:]|^)\/\/.*$/gm, "$1") // single-line
-			.replace(/\/\*[\s\S]*?\*\//g, "");   // block
+			.replace(/\/\*[\s\S]*?\*\//g, ""); // block
 	}
 	if (["py", "python", "sh", "bash", "shell", "yaml", "yml", "rb", "ruby"].includes(l)) {
 		return code.replace(/(^|\s)#.*$/gm, "$1");
@@ -115,7 +124,8 @@ function deduplicateLogLines(text: string): string {
 
 	for (const line of lines) {
 		const pattern = normalize(line);
-		if (pattern === prevPattern && pattern.length > 4) { // was 5
+		if (pattern === prevPattern && pattern.length > 4) {
+			// was 5
 			repeatCount++;
 			lastLine = line;
 		} else {
@@ -198,7 +208,7 @@ function uniqueLimited(items: string[], limit: number): string[] {
 
 function extractPathHints(text: string): string[] {
 	const pathLike =
-		/(?:[A-Za-z]:\\[^\s"'`<>|]+|\.{0,2}\/[^\s"'`<>|]+|[\w.-]+\/[\w./-]+\.[A-Za-z0-9]{1,8}|[\w.-]+\\[\w.\\-]+\.[A-Za-z0-9]{1,8})/g;
+		/(?:[A-Za-z]:\\[^\s"'`<>|]+|\.{0,2}\/[^\s"'`<>|]+|[\w.-]+\/[\w./-]+\.[A-Za-z0-9]{1,8}|[\w.-]+\\[\w.-]+\.[A-Za-z0-9]{1,8})/g;
 	return uniqueLimited(text.match(pathLike) ?? [], 24); // was 32
 }
 
@@ -208,7 +218,9 @@ function extractCommandHints(text: string): string[] {
 		lines
 			.map((line) => line.trim())
 			.filter((line) =>
-				/^(?:[$>]\s*)?(?:npm|pnpm|yarn|bun|node|python|pytest|vitest|cargo|go|git|rg|grep|tsc|eslint)(?:\s|$)/i.test(line),
+				/^(?:[$>]\s*)?(?:npm|pnpm|yarn|bun|node|python|pytest|vitest|cargo|go|git|rg|grep|tsc|eslint)(?:\s|$)/i.test(
+					line,
+				),
 			)
 			.map((line) => line.replace(/^[$>]\s*/, "")),
 		16, // was 24
@@ -219,7 +231,9 @@ function extractErrorHints(text: string): string[] {
 	const lines = text.split("\n");
 	return uniqueLimited(
 		lines.filter((line) =>
-			/\b(error|exception|failed|failure|traceback|timeout|eacces|enoent|cannot find|expected|received)\b/i.test(line),
+			/\b(error|exception|failed|failure|traceback|timeout|eacces|enoent|cannot find|expected|received)\b/i.test(
+				line,
+			),
 		),
 		16, // was 24
 	);
@@ -229,7 +243,8 @@ function summarizeCodeFences(text: string): string[] {
 	const summaries: string[] = [];
 	const fenceRe = /```([A-Za-z0-9_+.-]*)\n([\s\S]*?)```/g;
 	let match: RegExpExecArray | null;
-	while ((match = fenceRe.exec(text)) && summaries.length < 10) { // was 16
+	while ((match = fenceRe.exec(text)) && summaries.length < 10) {
+		// was 16
 		const lang = match[1] || "text";
 		const body = match[2] ?? "";
 		const lines = body.split("\n");
@@ -266,8 +281,7 @@ function summarizeLongPrompt(text: string): string {
 		.filter(Boolean)
 		.join("\n");
 
-	const rawTail =
-		normalized.length > CAPSULE_MAX_RAW_CHARS ? normalized.slice(-CAPSULE_MAX_RAW_CHARS) : normalized;
+	const rawTail = normalized.length > CAPSULE_MAX_RAW_CHARS ? normalized.slice(-CAPSULE_MAX_RAW_CHARS) : normalized;
 	const trimmedRawTail = rawTail.split("\n").slice(-CAPSULE_MAX_LINES).join("\n");
 	return `${capsule}\n[raw]\n${trimmedRawTail}`;
 }
@@ -295,7 +309,8 @@ export function optimizePromptForIntentCapsule(text: string): PromptCapsuleResul
 }
 
 // ── Local/Ollama aggressive trim ──────────────────────────────────────────────
-export function optimizeForLocalModel(text: string, maxChars = 4_000): TokenOptimizeResult { // was 6000
+export function optimizeForLocalModel(text: string, maxChars = 4_000): TokenOptimizeResult {
+	// was 6000
 	const base = optimizePromptText(text);
 	const working = base.optimizedText;
 	if (working.length <= maxChars) return base;

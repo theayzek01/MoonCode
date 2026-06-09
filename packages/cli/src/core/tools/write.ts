@@ -238,7 +238,9 @@ export function createWriteToolDefinition(
 			});
 			if (!policy.allowed) {
 				return {
-					content: [{ type: "text", text: `Policy blocked file write${policy.reason ? `: ${policy.reason}` : ""}.` }],
+					content: [
+						{ type: "text", text: `Policy blocked file write${policy.reason ? `: ${policy.reason}` : ""}.` },
+					],
 					details: undefined,
 				};
 			}
@@ -271,8 +273,8 @@ export function createWriteToolDefinition(
 									const diff =
 										Buffer.byteLength(before, "utf-8") + Buffer.byteLength(content, "utf-8") <=
 										WRITE_DIFF_MAX_BYTES
-										? createPatch(path, before, content, "before", "after")
-										: undefined;
+											? createPatch(path, before, content, "before", "after")
+											: undefined;
 									appendAuditEvent({
 										actor: "tool",
 										action: "write",

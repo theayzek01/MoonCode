@@ -457,15 +457,15 @@ export class Editor implements Component, Focusable {
 			const indicator = `↑ ${this.scrollOffset} more `;
 			result.push(this.borderColor(` ${indicator} `));
 		} else {
-            result.push(""); // subtle spacing above input
-        }
+			result.push(""); // subtle spacing above input
+		}
 
 		// Render each visible layout line
 		// Emit hardware cursor marker only when focused and not showing autocomplete
 		const emitCursorMarker = this.focused && !this.autocompleteState;
 
-		let sideBorder = "  ";
-		let rightBorder = "  ";
+		const sideBorder = "  ";
+		const rightBorder = "  ";
 
 		const textIsEmpty = this.getText().length === 0;
 
@@ -531,8 +531,8 @@ export class Editor implements Component, Focusable {
 			const indicator = `↓ ${linesBelow} more `;
 			result.push(this.borderColor(` ${indicator} `));
 		} else {
-            result.push(""); // subtle spacing below input
-        }
+			result.push(""); // subtle spacing below input
+		}
 
 		return result;
 	}

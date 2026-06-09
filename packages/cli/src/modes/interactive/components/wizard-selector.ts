@@ -36,7 +36,7 @@ export interface WizardStep {
 }
 
 export interface WizardResult {
-	answers: string[];   // selected label per step
+	answers: string[]; // selected label per step
 	completed: boolean;
 }
 
@@ -52,11 +52,7 @@ export class WizardSelectorComponent extends Container {
 	private hintText: Text;
 	private questionText: Text;
 
-	constructor(
-		steps: WizardStep[],
-		onDone: (result: WizardResult) => void,
-		onCancel: () => void,
-	) {
+	constructor(steps: WizardStep[], onDone: (result: WizardResult) => void, onCancel: () => void) {
 		super();
 		this.steps = steps;
 		this.onDone = onDone;
@@ -85,11 +81,15 @@ export class WizardSelectorComponent extends Container {
 
 		// Keyboard hints
 		this.hintText = new Text(
-			c.hint("⇄ tab") + c.dim("  ") +
-			c.hint("↑↓ select") + c.dim("  ") +
-			c.hint("enter confirm") + c.dim("  ") +
-			c.hint("esc dismiss"),
-			1, 0,
+			c.hint("⇄ tab") +
+				c.dim("  ") +
+				c.hint("↑↓ select") +
+				c.dim("  ") +
+				c.hint("enter confirm") +
+				c.dim("  ") +
+				c.hint("esc dismiss"),
+			1,
+			0,
 		);
 		this.addChild(this.hintText);
 		this.addChild(new Spacer(1));
@@ -149,9 +149,7 @@ export class WizardSelectorComponent extends Container {
 
 		// Show "Type your own answer" at the bottom
 		const isLastSelected = this.selectedIndex === step.options.length;
-		const ownLabel = isLastSelected
-			? c.active(bold("Type your own answer"))
-			: c.dim("Type your own answer");
+		const ownLabel = isLastSelected ? c.active(bold("Type your own answer")) : c.dim("Type your own answer");
 		this.listContainer.addChild(new Text(` ${c.dim(`${step.options.length + 1}.`)} ${ownLabel}`, 1, 0));
 	}
 
@@ -194,10 +192,7 @@ export class WizardSelectorComponent extends Container {
 		const step = this.steps[this.currentStep];
 		if (!step) return;
 
-		const selected =
-			this.selectedIndex < step.options.length
-				? step.options[this.selectedIndex]!.label
-				: "custom";
+		const selected = this.selectedIndex < step.options.length ? step.options[this.selectedIndex]!.label : "custom";
 
 		this.answers[this.currentStep] = selected;
 
@@ -240,7 +235,10 @@ export function parseWizardBlock(text: string): WizardStep[] | null {
 	const steps: WizardStep[] = [];
 
 	for (const block of stepBlocks) {
-		const lines = block.split("\n").map((l) => l.trim()).filter(Boolean);
+		const lines = block
+			.split("\n")
+			.map((l) => l.trim())
+			.filter(Boolean);
 		if (lines.length < 2) continue;
 
 		const title = lines[0]!.trim();

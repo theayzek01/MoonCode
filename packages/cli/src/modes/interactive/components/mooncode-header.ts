@@ -121,8 +121,15 @@ export class MoonCodeHeaderComponent implements Component {
 		const logo = color.primary(" MoonCode ");
 		const version = color.muted(`v${VERSION}`);
 		const title = color.text("open tui console");
-		const right = [color.muted("Theayzek01"), color.muted(branchLabel), color.secondary(mode)].join(color.dim("  |  "));
-		const top = renderStatusLine(`${logo}${color.dim("  |  ")}${version}${color.dim("  |  ")}${title}`, right, safeWidth, color.panel);
+		const right = [color.muted("Theayzek01"), color.muted(branchLabel), color.secondary(mode)].join(
+			color.dim("  |  "),
+		);
+		const top = renderStatusLine(
+			`${logo}${color.dim("  |  ")}${version}${color.dim("  |  ")}${title}`,
+			right,
+			safeWidth,
+			color.panel,
+		);
 
 		const left = color.muted(` ${fitText(cwd, Math.max(12, Math.floor(safeWidth * 0.38)))}`);
 		const mid = [color.text(model), color.muted(`think:${thinking}`), color.muted(ctxLabel)].join(color.dim("  /  "));

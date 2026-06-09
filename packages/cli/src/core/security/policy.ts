@@ -51,7 +51,10 @@ function splitEnvList(raw: string | undefined, fallback: string[]): string[] {
 
 export function redactSensitiveText(text: string): string {
 	return text
-		.replace(/\b(?:gh[pousr]_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9]{16,}|xox[baprs]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16})\b/g, "[REDACTED]")
+		.replace(
+			/\b(?:gh[pousr]_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9]{16,}|xox[baprs]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16})\b/g,
+			"[REDACTED]",
+		)
 		.replace(/\bBearer\s+[A-Za-z0-9\-._~+/]+=*\b/gi, "Bearer [REDACTED]");
 }
 
@@ -69,7 +72,13 @@ export function evaluateBashCommand(command: string, cwd: string, config = getPo
 	}
 
 	if (config.mode === "prompt") {
-		return { allowed: false, mode: config.mode, action: "bash", target: command, reason: "High-impact shell commands require confirmation." };
+		return {
+			allowed: false,
+			mode: config.mode,
+			action: "bash",
+			target: command,
+			reason: "High-impact shell commands require confirmation.",
+		};
 	}
 
 	return { allowed: true, mode: config.mode, action: "bash", target: command };

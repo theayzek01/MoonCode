@@ -12,7 +12,7 @@ const ANSI_RE = /\x1b\[[0-9;]*m/g;
 const rgb = (r: number, g: number, b: number, s: string) => `\x1b[38;2;${r};${g};${b}m${s}\x1b[39m`;
 const dim = (s: string) => rgb(65, 65, 65, s);
 const muted = (s: string) => rgb(120, 120, 120, s);
-const active = (s: string) => rgb(220, 160, 60, s);   // amber — matches screenshot
+const active = (s: string) => rgb(220, 160, 60, s); // amber — matches screenshot
 const done = (s: string) => rgb(80, 140, 80, s);
 const head = (s: string) => rgb(160, 160, 160, s);
 const bg = (s: string) => `\x1b[48;2;10;10;14m${s}\x1b[49m`;
@@ -94,19 +94,9 @@ export class TaskPanelComponent extends Container {
 			lines.push(bg(muted("  no tasks")));
 		} else {
 			for (const task of this.tasks) {
-				const marker =
-					task.status === "done"
-						? done("[✓]")
-						: task.status === "active"
-							? active("[·]")
-							: dim("[ ]");
+				const marker = task.status === "done" ? done("[✓]") : task.status === "active" ? active("[·]") : dim("[ ]");
 
-				const labelColor =
-					task.status === "done"
-						? done
-						: task.status === "active"
-							? active
-							: muted;
+				const labelColor = task.status === "done" ? done : task.status === "active" ? active : muted;
 
 				const maxLabel = Math.max(4, inner - 5);
 				const label = labelColor(fit(task.label, maxLabel));

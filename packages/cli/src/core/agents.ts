@@ -98,8 +98,7 @@ export function buildCodingAgentsPrompt(settings: CodingAgentsSettings | undefin
 	const verbosity = normalizeVerbosity(settings.verbosity);
 
 	const byDept = (dept: CodingAgentDepartment) =>
-		DEFAULT_CODING_AGENT_PROFILES
-			.filter((a) => a.department === dept)
+		DEFAULT_CODING_AGENT_PROFILES.filter((a) => a.department === dept)
 			.map((a) => `  ${a.id}: ${a.focus}`)
 			.join("\n");
 
@@ -166,8 +165,7 @@ const R = "\u001b[0m";
 const B = "\u001b[1m";
 const D = "\u001b[2m";
 
-const a256 = (code: number, text: string, on: boolean) =>
-	on ? `\u001b[38;5;${code}m${text}${R}` : text;
+const a256 = (code: number, text: string, on: boolean) => (on ? `\u001b[38;5;${code}m${text}${R}` : text);
 const bold = (t: string, on: boolean) => (on ? `${B}${t}${R}` : t);
 const dim = (t: string, on: boolean) => (on ? `${D}${t}${R}` : t);
 

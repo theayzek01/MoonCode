@@ -1298,6 +1298,13 @@ export class TUI extends Container {
 				}
 				buffer += "\r\n";
 
+				// If we were at the bottom of the screen, \r\n caused the terminal to scroll up.
+				// We must update the viewport tracking to maintain synchronization.
+				if (targetPrevRow - prevViewportTop >= height - 1) {
+					prevViewportTop++;
+					viewportTop++;
+				}
+
 				let line = newLine;
 				if (!isImageLine(line) && visibleWidth(line) > width) {
 					line = sliceByColumn(line, 0, width, true) + TUI.SEGMENT_RESET;
@@ -1338,7 +1345,7 @@ export class TUI extends Container {
 			} else if (moveDownToLast < 0) {
 				buffer += `\x1b[${-moveDownToLast}A`;
 			}
-			
+
 			if (extraLines > 0) {
 				buffer += "\x1b[1B";
 				for (let i = 0; i < extraLines; i++) {

@@ -10,7 +10,7 @@ export class BorderedLoader extends Container {
 	constructor(tui: TUI, theme: Theme, message: string, options?: { cancellable?: boolean }) {
 		super();
 		this.cancellable = options?.cancellable ?? true;
-		
+
 		if (!this.cancellable) {
 			this.signalController = new AbortController();
 		}

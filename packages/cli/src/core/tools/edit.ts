@@ -7,6 +7,8 @@ import { Box, Container, Spacer, Text } from "moon-tui";
 import { type Static, Type } from "typebox";
 import { renderDiff } from "../../modes/interactive/components/diff.js";
 import type { ToolDefinition } from "../extensions/types.js";
+import { appendAuditEvent } from "../security/audit.js";
+import { evaluateFilePath } from "../security/policy.js";
 import {
 	applyEditsToNormalizedContent,
 	computeEditsDiff,
@@ -24,8 +26,6 @@ import { resolveToCwd } from "./path-utils.js";
 import { assertNoPersonaLeak } from "./persona-guard.js";
 import { invalidArgText, shortenPath, str } from "./render-utils.js";
 import { wrapToolDefinition } from "./tool-definition-wrapper.js";
-import { appendAuditEvent } from "../security/audit.js";
-import { evaluateFilePath } from "../security/policy.js";
 
 type EditPreview = EditDiffResult | EditDiffError;
 

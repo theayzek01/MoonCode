@@ -166,7 +166,10 @@ export function tokenize(text: string): string[] {
 	const expanded: string[] = [];
 	for (const token of raw) {
 		expanded.push(token);
-		const camel = token.replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase().split(" ");
+		const camel = token
+			.replace(/([a-z])([A-Z])/g, "$1 $2")
+			.toLowerCase()
+			.split(" ");
 		if (camel.length > 1) expanded.push(...camel);
 		const snake = token.split("_").filter(Boolean);
 		if (snake.length > 1) expanded.push(...snake);
@@ -259,14 +262,22 @@ function addUnique(list: string[], seen: Set<string>, value: string | undefined)
 	list.push(trimmed);
 }
 
-function extractTypeScriptFacts(content: string, filePath: string): { symbols: string[]; dependencies: DependencyEdge[] } {
+function extractTypeScriptFacts(
+	content: string,
+	filePath: string,
+): { symbols: string[]; dependencies: DependencyEdge[] } {
 	const symbols: string[] = [];
 	const seen = new Set<string>();
 	const dependencies: DependencyEdge[] = [];
 	const sourceFile = ts.createSourceFile(filePath, content, ts.ScriptTarget.Latest, true);
 
 	const visit = (node: ts.Node): void => {
-		if (ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node) || ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node)) {
+		if (
+			ts.isFunctionDeclaration(node) ||
+			ts.isClassDeclaration(node) ||
+			ts.isInterfaceDeclaration(node) ||
+			ts.isTypeAliasDeclaration(node)
+		) {
 			addUnique(symbols, seen, node.name?.text);
 		} else if (ts.isEnumDeclaration(node)) {
 			addUnique(symbols, seen, node.name.text);
@@ -336,7 +347,10 @@ function extractFallbackSymbols(content: string, ext: string): string[] {
 	return [...new Set(symbols)];
 }
 
-function extractSymbolsAndDependencies(content: string, filePath: string): { symbols: string[]; dependencies: DependencyEdge[] } {
+function extractSymbolsAndDependencies(
+	content: string,
+	filePath: string,
+): { symbols: string[]; dependencies: DependencyEdge[] } {
 	const ext = extname(filePath).toLowerCase();
 	if ([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".vue", ".svelte", ".astro"].includes(ext)) {
 		const facts = extractTypeScriptFacts(content, filePath);

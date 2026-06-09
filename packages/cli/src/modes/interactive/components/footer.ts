@@ -157,7 +157,9 @@ export class FooterComponent implements Component {
 		const toolLabel = toolCount > 0 ? muted(`tools:${toolCount}`) : dim("tools:0");
 		const costLabel = showCost ? muted(`$${this.costTotal.toFixed(3)}`) : "";
 		const notification = xpState.notification ? muted(` ${xpState.notification}`) : "";
-		const left2 = showXpDetails ? `${muted(` ${levelLabel} `)}${xpDetail}${notification}` : muted(` ${fitText(levelLabel, Math.max(18, Math.floor(width * 0.38)))} `);
+		const left2 = showXpDetails
+			? `${muted(` ${levelLabel} `)}${xpDetail}${notification}`
+			: muted(` ${fitText(levelLabel, Math.max(18, Math.floor(width * 0.38)))} `);
 		const right2 = joinParts([browserStatus, toolLabel, costLabel]);
 		const row2 = renderLine(left2, right2, width, bg2);
 

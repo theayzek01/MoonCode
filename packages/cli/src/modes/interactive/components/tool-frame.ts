@@ -49,10 +49,7 @@ export function renderToolFrame(
 
 	// Header: "· bash  path/to/file"  — no borders
 	const header =
-		theme.fg(prefixColor, prefix) +
-		theme.fg("dim", " ") +
-		theme.fg("toolTitle", short) +
-		theme.fg("dim", " ");
+		theme.fg(prefixColor, prefix) + theme.fg("dim", " ") + theme.fg("toolTitle", short) + theme.fg("dim", " ");
 
 	const headerVisible = visibleWidth(header);
 	const maxContent = Math.max(1, width - headerVisible);
@@ -73,8 +70,7 @@ export function renderToolFrame(
 
 	// First content line on same row as header if short
 	const firstLine = contentLines.find((l) => l.trim().length > 0) ?? "";
-	const firstTrunc =
-		visibleWidth(firstLine) > maxContent ? truncateToWidth(firstLine, maxContent) : firstLine;
+	const firstTrunc = visibleWidth(firstLine) > maxContent ? truncateToWidth(firstLine, maxContent) : firstLine;
 
 	if (body.length <= 1) {
 		return [header + theme.fg("dim", firstTrunc)];

@@ -282,7 +282,12 @@ export function createAllToolDefinitions(cwd: string, options?: ToolsOptions): R
 }
 
 export function createCodingTools(cwd: string, options?: ToolsOptions): Tool[] {
-	return [createReadTool(cwd, options?.read), createBashTool(cwd, options?.bash), createEditTool(cwd, options?.edit), createWriteTool(cwd, options?.write)];
+	return [
+		createReadTool(cwd, options?.read),
+		createBashTool(cwd, options?.bash),
+		createEditTool(cwd, options?.edit),
+		createWriteTool(cwd, options?.write),
+	];
 }
 
 export function createReadOnlyTools(cwd: string, options?: ToolsOptions): Tool[] {
