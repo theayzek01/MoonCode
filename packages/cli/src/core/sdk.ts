@@ -277,9 +277,11 @@ export async function createEngineSession(
 		"bash",
 		"edit",
 		"write",
-		"git_ship",
+		"codebase_index",
 		"browser_tabs",
 		"browser_page",
+		"ask_question",
+		"invoke_subagent",
 	];
 	const allowedToolNames = options.tools ?? (options.noTools === "all" ? [] : undefined);
 	const initialActiveToolNames: string[] = options.tools

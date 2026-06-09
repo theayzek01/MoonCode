@@ -1,6 +1,6 @@
 {
 	"name": "mooncode",
-	"version": "26.2.0",
+	"version": "26.2.1",
 	"description": "MoonCode terminal coding agent",
 	"type": "module",
 	"moonConfig": {
@@ -62,9 +62,9 @@
 		"undici": "^7.25.0",
 		"uuid": "^14.0.0",
 		"yaml": "^2.8.2",
-		"moon-core": "^26.2.0",
-		"moon-engine": "^26.2.0",
-		"moon-tui": "^26.2.0"
+		"moon-core": "^26.2.1",
+		"moon-engine": "^26.2.1",
+		"moon-tui": "^26.2.1"
 	},
 	"overrides": {
 		"rimraf": "6.1.2",
