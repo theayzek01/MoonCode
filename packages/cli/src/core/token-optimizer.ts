@@ -8,73 +8,143 @@ export interface PromptCapsuleResult extends TokenOptimizeResult {
 	capsuleApplied: boolean;
 }
 
+// ── Regexes (static, no global lastIndex risk) ────────────────────────────────
+const ANSI_ESCAPE = /\x1b\[[0-?]*[ -/]*[@-~]/g;
+const OSC_ESCAPE = /\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)/g;
+const HTML_COMMENTS = /<!--[\s\S]*?-->/g;
+const TRAILING_WHITESPACE = /[ \t]+$/gm;
 const REPEATED_WHITESPACE = /[ \t]{3,}/g;
 const REPEATED_BLANK_LINES = /\n{3,}/g;
-const TRAILING_WHITESPACE = /[ \t]+$/gm;
-// Boş HTML comment'leri temizle
-const HTML_COMMENTS = /<!--[\s\S]*?-->/g;
-// Satır sonu noktalamasını normalize et
 const REDUNDANT_PUNCTUATION = /([.!?]){3,}/g;
-const ANSI_ESCAPE = /\x1b\[[0-?]*[ -/]*[@-~]/g;
-// Also strip OSC sequences (terminal title, hyperlinks, etc.)
-const OSC_ESCAPE = /\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)/g;
 const STACK_TRACE_LINE = /^\s*at\s+.+(?:\(|file:|[A-Za-z]:\\|\/).*/;
 const JSONISH_BLOCK = /^\s*[[{][\s\S]*[\]}]\s*$/;
-// Repeated log lines (e.g. "[INFO] processing file X" × 100)
-const REPEATED_LOG_LINE_THRESHOLD = 5;
-const CAPSULE_MIN_CHARS = 12_000;
-const CAPSULE_MAX_RAW_CHARS = 6_000;
-const CAPSULE_MAX_LINES = 80;
-// Note: TOOL_OUTPUT_BLOCK is created fresh per call (global regex with lastIndex would cause bugs across repeated calls)
 
-// Trim long tool output blocks — head/tail strategy
+// Long timestamp/date noise common in log files
+const LOG_TIMESTAMP = /\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?/g;
+
+const REPEATED_LOG_LINE_THRESHOLD = 4; // more aggressive: was 5
+const CAPSULE_MIN_CHARS = 8_000;       // was 12_000 — compress earlier
+const CAPSULE_MAX_RAW_CHARS = 4_000;   // was 6_000
+const CAPSULE_MAX_LINES = 60;          // was 80
+
+// ── Tool block trimming ────────────────────────────────────────────────────────
 function trimLongToolBlock(block: string): string {
 	const lines = block.split("\n");
-	// 40 satır altı dokunma
-	if (lines.length <= 40) return block;
-	const HEAD = 20;
-	const TAIL = 10;
-	const head = lines.slice(0, HEAD).join("\n");
-	const tail = lines.slice(-TAIL).join("\n");
+	if (lines.length <= 30) return block; // was 40
+	const HEAD = 15;  // was 20
+	const TAIL = 8;   // was 10
 	const trimmed = lines.length - HEAD - TAIL;
-	return `${head}\n...[${trimmed} lines trimmed]...\n${tail}`;
+	return `${lines.slice(0, HEAD).join("\n")}\n...[${trimmed} lines trimmed]...\n${lines.slice(-TAIL).join("\n")}`;
 }
 
-// Uzun satırları kırp (tek satırlık devasa output'lar için)
-function trimStackTraces(text: string, maxFrames = 8): string {
+// ── Stack trace trimming ───────────────────────────────────────────────────────
+function trimStackTraces(text: string, maxFrames = 5): string { // was 8
 	const lines = text.split("\n");
 	let frames = 0;
 	return lines
 		.filter((line) => {
-			if (!STACK_TRACE_LINE.test(line)) {
-				frames = 0;
-				return true;
-			}
-			frames++;
-			return frames <= maxFrames;
+			if (!STACK_TRACE_LINE.test(line)) { frames = 0; return true; }
+			return ++frames <= maxFrames;
 		})
 		.join("\n");
 }
 
+// ── JSON compaction ────────────────────────────────────────────────────────────
 function compactJsonish(text: string): string {
 	if (!JSONISH_BLOCK.test(text) || text.length > 200_000) return text;
-	try {
-		return JSON.stringify(JSON.parse(text));
-	} catch {
-		return text;
-	}
+	try { return JSON.stringify(JSON.parse(text)); } catch { return text; }
 }
 
-function trimLongLines(text: string, maxLen = 500): string {
+// ── Long line trimming ─────────────────────────────────────────────────────────
+function trimLongLines(text: string, maxLen = 400): string { // was 500
 	return text
 		.split("\n")
 		.map((line) => {
 			if (line.length <= maxLen) return line;
-			return `${line.slice(0, maxLen)}…[+${line.length - maxLen} chars]`;
+			return `${line.slice(0, maxLen)}…[+${line.length - maxLen}]`;
 		})
 		.join("\n");
 }
 
+// ── Comment stripping from code fences ────────────────────────────────────────
+function stripCommentsFromCodeBlock(code: string, lang: string): string {
+	const l = (lang || "").toLowerCase().trim();
+	if (!l) return code;
+	if (["json", "jsonish"].includes(l)) {
+		return code.replace(/\/\/.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "");
+	}
+	if (["js", "javascript", "ts", "typescript", "tsx", "jsx", "go", "java", "c", "cpp", "cs", "css"].includes(l)) {
+		return code
+			.replace(/([^:]|^)\/\/.*$/gm, "$1") // single-line
+			.replace(/\/\*[\s\S]*?\*\//g, "");   // block
+	}
+	if (["py", "python", "sh", "bash", "shell", "yaml", "yml", "rb", "ruby"].includes(l)) {
+		return code.replace(/(^|\s)#.*$/gm, "$1");
+	}
+	if (["html", "xml", "xhtml", "svg"].includes(l)) {
+		return code.replace(/<!--[\s\S]*?-->/g, "");
+	}
+	if (["sql"].includes(l)) {
+		return code.replace(/--.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "");
+	}
+	return code;
+}
+
+// ── Strip dead/empty lines left after comment removal ─────────────────────────
+function collapseEmptyLines(code: string): string {
+	return code.replace(/\n{3,}/g, "\n\n").trim();
+}
+
+// ── Deduplicate repeated log lines ────────────────────────────────────────────
+function deduplicateLogLines(text: string): string {
+	const lines = text.split("\n");
+	if (lines.length < REPEATED_LOG_LINE_THRESHOLD * 2) return text;
+
+	const result: string[] = [];
+	let prevPattern = "";
+	let repeatCount = 0;
+	let firstLine = "";
+	let lastLine = "";
+
+	const normalize = (line: string) =>
+		line
+			.replace(/\d{2,}/g, "N")
+			.replace(/[0-9a-f]{8,}/gi, "H")
+			.replace(LOG_TIMESTAMP, "TS")
+			.trim();
+
+	for (const line of lines) {
+		const pattern = normalize(line);
+		if (pattern === prevPattern && pattern.length > 4) { // was 5
+			repeatCount++;
+			lastLine = line;
+		} else {
+			if (repeatCount >= REPEATED_LOG_LINE_THRESHOLD) {
+				result.push(firstLine);
+				result.push(`  ...[${repeatCount - 1} similar]...`);
+				if (lastLine !== firstLine) result.push(lastLine);
+			} else {
+				for (let i = 0; i < repeatCount; i++) result.push(lastLine || firstLine);
+			}
+			prevPattern = pattern;
+			repeatCount = 1;
+			firstLine = line;
+			lastLine = line;
+		}
+	}
+
+	if (repeatCount >= REPEATED_LOG_LINE_THRESHOLD) {
+		result.push(firstLine);
+		result.push(`  ...[${repeatCount - 1} similar]...`);
+		if (lastLine !== firstLine) result.push(lastLine);
+	} else {
+		for (let i = 0; i < repeatCount; i++) result.push(lastLine || firstLine);
+	}
+
+	return result.join("\n");
+}
+
+// ── Primary optimizer ─────────────────────────────────────────────────────────
 export function optimizePromptText(text: string): TokenOptimizeResult {
 	const originalLength = text.length;
 
@@ -91,21 +161,20 @@ export function optimizePromptText(text: string): TokenOptimizeResult {
 	normalized = trimStackTraces(normalized);
 	normalized = deduplicateLogLines(normalized);
 
-	// Tool output bloklarini kirp (fresh regex per call - global stateful regex'te lastIndex bug'i)
-	const toolBlockRe = /```(?:json|bash|shell|text|plain|output|log)?\n([\s\S]*?)```/g;
-	normalized = normalized.replace(toolBlockRe, (_full, inner: string) => {
-		const compacted = compactJsonish(inner.trim());
-		const trimmedInner = trimLongLines(trimLongToolBlock(compacted));
-		return `\`\`\`\n${trimmedInner}\n\`\`\``;
+	// Code fence processing (fresh regex per call — avoid lastIndex bug)
+	const toolBlockRe = /```([A-Za-z0-9_+.-]*)\n([\s\S]*?)```/g;
+	normalized = normalized.replace(toolBlockRe, (_full, lang: string, inner: string) => {
+		let body = compactJsonish(inner.trim());
+		body = trimLongLines(trimLongToolBlock(body));
+		body = stripCommentsFromCodeBlock(body, lang);
+		body = collapseEmptyLines(body);
+		return `\`\`\`${lang}\n${body}\n\`\`\``;
 	});
 
 	normalized = compactJsonish(normalized);
-
 	normalized = normalized.trim();
 
-	if (normalized === text) {
-		return { optimizedText: text, wasOptimized: false, reductionChars: 0 };
-	}
+	if (normalized === text) return { optimizedText: text, wasOptimized: false, reductionChars: 0 };
 	return {
 		optimizedText: normalized,
 		wasOptimized: true,
@@ -113,14 +182,15 @@ export function optimizePromptText(text: string): TokenOptimizeResult {
 	};
 }
 
+// ── Capsule helpers ───────────────────────────────────────────────────────────
 function uniqueLimited(items: string[], limit: number): string[] {
 	const seen = new Set<string>();
 	const out: string[] = [];
 	for (const item of items) {
-		const normalized = item.trim();
-		if (!normalized || seen.has(normalized)) continue;
-		seen.add(normalized);
-		out.push(normalized);
+		const n = item.trim();
+		if (!n || seen.has(n)) continue;
+		seen.add(n);
+		out.push(n);
 		if (out.length >= limit) break;
 	}
 	return out;
@@ -129,7 +199,7 @@ function uniqueLimited(items: string[], limit: number): string[] {
 function extractPathHints(text: string): string[] {
 	const pathLike =
 		/(?:[A-Za-z]:\\[^\s"'`<>|]+|\.{0,2}\/[^\s"'`<>|]+|[\w.-]+\/[\w./-]+\.[A-Za-z0-9]{1,8}|[\w.-]+\\[\w.\\-]+\.[A-Za-z0-9]{1,8})/g;
-	return uniqueLimited(text.match(pathLike) ?? [], 32);
+	return uniqueLimited(text.match(pathLike) ?? [], 24); // was 32
 }
 
 function extractCommandHints(text: string): string[] {
@@ -137,17 +207,21 @@ function extractCommandHints(text: string): string[] {
 	return uniqueLimited(
 		lines
 			.map((line) => line.trim())
-			.filter((line) => /^(?:[$>]\s*)?(?:npm|pnpm|yarn|bun|node|python|pytest|vitest|cargo|go|git|rg|grep|tsc|eslint|blender)\b/i.test(line))
+			.filter((line) =>
+				/^(?:[$>]\s*)?(?:npm|pnpm|yarn|bun|node|python|pytest|vitest|cargo|go|git|rg|grep|tsc|eslint)(?:\s|$)/i.test(line),
+			)
 			.map((line) => line.replace(/^[$>]\s*/, "")),
-		24,
+		16, // was 24
 	);
 }
 
 function extractErrorHints(text: string): string[] {
 	const lines = text.split("\n");
 	return uniqueLimited(
-		lines.filter((line) => /\b(error|exception|failed|failure|traceback|timeout|eacces|enoent|cannot find|expected|received)\b/i.test(line)),
-		24,
+		lines.filter((line) =>
+			/\b(error|exception|failed|failure|traceback|timeout|eacces|enoent|cannot find|expected|received)\b/i.test(line),
+		),
+		16, // was 24
 	);
 }
 
@@ -155,12 +229,12 @@ function summarizeCodeFences(text: string): string[] {
 	const summaries: string[] = [];
 	const fenceRe = /```([A-Za-z0-9_+.-]*)\n([\s\S]*?)```/g;
 	let match: RegExpExecArray | null;
-	while ((match = fenceRe.exec(text)) && summaries.length < 16) {
+	while ((match = fenceRe.exec(text)) && summaries.length < 10) { // was 16
 		const lang = match[1] || "text";
 		const body = match[2] ?? "";
 		const lines = body.split("\n");
-		const firstSignal = lines.find((line) => line.trim().length > 0)?.trim() ?? "";
-		summaries.push(`${lang}: ${lines.length} lines, ${body.length} chars${firstSignal ? `, starts: ${firstSignal.slice(0, 120)}` : ""}`);
+		const first = lines.find((l) => l.trim().length > 0)?.trim() ?? "";
+		summaries.push(`${lang}:${lines.length}L${first ? `,${first.slice(0, 80)}` : ""}`);
 	}
 	return summaries;
 }
@@ -168,52 +242,50 @@ function summarizeCodeFences(text: string): string[] {
 function summarizeLongPrompt(text: string): string {
 	const normalized = optimizePromptText(text).optimizedText;
 	const lines = normalized.split("\n");
-	const head = lines.slice(0, Math.min(30, lines.length)).join("\n");
-	const tail = lines.slice(-Math.min(30, lines.length)).join("\n");
-	const pathHints = extractPathHints(normalized);
-	const commandHints = extractCommandHints(normalized);
-	const errorHints = extractErrorHints(normalized);
-	const codeFences = summarizeCodeFences(normalized);
+	const headN = Math.min(20, lines.length); // was 30
+	const tailN = Math.min(20, lines.length); // was 30
+	const head = lines.slice(0, headN).join("\n");
+	const tail = lines.slice(-tailN).join("\n");
+	const paths = extractPathHints(normalized);
+	const cmds = extractCommandHints(normalized);
+	const errs = extractErrorHints(normalized);
+	const fences = summarizeCodeFences(normalized);
 
 	const capsule = [
-		"[MoonCode Capsule/Razor]",
-		`Original: ${text.length} chars, ${text.split("\n").length} lines. Compressed before model input to reduce repeated/log-heavy context.`,
-		pathHints.length ? `Paths:\n- ${pathHints.join("\n- ")}` : "",
-		commandHints.length ? `Commands:\n- ${commandHints.join("\n- ")}` : "",
-		errorHints.length ? `Errors/signals:\n- ${errorHints.join("\n- ")}` : "",
-		codeFences.length ? `Code fences:\n- ${codeFences.join("\n- ")}` : "",
-		"Head:",
+		"[capsule]",
+		`${text.length}ch/${text.split("\n").length}L`,
+		paths.length ? `paths:${paths.slice(0, 12).join(",")}` : "",
+		cmds.length ? `cmds:${cmds.slice(0, 8).join(",")}` : "",
+		errs.length ? `errs:${errs.slice(0, 8).join(" | ")}` : "",
+		fences.length ? `fences:${fences.join(" | ")}` : "",
+		"[head]",
 		head,
-		"Tail:",
+		"[tail]",
 		tail,
 	]
 		.filter(Boolean)
 		.join("\n");
 
 	const rawTail =
-		normalized.length > CAPSULE_MAX_RAW_CHARS
-			? normalized.slice(-CAPSULE_MAX_RAW_CHARS)
-			: normalized;
+		normalized.length > CAPSULE_MAX_RAW_CHARS ? normalized.slice(-CAPSULE_MAX_RAW_CHARS) : normalized;
 	const trimmedRawTail = rawTail.split("\n").slice(-CAPSULE_MAX_LINES).join("\n");
-	return `${capsule}\n\n[Recent raw tail preserved]\n${trimmedRawTail}`;
+	return `${capsule}\n[raw]\n${trimmedRawTail}`;
 }
 
+// ── Intent capsule ────────────────────────────────────────────────────────────
 export function optimizePromptForIntentCapsule(text: string): PromptCapsuleResult {
 	const base = optimizePromptText(text);
 	const optimized = base.optimizedText;
 	const shouldCapsule =
 		optimized.length > CAPSULE_MIN_CHARS ||
-		optimized.split("\n").length > 260 ||
-		/```[\s\S]{8000,}```/.test(optimized);
+		optimized.split("\n").length > 200 || // was 260
+		/```[\s\S]{6000,}```/.test(optimized); // was 8000
 
-	if (!shouldCapsule) {
-		return { ...base, capsuleApplied: false };
-	}
+	if (!shouldCapsule) return { ...base, capsuleApplied: false };
 
 	const capsule = summarizeLongPrompt(optimized).trim();
-	if (capsule.length >= optimized.length) {
-		return { ...base, capsuleApplied: false };
-	}
+	if (capsule.length >= optimized.length) return { ...base, capsuleApplied: false };
+
 	return {
 		optimizedText: capsule,
 		wasOptimized: true,
@@ -222,83 +294,19 @@ export function optimizePromptForIntentCapsule(text: string): PromptCapsuleResul
 	};
 }
 
-/**
- * Local/Ollama modeller için agresif token kısıtması.
- * Context window küçük olduğu için daha sert kırpar.
- */
-export function optimizeForLocalModel(text: string, maxChars = 6000): TokenOptimizeResult {
+// ── Local/Ollama aggressive trim ──────────────────────────────────────────────
+export function optimizeForLocalModel(text: string, maxChars = 4_000): TokenOptimizeResult { // was 6000
 	const base = optimizePromptText(text);
 	const working = base.optimizedText;
+	if (working.length <= maxChars) return base;
 
-	if (working.length <= maxChars) {
-		return base;
-	}
-
-	// Fazlaysa ortayı sil, head + tail bırak
 	const head = Math.floor(maxChars * 0.65);
 	const tail = maxChars - head;
-	const trimmed = `${working.slice(0, head)}\n\n...[context trimmed, ${working.length - maxChars} chars skipped]...\n\n${working.slice(-tail)}`;
+	const trimmed = `${working.slice(0, head)}\n\n...[${working.length - maxChars}ch skipped]...\n\n${working.slice(-tail)}`;
 
 	return {
 		optimizedText: trimmed,
 		wasOptimized: true,
 		reductionChars: Math.max(0, text.length - trimmed.length),
 	};
-}
-
-/**
- * Deduplicate repeated log/output lines.
- * If the same pattern appears more than THRESHOLD times consecutively,
- * collapse into first + count + last.
- */
-function deduplicateLogLines(text: string): string {
-	const lines = text.split("\n");
-	if (lines.length < REPEATED_LOG_LINE_THRESHOLD * 2) return text;
-
-	const result: string[] = [];
-	let prevPattern = "";
-	let repeatCount = 0;
-	let firstLine = "";
-	let lastLine = "";
-
-	for (const line of lines) {
-		// Normalize numbers/hashes/timestamps to detect patterns
-		const pattern = line
-			.replace(/\d{2,}/g, "N")
-			.replace(/[0-9a-f]{8,}/gi, "H")
-			.trim();
-
-		if (pattern === prevPattern && pattern.length > 5) {
-			repeatCount++;
-			lastLine = line;
-		} else {
-			if (repeatCount >= REPEATED_LOG_LINE_THRESHOLD) {
-				result.push(firstLine);
-				result.push(`  ...[${repeatCount - 1} similar lines]...`);
-				if (lastLine !== firstLine) result.push(lastLine);
-			} else {
-				// Flush accumulated lines
-				for (let i = 0; i < repeatCount; i++) {
-					result.push(lastLine || firstLine);
-				}
-			}
-			prevPattern = pattern;
-			repeatCount = 1;
-			firstLine = line;
-			lastLine = line;
-		}
-	}
-
-	// Flush remaining
-	if (repeatCount >= REPEATED_LOG_LINE_THRESHOLD) {
-		result.push(firstLine);
-		result.push(`  ...[${repeatCount - 1} similar lines]...`);
-		if (lastLine !== firstLine) result.push(lastLine);
-	} else {
-		for (let i = 0; i < repeatCount; i++) {
-			result.push(lastLine || firstLine);
-		}
-	}
-
-	return result.join("\n");
 }

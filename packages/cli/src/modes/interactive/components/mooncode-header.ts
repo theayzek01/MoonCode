@@ -27,8 +27,8 @@ const color = {
 	text: (value: string) => rgb(229, 229, 229, value),
 	muted: (value: string) => rgb(150, 150, 150, value),
 	dim: (value: string) => rgb(90, 90, 90, value),
-	panel: (value: string) => bg(8, 8, 8, value),
-	panelAlt: (value: string) => bg(18, 18, 18, value),
+	panel: (value: string) => value,
+	panelAlt: (value: string) => value,
 };
 
 function fitText(value: string, maxWidth: number): string {

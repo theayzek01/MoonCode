@@ -127,6 +127,8 @@ import { ModelSelectorComponent } from "./components/model-selector.js";
 import { MoonCodeHeaderComponent } from "./components/mooncode-header.js";
 import { type AuthSelectorProvider, OAuthSelectorComponent } from "./components/oauth-selector.js";
 import { RoadmapComponent, type RoadmapStep } from "./components/roadmap.js";
+import { TaskPanelComponent, type TaskItem } from "./components/task-panel.js";
+import { parseWizardBlock, WizardSelectorComponent } from "./components/wizard-selector.js";
 import { ScopedModelsSelectorComponent } from "./components/scoped-models-selector.js";
 import { SessionSelectorComponent } from "./components/session-selector.js";
 import { SettingsSelectorComponent } from "./components/settings-selector.js";
@@ -456,6 +458,9 @@ export class InteractiveMode {
 	private activeMetricsChart: MetricsChartComponent | undefined = undefined;
 	private extensionTerminalInputUnsubscribers = new Set<() => void>();
 
+	// Wizard selector (inline multi-step option picker)
+	private wizardSelector: WizardSelectorComponent | undefined = undefined;
+
 	// Extension widgets (components rendered above/below the editor)
 	private extensionWidgetsAbove = new Map<string, Component & { dispose?(): void }>();
 	private extensionWidgetsBelow = new Map<string, Component & { dispose?(): void }>();
@@ -480,6 +485,10 @@ export class InteractiveMode {
 
 	// Zen Mode state
 	private isZenMode = false;
+
+	// Task Mode: side panel showing task list (on by default)
+	private isTaskMode = true;
+	private taskPanel: TaskPanelComponent | undefined = undefined;
 
 	// Convenience accessors
 	private get session(): EngineSession {
@@ -774,6 +783,7 @@ export class InteractiveMode {
 		}
 
 		this.roadmap = new RoadmapComponent();
+		this.taskPanel = new TaskPanelComponent(() => this.ui.requestRender());
 
 		// Main chat layout container
 		this.chatAndPendingContainer = new Container();
@@ -858,6 +868,9 @@ export class InteractiveMode {
 		this.mainLayout.addChild(this.chatAndPendingContainer);
 		if (this.currentSteps.length > 0 && !this.isZenMode) {
 			this.mainLayout.addChild(this.roadmap);
+		}
+		if (this.isTaskMode && !this.isZenMode && this.taskPanel) {
+			this.mainLayout.addChild(this.taskPanel);
 		}
 
 		this.ui.addChild(this.mainLayout);
@@ -1886,9 +1899,9 @@ export class InteractiveMode {
 			if (scratchConfig) {
 				this.settingsManager.setMcpServer("scratch", scratchConfig);
 			}
-			if (!existingMcpServers.blender) {
-				this.settingsManager.setMcpServer("blender", this.getBlenderMcpConfig());
-			}
+			// if (!existingMcpServers.blender) {
+			// 	this.settingsManager.setMcpServer("blender", this.getBlenderMcpConfig());
+			// }
 			await this.settingsManager.flush();
 			const tools = await this.session.connectConfiguredMcpServers();
 			const mcpToolCount = tools.filter((tool) => tool.startsWith("scratch_") || tool.startsWith("blender_")).length;
@@ -2401,6 +2414,43 @@ export class InteractiveMode {
 	}
 
 	/**
+	 * Show the multi-step wizard selector, triggered by :::wizard blocks.
+	 */
+	private showWizardSelector(steps: import("./components/wizard-selector.js").WizardStep[]): void {
+		this.hideWizardSelector();
+		this.wizardSelector = new WizardSelectorComponent(
+			steps,
+			(result) => {
+				this.hideWizardSelector();
+				// Feed answers back as user message
+				if (result.completed) {
+					const answersText = steps
+						.map((step, i) => `${step.title}: ${result.answers[i] ?? "—"}`)
+						.join("\n");
+					this.editor.setText(answersText);
+					this.ui.setFocus(this.editor);
+				}
+			},
+			() => {
+				this.hideWizardSelector();
+			},
+		);
+		this.editorContainer.clear();
+		this.editorContainer.addChild(this.wizardSelector);
+		this.ui.setFocus(this.wizardSelector);
+		this.ui.requestRender();
+	}
+
+	private hideWizardSelector(): void {
+		this.wizardSelector?.dispose();
+		this.wizardSelector = undefined;
+		this.editorContainer.clear();
+		this.editorContainer.addChild(this.editor);
+		this.ui.setFocus(this.editor);
+		this.ui.requestRender();
+	}
+
+	/**
 	 * Show a confirmation dialog for extensions.
 	 */
 	private async showExtensionConfirm(
@@ -2852,6 +2902,13 @@ export class InteractiveMode {
 				}
 				if (text === "/zen") {
 					this.toggleZenMode();
+					this.editor.setText("");
+					return;
+				}
+				if (text === "/taskmode") {
+					this.isTaskMode = !this.isTaskMode;
+					this.refreshLayout();
+					this.showStatus(this.isTaskMode ? "task panel on" : "task panel off");
 					this.editor.setText("");
 					return;
 				}
@@ -3355,6 +3412,14 @@ export class InteractiveMode {
 							this.roadmap.setEta(
 								Math.ceil(this.currentSteps.filter((s) => s.status !== "completed").length * 2),
 							);
+							if (this.taskPanel) {
+								const taskItems: TaskItem[] = this.currentSteps.map((s) => ({
+									id: s.id,
+									label: s.label,
+									status: s.status === "completed" ? "done" : s.status === "active" ? "active" : "pending",
+								}));
+								this.taskPanel.setTasks(taskItems);
+							}
 							this.refreshLayout();
 						}
 					}
@@ -3427,6 +3492,15 @@ export class InteractiveMode {
 					this.footer.invalidate();
 				}
 				this.ui.requestRender();
+
+				// Detect :::wizard block and show picker
+				if (event.message.role === "assistant") {
+					const msgText = event.message.content.find((c: any) => c.type === "text")?.text ?? "";
+					const wizardSteps = parseWizardBlock(msgText);
+					if (wizardSteps && wizardSteps.length > 0) {
+						this.showWizardSelector(wizardSteps);
+					}
+				}
 				break;
 
 			case "tool_execution_start": {
@@ -3533,10 +3607,11 @@ export class InteractiveMode {
 						.catch(() => {});
 				}
 
-				// Clear roadmap for next task
+				// Clear roadmap and task panel for next task
 				this.currentSteps = [];
 				this.roadmap.setSteps([]);
 				this.roadmap.setEta(0);
+				this.taskPanel?.clearTasks();
 
 				await this.checkShutdownRequested();
 

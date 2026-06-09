@@ -31,11 +31,11 @@ function sage(value: string): string {
 }
 
 function bg1(value: string): string {
-	return `\x1b[48;2;18;22;28m${value}\x1b[49m`;
+	return value;
 }
 
 function bg2(value: string): string {
-	return `\x1b[48;2;10;12;16m${value}\x1b[49m`;
+	return value;
 }
 
 function shortenPath(value: string): string {

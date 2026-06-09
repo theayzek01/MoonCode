@@ -1029,10 +1029,12 @@ export class EngineSession {
 
 	async connectConfiguredMcpServers(): Promise<string[]> {
 		const mcpConfigs = this.settingsManager.getMcpServers();
-		const mcpServerConfigs = Object.entries(mcpConfigs).map(([name, config]) => ({
-			name,
-			...config,
-		}));
+		const mcpServerConfigs = Object.entries(mcpConfigs)
+			.filter(([, config]) => config.autoStart !== false)
+			.map(([name, config]) => ({
+				name,
+				...config,
+			}));
 
 		if (this._mcpManager) {
 			await this._mcpManager.dispose();

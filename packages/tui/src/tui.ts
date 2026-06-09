@@ -547,12 +547,7 @@ export class TUI extends Container {
 		this.queryCellSize();
 		this.requestRender(true);
 
-		if (this.animInterval) clearInterval(this.animInterval);
-		this.animInterval = setInterval(() => {
-			if (!this.stopped) {
-				this.requestRender(false);
-			}
-		}, 30);
+		// Removed 30fps animation interval so native terminal text selection works
 	}
 
 	addInputListener(listener: InputListener): () => void {
@@ -1336,13 +1331,23 @@ export class TUI extends Container {
 		// Clear any remaining lines between renderEnd and previous content end
 		// This prevents ghost/duplicate frames when content shrinks or shifts
 		if (this.previousLines.length > newLines.length) {
-			// Move to end of new content first if we stopped before it
-			if (renderEnd < newLines.length - 1) {
-				const moveDown = newLines.length - 1 - renderEnd;
-				buffer += `\x1b[${moveDown}B`;
-				finalCursorRow = newLines.length - 1;
+			const extraLines = this.previousLines.length - newLines.length;
+			const moveDownToLast = Math.max(0, newLines.length - 1) - hardwareCursorRow;
+			if (moveDownToLast > 0) {
+				buffer += `\x1b[${moveDownToLast}B`;
+			} else if (moveDownToLast < 0) {
+				buffer += `\x1b[${-moveDownToLast}A`;
 			}
-			buffer += "\r\x1b[J";
+			
+			if (extraLines > 0) {
+				buffer += "\x1b[1B";
+				for (let i = 0; i < extraLines; i++) {
+					buffer += "\r\x1b[2K";
+					if (i < extraLines - 1) buffer += "\x1b[1B";
+				}
+				buffer += `\x1b[${extraLines}A`;
+			}
+			finalCursorRow = Math.max(0, newLines.length - 1);
 		} else if (renderEnd < newLines.length - 1 && lastChanged < newLines.length - 1) {
 			// Content didn't shrink but we only rendered up to lastChanged.
 			// Verify the remaining lines below renderEnd match previous.

@@ -9,7 +9,7 @@ export interface CodingAgentsSettings {
 	verbosity?: CodingAgentVerbosity;
 }
 
-export type CodingAgentDepartment = "leadership" | "engineering" | "product" | "quality" | "delivery";
+export type CodingAgentDepartment = "explore" | "build" | "verify";
 
 export interface CodingAgentProfile {
 	id: string;
@@ -20,75 +20,64 @@ export interface CodingAgentProfile {
 }
 
 export const DEFAULT_CODING_AGENT_PROFILES: readonly CodingAgentProfile[] = [
+	// ── EXPLORE (fast read-only, parallel) ────────────────────────────────────
 	{
-		id: "patron",
-		name: "Patron Agent / Orchestrator",
-		department: "leadership",
-		focus: "clarifies the goal and splits the work",
-		useWhen: "every agent run",
+		id: "scanner",
+		name: "Scanner",
+		department: "explore",
+		focus: "map files, imports, exports, deps — no writes",
+		useWhen: "first pass on any task",
 	},
 	{
+		id: "searcher",
+		name: "Searcher",
+		department: "explore",
+		focus: "grep patterns, symbol refs, API usages",
+		useWhen: "finding where things are used",
+	},
+	// ── BUILD (parallel where possible) ──────────────────────────────────────
+	{
 		id: "architect",
-		name: "Architect Agent",
-		department: "engineering",
-		focus: "file structure, data flow, integration risk",
-		useWhen: "multi-file/refactor/architecture decisions",
+		name: "Architect",
+		department: "build",
+		focus: "data flow, interface contracts, integration risk",
+		useWhen: "multi-file or cross-package work",
+	},
+	{
+		id: "coder",
+		name: "Coder",
+		department: "build",
+		focus: "implement, diff-only, runs on first try",
+		useWhen: "all code writes",
 	},
 	{
 		id: "backend",
-		name: "Backend Agent",
-		department: "engineering",
-		focus: "API, validation, auth, server-side rules",
-		useWhen: "when server/provider/runtime changes",
+		name: "Backend",
+		department: "build",
+		focus: "API, auth, validation, runtime correctness",
+		useWhen: "server-side changes",
 	},
 	{
 		id: "frontend",
-		name: "Frontend Agent",
-		department: "product",
-		focus: "TUI/Web flow, state, responsive behavior, empty/loading/error states, default premium dark SaaS UI",
-		useWhen: "when UI or interaction changes",
+		name: "Frontend",
+		department: "build",
+		focus: "TUI/UI flow, state, empty/error/loading states",
+		useWhen: "UI changes",
 	},
+	// ── VERIFY (run last, parallel) ───────────────────────────────────────────
 	{
-		id: "uiux",
-		name: "UI/UX Agent",
-		department: "product",
-		focus: "readability, accessibility, shadcn/Vercel dark SaaS polish, clear experience",
-		useWhen: "for everything visible on screen",
-	},
-	{
-		id: "test",
-		name: "Test Agent",
-		department: "quality",
-		focus: "regression, edge cases, manual verification",
-		useWhen: "when code changes",
+		id: "reviewer",
+		name: "Reviewer",
+		department: "verify",
+		focus: "correctness, edge cases, type safety",
+		useWhen: "after implementation",
 	},
 	{
 		id: "security",
-		name: "Security Agent",
-		department: "quality",
-		focus: "secrets, injection, path traversal, permissions",
-		useWhen: "when FS/network/auth/user input exists",
-	},
-	{
-		id: "devops",
-		name: "DevOps Agent",
-		department: "delivery",
-		focus: "build, release, environment, operations",
-		useWhen: "for install/CI/deploy flow",
-	},
-	{
-		id: "code-reviewer",
-		name: "Code Reviewer Agent",
-		department: "quality",
-		focus: "quality, consistency, missing edge cases",
-		useWhen: "at the end of implementation",
-	},
-	{
-		id: "integrator",
-		name: "Integrator Agent",
-		department: "delivery",
-		focus: "integrates parts into one coherent solution",
-		useWhen: "at final delivery",
+		name: "Security",
+		department: "verify",
+		focus: "injection, secrets, path traversal, permissions",
+		useWhen: "FS/network/auth/user input",
 	},
 ];
 
@@ -101,59 +90,69 @@ function normalizeVerbosity(verbosity: CodingAgentVerbosity | undefined): Coding
 	return verbosity ?? "summary";
 }
 
-function getVisibilityInstruction(verbosity: CodingAgentVerbosity): string {
-	if (verbosity === "quiet") return "Do not expose agent commentary; keep teamwork internal.";
-	if (verbosity === "verbose") return "Show a short Agent Board if useful; do not write fake meeting transcripts.";
-	return "Show a short 2-5 line Agent Board only if useful.";
-}
-
 export function buildCodingAgentsPrompt(settings: CodingAgentsSettings | undefined): string {
 	if (!settings) return "";
 	const mode = normalizeMode(settings.mode, settings.enabled);
 	const enabled = (settings.enabled ?? mode !== "off") && mode !== "off";
 	if (!enabled) return "";
 	const verbosity = normalizeVerbosity(settings.verbosity);
-	const agentLines = DEFAULT_CODING_AGENT_PROFILES.map(
-		(agent) => `- ${agent.name}: ${agent.focus}. Use: ${agent.useWhen}.`,
-	).join("\n");
+
+	const byDept = (dept: CodingAgentDepartment) =>
+		DEFAULT_CODING_AGENT_PROFILES
+			.filter((a) => a.department === dept)
+			.map((a) => `  ${a.id}: ${a.focus}`)
+			.join("\n");
+
+	const visibilityRule =
+		verbosity === "quiet"
+			? "∄agent commentary. Internal only."
+			: verbosity === "verbose"
+				? "Show agent board if useful. ∄fake transcripts."
+				: "≤3ln agent board. Only if useful.";
 
 	return `
 
-## Agent System (Company Mode)
+## ━ AGENT SYSTEM
+Mode: ${mode}  Visibility: ${verbosity}
+${mode === "auto" ? "auto: complex/multi-file → agents. trivial → direct." : "always: all coding work → agents."}
 
-Manage coding work with small-software-company discipline. This is not roleplay; it is a quality and organization layer.
+Departments (run EXPLORE→BUILD→VERIFY):
 
-Mode: ${mode}
-Visibility: ${verbosity}
+EXPLORE — parallel, read-only:
+${byDept("explore")}
 
-Activation:
-- auto: Use for complex, multi-file, UI+backend, architecture, bugfix, test, or security work; answer simple requests directly.
-- always: Always use for app/coding work.
+BUILD — parallel where independent:
+${byDept("build")}
 
-Team:
-${agentLines}
+VERIFY — parallel, final gate:
+${byDept("verify")}
 
-Workflow:
-1. Convert the request into goals and acceptance criteria.
-2. Split the work across the right specialists.
-3. Produce one coherent diff.
-4. Pass test, security, and review quality gates.
-5. Give a clean, concise final answer.
+Protocol:
+1. scanner+searcher → parallel → build context map
+2. architect → plan (skip for trivial)
+3. coder+backend+frontend → parallel where independent
+4. reviewer+security → parallel → one final diff
+5. ship single coherent patch
 
-Rules:
-- Do not make agents verbose.
-- Do not answer per role; produce one clear solution.
-- For code work, inspect repo context first, then implement, then run checks.
+Speed rules:
+- ∄sequential when parallel possible
+- explore agents share one read pass, ∄duplicate reads
+- small tasks: skip explore, go direct to coder
+- ∄agent verbosity. ∄roleplay. one clean output.
 - ${DEFAULT_UI_STYLE_GUIDELINE}
-- ${getVisibilityInstruction(verbosity)}`;
+- ${visibilityRule}`;
 }
 
-const DEPARTMENT_LABELS: Record<CodingAgentDepartment, string> = {
-	leadership: "Lead",
-	engineering: "Engineering",
-	product: "Product",
-	quality: "Quality",
-	delivery: "Delivery",
+const DEPT_LABEL: Record<CodingAgentDepartment, string> = {
+	explore: "Explore",
+	build: "Build",
+	verify: "Verify",
+};
+
+const DEPT_COLOR: Record<CodingAgentDepartment, number> = {
+	explore: 117,
+	build: 45,
+	verify: 82,
 };
 
 export interface CodingWorkspaceRenderOptions {
@@ -163,72 +162,49 @@ export interface CodingWorkspaceRenderOptions {
 	color?: boolean;
 }
 
-const ANSI_RESET = "\u001b[0m";
-const ANSI_BOLD = "\u001b[1m";
-const ANSI_DIM = "\u001b[2m";
+const R = "\u001b[0m";
+const B = "\u001b[1m";
+const D = "\u001b[2m";
 
-const DEPARTMENT_COLORS: Record<CodingAgentDepartment, number> = {
-	leadership: 214,
-	engineering: 45,
-	product: 117,
-	quality: 82,
-	delivery: 141,
-};
-
-function ansi256(code: number, text: string, enabled: boolean): string {
-	return enabled ? `\u001b[38;5;${code}m${text}${ANSI_RESET}` : text;
-}
-
-function bold(text: string, enabled: boolean): string {
-	return enabled ? `${ANSI_BOLD}${text}${ANSI_RESET}` : text;
-}
-
-function dim(text: string, enabled: boolean): string {
-	return enabled ? `${ANSI_DIM}${text}${ANSI_RESET}` : text;
-}
-
-function row(label: string, value: string, colorEnabled: boolean): string {
-	return `${ansi256(244, label.padEnd(10), colorEnabled)} ${value}`;
-}
+const a256 = (code: number, text: string, on: boolean) =>
+	on ? `\u001b[38;5;${code}m${text}${R}` : text;
+const bold = (t: string, on: boolean) => (on ? `${B}${t}${R}` : t);
+const dim = (t: string, on: boolean) => (on ? `${D}${t}${R}` : t);
 
 export function renderCodingAgentsWorkspace(
 	settings: CodingAgentsSettings | undefined,
 	options: CodingWorkspaceRenderOptions = {},
 ): string {
-	const colorEnabled = options.color ?? true;
+	const c = options.color ?? true;
 	const mode = normalizeMode(settings?.mode, settings?.enabled);
 	const enabled = (settings?.enabled ?? mode !== "off") && mode !== "off";
 	const verbosity = normalizeVerbosity(settings?.verbosity);
 	const status = enabled ? (mode === "always" ? "always" : "auto") : "off";
+
 	const lines: string[] = [
-		bold("MoonCode workspace", colorEnabled),
-		dim("minimal company mode", colorEnabled),
+		bold("agent workspace", c),
+		dim("explore → build → verify", c),
 		"",
-		row("status", ansi256(enabled ? 82 : 203, status, colorEnabled), colorEnabled),
-		row("view", ansi256(117, verbosity, colorEnabled), colorEnabled),
+		`${a256(244, "status".padEnd(10), c)} ${a256(enabled ? 82 : 203, status, c)}`,
+		`${a256(244, "verbosity".padEnd(10), c)} ${a256(117, verbosity, c)}`,
 	];
 
-	if (options.modelName) lines.push(row("model", ansi256(229, options.modelName, colorEnabled), colorEnabled));
-	if (options.cwd) lines.push(row("cwd", ansi256(153, options.cwd, colorEnabled), colorEnabled));
+	if (options.modelName) lines.push(`${a256(244, "model".padEnd(10), c)} ${a256(229, options.modelName, c)}`);
+	if (options.cwd) lines.push(`${a256(244, "cwd".padEnd(10), c)} ${a256(153, options.cwd, c)}`);
 	if (options.activeTools?.length)
-		lines.push(row("tools", ansi256(120, String(options.activeTools.length), colorEnabled), colorEnabled));
+		lines.push(`${a256(244, "tools".padEnd(10), c)} ${a256(120, String(options.activeTools.length), c)}`);
 
-	lines.push("", bold("Flow", colorEnabled), dim("brief → plan → implement → review → ship", colorEnabled), "");
+	lines.push("");
 
-	for (const department of Object.keys(DEPARTMENT_LABELS) as CodingAgentDepartment[]) {
-		const agents = DEFAULT_CODING_AGENT_PROFILES.filter((agent) => agent.department === department);
+	for (const dept of Object.keys(DEPT_LABEL) as CodingAgentDepartment[]) {
+		const agents = DEFAULT_CODING_AGENT_PROFILES.filter((a) => a.department === dept);
 		if (!agents.length) continue;
-		const color = DEPARTMENT_COLORS[department];
-		lines.push(ansi256(color, DEPARTMENT_LABELS[department], colorEnabled));
+		lines.push(a256(DEPT_COLOR[dept], DEPT_LABEL[dept], c));
 		for (const agent of agents) {
-			lines.push(`  ${bold(agent.name.padEnd(12), colorEnabled)} ${dim(agent.focus, colorEnabled)}`);
+			lines.push(`  ${bold(agent.id.padEnd(12), c)} ${dim(agent.focus, c)}`);
 		}
 		lines.push("");
 	}
 
-	lines.push(
-		bold("Useful commands", colorEnabled),
-		`${ansi256(117, "/workspace", colorEnabled)}  ${ansi256(117, "/agents status", colorEnabled)}  ${ansi256(117, "/index status", colorEnabled)}  ${ansi256(117, "/diff", colorEnabled)}  ${ansi256(117, "/ship", colorEnabled)}`,
-	);
 	return lines.join("\n").trimEnd();
 }

@@ -453,62 +453,19 @@ export class Editor implements Component, Focusable {
 
 		const result: string[] = [];
 
-		// Render top border. The composer is a full-width frame so its edges never visually drift.
-		let topBorderLine = "";
 		if (this.scrollOffset > 0) {
 			const indicator = `↑ ${this.scrollOffset} more `;
-			const remaining = width - 12 - indicator.length - 1; // "╭─ MoonCode " is 12 chars
-			if (remaining >= 0) {
-				const plainLine = `╭─ MoonCode ${"─".repeat(remaining)}${indicator}╮`;
-				topBorderLine = this.focused
-					? colorizeRGB(plainLine, 1.0, width)
-					: this.borderAccentColor("╭─ ") +
-						this.borderAccentColor("MoonCode ") +
-						this.borderColor("─".repeat(remaining)) +
-						this.borderColor(indicator) +
-						this.borderColor("╮");
-			} else {
-				const plainLine = `╭─ MoonCode ${"─".repeat(width)}╮`;
-				topBorderLine = this.focused
-					? colorizeRGB(plainLine, 1.0, width)
-					: truncateToWidth(
-							this.borderAccentColor("╭─ MoonCode ") +
-								this.borderColor("─".repeat(width)) +
-								this.borderColor("╮"),
-							width,
-						);
-			}
+			result.push(this.borderColor(` ${indicator} `));
 		} else {
-			const remaining = Math.max(0, width - 12 - 1);
-			const plainLine = `╭─ MoonCode ${"─".repeat(remaining)}╮`;
-			topBorderLine = this.focused
-				? colorizeRGB(plainLine, 1.0, width)
-				: this.borderAccentColor("╭─ ") +
-					this.borderAccentColor("MoonCode ") +
-					this.borderColor("─".repeat(remaining)) +
-					this.borderColor("╮");
-		}
-		result.push(topBorderLine);
+            result.push(""); // subtle spacing above input
+        }
 
 		// Render each visible layout line
 		// Emit hardware cursor marker only when focused and not showing autocomplete
 		const emitCursorMarker = this.focused && !this.autocompleteState;
 
-		let sideBorder = "";
-		if (this.focused) {
-			const { r, g, b } = getRainbowRGB(0, width, 1.0);
-			sideBorder = `\x1b[38;2;${r};${g};${b}m│ \x1b[39m`;
-		} else {
-			sideBorder = this.borderColor("│ ");
-		}
-
-		let rightBorder = "";
-		if (this.focused) {
-			const { r, g, b } = getRainbowRGB(width - 2, width, 1.0);
-			rightBorder = `\x1b[38;2;${r};${g};${b}m │\x1b[39m`;
-		} else {
-			rightBorder = this.borderColor(" │");
-		}
+		let sideBorder = "  ";
+		let rightBorder = "  ";
 
 		const textIsEmpty = this.getText().length === 0;
 
@@ -569,28 +526,13 @@ export class Editor implements Component, Focusable {
 			}
 		}
 
-		// Render bottom border
 		const linesBelow = layoutLines.length - (this.scrollOffset + visibleLines.length);
-		let bottomBorderLine = "";
 		if (linesBelow > 0) {
-			const indicator = ` ── ↓ ${linesBelow} more `;
-			const remaining = width - 2 - indicator.length;
-			const plainLine = `╰${"─".repeat(Math.max(0, remaining))}${indicator}╯`;
-			bottomBorderLine = this.focused
-				? colorizeRGB(plainLine, 1.0, width)
-				: this.borderAccentColor("╰") +
-					this.borderColor("─".repeat(Math.max(0, remaining))) +
-					this.borderColor(indicator) +
-					this.borderAccentColor("╯");
+			const indicator = `↓ ${linesBelow} more `;
+			result.push(this.borderColor(` ${indicator} `));
 		} else {
-			const plainLine = `╰${"─".repeat(Math.max(0, width - 2))}╯`;
-			bottomBorderLine = this.focused
-				? colorizeRGB(plainLine, 1.0, width)
-				: this.borderAccentColor("╰") +
-					this.borderColor("─".repeat(Math.max(0, width - 2))) +
-					this.borderAccentColor("╯");
-		}
-		result.push(bottomBorderLine);
+            result.push(""); // subtle spacing below input
+        }
 
 		return result;
 	}

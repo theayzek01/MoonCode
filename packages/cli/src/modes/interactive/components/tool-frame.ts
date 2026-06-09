@@ -3,69 +3,37 @@ import { type ThemeColor, theme } from "../theme/theme.js";
 
 export type ToolFrameState = "running" | "success" | "error" | "cancelled" | "pending";
 
-const TOOL_COLOR: Record<string, ThemeColor> = {
-	bash: "warning",
-	edit: "error",
-	write: "success",
-	read: "accent",
-	grep: "mdCode",
-	find: "borderAccent",
-	ls: "muted",
-	semantic_search: "thinkingText",
-	codebase_index: "accent",
-	git_ship: "success",
-	browser_tabs: "borderAccent",
-	browser_page: "borderAccent",
+// Minimal prefix symbols — no box-drawing, no animations
+const STATE_PREFIX: Record<ToolFrameState, string> = {
+	running: "·",
+	pending: "·",
+	success: "✓",
+	error: "✗",
+	cancelled: "–",
 };
 
-const TOOL_LABEL: Record<string, string> = {
-	bash: "$ Bash",
-	edit: "~ Edit",
-	write: "+ Write",
-	read: "= Read",
-	grep: "? Grep",
-	find: "@ Find",
-	ls: "# List",
-	semantic_search: "S Search",
-	codebase_index: "I Index",
-	git_ship: "G Git Ship",
-	browser_tabs: "T Browser Tabs",
-	browser_page: "P Browser Page",
+const STATE_COLOR: Record<ToolFrameState, ThemeColor> = {
+	running: "dim",
+	pending: "dim",
+	success: "success",
+	error: "error",
+	cancelled: "warning",
 };
 
-function toolColor(toolName: string, state: ToolFrameState): ThemeColor {
-	if (state === "error") return "error";
-	if (state === "cancelled") return "warning";
-	return TOOL_COLOR[toolName] ?? "toolTitle";
-}
-
-function stateLabel(state: ToolFrameState): string {
-	switch (state) {
-		case "running":
-		case "pending":
-			return "run";
-		case "success":
-			return "ok";
-		case "error":
-			return "err";
-		case "cancelled":
-			return "stop";
-	}
-}
-
-function stateColor(state: ToolFrameState): ThemeColor {
-	switch (state) {
-		case "running":
-		case "pending":
-			return "dim";
-		case "success":
-			return "success";
-		case "error":
-			return "error";
-		case "cancelled":
-			return "warning";
-	}
-}
+const TOOL_SHORT: Record<string, string> = {
+	bash: "$",
+	edit: "~",
+	write: "+",
+	read: "=",
+	grep: "?",
+	find: "@",
+	ls: "#",
+	semantic_search: "S",
+	codebase_index: "I",
+	git_ship: "G",
+	browser_tabs: "T",
+	browser_page: "P",
+};
 
 export function renderToolFrame(
 	toolName: string,
@@ -73,34 +41,44 @@ export function renderToolFrame(
 	contentLines: string[],
 	width: number,
 ): string[] {
-	if (width < 8) return contentLines;
+	if (width < 4) return contentLines;
 
-	const colorKey = toolColor(toolName, state);
-	const border = (text: string) => theme.fg(colorKey, text);
-	const muted = (text: string) => theme.fg("dim", text);
-	const label = TOOL_LABEL[toolName] ?? toolName;
-	const status = stateLabel(state);
-	const title = ` ${label} `;
-	const badge = `[${status}]`;
-	const titleWidth = visibleWidth(title);
-	const badgeWidth = visibleWidth(badge);
-	const minChromeWidth = 2 + titleWidth + badgeWidth + 1;
-	const fillWidth = Math.max(1, width - minChromeWidth);
-	const top =
-		border("+-") +
-		theme.bold(theme.fg(colorKey, title)) +
-		muted("-".repeat(fillWidth)) +
-		theme.bold(theme.fg(stateColor(state), badge)) +
-		border("+");
-	const bottom = border("+") + muted("-".repeat(Math.max(1, width - 2))) + border("+");
-	const side = border("|");
-	const innerWidth = Math.max(1, width - 2);
-	const body = contentLines.length > 0 ? contentLines : [""];
-	const framed = body.map((line) => {
-		const bodyLine = visibleWidth(line) > innerWidth ? truncateToWidth(line, innerWidth) : line;
-		const pad = Math.max(0, innerWidth - visibleWidth(bodyLine));
-		return side + bodyLine + " ".repeat(pad) + side;
-	});
+	const prefix = STATE_PREFIX[state];
+	const prefixColor = STATE_COLOR[state];
+	const short = TOOL_SHORT[toolName] ?? toolName.slice(0, 8);
 
-	return [top, ...framed, bottom];
+	// Header: "· bash  path/to/file"  — no borders
+	const header =
+		theme.fg(prefixColor, prefix) +
+		theme.fg("dim", " ") +
+		theme.fg("toolTitle", short) +
+		theme.fg("dim", " ");
+
+	const headerVisible = visibleWidth(header);
+	const maxContent = Math.max(1, width - headerVisible);
+
+	// Body lines: indented 2 spaces, no boxing
+	const indent = "  ";
+	const innerWidth = Math.max(1, width - indent.length);
+
+	if (contentLines.length === 0) return [header];
+
+	const body = contentLines
+		.filter((l) => l.trim().length > 0)
+		.slice(0, 12) // cap lines to keep display compact
+		.map((line) => {
+			const truncated = visibleWidth(line) > innerWidth ? truncateToWidth(line, innerWidth) : line;
+			return indent + theme.fg("dim", truncated);
+		});
+
+	// First content line on same row as header if short
+	const firstLine = contentLines.find((l) => l.trim().length > 0) ?? "";
+	const firstTrunc =
+		visibleWidth(firstLine) > maxContent ? truncateToWidth(firstLine, maxContent) : firstLine;
+
+	if (body.length <= 1) {
+		return [header + theme.fg("dim", firstTrunc)];
+	}
+
+	return [header + theme.fg("dim", firstTrunc), ...body.slice(1)];
 }

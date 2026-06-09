@@ -45,6 +45,7 @@ export const BUILTIN_SLASH_COMMANDS: ReadonlyArray<BuiltinSlashCommand> = [
 	{ name: "automation", description: "Toggle automation mode" },
 	{ name: "agentmode", description: "Toggle agent mode" },
 	{ name: "zen", description: "Toggle Zen mode (hide UI elements)" },
+	{ name: "taskmode", description: "Toggle task panel (default: on)" },
 
 	// === Tools & Integration ===
 	{ name: "init", description: "Create project config files" },

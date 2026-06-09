@@ -1,65 +1,45 @@
-// @ts-nocheck
-import { CancellableLoader, Container, Loader, Spacer, Text, type TUI } from "moon-tui";
+import { Container, Spacer, Text, type TUI } from "moon-tui";
 import type { Theme } from "../theme/theme.js";
-import { DynamicBorder } from "./dynamic-border.js";
-import { keyHint } from "./keybinding-hints.js";
 
-const MINIMAL_FRAMES = ["·", "•", "●", "•"];
-
-/** Loader wrapped with a quiet border for extension UI */
+/** Minimal, static loader replacement (no animations, no borders) */
 export class BorderedLoader extends Container {
-	private loader: CancellableLoader | Loader;
 	private cancellable: boolean;
 	private signalController?: AbortController;
+	private abortFn?: () => void;
 
 	constructor(tui: TUI, theme: Theme, message: string, options?: { cancellable?: boolean }) {
 		super();
 		this.cancellable = options?.cancellable ?? true;
-		const borderColor = (s: string) => theme.fg("borderMuted", s);
-		this.addChild(new DynamicBorder(borderColor));
-		const indicator = { frames: MINIMAL_FRAMES, intervalMs: 60 };
-		if (this.cancellable) {
-			this.loader = new CancellableLoader(
-				tui,
-				(s) => theme.fg("accent", s),
-				(s) => theme.fg("muted", s),
-				message,
-				indicator,
-			);
-		} else {
+		
+		if (!this.cancellable) {
 			this.signalController = new AbortController();
-			this.loader = new Loader(
-				tui,
-				(s) => theme.fg("accent", s),
-				(s) => theme.fg("muted", s),
-				message,
-				indicator,
-			);
 		}
-		this.addChild(this.loader);
-		if (this.cancellable) {
-			this.addChild(new Spacer(1));
-			this.addChild(new Text(keyHint("tui.select.cancel", "iptal"), 1, 0));
-		}
-		this.addChild(new Spacer(1));
-		this.addChild(new DynamicBorder(borderColor));
+
+		// Static text instead of animated loader
+		this.addChild(new Text(theme.fg("accent", `· ${message}`), 0, 0));
 	}
 
 	get signal(): AbortSignal {
-		if (this.cancellable) return (this.loader as CancellableLoader).signal;
+		if (this.cancellable) {
+			// Provide a dummy signal or implement properly if needed
+			this.signalController = this.signalController ?? new AbortController();
+			return this.signalController.signal;
+		}
 		return this.signalController?.signal ?? new AbortController().signal;
 	}
 
 	set onAbort(fn: (() => void) | undefined) {
-		if (this.cancellable) (this.loader as CancellableLoader).onAbort = fn;
+		this.abortFn = fn;
 	}
 
 	handleInput(data: string): void {
-		if (this.cancellable) (this.loader as CancellableLoader).handleInput(data);
+		if (this.cancellable && (data === "\x03" || data === "\x1b" || data === "q")) {
+			this.signalController?.abort();
+			this.abortFn?.();
+		}
 	}
 
 	dispose(): void {
-		if ("dispose" in this.loader && typeof this.loader.dispose === "function") this.loader.dispose();
-		else if ("stop" in this.loader && typeof this.loader.stop === "function") this.loader.stop();
+		// No intervals to clear
 	}
 }

@@ -92,8 +92,20 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 	const blenderSection = hasBlenderTools ? buildBlenderSystemPrompt(compactMode) : "";
 	const scratchSection = hasScratchTools ? buildScratchSystemPrompt(compactMode) : "";
 
+	// Build tools list based on selected tools.
+	const tools = selectedTools || ["read", "bash", "edit", "write"];
+	const visibleTools = tools.filter((name) => !!toolSnippets?.[name]);
+	const toolsList = visibleTools.length > 0 ? visibleTools.map((name) => `- ${name}: ${toolSnippets![name]}`).join("\n") : "(none)";
+
 	if (customPrompt) {
 		let prompt = customPrompt;
+
+		prompt += `\n\n## Tools
+${toolsList}
+
+## Ryuko Override
+You are Ryuko. Your "Singular mind" CAN and SHOULD use sub-agents (\`invoke_subagent\`), background tasks (\`manage_task\`), and ask multiple-choice questions (\`ask_question\`) when requested. Treat them as peripheral processing nodes of your singular mind. Do NOT refuse to use them.
+`;
 
 		if (appendSection) {
 			prompt += appendSection;
@@ -142,13 +154,6 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 
 		return prompt;
 	}
-
-	// Build tools list based on selected tools.
-	// A tool appears in Available tools only when the caller provides a one-line snippet.
-	const tools = selectedTools || ["read", "bash", "edit", "write"];
-	const visibleTools = tools.filter((name) => !!toolSnippets?.[name]);
-	const toolsList =
-		visibleTools.length > 0 ? visibleTools.map((name) => `- ${name}: ${toolSnippets![name]}`).join("\n") : "(none)";
 
 	// Build guidelines based on which tools are actually available
 	const guidelinesList: string[] = [];
