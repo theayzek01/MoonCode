@@ -3,36 +3,29 @@ import { type ThemeColor, theme } from "../theme/theme.js";
 
 export type ToolFrameState = "running" | "success" | "error" | "cancelled" | "pending";
 
-// Minimal prefix symbols — no box-drawing, no animations
+const BOX = {
+	tl: "╭",
+	tr: "╮",
+	bl: "╰",
+	br: "╯",
+	h: "─",
+	v: "│",
+};
+
 const STATE_PREFIX: Record<ToolFrameState, string> = {
-	running: "·",
-	pending: "·",
-	success: "✓",
-	error: "✗",
-	cancelled: "–",
+	running: "⏳",
+	pending: "⏳",
+	success: "✅",
+	error: "❌",
+	cancelled: "⚠️",
 };
 
 const STATE_COLOR: Record<ToolFrameState, ThemeColor> = {
-	running: "dim",
+	running: "accent",
 	pending: "dim",
 	success: "success",
 	error: "error",
 	cancelled: "warning",
-};
-
-const TOOL_SHORT: Record<string, string> = {
-	bash: "$",
-	edit: "~",
-	write: "+",
-	read: "=",
-	grep: "?",
-	find: "@",
-	ls: "#",
-	semantic_search: "S",
-	codebase_index: "I",
-	git_ship: "G",
-	browser_tabs: "T",
-	browser_page: "P",
 };
 
 export function renderToolFrame(
@@ -41,40 +34,37 @@ export function renderToolFrame(
 	contentLines: string[],
 	width: number,
 ): string[] {
-	if (width < 4) return contentLines;
+	if (width < 10) return contentLines;
 
 	const prefix = STATE_PREFIX[state];
 	const prefixColor = STATE_COLOR[state];
-	const short = TOOL_SHORT[toolName] ?? toolName.slice(0, 8);
 
-	// Header: "· bash  path/to/file"  — no borders
-	const header =
-		theme.fg(prefixColor, prefix) + theme.fg("dim", " ") + theme.fg("toolTitle", short) + theme.fg("dim", " ");
+	const titleText = ` ${prefix} ${toolName} `;
+	const titleVisible = visibleWidth(titleText);
+	
+	const topLineWidth = Math.max(0, width - 2 - titleVisible - 2);
+	const header = 
+		theme.fg(prefixColor, BOX.tl + BOX.h) +
+		theme.bold(theme.fg("toolTitle", titleText)) +
+		theme.fg(prefixColor, BOX.h.repeat(topLineWidth) + BOX.tr);
 
-	const headerVisible = visibleWidth(header);
-	const maxContent = Math.max(1, width - headerVisible);
-
-	// Body lines: indented 2 spaces, no boxing
-	const indent = "  ";
-	const innerWidth = Math.max(1, width - indent.length);
-
-	if (contentLines.length === 0) return [header];
-
+	const innerWidth = width - 4; // 2 for left border, 2 for right border padding
+	
 	const body = contentLines
 		.filter((l) => l.trim().length > 0)
-		.slice(0, 12) // cap lines to keep display compact
+		.slice(0, 20) // show up to 20 lines inside the box
 		.map((line) => {
 			const truncated = visibleWidth(line) > innerWidth ? truncateToWidth(line, innerWidth) : line;
-			return indent + theme.fg("dim", truncated);
+			const padCount = Math.max(0, innerWidth - visibleWidth(truncated));
+			return theme.fg(prefixColor, `${BOX.v} `) + theme.fg("dim", truncated) + " ".repeat(padCount) + theme.fg(prefixColor, ` ${BOX.v}`);
 		});
 
-	// First content line on same row as header if short
-	const firstLine = contentLines.find((l) => l.trim().length > 0) ?? "";
-	const firstTrunc = visibleWidth(firstLine) > maxContent ? truncateToWidth(firstLine, maxContent) : firstLine;
+	const bottomLine = theme.fg(prefixColor, BOX.bl + BOX.h.repeat(Math.max(0, width - 2)) + BOX.br);
 
-	if (body.length <= 1) {
-		return [header + theme.fg("dim", firstTrunc)];
+	if (body.length === 0) {
+		const emptyLine = theme.fg(prefixColor, `${BOX.v} `) + theme.fg("dim", "...") + " ".repeat(Math.max(0, innerWidth - 3)) + theme.fg(prefixColor, ` ${BOX.v}`);
+		return [header, emptyLine, bottomLine];
 	}
 
-	return [header + theme.fg("dim", firstTrunc), ...body.slice(1)];
+	return [header, ...body, bottomLine];
 }

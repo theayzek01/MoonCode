@@ -7,6 +7,33 @@ const OSC133_ZONE_START = "\x1b]133;A\x07";
 const OSC133_ZONE_END = "\x1b]133;B\x07";
 const OSC133_ZONE_FINAL = "\x1b]133;C\x07";
 
+class ThinkingBlock extends Container {
+	public isThinking = true;
+	constructor(text: string, markdownTheme: MarkdownTheme) {
+		super();
+		const md = new Markdown(text, 0, 0, markdownTheme, {
+			color: (t: string) => theme.fg("thinkingText", t),
+			italic: true,
+		});
+		this.addChild(md);
+	}
+
+	override render(width: number): string[] {
+		if (width < 6) return super.render(width);
+		const lines = super.render(width - 4);
+		if (lines.length === 0) return [];
+		return [
+			theme.fg("dim", " ╭── Thinking ──"),
+			...lines.map(line => theme.fg("dim", " │  ") + line),
+			theme.fg("dim", " ╰──────────────")
+		];
+	}
+
+	setText(text: string) {
+		(this.children[0] as Markdown).setText(text);
+	}
+}
+
 /**
  * Component that renders a complete assistant message
  */
@@ -132,13 +159,9 @@ export class AssistantMessageComponent extends Container {
 					}
 					childIndex++;
 				} else {
-					let component = this.contentContainer.children[childIndex] as Markdown | undefined;
-					if (!(component instanceof Markdown) || !(component as any).isThinking) {
-						component = new Markdown(thinking, 0, 0, this.markdownTheme, {
-							color: (text: string) => theme.fg("thinkingText", text),
-							italic: true,
-						});
-						(component as any).isThinking = true;
+					let component = this.contentContainer.children[childIndex] as ThinkingBlock | undefined;
+					if (!(component instanceof ThinkingBlock)) {
+						component = new ThinkingBlock(thinking, this.markdownTheme);
 						this.contentContainer.children[childIndex] = component;
 					} else {
 						component.setText(thinking);

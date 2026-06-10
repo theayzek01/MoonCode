@@ -27,8 +27,10 @@ const color = {
 	text: (value: string) => rgb(229, 229, 229, value),
 	muted: (value: string) => rgb(150, 150, 150, value),
 	dim: (value: string) => rgb(90, 90, 90, value),
-	panel: (value: string) => value,
-	panelAlt: (value: string) => value,
+	panel: (value: string) => bg(28, 28, 40, rgb(200, 200, 200, value)),
+	panelAlt: (value: string) => bg(20, 20, 28, rgb(150, 150, 150, value)),
+	accent: (value: string) => rgb(120, 150, 255, value),
+	success: (value: string) => rgb(80, 220, 120, value),
 };
 
 function fitText(value: string, maxWidth: number): string {
@@ -112,16 +114,24 @@ export class MoonCodeHeaderComponent implements Component {
 		const mcpClients = this.session.mcpManager?.getClients?.().size ?? 0;
 		const extensionStatuses = [...(this.footerData.getExtensionStatuses?.() ?? new Map()).values()];
 
+		// Icon mapping
+		const iconGit = "🌱";
+		const iconModel = "🧠";
+		const iconThink = "💭";
+		const iconCtx = "📦";
+		const iconMcp = "🔌";
+		const iconWeb = "🌐";
+
 		if (safeWidth < 72) {
 			const left = color.primary(" MoonCode ") + color.muted(fitText(cwd, Math.max(8, safeWidth - 36)));
 			const right = color.secondary(mode);
 			return [renderStatusLine(left, right, safeWidth, color.panel)];
 		}
 
-		const logo = color.primary(" MoonCode ");
-		const version = color.muted(`v${VERSION}`);
-		const title = color.text("open tui console");
-		const right = [color.muted("Theayzek01"), color.muted(branchLabel), color.secondary(mode)].join(
+		const logo = bg(40, 40, 60, color.primary(" 🌙 MoonCode "));
+		const version = color.accent(`v${VERSION}`);
+		const title = color.text("Console");
+		const right = [color.success("● " + mode), color.muted(`${iconGit} ${branchLabel}`)].join(
 			color.dim("  |  "),
 		);
 		const top = renderStatusLine(
@@ -131,9 +141,9 @@ export class MoonCodeHeaderComponent implements Component {
 			color.panel,
 		);
 
-		const left = color.muted(` ${fitText(cwd, Math.max(12, Math.floor(safeWidth * 0.38)))}`);
-		const mid = [color.text(model), color.muted(`think:${thinking}`), color.muted(ctxLabel)].join(color.dim("  /  "));
-		const right2 = color.muted(`providers:${providers}  /  browser:${browserClients}  /  mcp:${mcpClients}`);
+		const left = color.muted(` 📁 ${fitText(cwd, Math.max(12, Math.floor(safeWidth * 0.38)))}`);
+		const mid = [color.text(`${iconModel} ${model}`), color.muted(`${iconThink} ${thinking}`), color.muted(`${iconCtx} ${ctxLabel}`)].join(color.dim("  /  "));
+		const right2 = color.muted(`agents:${providers}  /  ${iconWeb}:${browserClients}  /  ${iconMcp}:${mcpClients}`);
 		const budget = safeWidth - widthOf(left) - widthOf(right2) - 4;
 		const center = fitText(mid, Math.max(12, budget));
 		const second = renderStatusLine(`${left}  ${center}`, right2, safeWidth, color.panelAlt);
@@ -142,11 +152,11 @@ export class MoonCodeHeaderComponent implements Component {
 			return [top, second];
 		}
 
-		const hints = color.dim(" /help /model /session /theme    tab:agent  ctrl+c:exit");
+		const hints = color.dim(" ⌨️  /help  /model  /session  /theme    TAB:agent  CTRL+C:exit");
 		const status =
 			extensionStatuses.length > 0
-				? color.muted(` ${extensionStatuses.join("  |  ")}`)
-				: color.muted(" extensions: idle");
+				? color.muted(` ⚡ ${extensionStatuses.join("  |  ")}`)
+				: color.muted(" 💤 extensions: idle");
 		return [top, second, renderRule(safeWidth), fitText(hints, safeWidth), fitText(status, safeWidth)];
 	}
 }

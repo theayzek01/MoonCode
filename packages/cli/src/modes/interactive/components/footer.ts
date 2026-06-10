@@ -31,11 +31,11 @@ function sage(value: string): string {
 }
 
 function bg1(value: string): string {
-	return value;
+	return `\x1b[48;2;24;24;36m${value}\x1b[49m`;
 }
 
 function bg2(value: string): string {
-	return value;
+	return `\x1b[48;2;20;20;28m${value}\x1b[49m`;
 }
 
 function shortenPath(value: string): string {
@@ -135,27 +135,27 @@ export class FooterComponent implements Component {
 		const showXpDetails = layout !== "compact";
 		const barWidth = layout === "compact" ? 4 : layout === "balanced" ? 6 : 8;
 
-		const pathLabel = muted(` ${shortenPath(cwd)} `);
-		const modelLabel = muted(fitText(model, Math.max(8, Math.floor(width * 0.22))));
+		const pathLabel = muted(` 📁 ${shortenPath(cwd)} `);
+		const modelLabel = muted(fitText(`🧠 ${model}`, Math.max(8, Math.floor(width * 0.22))));
 		const right1 = showPath
 			? joinParts([
 					modelLabel,
 					showVersion ? muted(`v${VERSION}`) : "",
-					dim(`think:${thinkLevel}`),
-					sage(`ctx:${ctxPct}`),
+					dim(`💭 think:${thinkLevel}`),
+					sage(`📦 ctx:${ctxPct}`),
 					phase,
 				])
-			: joinParts([dim(`think:${thinkLevel}`), sage(`ctx:${ctxPct}`), phase]);
+			: joinParts([dim(`💭 think:${thinkLevel}`), sage(`📦 ctx:${ctxPct}`), phase]);
 		const row1 = renderLine(showPath ? pathLabel : modelLabel, right1, width, bg1);
 
 		const filledCount = Math.min(barWidth, Math.round((xpState.percent / 100) * barWidth));
 		const emptyCount = Math.max(0, barWidth - filledCount);
 		const progressBar = `[${"#".repeat(filledCount)}${"-".repeat(emptyCount)}]`;
-		const levelLabel = `* LVL ${xpState.level} ${progressBar} ${xpState.percent}%`;
+		const levelLabel = `⭐ LVL ${xpState.level} ${progressBar} ${xpState.percent}%`;
 		const xpDetail = dim(`(${xpState.xp}/${xpState.neededXp} XP)`);
-		const browserStatus = browserClients > 0 ? sage(`o browser:${browserClients}`) : dim("o browser:0");
-		const toolLabel = toolCount > 0 ? muted(`tools:${toolCount}`) : dim("tools:0");
-		const costLabel = showCost ? muted(`$${this.costTotal.toFixed(3)}`) : "";
+		const browserStatus = browserClients > 0 ? sage(`🌐 browser:${browserClients}`) : dim("🌐 browser:0");
+		const toolLabel = toolCount > 0 ? muted(`🛠️ tools:${toolCount}`) : dim("🛠️ tools:0");
+		const costLabel = showCost ? muted(`💰 $${this.costTotal.toFixed(3)}`) : "";
 		const notification = xpState.notification ? muted(` ${xpState.notification}`) : "";
 		const left2 = showXpDetails
 			? `${muted(` ${levelLabel} `)}${xpDetail}${notification}`
