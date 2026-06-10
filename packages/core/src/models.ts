@@ -67,9 +67,9 @@ function getLocalOllamaModels(): string[] {
 // Inject Cloud & Local Ollama models dynamically
 const cloudOllamaModels = new Map<string, Model<Api>>();
 const localModels = getLocalOllamaModels();
-const finalOllamaModels = ["gemma4:31b-cloud"];
+const finalOllamaModels = ["gemma4:31b-cloud", "nemotron-3-super:cloud"];
 for (const model of localModels) {
-	if (model !== "gemma4:31b-cloud") {
+	if (model !== "gemma4:31b-cloud" && model !== "nemotron-3-super:cloud") {
 		finalOllamaModels.push(model);
 	}
 }
