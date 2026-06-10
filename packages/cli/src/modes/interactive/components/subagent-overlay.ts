@@ -1,4 +1,4 @@
-import { Engine, EngineMessage } from "moon-engine";
+import { type Engine, EngineMessage } from "moon-engine";
 import { Container, Text } from "moon-tui";
 
 const bg = (s: string) => `\x1b[48;2;20;25;35m${s}\x1b[49m`;
@@ -35,7 +35,8 @@ export class SubagentOverlayComponent extends Container {
 	}
 
 	handleInput(data: string): void {
-		if (data === "\x03" || data === "\x1b") { // Ctrl+C or Escape
+		if (data === "\x03" || data === "\x1b") {
+			// Ctrl+C or Escape
 			this.onDone();
 		}
 	}
@@ -50,7 +51,7 @@ export class SubagentOverlayComponent extends Container {
 		const messages = this.engine.state.messages;
 		for (const msg of messages) {
 			let contentStr = "";
-			
+
 			if ("content" in msg) {
 				if (typeof msg.content === "string") {
 					contentStr = msg.content;

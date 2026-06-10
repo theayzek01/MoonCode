@@ -2,7 +2,16 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { CodebaseIndex, CodeChunk } from "./indexer.js";
-import { buildIndex, loadCachedIndex, tokenize } from "./indexer.js";
+import { buildIndex, loadCachedIndex, tokenize, embedText } from "./indexer.js";
+
+function cosineSimilarity(a: number[], b: number[]): number {
+	if (!a || !b || a.length !== b.length) return 0;
+	let dotProduct = 0;
+	for (let i = 0; i < a.length; i++) {
+		dotProduct += a[i] * b[i];
+	}
+	return dotProduct;
+}
 
 export interface SearchResult {
 	filePath: string;
@@ -79,9 +88,14 @@ function extractSnippet(cwd: string, chunk: CodeChunk, queryTerms: Set<string>):
 
 // ─── Public search API ────────────────────────────────────────────────────────
 
-export function searchIndex(index: CodebaseIndex, query: string, cwd: string, limit = 5): SearchResult[] {
+export async function searchIndex(index: CodebaseIndex, query: string, cwd: string, limit = 5): Promise<SearchResult[]> {
 	const queryTerms = tokenize(query);
 	if (queryTerms.length === 0) return [];
+
+	let queryEmbedding: number[] | null = null;
+	if (index.schemaVersion >= 3) {
+		queryEmbedding = await embedText(query);
+	}
 
 	// Index eski formatta ise (idf yok) - graceful fallback
 	if (!index.idf) {
@@ -91,7 +105,15 @@ export function searchIndex(index: CodebaseIndex, query: string, cwd: string, li
 	const scored: Array<{ chunk: CodeChunk; score: number }> = [];
 
 	for (const chunk of index.chunks) {
-		const score = bm25Score(chunk, queryTerms, index.idf, index.avgTermCount ?? 100);
+		let score = bm25Score(chunk, queryTerms, index.idf, index.avgTermCount ?? 100);
+		
+		if (queryEmbedding && chunk.embedding) {
+			const sim = cosineSimilarity(queryEmbedding, chunk.embedding);
+			if (sim > 0.4) {
+				score += sim * 20; // boost semantic similarity
+			}
+		}
+
 		if (score > 0) scored.push({ chunk, score });
 	}
 
@@ -147,13 +169,13 @@ function legacySearch(index: any, query: string, cwd: string, limit: number): Se
 	}));
 }
 
-export function searchProject(cwd: string, query: string, limit = 5): SearchResult[] {
+export async function searchProject(cwd: string, query: string, limit = 5): Promise<SearchResult[]> {
 	let index = loadCachedIndex(cwd);
 	const MAX_AGE = 10 * 60 * 1000;
 	if (!index || Date.now() - index.timestamp > MAX_AGE) {
-		index = buildIndex(cwd);
+		index = await buildIndex(cwd);
 	}
-	return searchIndex(index, query, cwd, limit);
+	return await searchIndex(index, query, cwd, limit);
 }
 
 /**

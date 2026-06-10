@@ -16,7 +16,8 @@ export class SubagentStatusComponent extends Container {
 	}
 
 	handleInput(data: string): void {
-		if (data === "\x0f" || data === "\x16") { // Ctrl+O or Ctrl+V, let's use Ctrl+O for open overlay maybe?
+		if (data === "\x0f" || data === "\x16") {
+			// Ctrl+O or Ctrl+V, let's use Ctrl+O for open overlay maybe?
 			if (this.isActive) {
 				this.onOpenFn();
 			}

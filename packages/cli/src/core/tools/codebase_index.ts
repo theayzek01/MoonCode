@@ -20,7 +20,7 @@ export function createCodebaseIndexToolDefinition(cwd: string): ToolDefinition<t
 		parameters: codebaseIndexSchema,
 		async execute(_id, { force }, signal) {
 			if (signal?.aborted) throw new Error("aborted");
-			const index = buildIndex(cwd, force === true);
+			const index = await buildIndex(cwd, force === true);
 			return {
 				content: [
 					{

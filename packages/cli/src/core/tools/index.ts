@@ -77,6 +77,9 @@ export {
 	type ReadToolOptions,
 } from "./read.js";
 export { createSemanticSearchTool, createSemanticSearchToolDefinition } from "./semantic_search.js";
+export { createSnapshotTool, createSnapshotToolDefinition, type SnapshotToolInput } from "./snapshot.js";
+export { createUserProfileTool, createUserProfileToolDefinition, type UserProfileToolInput } from "./update_user_profile.js";
+export { createMessageAgentTool, createMessageAgentToolDefinition, type MessageAgentInput } from "./message_agent.js";
 export {
 	DEFAULT_MAX_BYTES,
 	DEFAULT_MAX_LINES,
@@ -98,7 +101,6 @@ export {
 import type { EngineTool } from "moon-engine";
 import type { ToolDefinition } from "../extensions/types.js";
 import { createAskQuestionTool, createAskQuestionToolDefinition } from "./ask_question.js";
-import { createTaskTool, createTaskToolDefinition } from "./task.js";
 import { type BashToolOptions, createBashTool, createBashToolDefinition } from "./bash.js";
 import {
 	createBrowserPageTool,
@@ -123,6 +125,10 @@ import { createInvokeSubagentTool, createInvokeSubagentToolDefinition } from "./
 import { createLsTool, createLsToolDefinition, type LsToolOptions } from "./ls.js";
 import { createReadTool, createReadToolDefinition, type ReadToolOptions } from "./read.js";
 import { createSemanticSearchTool, createSemanticSearchToolDefinition } from "./semantic_search.js";
+import { createSnapshotTool, createSnapshotToolDefinition } from "./snapshot.js";
+import { createUserProfileTool, createUserProfileToolDefinition } from "./update_user_profile.js";
+import { createMessageAgentTool, createMessageAgentToolDefinition } from "./message_agent.js";
+import { createTaskTool, createTaskToolDefinition } from "./task.js";
 import { createWriteTool, createWriteToolDefinition, type WriteToolOptions } from "./write.js";
 
 export type Tool = EngineTool<any>;
@@ -145,7 +151,10 @@ export type ToolName =
 	| "discord_list_guilds"
 	| "discord_get_channels"
 	| "discord_send_message"
-	| "discord_manage_channel";
+	| "discord_manage_channel"
+	| "snapshot"
+	| "update_user_profile"
+	| "message_agent";
 
 export const allToolNames: Set<ToolName> = new Set([
 	"read",
@@ -166,6 +175,9 @@ export const allToolNames: Set<ToolName> = new Set([
 	"discord_get_channels",
 	"discord_send_message",
 	"discord_manage_channel",
+	"snapshot",
+	"update_user_profile",
+	"message_agent",
 ]);
 
 export interface ToolsOptions {
@@ -216,6 +228,12 @@ export function createToolDefinition(toolName: ToolName, cwd: string, options?: 
 		case "discord_send_message":
 		case "discord_manage_channel":
 			return createDiscordToolDefinitions(options?.discord).find((definition) => definition.name === toolName)!;
+		case "snapshot":
+			return createSnapshotToolDefinition(cwd);
+		case "update_user_profile":
+			return createUserProfileToolDefinition();
+		case "message_agent":
+			return createMessageAgentToolDefinition();
 		default:
 			throw new Error(`Unknown tool name: ${toolName}`);
 	}
@@ -259,6 +277,12 @@ export function createTool(toolName: ToolName, cwd: string, options?: ToolsOptio
 			return createDiscordSendMessageTool(options?.discord);
 		case "discord_manage_channel":
 			return createDiscordManageChannelTool(options?.discord);
+		case "snapshot":
+			return createSnapshotTool(cwd);
+		case "update_user_profile":
+			return createUserProfileTool();
+		case "message_agent":
+			return createMessageAgentTool();
 		default:
 			throw new Error(`Unknown tool name: ${toolName}`);
 	}
@@ -276,6 +300,9 @@ export function createCodingToolDefinitions(cwd: string, options?: ToolsOptions)
 		createAskQuestionToolDefinition(),
 		createInvokeSubagentToolDefinition(cwd),
 		createTaskToolDefinition(),
+		createSnapshotToolDefinition(cwd),
+		createUserProfileToolDefinition(),
+		createMessageAgentToolDefinition(),
 	];
 }
 
@@ -305,6 +332,9 @@ export function createAllToolDefinitions(cwd: string, options?: ToolsOptions): R
 		browser_page: createBrowserPageToolDefinition(),
 		ask_question: createAskQuestionToolDefinition(),
 		invoke_subagent: createInvokeSubagentToolDefinition(cwd),
+		snapshot: createSnapshotToolDefinition(cwd),
+		update_user_profile: createUserProfileToolDefinition(),
+		message_agent: createMessageAgentToolDefinition(),
 		...Object.fromEntries(createDiscordToolDefinitions(options?.discord).map((tool) => [tool.name, tool])),
 	};
 }
@@ -321,6 +351,9 @@ export function createCodingTools(cwd: string, options?: ToolsOptions): Tool[] {
 		createAskQuestionTool(),
 		createInvokeSubagentTool(cwd),
 		createTaskTool(),
+		createSnapshotTool(cwd),
+		createUserProfileTool(),
+		createMessageAgentTool(),
 	];
 }
 
@@ -354,5 +387,8 @@ export function createAllTools(cwd: string, options?: ToolsOptions): Record<Tool
 		discord_get_channels: createDiscordGetChannelsTool(options?.discord),
 		discord_send_message: createDiscordSendMessageTool(options?.discord),
 		discord_manage_channel: createDiscordManageChannelTool(options?.discord),
+		snapshot: createSnapshotTool(cwd),
+		update_user_profile: createUserProfileTool(),
+		message_agent: createMessageAgentTool(),
 	};
 }

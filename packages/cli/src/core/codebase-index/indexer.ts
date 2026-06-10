@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { basename, extname, join, relative, resolve } from "node:path";
 import * as ts from "typescript";
+import { pipeline } from "@xenova/transformers";
 import { getEngineDir } from "../../config.js";
 
 const CODE_EXTENSIONS = new Set([
@@ -76,7 +77,25 @@ const CHUNK_SIZE = 50;
 const CHUNK_OVERLAP = 5;
 const MAX_FILE_SIZE = 512 * 1024;
 const MAX_FILES = 8000;
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
+
+let _embedder: any = null;
+async function getEmbedder() {
+	if (!_embedder) {
+		_embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
+	}
+	return _embedder;
+}
+
+export async function embedText(text: string): Promise<number[]> {
+	try {
+		const embedder = await getEmbedder();
+		const output = await embedder(text, { pooling: "mean", normalize: true });
+		return Array.from(output.data);
+	} catch (e) {
+		return [];
+	}
+}
 
 export interface CodeChunk {
 	filePath: string;
@@ -85,6 +104,7 @@ export interface CodeChunk {
 	symbols: string[];
 	tf: Record<string, number>;
 	termCount: number;
+	embedding?: number[];
 }
 
 export interface DependencyEdge {
@@ -439,7 +459,7 @@ export function loadCachedIndex(cwd: string): CodebaseIndex | null {
 	}
 }
 
-export function buildIndex(cwd: string, force = false): CodebaseIndex {
+export async function buildIndex(cwd: string, force = false): Promise<CodebaseIndex> {
 	const patterns = loadGitignorePatterns(cwd);
 	const files = collectFiles(cwd, patterns);
 	const projectHash = getProjectHash(cwd);
@@ -475,6 +495,15 @@ export function buildIndex(cwd: string, force = false): CodebaseIndex {
 		}
 
 		const result = chunkFile(file, cwd);
+		
+		// Generate embeddings for new chunks
+		for (const chunk of result.chunks) {
+			const chunkTextForEmbed = Array.from(new Set([...chunk.symbols, ...Object.keys(chunk.tf)])).join(" ");
+			if (chunkTextForEmbed.length > 5) {
+				chunk.embedding = await embedText(chunkTextForEmbed);
+			}
+		}
+
 		chunks.push(...result.chunks);
 		dependencyEdges.push(...result.dependencies);
 	}

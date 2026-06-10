@@ -6,6 +6,7 @@
 import { buildCodingAgentsPrompt, type CodingAgentsSettings } from "./agents.js";
 import { buildDesignPrompt, DEFAULT_UI_STYLE_GUIDELINE } from "./design-system/index.js";
 import { formatSkillsForPrompt, type Skill } from "./skills.js";
+import { getUserProfilePreface } from "./tools/update_user_profile.js";
 
 export interface RoboticsFunction {
 	name: string;
@@ -91,6 +92,15 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 	const hasScratchTools = (selectedTools ?? []).some((name) => name.startsWith("scratch_"));
 	const blenderSection = hasBlenderTools ? buildBlenderSystemPrompt(compactMode) : "";
 	const scratchSection = hasScratchTools ? buildScratchSystemPrompt(compactMode) : "";
+
+	// Global memory policy text
+	let memoryPreface = getMemoryPreface(10, compactMode, cwd);
+	
+	// Long-Term Style Profile
+	const styleProfile = getUserProfilePreface();
+	if (styleProfile) {
+		memoryPreface += `\n${styleProfile}`;
+	}
 
 	// Build tools list based on selected tools.
 	const tools = selectedTools || ["read", "bash", "edit", "write"];

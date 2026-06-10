@@ -92,6 +92,8 @@ import { type SessionContext, SessionManager } from "../../core/session-manager.
 import { BUILTIN_SLASH_COMMANDS } from "../../core/slash-commands.js";
 import type { SourceInfo } from "../../core/source-info.js";
 import { isInstallTelemetryEnabled } from "../../core/telemetry.js";
+import { subagentEventEmitter } from "../../core/tools/invoke_subagent.js";
+import { taskEventEmitter } from "../../core/tools/task.js";
 import type { TruncationResult } from "../../core/tools/truncate.js";
 import { handlePackageCommand } from "../../package-manager-cli.js";
 import { getChangelogPath, getNewEntries, parseChangelog } from "../../utils/changelog.js";
@@ -131,13 +133,11 @@ import { ScopedModelsSelectorComponent } from "./components/scoped-models-select
 import { SessionSelectorComponent } from "./components/session-selector.js";
 import { SettingsSelectorComponent } from "./components/settings-selector.js";
 import { SkillInvocationMessageComponent } from "./components/skill-invocation-message.js";
+import { SubagentOverlayComponent } from "./components/subagent-overlay.js";
+import { SubagentStatusComponent } from "./components/subagent-status.js";
 import { type TaskItem, TaskPanelComponent } from "./components/task-panel.js";
-import { taskEventEmitter } from "../../core/tools/task.js";
 import { ToolExecutionComponent } from "./components/tool-execution.js";
 import { TreeSelectorComponent } from "./components/tree-selector.js";
-import { SubagentStatusComponent } from "./components/subagent-status.js";
-import { SubagentOverlayComponent } from "./components/subagent-overlay.js";
-import { subagentEventEmitter } from "../../core/tools/invoke_subagent.js";
 import { UserMessageComponent } from "./components/user-message.js";
 import { UserMessageSelectorComponent } from "./components/user-message-selector.js";
 import { parseWizardBlock, WizardSelectorComponent } from "./components/wizard-selector.js";
@@ -795,37 +795,33 @@ export class InteractiveMode {
 		subagentEventEmitter.on("start", (payload: any) => {
 			activeSubagent = { id: payload.id, engine: payload.engine, taskName: payload.taskName };
 			this.subagentStatus?.setStatus(true, payload.taskName);
-			
+
 			// Override onClick to show overlay
 			if (this.subagentStatus) {
 				this.subagentStatus.onClick = () => {
 					if (!activeSubagent) return false;
-					
-					const overlay = new SubagentOverlayComponent(
-						activeSubagent.taskName,
-						activeSubagent.engine,
-						() => {
-							this.ui.hideOverlay();
-							this.editor.focus();
-							this.ui.requestRender();
-						}
-					);
-					
-					this.ui.showOverlay(overlay, { 
+
+					const overlay = new SubagentOverlayComponent(activeSubagent.taskName, activeSubagent.engine, () => {
+						this.ui.hideOverlay();
+						this.editor.focus();
+						this.ui.requestRender();
+					});
+
+					this.ui.showOverlay(overlay, {
 						width: "90%",
 						height: "90%",
-						title: "Sub-agent View"
+						title: "Sub-agent View",
 					});
 					return true;
 				};
 			}
-			
+
 			this.ui.requestRender();
 		});
 
 		subagentEventEmitter.on("update", (payload: any) => {
 			if (activeSubagent?.id === payload.id) {
-				// We don't necessarily need to do anything here if the overlay handles its own render loop, 
+				// We don't necessarily need to do anything here if the overlay handles its own render loop,
 				// but let's request a render just in case the overlay is open.
 				this.ui.requestRender();
 			}
@@ -7084,7 +7080,7 @@ export class InteractiveMode {
 			return;
 		}
 		this.showStatus("Index oluşturuluyor...");
-		const index = buildIndex(cwd, args === "force");
+		const index = await buildIndex(cwd, args === "force");
 		this.showStatus(`Index hazır: ${index.fileCount} dosya, ${index.chunkCount} chunk.`);
 	}
 

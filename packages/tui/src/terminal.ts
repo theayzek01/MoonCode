@@ -104,8 +104,8 @@ export class ProcessTerminal implements Terminal {
 		// Enable bracketed paste mode - terminal will wrap pastes in \x1b[200~ ... \x1b[201~
 		process.stdout.write("\x1b[?2004h");
 
-		// Disable Alternate Screen Buffer and Mouse Tracking to allow terminal scrollback and text selection
-		// process.stdout.write("\x1b[?1049h\x1b[?1000h\x1b[?1002h\x1b[?1015h\x1b[?1006h");
+		// Enable Alternate Screen Buffer and Mouse Tracking
+		process.stdout.write("\x1b[?1049h\x1b[?1000h\x1b[?1002h\x1b[?1015h\x1b[?1006h");
 
 		// Set up resize handler immediately
 		process.stdout.on("resize", this.resizeHandler);
@@ -286,6 +286,9 @@ export class ProcessTerminal implements Terminal {
 		}
 
 		process.stdout.write("\x1b[?2004l");
+
+		// Disable Alternate Screen Buffer and Mouse Tracking
+		process.stdout.write("\x1b[?1049l\x1b[?1000l\x1b[?1002l\x1b[?1015l\x1b[?1006l");
 
 		// Disable Kitty keyboard protocol if not already done by drainInput()
 		if (this._kittyProtocolActive) {

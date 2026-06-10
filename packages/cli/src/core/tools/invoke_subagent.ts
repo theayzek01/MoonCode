@@ -9,7 +9,7 @@ import { createCodingTools } from "./index.js";
 import { wrapToolDefinition } from "./tool-definition-wrapper.js";
 
 const invokeSubagentSchema = Type.Object({
-	TaskName: Type.String({ description: "Short human-readable name of the task." }),
+	TaskName: Type.String({ description: "Short human-readable name of the task. Also used as the agent ID for IPC." }),
 	Task: Type.String({ description: "Detailed task description/prompt for the sub-agent." }),
 	Context: Type.Optional(Type.String({ description: "Additional context to pass to the sub-agent." })),
 });
@@ -18,6 +18,9 @@ export type InvokeSubagentInput = Static<typeof invokeSubagentSchema>;
 
 export const subagentEventEmitter = new EventEmitter();
 
+// IPC Registry
+export const activeAgents = new Map<string, Engine>();
+
 export function createInvokeSubagentToolDefinition(
 	cwd: string,
 ): ToolDefinition<typeof invokeSubagentSchema, undefined, any> {
@@ -25,12 +28,16 @@ export function createInvokeSubagentToolDefinition(
 		name: "invoke_subagent",
 		label: "invoke subagent",
 		description:
-			"Spawn a new sub-agent to perform a task. The sub-agent runs independently in the background and returns its result.",
+			"Spawn a new sub-agent to perform a task. The sub-agent runs independently in the background. Other agents can message this agent using its TaskName.",
 		promptSnippet: "Delegate a complex task to a sub-agent",
 		parameters: invokeSubagentSchema,
 		async execute(_toolCallId, { TaskName, Task, Context }, _signal, onUpdate, ctx) {
 			if (!ctx.model) {
 				throw new Error("No model available to spawn sub-agent.");
+			}
+
+			if (activeAgents.has(TaskName)) {
+				throw new Error(`An agent with TaskName '${TaskName}' is already running.`);
 			}
 
 			// Report that the agent has started
@@ -44,16 +51,17 @@ export function createInvokeSubagentToolDefinition(
 			const engine = new Engine({
 				initialState: {
 					model: ctx.model,
-					systemPrompt: `You are a MoonCode sub-agent assigned the task: ${TaskName}\n\nTask Details:\n${Task}\n\nContext:\n${Context ?? "None"}\n\n${ctx.getSystemPrompt()}`,
+					systemPrompt: `You are a MoonCode sub-agent. Your ID is '${TaskName}'.\n\nTask Details:\n${Task}\n\nContext:\n${Context ?? "None"}\n\nYou can communicate with other agents via the message_agent tool.\n\n${ctx.getSystemPrompt()}`,
 					tools: createCodingTools(cwd),
 				},
 			});
 
-			const id = Math.random().toString(36).slice(2);
-			subagentEventEmitter.emit("start", { id, taskName: TaskName, engine });
+			activeAgents.set(TaskName, engine);
+
+			subagentEventEmitter.emit("start", { id: TaskName, taskName: TaskName, engine });
 
 			engine.subscribe((event) => {
-				subagentEventEmitter.emit("update", { id, event });
+				subagentEventEmitter.emit("update", { id: TaskName, event });
 			});
 
 			try {
@@ -79,7 +87,8 @@ export function createInvokeSubagentToolDefinition(
 			} catch (err: any) {
 				throw new Error(`Sub-agent failed: ${err.message}`);
 			} finally {
-				subagentEventEmitter.emit("end", { id });
+				activeAgents.delete(TaskName);
+				subagentEventEmitter.emit("end", { id: TaskName });
 			}
 		},
 	};
