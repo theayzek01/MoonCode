@@ -2,10 +2,10 @@
 
 <img src="https://i.hizliresim.com/q2e03b9.png" width="140" height="140" alt="MoonCode Logo" />
 
-<h1>MoonCode</h1>
+<h1>MoonCode v26.3</h1>
 
 <p>
-  <strong>Terminal için yerel, hızlı ve sessiz kodlama asistanı.</strong>
+  <strong>Terminal için yerel, otonom, hızlı ve zeki kodlama asistanı.</strong>
 </p>
 
 <p>
@@ -32,7 +32,8 @@
 
 <div align="center">
 
-<strong>MoonCode</strong>, terminal-first çalışma akışlarını, kalıcı oturumları, Browser Bridge’i ve MCP desteğini tek bir yerde toplayan yerel bir kodlama asistanıdır.
+<strong>MoonCode V26.3 Dev Güncellemesi!</strong><br/>
+Artık sadece terminal odaklı bir araç değil, <em>Time-Travel Debugging</em>, <em>Multi-Agent Swarm</em>, <em>Semantic RAG</em> ve <em>Long-Term Style Memory</em> destekleyen otonom bir AI iş arkadaşı.
 
 <br/>
 <br/>
@@ -47,20 +48,19 @@
 
 ## MoonCode Nedir?
 
-MoonCode, geliştiriciler için terminal içinde çalışan yerel bir kodlama asistanıdır.
+MoonCode, geliştiriciler için terminal içinde çalışan **otonom bir kodlama asistanıdır**. Local-first yaklaşımı ile gizliliği ön planda tutar, terminal akışını bozmaz ve doğrudan kod yazıp hataları düzeltebilir.
 
-Hızlı, sessiz ve local-first bir deneyim sunmak için tasarlanmıştır.
-Terminal odaklı çalışma akışlarını korur, oturumları kalıcı hale getirir ve Browser Bridge ile MCP desteğini aynı çatı altında toplar.
+Yeni özellikleri sayesinde sadece sorduğun sorulara cevap veren bir chat botundan fazlasıdır: Kod yazış stilini öğrenir, hataları zamanda geri alarak onarır ve alt ajanlarla takım halinde çalışır.
 
-> Daha az dikkat dağınıklığı.
-> Daha hızlı terminal akışı.
+> Daha otonom.
+> Daha geniş hafıza.
 > Daha yerel ve kontrollü geliştirme deneyimi.
 
 ---
 
 ## Kurulum
 
-### Windows
+### Hızlı Kurulum
 
 Release paketinden kurulum yapmak için:
 
@@ -68,9 +68,11 @@ Release paketinden kurulum yapmak için:
 setup.bat install
 ```
 
-### Geliştirici Kurulumu
+### Geliştirici (Kaynak Koddan) Kurulumu
 
 ```bash
+git clone https://github.com/theayzek01/MoonCode.git
+cd MoonCode
 npm install
 npm run build
 mooncode
@@ -78,7 +80,48 @@ mooncode
 
 ---
 
-## Özellikler
+## 🔥 Yeni Özellikler (v26.3)
+
+<table>
+  <tr>
+    <td align="center" width="72">
+      <img src="https://api.iconify.design/mdi:history.svg?color=white" width="30" height="30" alt="Time Travel" />
+    </td>
+    <td>
+      <strong>Time-Travel Debugging</strong><br/>
+      Hata yapmaktan korkma! Ajan kod üzerinde tehlikeli işlemler yapmadan önce otomatik <code>snapshot</code> alır. Kod bozulursa, hata öncesine geri dönüp başka bir yol dener. (Ctrl+Z'nin otonom hali)
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="72">
+      <img src="https://api.iconify.design/mdi:brain.svg?color=white" width="30" height="30" alt="Style Memory" />
+    </td>
+    <td>
+      <strong>Long-Term Style Memory</strong><br/>
+      Kullanıcının yazdığı kodu, favori kütüphanelerini, adlandırma standartlarını (örn. "Tailwind sevmez, Vanilla CSS sever") öğrenip kalıcı profiline işler. Kodlar tamamen senin elinden çıkmış gibi görünür.
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="72">
+      <img src="https://api.iconify.design/mdi:network.svg?color=white" width="30" height="30" alt="Swarm" />
+    </td>
+    <td>
+      <strong>Multi-Agent Swarm (IPC)</strong><br/>
+      Sadece tek bir yapay zeka ile sınırlı değilsin. Ana ajan, işi parçalara böler, "Researcher" ajanını internete bağlar, "Coder" ajanıyla IPC üzerinden iletişim kurarak paralel geliştirme sağlar.
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="72">
+      <img src="https://api.iconify.design/mdi:text-search.svg?color=white" width="30" height="30" alt="Semantic RAG" />
+    </td>
+    <td>
+      <strong>Semantic RAG (Vektör Arama)</strong><br/>
+      Kelime tabanlı aramaya veda et. <code>@xenova/transformers</code> kullanarak 100% lokal vektör (Embedding) veritabanı oluşturur. "Ödeme işlemcisi neredeydi?" dediğinde dosyayı anlamsal olarak bulup getirir.
+    </td>
+  </tr>
+</table>
+
+## Temel Özellikler
 
 <table>
   <tr>
@@ -86,17 +129,8 @@ mooncode
       <img src="https://api.iconify.design/mdi:console-line.svg?color=white" width="30" height="30" alt="Terminal" />
     </td>
     <td>
-      <strong>Terminal tabanlı çalışma akışı</strong><br/>
-      Komut satırından ayrılmadan geliştirme deneyimi.
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="72">
-      <img src="https://api.iconify.design/mdi:content-save-outline.svg?color=white" width="30" height="30" alt="Persistent Sessions" />
-    </td>
-    <td>
-      <strong>Kalıcı oturumlar</strong><br/>
-      Çalışma bağlamını koruyan uzun ömürlü oturum yapısı.
+      <strong>TUI Arayüzü & Terminal Akışı</strong><br/>
+      Komut satırından ayrılmadan, okunabilir metin düzeni, kaydırılabilir loglar, terminali tıkamayan native Alternate Screen Buffer desteği.
     </td>
   </tr>
   <tr>
@@ -105,7 +139,7 @@ mooncode
     </td>
     <td>
       <strong>Browser Bridge</strong><br/>
-      Tarayıcı tarafındaki iş akışlarını terminal deneyimine bağlar.
+      Otonom ajan interneti senin gibi gezer. Chrome eklentisiyle birlikte çalışıp doküman okuyabilir, hata mesajlarını Google'da araştırabilir.
     </td>
   </tr>
   <tr>
@@ -113,17 +147,8 @@ mooncode
       <img src="https://api.iconify.design/mdi:connection.svg?color=white" width="30" height="30" alt="MCP" />
     </td>
     <td>
-      <strong>MCP desteği</strong><br/>
-      Harici araçlar ve bağlam sağlayıcılarla genişletilebilir yapı.
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="72">
-      <img src="https://api.iconify.design/mdi:view-dashboard-outline.svg?color=white" width="30" height="30" alt="TUI" />
-    </td>
-    <td>
-      <strong>TUI arayüzü</strong><br/>
-      Terminal içinde daha okunabilir ve düzenli kullanım.
+      <strong>MCP Desteği</strong><br/>
+      Model Context Protocol (MCP) sayesinde her türlü veritabanına, harici araçlara ve API'lara sorunsuz eklenebilir.
     </td>
   </tr>
   <tr>
@@ -131,33 +156,17 @@ mooncode
       <img src="https://api.iconify.design/mdi:shield-lock-outline.svg?color=white" width="30" height="30" alt="Local First" />
     </td>
     <td>
-      <strong>Local-first çalışma</strong><br/>
-      Varsayılan olarak yerel, kontrollü ve sessiz bir deneyim.
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="72">
-      <img src="https://api.iconify.design/mdi:robot-outline.svg?color=white" width="30" height="30" alt="Sub-agents" />
-    </td>
-    <td>
-      <strong>Gelişmiş Alt Ajanlar (Sub-agents)</strong><br/>
-      Bağımsız ve paralel çalışabilen, TUI üzerinden izlenebilir (Ctrl+O) görev yöneticisi alt ajanlar.
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="72">
-      <img src="https://api.iconify.design/mdi:toolbox-outline.svg?color=white" width="30" height="30" alt="Advanced Tools" />
-    </td>
-    <td>
-      <strong>Genişletilmiş Tool Seti</strong><br/>
-      bash (Terminal komutları), edit/read/write (Gelişmiş dosya işlemleri), codebase_index (Proje içi akıllı arama) ve tarayıcı araçları (browser_tabs, browser_page).
+      <strong>Lokal ve Güvenli</strong><br/>
+      Varsayılan olarak Ollama (gemma4 vs.) yerel modellerini kullanır, ancak ihtiyaç anında Anthropic, OpenAI veya Gemini gibi bulut API'larına da geçebilir. Kodun senin bilgisayarında kalır.
     </td>
   </tr>
 </table>
 
 ---
 
-## Temel Komutlar
+## Temel Komutlar (TUI)
+
+TUI içerisinde `/` yazarak veya sohbet sırasında tetikleyebileceğiniz ana komutlar:
 
 <table>
   <tr>
@@ -170,23 +179,23 @@ mooncode
   </tr>
   <tr>
     <td><code>/brain</code></td>
-    <td>Bağlamı ve önerileri gösterir.</td>
+    <td>Bağlamı, hafıza haritasını ve ajan önerilerini gösterir.</td>
   </tr>
   <tr>
     <td><code>/autothink</code></td>
-    <td>Otomatik düşünme modunu açar veya kapatır.</td>
+    <td>Otomatik düşünme modunu (Otonomi) açar veya kapatır.</td>
   </tr>
   <tr>
     <td><code>/browser</code></td>
-    <td>Tarayıcı bağlantı durumunu gösterir.</td>
+    <td>Browser Bridge bağlantı durumunu test eder.</td>
   </tr>
   <tr>
     <td><code>/mcp</code></td>
-    <td>MCP yönetim ekranını açar.</td>
+    <td>Model Context Protocol sunucularını yönetir.</td>
   </tr>
   <tr>
     <td><code>/doctor</code></td>
-    <td>Sistem ve proje durum özetini gösterir.</td>
+    <td>Sistem durumunu, ajan Swarm'larını ve ortam değişkenlerini raporlar.</td>
   </tr>
 </table>
 
@@ -226,56 +235,25 @@ mooncode
       <code>packages/cli/browser-extension/chrome</code>
     </td>
   </tr>
-  <tr>
-    <td>
-      <img src="https://api.iconify.design/mdi:file-document-outline.svg?color=white" width="18" height="18" alt="Deep Dive" />
-      Detaylı inceleme notları
-    </td>
-    <td>
-      <code>docs/MOONCODE_DEEP_DIVE.md</code>
-    </td>
-  </tr>
 </table>
 
 ---
 
-## Geliştirme
+## Geliştirme ve Katkı
 
-Projeyi kontrol etmek ve testleri çalıştırmak için:
+Projeyi derlemek ve yerel test yapmak isterseniz:
 
 ```bash
-npm run check:ci
+npm run clean
+npm run build
 npm test
 ```
 
 ---
 
-## Gereksinimler
-
-<table>
-  <tr>
-    <td align="center" width="72">
-      <img src="https://api.iconify.design/mdi:nodejs.svg?color=white" width="30" height="30" alt="Node.js" />
-    </td>
-    <td>
-      <strong>Node.js 20+</strong>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="72">
-      <img src="https://api.iconify.design/mdi:git.svg?color=white" width="30" height="30" alt="Git" />
-    </td>
-    <td>
-      <strong>Git</strong>
-    </td>
-  </tr>
-</table>
-
----
-
 ## Lisans
 
-Bu proje **MIT Lisansı** ile lisanslanmıştır.
+Bu proje **MIT Lisansı** ile lisanslanmıştır. Gönül rahatlığıyla kullanabilir, kopyalayabilir ve değiştirebilirsiniz.
 
 ---
 
@@ -287,6 +265,6 @@ Bu proje **MIT Lisansı** ile lisanslanmıştır.
 <br/>
 
 <strong>MoonCode</strong><br/>
-Terminal içinde daha sakin, daha hızlı ve daha yerel bir kodlama deneyimi.
+Terminal içinde daha sakin, daha hızlı, daha akıllı ve daha yerel bir kodlama deneyimi.
 
 </div>
