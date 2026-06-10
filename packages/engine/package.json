@@ -1,6 +1,6 @@
 {
   "name": "moon-engine",
-  "version": "26.2.2",
+  "version": "26.3.0",
   "description": "General-purpose state management engine",
   "type": "module",
   "main": "./dist/index.js",
