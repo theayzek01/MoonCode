@@ -932,7 +932,7 @@
 
 	<!-- New Chat & Directory Select -->
 	<div style="padding:0 10px 8px; display:flex; flex-direction:column; gap:8px;">
-		<button onclick="newChat()" style="width:100%; display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 6px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;color:var(--fg);font-size:0.75rem;font-weight:500;font-family:'Inter',sans-serif;transition:all 0.15s;" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--surface2)'" title="New Chat">
+		<button onclick="newConversationChat()" style="width:100%; display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 6px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;color:var(--fg);font-size:0.75rem;font-weight:500;font-family:'Inter',sans-serif;transition:all 0.15s;" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--surface2)'" title="New Chat">
 			<span class="material-symbols-rounded" style="color:var(--accent);font-size:16px;">add</span>
 			<span>New Chat</span>
 		</button>
@@ -1768,11 +1768,13 @@ function renderConversations(sessions, activeId) {
 	});
 }
 
-async function newChat() {
+async function newConversationChat() {
 	try {
 		const res = await fetch('/api/conversations/new', { method: 'POST' });
 		if (res.ok) {
-			loadConversations();
+			const data = await res.json();
+			// Wait a tick for file to be written, then refresh list
+			setTimeout(() => loadConversations(), 300);
 		}
 	} catch(e) {
 		console.error(e);
@@ -1963,7 +1965,7 @@ function selectCommand(cmd) {
 
 // ─── COMMAND PALETTE ──────────────────────────────────────────────────────
 const paletteCommands = [
-	{ icon: 'add', title: 'Yeni Sohbet', desc: 'Sohbeti temizle', action: () => newChat(), kbd: 'Ctrl+N' },
+	{ icon: 'add', title: 'Yeni Sohbet', desc: 'Sohbeti temizle', action: () => newConversationChat(), kbd: 'Ctrl+N' },
 	{ icon: 'construction', title: 'Derle', desc: 'Projeyi derle', action: () => { closeModal('cmd-palette'); insertPrompt('/build'); sendMessage(); } },
 	{ icon: 'science', title: 'Run Test', desc: 'Run the test suite', action: () => { closeModal('cmd-palette'); insertPrompt('/test'); sendMessage(); } },
 	{ icon: 'rate_review', title: 'Code Review', desc: 'Review the code', action: () => { closeModal('cmd-palette'); insertPrompt('/review'); sendMessage(); } },
@@ -2035,7 +2037,7 @@ document.addEventListener('keydown', (e) => {
 		if (e.key === 'k') { e.preventDefault(); openCmdPalette(); }
 		else if (e.key === 'b') { e.preventDefault(); toggleSidebar(); }
 		else if (e.key === 'f') { e.preventDefault(); toggleSearch(); }
-		else if (e.key === 'n') { e.preventDefault(); newChat(); }
+		else if (e.key === 'n') { e.preventDefault(); newConversationChat(); }
 	}
 	if (e.key === 'Escape') {
 		if (document.querySelector('.modal-overlay.active')) {
@@ -2280,6 +2282,32 @@ function updateMessage(id, content, isStreaming = false) {
 
 // ─── TOOL RENDER ──────────────────────────────────────────────────────────
 function renderTool(toolCallId, name, args, status, result) {
+	const nameLC = name.toLowerCase();
+	
+	// ask_question: intercept EARLY before any DOM creation
+	if (nameLC.includes('ask_question')) {
+		const aqc = document.getElementById('ask-question-container');
+		if (status === 'running' && aqc) {
+			const questions = args?.questions || [];
+			const question = questions[0]?.question || args?.question || 'Lütfen bir seçim yapın:';
+			const options = questions[0]?.options || args?.options || [];
+			if (options.length > 0) {
+				aqc.innerHTML = `
+					<div style="font-size:0.85rem; font-weight:600; color:var(--fg); display:flex; align-items:center; gap:6px; margin-bottom:8px;">
+						<span class="material-symbols-rounded" style="font-size:16px; color:var(--accent);">help_center</span>
+						${escapeHtml(question)}
+					</div>
+					<div style="display:flex; flex-wrap:wrap; gap:8px;">
+						${options.map(opt => `<button onclick="answerQuestion('${escapeHtml(opt)}')" style="padding:6px 14px; font-size:0.82rem; cursor:pointer; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--fg); font-family:inherit; transition:border-color 0.15s,color 0.15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--fg)'">${escapeHtml(opt)}</button>`).join('')}
+					</div>`;
+				aqc.classList.remove('hidden');
+			}
+		} else if (status !== 'running' && aqc) {
+			aqc.classList.add('hidden');
+		}
+		return; // Never render ask_question as a tool card
+	}
+	
 	let el = document.getElementById('tool-' + toolCallId);
 	
 	if (!el) {
@@ -2356,21 +2384,24 @@ function renderTool(toolCallId, name, args, status, result) {
 		
 		let optionsHtml = '';
 		if (nameLC.includes('ask_question') && subStatusClass === 'running' && t.args && Array.isArray(t.args.options)) {
-			// Move to input area container
+			// Render directly into the input container — NOT inline in the tool card
 			const aqc = document.getElementById('ask-question-container');
 			if (aqc) {
+				const q = t.args.questions?.[0]?.question || t.args.question || 'Lütfen bir seçim yapın:';
+				const opts = t.args.questions?.[0]?.options || t.args.options || [];
 				aqc.innerHTML = `
-					<div style="font-size:0.85rem; font-weight:600; color:var(--fg); display:flex; align-items:center; gap:6px;">
+					<div style="font-size:0.85rem; font-weight:600; color:var(--fg); display:flex; align-items:center; gap:6px; margin-bottom:6px;">
 						<span class="material-symbols-rounded" style="font-size:16px; color:var(--accent);">help_center</span>
-						${escapeHtml(t.args.question || 'Lütfen bir seçim yapın:')}
+						${escapeHtml(q)}
 					</div>
 					<div style="display:flex; flex-wrap:wrap; gap:8px;">
-						${t.args.options.map(opt => `<button class="p-btn primary" style="font-size:0.8rem; padding:6px 12px; cursor:pointer;" onclick="answerQuestion('${escapeHtml(opt)}')">${escapeHtml(opt)}</button>`).join('')}
+						${opts.map(opt => `<button class="p-btn" style="font-size:0.82rem; padding:6px 14px; cursor:pointer; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--fg); transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--fg)'" onclick="answerQuestion('${escapeHtml(opt)}')">${escapeHtml(opt)}</button>`).join('')}
 					</div>
 				`;
 				aqc.classList.remove('hidden');
 			}
-			return ''; // hide the tool card from chat history while running
+			// Don't render tool card while waiting for answer
+			return;
 		} else if (nameLC.includes('ask_question') && subStatusClass !== 'running') {
 			const aqc = document.getElementById('ask-question-container');
 			if (aqc) aqc.classList.add('hidden');
@@ -2901,6 +2932,8 @@ es.onmessage = (e) => {
 			currentAssistantMsgId = null;
 			newChat();
 			setGeneratingState(false);
+			// Refresh sidebar so new session appears
+			setTimeout(() => loadConversations(), 400);
 
 		} else if (data.type === 'state_update') {
 			if (data.state?.model) {
