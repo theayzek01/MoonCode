@@ -3,10 +3,13 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import fs from "fs";
 import path, { dirname, join } from "path";
 import { fileURLToPath } from "url";
+import { promisify } from "node:util";
 import { getEngineDir } from "../../config.js";
 import type { EngineSessionRuntime } from "../../core/engine-session-runtime.js";
 import { buildSessionInfo, SessionManager } from "../../core/session-manager.js";
 import type { InteractiveModeOptions } from "../interactive/interactive-mode.js";
+
+const execAsync = promisify(exec);
 
 export class WebMode {
 	private runtime: EngineSessionRuntime;
@@ -42,9 +45,21 @@ export class WebMode {
 		this.options = options;
 	}
 
+	private activeUnsubscribe: (() => void) | null = null;
+
 	async init() {
 		this.hookConsole();
-		this.runtime.session.subscribe((event) => {
+		this.bindSession(this.runtime.session);
+		this.runtime.setRebindSession(async (newSession) => {
+			this.bindSession(newSession);
+		});
+	}
+
+	private bindSession(session: any) {
+		if (this.activeUnsubscribe) {
+			this.activeUnsubscribe();
+		}
+		this.activeUnsubscribe = session.subscribe((event: any) => {
 			this.broadcastEvent(event);
 			this.broadcastEvent(this.getStateUpdateEvent());
 		});
@@ -547,6 +562,23 @@ export class WebMode {
 					res.end(JSON.stringify({ error: e.message }));
 				}
 			});
+			return;
+		}
+
+		if (method === "POST" && url.pathname === "/api/project/select-directory") {
+			try {
+				let selectedPath = "";
+				if (process.platform === "win32") {
+					const psCommand = `powershell -NoProfile -Command "Add-Type -AssemblyName System.Windows.Forms; $f = New-Object System.Windows.Forms.FolderBrowserDialog; $f.Description = 'MoonCode Proje Klasörü Seçin'; if ($f.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { Write-Output $f.SelectedPath }"`;
+					const { stdout } = await execAsync(psCommand);
+					selectedPath = stdout.trim();
+				}
+				res.setHeader("Content-Type", "application/json");
+				res.end(JSON.stringify({ success: true, path: selectedPath || null }));
+			} catch (e: any) {
+				res.statusCode = 500;
+				res.end(JSON.stringify({ error: e.message }));
+			}
 			return;
 		}
 

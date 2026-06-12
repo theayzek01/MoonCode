@@ -855,45 +855,24 @@
 		</button>
 	</div>
 
-	<!-- New Chat & New Project -->
-	<div style="padding:0 10px 8px; display:flex; gap:8px;">
-		<button onclick="createNewProjectPrompt()" style="flex:1; display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 6px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;color:var(--fg);font-size:0.75rem;font-weight:500;font-family:'Inter',sans-serif;transition:all 0.15s;" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--surface2)'" title="Yeni Proje">
-			<span class="material-symbols-rounded" style="color:var(--accent2);font-size:16px;">create_new_folder</span>
-			<span>Yeni Proje</span>
-		</button>
-		<button onclick="newChat()" style="flex:1; display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 6px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;color:var(--fg);font-size:0.75rem;font-weight:500;font-family:'Inter',sans-serif;transition:all 0.15s;" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--surface2)'" title="Yeni Sohbet">
+	<!-- New Chat & Directory Select -->
+	<div style="padding:0 10px 8px; display:flex; flex-direction:column; gap:8px;">
+		<button onclick="newChat()" style="width:100%; display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 6px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;color:var(--fg);font-size:0.75rem;font-weight:500;font-family:'Inter',sans-serif;transition:all 0.15s;" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--surface2)'" title="Yeni Sohbet">
 			<span class="material-symbols-rounded" style="color:var(--accent);font-size:16px;">add</span>
 			<span>Yeni Sohbet</span>
 		</button>
-	</div>
+		
+		<button onclick="selectProjectDirectory()" style="width:100%; display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 6px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;color:var(--fg);font-size:0.75rem;font-weight:500;font-family:'Inter',sans-serif;transition:all 0.15s;" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--surface2)'" title="Dizin Seç">
+			<span class="material-symbols-rounded" style="color:var(--accent2);font-size:16px;">folder_open</span>
+			<span>Proje Dizini Seç</span>
+		</button>
 
-	<div class="divider"></div>
-
-	<!-- Quick actions -->
-	<div style="padding:4px 10px;">
-		<div class="sidebar-item" onclick="openCmdPalette()">
-			<span class="material-symbols-rounded" style="font-size:17px;flex-shrink:0;">apps</span>
-			<span>Komut Paleti</span>
-			<kbd style="margin-left:auto;font-size:0.6rem;">Ctrl+K</kbd>
-		</div>
-		<div class="sidebar-item" onclick="toggleSearch()">
-			<span class="material-symbols-rounded" style="font-size:17px;flex-shrink:0;">search</span>
-			<span>Sohbette Ara</span>
-			<kbd style="margin-left:auto;font-size:0.6rem;">Ctrl+F</kbd>
-		</div>
-		<div class="sidebar-item" onclick="exportChat()">
-			<span class="material-symbols-rounded" style="font-size:17px;flex-shrink:0;">download</span>
-			<span>Sohbeti Dışa Aktar</span>
-		</div>
-	</div>
-
-	<div class="divider"></div>
-
-	<!-- Projects and Chats -->
-	<div style="flex:1;overflow-y:auto;padding:4px 10px;">
-		<div style="font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding:4px 12px;margin-bottom:4px;">Projeler</div>
-		<div id="project-list" style="display:flex;flex-direction:column;gap:4px;">
-			<div style="text-align:center;padding:12px;color:var(--muted);font-size:0.78rem;">Projeler yükleniyor...</div>
+		<div style="padding:10px; background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:10px; margin-top:4px;">
+			<div style="font-size:0.65rem; font-weight:700; text-transform:uppercase; color:var(--muted); margin-bottom:4px; display:flex; align-items:center; gap:4px;">
+				<span class="material-symbols-rounded" style="font-size:12px;">folder</span>
+				<span>Aktif Proje Dizini</span>
+			</div>
+			<div id="active-cwd-display" style="font-size:0.75rem; word-break:break-all; color:var(--fg); font-family:'JetBrains Mono', monospace; line-height:1.4;">Yükleniyor...</div>
 		</div>
 	</div>
 
@@ -2501,183 +2480,35 @@ async function saveEdit(id) {
 	}
 }
 
-// ─── PROJECTS ─────────────────────────────────────────────────────────────
-let projectData = [];
-let activeProjectCwd = null;
-let activeProjectMenu = null;
-
-async function loadProjects() {
-	const list = document.getElementById('project-list');
-	if (!list) return;
+// ─── DIRECTORY SELECTION ──────────────────────────────────────────────────
+async function selectProjectDirectory() {
 	try {
-		const res = await fetch('/api/sessions');
-		projectData = await res.json();
-		if (!projectData.length) {
-			list.innerHTML = '<div style="text-align:center;padding:12px;color:var(--muted);font-size:0.78rem;">Henüz proje yok</div>';
-			return;
+		const res = await fetch('/api/project/select-directory', { method: 'POST' });
+		const data = await res.json();
+		let selectedPath = data.path;
+		
+		if (!selectedPath) {
+			selectedPath = prompt('Proje klasörünün tam yolunu girin:');
 		}
-		list.innerHTML = '';
-		projectData.forEach(proj => {
-			const isActive = proj.cwd === activeProjectCwd;
-			const wrap = document.createElement('div');
-			wrap.style.cssText = 'margin-bottom:2px;';
-
-			const projEl = document.createElement('div');
-			projEl.className = 'sidebar-item' + (isActive ? ' active' : '');
-			projEl.style.cssText = 'padding:7px 10px;display:flex;align-items:center;gap:8px;cursor:pointer;border-radius:10px;justify-content:space-between;';
-			projEl.innerHTML = `
-				<div style="display:flex;align-items:center;gap:7px;overflow:hidden;">
-					<span class="material-symbols-rounded" style="font-size:16px;color:var(--accent2);flex-shrink:0;">folder</span>
-					<span style="font-size:0.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(proj.name)}</span>
-				</div>
-				<div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
-					<span style="font-size:0.65rem;color:var(--muted);">${proj.sessions?.length || 0} sohbet</span>
-					<button onclick="event.stopPropagation();showProjectMenu(event,'${escapeJsString(proj.cwd)}')" class="tool-btn" style="padding:2px;opacity:0;" class="proj-menu-btn">
-						<span class="material-symbols-rounded" style="font-size:15px;">more_vert</span>
-					</button>
-				</div>`;
-			projEl.addEventListener('mouseenter', () => projEl.querySelector('button')?.style && (projEl.querySelector('button').style.opacity = '1'));
-			projEl.addEventListener('mouseleave', () => projEl.querySelector('button')?.style && (projEl.querySelector('button').style.opacity = '0'));
-			projEl.addEventListener('click', () => toggleProjectSessions(proj, wrap, projEl));
-
-			const sessWrap = document.createElement('div');
-			sessWrap.style.cssText = 'padding-left:14px;display:none;flex-direction:column;gap:2px;';
-
-			(proj.sessions || []).slice(0, 8).forEach(sess => {
-				const sessEl = document.createElement('div');
-				sessEl.className = 'sidebar-item';
-				sessEl.style.cssText = 'font-size:0.75rem;padding:5px 8px;border-radius:7px;cursor:pointer;display:flex;align-items:center;gap:6px;';
-				sessEl.innerHTML = `
-					<span class="material-symbols-rounded" style="font-size:13px;color:var(--muted);flex-shrink:0;">chat</span>
-					<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(sess.name || 'Başlıksız')}</span>`;
-				sessEl.addEventListener('click', (ev) => { ev.stopPropagation(); switchSession(sess.path, proj.cwd); });
-				sessWrap.appendChild(sessEl);
-			});
-
-			wrap.appendChild(projEl);
-			wrap.appendChild(sessWrap);
-			list.appendChild(wrap);
-		});
-	} catch(e) {
-		list.innerHTML = '<div style="text-align:center;padding:12px;color:#ff6464;font-size:0.75rem;">Projeler yüklenemedi</div>';
-	}
-}
-
-function toggleProjectSessions(proj, wrap, projEl) {
-	const sessWrap = wrap.querySelector('div:last-child');
-	if (!sessWrap) return;
-	const open = sessWrap.style.display !== 'none';
-	sessWrap.style.display = open ? 'none' : 'flex';
-	activeProjectCwd = open ? null : proj.cwd;
-	// Update the terminal project badge
-	const badge = document.getElementById('terminal-project-badge');
-	if (badge) badge.textContent = open ? '' : proj.name;
-}
-
-async function switchSession(filePath, cwd) {
-	try {
-		const res = await fetch('/api/session/switch', {
+		
+		if (!selectedPath || !selectedPath.trim()) return;
+		
+		const createRes = await fetch('/api/session/create', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ path: filePath })
+			body: JSON.stringify({ cwd: selectedPath.trim() })
 		});
-		if (res.ok) {
-			activeProjcetCwd = cwd;
-			toast('Sohbet yüklendi', 'success');
+		
+		if (createRes.ok) {
 			newChat();
-			loadHistory();
+			toast('Proje dizini değiştirildi', 'success');
+			checkInitialStatus();
 		} else {
-			toast('Sohbet yüklenemedi', 'error');
+			toast('Dizin değiştirilemedi', 'error');
 		}
 	} catch(e) {
-		toast('Bağlantı hatası', 'error');
+		toast('Dizin değiştirme hatası', 'error');
 	}
-}
-
-async function createNewProjectPrompt() {
-	const cwd = prompt('Proje klasörünün tam yolunu girin:');
-	if (!cwd || !cwd.trim()) return;
-	try {
-		const res = await fetch('/api/session/create', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ cwd: cwd.trim() })
-		});
-		if (res.ok) {
-			newChat();
-			toast('Yeni proje oluşturuldu', 'success');
-			setTimeout(loadProjects, 500);
-		}
-	} catch(e) {
-		toast('Proje oluşturulamadı', 'error');
-	}
-}
-
-function showProjectMenu(e, cwd) {
-	activeProjectMenu = cwd;
-	const menu = document.getElementById('project-menu');
-	if (!menu) return;
-	menu.classList.remove('hidden');
-	const x = Math.min(e.clientX, window.innerWidth - 220);
-	const y = Math.min(e.clientY, window.innerHeight - 200);
-	menu.style.left = x + 'px';
-	menu.style.top = y + 'px';
-	e.stopPropagation();
-}
-
-document.addEventListener('click', () => {
-	const menu = document.getElementById('project-menu');
-	if (menu) menu.classList.add('hidden');
-});
-
-function pinActiveProject() {
-	if (!activeProjectMenu) return;
-	toast('Proje sabitlendi', 'success');
-	document.getElementById('project-menu')?.classList.add('hidden');
-}
-
-async function openActiveProjectExplorer() {
-	if (!activeProjectMenu) return;
-	try {
-		await fetch('/api/project/open-explorer', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ cwd: activeProjectMenu })
-		});
-	} catch(e) {}
-	document.getElementById('project-menu')?.classList.add('hidden');
-}
-
-function renameActiveProject() {
-	if (!activeProjectMenu) return;
-	const newName = prompt('Proje için yeni ad girin:');
-	if (newName) toast('Yeniden adlandırma kaydedildi (yerel)', 'info');
-	document.getElementById('project-menu')?.classList.add('hidden');
-}
-
-function archiveActiveProject() {
-	if (!activeProjectMenu) return;
-	toast('Proje arşivlendi', 'info');
-	document.getElementById('project-menu')?.classList.add('hidden');
-}
-
-async function deleteActiveProject() {
-	if (!activeProjectMenu) return;
-	if (!confirm('Proje listeden kaldırılacak. Emin misiniz?')) return;
-	try {
-		const res = await fetch('/api/project/delete', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ cwd: activeProjectMenu })
-		});
-		if (res.ok) {
-			toast('Proje silindi', 'success');
-			loadProjects();
-		}
-	} catch(e) {
-		toast('Silinemedi', 'error');
-	}
-	document.getElementById('project-menu')?.classList.add('hidden');
 }
 
 // ─── RUN CODE ─────────────────────────────────────────────────────────────
@@ -2697,9 +2528,7 @@ loadHistory();
 updateUserUI();
 fetchCommands();
 initSettings();
-loadProjects();
 setInterval(updateUserUI, 8000);
-setInterval(loadProjects, 30000);
 
 // Sidebar starts open on wide screens
 if (window.innerWidth < 768) toggleSidebar();
