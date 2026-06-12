@@ -314,7 +314,6 @@ export function createBrowserPageToolDefinition(
 		async execute(_id, params, signal) {
 			if (signal?.aborted) throw new Error("Operation aborted");
 
-
 			validatePage(params);
 			const cmdParams = normalizePageParams(params);
 			const result = await sendBrowserCommand("page", cmdParams);

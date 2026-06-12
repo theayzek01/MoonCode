@@ -193,7 +193,9 @@ Singular_mind ⊃ sub-agents(\`invoke_subagent\`) ∧ background_tasks(\`manage_
 
 	addGuideline("Always show file paths clearly; include relevant paths when explaining code or diffs.");
 	addGuideline(DEFAULT_UI_STYLE_GUIDELINE);
-	addGuideline("CRITICAL: NEVER use emojis (e.g. 💻, 🛠️, ✅). Emojis are STRICTLY FORBIDDEN in your output. You MUST use Google Material Icons instead (e.g. <span class=\"material-symbols-rounded\" style=\"font-size:16px; vertical-align:middle; margin-right:4px;\">computer</span>). Failure to replace emojis with Material Icons is unacceptable.");
+	addGuideline(
+		'CRITICAL: NEVER use emojis (e.g. 💻, 🛠️, ✅). Emojis are STRICTLY FORBIDDEN in your output. You MUST use Google Material Icons instead (e.g. <span class="material-symbols-rounded" style="font-size:16px; vertical-align:middle; margin-right:4px;">computer</span>). Failure to replace emojis with Material Icons is unacceptable.',
+	);
 
 	// File exploration guidelines
 	if (hasBash && !hasGrep && !hasFind && !hasLs) {

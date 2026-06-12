@@ -1,16 +1,15 @@
 import { exec } from "node:child_process";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { promisify } from "node:util";
-import fs from "fs";
+import fs, { existsSync, promises as fsPromises } from "fs";
 import path, { dirname, join, resolve } from "path";
 import { fileURLToPath } from "url";
 import { getEngineDir } from "../../config.js";
 import { getBrowserBridgeStatus } from "../../core/browser-bridge-server.js";
 import type { EngineSessionRuntime } from "../../core/engine-session-runtime.js";
-import { buildSessionInfo, SessionManager, listSessionsFromDir } from "../../core/session-manager.js";
+import { buildSessionInfo, listSessionsFromDir, SessionManager } from "../../core/session-manager.js";
 import { BUILTIN_SLASH_COMMANDS } from "../../core/slash-commands.js";
 import type { InteractiveModeOptions } from "../interactive/interactive-mode.js";
-import { existsSync, promises as fsPromises } from "fs";
 
 const execAsync = promisify(exec);
 
@@ -607,7 +606,7 @@ export class WebMode {
 				const sessions = await listSessionsFromDir(sessionDir);
 				// Sort by modified desc
 				sessions.sort((a, b) => b.modified.getTime() - a.modified.getTime());
-				
+
 				res.setHeader("Content-Type", "application/json");
 				res.end(JSON.stringify({ sessions, activeId: this.runtime.session.sessionManager.getSessionId() }));
 			} catch (e: any) {
@@ -645,7 +644,7 @@ export class WebMode {
 					const { id } = JSON.parse(body);
 					const sessionDir = this.runtime.session.sessionManager.getSessionDir();
 					const sessions = await listSessionsFromDir(sessionDir);
-					const target = sessions.find(s => s.id === id);
+					const target = sessions.find((s) => s.id === id);
 					if (target && target.path) {
 						await this.runtime.switchSession(target.path);
 						res.setHeader("Content-Type", "application/json");
@@ -671,7 +670,7 @@ export class WebMode {
 					const { id, name } = JSON.parse(body);
 					const sessionDir = this.runtime.session.sessionManager.getSessionDir();
 					const sessions = await listSessionsFromDir(sessionDir);
-					const target = sessions.find(s => s.id === id);
+					const target = sessions.find((s) => s.id === id);
 					if (target && target.path) {
 						if (id === this.runtime.session.sessionManager.getSessionId()) {
 							this.runtime.session.sessionManager.appendSessionInfo(name);
@@ -682,7 +681,7 @@ export class WebMode {
 								id: `info-${Date.now()}`,
 								parentId: null,
 								timestamp: new Date().toISOString(),
-								name: name
+								name: name,
 							};
 							await fsPromises.appendFile(target.path, "\\n" + JSON.stringify(infoEntry) + "\\n");
 						}
@@ -708,13 +707,15 @@ export class WebMode {
 					const { id } = JSON.parse(body);
 					const sessionDir = this.runtime.session.sessionManager.getSessionDir();
 					const sessions = await listSessionsFromDir(sessionDir);
-					const target = sessions.find(s => s.id === id);
+					const target = sessions.find((s) => s.id === id);
 					if (target && target.path) {
 						await fsPromises.unlink(target.path);
-						
+
 						// If deleting active session, switch to newest remaining or create new
 						if (this.runtime.session.sessionManager.getSessionId() === id) {
-							const remaining = sessions.filter(s => s.id !== id).sort((a, b) => b.modified.getTime() - a.modified.getTime());
+							const remaining = sessions
+								.filter((s) => s.id !== id)
+								.sort((a, b) => b.modified.getTime() - a.modified.getTime());
 							if (remaining.length > 0) {
 								await this.runtime.switchSession(remaining[0].path);
 							} else {
@@ -729,7 +730,7 @@ export class WebMode {
 							}
 							this.broadcastEvent({ type: "clear_chat" });
 						}
-						
+
 						res.setHeader("Content-Type", "application/json");
 						res.end(JSON.stringify({ success: true }));
 					} else {
