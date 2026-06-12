@@ -1,5 +1,5 @@
-import { createAssistantMessageEventStream } from "../utils/event-stream.js";
 import type { Api, AssistantMessageEventStream, Context, Model } from "../types.js";
+import { createAssistantMessageEventStream } from "../utils/event-stream.js";
 import { streamSimpleAnthropic } from "./anthropic.js";
 import { streamSimpleOpenAIResponses } from "./openai-responses.js";
 
@@ -45,11 +45,7 @@ export function invalidateGitlabDirectAccessToken() {
 	cachedDirectAccess = null;
 }
 
-export function streamGitLabDuo(
-	model: Model<Api>,
-	context: Context,
-	options?: any,
-): AssistantMessageEventStream {
+export function streamGitLabDuo(model: Model<Api>, context: Context, options?: any): AssistantMessageEventStream {
 	const stream = createAssistantMessageEventStream();
 
 	(async () => {
@@ -61,10 +57,9 @@ export function streamGitLabDuo(
 			const headers = { ...directAccess.headers, Authorization: `Bearer ${directAccess.token}` };
 			const streamOptions = { ...options, apiKey: "gitlab-duo", headers };
 
-			const innerStream =
-				model.id.includes("claude")
-					? streamSimpleAnthropic(model as Model<"anthropic-messages">, context, streamOptions)
-					: streamSimpleOpenAIResponses(model as Model<"openai-responses">, context, streamOptions);
+			const innerStream = model.id.includes("claude")
+				? streamSimpleAnthropic(model as Model<"anthropic-messages">, context, streamOptions)
+				: streamSimpleOpenAIResponses(model as Model<"openai-responses">, context, streamOptions);
 
 			for await (const event of innerStream) stream.push(event);
 			stream.end();

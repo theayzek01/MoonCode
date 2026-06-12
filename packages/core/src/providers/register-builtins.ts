@@ -11,11 +11,11 @@ import type {
 	StreamOptions,
 } from "../types.js";
 import { AssistantMessageEventStream } from "../utils/event-stream.js";
-import { streamGitLabDuo } from "./gitlab-duo.js";
-import * as anthropicModule from "./anthropic.js";
 import type { BedrockOptions } from "./amazon-bedrock.js";
 import type { AnthropicOptions } from "./anthropic.js";
+import * as anthropicModule from "./anthropic.js";
 import type { AzureOpenAIResponsesOptions } from "./azure-openai-responses.js";
+import { streamGitLabDuo } from "./gitlab-duo.js";
 import type { GoogleOptions } from "./google.js";
 import type { GoogleGeminiCliOptions } from "./google-antigravity.js";
 import type { GoogleVertexOptions } from "./google-vertex.js";

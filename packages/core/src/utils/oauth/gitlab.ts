@@ -1,7 +1,6 @@
-import type { Model, Api } from "../../types.js";
-import type { OAuthCredentials, OAuthLoginCallbacks, OAuthProviderInterface } from "./types.js";
-
 import { invalidateGitlabDirectAccessToken } from "../../providers/gitlab-duo.js";
+import type { Api, Model } from "../../types.js";
+import type { OAuthCredentials, OAuthLoginCallbacks, OAuthProviderInterface } from "./types.js";
 
 const GITLAB_COM_URL = "https://gitlab.com";
 const Core_GATEWAY_URL = "https://cloud.gitlab.com";
@@ -16,7 +15,7 @@ export const GITLAB_MODELS: Model<any>[] = [
 	{
 		id: "claude-opus-4-5-20251101",
 		name: "Claude Opus 4.5",
-        provider: "gitlab-duo",
+		provider: "gitlab-duo",
 		api: "gitlab-duo-api",
 		baseUrl: ANTHROPIC_PROXY_URL,
 		reasoning: true,
@@ -28,7 +27,7 @@ export const GITLAB_MODELS: Model<any>[] = [
 	{
 		id: "claude-sonnet-4-5-20250929",
 		name: "Claude Sonnet 4.5",
-        provider: "gitlab-duo",
+		provider: "gitlab-duo",
 		api: "gitlab-duo-api",
 		baseUrl: ANTHROPIC_PROXY_URL,
 		reasoning: true,
@@ -40,7 +39,7 @@ export const GITLAB_MODELS: Model<any>[] = [
 	{
 		id: "claude-haiku-4-5-20251001",
 		name: "Claude Haiku 4.5",
-        provider: "gitlab-duo",
+		provider: "gitlab-duo",
 		api: "gitlab-duo-api",
 		baseUrl: ANTHROPIC_PROXY_URL,
 		reasoning: true,
@@ -52,7 +51,7 @@ export const GITLAB_MODELS: Model<any>[] = [
 	{
 		id: "gpt-5.1-2025-11-13",
 		name: "GPT-5.1",
-        provider: "gitlab-duo",
+		provider: "gitlab-duo",
 		api: "gitlab-duo-api",
 		baseUrl: OpenAI_PROXY_URL,
 		reasoning: true,
@@ -64,7 +63,7 @@ export const GITLAB_MODELS: Model<any>[] = [
 	{
 		id: "gpt-5-mini-2025-08-07",
 		name: "GPT-5 Mini",
-        provider: "gitlab-duo",
+		provider: "gitlab-duo",
 		api: "gitlab-duo-api",
 		baseUrl: OpenAI_PROXY_URL,
 		reasoning: true,
@@ -76,7 +75,7 @@ export const GITLAB_MODELS: Model<any>[] = [
 	{
 		id: "gpt-5-codex",
 		name: "GPT-5 Codex",
-        provider: "gitlab-duo",
+		provider: "gitlab-duo",
 		api: "gitlab-duo-api",
 		baseUrl: OpenAI_PROXY_URL,
 		reasoning: true,

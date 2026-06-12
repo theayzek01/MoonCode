@@ -1,15 +1,15 @@
 import { exec } from "node:child_process";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import { promisify } from "node:util";
 import fs from "fs";
 import path, { dirname, join } from "path";
 import { fileURLToPath } from "url";
-import { promisify } from "node:util";
 import { getEngineDir } from "../../config.js";
+import { getBrowserBridgeStatus } from "../../core/browser-bridge-server.js";
 import type { EngineSessionRuntime } from "../../core/engine-session-runtime.js";
 import { buildSessionInfo, SessionManager } from "../../core/session-manager.js";
-import type { InteractiveModeOptions } from "../interactive/interactive-mode.js";
-import { getBrowserBridgeStatus } from "../../core/browser-bridge-server.js";
 import { BUILTIN_SLASH_COMMANDS } from "../../core/slash-commands.js";
+import type { InteractiveModeOptions } from "../interactive/interactive-mode.js";
 
 const execAsync = promisify(exec);
 
@@ -25,7 +25,11 @@ export class WebMode {
 	private getWebProjects(): string[] {
 		const filePath = join(getEngineDir(), "web-projects.json");
 		if (fs.existsSync(filePath)) {
-			try { return JSON.parse(fs.readFileSync(filePath, "utf-8")); } catch(e) { return []; }
+			try {
+				return JSON.parse(fs.readFileSync(filePath, "utf-8"));
+			} catch (e) {
+				return [];
+			}
 		}
 		return [];
 	}
@@ -154,17 +158,17 @@ export class WebMode {
 			serverModule.setAuthPanelStateProvider(() => {
 				const authStorage = this.runtime.session.modelRegistry.authStorage;
 				const providerMap = new Map();
-				
+
 				for (const p of getProviders()) {
 					providerMap.set(p, {
 						id: p,
 						name: this.runtime.session.modelRegistry.getProviderDisplayName(p) || p,
 						supportsOAuth: false,
 						supportsApiKey: true,
-						auth: authStorage.getAuthStatus(p)
+						auth: authStorage.getAuthStatus(p),
 					});
 				}
-				
+
 				for (const p of authStorage.getOAuthProviders()) {
 					if (providerMap.has(p.id)) {
 						providerMap.get(p.id).supportsOAuth = true;
@@ -175,7 +179,7 @@ export class WebMode {
 							name: p.name,
 							supportsOAuth: true,
 							supportsApiKey: true,
-							auth: authStorage.getAuthStatus(p.id)
+							auth: authStorage.getAuthStatus(p.id),
 						});
 					}
 				}
@@ -183,7 +187,7 @@ export class WebMode {
 				return {
 					providers: Array.from(providerMap.values()),
 					accounts: authStorage.listManagedAccounts(),
-					models: { available: 0, total: 0 }
+					models: { available: 0, total: 0 },
 				};
 			});
 			serverModule.webUiAuthActionListeners.add(async (action: any) => {
@@ -199,17 +203,43 @@ export class WebMode {
 					await authStorage.login(action.providerId, {
 						onAuth: (info: any) => {
 							currentAuthUrl = info.url;
-							serverModule.setAuthPanelOAuthEvent({ providerId: action.providerId, url: currentAuthUrl, instructions: info.instructions || "Please open the login URL in your browser." });
+							serverModule.setAuthPanelOAuthEvent({
+								providerId: action.providerId,
+								url: currentAuthUrl,
+								instructions: info.instructions || "Please open the login URL in your browser.",
+							});
 						},
 						onPrompt: async (prompt: any) => {
-							serverModule.setAuthPanelOAuthEvent({ providerId: action.providerId, status: "pending", instructions: prompt.message, url: currentAuthUrl });
+							serverModule.setAuthPanelOAuthEvent({
+								providerId: action.providerId,
+								status: "pending",
+								instructions: prompt.message,
+								url: currentAuthUrl,
+							});
 							return "";
 						},
-						onProgress: (msg: string) => serverModule.setAuthPanelOAuthEvent({ providerId: action.providerId, status: "pending", instructions: msg, url: currentAuthUrl }),
-						onInfo: (lines: string[]) => serverModule.setAuthPanelOAuthEvent({ providerId: action.providerId, status: "pending", instructions: lines.join("\n"), url: currentAuthUrl }),
-						onManualCodeInput: () => new Promise<string>(() => {})
+						onProgress: (msg: string) =>
+							serverModule.setAuthPanelOAuthEvent({
+								providerId: action.providerId,
+								status: "pending",
+								instructions: msg,
+								url: currentAuthUrl,
+							}),
+						onInfo: (lines: string[]) =>
+							serverModule.setAuthPanelOAuthEvent({
+								providerId: action.providerId,
+								status: "pending",
+								instructions: lines.join("\n"),
+								url: currentAuthUrl,
+							}),
+						onManualCodeInput: () => new Promise<string>(() => {}),
 					});
-					serverModule.setAuthPanelOAuthEvent({ providerId: action.providerId, status: "success", instructions: "Login successful!", url: "" });
+					serverModule.setAuthPanelOAuthEvent({
+						providerId: action.providerId,
+						status: "success",
+						instructions: "Login successful!",
+						url: "",
+					});
 				}
 			});
 			this.webUiServerInstance = serverModule.startWebUiServer({ port: 3131 });
@@ -527,7 +557,7 @@ export class WebMode {
 			try {
 				const sessionsDir = join(getEngineDir(), "sessions");
 				const projects: Record<string, any> = {};
-				
+
 				// Ensure current cwd is always considered an explicitly added project
 				this.addWebProject(this.runtime.cwd);
 				const webProjects = this.getWebProjects();
@@ -537,7 +567,7 @@ export class WebMode {
 					projects[projectCwd] = {
 						cwd: projectCwd,
 						name: projectName,
-						sessions: []
+						sessions: [],
 					};
 
 					// Find sessions for this cwd
@@ -562,7 +592,9 @@ export class WebMode {
 						}
 					}
 					// Sort sessions by modified desc
-					projects[projectCwd].sessions.sort((a: any, b: any) => new Date(b.modified).getTime() - new Date(a.modified).getTime());
+					projects[projectCwd].sessions.sort(
+						(a: any, b: any) => new Date(b.modified).getTime() - new Date(a.modified).getTime(),
+					);
 				}
 
 				res.end(JSON.stringify(Object.values(projects)));
@@ -784,7 +816,8 @@ export class WebMode {
 						if (k === "compactionProfile") sm.setCompactionProfile(v as any);
 						if (k === "reserveTokens") sm.setCompactionReserveTokens(v ? Number(v) : undefined);
 						if (k === "keepRecentTokens") sm.setCompactionKeepRecentTokens(v ? Number(v) : undefined);
-						if (k === "permissionLevel" && ["ask", "safe", "full"].includes(v as string)) sm.setPermissionLevel(v as any);
+						if (k === "permissionLevel" && ["ask", "safe", "full"].includes(v as string))
+							sm.setPermissionLevel(v as any);
 					}
 					res.setHeader("Content-Type", "application/json");
 					res.end(JSON.stringify({ success: true }));
@@ -892,7 +925,7 @@ export class WebMode {
 				if (token) {
 					headers["Authorization"] = `token ${token}`;
 				}
-				
+
 				const response = await fetch("https://api.github.com/gists", {
 					method: "POST",
 					headers,
@@ -901,13 +934,13 @@ export class WebMode {
 						public: false,
 						files: {
 							"session.html": {
-								content: htmlContent
-							}
-						}
-					})
+								content: htmlContent,
+							},
+						},
+					}),
 				});
 
-				const result = await response.json() as any;
+				const result = (await response.json()) as any;
 				if (response.ok && result.html_url) {
 					res.setHeader("Content-Type", "application/json");
 					res.end(JSON.stringify({ success: true, url: result.html_url }));

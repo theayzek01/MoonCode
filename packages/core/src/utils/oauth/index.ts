@@ -21,11 +21,11 @@ export {
 	normalizeDomain,
 	refreshGitHubCopilotToken,
 } from "./github-copilot.js";
+export { gitlabOAuthProvider, loginGitLab, refreshGitLabToken } from "./gitlab.js";
 // Ollama
 export { loginOllama, ollamaOAuthProvider } from "./ollama.js";
 // OpenAI Codex (ChatGPT OAuth)
 export { loginOpenAICodex, openaiCodexOAuthProvider, refreshOpenAICodexToken } from "./openai-codex.js";
-export { gitlabOAuthProvider, loginGitLab, refreshGitLabToken } from "./gitlab.js";
 
 export * from "./types.js";
 
