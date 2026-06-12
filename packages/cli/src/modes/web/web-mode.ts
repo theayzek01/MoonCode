@@ -3,10 +3,10 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import fs from "fs";
 import path, { dirname, join } from "path";
 import { fileURLToPath } from "url";
-import type { EngineSessionRuntime } from "../../core/engine-session-runtime.js";
-import type { InteractiveModeOptions } from "../interactive/interactive-mode.js";
 import { getEngineDir } from "../../config.js";
+import type { EngineSessionRuntime } from "../../core/engine-session-runtime.js";
 import { buildSessionInfo, SessionManager } from "../../core/session-manager.js";
+import type { InteractiveModeOptions } from "../interactive/interactive-mode.js";
 
 export class WebMode {
 	private runtime: EngineSessionRuntime;
@@ -155,29 +155,41 @@ export class WebMode {
 			const fileName = url.pathname.slice("/assets/".length);
 			// Prevent path traversal
 			if (fileName.includes("..") || fileName.includes("/")) {
-				res.statusCode = 400; res.end("Bad Request"); return;
+				res.statusCode = 400;
+				res.end("Bad Request");
+				return;
 			}
 			const _filename2 = fileURLToPath(import.meta.url);
 			const _dirname2 = dirname(_filename2);
 			// Try the package assets dir, then walk up to project root assets/
 			const candidates = [
-				path.join(_dirname2, '../../../../assets', fileName),
-				path.join(_dirname2, '../../../../../assets', fileName),
-				path.join(process.cwd(), 'assets', fileName),
+				path.join(_dirname2, "../../../../assets", fileName),
+				path.join(_dirname2, "../../../../../assets", fileName),
+				path.join(process.cwd(), "assets", fileName),
 			];
 			let served = false;
 			for (const candidate of candidates) {
 				if (fs.existsSync(candidate)) {
 					const ext = path.extname(fileName).toLowerCase();
-					const mime: Record<string,string> = { '.png':'image/png', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.svg':'image/svg+xml', '.gif':'image/gif', '.webp':'image/webp' };
-					res.setHeader("Content-Type", mime[ext] || 'application/octet-stream');
+					const mime: Record<string, string> = {
+						".png": "image/png",
+						".jpg": "image/jpeg",
+						".jpeg": "image/jpeg",
+						".svg": "image/svg+xml",
+						".gif": "image/gif",
+						".webp": "image/webp",
+					};
+					res.setHeader("Content-Type", mime[ext] || "application/octet-stream");
 					res.setHeader("Cache-Control", "public, max-age=3600");
 					res.end(fs.readFileSync(candidate));
 					served = true;
 					break;
 				}
 			}
-			if (!served) { res.statusCode = 404; res.end("Not Found"); }
+			if (!served) {
+				res.statusCode = 404;
+				res.end("Not Found");
+			}
 			return;
 		}
 
@@ -434,7 +446,7 @@ export class WebMode {
 					for (const dir of dirs) {
 						const fullDir = join(sessionsDir, dir);
 						if (fs.statSync(fullDir).isDirectory()) {
-							const files = fs.readdirSync(fullDir).filter(f => f.endsWith(".jsonl"));
+							const files = fs.readdirSync(fullDir).filter((f) => f.endsWith(".jsonl"));
 							const projectSessions = [];
 							let projectCwd = "";
 							for (const file of files) {
@@ -462,11 +474,20 @@ export class WebMode {
 									projectCwd = decoded;
 								}
 							}
-							const projectName = path.basename(projectCwd) || projectCwd;
+							if (projectCwd.includes("AppData\\Local\\Temp") || projectCwd.includes("/tmp/") || projectCwd.includes("\\Temp\\") || projectCwd.includes("AppData/Local/Temp")) {
+								continue;
+							}
+							let projectName = path.basename(projectCwd) || projectCwd;
+							// If basename is randomly generated for tests, clean it or fallback
+							if (projectName.match(/^[a-z0-9]{9,15}$/) && projectCwd.includes("Mooncli")) {
+								continue;
+							}
 							projects[projectCwd] = {
 								cwd: projectCwd,
 								name: projectName,
-								sessions: projectSessions.sort((a: any, b: any) => new Date(b.modified).getTime() - new Date(a.modified).getTime()),
+								sessions: projectSessions.sort(
+									(a: any, b: any) => new Date(b.modified).getTime() - new Date(a.modified).getTime(),
+								),
 							};
 						}
 					}
@@ -527,7 +548,8 @@ export class WebMode {
 			req.on("end", async () => {
 				try {
 					const { cwd } = JSON.parse(body);
-					const startCmd = process.platform === "win32" ? "explorer" : process.platform === "darwin" ? "open" : "xdg-open";
+					const startCmd =
+						process.platform === "win32" ? "explorer" : process.platform === "darwin" ? "open" : "xdg-open";
 					exec(`${startCmd} "${cwd}"`);
 					res.setHeader("Content-Type", "application/json");
 					res.end(JSON.stringify({ success: true }));
