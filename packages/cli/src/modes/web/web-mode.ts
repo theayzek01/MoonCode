@@ -2,14 +2,15 @@ import { exec } from "node:child_process";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { promisify } from "node:util";
 import fs from "fs";
-import path, { dirname, join } from "path";
+import path, { dirname, join, resolve } from "path";
 import { fileURLToPath } from "url";
 import { getEngineDir } from "../../config.js";
 import { getBrowserBridgeStatus } from "../../core/browser-bridge-server.js";
 import type { EngineSessionRuntime } from "../../core/engine-session-runtime.js";
-import { buildSessionInfo, SessionManager } from "../../core/session-manager.js";
+import { buildSessionInfo, SessionManager, listSessionsFromDir } from "../../core/session-manager.js";
 import { BUILTIN_SLASH_COMMANDS } from "../../core/slash-commands.js";
 import type { InteractiveModeOptions } from "../interactive/interactive-mode.js";
+import { existsSync, promises as fsPromises } from "fs";
 
 const execAsync = promisify(exec);
 
@@ -592,6 +593,135 @@ export class WebMode {
 					}
 					res.setHeader("Content-Type", "application/json");
 					res.end(JSON.stringify({ success: true }));
+				} catch (e: any) {
+					res.statusCode = 500;
+					res.end(JSON.stringify({ error: e.message }));
+				}
+			});
+			return;
+		}
+
+		if (method === "GET" && url.pathname === "/api/conversations") {
+			try {
+				const sessionDir = this.runtime.session.sessionManager.getSessionDir();
+				const sessions = await listSessionsFromDir(sessionDir);
+				// Sort by modified desc
+				sessions.sort((a, b) => b.modified.getTime() - a.modified.getTime());
+				
+				res.setHeader("Content-Type", "application/json");
+				res.end(JSON.stringify({ sessions, activeId: this.runtime.session.sessionManager.getSessionId() }));
+			} catch (e: any) {
+				res.statusCode = 500;
+				res.end(JSON.stringify({ error: e.message }));
+			}
+			return;
+		}
+
+		if (method === "POST" && url.pathname === "/api/conversations/new") {
+			try {
+				const sm = this.runtime.session.sessionManager;
+				sm.newSession();
+				await this.runtime.switchSession(sm.getSessionFile()!);
+				res.setHeader("Content-Type", "application/json");
+				res.end(JSON.stringify({ success: true, id: sm.getSessionId() }));
+				this.broadcastEvent({ type: "clear_chat" });
+			} catch (e: any) {
+				res.statusCode = 500;
+				res.end(JSON.stringify({ error: e.message }));
+			}
+			return;
+		}
+
+		if (method === "POST" && url.pathname === "/api/conversations/switch") {
+			let body = "";
+			req.on("data", (chunk) => (body += chunk));
+			req.on("end", async () => {
+				try {
+					const { id } = JSON.parse(body);
+					const sessionDir = this.runtime.session.sessionManager.getSessionDir();
+					const sessions = await listSessionsFromDir(sessionDir);
+					const target = sessions.find(s => s.id === id);
+					if (target && target.path) {
+						await this.runtime.switchSession(target.path);
+						res.setHeader("Content-Type", "application/json");
+						res.end(JSON.stringify({ success: true }));
+						this.broadcastEvent({ type: "clear_chat" }); // triggers client reload
+					} else {
+						res.statusCode = 404;
+						res.end(JSON.stringify({ error: "Session not found" }));
+					}
+				} catch (e: any) {
+					res.statusCode = 500;
+					res.end(JSON.stringify({ error: e.message }));
+				}
+			});
+			return;
+		}
+
+		if (method === "POST" && url.pathname === "/api/conversations/rename") {
+			let body = "";
+			req.on("data", (chunk) => (body += chunk));
+			req.on("end", async () => {
+				try {
+					const { id, name } = JSON.parse(body);
+					const sessionDir = this.runtime.session.sessionManager.getSessionDir();
+					const sessions = await listSessionsFromDir(sessionDir);
+					const target = sessions.find(s => s.id === id);
+					if (target && target.path) {
+						// Write a session_info entry to that file
+						const infoEntry = {
+							type: "session_info",
+							id: `info-${Date.now()}`,
+							parentId: null,
+							timestamp: new Date().toISOString(),
+							name: name
+						};
+						await fsPromises.appendFile(target.path, "\\n" + JSON.stringify(infoEntry) + "\\n");
+						res.setHeader("Content-Type", "application/json");
+						res.end(JSON.stringify({ success: true }));
+					} else {
+						res.statusCode = 404;
+						res.end(JSON.stringify({ error: "Session not found" }));
+					}
+				} catch (e: any) {
+					res.statusCode = 500;
+					res.end(JSON.stringify({ error: e.message }));
+				}
+			});
+			return;
+		}
+
+		if (method === "POST" && url.pathname === "/api/conversations/delete") {
+			let body = "";
+			req.on("data", (chunk) => (body += chunk));
+			req.on("end", async () => {
+				try {
+					const { id } = JSON.parse(body);
+					const sessionDir = this.runtime.session.sessionManager.getSessionDir();
+					const sessions = await listSessionsFromDir(sessionDir);
+					const target = sessions.find(s => s.id === id);
+					if (target && target.path) {
+						await fsPromises.unlink(target.path);
+						
+						// If deleting active session, switch to newest remaining or create new
+						if (this.runtime.session.sessionManager.getSessionId() === id) {
+							const remaining = sessions.filter(s => s.id !== id).sort((a, b) => b.modified.getTime() - a.modified.getTime());
+							if (remaining.length > 0) {
+								await this.runtime.switchSession(remaining[0].path);
+							} else {
+								const sm = this.runtime.session.sessionManager;
+								sm.newSession();
+								await this.runtime.switchSession(sm.getSessionFile()!);
+							}
+							this.broadcastEvent({ type: "clear_chat" });
+						}
+						
+						res.setHeader("Content-Type", "application/json");
+						res.end(JSON.stringify({ success: true }));
+					} else {
+						res.statusCode = 404;
+						res.end(JSON.stringify({ error: "Session not found" }));
+					}
 				} catch (e: any) {
 					res.statusCode = 500;
 					res.end(JSON.stringify({ error: e.message }));

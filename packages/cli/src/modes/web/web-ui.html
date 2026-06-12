@@ -953,6 +953,16 @@
 
 	<div class="divider"></div>
 
+	<!-- Conversation List -->
+	<div id="sidebar-conversations" style="flex:1; overflow-y:auto; padding:0 10px; display:flex; flex-direction:column; gap:4px; padding-bottom:10px;">
+		<div style="padding:10px 6px 4px; font-size:0.65rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px;">Sohbetler</div>
+		<div id="conversation-list" style="display:flex; flex-direction:column; gap:2px;">
+			<!-- Injected by JS -->
+		</div>
+	</div>
+
+	<div class="divider"></div>
+
 	<!-- Sidebar Footer -->
 	<div style="padding:10px 10px;flex-shrink:0;">
 		<div class="sidebar-item" onclick="openSemanticBrain()">
@@ -1684,6 +1694,125 @@ function toggleSidebar() {
 	const sb = document.getElementById('sidebar');
 	if (sidebarOpen) sb.classList.remove('collapsed');
 	else sb.classList.add('collapsed');
+}
+
+// Conversations API
+async function loadConversations() {
+	try {
+		const res = await fetch('/api/conversations');
+		if (!res.ok) throw new Error('Failed to load conversations');
+		const data = await res.json();
+		renderConversations(data.sessions, data.activeId);
+	} catch(e) {
+		console.error(e);
+	}
+}
+
+function renderConversations(sessions, activeId) {
+	const list = document.getElementById('conversation-list');
+	if (!list) return;
+	
+	list.innerHTML = '';
+	sessions.forEach(s => {
+		const item = document.createElement('div');
+		item.className = 'sidebar-item' + (s.id === activeId ? ' active' : '');
+		item.style.display = 'flex';
+		item.style.alignItems = 'center';
+		item.style.justifyContent = 'space-between';
+		item.style.padding = '8px 10px';
+		item.style.gap = '8px';
+		
+		const title = s.name || s.firstMessage || 'Yeni Sohbet';
+		const titleEl = document.createElement('div');
+		titleEl.style.flex = '1';
+		titleEl.style.whiteSpace = 'nowrap';
+		titleEl.style.overflow = 'hidden';
+		titleEl.style.textOverflow = 'ellipsis';
+		titleEl.style.fontSize = '0.78rem';
+		titleEl.textContent = title;
+		
+		const actionsEl = document.createElement('div');
+		actionsEl.style.display = 'none';
+		actionsEl.style.gap = '4px';
+		actionsEl.className = 'conv-actions';
+		
+		const editBtn = document.createElement('button');
+		editBtn.className = 'tool-btn';
+		editBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size:14px;">edit</span>';
+		editBtn.onclick = (e) => { e.stopPropagation(); renameConversation(s.id, title); };
+		
+		const delBtn = document.createElement('button');
+		delBtn.className = 'tool-btn';
+		delBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size:14px;color:#ff6464;">delete</span>';
+		delBtn.onclick = (e) => { e.stopPropagation(); deleteConversation(s.id); };
+		
+		actionsEl.appendChild(editBtn);
+		actionsEl.appendChild(delBtn);
+		
+		item.appendChild(titleEl);
+		item.appendChild(actionsEl);
+		
+		item.onmouseover = () => { actionsEl.style.display = 'flex'; };
+		item.onmouseout = () => { actionsEl.style.display = 'none'; };
+		item.onclick = () => switchConversation(s.id);
+		
+		list.appendChild(item);
+	});
+}
+
+async function newChat() {
+	try {
+		const res = await fetch('/api/conversations/new', { method: 'POST' });
+		if (res.ok) {
+			loadConversations();
+		}
+	} catch(e) {
+		console.error(e);
+	}
+}
+
+async function switchConversation(id) {
+	try {
+		const res = await fetch('/api/conversations/switch', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ id })
+		});
+		if (res.ok) {
+			loadConversations();
+		}
+	} catch(e) {
+		console.error(e);
+	}
+}
+
+async function renameConversation(id, oldName) {
+	const newName = prompt("Sohbetin yeni adı:", oldName);
+	if (!newName || newName.trim() === '' || newName === oldName) return;
+	try {
+		const res = await fetch('/api/conversations/rename', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ id, name: newName })
+		});
+		if (res.ok) loadConversations();
+	} catch(e) {
+		console.error(e);
+	}
+}
+
+async function deleteConversation(id) {
+	if (!confirm("Sohbeti kalıcı olarak silmek istiyor musun?")) return;
+	try {
+		const res = await fetch('/api/conversations/delete', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ id })
+		});
+		if (res.ok) loadConversations();
+	} catch(e) {
+		console.error(e);
+	}
 }
 
 // ─── SEARCH ───────────────────────────────────────────────────────────────

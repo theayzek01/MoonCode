@@ -620,7 +620,7 @@ export async function buildSessionInfo(filePath: string): Promise<SessionInfo | 
 
 export type SessionListProgress = (loaded: number, total: number) => void;
 
-async function listSessionsFromDir(
+export async function listSessionsFromDir(
 	dir: string,
 	onProgress?: SessionListProgress,
 	progressOffset = 0,
