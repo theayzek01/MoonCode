@@ -1112,6 +1112,9 @@
 	<!-- Input Area -->
 	<div id="input-area">
 		<div class="input-wrap" style="position:relative;">
+			<!-- Ask Question Container -->
+			<div id="ask-question-container" class="hidden" style="padding:10px 14px; background:var(--surface2); border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:8px;"></div>
+
 			<!-- Autocomplete -->
 			<div id="autocomplete" class="hidden"></div>
 
@@ -1912,6 +1915,8 @@ promptInput.addEventListener('input', () => {
 	handleAutocomplete();
 });
 
+
+
 // ─── INPUT AREA PADDING ───────────────────────────────────────────────────
 const inputArea = document.getElementById('input-area');
 function updateChatPadding() {
@@ -2074,6 +2079,16 @@ function setGeneratingState(generating) {
 	isGenerating = generating;
 	sendBtn.classList.toggle('hidden', generating);
 	stopBtn.classList.toggle('hidden', !generating);
+	
+	if (!generating) {
+		setTimeout(() => {
+			const isAsking = document.querySelector('.tool-card .running') !== null;
+			if (!isAsking) {
+				const aqc = document.getElementById('ask-question-container');
+				if (aqc) aqc.classList.add('hidden');
+			}
+		}, 100);
+	}
 
 	let indicator = document.getElementById('global-indicator');
 	if (generating && !indicator) {
@@ -2341,11 +2356,24 @@ function renderTool(toolCallId, name, args, status, result) {
 		
 		let optionsHtml = '';
 		if (nameLC.includes('ask_question') && subStatusClass === 'running' && t.args && Array.isArray(t.args.options)) {
-			optionsHtml = '<div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;">';
-			t.args.options.forEach(opt => {
-				optionsHtml += `<button class="p-btn secondary" style="font-size:0.8rem; padding:6px 12px; cursor:pointer;" onclick="answerQuestion('${escapeHtml(opt)}')">${escapeHtml(opt)}</button>`;
-			});
-			optionsHtml += '</div>';
+			// Move to input area container
+			const aqc = document.getElementById('ask-question-container');
+			if (aqc) {
+				aqc.innerHTML = `
+					<div style="font-size:0.85rem; font-weight:600; color:var(--fg); display:flex; align-items:center; gap:6px;">
+						<span class="material-symbols-rounded" style="font-size:16px; color:var(--accent);">help_center</span>
+						${escapeHtml(t.args.question || 'Lütfen bir seçim yapın:')}
+					</div>
+					<div style="display:flex; flex-wrap:wrap; gap:8px;">
+						${t.args.options.map(opt => `<button class="p-btn primary" style="font-size:0.8rem; padding:6px 12px; cursor:pointer;" onclick="answerQuestion('${escapeHtml(opt)}')">${escapeHtml(opt)}</button>`).join('')}
+					</div>
+				`;
+				aqc.classList.remove('hidden');
+			}
+			return ''; // hide the tool card from chat history while running
+		} else if (nameLC.includes('ask_question') && subStatusClass !== 'running') {
+			const aqc = document.getElementById('ask-question-container');
+			if (aqc) aqc.classList.add('hidden');
 		}
 
 		let previewBtnHtml = '';
