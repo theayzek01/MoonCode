@@ -885,13 +885,32 @@
 		}
 
 		/* ─── ADVANCED SETTINGS TABS ─────────────────────────────────────── */
-		.stab-row { display: flex; gap: 4px; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+		.stab-row { display: flex; flex-direction: column; gap: 4px; }
 		.stab {
-			padding: 5px 12px; border-radius: 8px 8px 0 0; font-size: 0.73rem;
-			background: none; border: none; cursor: pointer; color: var(--muted);
-			font-family: 'Inter', sans-serif; font-weight: 500; transition: all 0.15s;
+			text-align: left;
+			width: 100%;
+			padding: 8px 12px;
+			border-radius: 8px;
+			font-size: 0.78rem;
+			background: none;
+			border: none;
+			cursor: pointer;
+			color: var(--muted);
+			font-family: 'Inter', sans-serif;
+			font-weight: 500;
+			transition: all 0.15s;
+			display: flex;
+			align-items: center;
+			gap: 8px;
 		}
-		.stab.active { color: var(--accent); background: rgba(108,143,255,0.1); }
+		.stab:hover {
+			color: var(--fg);
+			background: rgba(255,255,255,0.03);
+		}
+		.stab.active {
+			color: var(--accent);
+			background: rgba(108,143,255,0.08) !important;
+		}
 		.stab-panel { display: none; }
 		.stab-panel.active { display: block; }
 
@@ -1215,101 +1234,154 @@
 
 <!-- Settings Modal -->
 <div id="settingsModal" class="modal-overlay" onclick="overlayClose(event,'settingsModal')">
-	<div class="modal" style="max-width:520px;" onclick="event.stopPropagation()">
-		<div class="modal-header">
+	<div class="modal" style="max-width:680px;" onclick="event.stopPropagation()">
+		<div class="modal-header" style="border-bottom: 1px solid var(--border);">
 			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">settings</span>Settings</div>
 			<button class="modal-close" onclick="closeModal('settingsModal')"><span class="material-symbols-rounded">close</span></button>
 		</div>
-		<div class="modal-body" style="padding-top:4px;">
-			<div class="stab-row">
-				<button class="stab active" onclick="switchSettingsTab('general',this)">General</button>
-				<button class="stab" onclick="switchSettingsTab('compaction',this)">Memory</button>
-				<button class="stab" onclick="switchSettingsTab('security',this)">Security</button>
+		<div class="modal-body" style="padding: 0; display: flex; height: 480px;">
+			<!-- Left Sidebar Tabs -->
+			<div style="width: 180px; border-right: 1px solid var(--border); background: rgba(0,0,0,0.12); padding: 12px; display: flex; flex-direction: column; gap: 4px; flex-shrink: 0;">
+				<button class="stab active" onclick="switchSettingsTab('general',this)">
+					<span class="material-symbols-rounded" style="font-size: 17px;">tune</span>
+					<span>General</span>
+				</button>
+				<button class="stab" onclick="switchSettingsTab('compaction',this)">
+					<span class="material-symbols-rounded" style="font-size: 17px;">memory</span>
+					<span>Memory</span>
+				</button>
+				<button class="stab" onclick="switchSettingsTab('security',this)">
+					<span class="material-symbols-rounded" style="font-size: 17px;">security</span>
+					<span>Security</span>
+				</button>
 			</div>
-			<!-- General Tab -->
-			<div class="stab-panel active" id="stab-general">
-				<div class="form-group">
-					<label class="form-label">Theme</label>
-					<select class="form-select" id="set-theme" onchange="setTheme(this.value)">
-						<option value="mooncode">MoonCode (Default)</option>
-						<option value="nord">Nord</option>
-						<option value="forest">Forest</option>
-						<option value="rosepine">Rosé Pine</option>
-						<option value="sepia">Sepia (Eye Friendly)</option>
-						<option value="light">Light</option>
-					</select>
-				</div>
-			</div>
-			<!-- Compaction Tab -->
-			<div class="stab-panel" id="stab-compaction">
-				<div class="form-group">
-					<label class="form-label">Compaction Profile</label>
-					<select class="form-select" id="set-profile">
-						<option value="nuclear">Nuclear — Extreme zero-token mode</option>
-						<option value="balanced">Balanced — Speed/Quality balance</option>
-						<option value="aggressive">Aggressive — Maximum context preservation</option>
-						<option value="off">Off — No automatic compaction</option>
-					</select>
-				</div>
-				<div class="form-group">
-					<label class="form-label" style="display:flex;justify-content:space-between;">
-						<span>Reserved Tokens</span>
-						<span id="reserve-val" style="color:var(--accent);font-weight:700;">1000</span>
-					</label>
-					<div style="font-size:0.72rem;color:var(--muted);margin-bottom:6px;">Minimum tokens reserved for response (does not trigger compaction)</div>
-					<input type="range" id="set-reserve" min="500" max="8000" step="500" value="1000" style="width:100%;accent-color:var(--accent);" oninput="document.getElementById('reserve-val').textContent=this.value">
-				</div>
-				<div class="form-group">
-					<label class="form-label" style="display:flex;justify-content:space-between;">
-						<span>Recent History Protection</span>
-						<span id="keep-val" style="color:var(--accent);font-weight:700;">2000</span>
-					</label>
-					<div style="font-size:0.72rem;color:var(--muted);margin-bottom:6px;">Last N tokens to keep after compaction</div>
-					<input type="range" id="set-keep" min="500" max="16000" step="500" value="2000" style="width:100%;accent-color:var(--accent);" oninput="document.getElementById('keep-val').textContent=this.value">
-				</div>
-				<label class="form-checkbox-row">
-					<input type="checkbox" id="set-tool-compaction">
-					<div>
-						<div style="font-size:0.82rem;font-weight:500;">Tool-Based Compaction</div>
-						<div style="font-size:0.72rem;color:var(--muted);">Automatically compact large tool outputs</div>
+			<!-- Right Panel Content -->
+			<div style="flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px;">
+				<!-- General Panel -->
+				<div class="stab-panel active" id="stab-general">
+					<div style="font-size: 0.9rem; font-weight: 600; margin-bottom: 12px; color: var(--fg);">General Settings</div>
+					<div class="form-group">
+						<label class="form-label">Theme</label>
+						<select class="form-select" id="set-theme" onchange="setTheme(this.value)">
+							<option value="mooncode">MoonCode (Default)</option>
+							<option value="nord">Nord</option>
+							<option value="forest">Forest</option>
+							<option value="rosepine">Rosé Pine</option>
+							<option value="sepia">Sepia (Eye Friendly)</option>
+							<option value="light">Light</option>
+						</select>
 					</div>
-				</label>
-			</div>
-			<!-- Security Tab -->
-			<div class="stab-panel" id="stab-security">
-				<div class="form-group">
-					<label class="form-label">Global Permission Level</label>
-					<div style="font-size:0.72rem;color:var(--muted);margin-bottom:8px;">Default tool approval behavior for all projects</div>
-					<div style="display:flex;flex-direction:column;gap:5px;" id="perm-radio-group">
-						<label class="perm-row" data-val="ask">
-							<input type="radio" name="perm-level" value="ask" style="display:none;">
-							<span class="material-symbols-rounded" style="color:var(--accent);font-size:18px;">help</span>
-							<div style="flex:1;">
-								<div style="font-size:0.8rem;font-weight:500;">Always Ask</div>
-								<div style="font-size:0.7rem;color:var(--muted);">Ask for confirmation before running any tool (default)</div>
+				</div>
+
+				<!-- Compaction Panel -->
+				<div class="stab-panel" id="stab-compaction">
+					<div style="font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; color: var(--fg);">Memory & Compaction Profile</div>
+					<div style="font-size:0.72rem; color:var(--muted); margin-bottom:14px; line-height: 1.4;">Select how MoonCode manages conversation memory and context token size automatically.</div>
+					
+					<!-- 2x2 Grid of 4 Large Square Cards for Compaction Profile -->
+					<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px;">
+						<!-- Nuclear Card -->
+						<div class="profile-card" data-val="nuclear" onclick="selectProfileCard('nuclear')" style="border: 1px solid var(--border); border-radius: 12px; padding: 12px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 6px; background: var(--bg2);">
+							<div style="display: flex; align-items: center; justify-content: space-between;">
+								<span class="material-symbols-rounded" style="color: #ff4a4a; font-size: 24px;">local_fire_department</span>
+								<div class="radio-indicator" style="width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;"></div>
 							</div>
-						</label>
-						<label class="perm-row" data-val="safe">
-							<input type="radio" name="perm-level" value="safe" style="display:none;">
-							<span class="material-symbols-rounded" style="color:var(--accent2);font-size:18px;">shield</span>
-							<div style="flex:1;">
-								<div style="font-size:0.8rem;font-weight:500;">Safe Mode</div>
-								<div style="font-size:0.7rem;color:var(--muted);">Auto-approve read-only tools, ask for writing</div>
+							<div style="font-weight: 600; font-size: 0.82rem; color: var(--fg);">Nuclear</div>
+							<div style="font-size: 0.7rem; color: var(--muted); line-height: 1.35;">Extreme zero-token mode. Aggressive context cleanup.</div>
+						</div>
+						<!-- Aggressive Card -->
+						<div class="profile-card" data-val="aggressive" onclick="selectProfileCard('aggressive')" style="border: 1px solid var(--border); border-radius: 12px; padding: 12px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 6px; background: var(--bg2);">
+							<div style="display: flex; align-items: center; justify-content: space-between;">
+								<span class="material-symbols-rounded" style="color: #ff9800; font-size: 24px;">offline_bolt</span>
+								<div class="radio-indicator" style="width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;"></div>
 							</div>
-						</label>
-						<label class="perm-row" data-val="full">
-							<input type="radio" name="perm-level" value="full" style="display:none;">
-							<span class="material-symbols-rounded" style="color:#4ade80;font-size:18px;">check_circle</span>
-							<div style="flex:1;">
-								<div style="font-size:0.8rem;font-weight:500;">Full Permission</div>
-								<div style="font-size:0.7rem;color:var(--muted);">Auto-approve all tools (use with caution)</div>
+							<div style="font-weight: 600; font-size: 0.82rem; color: var(--fg);">Aggressive</div>
+							<div style="font-size: 0.7rem; color: var(--muted); line-height: 1.35;">Maximum context preservation. Keeps history detailed.</div>
+						</div>
+						<!-- Balanced Card -->
+						<div class="profile-card" data-val="balanced" onclick="selectProfileCard('balanced')" style="border: 1px solid var(--border); border-radius: 12px; padding: 12px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 6px; background: var(--bg2);">
+							<div style="display: flex; align-items: center; justify-content: space-between;">
+								<span class="material-symbols-rounded" style="color: #6c8fff; font-size: 24px;">balance</span>
+								<div class="radio-indicator" style="width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;"></div>
 							</div>
+							<div style="font-weight: 600; font-size: 0.82rem; color: var(--fg);">Balanced</div>
+							<div style="font-size: 0.7rem; color: var(--muted); line-height: 1.35;">Balanced profile. Speed and quality optimize.</div>
+						</div>
+						<!-- Off Card -->
+						<div class="profile-card" data-val="off" onclick="selectProfileCard('off')" style="border: 1px solid var(--border); border-radius: 12px; padding: 12px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 6px; background: var(--bg2);">
+							<div style="display: flex; align-items: center; justify-content: space-between;">
+								<span class="material-symbols-rounded" style="color: var(--muted); font-size: 24px;">power_settings_new</span>
+								<div class="radio-indicator" style="width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;"></div>
+							</div>
+							<div style="font-weight: 600; font-size: 0.82rem; color: var(--fg);">Off</div>
+							<div style="font-size: 0.7rem; color: var(--muted); line-height: 1.35;">No automatic compaction. Keeps everything.</div>
+						</div>
+					</div>
+					<input type="hidden" id="set-profile" value="balanced">
+
+					<div class="form-group">
+						<label class="form-label" style="display:flex;justify-content:space-between;">
+							<span>Reserved Tokens</span>
+							<span id="reserve-val" style="color:var(--accent);font-weight:700;">1000</span>
 						</label>
+						<div style="font-size:0.7rem;color:var(--muted);margin-bottom:6px;">Minimum tokens reserved for response (does not trigger compaction)</div>
+						<input type="range" id="set-reserve" min="500" max="8000" step="500" value="1000" style="width:100%;accent-color:var(--accent);" oninput="document.getElementById('reserve-val').textContent=this.value">
+					</div>
+					<div class="form-group">
+						<label class="form-label" style="display:flex;justify-content:space-between;">
+							<span>Recent History Protection</span>
+							<span id="keep-val" style="color:var(--accent);font-weight:700;">2000</span>
+						</label>
+						<div style="font-size:0.7rem;color:var(--muted);margin-bottom:6px;">Last N tokens to keep after compaction</div>
+						<input type="range" id="set-keep" min="500" max="16000" step="500" value="2000" style="width:100%;accent-color:var(--accent);" oninput="document.getElementById('keep-val').textContent=this.value">
+					</div>
+					<label class="form-checkbox-row">
+						<input type="checkbox" id="set-tool-compaction">
+						<div>
+							<div style="font-size:0.8rem;font-weight:500;">Tool-Based Compaction</div>
+							<div style="font-size:0.7rem;color:var(--muted);">Automatically compact large tool outputs</div>
+						</div>
+					</label>
+				</div>
+
+				<!-- Security Panel -->
+				<div class="stab-panel" id="stab-security">
+					<div style="font-size: 0.9rem; font-weight: 600; margin-bottom: 12px; color: var(--fg);">Security Settings</div>
+					<div class="form-group">
+						<label class="form-label">Global Permission Level</label>
+						<div style="font-size:0.7rem;color:var(--muted);margin-bottom:8px;">Default tool approval behavior for all projects</div>
+						<div style="display:flex;flex-direction:column;gap:5px;" id="perm-radio-group">
+							<label class="perm-row" data-val="ask">
+								<input type="radio" name="perm-level" value="ask" style="display:none;">
+								<span class="material-symbols-rounded" style="color:var(--accent);font-size:18px;">help</span>
+								<div style="flex:1;">
+									<div style="font-size:0.8rem;font-weight:500;">Always Ask</div>
+									<div style="font-size:0.7rem;color:var(--muted);">Ask for confirmation before running any tool (default)</div>
+								</div>
+							</label>
+							<label class="perm-row" data-val="safe">
+								<input type="radio" name="perm-level" value="safe" style="display:none;">
+								<span class="material-symbols-rounded" style="color:var(--accent2);font-size:18px;">shield</span>
+								<div style="flex:1;">
+									<div style="font-size:0.8rem;font-weight:500;">Safe Mode</div>
+									<div style="font-size:0.7rem;color:var(--muted);">Auto-approve read-only tools, ask for writing</div>
+								</div>
+							</label>
+							<label class="perm-row" data-val="full">
+								<input type="radio" name="perm-level" value="full" style="display:none;">
+								<span class="material-symbols-rounded" style="color:#4ade80;font-size:18px;">check_circle</span>
+								<div style="flex:1;">
+									<div style="font-size:0.8rem;font-weight:500;">Full Permission</div>
+									<div style="font-size:0.7rem;color:var(--muted);">Auto-approve all tools (use with caution)</div>
+								</div>
+							</label>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-		<div class="modal-footer">Cancel</button>
+		<div class="modal-footer" style="border-top: 1px solid var(--border);">
+			<button onclick="closeModal('settingsModal')" class="btn btn-ghost">Cancel</button>
 			<button onclick="saveSettings()" class="btn btn-primary"><span class="material-symbols-rounded" style="font-size:15px;">save</span>Save</button>
 		</div>
 	</div>
@@ -2639,6 +2711,25 @@ function switchSettingsTab(name, btn) {
 	document.getElementById('stab-' + name)?.classList.add('active');
 }
 
+// ─── PROFILE CARD SELECTION ───────────────────────────────────────────────
+function selectProfileCard(val) {
+	const hiddenInput = document.getElementById('set-profile');
+	if (hiddenInput) hiddenInput.value = val;
+	
+	document.querySelectorAll('.profile-card').forEach(card => {
+		const isSelected = card.dataset.val === val;
+		card.style.borderColor = isSelected ? 'var(--accent)' : 'var(--border)';
+		card.style.background = isSelected ? 'rgba(108,143,255,0.05)' : 'var(--bg2)';
+		card.style.boxShadow = isSelected ? '0 0 12px rgba(108,143,255,0.15)' : 'none';
+		const indicator = card.querySelector('.radio-indicator');
+		if (indicator) {
+			indicator.style.borderColor = isSelected ? 'var(--accent)' : 'var(--border)';
+			indicator.style.background = isSelected ? 'var(--accent)' : 'transparent';
+			indicator.innerHTML = isSelected ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: #fff;"></div>' : '';
+		}
+	});
+}
+
 // ─── SETTINGS ─────────────────────────────────────────────────────────────
 async function loadSettings() {
 	try {
@@ -2650,8 +2741,8 @@ async function loadSettings() {
 		if (themeEl) themeEl.value = s.theme || 'mooncode';
 
 		// Compaction tab
-		const profileEl = document.getElementById('set-profile');
-		if (profileEl) profileEl.value = s.compactionProfile || 'balanced';
+		const profile = s.compactionProfile || 'balanced';
+		selectProfileCard(profile);
 
 		const reserveEl = document.getElementById('set-reserve');
 		if (reserveEl) { reserveEl.value = s.reserveTokens || 1000; document.getElementById('reserve-val').textContent = s.reserveTokens || 1000; }
@@ -2873,6 +2964,8 @@ async function loadHistory() {
 		const res = await fetch('/api/history');
 		const history = await res.json();
 		if (!history?.length) return;
+		localStorage.setItem('mooncode_welcomed', 'true');
+		closeWelcomeModal();
 		chatInner.innerHTML = '';
 		history.forEach(msg => {
 			if (msg.role === 'user' || msg.role === 'assistant') {
@@ -3512,10 +3605,27 @@ async function openSemanticBrain() {
 		setTimeout(() => { modal.style.display = 'none'; }, 400);
 	}
 	window.addEventListener('DOMContentLoaded', () => {
-		if (!localStorage.getItem('mooncode_welcomed')) {
-			localStorage.setItem('mooncode_welcomed', 'true');
-			setTimeout(showWelcomeModal, 500);
-		}
+		setTimeout(async () => {
+			if (localStorage.getItem('mooncode_welcomed') === 'true') return;
+			try {
+				const resHistory = await fetch('/api/history');
+				const history = await resHistory.json();
+				if (history && history.length > 0) {
+					localStorage.setItem('mooncode_welcomed', 'true');
+					return;
+				}
+				const resConv = await fetch('/api/conversations');
+				const convs = await resConv.json();
+				if (convs.sessions && convs.sessions.length > 0) {
+					localStorage.setItem('mooncode_welcomed', 'true');
+					return;
+				}
+				showWelcomeModal();
+			} catch (e) {
+				// Fallback if APIs fail
+				showWelcomeModal();
+			}
+		}, 600);
 	});
 </script></body>
 </html>
