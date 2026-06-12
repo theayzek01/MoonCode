@@ -105,15 +105,6 @@ mooncode web
   </tr>
   <tr>
     <td align="center" width="72">
-      <img src="https://api.iconify.design/mdi:console.svg?color=white" width="30" height="30" alt="Terminal" />
-    </td>
-    <td>
-      <strong>Dahili Canlı Terminal</strong><br/>
-      Arayüzden hiç ayrılmadan komut satırına erişin! Alt kısımdan açılabilen "MoonCode Terminal" paneli ile anlık olarak komut çalıştırabilir (npm, git vs.) ve çıktıları anlık takip edebilirsiniz.
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="72">
       <img src="https://api.iconify.design/mdi:brain.svg?color=white" width="30" height="30" alt="Multi-Model" />
     </td>
     <td>

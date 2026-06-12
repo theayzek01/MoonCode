@@ -962,9 +962,6 @@
 			<button onclick="openCmdPalette()" class="tool-btn" title="Komut Paleti (Ctrl+K)">
 				<span class="material-symbols-rounded">apps</span>
 			</button>
-			<button onclick="toggleTerminal()" class="tool-btn" title="Terminal Panelini Aç/Kapat">
-				<span class="material-symbols-rounded">terminal</span>
-			</button>
 			<!-- User menu -->
 			<div style="position:relative;">
 				<button id="user-menu-btn" onclick="toggleUserMenu()" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#fff;transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'" title="Kullanıcı menüsu">
@@ -1071,31 +1068,6 @@
 			<div style="text-align:center;font-size:0.65rem;color:var(--muted);margin-top:6px;opacity:0.5;">
 				MoonCode yapay zeka hatalar yapabilir. Kritik bilgileri doğrulayın.
 			</div>
-		</div>
-	<!-- Terminal Panel -->
-	<div id="terminal-panel" class="hidden" style="position:absolute;bottom:0;left:0;right:0;height:280px;background:var(--bg);border-top:1px solid var(--border);box-shadow:0 -4px 24px rgba(0,0,0,0.3);z-index:40;display:flex;flex-direction:column;transition:transform 0.3s ease-in-out;">
-		<!-- Terminal Header -->
-		<div style="padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:between;flex-shrink:0;">
-			<div style="display:flex;align-items:center;gap:8px;font-size:0.8rem;font-weight:600;color:var(--fg);">
-				<span class="material-symbols-rounded" style="color:var(--accent2);font-size:16px;">terminal</span>
-				<span>MoonCode Terminal</span>
-				<span id="terminal-project-badge" style="font-size:0.7rem;background:var(--surface2);color:var(--muted);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;"></span>
-			</div>
-			<div style="display:flex;align-items:center;gap:4px;margin-left:auto;">
-				<button onclick="clearTerminal()" class="tool-btn" style="padding:4px;" title="Terminali Temizle">
-					<span class="material-symbols-rounded" style="font-size:16px;">delete_sweep</span>
-				</button>
-				<button onclick="toggleTerminal()" class="tool-btn" style="padding:4px;" title="Kapat">
-					<span class="material-symbols-rounded" style="font-size:16px;">close</span>
-				</button>
-			</div>
-		</div>
-		<!-- Terminal Output -->
-		<div id="terminal-output" style="flex:1;overflow-y:auto;padding:12px;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#a6accd;background:#090a0f;line-height:1.6;white-space:pre-wrap;word-break:break-all;"></div>
-		<!-- Terminal Input -->
-		<div style="padding:8px 12px;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0;">
-			<span style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--accent2);font-weight:600;">$</span>
-			<input id="terminal-input" placeholder="Komut çalıştır..." style="flex:1;background:none;border:none;outline:none;color:var(--fg);font-family:'JetBrains Mono',monospace;font-size:0.78rem;" onkeydown="terminalInputKeydown(event)">
 		</div>
 	</div>
 </div>
@@ -2529,96 +2501,6 @@ async function saveEdit(id) {
 	}
 }
 
-// ─── TERMINAL ─────────────────────────────────────────────────────────────
-let terminalOpen = false;
-let termCmdHistory = [];
-let termHistIdx = -1;
-
-function toggleTerminal() {
-	terminalOpen = !terminalOpen;
-	const panel = document.getElementById('terminal-panel');
-	if (!panel) return;
-	if (terminalOpen) {
-		panel.classList.remove('hidden');
-		panel.style.transform = 'translateY(0)';
-		document.getElementById('terminal-input')?.focus();
-		// Stream existing log buffer
-		const out = document.getElementById('terminal-output');
-		if (out && out.children.length === 0) {
-			out.textContent = '$ MoonCode Terminal — hazır\n';
-		}
-	} else {
-		panel.classList.add('hidden');
-	}
-}
-
-function clearTerminal() {
-	const out = document.getElementById('terminal-output');
-	if (out) out.textContent = '';
-}
-
-function appendTerminalLine(text, type = 'output') {
-	const out = document.getElementById('terminal-output');
-	if (!out) return;
-	const span = document.createElement('span');
-	span.textContent = text;
-	if (type === 'error') span.style.color = '#ff6464';
-	else if (type === 'cmd') span.style.color = 'var(--accent2)';
-	out.appendChild(span);
-	out.scrollTop = out.scrollHeight;
-}
-
-async function terminalInputKeydown(e) {
-	const input = document.getElementById('terminal-input');
-	if (e.key === 'ArrowUp') {
-		e.preventDefault();
-		if (termHistIdx < termCmdHistory.length - 1) {
-			termHistIdx++;
-			input.value = termCmdHistory[termCmdHistory.length - 1 - termHistIdx];
-		}
-		return;
-	}
-	if (e.key === 'ArrowDown') {
-		e.preventDefault();
-		if (termHistIdx > 0) {
-			termHistIdx--;
-			input.value = termCmdHistory[termCmdHistory.length - 1 - termHistIdx];
-		} else {
-			termHistIdx = -1;
-			input.value = '';
-		}
-		return;
-	}
-	if (e.key !== 'Enter') return;
-	const cmd = input.value.trim();
-	if (!cmd) return;
-	termCmdHistory.push(cmd);
-	termHistIdx = -1;
-	input.value = '';
-	appendTerminalLine(`$ ${cmd}\n`, 'cmd');
-	try {
-		await fetch('/api/terminal/input', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ command: cmd })
-		});
-	} catch(err) {
-		appendTerminalLine('Bağlantı hatası\n', 'error');
-	}
-}
-
-// Listen for terminal_log events from SSE
-const _origOnMessage = es.onmessage;
-es.onmessage = (e) => {
-	_origOnMessage && _origOnMessage.call(es, e);
-	try {
-		const data = JSON.parse(e.data);
-		if (data.type === 'terminal_log' && terminalOpen) {
-			appendTerminalLine(data.data);
-		}
-	} catch(err) {}
-};
-
 // ─── PROJECTS ─────────────────────────────────────────────────────────────
 let projectData = [];
 let activeProjectCwd = null;
@@ -2804,21 +2686,9 @@ function runCode(btn) {
 	if (!codeBlock) return;
 	const pre = codeBlock.querySelector('pre');
 	const code = pre ? pre.textContent.trim() : '';
-	const lang = codeBlock.querySelector('.lang-badge')?.textContent?.trim()?.replace('code','').trim() || 'bash';
 
-	if (!terminalOpen) toggleTerminal();
-	appendTerminalLine(`$ # Çalıştırılıyor (${lang})\n`, 'cmd');
-
-	if (['bash','sh','shell'].includes(lang)) {
-		fetch('/api/terminal/input', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ command: code.split('\n')[0] })
-		}).then(() => toast('Komut gönderildi', 'info'));
-	} else {
-		navigator.clipboard.writeText(code);
-		toast('Kod panoya kopyalandı — terminale yapıştırın', 'info');
-	}
+	navigator.clipboard.writeText(code);
+	toast('Kod panoya kopyalandı — terminale yapıştırın', 'info');
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────

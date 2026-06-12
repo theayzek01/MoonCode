@@ -1,4 +1,4 @@
-import { exec, spawn } from "node:child_process";
+import { exec } from "node:child_process";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import fs from "fs";
 import path, { dirname, join } from "path";
@@ -576,40 +576,6 @@ export class WebMode {
 				try {
 					const { cwd } = JSON.parse(body);
 					this.removeWebProject(cwd);
-					res.setHeader("Content-Type", "application/json");
-					res.end(JSON.stringify({ success: true }));
-				} catch (e: any) {
-					res.statusCode = 500;
-					res.end(JSON.stringify({ error: e.message }));
-				}
-			});
-			return;
-		}
-
-		if (method === "POST" && url.pathname === "/api/terminal/input") {
-			let body = "";
-			req.on("data", (chunk) => (body += chunk));
-			req.on("end", async () => {
-				try {
-					const { command } = JSON.parse(body);
-					process.stdout.write(`\n$ ${command}\n`);
-					const shell = process.platform === "win32" ? "powershell.exe" : "bash";
-					const child = spawn(command, { shell: true, cwd: this.runtime.cwd });
-					child.stdout.on("data", (data) => {
-						const text = data.toString();
-						process.stdout.write(text);
-						this.broadcastEvent({ type: "terminal_log", data: text });
-					});
-					child.stderr.on("data", (data) => {
-						const text = data.toString();
-						process.stderr.write(text);
-						this.broadcastEvent({ type: "terminal_log", data: text });
-					});
-					child.on("error", (error) => {
-						const text = `Error: ${error.message}\n`;
-						process.stderr.write(text);
-						this.broadcastEvent({ type: "terminal_log", data: text });
-					});
 					res.setHeader("Content-Type", "application/json");
 					res.end(JSON.stringify({ success: true }));
 				} catch (e: any) {
