@@ -162,9 +162,10 @@ export class ModelSelectorComponent extends Container implements Focusable {
 	}
 
 	private getScopeText(): string {
-		const allTag = this.scope === "all" ? theme.bg("accent", theme.fg("bg", " HEPSİ ")) : theme.fg("dim", " HEPSİ ");
+		const allTag =
+			this.scope === "all" ? theme.bg("selectedBg", theme.fg("text", " HEPSİ ")) : theme.fg("dim", " HEPSİ ");
 		const scopedTag =
-			this.scope === "scoped" ? theme.bg("accent", theme.fg("bg", " KISITLI ")) : theme.fg("dim", " KISITLI ");
+			this.scope === "scoped" ? theme.bg("selectedBg", theme.fg("text", " KISITLI ")) : theme.fg("dim", " KISITLI ");
 		return `${theme.fg("dim", "Kapsam [TAB]: ")}${allTag} ${scopedTag}`;
 	}
 

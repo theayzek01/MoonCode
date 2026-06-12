@@ -3,8 +3,8 @@
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { basename, extname, join, relative, resolve } from "node:path";
-import * as ts from "typescript";
 import { pipeline } from "@xenova/transformers";
+import * as ts from "typescript";
 import { getEngineDir } from "../../config.js";
 
 const CODE_EXTENSIONS = new Set([
@@ -495,7 +495,7 @@ export async function buildIndex(cwd: string, force = false): Promise<CodebaseIn
 		}
 
 		const result = chunkFile(file, cwd);
-		
+
 		// Generate embeddings for new chunks
 		for (const chunk of result.chunks) {
 			const chunkTextForEmbed = Array.from(new Set([...chunk.symbols, ...Object.keys(chunk.tf)])).join(" ");

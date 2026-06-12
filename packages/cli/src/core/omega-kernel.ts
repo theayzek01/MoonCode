@@ -494,7 +494,7 @@ export class OmegaKernel {
 	 * Local JSON persistence for Patch Memory
 	 */
 	private loadPatchMemory(): void {
-		const memPath = path.join(os.homedir(), ".Mooncli", "omega-memory.json");
+		const memPath = path.join(os.homedir(), ".mooncode", "omega-memory.json");
 		if (fs.existsSync(memPath)) {
 			try {
 				this.patchMemory = JSON.parse(fs.readFileSync(memPath, "utf8"));
@@ -503,7 +503,7 @@ export class OmegaKernel {
 	}
 
 	private saveTaskToMemory(contract: IntentContract, cert: PatchCertificate): void {
-		const memPath = path.join(os.homedir(), ".Mooncli", "omega-memory.json");
+		const memPath = path.join(os.homedir(), ".mooncode", "omega-memory.json");
 		const dir = path.dirname(memPath);
 
 		try {

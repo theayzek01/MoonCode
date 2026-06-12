@@ -45,7 +45,7 @@ import { SessionManager } from "./core/session-manager.js";
 import { SettingsManager } from "./core/settings-manager.js";
 import { printTimings, resetTimings, time } from "./core/timings.js";
 import { runMigrations, showDeprecationWarnings } from "./migrations.js";
-import { InteractiveMode, runHeadlessMode, runPrintMode, runRpcMode } from "./modes/index.js";
+import { InteractiveMode, runHeadlessMode, runPrintMode, runRpcMode, WebMode } from "./modes/index.js";
 import { ExtensionSelectorComponent } from "./modes/interactive/components/extension-selector.js";
 import { initTheme, stopThemeWatcher } from "./modes/interactive/theme/theme.js";
 import { handleConfigCommand, handlePackageCommand } from "./package-manager-cli.js";
@@ -1036,7 +1036,7 @@ export async function main(args: string[], options?: MainOptions) {
 			console.log(chalk.dim(`Model scope: ${modelList} ${chalk.gray("(Ctrl+P to cycle)")}`));
 		}
 
-		const interactiveMode = new InteractiveMode(runtime, {
+		const appModeInstance = new WebMode(runtime, {
 			migratedProviders,
 			modelFallbackMessage,
 			initialMessage,
@@ -1045,10 +1045,10 @@ export async function main(args: string[], options?: MainOptions) {
 			verbose: parsed.verbose,
 		});
 		if (startupBenchmark) {
-			await interactiveMode.init();
-			time("interactiveMode.init");
+			await appModeInstance.init();
+			time("appModeInstance.init");
 			printTimings();
-			interactiveMode.stop();
+			// appModeInstance.stop();
 			stopThemeWatcher();
 			if (process.stdout.writableLength > 0) {
 				await new Promise<void>((resolve) => process.stdout.once("drain", resolve));
@@ -1060,7 +1060,8 @@ export async function main(args: string[], options?: MainOptions) {
 		}
 
 		printTimings();
-		await interactiveMode.run();
+		await appModeInstance.init();
+		await appModeInstance.run();
 	} else {
 		printTimings();
 		const exitCode = await runPrintMode(runtime, {

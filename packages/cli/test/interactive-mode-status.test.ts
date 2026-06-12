@@ -324,21 +324,21 @@ describe("InteractiveMode.showLoadedResources", () => {
 	function createExtensionFixtures(): ExtensionFixture[] {
 		return [
 			{
-				path: "/tmp/project/.Mooncli/extensions/answer.ts",
-				sourceInfo: createSourceInfo("/tmp/project/.Mooncli/extensions/answer.ts", {
+				path: "/tmp/project/.mooncode/extensions/answer.ts",
+				sourceInfo: createSourceInfo("/tmp/project/.mooncode/extensions/answer.ts", {
 					source: "local",
 					scope: "project",
 					origin: "top-level",
-					baseDir: "/tmp/project/.Mooncli/extensions",
+					baseDir: "/tmp/project/.mooncode/extensions",
 				}),
 			},
 			{
-				path: "/tmp/project/.Mooncli/extensions/local-index/index.ts",
-				sourceInfo: createSourceInfo("/tmp/project/.Mooncli/extensions/local-index/index.ts", {
+				path: "/tmp/project/.mooncode/extensions/local-index/index.ts",
+				sourceInfo: createSourceInfo("/tmp/project/.mooncode/extensions/local-index/index.ts", {
 					source: "local",
 					scope: "project",
 					origin: "top-level",
-					baseDir: "/tmp/project/.Mooncli/extensions",
+					baseDir: "/tmp/project/.mooncode/extensions",
 				}),
 			},
 			{
@@ -351,50 +351,50 @@ describe("InteractiveMode.showLoadedResources", () => {
 				}),
 			},
 			{
-				path: "/tmp/project/.Mooncli/npm/node_modules/Mooncli-markdown-preview/extensions/index.ts",
+				path: "/tmp/project/.mooncode/npm/node_modules/Mooncli-markdown-preview/extensions/index.ts",
 				sourceInfo: createSourceInfo(
-					"/tmp/project/.Mooncli/npm/node_modules/Mooncli-markdown-preview/extensions/index.ts",
+					"/tmp/project/.mooncode/npm/node_modules/Mooncli-markdown-preview/extensions/index.ts",
 					{
 						source: "npm:Mooncli-markdown-preview",
 						scope: "project",
 						origin: "package",
-						baseDir: "/tmp/project/.Mooncli/npm/node_modules/Mooncli-markdown-preview",
+						baseDir: "/tmp/project/.mooncode/npm/node_modules/Mooncli-markdown-preview",
 					},
 				),
 			},
 			{
-				path: "/tmp/project/.Mooncli/npm/node_modules/@scope/Mooncli-scoped/extensions/index.ts",
+				path: "/tmp/project/.mooncode/npm/node_modules/@scope/Mooncli-scoped/extensions/index.ts",
 				sourceInfo: createSourceInfo(
-					"/tmp/project/.Mooncli/npm/node_modules/@scope/Mooncli-scoped/extensions/index.ts",
+					"/tmp/project/.mooncode/npm/node_modules/@scope/Mooncli-scoped/extensions/index.ts",
 					{
 						source: "npm:@scope/Mooncli-scoped",
 						scope: "project",
 						origin: "package",
-						baseDir: "/tmp/project/.Mooncli/npm/node_modules/@scope/Mooncli-scoped",
+						baseDir: "/tmp/project/.mooncode/npm/node_modules/@scope/Mooncli-scoped",
 					},
 				),
 			},
 			{
-				path: "/tmp/project/.Mooncli/git/github.com/HazAT/Mooncli-interactive-subengines/extensions/index.ts",
+				path: "/tmp/project/.mooncode/git/github.com/HazAT/Mooncli-interactive-subengines/extensions/index.ts",
 				sourceInfo: createSourceInfo(
-					"/tmp/project/.Mooncli/git/github.com/HazAT/Mooncli-interactive-subengines/extensions/index.ts",
+					"/tmp/project/.mooncode/git/github.com/HazAT/Mooncli-interactive-subengines/extensions/index.ts",
 					{
 						source: "git:github.com/HazAT/Mooncli-interactive-subengines",
 						scope: "project",
 						origin: "package",
-						baseDir: "/tmp/project/.Mooncli/git/github.com/HazAT/Mooncli-interactive-subengines",
+						baseDir: "/tmp/project/.mooncode/git/github.com/HazAT/Mooncli-interactive-subengines",
 					},
 				),
 			},
 			{
-				path: "/tmp/project/.Mooncli/git/github.com/HazAT/Mooncli-interactive-subengines/extensions/subengines/index.ts",
+				path: "/tmp/project/.mooncode/git/github.com/HazAT/Mooncli-interactive-subengines/extensions/subengines/index.ts",
 				sourceInfo: createSourceInfo(
-					"/tmp/project/.Mooncli/git/github.com/HazAT/Mooncli-interactive-subengines/extensions/subengines/index.ts",
+					"/tmp/project/.mooncode/git/github.com/HazAT/Mooncli-interactive-subengines/extensions/subengines/index.ts",
 					{
 						source: "git:github.com/HazAT/Mooncli-interactive-subengines",
 						scope: "project",
 						origin: "package",
-						baseDir: "/tmp/project/.Mooncli/git/github.com/HazAT/Mooncli-interactive-subengines",
+						baseDir: "/tmp/project/.mooncode/git/github.com/HazAT/Mooncli-interactive-subengines",
 					},
 				),
 			},
@@ -737,14 +737,14 @@ describe("InteractiveMode.showLoadedResources", () => {
 	test("package extensions still strip index.ts correctly (regression guard)", () => {
 		const extensions: ExtensionFixture[] = [
 			{
-				path: "/tmp/project/.Mooncli/npm/node_modules/Mooncli-markdown-preview/extensions/index.ts",
+				path: "/tmp/project/.mooncode/npm/node_modules/Mooncli-markdown-preview/extensions/index.ts",
 				sourceInfo: createSourceInfo(
-					"/tmp/project/.Mooncli/npm/node_modules/Mooncli-markdown-preview/extensions/index.ts",
+					"/tmp/project/.mooncode/npm/node_modules/Mooncli-markdown-preview/extensions/index.ts",
 					{
 						source: "npm:Mooncli-markdown-preview",
 						scope: "project",
 						origin: "package",
-						baseDir: "/tmp/project/.Mooncli/npm/node_modules/Mooncli-markdown-preview",
+						baseDir: "/tmp/project/.mooncode/npm/node_modules/Mooncli-markdown-preview",
 					},
 				),
 			},
@@ -779,8 +779,8 @@ describe("InteractiveMode.showLoadedResources", () => {
 		expect(normalizeRenderedOutput(fakeThis.chatContainer)).toMatchInlineSnapshot(`
 "[Extensions]
   project
-    /tmp/project/.Mooncli/extensions/answer.ts
-    /tmp/project/.Mooncli/extensions/local-index
+    /tmp/project/.mooncode/extensions/answer.ts
+    /tmp/project/.mooncode/extensions/local-index
     git:github.com/HazAT/Mooncli-interactive-subengines
       extensions
       extensions/subengines
@@ -801,7 +801,7 @@ describe("InteractiveMode.showLoadedResources", () => {
 			quietStartup: false,
 			cwd,
 			contextFiles: [
-				{ path: path.join(home, ".Mooncli", "engine", "AGENTS.md") },
+				{ path: path.join(home, ".mooncode", "engine", "AGENTS.md") },
 				{ path: path.join(cwd, "AGENTS.md") },
 			],
 		});
@@ -812,7 +812,7 @@ describe("InteractiveMode.showLoadedResources", () => {
 
 		const output = renderAll(fakeThis.chatContainer).replace(/\\/g, "/");
 		expect(output).toContain("[Context]");
-		expect(output).toContain("~/.Mooncli/engine/AGENTS.md, AGENTS.md");
+		expect(output).toContain("~/.mooncode/engine/AGENTS.md, AGENTS.md");
 		expect(output).not.toContain(`${cwd.replace(/\\/g, "/")}/AGENTS.md`);
 	});
 
@@ -824,7 +824,7 @@ describe("InteractiveMode.showLoadedResources", () => {
 			toolOutputExpanded: true,
 			cwd,
 			contextFiles: [
-				{ path: path.join(home, ".Mooncli", "engine", "AGENTS.md") },
+				{ path: path.join(home, ".mooncode", "engine", "AGENTS.md") },
 				{ path: path.join(cwd, "AGENTS.md") },
 			],
 		});
@@ -835,9 +835,9 @@ describe("InteractiveMode.showLoadedResources", () => {
 
 		const output = renderAll(fakeThis.chatContainer).replace(/\\/g, "/");
 		expect(output).toContain("[Context]");
-		expect(output).toContain("~/.Mooncli/engine/AGENTS.md");
+		expect(output).toContain("~/.mooncode/engine/AGENTS.md");
 		expect(output).toContain("~/Development/Mooncli-mono/AGENTS.md");
-		expect(output).not.toContain("~/.Mooncli/engine/AGENTS.md, AGENTS.md");
+		expect(output).not.toContain("~/.mooncode/engine/AGENTS.md, AGENTS.md");
 	});
 
 	test("does not show verbose listing on quiet startup during reload", () => {

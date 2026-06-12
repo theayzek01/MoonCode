@@ -1,5 +1,5 @@
-import { Tool } from "./index.js";
-import { type EngineSession } from "../engine-session.js";
+import type { EngineSession } from "../engine-session.js";
+import type { Tool } from "./index.js";
 
 export function getCompactContextTool(session: EngineSession): Tool {
 	return {
@@ -12,23 +12,35 @@ export function getCompactContextTool(session: EngineSession): Tool {
 			properties: {
 				instructions: {
 					type: "string",
-					description: "İsteğe bağlı olarak, sıkıştırma (compaction) sırasında korunması gereken özel talimatlar (örneğin 'Şu dosyanın yolunu kesinlikle unutma').",
+					description:
+						"İsteğe bağlı olarak, sıkıştırma (compaction) sırasında korunması gereken özel talimatlar (örneğin 'Şu dosyanın yolunu kesinlikle unutma').",
 				},
 			},
 		},
 		execute: async (toolCallId: string, params: unknown, signal?: AbortSignal) => {
 			if (!signal) {
-				return { content: [{ type: "text", text: "Hata: İptal sinyali (signal) eksik." }], details: { error: true } };
+				return {
+					content: [{ type: "text", text: "Hata: İptal sinyali (signal) eksik." }],
+					details: { error: true },
+				};
 			}
 			try {
 				const typedParams = params as { instructions?: string };
 				const result = await session.compact(typedParams.instructions);
-				return { 
-					content: [{ type: "text", text: `Sıkıştırma tamamlandı. Orijinal token: ${result.tokensBefore}. Yeni özet eklendi:\n${result.summary}` }], 
-					details: result 
+				return {
+					content: [
+						{
+							type: "text",
+							text: `Sıkıştırma tamamlandı. Orijinal token: ${result.tokensBefore}. Yeni özet eklendi:\n${result.summary}`,
+						},
+					],
+					details: result,
 				};
 			} catch (err: any) {
-				return { content: [{ type: "text", text: `Sıkıştırma başarısız oldu: ${err.message}` }], details: { error: err.message } };
+				return {
+					content: [{ type: "text", text: `Sıkıştırma başarısız oldu: ${err.message}` }],
+					details: { error: err.message },
+				};
 			}
 		},
 	};

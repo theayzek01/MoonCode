@@ -2,7 +2,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { CodebaseIndex, CodeChunk } from "./indexer.js";
-import { buildIndex, loadCachedIndex, tokenize, embedText } from "./indexer.js";
+import { buildIndex, embedText, loadCachedIndex, tokenize } from "./indexer.js";
 
 function cosineSimilarity(a: number[], b: number[]): number {
 	if (!a || !b || a.length !== b.length) return 0;
@@ -88,7 +88,12 @@ function extractSnippet(cwd: string, chunk: CodeChunk, queryTerms: Set<string>):
 
 // ─── Public search API ────────────────────────────────────────────────────────
 
-export async function searchIndex(index: CodebaseIndex, query: string, cwd: string, limit = 5): Promise<SearchResult[]> {
+export async function searchIndex(
+	index: CodebaseIndex,
+	query: string,
+	cwd: string,
+	limit = 5,
+): Promise<SearchResult[]> {
 	const queryTerms = tokenize(query);
 	if (queryTerms.length === 0) return [];
 
@@ -106,7 +111,7 @@ export async function searchIndex(index: CodebaseIndex, query: string, cwd: stri
 
 	for (const chunk of index.chunks) {
 		let score = bm25Score(chunk, queryTerms, index.idf, index.avgTermCount ?? 100);
-		
+
 		if (queryEmbedding && chunk.embedding) {
 			const sim = cosineSimilarity(queryEmbedding, chunk.embedding);
 			if (sim > 0.4) {

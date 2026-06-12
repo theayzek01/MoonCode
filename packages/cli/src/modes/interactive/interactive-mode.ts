@@ -48,7 +48,7 @@ import {
 	TUI,
 	visibleWidth,
 } from "moon-tui";
-import { buildInitialMessage } from "../../cli/initial-message.js";
+import { buildWelcomeMessage } from "../../cli/initial-message.js";
 import {
 	APP_NAME,
 	APP_TITLE,
@@ -4076,7 +4076,7 @@ export class InteractiveMode {
 
 	renderInitialMessages(): void {
 		// macOS Style Intro
-		const intro = buildInitialMessage();
+		const intro = buildWelcomeMessage();
 		if (intro?.text && this.session.isNewSession) {
 			this.chatContainer.addChild(new Text(intro.text, 0, 1));
 			this.chatContainer.addChild(new DynamicBorder());
@@ -4171,13 +4171,22 @@ export class InteractiveMode {
 
 		// Global error handlers to prevent background stack traces from corrupting the TUI
 		const uncaughtHandler = (err: Error) => {
-			this.showWarning(`Sistem hatası: ${err.message}`);
-			this.ui.requestRender();
+			try {
+				this.showWarning(`Sistem hatası: ${err.message}`);
+				this.ui.requestRender();
+			} catch (e) {
+				console.error("Crash before theme initialized. Original error:", err);
+				process.exit(1);
+			}
 		};
 		const unhandledRejectionHandler = (reason: unknown) => {
 			const msg = reason instanceof Error ? reason.message : String(reason);
-			this.showWarning(`Arka plan hatası: ${msg}`);
-			this.ui.requestRender();
+			try {
+				this.showWarning(`Arka plan hatası: ${msg}`);
+				this.ui.requestRender();
+			} catch (e) {
+				console.error("Background error before theme init:", reason);
+			}
 		};
 
 		process.on("uncaughtException", uncaughtHandler);
@@ -6227,7 +6236,7 @@ export class InteractiveMode {
 		const targets = [
 			path.join(getEngineDir(), "memory-signals.json"),
 			path.join(getEngineDir(), "learning-experience.json"),
-			path.join(os.homedir(), ".Mooncli", "omega-memory.json"),
+			path.join(os.homedir(), ".mooncode", "omega-memory.json"),
 		];
 		let removed = 0;
 		for (const file of targets) {

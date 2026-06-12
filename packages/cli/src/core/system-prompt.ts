@@ -95,7 +95,7 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 
 	// Global memory policy text
 	let memoryPreface = getMemoryPreface(10, compactMode, cwd);
-	
+
 	// Long-Term Style Profile
 	const styleProfile = getUserProfilePreface();
 	if (styleProfile) {
@@ -463,9 +463,7 @@ function buildCompactSystemPrompt(options: BuildSystemPromptOptions): string {
 	const hasScratchTools = tools.some((name) => name.startsWith("scratch_"));
 	const visibleTools = tools.filter((n) => !!toolSnippets?.[n]);
 	const toolsList =
-		visibleTools.length > 0
-			? visibleTools.map((n) => `${n}: ${toolSnippets![n]}`).join(", ")
-			: "read, bash, edit, write";
+		visibleTools.length > 0 ? visibleTools.map((n) => `${n}: ${toolSnippets![n]}`).join(", ") : "(none)";
 
 	const hasBrowser = tools.includes("browser_tabs") || tools.includes("browser_page");
 	const hasSemanticSearch = tools.includes("semantic_search");
@@ -474,11 +472,14 @@ function buildCompactSystemPrompt(options: BuildSystemPromptOptions): string {
 		? "\n- semantic_search finds candidates only. Always verify against source files."
 		: "";
 
+	const toolsFormatted =
+		visibleTools.length > 0 ? visibleTools.map((n) => `- ${n}: ${toolSnippets![n]}`).join("\n") : "(none)";
+
 	// Brain.md distilled: uncertainty-reduction engine, minimal token footprint.
 	// Every rule is an invariant from brain.md — not decoration.
 	const lines = [
 		"You are MoonCode. Created by Theayzek. Do not introduce yourself unless asked.",
-		`Tools: ${toolsList}`,
+		`Available tools:\n${toolsFormatted}`,
 		`Date: ${d} | Cwd: ${promptCwd}`,
 		"",
 		"## Directives",

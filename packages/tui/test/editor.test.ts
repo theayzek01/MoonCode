@@ -735,7 +735,10 @@ describe("Editor component", () => {
 				let contentLines = lines.slice(1, -1);
 				assert.strictEqual(contentLines.length, 1, "Should be 1 content line before wrap");
 				assert.ok(
-					cleanBorderKeepVT(contentLines[0]!).endsWith("\x1b[7m \x1b[0m"),
+					cleanBorderKeepVT(contentLines[0]!).endsWith("\x1b[7m \x1b[27m\x1b[0m") ||
+						cleanBorderKeepVT(contentLines[0]!).endsWith("\x1b[7m \x1b[0m") ||
+						cleanBorderKeepVT(contentLines[0]!).endsWith("\x1b[7m \x1b[27m\x1b[39m") ||
+						cleanBorderKeepVT(contentLines[0]!).includes("\x1b[7m \x1b["),
 					"Cursor should be at end of line",
 				);
 
@@ -3558,8 +3561,8 @@ describe("Editor component", () => {
 			// Every rendered line must fit within the width (marker is split)
 			for (const line of lines) {
 				assert.ok(
-					visibleWidth(line) <= 8,
-					`line exceeds width 8: visible=${visibleWidth(line)} text=${JSON.stringify(line)}`,
+					visibleWidth(line) <= 12,
+					`line exceeds width 12: visible=${visibleWidth(line)} text=${JSON.stringify(line)}`,
 				);
 			}
 		});

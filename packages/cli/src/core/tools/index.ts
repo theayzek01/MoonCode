@@ -68,6 +68,7 @@ export {
 	type LsToolInput,
 	type LsToolOptions,
 } from "./ls.js";
+export { createMessageAgentTool, createMessageAgentToolDefinition, type MessageAgentInput } from "./message_agent.js";
 export {
 	createReadTool,
 	createReadToolDefinition,
@@ -78,8 +79,6 @@ export {
 } from "./read.js";
 export { createSemanticSearchTool, createSemanticSearchToolDefinition } from "./semantic_search.js";
 export { createSnapshotTool, createSnapshotToolDefinition, type SnapshotToolInput } from "./snapshot.js";
-export { createUserProfileTool, createUserProfileToolDefinition, type UserProfileToolInput } from "./update_user_profile.js";
-export { createMessageAgentTool, createMessageAgentToolDefinition, type MessageAgentInput } from "./message_agent.js";
 export {
 	DEFAULT_MAX_BYTES,
 	DEFAULT_MAX_LINES,
@@ -90,6 +89,11 @@ export {
 	truncateLine,
 	truncateTail,
 } from "./truncate.js";
+export {
+	createUserProfileTool,
+	createUserProfileToolDefinition,
+	type UserProfileToolInput,
+} from "./update_user_profile.js";
 export {
 	createWriteTool,
 	createWriteToolDefinition,
@@ -123,12 +127,12 @@ import { createGitShipTool, createGitShipToolDefinition } from "./git-ship.js";
 import { createGrepTool, createGrepToolDefinition, type GrepToolOptions } from "./grep.js";
 import { createInvokeSubagentTool, createInvokeSubagentToolDefinition } from "./invoke_subagent.js";
 import { createLsTool, createLsToolDefinition, type LsToolOptions } from "./ls.js";
+import { createMessageAgentTool, createMessageAgentToolDefinition } from "./message_agent.js";
 import { createReadTool, createReadToolDefinition, type ReadToolOptions } from "./read.js";
 import { createSemanticSearchTool, createSemanticSearchToolDefinition } from "./semantic_search.js";
 import { createSnapshotTool, createSnapshotToolDefinition } from "./snapshot.js";
-import { createUserProfileTool, createUserProfileToolDefinition } from "./update_user_profile.js";
-import { createMessageAgentTool, createMessageAgentToolDefinition } from "./message_agent.js";
 import { createTaskTool, createTaskToolDefinition } from "./task.js";
+import { createUserProfileTool, createUserProfileToolDefinition } from "./update_user_profile.js";
 import { createWriteTool, createWriteToolDefinition, type WriteToolOptions } from "./write.js";
 
 export type Tool = EngineTool<any>;

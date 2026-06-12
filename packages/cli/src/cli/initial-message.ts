@@ -14,7 +14,7 @@ function getGreeting(): string {
 	return "İyi geceler";
 }
 
-export function buildInitialMessage(): { text: string } {
+export function buildWelcomeMessage(): { text: string } {
 	const blue = chalk.hex("#7ab7ff");
 	const dim = chalk.hex("#6f7a8f");
 	const bright = chalk.hex("#e9eef8").bold;
@@ -36,4 +36,38 @@ export function buildInitialMessage(): { text: string } {
 	].join("\n");
 
 	return { text };
+}
+
+import type { ImageContent } from "moon-core";
+import type { Args } from "./args.js";
+
+export function buildInitialMessage({
+	parsed,
+	stdinContent,
+	fileText,
+	fileImages,
+}: {
+	parsed: Args;
+	stdinContent?: string;
+	fileText?: string;
+	fileImages?: ImageContent[];
+}): { initialMessage?: string; initialImages?: ImageContent[] } {
+	const parts: string[] = [];
+	if (stdinContent) parts.push(stdinContent.trimEnd());
+	if (fileText) parts.push(fileText.trimEnd());
+
+	if (parts.length > 0) {
+		if (parsed.messages.length > 0) {
+			parts.push(parsed.messages.shift()!);
+		}
+		return {
+			initialMessage: parts.join("\n"),
+			initialImages: fileImages,
+		};
+	}
+
+	return {
+		initialMessage: parsed.messages.length > 0 ? parsed.messages.shift()! : undefined,
+		initialImages: fileImages,
+	};
 }

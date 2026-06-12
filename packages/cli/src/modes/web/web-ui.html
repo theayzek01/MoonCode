@@ -4,6 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>MoonCode – AI Kodlama Asistanı</title>
+	<link rel="icon" type="image/png" href="/assets/Moon-cli-logo.png">
 	<meta name="description" content="MoonCode – Güçlü yapay zeka destekli kodlama asistanı">
 	<script src="https://cdn.tailwindcss.com"></script>
 	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -823,12 +824,10 @@
 <!-- ═══════════════════ SIDEBAR ═══════════════════════════════════════════ -->
 <div id="sidebar">
 	<!-- Brand -->
-	<div style="padding:16px 14px 12px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
-		<div style="display:flex;align-items:center;gap:8px;">
-			<div style="width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-				<span class="material-symbols-rounded" style="font-size:17px;color:#fff;">auto_awesome</span>
-			</div>
-			<span style="font-weight:700;font-size:0.95rem;white-space:nowrap;">MoonCode</span>
+	<div style="padding:14px 14px 10px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
+		<div style="display:flex;align-items:center;gap:9px;">
+			<img src="/assets/Moon-cli-logo.png" alt="logo" style="width:28px;height:28px;border-radius:7px;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">
+			<span style="font-weight:700;font-size:0.95rem;white-space:nowrap;letter-spacing:-0.01em;">MoonCode</span>
 		</div>
 		<button onclick="toggleSidebar()" class="tool-btn">
 			<span class="material-symbols-rounded" style="font-size:18px;">close</span>
@@ -943,10 +942,10 @@
 			</button>
 			<!-- User menu -->
 			<div style="position:relative;">
-				<button id="user-menu-btn" onclick="toggleUserMenu()" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#fff;transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'" title="Kullanıcı menüsü">
+				<button id="user-menu-btn" onclick="toggleUserMenu()" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#fff;transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'" title="Kullanıcı menüsu">
 					<span id="user-initial">U</span>
 				</button>
-				<div id="user-dropdown" class="hidden" style="position:absolute;right:0;top:calc(100%+8px);width:280px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);z-index:200;padding:8px;animation:scaleIn 0.15s ease;"></div>
+				<div id="user-dropdown" class="hidden" style="position:absolute;right:0;top:calc(100% + 8px);width:280px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);z-index:200;padding:8px;animation:scaleIn 0.15s ease;"></div>
 			</div>
 		</div>
 	</div>
@@ -959,13 +958,19 @@
 		<button onclick="toggleSearch()" class="tool-btn"><span class="material-symbols-rounded" style="font-size:17px;">close</span></button>
 	</div>
 
+	<!-- Scroll to bottom button -->
+	<button id="scroll-btn" onclick="chatContainer.scrollTop=chatContainer.scrollHeight" class="hidden" style="position:absolute;bottom:170px;right:20px;z-index:30;width:36px;height:36px;border-radius:50%;background:var(--surface);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);box-shadow:var(--shadow);transition:all 0.2s;" onmouseover="this.style.color='var(--fg)'" onmouseout="this.style.color='var(--muted)'" title="A\u015fa\u011f\u0131 git">
+		<span class="material-symbols-rounded" style="font-size:18px;">keyboard_double_arrow_down</span>
+	</button>
+
 	<!-- Chat -->
 	<div id="chat-container">
 		<div class="chat-inner" id="chat-inner">
 			<!-- Empty state -->
 			<div id="empty-state">
-				<div class="empty-orb">
-					<span class="material-symbols-rounded thinking-pulse" style="font-size:28px;color:var(--accent);">auto_awesome</span>
+				<div class="empty-orb" style="background:none;border:none;">
+					<img src="/assets/Moon-cli-logo.png" alt="MoonCode" style="width:68px;height:68px;border-radius:18px;object-fit:cover;filter:drop-shadow(0 0 18px rgba(108,143,255,0.35));" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+					<span class="material-symbols-rounded thinking-pulse" style="font-size:32px;color:var(--accent);display:none;">auto_awesome</span>
 				</div>
 				<h2 style="font-size:1.3rem;font-weight:600;margin:0 0 8px;">Bugün nasıl yardımcı olabilirim?</h2>
 				<p style="color:var(--muted);font-size:0.85rem;margin:0 0 28px;max-width:400px;line-height:1.6;">Kodunuzu yazın, hata ayıklayın, refactor yapın veya sıfırdan proje başlatın.</p>
@@ -1583,6 +1588,14 @@ promptInput.addEventListener('keydown', (e) => {
 	if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 });
 
+chatContainer.addEventListener('scroll', () => {
+	const scrollBtn = document.getElementById('scroll-btn');
+	if (scrollBtn) {
+		const nearBottom = chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight < 120;
+		scrollBtn.classList.toggle('hidden', nearBottom);
+	}
+});
+
 // ─── APPEND TO CHAT ───────────────────────────────────────────────────────
 function appendToChat(el) {
 	const indicator = document.getElementById('global-indicator');
@@ -1624,30 +1637,41 @@ function appendMessage(role, content, id = null) {
 	row.className = `msg-row ${role} msg-enter`;
 	row.id = id || ('msg-' + Date.now() + Math.random().toString(36).substr(2,5));
 
+	const timeStr = new Date().toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' });
+
 	if (role === 'user') {
+		const text = typeof content === 'string' ? content : '';
+		// preserve newlines as <br> but escape HTML
+		const safeHtml = escapeHtml(text).replace(/\n/g, '<br>');
 		row.innerHTML = `
-			<div class="user-bubble">${escapeHtml(typeof content === 'string' ? content : '')}</div>
-			<div class="action-bar">
-				<button onclick="copyText(this.closest('.msg-row').querySelector('.user-bubble').textContent)" title="Kopyala">
-					<span class="material-symbols-rounded" style="font-size:16px;">content_copy</span>
-				</button>
+			<div class="user-bubble">${safeHtml}</div>
+			<div style="display:flex;align-items:center;gap:6px;">
+				<span style="font-size:0.65rem;color:var(--muted);opacity:0.6;">${timeStr}</span>
+				<div class="action-bar" style="margin-top:0;">
+					<button onclick="copyText(this.closest('.msg-row').querySelector('.user-bubble').textContent)" title="Kopyala">
+						<span class="material-symbols-rounded" style="font-size:15px;">content_copy</span>
+					</button>
+				</div>
 			</div>`;
 	} else {
 		row.innerHTML = `
 			<div class="assistant-content prose" id="inner-${row.id}"></div>
-			<div class="action-bar">
-				<button onclick="copyText(document.getElementById('inner-${row.id}').innerText)" title="Kopyala">
-					<span class="material-symbols-rounded" style="font-size:16px;">content_copy</span>
-				</button>
-				<button onclick="shareMsg('${row.id}')" title="Paylaş">
-					<span class="material-symbols-rounded" style="font-size:16px;">share</span>
-				</button>
-				<button onclick="likeMsg('${row.id}', true)" title="Beğen">
-					<span class="material-symbols-rounded" style="font-size:16px;">thumb_up</span>
-				</button>
-				<button onclick="likeMsg('${row.id}', false)" title="Beğenme">
-					<span class="material-symbols-rounded" style="font-size:16px;">thumb_down</span>
-				</button>
+			<div style="display:flex;align-items:center;gap:6px;margin-top:2px;">
+				<span style="font-size:0.65rem;color:var(--muted);opacity:0.6;">${timeStr}</span>
+				<div class="action-bar" style="margin-top:0;">
+					<button onclick="copyText(document.getElementById('inner-${row.id}').innerText)" title="Kopyala">
+						<span class="material-symbols-rounded" style="font-size:15px;">content_copy</span>
+					</button>
+					<button onclick="shareMsg('${row.id}')" title="Payla\u015f">
+						<span class="material-symbols-rounded" style="font-size:15px;">share</span>
+					</button>
+					<button onclick="likeMsg('${row.id}', true)" title="Be\u011fen">
+						<span class="material-symbols-rounded" style="font-size:15px;">thumb_up</span>
+					</button>
+					<button onclick="likeMsg('${row.id}', false)" title="Be\u011fenme">
+						<span class="material-symbols-rounded" style="font-size:15px;">thumb_down</span>
+					</button>
+				</div>
 			</div>`;
 		if (content) updateMessage(row.id, content);
 	}
@@ -1782,8 +1806,8 @@ function newChat() {
 	currentAssistantMsgId = null;
 	chatInner.innerHTML = `
 		<div id="empty-state">
-			<div class="empty-orb">
-				<span class="material-symbols-rounded thinking-pulse" style="font-size:28px;color:var(--accent);">auto_awesome</span>
+			<div class="empty-orb" style="background:none;border:none;">
+				<img src="/assets/Moon-cli-logo.png" alt="MoonCode" style="width:68px;height:68px;border-radius:18px;object-fit:cover;filter:drop-shadow(0 0 20px rgba(108,143,255,0.4));" onerror="this.style.display='none'">
 			</div>
 			<h2 style="font-size:1.3rem;font-weight:600;margin:0 0 8px;">Bugün nasıl yardımcı olabilirim?</h2>
 			<p style="color:var(--muted);font-size:0.85rem;margin:0 0 28px;max-width:400px;line-height:1.6;">Kodunuzu yazın, hata ayıklayın, refactor yapın veya sıfırdan proje başlatın.</p>

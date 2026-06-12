@@ -24,8 +24,8 @@ class ThinkingBlock extends Container {
 		if (lines.length === 0) return [];
 		return [
 			theme.fg("dim", " ╭── Thinking ──"),
-			...lines.map(line => theme.fg("dim", " │  ") + line),
-			theme.fg("dim", " ╰──────────────")
+			...lines.map((line) => theme.fg("dim", " │  ") + line),
+			theme.fg("dim", " ╰──────────────"),
 		];
 	}
 

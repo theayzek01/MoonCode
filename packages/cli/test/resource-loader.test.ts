@@ -98,7 +98,7 @@ Prompt content.`,
 
 		it("should prefer project resources over user on name collisions", async () => {
 			const userPromptsDir = join(engineDir, "prompts");
-			const projectPromptsDir = join(cwd, ".Mooncli", "prompts");
+			const projectPromptsDir = join(cwd, ".mooncode", "prompts");
 			mkdirSync(userPromptsDir, { recursive: true });
 			mkdirSync(projectPromptsDir, { recursive: true });
 			const userPromptPath = join(userPromptsDir, "commit.md");
@@ -107,7 +107,7 @@ Prompt content.`,
 			writeFileSync(projectPromptPath, "Project prompt");
 
 			const userSkillDir = join(engineDir, "skills", "collision-skill");
-			const projectSkillDir = join(cwd, ".Mooncli", "skills", "collision-skill");
+			const projectSkillDir = join(cwd, ".mooncode", "skills", "collision-skill");
 			mkdirSync(userSkillDir, { recursive: true });
 			mkdirSync(projectSkillDir, { recursive: true });
 			const userSkillPath = join(userSkillDir, "SKILL.md");
@@ -134,9 +134,9 @@ Project skill`,
 			) as { name: string; vars?: Record<string, string> };
 			baseTheme.name = "collision-theme";
 			const userThemePath = join(engineDir, "themes", "collision.json");
-			const projectThemePath = join(cwd, ".Mooncli", "themes", "collision.json");
+			const projectThemePath = join(cwd, ".mooncode", "themes", "collision.json");
 			mkdirSync(join(engineDir, "themes"), { recursive: true });
-			mkdirSync(join(cwd, ".Mooncli", "themes"), { recursive: true });
+			mkdirSync(join(cwd, ".mooncode", "themes"), { recursive: true });
 			writeFileSync(userThemePath, JSON.stringify(baseTheme, null, 2));
 			if (baseTheme.vars) {
 				baseTheme.vars.accent = "#ff00ff";
@@ -170,9 +170,9 @@ Project skill`,
 			);
 
 			mkdirSync(engineDir, { recursive: true });
-			mkdirSync(join(cwd, ".Mooncli"), { recursive: true });
+			mkdirSync(join(cwd, ".mooncode"), { recursive: true });
 			symlinkSync(sharedExtDir, join(engineDir, "extensions"), "dir");
-			symlinkSync(sharedExtDir, join(cwd, ".Mooncli", "extensions"), "dir");
+			symlinkSync(sharedExtDir, join(cwd, ".mooncode", "extensions"), "dir");
 
 			const loader = new DefaultResourceLoader({ cwd, engineDir });
 			await loader.reload();
@@ -183,12 +183,12 @@ Project skill`,
 
 			// mergePaths processes project paths before user paths, so the project
 			// alias is the canonical survivor.
-			expect(extensionsResult.extensions[0].path).toBe(join(cwd, ".Mooncli", "extensions", "shared.ts"));
+			expect(extensionsResult.extensions[0].path).toBe(join(cwd, ".mooncode", "extensions", "shared.ts"));
 		});
 
 		it("should keep both extensions loaded when command names collide", async () => {
 			const userExtDir = join(engineDir, "extensions");
-			const projectExtDir = join(cwd, ".Mooncli", "extensions");
+			const projectExtDir = join(cwd, ".mooncode", "extensions");
 			mkdirSync(userExtDir, { recursive: true });
 			mkdirSync(projectExtDir, { recursive: true });
 
@@ -317,8 +317,8 @@ Content`,
 			expect(enginesFiles).toEqual([]);
 		});
 
-		it("should discover SYSTEM.md from cwd/.Mooncli", async () => {
-			const piDir = join(cwd, ".Mooncli");
+		it("should discover SYSTEM.md from cwd/.mooncode", async () => {
+			const piDir = join(cwd, ".mooncode");
 			mkdirSync(piDir, { recursive: true });
 			writeFileSync(join(piDir, "SYSTEM.md"), "You are a helpful assistant.");
 
@@ -329,7 +329,7 @@ Content`,
 		});
 
 		it("should discover APPEND_SYSTEM.md", async () => {
-			const piDir = join(cwd, ".Mooncli");
+			const piDir = join(cwd, ".mooncode");
 			mkdirSync(piDir, { recursive: true });
 			writeFileSync(join(piDir, "APPEND_SYSTEM.md"), "Additional instructions.");
 

@@ -131,9 +131,7 @@ export class MoonCodeHeaderComponent implements Component {
 		const logo = bg(40, 40, 60, color.primary(" 🌙 MoonCode "));
 		const version = color.accent(`v${VERSION}`);
 		const title = color.text("Console");
-		const right = [color.success("● " + mode), color.muted(`${iconGit} ${branchLabel}`)].join(
-			color.dim("  |  "),
-		);
+		const right = [color.success("● " + mode), color.muted(`${iconGit} ${branchLabel}`)].join(color.dim("  |  "));
 		const top = renderStatusLine(
 			`${logo}${color.dim("  |  ")}${version}${color.dim("  |  ")}${title}`,
 			right,
@@ -142,7 +140,11 @@ export class MoonCodeHeaderComponent implements Component {
 		);
 
 		const left = color.muted(` 📁 ${fitText(cwd, Math.max(12, Math.floor(safeWidth * 0.38)))}`);
-		const mid = [color.text(`${iconModel} ${model}`), color.muted(`${iconThink} ${thinking}`), color.muted(`${iconCtx} ${ctxLabel}`)].join(color.dim("  /  "));
+		const mid = [
+			color.text(`${iconModel} ${model}`),
+			color.muted(`${iconThink} ${thinking}`),
+			color.muted(`${iconCtx} ${ctxLabel}`),
+		].join(color.dim("  /  "));
 		const right2 = color.muted(`agents:${providers}  /  ${iconWeb}:${browserClients}  /  ${iconMcp}:${mcpClients}`);
 		const budget = safeWidth - widthOf(left) - widthOf(right2) - 4;
 		const center = fitText(mid, Math.max(12, budget));

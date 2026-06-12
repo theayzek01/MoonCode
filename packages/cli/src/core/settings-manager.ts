@@ -774,6 +774,15 @@ export class SettingsManager {
 		return this.settings.compaction?.profile ?? "aggressive";
 	}
 
+	setCompactionProfile(profile: "aggressive" | "balanced" | "off"): void {
+		if (!this.globalSettings.compaction) {
+			this.globalSettings.compaction = {};
+		}
+		this.globalSettings.compaction.profile = profile;
+		this.markModified("compaction", "profile");
+		this.save();
+	}
+
 	getCompactionEnabled(): boolean {
 		if (this.getCompactionProfile() === "off") return false;
 		return this.settings.compaction?.enabled ?? true;

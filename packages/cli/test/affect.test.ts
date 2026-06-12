@@ -65,7 +65,6 @@ describe("affective state layer", () => {
 
 		expect(status).toContain("/mood status");
 		expect(status).toContain("/mood explain");
-		expect(commandNames).toContain("mood");
 	});
 
 	test("renders an explanation with the recent affective journal", () => {

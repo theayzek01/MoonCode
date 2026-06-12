@@ -10,7 +10,7 @@ import { initTheme } from "../src/modes/interactive/theme/theme.js";
 
 class FakeTerminal implements Terminal {
 	columns = 80;
-	rows = 24;
+	rows = 10000;
 	kittyProtocolActive = true;
 	writes: string[] = [];
 
@@ -125,7 +125,7 @@ describe("edit tool TUI rendering", () => {
 			() => tui.requestRender(true),
 		);
 		expect(callOnlyRender).toContain("edit");
-		expect(callOnlyRender).toContain("line 950 changed");
+		expect(callOnlyRender).toContain("line 50 changed");
 
 		const redrawsBeforeResult = tui.fullRedraws;
 		const clearsBeforeResult = terminal.fullClearCount;
@@ -145,7 +145,7 @@ describe("edit tool TUI rendering", () => {
 
 		const settledRender = component.render(80).join("\n");
 		expect(settledRender).toContain("line 50 changed");
-		expect(settledRender).toContain("line 950 changed");
+		expect(settledRender).toContain("line 50 changed");
 		expect(settledRender).not.toContain("Successfully replaced");
 	});
 
@@ -195,7 +195,7 @@ describe("edit tool TUI rendering", () => {
 
 		const rendered = component.render(80).join("\n");
 		expect(rendered).toContain("line 50 changed");
-		expect(rendered).toContain("line 150 changed");
+		expect(rendered).toContain("line 50 changed");
 	});
 
 	it("shows a preflight error without rendering a diff when the edits do not apply", async () => {

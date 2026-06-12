@@ -1,14 +1,19 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { Type, type Static } from "typebox";
-import type { ToolDefinition } from "../extensions/types.js";
 import type { EngineTool } from "moon-engine";
-import { wrapToolDefinition } from "./tool-definition-wrapper.js";
+import { type Static, Type } from "typebox";
 import { getEngineDir } from "../../config.js";
+import type { ToolDefinition } from "../extensions/types.js";
+import { wrapToolDefinition } from "./tool-definition-wrapper.js";
 
 const profileSchema = Type.Object({
-	category: Type.String({ description: "Category of preference (e.g. 'frameworks', 'architecture', 'styling', 'naming', 'general')" }),
-	preference: Type.String({ description: "The specific preference or rule the user wants to enforce (e.g. 'Prefers Vanilla CSS over Tailwind')" }),
+	category: Type.String({
+		description: "Category of preference (e.g. 'frameworks', 'architecture', 'styling', 'naming', 'general')",
+	}),
+	preference: Type.String({
+		description:
+			"The specific preference or rule the user wants to enforce (e.g. 'Prefers Vanilla CSS over Tailwind')",
+	}),
 });
 
 export type UserProfileToolInput = Static<typeof profileSchema>;
@@ -36,24 +41,27 @@ export function createUserProfileToolDefinition(): ToolDefinition<typeof profile
 	return {
 		name: "update_user_profile",
 		label: "update profile",
-		description: "Long-term Style Memory: Update the user's coding profile with a new learned preference. Call this when the user explicitly or implicitly states a strong architectural, stylistic, or tooling preference that should be remembered across all projects.",
+		description:
+			"Long-term Style Memory: Update the user's coding profile with a new learned preference. Call this when the user explicitly or implicitly states a strong architectural, stylistic, or tooling preference that should be remembered across all projects.",
 		promptSnippet: "Update user's long-term profile",
 		parameters: profileSchema,
 		async execute(_toolCallId, { category, preference }, signal, _onUpdate, ctx) {
 			try {
 				const profilePath = getProfilePath();
 				const profile = loadUserProfile();
-				
+
 				if (!profile[category]) {
 					profile[category] = [];
 				}
-				
+
 				// Avoid exact duplicates
 				if (!profile[category].includes(preference)) {
 					profile[category].push(preference);
 					writeFileSync(profilePath, JSON.stringify(profile, null, 2), "utf-8");
 					return {
-						content: [{ type: "text", text: `Successfully saved preference '${preference}' to category '${category}'.` }],
+						content: [
+							{ type: "text", text: `Successfully saved preference '${preference}' to category '${category}'.` },
+						],
 						details: undefined,
 					};
 				}
@@ -79,16 +87,17 @@ export function createUserProfileTool(): EngineTool<typeof profileSchema> {
 export function getUserProfilePreface(): string {
 	const profile = loadUserProfile();
 	if (Object.keys(profile).length === 0) return "";
-	
+
 	let preface = "## User Long-Term Style Memory\n";
-	preface += "The user has the following established coding preferences. ALWAYS adhere to these rules unless explicitly told otherwise:\n";
-	
+	preface +=
+		"The user has the following established coding preferences. ALWAYS adhere to these rules unless explicitly told otherwise:\n";
+
 	for (const [category, preferences] of Object.entries(profile)) {
 		preface += `\n### ${category.toUpperCase()}\n`;
 		for (const pref of preferences) {
 			preface += `- ${pref}\n`;
 		}
 	}
-	
+
 	return preface + "\n";
 }

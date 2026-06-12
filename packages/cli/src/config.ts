@@ -79,6 +79,7 @@ function getInferredNpmInstall(packageName: string): { root: string; prefix: str
 	if (!root || path.basename(root) !== "node_modules") return undefined;
 	const parent = path.dirname(root);
 	if (path.basename(parent) === "lib") return { root, prefix: path.dirname(parent) };
+	if (process.platform === "win32") return { root, prefix: parent };
 	return undefined;
 }
 
@@ -280,6 +281,9 @@ export function getThemesDir(): string {
 		return join(getPackageDir(), "theme");
 	}
 	const packageDir = getPackageDir();
+	if (basename(packageDir) === "dist") {
+		return join(packageDir, "modes", "interactive", "theme");
+	}
 	const srcOrDist = existsSync(join(packageDir, "src")) ? "src" : "dist";
 	return join(packageDir, srcOrDist, "modes", "interactive", "theme");
 }
@@ -292,6 +296,9 @@ export function getExportTemplateDir(): string {
 		return join(getPackageDir(), "export-html");
 	}
 	const packageDir = getPackageDir();
+	if (basename(packageDir) === "dist") {
+		return join(packageDir, "core", "export-html");
+	}
 	const srcOrDist = existsSync(join(packageDir, "src")) ? "src" : "dist";
 	return join(packageDir, srcOrDist, "core", "export-html");
 }

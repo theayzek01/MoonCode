@@ -100,6 +100,7 @@ import { createSyntheticSourceInfo, type SourceInfo } from "./source-info.js";
 import { type BuildSystemPromptOptions, buildSystemPrompt, type RoboticsFunction } from "./system-prompt.js";
 import { optimizePromptForIntentCapsule, optimizePromptText } from "./token-optimizer.js";
 import { type BashOperations, createLocalBashOperations } from "./tools/bash.js";
+import { getCompactContextTool } from "./tools/compact-context.js";
 import { createAllToolDefinitions } from "./tools/index.js";
 import {
 	createRoboticsAnalyzeToolDefinition,
@@ -3011,6 +3012,9 @@ export class EngineSession {
 		this._baseToolDefinitions = new Map(
 			Object.entries(baseToolDefinitions).map(([name, tool]) => [name, tool as ToolDefinition]),
 		);
+
+		const compactTool = getCompactContextTool(this);
+		this._baseToolDefinitions.set(compactTool.name, compactTool as unknown as ToolDefinition);
 
 		const extensionsResult = this._resourceLoader.getExtensions();
 		if (options.flagValues) {

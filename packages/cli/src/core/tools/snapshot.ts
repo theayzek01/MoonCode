@@ -1,13 +1,15 @@
-import { existsSync, mkdirSync, cpSync, rmSync, readdirSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
-import { Type, type Static } from "typebox";
-import type { ToolDefinition } from "../extensions/types.js";
 import type { EngineTool } from "moon-engine";
+import { type Static, Type } from "typebox";
+import type { ToolDefinition } from "../extensions/types.js";
 import { wrapToolDefinition } from "./tool-definition-wrapper.js";
 
 const snapshotSchema = Type.Object({
 	action: Type.String({ description: "Action to perform: 'create', 'restore', or 'list'" }),
-	snapshotName: Type.Optional(Type.String({ description: "Name of the snapshot (optional for create, required for restore)" }))
+	snapshotName: Type.Optional(
+		Type.String({ description: "Name of the snapshot (optional for create, required for restore)" }),
+	),
 });
 
 export type SnapshotToolInput = Static<typeof snapshotSchema>;
@@ -16,7 +18,8 @@ export function createSnapshotToolDefinition(cwd: string): ToolDefinition<typeof
 	return {
 		name: "snapshot",
 		label: "snapshot",
-		description: "Time-Travel Debugging: Create, restore, or list project snapshots. Use this to backup the workspace before risky operations, or to rollback when an error occurs.",
+		description:
+			"Time-Travel Debugging: Create, restore, or list project snapshots. Use this to backup the workspace before risky operations, or to rollback when an error occurs.",
 		promptSnippet: "Manage workspace snapshots",
 		parameters: snapshotSchema,
 		async execute(_toolCallId, { action, snapshotName }, signal, _onUpdate, ctx) {
@@ -29,7 +32,12 @@ export function createSnapshotToolDefinition(cwd: string): ToolDefinition<typeof
 			const filterFunc = (src: string, dest: string) => {
 				const ignores = ["node_modules", ".git", ".mooncode", "dist"];
 				for (const ignore of ignores) {
-					if (src.includes(`\\${ignore}\\`) || src.includes(`/${ignore}/`) || src.endsWith(`\\${ignore}`) || src.endsWith(`/${ignore}`)) {
+					if (
+						src.includes(`\\${ignore}\\`) ||
+						src.includes(`/${ignore}/`) ||
+						src.endsWith(`\\${ignore}`) ||
+						src.endsWith(`/${ignore}`)
+					) {
 						return false;
 					}
 				}

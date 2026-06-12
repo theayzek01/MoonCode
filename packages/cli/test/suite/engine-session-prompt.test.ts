@@ -309,7 +309,7 @@ describe("EngineSession prompt characterization", () => {
 		harnesses.push(harness);
 		harness.session.engine.state.model = undefined as unknown as Model<any>;
 
-		await expect(harness.session.prompt("hi")).rejects.toThrow("No model selected.");
+		await expect(harness.session.prompt("hi")).rejects.toThrow("Model secilmedi.");
 	});
 
 	it("throws when prompting without configured auth", async () => {
@@ -317,7 +317,7 @@ describe("EngineSession prompt characterization", () => {
 		harnesses.push(harness);
 
 		await expect(harness.session.prompt("hi")).rejects.toThrow(
-			`No API key found for ${harness.getModel().provider}.`,
+			`${harness.getModel().provider} icin API anahtari bulunamadi.`,
 		);
 	});
 });

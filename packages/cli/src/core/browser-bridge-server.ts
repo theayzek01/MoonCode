@@ -255,16 +255,6 @@ export function startBrowserBridgeServer(options: { port?: number; keepAlive?: b
 			if (!options.keepAlive) {
 				server.unref();
 			}
-			// Automatically start Web UI server in master mode, but never on the browser bridge port.
-			import("./web-ui-server.js")
-				.then((webUi) => {
-					const webPort = Number(process.env.MOON_WEB_PORT || DEFAULT_WEB_UI_PORT);
-					if (webPort === p) return;
-					webUi.startWebUiServer({ port: webPort });
-				})
-				.catch((err) => {
-					console.error(`[Moon Web UI Auto-Start Error] ${err.message}`);
-				});
 		});
 	};
 

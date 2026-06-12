@@ -26,10 +26,10 @@ import { createCodingTools } from "../src/index.js";
 export const API_KEY = process.env.ANTHROPIC_OAUTH_TOKEN || process.env.ANTHROPIC_API_KEY;
 
 // ============================================================================
-// OAuth API key resolution from ~/.Mooncli/engine/auth.json
+// OAuth API key resolution from ~/.mooncode/engine/auth.json
 // ============================================================================
 
-const AUTH_PATH = join(homedir(), ".Mooncli", "engine", "auth.json");
+const AUTH_PATH = join(homedir(), ".mooncode", "engine", "auth.json");
 
 type ApiKeyCredential = {
 	type: "api_key";
@@ -66,7 +66,7 @@ function saveAuthStorage(storage: AuthStorageData): void {
 }
 
 /**
- * Resolve API key for a provider from ~/.Mooncli/engine/auth.json
+ * Resolve API key for a provider from ~/.mooncode/engine/auth.json
  *
  * For API key credentials, returns the key directly.
  * For OAuth credentials, returns the access token (refreshing if expired and saving back).
@@ -106,7 +106,7 @@ export async function resolveApiKey(provider: string): Promise<string | undefine
 }
 
 /**
- * Check if a provider has credentials in ~/.Mooncli/engine/auth.json
+ * Check if a provider has credentials in ~/.mooncode/engine/auth.json
  */
 export function hasAuthForProvider(provider: string): boolean {
 	const storage = loadAuthStorage();
@@ -114,10 +114,10 @@ export function hasAuthForProvider(provider: string): boolean {
 }
 
 /** Path to the real Mooncli engine config directory */
-export const PI_AGENT_DIR = join(homedir(), ".Mooncli", "engine");
+export const PI_AGENT_DIR = join(homedir(), ".mooncode", "engine");
 
 /**
- * Get an AuthStorage instance backed by ~/.Mooncli/engine/auth.json
+ * Get an AuthStorage instance backed by ~/.mooncode/engine/auth.json
  * Use this for tests that need real OAuth credentials.
  */
 export function getRealAuthStorage(): AuthStorage {

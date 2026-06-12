@@ -9,7 +9,7 @@ describe("agent workspace", () => {
 			{ activeTools: ["read", "bash"], cwd: "/repo", modelName: "test-model" },
 		);
 
-		expect(output).toContain("Mooncli Company Workspace");
+		expect(output).toContain("MoonCode Company Workspace");
 		expect(output).toContain("Leadership Office");
 		expect(output).toContain("Engineering Floor");
 		expect(output).toContain("Product Studio");

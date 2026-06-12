@@ -29,7 +29,7 @@ describe("optimizePromptText", () => {
 		const result = optimizePromptForIntentCapsule(input);
 
 		expect(result.capsuleApplied).toBe(true);
-		expect(result.optimizedText).toContain("[MoonCode Capsule/Razor]");
+		expect(result.optimizedText).toContain("[capsule]");
 		expect(result.optimizedText).toContain("src/app/module-");
 		expect(result.optimizedText.length).toBeLessThan(input.length / 2);
 	});
