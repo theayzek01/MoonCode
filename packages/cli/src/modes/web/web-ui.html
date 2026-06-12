@@ -1159,22 +1159,6 @@
 	</div>
 </div>
 
-<!-- Mini Browser Modal -->
-<div id="miniBrowserModal" class="modal-overlay" style="align-items:center; justify-content:flex-end; padding-right: 20px;">
-	<div class="modal" style="width:400px; height:600px; max-width:90%; display:flex; flex-direction:column; box-shadow: -5px 0 30px rgba(0,0,0,0.5);">
-		<div class="modal-header" style="background:var(--surface2); padding: 8px 12px;">
-			<div class="modal-title" style="font-size:0.8rem; color:var(--accent);"><span class="material-symbols-rounded" style="font-size:16px;">language</span> Mini Browser</div>
-			<div style="display:flex; gap:6px; align-items:center;">
-				<input type="text" id="miniBrowserUrl" readonly style="background:var(--bg); border:1px solid var(--border); border-radius:4px; font-size:0.7rem; padding:2px 6px; width:200px; color:var(--muted);">
-				<button class="modal-close" onclick="document.getElementById('miniBrowserModal').classList.remove('active')"><span class="material-symbols-rounded">close</span></button>
-			</div>
-		</div>
-		<div class="modal-body" style="flex:1; padding:0; background:#fff; overflow:hidden;">
-			<iframe id="miniBrowserFrame" src="about:blank" style="width:100%; height:100%; border:none;"></iframe>
-		</div>
-	</div>
-</div>
-
 <!-- Semantic Brain Modal -->
 <div id="semanticBrainModal" class="modal-overlay" onclick="overlayClose(event, 'semanticBrainModal')">
 	<div class="modal" style="max-width:680px;" onclick="event.stopPropagation()">
@@ -2154,8 +2138,12 @@ function renderTool(toolCallId, name, args, status, result) {
 		let lastToolEl = null;
 		for (let i = children.length - 1; i >= 0; i--) {
 			if (children[i].id === 'global-indicator') continue;
-			if (children[i].querySelector('.tool-card')) {
+			if (children[i].hasAttribute('data-tool-name')) {
 				lastToolEl = children[i];
+				break;
+			}
+			if (children[i].classList.contains('msg-row')) {
+				// We hit a user message or assistant text message, break so we don't merge across turns
 				break;
 			}
 		}
@@ -2226,41 +2214,23 @@ function renderTool(toolCallId, name, args, status, result) {
 			optionsHtml += '</div>';
 		}
 
+		let previewBtnHtml = '';
+		if ((nameLC.includes('browser_tabs') || nameLC.includes('browser_page')) && t.args && t.args.url) {
+			previewBtnHtml = `<button class="p-btn secondary" style="font-size:0.65rem; padding:2px 6px; margin-left:auto;" onclick="window.open('${escapeHtml(t.args.url)}', 'MoonCodePreview', 'width=1000,height=800')"><span class="material-symbols-rounded" style="font-size:12px; margin-right:4px;">open_in_new</span>Ön İzleme Yap</button>`;
+		}
+
 		bodyHtml += `
 			<div style="border-bottom: ${index < count - 1 ? '1px solid var(--border)' : 'none'}; padding: 10px 12px;">
 				<div style="display:flex; align-items:center; gap:8px; font-weight:600; font-size:0.75rem; color:var(--muted); margin-bottom: 6px;">
 					<span class="tool-status-dot" style="width:6px; height:6px; background:${subStatusClass === 'running' ? iconColor : subStatusClass === 'error' ? '#ff6464' : 'var(--accent2)'}"></span>
 					<span>${name} #${index + 1}</span>
+					${previewBtnHtml}
 				</div>
 				${fmtArgs ? `<div class="tool-section"><div class="tool-section-label" style="font-size:0.6rem;">Girdi</div><pre style="max-height:120px;color:${iconColor}aa;">${escapeHtml(fmtArgs)}</pre></div>` : ''}
 				${optionsHtml}
 				${fmtResult ? `<div class="tool-section result"><div class="tool-section-label" style="font-size:0.6rem;">Çıktı</div><pre style="max-height:120px;">${escapeHtml(fmtResult)}</pre></div>` : ''}
 			</div>
 		`;
-		
-		// Update Mini Browser
-		if ((nameLC.includes('browser_tabs') || nameLC.includes('browser_page')) && t.args && t.args.url) {
-			const frame = document.getElementById('miniBrowserFrame');
-			const urlInput = document.getElementById('miniBrowserUrl');
-			const modal = document.getElementById('miniBrowserModal');
-			if (frame.src !== t.args.url) {
-				frame.src = t.args.url;
-				urlInput.value = t.args.url;
-			}
-			if (subStatusClass === 'running') {
-				modal.classList.add('active');
-			}
-		}
-		if ((nameLC.includes('browser_tabs') || nameLC.includes('browser_page')) && subStatusClass !== 'running') {
-			// Auto close mini browser when done? User said: "işi bitince kapansın ya da bizde kapatabilelim"
-			// But maybe delay it a bit so user can see it
-			setTimeout(() => {
-				const modal = document.getElementById('miniBrowserModal');
-				if (modal && modal.classList.contains('active')) {
-					modal.classList.remove('active');
-				}
-			}, 3000);
-		}
 	});
 
 	el.innerHTML = `

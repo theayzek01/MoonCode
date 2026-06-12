@@ -193,6 +193,7 @@ Singular_mind ⊃ sub-agents(\`invoke_subagent\`) ∧ background_tasks(\`manage_
 
 	addGuideline("Always show file paths clearly; include relevant paths when explaining code or diffs.");
 	addGuideline(DEFAULT_UI_STYLE_GUIDELINE);
+	addGuideline("Use Google Material Icons (<span class=\"material-symbols-rounded\" style=\"font-size:16px; vertical-align:middle; margin-right:4px;\">icon_name</span>) instead of emojis when formatting tables or markdown.");
 
 	// File exploration guidelines
 	if (hasBash && !hasGrep && !hasFind && !hasLs) {
