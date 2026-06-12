@@ -87,7 +87,9 @@ export class WebMode {
 			addAutocompleteProvider: () => {},
 			setEditorComponent: () => {},
 			getEditorComponent: () => undefined,
-			get theme() { return undefined; },
+			get theme() {
+				return undefined;
+			},
 			getAllThemes: () => [],
 			getTheme: () => undefined,
 			setTheme: () => ({ success: false, error: "Not supported" }),
@@ -498,8 +500,8 @@ export class WebMode {
 								message: {
 									id: "error-" + Date.now(),
 									role: "assistant",
-									content: `❌ Hata oluştu: ${err.message || err}`
-								}
+									content: `❌ Hata oluştu: ${err.message || err}`,
+								},
 							});
 							this.broadcastEvent({ type: "engine_end" });
 						});
@@ -935,7 +937,6 @@ export class WebMode {
 			}
 			return;
 		}
-
 
 		if (method === "GET" && url.pathname === "/api/session/export") {
 			try {
