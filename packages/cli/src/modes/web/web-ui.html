@@ -1712,6 +1712,11 @@ function renderConversations(sessions, activeId) {
 	const list = document.getElementById('conversation-list');
 	if (!list) return;
 	
+	let hasActive = sessions.some(s => s.id === activeId);
+	if (!hasActive && activeId) {
+		sessions.unshift({ id: activeId, name: 'Yeni Sohbet', firstMessage: '' });
+	}
+	
 	list.innerHTML = '';
 	sessions.forEach(s => {
 		const item = document.createElement('div');

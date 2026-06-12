@@ -621,7 +621,12 @@ export class WebMode {
 			try {
 				const sm = this.runtime.session.sessionManager;
 				sm.newSession();
-				await this.runtime.switchSession(sm.getSessionFile()!);
+				const sf = sm.getSessionFile()!;
+				const header = sm.getHeader();
+				if (header) {
+					await fsPromises.writeFile(sf, JSON.stringify(header) + "\\n");
+				}
+				await this.runtime.switchSession(sf);
 				res.setHeader("Content-Type", "application/json");
 				res.end(JSON.stringify({ success: true, id: sm.getSessionId() }));
 				this.broadcastEvent({ type: "clear_chat" });
@@ -668,15 +673,19 @@ export class WebMode {
 					const sessions = await listSessionsFromDir(sessionDir);
 					const target = sessions.find(s => s.id === id);
 					if (target && target.path) {
-						// Write a session_info entry to that file
-						const infoEntry = {
-							type: "session_info",
-							id: `info-${Date.now()}`,
-							parentId: null,
-							timestamp: new Date().toISOString(),
-							name: name
-						};
-						await fsPromises.appendFile(target.path, "\\n" + JSON.stringify(infoEntry) + "\\n");
+						if (id === this.runtime.session.sessionManager.getSessionId()) {
+							this.runtime.session.sessionManager.appendSessionInfo(name);
+						} else {
+							// Write a session_info entry to that file
+							const infoEntry = {
+								type: "session_info",
+								id: `info-${Date.now()}`,
+								parentId: null,
+								timestamp: new Date().toISOString(),
+								name: name
+							};
+							await fsPromises.appendFile(target.path, "\\n" + JSON.stringify(infoEntry) + "\\n");
+						}
 						res.setHeader("Content-Type", "application/json");
 						res.end(JSON.stringify({ success: true }));
 					} else {
@@ -711,7 +720,12 @@ export class WebMode {
 							} else {
 								const sm = this.runtime.session.sessionManager;
 								sm.newSession();
-								await this.runtime.switchSession(sm.getSessionFile()!);
+								const sf = sm.getSessionFile()!;
+								const header = sm.getHeader();
+								if (header) {
+									await fsPromises.writeFile(sf, JSON.stringify(header) + "\\n");
+								}
+								await this.runtime.switchSession(sf);
 							}
 							this.broadcastEvent({ type: "clear_chat" });
 						}
