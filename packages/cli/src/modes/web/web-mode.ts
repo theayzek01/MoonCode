@@ -1,10 +1,12 @@
 import { exec } from "node:child_process";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import fs from "fs";
-import path, { dirname } from "path";
+import path, { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import type { EngineSessionRuntime } from "../../core/engine-session-runtime.js";
 import type { InteractiveModeOptions } from "../interactive/interactive-mode.js";
+import { getEngineDir } from "../../config.js";
+import { buildSessionInfo, SessionManager } from "../../core/session-manager.js";
 
 export class WebMode {
 	private runtime: EngineSessionRuntime;
@@ -13,6 +15,7 @@ export class WebMode {
 	private server: ReturnType<typeof createServer> | null = null;
 	private port: number = 0;
 	private pinnedMessageIds: Set<string> = new Set();
+	private logBuffer: string[] = [];
 
 	constructor(runtime: EngineSessionRuntime, options: InteractiveModeOptions) {
 		this.runtime = runtime;
@@ -20,10 +23,30 @@ export class WebMode {
 	}
 
 	async init() {
+		this.hookConsole();
 		this.runtime.session.subscribe((event) => {
 			this.broadcastEvent(event);
 			this.broadcastEvent(this.getStateUpdateEvent());
 		});
+	}
+
+	private hookConsole() {
+		const originalWrite = process.stdout.write;
+		process.stdout.write = (chunk: any, encoding?: any, callback?: any): boolean => {
+			const str = chunk.toString();
+			this.logBuffer.push(str);
+			if (this.logBuffer.length > 200) this.logBuffer.shift();
+			this.broadcastEvent({ type: "terminal_log", data: str });
+			return originalWrite.call(process.stdout, chunk, encoding, callback);
+		};
+		const originalErrWrite = process.stderr.write;
+		process.stderr.write = (chunk: any, encoding?: any, callback?: any): boolean => {
+			const str = chunk.toString();
+			this.logBuffer.push(str);
+			if (this.logBuffer.length > 200) this.logBuffer.shift();
+			this.broadcastEvent({ type: "terminal_log", data: str });
+			return originalErrWrite.call(process.stderr, chunk, encoding, callback);
+		};
 	}
 
 	private getStateUpdateEvent() {
@@ -177,6 +200,9 @@ export class WebMode {
 					},
 				};
 				res.write("data: " + JSON.stringify(initialState) + "\n\n");
+				for (const log of this.logBuffer) {
+					res.write("data: " + JSON.stringify({ type: "terminal_log", data: log }) + "\n\n");
+				}
 			} catch (e) {}
 
 			req.on("close", () => {
@@ -398,6 +424,164 @@ export class WebMode {
 			return;
 		}
 
+		if (method === "GET" && url.pathname === "/api/sessions") {
+			res.setHeader("Content-Type", "application/json");
+			try {
+				const sessionsDir = join(getEngineDir(), "sessions");
+				const projects: Record<string, any> = {};
+				if (fs.existsSync(sessionsDir)) {
+					const dirs = fs.readdirSync(sessionsDir);
+					for (const dir of dirs) {
+						const fullDir = join(sessionsDir, dir);
+						if (fs.statSync(fullDir).isDirectory()) {
+							const files = fs.readdirSync(fullDir).filter(f => f.endsWith(".jsonl"));
+							const projectSessions = [];
+							let projectCwd = "";
+							for (const file of files) {
+								const filePath = join(fullDir, file);
+								const info = await buildSessionInfo(filePath);
+								if (info) {
+									projectSessions.push({
+										id: info.id,
+										path: info.path,
+										name: info.name || info.firstMessage || "Başlıksız Sohbet",
+										created: info.created,
+										modified: info.modified,
+										messageCount: info.messageCount,
+									});
+									if (!projectCwd) {
+										projectCwd = info.cwd;
+									}
+								}
+							}
+							if (!projectCwd) {
+								const decoded = dir.replace(/^--/, "").replace(/--$/, "").replace(/-/g, path.sep);
+								if (process.platform === "win32" && decoded.match(/^[a-zA-Z]/)) {
+									projectCwd = decoded.charAt(0) + ":" + decoded.slice(1);
+								} else {
+									projectCwd = decoded;
+								}
+							}
+							const projectName = path.basename(projectCwd) || projectCwd;
+							projects[projectCwd] = {
+								cwd: projectCwd,
+								name: projectName,
+								sessions: projectSessions.sort((a: any, b: any) => new Date(b.modified).getTime() - new Date(a.modified).getTime()),
+							};
+						}
+					}
+				}
+				res.end(JSON.stringify(Object.values(projects)));
+			} catch (e: any) {
+				res.statusCode = 500;
+				res.end(JSON.stringify({ error: e.message }));
+			}
+			return;
+		}
+
+		if (method === "POST" && url.pathname === "/api/session/switch") {
+			let body = "";
+			req.on("data", (chunk) => (body += chunk));
+			req.on("end", async () => {
+				try {
+					const { path: filePath } = JSON.parse(body);
+					if (fs.existsSync(filePath)) {
+						await this.runtime.switchSession(filePath);
+						res.setHeader("Content-Type", "application/json");
+						res.end(JSON.stringify({ success: true }));
+					} else {
+						res.statusCode = 404;
+						res.end(JSON.stringify({ error: "Session file not found" }));
+					}
+				} catch (e: any) {
+					res.statusCode = 500;
+					res.end(JSON.stringify({ error: e.message }));
+				}
+			});
+			return;
+		}
+
+		if (method === "POST" && url.pathname === "/api/session/create") {
+			let body = "";
+			req.on("data", (chunk) => (body += chunk));
+			req.on("end", async () => {
+				try {
+					const { cwd } = JSON.parse(body);
+					const sessionDir = this.runtime.session.sessionManager.getSessionDir();
+					const sm = SessionManager.create(cwd, sessionDir);
+					sm.newSession();
+					await this.runtime.switchSession(sm.getSessionFile()!);
+					res.setHeader("Content-Type", "application/json");
+					res.end(JSON.stringify({ success: true, path: sm.getSessionFile() }));
+				} catch (e: any) {
+					res.statusCode = 500;
+					res.end(JSON.stringify({ error: e.message }));
+				}
+			});
+			return;
+		}
+
+		if (method === "POST" && url.pathname === "/api/project/open-explorer") {
+			let body = "";
+			req.on("data", (chunk) => (body += chunk));
+			req.on("end", async () => {
+				try {
+					const { cwd } = JSON.parse(body);
+					const startCmd = process.platform === "win32" ? "explorer" : process.platform === "darwin" ? "open" : "xdg-open";
+					exec(`${startCmd} "${cwd}"`);
+					res.setHeader("Content-Type", "application/json");
+					res.end(JSON.stringify({ success: true }));
+				} catch (e: any) {
+					res.statusCode = 500;
+					res.end(JSON.stringify({ error: e.message }));
+				}
+			});
+			return;
+		}
+
+		if (method === "POST" && url.pathname === "/api/project/delete") {
+			let body = "";
+			req.on("data", (chunk) => (body += chunk));
+			req.on("end", async () => {
+				try {
+					const { cwd } = JSON.parse(body);
+					const safePath = `--${cwd.replace(/^[/\\]/, "").replace(/[/\\:]/g, "-")}--`;
+					const projectDir = join(getEngineDir(), "sessions", safePath);
+					if (fs.existsSync(projectDir)) {
+						fs.rmSync(projectDir, { recursive: true, force: true });
+					}
+					res.setHeader("Content-Type", "application/json");
+					res.end(JSON.stringify({ success: true }));
+				} catch (e: any) {
+					res.statusCode = 500;
+					res.end(JSON.stringify({ error: e.message }));
+				}
+			});
+			return;
+		}
+
+		if (method === "POST" && url.pathname === "/api/terminal/input") {
+			let body = "";
+			req.on("data", (chunk) => (body += chunk));
+			req.on("end", async () => {
+				try {
+					const { command } = JSON.parse(body);
+					process.stdout.write(`\n$ ${command}\n`);
+					exec(command, { cwd: this.runtime.cwd }, (error, stdout, stderr) => {
+						if (stdout) process.stdout.write(stdout);
+						if (stderr) process.stderr.write(stderr);
+						if (error) process.stderr.write(`Error: ${error.message}\n`);
+					});
+					res.setHeader("Content-Type", "application/json");
+					res.end(JSON.stringify({ success: true }));
+				} catch (e: any) {
+					res.statusCode = 500;
+					res.end(JSON.stringify({ error: e.message }));
+				}
+			});
+			return;
+		}
+
 		if (method === "POST" && url.pathname === "/api/reset") {
 			this.runtime.session.engine.reset();
 			this.broadcastEvent({ type: "clear_chat" });
@@ -491,6 +675,7 @@ export class WebMode {
 					compactionProfile: sm.getCompactionProfile(),
 					enableToolBasedCompaction: sm.getCompactionEnabled(),
 					thinkingLevel: sm.getDefaultThinkingLevel(),
+					permissionLevel: sm.getPermissionLevel(),
 				}),
 			);
 
@@ -503,11 +688,11 @@ export class WebMode {
 			req.on("end", async () => {
 				try {
 					const updates = JSON.parse(body);
+					const sm = this.runtime.session.settingsManager;
 					for (const [k, v] of Object.entries(updates)) {
-						const sm = this.runtime.session.settingsManager;
 						if (k === "theme") sm.setTheme(v as string);
-
 						if (k === "enableToolBasedCompaction") sm.setCompactionEnabled(v as boolean);
+						if (k === "permissionLevel") sm.setPermissionLevel(v as any);
 					}
 					res.setHeader("Content-Type", "application/json");
 					res.end(JSON.stringify({ success: true }));

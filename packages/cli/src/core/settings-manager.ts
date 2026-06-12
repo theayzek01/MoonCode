@@ -151,6 +151,7 @@ export interface Settings {
 	affect?: AffectiveSettings; // Persistent affective control layer
 	robotics?: RoboticsSettings; // Robotics mode configuration
 	discordToken?: string; // Discord Bot Token
+	permissionLevel?: "ask" | "safe" | "full";
 }
 
 export interface McpServerConfig {
@@ -691,6 +692,21 @@ export class SettingsManager {
 	setTheme(theme: string): void {
 		this.globalSettings.theme = theme;
 		this.markModified("theme");
+		this.save();
+	}
+
+	getPermissionLevel(): "ask" | "safe" | "full" {
+		return this.settings.permissionLevel || "ask";
+	}
+
+	setPermissionLevel(level: "ask" | "safe" | "full"): void {
+		this.globalSettings.permissionLevel = level;
+		this.markModified("permissionLevel");
+		if (level === "full") {
+			this.setAutomationRequireConfirmation(false);
+		} else {
+			this.setAutomationRequireConfirmation(true);
+		}
 		this.save();
 	}
 

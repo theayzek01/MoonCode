@@ -548,7 +548,7 @@ function getSessionModifiedDate(entries: FileEntry[], header: SessionHeader, sta
 	return !Number.isNaN(headerTime) ? new Date(headerTime) : statsMtime;
 }
 
-async function buildSessionInfo(filePath: string): Promise<SessionInfo | null> {
+export async function buildSessionInfo(filePath: string): Promise<SessionInfo | null> {
 	try {
 		const content = await readFile(filePath, "utf8");
 		const entries: FileEntry[] = [];

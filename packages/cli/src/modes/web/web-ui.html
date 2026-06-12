@@ -8,6 +8,8 @@
 	<meta name="description" content="MoonCode – Güçlü yapay zeka destekli kodlama asistanı">
 	<script src="https://cdn.tailwindcss.com"></script>
 	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" id="hljs-theme">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -853,10 +855,14 @@
 		</button>
 	</div>
 
-	<!-- New Chat -->
-	<div style="padding:0 10px 8px;">
-		<button onclick="newChat()" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;color:var(--fg);font-size:0.8rem;font-weight:500;font-family:'Inter',sans-serif;transition:all 0.15s;" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--surface2)'">
-			<span class="material-symbols-rounded" style="color:var(--accent);font-size:18px;">add</span>
+	<!-- New Chat & New Project -->
+	<div style="padding:0 10px 8px; display:flex; gap:8px;">
+		<button onclick="createNewProjectPrompt()" style="flex:1; display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 6px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;color:var(--fg);font-size:0.75rem;font-weight:500;font-family:'Inter',sans-serif;transition:all 0.15s;" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--surface2)'" title="Yeni Proje">
+			<span class="material-symbols-rounded" style="color:var(--accent2);font-size:16px;">create_new_folder</span>
+			<span>Yeni Proje</span>
+		</button>
+		<button onclick="newChat()" style="flex:1; display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 6px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;color:var(--fg);font-size:0.75rem;font-weight:500;font-family:'Inter',sans-serif;transition:all 0.15s;" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--surface2)'" title="Yeni Sohbet">
+			<span class="material-symbols-rounded" style="color:var(--accent);font-size:16px;">add</span>
 			<span>Yeni Sohbet</span>
 		</button>
 	</div>
@@ -883,14 +889,11 @@
 
 	<div class="divider"></div>
 
-	<!-- Recent chats -->
+	<!-- Projects and Chats -->
 	<div style="flex:1;overflow-y:auto;padding:4px 10px;">
-		<div style="font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding:4px 12px;margin-bottom:4px;">Son Sohbetler</div>
-		<div id="recent-list">
-			<div class="sidebar-item active" style="font-size:0.78rem;">
-				<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent);flex-shrink:0;">chat</span>
-				<span style="overflow:hidden;text-overflow:ellipsis;">Mevcut oturum</span>
-			</div>
+		<div style="font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding:4px 12px;margin-bottom:4px;">Projeler</div>
+		<div id="project-list" style="display:flex;flex-direction:column;gap:4px;">
+			<div style="text-align:center;padding:12px;color:var(--muted);font-size:0.78rem;">Projeler yükleniyor...</div>
 		</div>
 	</div>
 
@@ -958,6 +961,9 @@
 			</button>
 			<button onclick="openCmdPalette()" class="tool-btn" title="Komut Paleti (Ctrl+K)">
 				<span class="material-symbols-rounded">apps</span>
+			</button>
+			<button onclick="toggleTerminal()" class="tool-btn" title="Terminal Panelini Aç/Kapat">
+				<span class="material-symbols-rounded">terminal</span>
 			</button>
 			<!-- User menu -->
 			<div style="position:relative;">
@@ -1065,6 +1071,31 @@
 			<div style="text-align:center;font-size:0.65rem;color:var(--muted);margin-top:6px;opacity:0.5;">
 				MoonCode yapay zeka hatalar yapabilir. Kritik bilgileri doğrulayın.
 			</div>
+		</div>
+	<!-- Terminal Panel -->
+	<div id="terminal-panel" class="hidden" style="position:absolute;bottom:0;left:0;right:0;height:280px;background:var(--bg);border-top:1px solid var(--border);box-shadow:0 -4px 24px rgba(0,0,0,0.3);z-index:40;display:flex;flex-direction:column;transition:transform 0.3s ease-in-out;">
+		<!-- Terminal Header -->
+		<div style="padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:between;flex-shrink:0;">
+			<div style="display:flex;align-items:center;gap:8px;font-size:0.8rem;font-weight:600;color:var(--fg);">
+				<span class="material-symbols-rounded" style="color:var(--accent2);font-size:16px;">terminal</span>
+				<span>MoonCode Terminal</span>
+				<span id="terminal-project-badge" style="font-size:0.7rem;background:var(--surface2);color:var(--muted);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;"></span>
+			</div>
+			<div style="display:flex;align-items:center;gap:4px;margin-left:auto;">
+				<button onclick="clearTerminal()" class="tool-btn" style="padding:4px;" title="Terminali Temizle">
+					<span class="material-symbols-rounded" style="font-size:16px;">delete_sweep</span>
+				</button>
+				<button onclick="toggleTerminal()" class="tool-btn" style="padding:4px;" title="Kapat">
+					<span class="material-symbols-rounded" style="font-size:16px;">close</span>
+				</button>
+			</div>
+		</div>
+		<!-- Terminal Output -->
+		<div id="terminal-output" style="flex:1;overflow-y:auto;padding:12px;font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:#a6accd;background:#090a0f;line-height:1.6;white-space:pre-wrap;word-break:break-all;"></div>
+		<!-- Terminal Input -->
+		<div style="padding:8px 12px;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0;">
+			<span style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--accent2);font-weight:600;">$</span>
+			<input id="terminal-input" placeholder="Komut çalıştır..." style="flex:1;background:none;border:none;outline:none;color:var(--fg);font-family:'JetBrains Mono',monospace;font-size:0.78rem;" onkeydown="terminalInputKeydown(event)">
 		</div>
 	</div>
 </div>
@@ -1251,6 +1282,31 @@
 
 <!-- Toast Container -->
 <div id="toast-container"></div>
+
+<!-- Project Context Menu -->
+<div id="project-menu" class="hidden" style="position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);z-index:1000;padding:6px;width:210px;font-size:0.8rem;animation:scaleIn 0.15s ease;">
+	<div class="sidebar-item" onclick="pinActiveProject()" style="padding:6px 10px;display:flex;align-items:center;gap:8px;cursor:pointer;">
+		<span class="material-symbols-rounded" style="font-size:16px;">push_pin</span>
+		<span>Projeyi sabitle</span>
+	</div>
+	<div class="sidebar-item" onclick="openActiveProjectExplorer()" style="padding:6px 10px;display:flex;align-items:center;gap:8px;cursor:pointer;">
+		<span class="material-symbols-rounded" style="font-size:16px;">folder_open</span>
+		<span>Dosya Gezgininde aç</span>
+	</div>
+	<div class="sidebar-item" onclick="renameActiveProject()" style="padding:6px 10px;display:flex;align-items:center;gap:8px;cursor:pointer;">
+		<span class="material-symbols-rounded" style="font-size:16px;">edit</span>
+		<span>Projeyi yeniden adlandır</span>
+	</div>
+	<div class="sidebar-item" onclick="archiveActiveProject()" style="padding:6px 10px;display:flex;align-items:center;gap:8px;cursor:pointer;">
+		<span class="material-symbols-rounded" style="font-size:16px;">archive</span>
+		<span>Sohbetleri arşivle</span>
+	</div>
+	<div class="divider"></div>
+	<div class="sidebar-item" onclick="deleteActiveProject()" style="color:#ff6464;padding:6px 10px;display:flex;align-items:center;gap:8px;cursor:pointer;">
+		<span class="material-symbols-rounded" style="font-size:16px;color:#ff6464;">delete</span>
+		<span>Kaldır</span>
+	</div>
+</div>
 
 <!-- ═══════════════════ SCRIPT ═══════════════════════════════════════════ -->
 <script>
@@ -1756,6 +1812,24 @@ function updateMessage(id, content) {
 	}
 	html += marked.parse(text || '');
 	inner.innerHTML = html;
+
+	// ── KaTeX math rendering ──────────────────────────────────────────
+	if (typeof katex !== 'undefined') {
+		// Block math: $$...$$
+		inner.querySelectorAll('p, div, li, td').forEach(el => {
+			el.innerHTML = el.innerHTML.replace(/\$\$([\s\S]+?)\$\$/g, (_, expr) => {
+				try {
+					return katex.renderToString(expr.trim(), { displayMode: true, throwOnError: false });
+				} catch(e) { return _; }
+			});
+			// Inline math: $...$
+			el.innerHTML = el.innerHTML.replace(/(?<!\$)\$(?!\$)([^\n$]+?)(?<!\$)\$(?!\$)/g, (_, expr) => {
+				try {
+					return katex.renderToString(expr.trim(), { displayMode: false, throwOnError: false });
+				} catch(e) { return _; }
+			});
+		});
+	}
 	chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
@@ -1970,6 +2044,23 @@ async function loadSettings() {
 					<option value="off" ${s.compactionProfile==='off'?'selected':''}>Kapalı</option>
 				</select>
 			</div>
+			<div class="form-group">
+				<label class="form-label">Genel İzin Seviyesi</label>
+				<div style="font-size:0.72rem;color:var(--muted);margin-bottom:6px;">Tüm projeler için varsayılan araç onay davranışı</div>
+				<div style="display:flex;flex-direction:column;gap:4px;">
+					${['auto','ask','always','never'].map(level => {
+						const labels = { auto: 'Otomatik — AI karar verir', ask: 'Her zaman sor', always: 'Her zaman izin ver', never: 'Hiçbir zaman izin verme' };
+						const icons = { auto: 'auto_mode', ask: 'help', always: 'check_circle', never: 'block' };
+						const colors = { auto: 'var(--accent2)', ask: 'var(--accent)', always: '#4ade80', never: '#ff6464' };
+						const active = (s.permissionLevel || 'ask') === level;
+						return `<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;cursor:pointer;border:1px solid ${active ? 'var(--accent)' : 'var(--border)'};background:${active ? 'rgba(108,143,255,0.08)' : 'var(--surface2)'};transition:all 0.15s;" onclick="document.querySelectorAll('.perm-opt').forEach(r=>r.checked=false); this.querySelector('input').checked=true; document.querySelectorAll('.perm-label-wrap').forEach(el=>el.parentElement.style.background='var(--surface2)'); document.querySelectorAll('.perm-label-wrap').forEach(el=>el.parentElement.style.borderColor='var(--border)'); this.style.background='rgba(108,143,255,0.08)'; this.style.borderColor='var(--accent)';">
+							<input type="radio" class="perm-opt" name="perm-level" value="${level}" ${active ? 'checked' : ''} style="display:none;">
+							<span class="material-symbols-rounded" style="color:${colors[level]};font-size:18px;">${icons[level]}</span>
+							<span class="perm-label-wrap" style="font-size:0.8rem;color:var(--fg);">${labels[level]}</span>
+						</label>`;
+					}).join('')}
+				</div>
+			</div>
 			<label class="form-checkbox-row">
 				<input type="checkbox" id="set-tool-compaction" ${s.enableToolBasedCompaction?'checked':''}>
 				<div>
@@ -1986,11 +2077,13 @@ async function saveSettings() {
 	const theme = document.getElementById('set-theme')?.value;
 	const profile = document.getElementById('set-profile')?.value;
 	const toolCompaction = document.getElementById('set-tool-compaction')?.checked;
+	const permOpt = document.querySelector('.perm-opt:checked');
+	const permissionLevel = permOpt ? permOpt.value : undefined;
 	try {
 		await fetch('/api/settings', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ theme, profile, enableToolBasedCompaction: toolCompaction })
+			body: JSON.stringify({ theme, profile, enableToolBasedCompaction: toolCompaction, permissionLevel })
 		});
 		if (theme) setTheme(theme);
 		closeModal('settingsModal');
@@ -2436,13 +2529,307 @@ async function saveEdit(id) {
 	}
 }
 
+// ─── TERMINAL ─────────────────────────────────────────────────────────────
+let terminalOpen = false;
+let termCmdHistory = [];
+let termHistIdx = -1;
+
+function toggleTerminal() {
+	terminalOpen = !terminalOpen;
+	const panel = document.getElementById('terminal-panel');
+	if (!panel) return;
+	if (terminalOpen) {
+		panel.classList.remove('hidden');
+		panel.style.transform = 'translateY(0)';
+		document.getElementById('terminal-input')?.focus();
+		// Stream existing log buffer
+		const out = document.getElementById('terminal-output');
+		if (out && out.children.length === 0) {
+			out.textContent = '$ MoonCode Terminal — hazır\n';
+		}
+	} else {
+		panel.classList.add('hidden');
+	}
+}
+
+function clearTerminal() {
+	const out = document.getElementById('terminal-output');
+	if (out) out.textContent = '';
+}
+
+function appendTerminalLine(text, type = 'output') {
+	const out = document.getElementById('terminal-output');
+	if (!out) return;
+	const span = document.createElement('span');
+	span.textContent = text;
+	if (type === 'error') span.style.color = '#ff6464';
+	else if (type === 'cmd') span.style.color = 'var(--accent2)';
+	out.appendChild(span);
+	out.scrollTop = out.scrollHeight;
+}
+
+async function terminalInputKeydown(e) {
+	const input = document.getElementById('terminal-input');
+	if (e.key === 'ArrowUp') {
+		e.preventDefault();
+		if (termHistIdx < termCmdHistory.length - 1) {
+			termHistIdx++;
+			input.value = termCmdHistory[termCmdHistory.length - 1 - termHistIdx];
+		}
+		return;
+	}
+	if (e.key === 'ArrowDown') {
+		e.preventDefault();
+		if (termHistIdx > 0) {
+			termHistIdx--;
+			input.value = termCmdHistory[termCmdHistory.length - 1 - termHistIdx];
+		} else {
+			termHistIdx = -1;
+			input.value = '';
+		}
+		return;
+	}
+	if (e.key !== 'Enter') return;
+	const cmd = input.value.trim();
+	if (!cmd) return;
+	termCmdHistory.push(cmd);
+	termHistIdx = -1;
+	input.value = '';
+	appendTerminalLine(`$ ${cmd}\n`, 'cmd');
+	try {
+		await fetch('/api/terminal/input', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ command: cmd })
+		});
+	} catch(err) {
+		appendTerminalLine('Bağlantı hatası\n', 'error');
+	}
+}
+
+// Listen for terminal_log events from SSE
+const _origOnMessage = es.onmessage;
+es.onmessage = (e) => {
+	_origOnMessage && _origOnMessage.call(es, e);
+	try {
+		const data = JSON.parse(e.data);
+		if (data.type === 'terminal_log' && terminalOpen) {
+			appendTerminalLine(data.data);
+		}
+	} catch(err) {}
+};
+
+// ─── PROJECTS ─────────────────────────────────────────────────────────────
+let projectData = [];
+let activeProjectCwd = null;
+let activeProjectMenu = null;
+
+async function loadProjects() {
+	const list = document.getElementById('project-list');
+	if (!list) return;
+	try {
+		const res = await fetch('/api/sessions');
+		projectData = await res.json();
+		if (!projectData.length) {
+			list.innerHTML = '<div style="text-align:center;padding:12px;color:var(--muted);font-size:0.78rem;">Henüz proje yok</div>';
+			return;
+		}
+		list.innerHTML = '';
+		projectData.forEach(proj => {
+			const isActive = proj.cwd === activeProjectCwd;
+			const wrap = document.createElement('div');
+			wrap.style.cssText = 'margin-bottom:2px;';
+
+			const projEl = document.createElement('div');
+			projEl.className = 'sidebar-item' + (isActive ? ' active' : '');
+			projEl.style.cssText = 'padding:7px 10px;display:flex;align-items:center;gap:8px;cursor:pointer;border-radius:10px;justify-content:space-between;';
+			projEl.innerHTML = `
+				<div style="display:flex;align-items:center;gap:7px;overflow:hidden;">
+					<span class="material-symbols-rounded" style="font-size:16px;color:var(--accent2);flex-shrink:0;">folder</span>
+					<span style="font-size:0.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(proj.name)}</span>
+				</div>
+				<div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
+					<span style="font-size:0.65rem;color:var(--muted);">${proj.sessions?.length || 0} sohbet</span>
+					<button onclick="event.stopPropagation();showProjectMenu(event,'${escapeJsString(proj.cwd)}')" class="tool-btn" style="padding:2px;opacity:0;" class="proj-menu-btn">
+						<span class="material-symbols-rounded" style="font-size:15px;">more_vert</span>
+					</button>
+				</div>`;
+			projEl.addEventListener('mouseenter', () => projEl.querySelector('button')?.style && (projEl.querySelector('button').style.opacity = '1'));
+			projEl.addEventListener('mouseleave', () => projEl.querySelector('button')?.style && (projEl.querySelector('button').style.opacity = '0'));
+			projEl.addEventListener('click', () => toggleProjectSessions(proj, wrap, projEl));
+
+			const sessWrap = document.createElement('div');
+			sessWrap.style.cssText = 'padding-left:14px;display:none;flex-direction:column;gap:2px;';
+
+			(proj.sessions || []).slice(0, 8).forEach(sess => {
+				const sessEl = document.createElement('div');
+				sessEl.className = 'sidebar-item';
+				sessEl.style.cssText = 'font-size:0.75rem;padding:5px 8px;border-radius:7px;cursor:pointer;display:flex;align-items:center;gap:6px;';
+				sessEl.innerHTML = `
+					<span class="material-symbols-rounded" style="font-size:13px;color:var(--muted);flex-shrink:0;">chat</span>
+					<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(sess.name || 'Başlıksız')}</span>`;
+				sessEl.addEventListener('click', (ev) => { ev.stopPropagation(); switchSession(sess.path, proj.cwd); });
+				sessWrap.appendChild(sessEl);
+			});
+
+			wrap.appendChild(projEl);
+			wrap.appendChild(sessWrap);
+			list.appendChild(wrap);
+		});
+	} catch(e) {
+		list.innerHTML = '<div style="text-align:center;padding:12px;color:#ff6464;font-size:0.75rem;">Projeler yüklenemedi</div>';
+	}
+}
+
+function toggleProjectSessions(proj, wrap, projEl) {
+	const sessWrap = wrap.querySelector('div:last-child');
+	if (!sessWrap) return;
+	const open = sessWrap.style.display !== 'none';
+	sessWrap.style.display = open ? 'none' : 'flex';
+	activeProjectCwd = open ? null : proj.cwd;
+	// Update the terminal project badge
+	const badge = document.getElementById('terminal-project-badge');
+	if (badge) badge.textContent = open ? '' : proj.name;
+}
+
+async function switchSession(filePath, cwd) {
+	try {
+		const res = await fetch('/api/session/switch', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ path: filePath })
+		});
+		if (res.ok) {
+			activeProjcetCwd = cwd;
+			toast('Sohbet yüklendi', 'success');
+			newChat();
+			loadHistory();
+		} else {
+			toast('Sohbet yüklenemedi', 'error');
+		}
+	} catch(e) {
+		toast('Bağlantı hatası', 'error');
+	}
+}
+
+async function createNewProjectPrompt() {
+	const cwd = prompt('Proje klasörünün tam yolunu girin:');
+	if (!cwd || !cwd.trim()) return;
+	try {
+		const res = await fetch('/api/session/create', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ cwd: cwd.trim() })
+		});
+		if (res.ok) {
+			newChat();
+			toast('Yeni proje oluşturuldu', 'success');
+			setTimeout(loadProjects, 500);
+		}
+	} catch(e) {
+		toast('Proje oluşturulamadı', 'error');
+	}
+}
+
+function showProjectMenu(e, cwd) {
+	activeProjectMenu = cwd;
+	const menu = document.getElementById('project-menu');
+	if (!menu) return;
+	menu.classList.remove('hidden');
+	const x = Math.min(e.clientX, window.innerWidth - 220);
+	const y = Math.min(e.clientY, window.innerHeight - 200);
+	menu.style.left = x + 'px';
+	menu.style.top = y + 'px';
+	e.stopPropagation();
+}
+
+document.addEventListener('click', () => {
+	const menu = document.getElementById('project-menu');
+	if (menu) menu.classList.add('hidden');
+});
+
+function pinActiveProject() {
+	if (!activeProjectMenu) return;
+	toast('Proje sabitlendi', 'success');
+	document.getElementById('project-menu')?.classList.add('hidden');
+}
+
+async function openActiveProjectExplorer() {
+	if (!activeProjectMenu) return;
+	try {
+		await fetch('/api/project/open-explorer', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ cwd: activeProjectMenu })
+		});
+	} catch(e) {}
+	document.getElementById('project-menu')?.classList.add('hidden');
+}
+
+function renameActiveProject() {
+	if (!activeProjectMenu) return;
+	const newName = prompt('Proje için yeni ad girin:');
+	if (newName) toast('Yeniden adlandırma kaydedildi (yerel)', 'info');
+	document.getElementById('project-menu')?.classList.add('hidden');
+}
+
+function archiveActiveProject() {
+	if (!activeProjectMenu) return;
+	toast('Proje arşivlendi', 'info');
+	document.getElementById('project-menu')?.classList.add('hidden');
+}
+
+async function deleteActiveProject() {
+	if (!activeProjectMenu) return;
+	if (!confirm('Bu projenin tüm sohbetleri silinecek. Emin misiniz?')) return;
+	try {
+		const res = await fetch('/api/project/delete', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ cwd: activeProjectMenu })
+		});
+		if (res.ok) {
+			toast('Proje silindi', 'success');
+			loadProjects();
+		}
+	} catch(e) {
+		toast('Silinemedi', 'error');
+	}
+	document.getElementById('project-menu')?.classList.add('hidden');
+}
+
+// ─── RUN CODE ─────────────────────────────────────────────────────────────
+function runCode(btn) {
+	const codeBlock = btn.closest('.code-block');
+	if (!codeBlock) return;
+	const pre = codeBlock.querySelector('pre');
+	const code = pre ? pre.textContent.trim() : '';
+	const lang = codeBlock.querySelector('.lang-badge')?.textContent?.trim()?.replace('code','').trim() || 'bash';
+
+	if (!terminalOpen) toggleTerminal();
+	appendTerminalLine(`$ # Çalıştırılıyor (${lang})\n`, 'cmd');
+
+	if (['bash','sh','shell'].includes(lang)) {
+		fetch('/api/terminal/input', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ command: code.split('\n')[0] })
+		}).then(() => toast('Komut gönderildi', 'info'));
+	} else {
+		navigator.clipboard.writeText(code);
+		toast('Kod panoya kopyalandı — terminale yapıştırın', 'info');
+	}
+}
+
 // ─── INIT ─────────────────────────────────────────────────────────────────
 checkInitialStatus();
 loadHistory();
 updateUserUI();
 fetchCommands();
 initSettings();
+loadProjects();
 setInterval(updateUserUI, 8000);
+setInterval(loadProjects, 30000);
 
 // Sidebar starts open on wide screens
 if (window.innerWidth < 768) toggleSidebar();
