@@ -12,6 +12,7 @@ export class WebMode {
 	private clients: ServerResponse[] = [];
 	private server: ReturnType<typeof createServer> | null = null;
 	private port: number = 0;
+	private pinnedMessageIds: Set<string> = new Set();
 
 	constructor(runtime: EngineSessionRuntime, options: InteractiveModeOptions) {
 		this.runtime = runtime;
@@ -239,24 +240,30 @@ export class WebMode {
 			res.setHeader("Content-Type", "application/json");
 			const messages = this.runtime.session.engine.state.messages || [];
 
-			const mapped = messages.map((m: any, index: number) => ({
-				id: m.id || `msg-${index}`,
-				role: m.role,
-				text:
-					typeof m.content === "string"
-						? m.content
-						: m.content && m.content.map
-							? m.content.map((c: any) => c.text).join("")
-							: "",
-				tools: (m.toolInvocations || []).map((t: any) => ({
-					id: t.toolCallId,
-					name: t.toolName,
-					status: t.state === "result" ? "success" : t.state === "error" ? "error" : "running",
-					input: typeof t.args === "string" ? t.args : JSON.stringify(t.args || {}),
-					output: typeof t.result === "string" ? t.result : JSON.stringify(t.result || ""),
-				})),
-				status: "complete",
-			}));
+			const mapped = messages.map((m: any, index: number) => {
+				if (!m.id) {
+					m.id = `msg-${Date.now()}-${index}-${Math.random().toString(36).substr(2, 5)}`;
+				}
+				return {
+					id: m.id,
+					role: m.role,
+					text:
+						typeof m.content === "string"
+							? m.content
+							: m.content && m.content.map
+								? m.content.map((c: any) => c.text).join("")
+								: "",
+					tools: (m.toolInvocations || []).map((t: any) => ({
+						id: t.toolCallId,
+						name: t.toolName,
+						status: t.state === "result" ? "success" : t.state === "error" ? "error" : "running",
+						input: typeof t.args === "string" ? t.args : JSON.stringify(t.args || {}),
+						output: typeof t.result === "string" ? t.result : JSON.stringify(t.result || ""),
+					})),
+					status: "complete",
+					pinned: this.pinnedMessageIds.has(m.id),
+				};
+			});
 			res.end(JSON.stringify(mapped));
 			return;
 		}
@@ -297,6 +304,92 @@ export class WebMode {
 					if (!handled) {
 						this.runtime.session.prompt(prompt).catch(console.error);
 					}
+				} catch (e: any) {
+					res.statusCode = 500;
+					res.end(JSON.stringify({ error: e.message }));
+				}
+			});
+			return;
+		}
+
+		if (method === "POST" && url.pathname === "/api/history/delete") {
+			let body = "";
+			req.on("data", (chunk) => (body += chunk));
+			req.on("end", async () => {
+				try {
+					const { id } = JSON.parse(body);
+					const messages = this.runtime.session.engine.state.messages || [];
+					const index = messages.findIndex((m: any) => m.id === id);
+					if (index !== -1) {
+						const msg = messages[index];
+						if (msg.role === "user" && index + 1 < messages.length && messages[index + 1].role === "assistant") {
+							messages.splice(index, 2);
+						} else {
+							messages.splice(index, 1);
+						}
+						this.pinnedMessageIds.delete(id);
+						res.setHeader("Content-Type", "application/json");
+						res.end(JSON.stringify({ success: true }));
+					} else {
+						res.statusCode = 404;
+						res.end(JSON.stringify({ error: "Message not found" }));
+					}
+				} catch (e: any) {
+					res.statusCode = 500;
+					res.end(JSON.stringify({ error: e.message }));
+				}
+			});
+			return;
+		}
+
+		if (method === "POST" && url.pathname === "/api/history/edit") {
+			let body = "";
+			req.on("data", (chunk) => (body += chunk));
+			req.on("end", async () => {
+				try {
+					const { id, text } = JSON.parse(body);
+					const messages = this.runtime.session.engine.state.messages || [];
+					const msg: any = messages.find((m: any) => m.id === id);
+					if (msg) {
+						if (typeof msg.content === "string") {
+							msg.content = text;
+						} else if (Array.isArray(msg.content)) {
+							const textBlock = msg.content.find((c: any) => c.type === "text");
+							if (textBlock) {
+								textBlock.text = text;
+							} else {
+								msg.content = [{ type: "text", text }];
+							}
+						} else {
+							msg.content = text;
+						}
+						res.setHeader("Content-Type", "application/json");
+						res.end(JSON.stringify({ success: true }));
+					} else {
+						res.statusCode = 404;
+						res.end(JSON.stringify({ error: "Message not found" }));
+					}
+				} catch (e: any) {
+					res.statusCode = 500;
+					res.end(JSON.stringify({ error: e.message }));
+				}
+			});
+			return;
+		}
+
+		if (method === "POST" && url.pathname === "/api/history/pin") {
+			let body = "";
+			req.on("data", (chunk) => (body += chunk));
+			req.on("end", async () => {
+				try {
+					const { id, pinned } = JSON.parse(body);
+					if (pinned) {
+						this.pinnedMessageIds.add(id);
+					} else {
+						this.pinnedMessageIds.delete(id);
+					}
+					res.setHeader("Content-Type", "application/json");
+					res.end(JSON.stringify({ success: true }));
 				} catch (e: any) {
 					res.statusCode = 500;
 					res.end(JSON.stringify({ error: e.message }));

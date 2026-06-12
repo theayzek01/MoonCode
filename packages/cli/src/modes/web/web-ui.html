@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>MoonCode – AI Kodlama Asistanı</title>
-	<link rel="icon" type="image/png" href="/assets/Moon-cli-logo.png">
+	<link rel="icon" type="image/png" href="/assets/Mooncodewhitelogo.png">
 	<meta name="description" content="MoonCode – Güçlü yapay zeka destekli kodlama asistanı">
 	<script src="https://cdn.tailwindcss.com"></script>
 	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -817,6 +817,25 @@
 		.divider { width: 100%; height: 1px; background: var(--border); margin: 8px 0; }
 		.spin { animation: spin 0.8s linear infinite; }
 		.hidden { display: none !important; }
+
+		/* ─── PINNED & HIGHLIGHT ────────────────────────────────────────── */
+		.pinned-message .user-bubble {
+			border-color: var(--accent);
+			box-shadow: 0 0 12px rgba(108,143,255,0.12);
+		}
+		.pinned-message.msg-row.assistant {
+			background: rgba(108,143,255,0.03);
+			border-left: 3px solid var(--accent);
+			padding-left: 10px;
+			border-radius: 0 8px 8px 0;
+		}
+		@keyframes pulseHighlight {
+			0%, 100% { background: transparent; }
+			50% { background: rgba(108,143,255,0.15); }
+		}
+		.pulse-highlight {
+			animation: pulseHighlight 2s ease;
+		}
 	</style>
 </head>
 <body>
@@ -826,7 +845,7 @@
 	<!-- Brand -->
 	<div style="padding:14px 14px 10px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
 		<div style="display:flex;align-items:center;gap:9px;">
-			<img src="/assets/Moon-cli-logo.png" alt="logo" style="width:28px;height:28px;border-radius:7px;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">
+			<img src="/assets/Mooncodewhitelogo.png" alt="logo" style="width:28px;height:28px;border-radius:7px;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">
 			<span style="font-weight:700;font-size:0.95rem;white-space:nowrap;letter-spacing:-0.01em;">MoonCode</span>
 		</div>
 		<button onclick="toggleSidebar()" class="tool-btn">
@@ -958,6 +977,15 @@
 		<button onclick="toggleSearch()" class="tool-btn"><span class="material-symbols-rounded" style="font-size:17px;">close</span></button>
 	</div>
 
+	<!-- Pinned Messages Bar -->
+	<div id="pinned-bar" class="hidden" style="background:var(--surface);border-bottom:1px solid var(--border);padding:8px 16px;display:flex;align-items:center;gap:10px;font-size:0.8rem;z-index:9;flex-shrink:0;">
+		<span class="material-symbols-rounded" style="color:var(--accent);font-size:16px;font-variation-settings:'FILL' 1;">push_pin</span>
+		<span style="font-weight:600;color:var(--fg);white-space:nowrap;">Sabitlenenler:</span>
+		<div id="pinned-list" style="display:flex;gap:6px;overflow-x:auto;flex:1;align-items:center;scrollbar-width:none;">
+			<!-- Pinned item chips -->
+		</div>
+	</div>
+
 	<!-- Scroll to bottom button -->
 	<button id="scroll-btn" onclick="chatContainer.scrollTop=chatContainer.scrollHeight" class="hidden" style="position:absolute;bottom:170px;right:20px;z-index:30;width:36px;height:36px;border-radius:50%;background:var(--surface);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);box-shadow:var(--shadow);transition:all 0.2s;" onmouseover="this.style.color='var(--fg)'" onmouseout="this.style.color='var(--muted)'" title="A\u015fa\u011f\u0131 git">
 		<span class="material-symbols-rounded" style="font-size:18px;">keyboard_double_arrow_down</span>
@@ -969,7 +997,7 @@
 			<!-- Empty state -->
 			<div id="empty-state">
 				<div class="empty-orb" style="background:none;border:none;">
-					<img src="/assets/Moon-cli-logo.png" alt="MoonCode" style="width:68px;height:68px;border-radius:18px;object-fit:cover;filter:drop-shadow(0 0 18px rgba(108,143,255,0.35));" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+					<img src="/assets/Mooncodewhitelogo.png" alt="MoonCode" style="width:68px;height:68px;border-radius:18px;object-fit:cover;filter:drop-shadow(0 0 18px rgba(108,143,255,0.35));" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
 					<span class="material-symbols-rounded thinking-pulse" style="font-size:32px;color:var(--accent);display:none;">auto_awesome</span>
 				</div>
 				<h2 style="font-size:1.3rem;font-weight:600;margin:0 0 8px;">Bugün nasıl yardımcı olabilirim?</h2>
@@ -1628,16 +1656,18 @@ function setGeneratingState(generating) {
 }
 
 // ─── APPEND MESSAGE ───────────────────────────────────────────────────────
-function appendMessage(role, content, id = null) {
+function appendMessage(role, content, id = null, pinned = false) {
 	// Remove empty state
 	const emptyState = document.getElementById('empty-state');
 	if (emptyState) emptyState.remove();
 
 	const row = document.createElement('div');
-	row.className = `msg-row ${role} msg-enter`;
+	row.className = `msg-row ${role} msg-enter${pinned ? ' pinned-message' : ''}`;
 	row.id = id || ('msg-' + Date.now() + Math.random().toString(36).substr(2,5));
 
 	const timeStr = new Date().toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' });
+	const pinIcon = 'push_pin';
+	const pinStyle = pinned ? 'color:var(--accent);font-variation-settings:\'FILL\' 1;' : '';
 
 	if (role === 'user') {
 		const text = typeof content === 'string' ? content : '';
@@ -1650,6 +1680,15 @@ function appendMessage(role, content, id = null) {
 				<div class="action-bar" style="margin-top:0;">
 					<button onclick="copyText(this.closest('.msg-row').querySelector('.user-bubble').textContent)" title="Kopyala">
 						<span class="material-symbols-rounded" style="font-size:15px;">content_copy</span>
+					</button>
+					<button onclick="editMsg('${row.id}')" title="Düzenle">
+						<span class="material-symbols-rounded" style="font-size:15px;">edit</span>
+					</button>
+					<button onclick="deleteMsg('${row.id}')" title="Sil">
+						<span class="material-symbols-rounded" style="font-size:15px;">delete</span>
+					</button>
+					<button onclick="togglePin('${row.id}')" title="Sabitle" class="pin-btn">
+						<span class="material-symbols-rounded" style="font-size:15px;${pinStyle}">${pinIcon}</span>
 					</button>
 				</div>
 			</div>`;
@@ -1670,6 +1709,12 @@ function appendMessage(role, content, id = null) {
 					</button>
 					<button onclick="likeMsg('${row.id}', false)" title="Be\u011fenme">
 						<span class="material-symbols-rounded" style="font-size:15px;">thumb_down</span>
+					</button>
+					<button onclick="deleteMsg('${row.id}')" title="Sil">
+						<span class="material-symbols-rounded" style="font-size:15px;">delete</span>
+					</button>
+					<button onclick="togglePin('${row.id}')" title="Sabitle" class="pin-btn">
+						<span class="material-symbols-rounded" style="font-size:15px;${pinStyle}">${pinIcon}</span>
 					</button>
 				</div>
 			</div>`;
@@ -1782,6 +1827,7 @@ async function sendMessage() {
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ prompt: text })
 		});
+		syncMessageIds();
 		if (!res.ok) {
 			setGeneratingState(false);
 			appendMessage('assistant', 'Hata: ' + await res.text());
@@ -1807,7 +1853,7 @@ function newChat() {
 	chatInner.innerHTML = `
 		<div id="empty-state">
 			<div class="empty-orb" style="background:none;border:none;">
-				<img src="/assets/Moon-cli-logo.png" alt="MoonCode" style="width:68px;height:68px;border-radius:18px;object-fit:cover;filter:drop-shadow(0 0 20px rgba(108,143,255,0.4));" onerror="this.style.display='none'">
+				<img src="/assets/Mooncodewhitelogo.png" alt="MoonCode" style="width:68px;height:68px;border-radius:18px;object-fit:cover;filter:drop-shadow(0 0 20px rgba(108,143,255,0.4));" onerror="this.style.display='none'">
 			</div>
 			<h2 style="font-size:1.3rem;font-weight:600;margin:0 0 8px;">Bugün nasıl yardımcı olabilirim?</h2>
 			<p style="color:var(--muted);font-size:0.85rem;margin:0 0 28px;max-width:400px;line-height:1.6;">Kodunuzu yazın, hata ayıklayın, refactor yapın veya sıfırdan proje başlatın.</p>
@@ -2067,13 +2113,14 @@ async function loadHistory() {
 			if (msg.role === 'user' || msg.role === 'assistant') {
 				const content = msg.text || (Array.isArray(msg.content) ? msg.content : null);
 				if (content || msg.role === 'assistant') {
-					appendMessage(msg.role, content || '', msg.id);
+					appendMessage(msg.role, content || '', msg.id, msg.pinned);
 				}
 			}
 			if (msg.tools?.length) {
 				msg.tools.forEach(t => renderTool(t.id, t.name, t.input, t.status === 'success' ? 'done' : 'running', t.output));
 			}
 		});
+		updatePinnedBar();
 	} catch(e) {}
 }
 
@@ -2127,6 +2174,7 @@ es.onmessage = (e) => {
 		} else if (data.type === 'engine_end') {
 			setGeneratingState(false);
 			currentAssistantMsgId = null;
+			syncMessageIds();
 
 		} else if (data.type === 'message_start' || data.type === 'message_update' || data.type === 'message_end') {
 			if (!data.message || data.message.role !== 'assistant') return;
@@ -2148,6 +2196,7 @@ es.onmessage = (e) => {
 				setGeneratingState(false);
 				if (currentAssistantMsgId) updateMessage(currentAssistantMsgId, data.message.content);
 				currentAssistantMsgId = null;
+				syncMessageIds();
 			}
 
 		} else if (data.type === 'tool_execution_start' || data.type === 'tool_execution_step') {
@@ -2178,8 +2227,7 @@ es.onmessage = (e) => {
 	} catch(err) {
 		console.error('SSE parse error', err);
 	}
-};
-es.onerror = () => {};
+}
 
 // ─── ESCAPE HTML ──────────────────────────────────────────────────────────
 function escapeHtml(str) {
@@ -2189,6 +2237,203 @@ function escapeHtml(str) {
 		.replace(/>/g,'&gt;')
 		.replace(/"/g,'&quot;')
 		.replace(/'/g,'&#39;');
+}
+
+// ─── ESCAPE JS STRING FOR TEMPLATE LITERALS ──────────────────────────────
+function escapeJsString(str) {
+	return str
+		.replace(/\\/g, '\\\\')
+		.replace(/`/g, '\\`')
+		.replace(/\$/g, '\\$');
+}
+
+// ─── SYNC MESSAGE IDS WITH BACKEND ────────────────────────────────────────
+async function syncMessageIds() {
+	try {
+		const res = await fetch('/api/history');
+		const history = await res.json();
+		const rows = chatInner.querySelectorAll('.msg-row');
+		let histIdx = 0;
+		for (let i = 0; i < rows.length; i++) {
+			const row = rows[i];
+			if (row.id === 'global-indicator' || row.querySelector('.tool-card')) continue;
+			if (histIdx < history.length) {
+				const histMsg = history[histIdx];
+				row.id = histMsg.id;
+				const inner = row.querySelector('.assistant-content');
+				if (inner) {
+					inner.id = 'inner-' + histMsg.id;
+				}
+				histIdx++;
+			}
+		}
+		updatePinnedBar();
+	} catch(e) {
+		console.error('syncMessageIds error', e);
+	}
+}
+
+// ─── UPDATE PINNED BAR ──────────────────────────────────────────────────
+function updatePinnedBar() {
+	const bar = document.getElementById('pinned-bar');
+	const list = document.getElementById('pinned-list');
+	if (!bar || !list) return;
+
+	const pinnedRows = [];
+	chatInner.querySelectorAll('.msg-row').forEach(row => {
+		const pinBtn = row.querySelector('.pin-btn span');
+		if (pinBtn && pinBtn.style.color.includes('var(--accent)')) {
+			const textEl = row.querySelector('.user-bubble, .assistant-content');
+			if (textEl) {
+				let text = textEl.textContent.trim();
+				if (text.length > 30) text = text.slice(0, 30) + '...';
+				pinnedRows.push({ id: row.id, text });
+			}
+		}
+	});
+
+	if (pinnedRows.length === 0) {
+		bar.classList.add('hidden');
+		return;
+	}
+
+	bar.classList.remove('hidden');
+	list.innerHTML = pinnedRows.map(p => `
+		<div onclick="scrollToMessage('${p.id}')" style="display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:0.75rem;color:var(--fg);cursor:pointer;white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+			<span style="overflow:hidden;text-overflow:ellipsis;">${escapeHtml(p.text)}</span>
+			<span onclick="event.stopPropagation(); togglePin('${p.id}')" class="material-symbols-rounded" style="font-size:12px;color:var(--muted);cursor:pointer;" onmouseover="this.style.color='#ff6464'" onmouseout="this.style.color='var(--muted)'">close</span>
+		</div>
+	`).join('');
+}
+
+// ─── SCROLL TO MESSAGE ───────────────────────────────────────────────────
+function scrollToMessage(id) {
+	const el = document.getElementById(id);
+	if (!el) return;
+	el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+	el.classList.add('pulse-highlight');
+	setTimeout(() => el.classList.remove('pulse-highlight'), 2000);
+}
+
+// ─── TOGGLE PIN STATE ────────────────────────────────────────────────────
+async function togglePin(id) {
+	const row = document.getElementById(id);
+	if (!row) return;
+	const pinBtn = row.querySelector('.pin-btn span');
+	if (!pinBtn) return;
+	const currentlyPinned = pinBtn.style.color.includes('var(--accent)');
+	const newPinned = !currentlyPinned;
+
+	try {
+		const res = await fetch('/api/history/pin', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ id, pinned: newPinned })
+		});
+		if (res.ok) {
+			if (newPinned) {
+				pinBtn.style.color = 'var(--accent)';
+				pinBtn.style.fontVariationSettings = "'FILL' 1";
+				row.classList.add('pinned-message');
+				toast('Mesaj sabitlendi', 'success');
+			} else {
+				pinBtn.style.color = '';
+				pinBtn.style.fontVariationSettings = '';
+				row.classList.remove('pinned-message');
+				toast('Sabitleme kaldırıldı', 'info');
+			}
+			updatePinnedBar();
+		}
+	} catch(e) {
+		toast('İşlem başarısız oldu', 'error');
+	}
+}
+
+// ─── DELETE MESSAGE ──────────────────────────────────────────────────────
+async function deleteMsg(id) {
+	const row = document.getElementById(id);
+	if (!row) return;
+	if (!confirm('Bu mesajı silmek istediğinize emin misiniz?')) return;
+
+	try {
+		const res = await fetch('/api/history/delete', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ id })
+		});
+		if (res.ok) {
+			const nextRow = row.nextElementSibling;
+			if (row.classList.contains('user') && nextRow && nextRow.classList.contains('assistant') && !nextRow.querySelector('.tool-card')) {
+				nextRow.remove();
+			}
+			row.remove();
+			toast('Mesaj silindi', 'success');
+			updatePinnedBar();
+			
+			if (chatInner.children.length === 0 || (chatInner.children.length === 1 && chatInner.children[0].id === 'global-indicator')) {
+				newChat();
+			}
+		}
+	} catch(e) {
+		toast('Mesaj silinemedi', 'error');
+	}
+}
+
+// ─── EDIT MESSAGE ────────────────────────────────────────────────────────
+function editMsg(id) {
+	const row = document.getElementById(id);
+	if (!row) return;
+	const bubble = row.querySelector('.user-bubble');
+	if (!bubble) return;
+
+	if (bubble.querySelector('textarea')) return;
+
+	const originalText = bubble.innerText;
+
+	bubble.innerHTML = `
+		<textarea class="form-input" style="width:100%;background:var(--bg2);color:var(--fg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:0.875rem;resize:vertical;" rows="2"></textarea>
+		<div style="display:flex;justify-content:flex-end;gap:6px;margin-top:6px;">
+			<button class="btn btn-ghost" style="padding:4px 8px;font-size:0.75rem;" onclick="cancelEdit('${id}', \`${escapeJsString(originalText)}\`)">İptal</button>
+			<button class="btn btn-primary" style="padding:4px 8px;font-size:0.75rem;" onclick="saveEdit('${id}')">Kaydet</button>
+		</div>
+	`;
+	const textarea = bubble.querySelector('textarea');
+	textarea.value = originalText;
+	textarea.focus();
+}
+
+function cancelEdit(id, originalText) {
+	const row = document.getElementById(id);
+	if (!row) return;
+	const bubble = row.querySelector('.user-bubble');
+	if (!bubble) return;
+	bubble.innerHTML = escapeHtml(originalText).replace(/\n/g, '<br>');
+}
+
+async function saveEdit(id) {
+	const row = document.getElementById(id);
+	if (!row) return;
+	const bubble = row.querySelector('.user-bubble');
+	if (!bubble) return;
+	const textarea = bubble.querySelector('textarea');
+	if (!textarea) return;
+	const newText = textarea.value.trim();
+	if (!newText) return;
+
+	try {
+		const res = await fetch('/api/history/edit', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ id, text: newText })
+		});
+		if (res.ok) {
+			bubble.innerHTML = escapeHtml(newText).replace(/\n/g, '<br>');
+			toast('Mesaj güncellendi', 'success');
+			updatePinnedBar();
+		}
+	} catch(e) {
+		toast('Güncelleme başarısız oldu', 'error');
+	}
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────
