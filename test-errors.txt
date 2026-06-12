@@ -1,0 +1,180 @@
+[41m[1m FAIL [22m[49m test/affect.test.ts[2m > [22maffective state layer[2m > [22mrenders status and registers the slash command
+[31m[1mAssertionError[22m: expected [ 'new', 'resume', 'name', …(47) ] to include 'mood'[39m
+[41m[1m FAIL [22m[49m test/agents.test.ts[2m > [22magent workspace[2m > [22mrenders the company-style workspace departments
+[31m[1mAssertionError[22m: expected '\u001b[1magent workspace\u001b[0m\n\u…' to contain 'Mooncli Company Workspace'[39m
+[41m[1m FAIL [22m[49m test/agents.test.ts[2m > [22magent workspace[2m > [22mregisters agent commands as built-in slash commands
+[31m[1mAssertionError[22m: expected [ 'new', 'resume', 'name', …(47) ] to include 'workspace'[39m
+[41m[1m FAIL [22m[49m test/compaction.test.ts[2m > [22mshouldCompact[2m > [22mshould return true when context exceeds threshold
+[31m[1mAssertionError[22m: expected true to be false // Object.is equality[39m
+[41m[1m FAIL [22m[49m test/edit-tool-no-full-redraw.test.ts[2m > [22medit tool TUI rendering[2m > [22mrenders the large diff in the call preview and does not full-redraw when the result settles
+[31m[1mAssertionError[22m: expected '\u001b[38;2;232;107;107m╭─\u001b[39m\…' to contain 'line 950 changed'[39m
+[41m[1m FAIL [22m[49m test/edit-tool-no-full-redraw.test.ts[2m > [22medit tool TUI rendering[2m > [22mreconstructs the boxed preview from a settled result without argsComplete
+[31m[1mAssertionError[22m: expected '\u001b[38;2;127;199;147m╭─\u001b[39m\…' to contain 'line 150 changed'[39m
+[41m[1m FAIL [22m[49m test/engine-session-auto-compaction-queue.test.ts[2m > [22mEngineSession auto-compaction queue resume[2m > [22mshould trigger threshold compaction for error messages using last successful usage
+[31m[1mAssertionError[22m: expected "_runAutoCompaction" to be called with arguments: [ 'threshold', false ][90m
+[41m[1m FAIL [22m[49m test/engine-session-dynamic-tools.test.ts[2m > [22mEngineSession dynamic tool registration[2m > [22mrefreshes tool registry when tools are registered after initialization
+[31m[1mAssertionError[22m: expected 'You are MoonCode. Created by Theayzek…' to contain '- dynamic_tool: Run dynamic test beha…'[39m
+[41m[1m FAIL [22m[49m test/engine-session-runtime-events.test.ts[2m > [22mEngineSessionRuntime session lifecycle events[2m > [22mruns beforeSessionInvalidate after session_shutdown and before rebindSession
+[31m[1mAssertionError[22m: expected [Function] to throw error including 'This extension ctx is stale after ses…' but got 'This extension ctx is stale after ses…'[39m
+[41m[1m FAIL [22m[49m test/engine-session-runtime-events.test.ts[2m > [22mEngineSessionRuntime session lifecycle events[2m > [22mruns beforeSessionInvalidate after session_shutdown and before rebindSession
+[41m[1m FAIL [22m[49m test/footer-width.test.ts[2m > [22mFooterComponent width handling[2m > [22mkeeps stats line within width for wide model and provider names
+[31m[1mAssertionError[22m: expected 63 to be less than or equal to 60[39m
+[41m[1m FAIL [22m[49m test/git-update.test.ts[2m > [22mDefaultPackageManager git update[2m > [22mtemporary git sources[2m > [22mshould refresh cached temporary git sources when resolving
+[31m[1mAssertionError[22m: expected [ Array(1) ] to include 'git fetch --prune --no-tags origin +r…'[39m
+[41m[1m FAIL [22m[49m test/git-update.test.ts[2m > [22mDefaultPackageManager git update[2m > [22mtemporary git sources[2m > [22mshould not refresh pinned temporary git sources
+[31m[1mAssertionError[22m: expected [ …(2) ] to deeply equal [][39m
+[41m[1m FAIL [22m[49m test/image-processing.test.ts[2m > [22mresizeImage[2m > [22mshould resize image exceeding byte limit
+[31m[1mAssertionError[22m: expected null not to be null[39m
+[41m[1m FAIL [22m[49m test/interactive-chrome-stability.test.ts[2m > [22minteractive chrome stability[2m > [22mheader height stays stable across renders
+[41m[1m FAIL [22m[49m test/interactive-mode-clone-command.test.ts[2m > [22mInteractiveMode /clone[2m > [22mclones the current leaf into a new session
+[31m[1mAssertionError[22m: expected "spy" to be called with arguments: [ 'Cloned to new session' ][90m
+[41m[1m FAIL [22m[49m test/interactive-mode-clone-command.test.ts[2m > [22mInteractiveMode /clone[2m > [22mshows a status message when there is nothing to clone
+[31m[1mAssertionError[22m: expected "spy" to be called with arguments: [ 'Nothing to clone yet' ][90m
+[41m[1m FAIL [22m[49m test/interactive-mode-compaction.test.ts[2m > [22mInteractiveMode compaction events[2m > [22mrebuilds chat and appends a synthetic compaction summary at the bottom
+[41m[1m FAIL [22m[49m test/interactive-mode-status.test.ts[2m > [22mInteractiveMode.createExtensionUIContext setTheme[2m > [22mpersists theme changes to settings manager
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+[41m[1m FAIL [22m[49m test/interactive-mode-status.test.ts[2m > [22mInteractiveMode.showLoadedResources[2m > [22mstill shows diagnostics on quiet startup when requested
+[31m[1mAssertionError[22m: expected '\u001b[38;2;202;164;105m[Yetenek çakı…' to contain '[Skill conflicts]'[39m
+[41m[1m FAIL [22m[49m test/interactive-mode-suspend.test.ts[2m > [22mInteractiveMode.handleCtrlZ[2m > [22mshows a status message and skips suspend on Windows
+[31m[1mAssertionError[22m: expected "spy" to be called with arguments: [ Array(1) ][90m
+[41m[1m FAIL [22m[49m test/interactive-mode-suspend.test.ts[2m > [22mInteractiveMode.handleCtrlZ[2m > [22mkeeps the process alive while suspended and restores the TUI on SIGCONT
+[41m[1m FAIL [22m[49m test/interactive-mode-suspend.test.ts[2m > [22mInteractiveMode.handleCtrlZ[2m > [22mcleans up the temporary handlers if suspension fails
+[31m[1mAssertionError[22m: expected a thrown error to be Error: suspend failed[39m
+[41m[1m FAIL [22m[49m test/oauth-selector.test.ts[2m > [22mOAuthSelectorComponent[2m > [22mkeeps built-in API key providers separate from OAuth-only providers
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+[41m[1m FAIL [22m[49m test/oauth-selector.test.ts[2m > [22mOAuthSelectorComponent[2m > [22mshows stored OAuth auth distinctly in the API key selector
+[31m[1mAssertionError[22m: expected '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━…' to contain 'subscription configured'[39m
+[41m[1m FAIL [22m[49m test/oauth-selector.test.ts[2m > [22mOAuthSelectorComponent[2m > [22mshows environment API key auth as configured
+[31m[1mAssertionError[22m: expected '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━…' to contain '✓ env: OpenAI_API_KEY'[39m
+[41m[1m FAIL [22m[49m test/oauth-selector.test.ts[2m > [22mOAuthSelectorComponent[2m > [22mshows custom provider environment API key auth from status resolver
+[31m[1mAssertionError[22m: expected '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━…' to contain '✓ env: OLLAMA_API_KEY'[39m
+[41m[1m FAIL [22m[49m test/oauth-selector.test.ts[2m > [22mOAuthSelectorComponent[2m > [22mshows models.json API key auth as configured
+[31m[1mAssertionError[22m: expected '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━…' to contain '✓ key in models.json'[39m
+[41m[1m FAIL [22m[49m test/oauth-selector.test.ts[2m > [22mOAuthSelectorComponent[2m > [22mshows models.json command auth as configured
+[31m[1mAssertionError[22m: expected '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━…' to contain '✓ command in models.json'[39m
+[41m[1m FAIL [22m[49m test/package-command-paths.test.ts[2m > [22mpackage commands[2m > [22mshows install subcommand help
+[31m[1mAssertionError[22m: expected 'Kullanım:\n  MoonCode install <source…' to contain 'Moon install <source> [-l]'[39m
+[41m[1m FAIL [22m[49m test/package-command-paths.test.ts[2m > [22mpackage commands[2m > [22mshows a friendly error for unknown install options
+[31m[1mAssertionError[22m: expected '"install" için bilinmeyen seçenek: --…' to contain '"Moon --help" veya "Moon install <sou…'[39m
+[41m[1m FAIL [22m[49m test/package-command-paths.test.ts[2m > [22mpackage commands[2m > [22mshows a friendly error for missing install source
+[31m[1mAssertionError[22m: expected 'install kaynağı eksik.\nKullanım: Moo…' to contain 'Kullanım: Moon install <source> [-l]'[39m
+[41m[1m FAIL [22m[49m test/package-manager.test.ts[2m > [22mDefaultPackageManager[2m > [22mresolve[2m > [22mshould resolve project paths relative to .Mooncli
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+[41m[1m FAIL [22m[49m test/package-manager.test.ts[2m > [22mDefaultPackageManager[2m > [22mresolve[2m > [22mshould resolve symlinked user and project resources once
+[31m[1mAssertionError[22m: expected 'user' to be 'project' // Object.is equality[39m
+[41m[1m FAIL [22m[49m test/package-manager.test.ts[2m > [22mDefaultPackageManager[2m > [22mresolve[2m > [22mshould auto-discover project prompts with overrides
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+[41m[1m FAIL [22m[49m test/package-manager.test.ts[2m > [22mDefaultPackageManager[2m > [22mignore files[2m > [22mshould not apply parent .gitignore to .Mooncli auto-discovery
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+[41m[1m FAIL [22m[49m test/package-manager.test.ts[2m > [22mDefaultPackageManager[2m > [22mnpmCommand[2m > [22mshould update git package dependencies with --omit=dev
+[31m[1mAssertionError[22m: expected "runCommand" to be called with arguments: [ 'npm', …(2) ][90m
+[41m[1m FAIL [22m[49m test/package-manager.test.ts[2m > [22mDefaultPackageManager[2m > [22mnpmCommand[2m > [22mshould use plain install through npmCommand argv when updating git package dependencies
+[31m[1mAssertionError[22m: expected "runCommand" to be called with arguments: [ 'mise', …(2) ][90m
+[41m[1m FAIL [22m[49m test/package-manager.test.ts[2m > [22mDefaultPackageManager[2m > [22moffline mode and network timeouts[2m > [22mshould update project npm packages using @latest when newer version is available
+[31m[1mAssertionError[22m: expected "runCommandCapture" to be called with arguments: [ 'npm', …(2) ][90m
+[41m[1m FAIL [22m[49m test/package-manager.test.ts[2m > [22mDefaultPackageManager[2m > [22moffline mode and network timeouts[2m > [22mshould skip project npm update when installed version matches latest
+[31m[1mAssertionError[22m: expected "runCommandCapture" to be called with arguments: [ 'npm', …(2) ][90m
+[41m[1m FAIL [22m[49m test/package-manager.test.ts[2m > [22mDefaultPackageManager[2m > [22moffline mode and network timeouts[2m > [22mshould batch npm updates per scope and run git updates in parallel while skipping pinned and current packages
+[31m[1mAssertionError[22m: expected "runCommandCapture" to be called 5 times, but got 3 times[39m
+[41m[1m FAIL [22m[49m test/package-manager.test.ts[2m > [22mDefaultPackageManager[2m > [22moffline mode and network timeouts[2m > [22mshould not run npm view during resolve for installed unpinned packages
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+[41m[1m FAIL [22m[49m test/package-manager.test.ts[2m > [22mDefaultPackageManager[2m > [22moffline mode and network timeouts[2m > [22mshould report updates for installed unpinned npm packages
+[31m[1mAssertionError[22m: expected [] to deeply equal [ { source: 'npm:example', …(3) } ][39m
+[41m[1m FAIL [22m[49m test/paths.test.ts[2m > [22mcanonicalizePath[2m > [22mresolves symlinks to their targets
+[41m[1m FAIL [22m[49m test/paths.test.ts[2m > [22mcanonicalizePath[2m > [22mresolves directory symlinks
+[41m[1m FAIL [22m[49m test/paths.test.ts[2m > [22mcanonicalizePath[2m > [22mfalls back to the raw path for a dangling symlink
+[41m[1m FAIL [22m[49m test/resource-loader.test.ts[2m > [22mDefaultResourceLoader[2m > [22mreload[2m > [22mshould prefer project resources over user on name collisions
+[31m[1mAssertionError[22m: expected 'C:\Users\ozenc\AppData\Local\Temp\rl-…' to be 'C:\Users\ozenc\AppData\Local\Temp\rl-…' // Object.is equality[39m
+[41m[1m FAIL [22m[49m test/resource-loader.test.ts[2m > [22mDefaultResourceLoader[2m > [22mreload[2m > [22mshould load symlinked user and project extensions once
+[41m[1m FAIL [22m[49m test/resource-loader.test.ts[2m > [22mDefaultResourceLoader[2m > [22mreload[2m > [22mshould keep both extensions loaded when command names collide
+[31m[1mAssertionError[22m: expected [ { …(9) } ] to have a length of 2 but got 1[39m
+[41m[1m FAIL [22m[49m test/resource-loader.test.ts[2m > [22mDefaultResourceLoader[2m > [22mreload[2m > [22mshould discover SYSTEM.md from cwd/.Mooncli
+[31m[1mAssertionError[22m: expected undefined to be 'You are a helpful assistant.' // Object.is equality[39m
+[41m[1m FAIL [22m[49m test/resource-loader.test.ts[2m > [22mDefaultResourceLoader[2m > [22mreload[2m > [22mshould discover APPEND_SYSTEM.md
+[31m[1mAssertionError[22m: expected [] to include 'Additional instructions.'[39m
+[41m[1m FAIL [22m[49m test/rpc-prompt-response-semantics.test.ts[2m > [22mRPC prompt response semantics[2m > [22memits one failure response when prompt preflight rejects
+[31m[1mAssertionError[22m: expected { id: 'b1', type: 'response', …(3) } to match object { id: 'b1', type: 'response', …(3) }[39m
+[41m[1m FAIL [22m[49m test/sdk-openrouter-attribution.test.ts[2m > [22mcreateEngineSession OpenRouter attribution headers[2m > [22madds default attribution headers for OpenRouter models
+[31m[1mAssertionError[22m: expected 'https://github.com/theayzek01/MoonCode' to be 'https://Mooncli.dev' // Object.is equality[39m
+[41m[1m FAIL [22m[49m test/sdk-openrouter-attribution.test.ts[2m > [22mcreateEngineSession OpenRouter attribution headers[2m > [22madds attribution headers for custom providers routed through OpenRouter
+[31m[1mAssertionError[22m: expected 'https://github.com/theayzek01/MoonCode' to be 'https://Mooncli.dev' // Object.is equality[39m
+[41m[1m FAIL [22m[49m test/sdk-session-manager.test.ts[2m > [22mcreateEngineSession session manager defaults[2m > [22muses engineDir for the default persisted session path
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+[41m[1m FAIL [22m[49m test/sdk-session-manager.test.ts[2m > [22mcreateEngineSession session manager defaults[2m > [22mderives cwd from an explicit sessionManager when cwd is omitted
+[31m[1mAssertionError[22m: expected 'You are MoonCode. Created by Theayzek…' to contain 'Current working directory: C:\Users\o…'[39m
+[41m[1m FAIL [22m[49m test/session-selector-path-delete.test.ts[2m > [22msession selector path/delete interactions[2m > [22mdoes not switch scope back to All when All load resolves after toggling back to Current
+[31m[1mAssertionError[22m: expected ' \n\u001b[38;2;232;107;107m━━━━━━━━━━…' to contain 'Resume Session (Current Folder)'[39m
+[41m[1m FAIL [22m[49m test/session-selector-rename.test.ts[2m > [22msession selector rename[2m > [22mshows rename hint in interactive /resume picker configuration
+[31m[1mAssertionError[22m: expected ' \n\u001b[38;2;232;107;107m━━━━━━━━━━…' to contain 'rename'[39m
+[41m[1m FAIL [22m[49m test/session-selector-rename.test.ts[2m > [22msession selector rename[2m > [22menters rename mode on Ctrl+R and submits with Enter
+[31m[1mAssertionError[22m: expected ' \n\u001b[38;2;232;107;107m━━━━━━━━━━…' to contain 'Rename Session'[39m
+[41m[1m FAIL [22m[49m test/settings-manager-bug.test.ts[2m > [22mSettingsManager - External Edit Preservation[2m > [22mshould preserve external project settings changes when updating unrelated project field
+[31m[1mAssertionError[22m: expected [ './old-extension.ts' ] to deeply equal [ './updated-extension.ts' ][39m
+[41m[1m FAIL [22m[49m test/settings-manager-bug.test.ts[2m > [22mSettingsManager - External Edit Preservation[2m > [22mshould let in-memory project changes override external changes for the same project field
+[31m[1mAssertionError[22m: expected [ './external-extension.ts' ] to deeply equal [ './in-memory-extension.ts' ][39m
+[41m[1m FAIL [22m[49m test/settings-manager.test.ts[2m > [22mSettingsManager[2m > [22merror tracking[2m > [22mshould collect and clear load errors via drainErrors
+[31m[1mAssertionError[22m: expected [ { scope: 'global', …(1) } ] to have a length of 2 but got 1[39m
+[41m[1m FAIL [22m[49m test/settings-manager.test.ts[2m > [22mSettingsManager[2m > [22mproject settings directory creation[2m > [22mshould create .Mooncli folder when writing project settings
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+[41m[1m FAIL [22m[49m test/settings-manager.test.ts[2m > [22mSettingsManager[2m > [22mgetSessionDir[2m > [22mshould return project sessionDir, overriding global
+[31m[1mAssertionError[22m: expected '/global/sessions' to be './sessions' // Object.is equality[39m
+[41m[1m FAIL [22m[49m test/stdout-cleanliness.test.ts[2m > [22mstdout cleanliness in non-interactive modes[2m > [22mkeeps stdout empty for --mode json --help while routing startup chatter to stderr
+[31m[1mAssertionError[22m: expected 'MoonCode - serious terminal coding ag…' to contain 'changed 1 package in 471ms'[39m
+[41m[1m FAIL [22m[49m test/stdout-cleanliness.test.ts[2m > [22mstdout cleanliness in non-interactive modes[2m > [22mkeeps stdout empty for -p --help while routing startup chatter to stderr
+[31m[1mAssertionError[22m: expected 'MoonCode - serious terminal coding ag…' to contain 'changed 1 package in 471ms'[39m
+[41m[1m FAIL [22m[49m test/system-prompt.test.ts[2m > [22mbuildSystemPrompt[2m > [22mempty tools[2m > [22mshows (none) for empty tools list
+[41m[1m FAIL [22m[49m test/system-prompt.test.ts[2m > [22mbuildSystemPrompt[2m > [22mempty tools[2m > [22mshows file paths guideline even with no tools
+[41m[1m FAIL [22m[49m test/system-prompt.test.ts[2m > [22mbuildSystemPrompt[2m > [22mdefault tools[2m > [22mincludes all default tools when snippets are provided
+[41m[1m FAIL [22m[49m test/system-prompt.test.ts[2m > [22mbuildSystemPrompt[2m > [22mcustom tool snippets[2m > [22mincludes custom tools in available tools section when promptSnippet is provided
+[41m[1m FAIL [22m[49m test/system-prompt.test.ts[2m > [22mbuildSystemPrompt[2m > [22mcustom tool snippets[2m > [22momits custom tools from available tools section when promptSnippet is not provided
+[41m[1m FAIL [22m[49m test/system-prompt.test.ts[2m > [22mbuildSystemPrompt[2m > [22magent system[2m > [22mincludes company-style coding agents when enabled
+[41m[1m FAIL [22m[49m test/system-prompt.test.ts[2m > [22mbuildSystemPrompt[2m > [22magent system[2m > [22momits company-style coding agents when disabled
+[41m[1m FAIL [22m[49m test/system-prompt.test.ts[2m > [22mbuildSystemPrompt[2m > [22mreasoning discipline[2m > [22mincludes target discipline and token economy rules
+[41m[1m FAIL [22m[49m test/system-prompt.test.ts[2m > [22mbuildSystemPrompt[2m > [22mprompt guidelines[2m > [22mappends promptGuidelines to default guidelines
+[41m[1m FAIL [22m[49m test/system-prompt.test.ts[2m > [22mbuildSystemPrompt[2m > [22mprompt guidelines[2m > [22mdeduplicates and trims promptGuidelines
+[41m[1m FAIL [22m[49m test/system-prompt.test.ts[2m > [22mbuildSystemPrompt[2m > [22mblender mode[2m > [22madds production loop and quality gate when blender tools are selected
+[41m[1m FAIL [22m[49m test/theme-export.test.ts[2m > [22mgetThemeExportColors[2m > [22mresolves export variable references using the same syntax as colors
+[31m[1mAssertionError[22m: expected {} to deeply equal { pageBg: '#112233', …(2) }[39m
+[41m[1m FAIL [22m[49m test/theme-export.test.ts[2m > [22mgetThemeExportColors[2m > [22mresolves recursive vars and converts 256-color export values to hex
+[31m[1mAssertionError[22m: expected {} to deeply equal { pageBg: '#abcdef', …(2) }[39m
+[41m[1m FAIL [22m[49m test/tool-execution-component.test.ts[2m > [22mToolExecutionComponent parity[2m > [22mdoes not duplicate built-in headers when passed the active built-in definition
+[31m[1mAssertionError[22m: expected 2 to be 1 // Object.is equality[39m
+[41m[1m FAIL [22m[49m test/tool-execution-component.test.ts[2m > [22mToolExecutionComponent parity[2m > [22mtrims trailing blank display lines from write previews
+[31m[1mAssertionError[22m: expected '╭─ ⏳ write ──────────────────────────…' to contain 'one'[39m
+[41m[1m FAIL [22m[49m test/tools.test.ts[2m > [22mCoding Engine Tools[2m > [22mread tool[2m > [22mshould truncate files exceeding line limit
+[31m[1mAssertionError[22m: expected 'Line 1\nLine 2\nLine 3\nLine 4\nLine …' to contain 'Line 2000'[39m
+[41m[1m FAIL [22m[49m test/tools.test.ts[2m > [22mCoding Engine Tools[2m > [22mread tool[2m > [22mshould include truncation details when truncated
+[31m[1mAssertionError[22m: expected 200 to be 2000 // Object.is equality[39m
+[41m[1m FAIL [22m[49m test/tools.test.ts[2m > [22mCoding Engine Tools[2m > [22mwrite tool[2m > [22mshould write file contents
+[31m[1mAssertionError[22m: expected { Object (diff) } to be undefined[39m
+[41m[1m FAIL [22m[49m test/tools.test.ts[2m > [22mCoding Engine Tools[2m > [22medit tool[2m > [22mshould include EACCES for read-only files
+[31m[1mAssertionError[22m: expected [Function] to throw error including 'Could not edit file: C:\Users\ozenc\A…' but got 'Could not edit file: C:\Users\ozenc\A…'[39m
+[41m[1m FAIL [22m[49m test/tools.test.ts[2m > [22mCoding Engine Tools[2m > [22medit tool[2m > [22mshould include EACCES in diff preview for unreadable files
+[31m[1mAssertionError[22m: expected { diff: '-1 hello\n+1 world', …(1) } to deeply equal { Object (error) }[39m
+[41m[1m FAIL [22m[49m test/tools.test.ts[2m > [22mCoding Engine Tools[2m > [22mgrep tool[2m > [22mshould include filename when searching a single file
+[41m[1m FAIL [22m[49m test/tools.test.ts[2m > [22mCoding Engine Tools[2m > [22mgrep tool[2m > [22mshould respect global limit and include context lines
+[41m[1m FAIL [22m[49m test/tools.test.ts[2m > [22mCoding Engine Tools[2m > [22mgrep tool[2m > [22mshould treat flag-like patterns as search text
+[41m[1m FAIL [22m[49m test/tools.test.ts[2m > [22mCoding Engine Tools[2m > [22mfind tool[2m > [22mshould include hidden files that are not gitignored
+[41m[1m FAIL [22m[49m test/tools.test.ts[2m > [22mCoding Engine Tools[2m > [22mfind tool[2m > [22mshould respect .gitignore
+[41m[1m FAIL [22m[49m test/tools.test.ts[2m > [22mCoding Engine Tools[2m > [22mfind tool[2m > [22mshould treat flag-like patterns as search text
+[41m[1m FAIL [22m[49m test/suite/regressions/3303-find-nested-gitignore.test.ts[2m > [22missue #3303 nested .gitignore rules leak into sibling directories[2m > [22mflat sibling case[2m > [22mapplies a/.gitignore only inside a/ and leaves b/ untouched
+[41m[1m FAIL [22m[49m test/suite/regressions/3303-find-nested-gitignore.test.ts[2m > [22missue #3303 nested .gitignore rules leak into sibling directories[2m > [22mdeeply nested case[2m > [22mscopes each .gitignore to its own subtree
+[41m[1m FAIL [22m[49m test/tools.test.ts[2m > [22mCoding Engine Tools[2m > [22mfind tool[2m > [22mshould surface fd glob parse errors
+[31m[1mAssertionError[22m: expected [Function] to throw error matching /error parsing glob|fd exited with co…/i but got 'fd is not available and could not be …'[39m
+[41m[1m FAIL [22m[49m test/user-message.test.ts[2m > [22mUserMessageComponent[2m > [22mkeeps user message height stable while moving closing OSC markers off line end
+[31m[1mAssertionError[22m: expected [ Array(1) ] to have a length of 3 but got 1[39m
+[41m[1m FAIL [22m[49m test/suite/engine-session-prompt.test.ts[2m > [22mEngineSession prompt characterization[2m > [22mthrows when prompting without a model
+[31m[1mAssertionError[22m: expected [Function] to throw error including 'No model selected.' but got 'Model secilmedi.\n\nOAuth veya API an…'[39m
+[41m[1m FAIL [22m[49m test/suite/engine-session-prompt.test.ts[2m > [22mEngineSession prompt characterization[2m > [22mthrows when prompting without configured auth
+[31m[1mAssertionError[22m: expected [Function] to throw error including 'No API key found for faux.' but got 'faux icin API anahtari bulunamadi.\n\…'[39m
+[41m[1m FAIL [22m[49m test/suite/regressions/2781-skill-collision-precedence.test.ts[2m > [22missue #2781 skill collision precedence: user skills should override package skills[2m > [22mproject auto-discovered skill should override package skill with same name
+[31m[1mAssertionError[22m: expected 'C:\Users\ozenc\AppData\Local\Temp\Moo…' to be 'C:\Users\ozenc\AppData\Local\Temp\Moo…' // Object.is equality[39m
+[41m[1m FAIL [22m[49m test/suite/regressions/2781-skill-collision-precedence.test.ts[2m > [22missue #2781 skill collision precedence: user skills should override package skills[2m > [22mproject skill should override user skill which should override package skill
+[31m[1mAssertionError[22m: expected 'C:\Users\ozenc\AppData\Local\Temp\Moo…' to be 'C:\Users\ozenc\AppData\Local\Temp\Moo…' // Object.is equality[39m
+[41m[1m FAIL [22m[49m test/suite/regressions/2791-fswatch-error-crash.test.ts[2m > [22missue #2791 fs.watch error event crashes process[2m > [22mprocess should survive an error event on the theme FSWatcher
+[31m[1mAssertionError[22m: Child crashed (exit 1). stderr: : expected 1 to be +0 // Object.is equality[39m
+[41m[1m FAIL [22m[49m test/suite/regressions/2835-tools-allowlist-filters-extension-tools.test.ts[2m > [22mregression #2835: tool allowlists filter extension tools[2m > [22mallows only explicitly listed built-in and extension tools
+[31m[1mAssertionError[22m: expected 'You are MoonCode. Created by Theayzek…' to contain '- read: Read file contents'[39m
+[41m[1m FAIL [22m[49m test/suite/regressions/2835-tools-allowlist-filters-extension-tools.test.ts[2m > [22mregression #2835: tool allowlists filter extension tools[2m > [22mdisables all tools when the allowlist is empty
+[31m[1mAssertionError[22m: expected 'You are MoonCode. Created by Theayzek…' to contain 'Available tools:\n(none)'[39m
+[41m[1m FAIL [22m[49m test/suite/regressions/3217-scoped-model-order.test.ts[2m > [22missue #3217 scoped model ordering[2m > [22mpreserves scoped model order in the /model scoped tab

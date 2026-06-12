@@ -326,40 +326,70 @@
 
 		/* ─── THINKING BLOCK ─────────────────────────────────────────────── */
 		.thinking-block {
-			background: rgba(108,143,255,0.04);
-			border: 1px solid rgba(108,143,255,0.12);
+			position: relative;
+			background: rgba(108,143,255,0.03);
+			border: 1px solid rgba(108,143,255,0.15);
 			border-radius: 12px;
 			overflow: hidden;
 			margin-bottom: 12px;
 			font-size: 0.8rem;
+			transition: border-color 0.3s;
+		}
+		.thinking-block.streaming {
+			border-color: rgba(108,143,255,0.4);
+			box-shadow: 0 0 0 1px rgba(108,143,255,0.08), 0 0 16px rgba(108,143,255,0.06);
 		}
 		.thinking-summary {
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
-			padding: 8px 12px;
+			padding: 9px 14px;
 			cursor: pointer;
 			user-select: none;
 			color: var(--accent);
-			font-weight: 500;
+			font-weight: 600;
+			font-size: 0.75rem;
+			gap: 8px;
 			transition: background 0.15s;
 		}
-		.thinking-summary:hover { background: rgba(108,143,255,0.05); }
+		.thinking-summary:hover { background: rgba(108,143,255,0.06); }
+		.thinking-meta {
+			display: flex; align-items: center; gap: 8px;
+			margin-left: auto; color: var(--muted); font-weight: 400;
+			font-size: 0.68rem; font-family: 'JetBrains Mono', monospace;
+		}
 		.thinking-body {
-			padding: 10px 14px;
+			padding: 10px 14px 12px;
 			border-top: 1px solid rgba(108,143,255,0.1);
 			color: var(--muted);
 			font-family: 'JetBrains Mono', monospace;
-			font-size: 0.78rem;
-			line-height: 1.7;
+			font-size: 0.76rem;
+			line-height: 1.75;
 			white-space: pre-wrap;
-			max-height: 300px;
+			word-break: break-word;
+			max-height: 340px;
 			overflow-y: auto;
-			background: rgba(0,0,0,0.15);
+			background: rgba(0,0,0,0.12);
+			scrollbar-width: thin;
 		}
-		.thinking-block.collapsed .thinking-body { display: none; }
-		.thinking-chevron { transition: transform 0.2s; }
+		.thinking-body::-webkit-scrollbar { width: 4px; }
+		.thinking-body::-webkit-scrollbar-thumb { background: rgba(108,143,255,0.2); border-radius: 4px; }
+		.thinking-block.collapsed .thinking-body {
+			display: none;
+		}
+		.thinking-chevron { transition: transform 0.25s cubic-bezier(.4,0,.2,1); flex-shrink:0; }
 		.thinking-block:not(.collapsed) .thinking-chevron { transform: rotate(180deg); }
+		@keyframes thinkingBorderPulse {
+			0%, 100% { border-color: rgba(108,143,255,0.15); }
+			50% { border-color: rgba(108,143,255,0.45); }
+		}
+		.thinking-block.streaming { animation: thinkingBorderPulse 2s ease-in-out infinite; }
+		/* smooth token-by-token text appearance */
+		@keyframes fadeInChar {
+			from { opacity: 0; transform: translateY(2px); }
+			to   { opacity: 1; transform: translateY(0); }
+		}
+		.thinking-body { scroll-behavior: smooth; }
 
 		/* ─── TOOL CARDS ─────────────────────────────────────────────────── */
 		.tool-card {
@@ -820,6 +850,51 @@
 		.spin { animation: spin 0.8s linear infinite; }
 		.hidden { display: none !important; }
 
+		/* ─── BROWSER BRIDGE PILL ────────────────────────────────────────── */
+		.bridge-pill {
+			display: flex; align-items: center; gap: 5px;
+			padding: 4px 10px; border-radius: 20px;
+			border: 1px solid var(--border); background: var(--surface2);
+			font-size: 0.68rem; font-weight: 600; cursor: pointer;
+			transition: all 0.2s; color: var(--muted);
+		}
+		.bridge-pill:hover { border-color: var(--accent); color: var(--fg); }
+		.bridge-pill.connected { border-color: #4ade8060; color: #4ade80; background: rgba(74,222,128,0.07); }
+		.bridge-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink:0; }
+
+		/* ─── SESSION ACTION BAR ─────────────────────────────────────────── */
+		.session-actions { display: flex; align-items: center; gap: 5px; }
+		.session-btn {
+			display: flex; align-items: center; gap: 4px;
+			padding: 4px 9px; border-radius: 8px;
+			border: 1px solid var(--border); background: var(--surface2);
+			font-size: 0.68rem; font-weight: 600; cursor: pointer;
+			color: var(--muted); transition: all 0.15s; font-family: 'Inter', sans-serif;
+		}
+		.session-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(108,143,255,0.08); }
+		.session-btn .material-symbols-rounded { font-size: 14px; }
+
+		/* ─── IMPORT DROP ZONE ───────────────────────────────────────────── */
+		.drop-zone {
+			border: 2px dashed var(--border); border-radius: 12px;
+			padding: 28px 20px; text-align: center; cursor: pointer;
+			transition: all 0.2s; color: var(--muted);
+		}
+		.drop-zone:hover, .drop-zone.drag-over {
+			border-color: var(--accent); background: rgba(108,143,255,0.05); color: var(--accent);
+		}
+
+		/* ─── ADVANCED SETTINGS TABS ─────────────────────────────────────── */
+		.stab-row { display: flex; gap: 4px; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+		.stab {
+			padding: 5px 12px; border-radius: 8px 8px 0 0; font-size: 0.73rem;
+			background: none; border: none; cursor: pointer; color: var(--muted);
+			font-family: 'Inter', sans-serif; font-weight: 500; transition: all 0.15s;
+		}
+		.stab.active { color: var(--accent); background: rgba(108,143,255,0.1); }
+		.stab-panel { display: none; }
+		.stab-panel.active { display: block; }
+
 		/* ─── PINNED & HIGHLIGHT ────────────────────────────────────────── */
 		.pinned-message .user-bubble {
 			border-color: var(--accent);
@@ -934,6 +1009,26 @@
 			<div class="status-pill" id="token-pill" title="Token kullanımı">
 				<span class="material-symbols-rounded" style="font-size:13px;">data_usage</span>
 				<span id="token-usage">0 / 0</span>
+			</div>
+			<!-- Browser Bridge Status -->
+			<div class="bridge-pill" id="bridge-pill" onclick="openModal('bridgeModal')" title="Tarayıcı Köprüsü">
+				<span class="bridge-dot"></span>
+				<span id="bridge-label">Köprü</span>
+			</div>
+			<!-- Session Actions -->
+			<div class="session-actions">
+				<button class="session-btn" onclick="forkSession()" title="Oturumu Dallandır">
+					<span class="material-symbols-rounded">call_split</span>
+					<span class="hide-sm">Fork</span>
+				</button>
+				<button class="session-btn" onclick="openModal('exportModal')" title="Dışa/İçe Aktar">
+					<span class="material-symbols-rounded">import_export</span>
+					<span class="hide-sm">Aktar</span>
+				</button>
+				<button class="session-btn" onclick="shareSession()" title="Gist ile Paylaş" id="share-btn">
+					<span class="material-symbols-rounded">share</span>
+					<span class="hide-sm">Paylaş</span>
+				</button>
 			</div>
 			<button onclick="toggleSearch()" class="tool-btn" title="Ara (Ctrl+F)">
 				<span class="material-symbols-rounded">search</span>
@@ -1096,13 +1191,98 @@
 
 <!-- Settings Modal -->
 <div id="settingsModal" class="modal-overlay" onclick="overlayClose(event,'settingsModal')">
-	<div class="modal" style="max-width:440px;" onclick="event.stopPropagation()">
+	<div class="modal" style="max-width:520px;" onclick="event.stopPropagation()">
 		<div class="modal-header">
 			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">settings</span> Ayarlar</div>
 			<button class="modal-close" onclick="closeModal('settingsModal')"><span class="material-symbols-rounded">close</span></button>
 		</div>
-		<div class="modal-body" id="settings-body">
-			<div style="text-align:center;padding:20px;color:var(--muted);font-size:0.82rem;">Yükleniyor...</div>
+		<div class="modal-body" style="padding-top:4px;">
+			<div class="stab-row">
+				<button class="stab active" onclick="switchSettingsTab('general',this)">Genel</button>
+				<button class="stab" onclick="switchSettingsTab('compaction',this)">Bellek</button>
+				<button class="stab" onclick="switchSettingsTab('security',this)">Güvenlik</button>
+			</div>
+			<!-- General Tab -->
+			<div class="stab-panel active" id="stab-general">
+				<div class="form-group">
+					<label class="form-label">Tema</label>
+					<select class="form-select" id="set-theme" onchange="setTheme(this.value)">
+						<option value="mooncode">MoonCode (Varsayılan)</option>
+						<option value="nord">Nord</option>
+						<option value="forest">Orman</option>
+						<option value="rosepine">Rosé Pine</option>
+						<option value="sepia">Sepya (Göz Dostu)</option>
+						<option value="light">Açık</option>
+					</select>
+				</div>
+			</div>
+			<!-- Compaction Tab -->
+			<div class="stab-panel" id="stab-compaction">
+				<div class="form-group">
+					<label class="form-label">Sıkıştırma Profili</label>
+					<select class="form-select" id="set-profile">
+						<option value="balanced">Dengeli — Hız/Kalite dengesi</option>
+						<option value="aggressive">Agresif — Maksimum bağlam koruma</option>
+						<option value="off">Kapalı — Otomatik sıkıştırma yok</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label class="form-label" style="display:flex;justify-content:space-between;">
+						<span>Rezerve Token</span>
+						<span id="reserve-val" style="color:var(--accent);font-weight:700;">1000</span>
+					</label>
+					<div style="font-size:0.72rem;color:var(--muted);margin-bottom:6px;">Yanıt için ayrılan minimum token (sıkıştırma tetiklemez)</div>
+					<input type="range" id="set-reserve" min="500" max="8000" step="500" value="1000" style="width:100%;accent-color:var(--accent);" oninput="document.getElementById('reserve-val').textContent=this.value">
+				</div>
+				<div class="form-group">
+					<label class="form-label" style="display:flex;justify-content:space-between;">
+						<span>Kısa Geçmiş Koruması</span>
+						<span id="keep-val" style="color:var(--accent);font-weight:700;">2000</span>
+					</label>
+					<div style="font-size:0.72rem;color:var(--muted);margin-bottom:6px;">Sıkıştırma sonrası korunacak son N token</div>
+					<input type="range" id="set-keep" min="500" max="16000" step="500" value="2000" style="width:100%;accent-color:var(--accent);" oninput="document.getElementById('keep-val').textContent=this.value">
+				</div>
+				<label class="form-checkbox-row">
+					<input type="checkbox" id="set-tool-compaction">
+					<div>
+						<div style="font-size:0.82rem;font-weight:500;">Araç Tabanlı Sıkıştırma</div>
+						<div style="font-size:0.72rem;color:var(--muted);">Büyük araç çıktılarını otomatik sıkıştır</div>
+					</div>
+				</label>
+			</div>
+			<!-- Security Tab -->
+			<div class="stab-panel" id="stab-security">
+				<div class="form-group">
+					<label class="form-label">Genel İzin Seviyesi</label>
+					<div style="font-size:0.72rem;color:var(--muted);margin-bottom:8px;">Tüm projeler için varsayılan araç onay davranışı</div>
+					<div style="display:flex;flex-direction:column;gap:5px;" id="perm-radio-group">
+						<label class="perm-row" data-val="ask">
+							<input type="radio" name="perm-level" value="ask" style="display:none;">
+							<span class="material-symbols-rounded" style="color:var(--accent);font-size:18px;">help</span>
+							<div style="flex:1;">
+								<div style="font-size:0.8rem;font-weight:500;">Her Zaman Sor</div>
+								<div style="font-size:0.7rem;color:var(--muted);">Her araç çalıştırmadan önce onay iste (varsayılan)</div>
+							</div>
+						</label>
+						<label class="perm-row" data-val="safe">
+							<input type="radio" name="perm-level" value="safe" style="display:none;">
+							<span class="material-symbols-rounded" style="color:var(--accent2);font-size:18px;">shield</span>
+							<div style="flex:1;">
+								<div style="font-size:0.8rem;font-weight:500;">Güvenli Mod</div>
+								<div style="font-size:0.7rem;color:var(--muted);">Salt-okunur araçlara otomatik izin, yazma için sor</div>
+							</div>
+						</label>
+						<label class="perm-row" data-val="full">
+							<input type="radio" name="perm-level" value="full" style="display:none;">
+							<span class="material-symbols-rounded" style="color:#4ade80;font-size:18px;">check_circle</span>
+							<div style="flex:1;">
+								<div style="font-size:0.8rem;font-weight:500;">Tam İzin</div>
+								<div style="font-size:0.7rem;color:var(--muted);">Tüm araçlara otomatik izin ver (dikkatli kullanın)</div>
+							</div>
+						</label>
+					</div>
+				</div>
+			</div>
 		</div>
 		<div class="modal-footer">
 			<button onclick="closeModal('settingsModal')" class="btn btn-ghost">İptal</button>
@@ -1228,6 +1408,110 @@
 			<input id="cmd-input" placeholder="Komut ara veya mesaj gönder..." oninput="filterCommands(this.value)" onkeydown="cmdKeydown(event)">
 		</div>
 		<div class="cmd-list" id="cmd-list" style="padding:0 8px 10px;"></div>
+	</div>
+</div>
+
+<!-- ═══════════════════ BROWSER BRIDGE MODAL ═══════════════════════════════ -->
+<div id="bridgeModal" class="modal-overlay" onclick="overlayClose(event,'bridgeModal')">
+	<div class="modal" style="max-width:420px;" onclick="event.stopPropagation()">
+		<div class="modal-header">
+			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">open_in_browser</span> Tarayıcı Köprüsü</div>
+			<button class="modal-close" onclick="closeModal('bridgeModal')"><span class="material-symbols-rounded">close</span></button>
+		</div>
+		<div class="modal-body">
+			<div style="display:flex;align-items:center;justify-content:space-between;padding:14px;border-radius:12px;background:var(--surface2);border:1px solid var(--border);margin-bottom:14px;">
+				<div style="display:flex;align-items:center;gap:10px;">
+					<span class="material-symbols-rounded" style="font-size:28px;color:var(--accent);">lan</span>
+					<div>
+						<div style="font-size:0.85rem;font-weight:600;">Köprü Durumu</div>
+						<div id="bridge-status-text" style="font-size:0.72rem;color:var(--muted);">Kontrol ediliyor...</div>
+					</div>
+				</div>
+				<div id="bridge-status-badge" style="padding:4px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;background:var(--surface);border:1px solid var(--border);">—</div>
+			</div>
+			<div style="font-size:0.78rem;color:var(--muted);line-height:1.7;padding:10px 14px;border-radius:10px;background:rgba(108,143,255,0.04);border:1px solid rgba(108,143,255,0.12);">
+				<div style="font-weight:600;color:var(--fg);margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+					<span class="material-symbols-rounded" style="font-size:16px;color:var(--accent);">info</span> Tarayıcı Köprüsü Nedir?
+				</div>
+				MoonCode'un tarayıcıyı kontrol etmesini sağlar. Etkinleştirildiğinde web sayfaları açabilir, form doldurup gönderebilir, ekran görüntüsü alabilirsiniz.
+			</div>
+			<div id="bridge-connected-info" class="hidden" style="margin-top:12px;padding:10px 14px;border-radius:10px;background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.2);font-size:0.75rem;color:#4ade80;">
+				<span class="material-symbols-rounded" style="font-size:15px;vertical-align:middle;">check_circle</span>
+				Tarayıcı bağlı ve hazır. MoonCode ajan görevlerinde tarayıcıyı kullanabilir.
+			</div>
+		</div>
+		<div class="modal-footer">
+			<button onclick="closeModal('bridgeModal')" class="btn btn-ghost">Kapat</button>
+			<button onclick="refreshBridgeStatus()" class="btn btn-primary"><span class="material-symbols-rounded" style="font-size:15px;">refresh</span>Yenile</button>
+		</div>
+	</div>
+</div>
+
+<!-- ═══════════════════ EXPORT / IMPORT MODAL ════════════════════════════════ -->
+<div id="exportModal" class="modal-overlay" onclick="overlayClose(event,'exportModal')">
+	<div class="modal" style="max-width:460px;" onclick="event.stopPropagation()">
+		<div class="modal-header">
+			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">import_export</span> Dışa / İçe Aktar</div>
+			<button class="modal-close" onclick="closeModal('exportModal')"><span class="material-symbols-rounded">close</span></button>
+		</div>
+		<div class="modal-body">
+			<!-- Export section -->
+			<div style="margin-bottom:16px;">
+				<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.08em;margin-bottom:8px;">Dışa Aktar</div>
+				<div style="display:flex;gap:8px;">
+					<button onclick="exportSession('jsonl')" class="btn btn-ghost" style="flex:1;justify-content:center;gap:6px;">
+						<span class="material-symbols-rounded" style="font-size:16px;">data_object</span>
+						JSONL (Ham)
+					</button>
+					<button onclick="exportSession('html')" class="btn btn-ghost" style="flex:1;justify-content:center;gap:6px;">
+						<span class="material-symbols-rounded" style="font-size:16px;">html</span>
+						HTML (Görünüm)
+					</button>
+				</div>
+			</div>
+			<div class="divider"></div>
+			<!-- Import section -->
+			<div style="margin-top:16px;">
+				<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.08em;margin-bottom:8px;">İçe Aktar (JSONL)</div>
+				<div class="drop-zone" id="drop-zone" onclick="document.getElementById('import-file-input').click()" ondrop="handleImportDrop(event)" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')">
+					<span class="material-symbols-rounded" style="font-size:32px;display:block;margin-bottom:6px;">upload_file</span>
+					<div style="font-size:0.82rem;font-weight:500;">Dosyayı buraya sürükleyin</div>
+					<div style="font-size:0.72rem;margin-top:4px;">veya tıklayın — .jsonl dosyası</div>
+				</div>
+				<input type="file" id="import-file-input" class="hidden" accept=".jsonl" onchange="handleImportFile(this)">
+			</div>
+		</div>
+		<div class="modal-footer">
+			<button onclick="closeModal('exportModal')" class="btn btn-ghost">Kapat</button>
+		</div>
+	</div>
+</div>
+
+<!-- ═══════════════════ SHARE RESULT MODAL ══════════════════════════════════ -->
+<div id="shareModal" class="modal-overlay" onclick="overlayClose(event,'shareModal')">
+	<div class="modal" style="max-width:420px;" onclick="event.stopPropagation()">
+		<div class="modal-header">
+			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">share</span> Oturum Paylaşıldı</div>
+			<button class="modal-close" onclick="closeModal('shareModal')"><span class="material-symbols-rounded">close</span></button>
+		</div>
+		<div class="modal-body">
+			<div style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;">Oturum GitHub Gist olarak paylaşıldı. Aşağıdaki bağlantıyı kopyalayın:</div>
+			<div style="display:flex;gap:6px;align-items:center;">
+				<input id="share-url-input" class="form-input" type="text" readonly style="flex:1;font-family:'JetBrains Mono',monospace;font-size:0.75rem;" value="">
+				<button onclick="copyShareUrl()" class="btn btn-primary" style="flex-shrink:0;">
+					<span class="material-symbols-rounded" style="font-size:15px;">content_copy</span>
+				</button>
+			</div>
+			<div style="margin-top:10px;">
+				<a id="share-open-link" href="#" target="_blank" style="font-size:0.78rem;color:var(--accent);display:flex;align-items:center;gap:4px;text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+					<span class="material-symbols-rounded" style="font-size:15px;">open_in_new</span>
+					Gist'i aç
+				</a>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<button onclick="closeModal('shareModal')" class="btn btn-ghost">Kapat</button>
+		</div>
 	</div>
 </div>
 
@@ -1372,6 +1656,7 @@ function openModal(id) {
 	document.getElementById(id).classList.add('active');
 	if (id === 'modelModal') loadModels();
 	if (id === 'settingsModal') loadSettings();
+	if (id === 'bridgeModal') refreshBridgeStatus();
 }
 function closeModal(id) {
 	if (id) document.getElementById(id)?.classList.remove('active');
@@ -1733,7 +2018,9 @@ function appendMessage(role, content, id = null, pinned = false) {
 }
 
 // ─── UPDATE MESSAGE ───────────────────────────────────────────────────────
-function updateMessage(id, content) {
+const thinkingStartTimes = new Map(); // msgId -> timestamp when thinking started
+
+function updateMessage(id, content, isStreaming = false) {
 	const inner = document.getElementById('inner-' + id);
 	if (!inner) return;
 
@@ -1749,20 +2036,67 @@ function updateMessage(id, content) {
 
 	let html = '';
 	if (thinking.trim()) {
+		// Track timing
+		if (!thinkingStartTimes.has(id)) thinkingStartTimes.set(id, Date.now());
+		const elapsed = Math.round((Date.now() - thinkingStartTimes.get(id)) / 1000);
+		const charCount = thinking.length;
+
+		// While streaming → open (not collapsed), after done → collapsed
+		const collapsedClass = isStreaming ? '' : 'collapsed';
+		const streamingClass = isStreaming ? 'streaming' : '';
+		const pulseClass = isStreaming ? 'thinking-pulse' : '';
+		const metaText = isStreaming
+			? `${charCount.toLocaleString()} karakter`
+			: `${elapsed}s · ${charCount.toLocaleString()} karakter`;
+
+		// Preserve collapsed state if user manually toggled
+		const existingBlock = inner.querySelector('.thinking-block');
+		const userCollapsed = existingBlock && !isStreaming
+			? existingBlock.classList.contains('collapsed')
+			: !isStreaming; // default: collapsed after done
+		const finalCollapsed = isStreaming ? '' : (userCollapsed ? 'collapsed' : '');
+
 		html += `
-			<div class="thinking-block collapsed">
+			<div class="thinking-block ${finalCollapsed} ${streamingClass}">
 				<div class="thinking-summary" onclick="this.parentElement.classList.toggle('collapsed')">
-					<span style="display:flex;align-items:center;gap:6px;">
-						<span class="material-symbols-rounded thinking-pulse" style="font-size:15px;">psychology</span>
-						Düşünce Süreci
+					<span style="display:flex;align-items:center;gap:7px;">
+						<span class="material-symbols-rounded ${pulseClass}" style="font-size:16px;">psychology</span>
+						<span>${isStreaming ? 'Düşünüyor...' : 'Düşünce Süreci'}</span>
 					</span>
-					<span class="material-symbols-rounded thinking-chevron" style="font-size:16px;">expand_more</span>
+					<span class="thinking-meta">
+						<span>${metaText}</span>
+						<span class="material-symbols-rounded thinking-chevron" style="font-size:16px;color:var(--muted);">expand_more</span>
+					</span>
 				</div>
 				<div class="thinking-body">${escapeHtml(thinking)}</div>
 			</div>`;
+	} else if (!isStreaming) {
+		// Clean up timing when no thinking in final message
+		thinkingStartTimes.delete(id);
 	}
 	html += marked.parse(text || '');
+
+	// Smart update: preserve thinking block collapse state
+	const existingThinking = inner.querySelector('.thinking-block');
+	const wasCollapsed = existingThinking ? existingThinking.classList.contains('collapsed') : true;
 	inner.innerHTML = html;
+
+	// Restore user's collapse preference if they manually changed it during stream
+	if (!isStreaming) {
+		const newBlock = inner.querySelector('.thinking-block');
+		if (newBlock) {
+			// stays collapsed (default after done)
+			newBlock.classList.add('collapsed');
+		}
+		thinkingStartTimes.delete(id);
+	} else if (isStreaming) {
+		const newBlock = inner.querySelector('.thinking-block');
+		if (newBlock) {
+			// RAF-based smooth auto-scroll during stream
+			const body = newBlock.querySelector('.thinking-body');
+			if (body) requestAnimationFrame(() => { body.scrollTop = body.scrollHeight; });
+		}
+	}
 
 	// ── KaTeX math rendering ──────────────────────────────────────────
 	if (typeof katex !== 'undefined') {
@@ -1969,72 +2303,79 @@ async function setReasoning(level) {
 	toast(`Düşünme seviyesi: ${reasoningLabels[level]}`, 'info');
 }
 
+// ─── SETTINGS TABS ────────────────────────────────────────────────────────
+function switchSettingsTab(name, btn) {
+	document.querySelectorAll('.stab').forEach(t => t.classList.remove('active'));
+	document.querySelectorAll('.stab-panel').forEach(p => p.classList.remove('active'));
+	if (btn) btn.classList.add('active');
+	document.getElementById('stab-' + name)?.classList.add('active');
+}
+
 // ─── SETTINGS ─────────────────────────────────────────────────────────────
 async function loadSettings() {
-	const body = document.getElementById('settings-body');
 	try {
 		const res = await fetch('/api/settings');
 		const s = await res.json();
-		body.innerHTML = `
-			<div class="form-group">
-				<label class="form-label">Tema</label>
-				<select class="form-select" id="set-theme" onchange="setTheme(this.value)">
-					<option value="mooncode" ${s.theme==='mooncode'||!s.theme?'selected':''}>MoonCode (Varsayılan)</option>
-					<option value="nord" ${s.theme==='nord'?'selected':''}>Nord</option>
-					<option value="forest" ${s.theme==='forest'?'selected':''}>Orman</option>
-					<option value="rosepine" ${s.theme==='rosepine'?'selected':''}>Rosé Pine</option>
-					<option value="sepia" ${s.theme==='sepia'?'selected':''}>Sepya (Göz Dostu)</option>
-					<option value="light" ${s.theme==='light'?'selected':''}>Açık</option>
-				</select>
-			</div>
-			<div class="form-group">
-				<label class="form-label">Sıkıştırma Profili</label>
-				<select class="form-select" id="set-profile">
-					<option value="balanced" ${s.compactionProfile==='balanced'?'selected':''}>Dengeli</option>
-					<option value="aggressive" ${s.compactionProfile==='aggressive'?'selected':''}>Agresif</option>
-					<option value="off" ${s.compactionProfile==='off'?'selected':''}>Kapalı</option>
-				</select>
-			</div>
-			<div class="form-group">
-				<label class="form-label">Genel İzin Seviyesi</label>
-				<div style="font-size:0.72rem;color:var(--muted);margin-bottom:6px;">Tüm projeler için varsayılan araç onay davranışı</div>
-				<div style="display:flex;flex-direction:column;gap:4px;">
-					${['auto','ask','always','never'].map(level => {
-						const labels = { auto: 'Otomatik — AI karar verir', ask: 'Her zaman sor', always: 'Her zaman izin ver', never: 'Hiçbir zaman izin verme' };
-						const icons = { auto: 'auto_mode', ask: 'help', always: 'check_circle', never: 'block' };
-						const colors = { auto: 'var(--accent2)', ask: 'var(--accent)', always: '#4ade80', never: '#ff6464' };
-						const active = (s.permissionLevel || 'ask') === level;
-						return `<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;cursor:pointer;border:1px solid ${active ? 'var(--accent)' : 'var(--border)'};background:${active ? 'rgba(108,143,255,0.08)' : 'var(--surface2)'};transition:all 0.15s;" onclick="document.querySelectorAll('.perm-opt').forEach(r=>r.checked=false); this.querySelector('input').checked=true; document.querySelectorAll('.perm-label-wrap').forEach(el=>el.parentElement.style.background='var(--surface2)'); document.querySelectorAll('.perm-label-wrap').forEach(el=>el.parentElement.style.borderColor='var(--border)'); this.style.background='rgba(108,143,255,0.08)'; this.style.borderColor='var(--accent)';">
-							<input type="radio" class="perm-opt" name="perm-level" value="${level}" ${active ? 'checked' : ''} style="display:none;">
-							<span class="material-symbols-rounded" style="color:${colors[level]};font-size:18px;">${icons[level]}</span>
-							<span class="perm-label-wrap" style="font-size:0.8rem;color:var(--fg);">${labels[level]}</span>
-						</label>`;
-					}).join('')}
-				</div>
-			</div>
-			<label class="form-checkbox-row">
-				<input type="checkbox" id="set-tool-compaction" ${s.enableToolBasedCompaction?'checked':''}>
-				<div>
-					<div style="font-size:0.82rem;font-weight:500;">Araç Tabanlı Sıkıştırma</div>
-					<div style="font-size:0.72rem;color:var(--muted);">Büyük araç çıktılarını otomatik sıkıştır</div>
-				</div>
-			</label>`;
+
+		// General tab
+		const themeEl = document.getElementById('set-theme');
+		if (themeEl) themeEl.value = s.theme || 'mooncode';
+
+		// Compaction tab
+		const profileEl = document.getElementById('set-profile');
+		if (profileEl) profileEl.value = s.compactionProfile || 'balanced';
+
+		const reserveEl = document.getElementById('set-reserve');
+		if (reserveEl) { reserveEl.value = s.reserveTokens || 1000; document.getElementById('reserve-val').textContent = s.reserveTokens || 1000; }
+
+		const keepEl = document.getElementById('set-keep');
+		if (keepEl) { keepEl.value = s.keepRecentTokens || 2000; document.getElementById('keep-val').textContent = s.keepRecentTokens || 2000; }
+
+		const toolEl = document.getElementById('set-tool-compaction');
+		if (toolEl) toolEl.checked = !!s.enableToolBasedCompaction;
+
+		// Security tab — permission radio
+		const permLevel = s.permissionLevel || 'ask';
+		document.querySelectorAll('.perm-row').forEach(row => {
+			const val = row.dataset.val;
+			const active = val === permLevel;
+			row.style.border = active ? '1px solid var(--accent)' : '1px solid var(--border)';
+			row.style.background = active ? 'rgba(108,143,255,0.08)' : 'var(--surface2)';
+			const radio = row.querySelector('input[type=radio]');
+			if (radio) radio.checked = active;
+			row.onclick = () => {
+				document.querySelectorAll('.perm-row').forEach(r => {
+					r.style.border = '1px solid var(--border)';
+					r.style.background = 'var(--surface2)';
+					const ri = r.querySelector('input[type=radio]'); if (ri) ri.checked = false;
+				});
+				row.style.border = '1px solid var(--accent)';
+				row.style.background = 'rgba(108,143,255,0.08)';
+				const ri = row.querySelector('input[type=radio]'); if (ri) ri.checked = true;
+			};
+			row.style.display = 'flex'; row.style.alignItems = 'center'; row.style.gap = '10px';
+			row.style.padding = '8px 12px'; row.style.borderRadius = '10px'; row.style.cursor = 'pointer';
+			row.style.transition = 'all 0.15s';
+		});
+
 	} catch(e) {
-		body.innerHTML = '<div style="color:#ff6464;font-size:0.82rem;padding:8px;">Ayarlar yüklenemedi</div>';
+		toast('Ayarlar yüklenemedi', 'error');
 	}
 }
 
 async function saveSettings() {
 	const theme = document.getElementById('set-theme')?.value;
 	const profile = document.getElementById('set-profile')?.value;
+	const reserveTokens = Number(document.getElementById('set-reserve')?.value) || undefined;
+	const keepRecentTokens = Number(document.getElementById('set-keep')?.value) || undefined;
 	const toolCompaction = document.getElementById('set-tool-compaction')?.checked;
-	const permOpt = document.querySelector('.perm-opt:checked');
+	const permOpt = document.querySelector('.perm-row input[type=radio]:checked');
 	const permissionLevel = permOpt ? permOpt.value : undefined;
 	try {
 		await fetch('/api/settings', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ theme, profile, enableToolBasedCompaction: toolCompaction, permissionLevel })
+			body: JSON.stringify({ theme, compactionProfile: profile, enableToolBasedCompaction: toolCompaction, reserveTokens, keepRecentTokens, permissionLevel })
 		});
 		if (theme) setTheme(theme);
 		closeModal('settingsModal');
@@ -2064,8 +2405,44 @@ document.addEventListener('click', (e) => {
 function handleAuthAction() { window.open(authUrl + '/login', '_blank'); }
 
 async function updateUserUI() {
+	const renderDropdown = (html) => {
+		const dd = document.getElementById('user-dropdown');
+		if (dd) dd.innerHTML = html;
+	};
+
+	const fallbackContent = `
+		<div style="padding:16px 12px;text-align:center;border-bottom:1px solid var(--border);margin-bottom:6px;">
+			<span class="material-symbols-rounded" style="font-size:40px;color:var(--accent);opacity:0.6;">person</span>
+			<div style="font-size:0.85rem;font-weight:600;margin-top:8px;">Mooncode</div>
+			<div style="font-size:0.72rem;color:var(--muted);margin-top:2px;">Yerel oturum</div>
+		</div>
+		<div class="sidebar-item" onclick="openModal('settingsModal')" style="gap:10px;">
+			<span class="material-symbols-rounded" style="font-size:16px;">settings</span>
+			Ayarlar
+		</div>
+		<div class="sidebar-item" onclick="openModal('exportModal')" style="gap:10px;">
+			<span class="material-symbols-rounded" style="font-size:16px;">download</span>
+			Oturumu Dışa Aktar
+		</div>
+		<div class="sidebar-item" onclick="openModal('bridgeModal')" style="gap:10px;">
+			<span class="material-symbols-rounded" style="font-size:16px;">cable</span>
+			Tarayıcı Köprüsü
+		</div>
+		<div style="padding:8px 12px;margin-top:4px;border-top:1px solid var(--border);">
+			<div id="user-dropdown-cwd" style="font-size:0.68rem;color:var(--muted);font-family:'JetBrains Mono',monospace;word-break:break-all;"></div>
+		</div>`;
+
+	// Always render fallback immediately so dropdown is never empty
+	renderDropdown(fallbackContent);
+
+	// Populate cwd from sidebar
+	const cwdEl = document.getElementById('active-cwd-display');
+	const ddCwd = document.getElementById('user-dropdown-cwd');
+	if (cwdEl && ddCwd) ddCwd.textContent = cwdEl.textContent || '';
+
 	try {
 		const res = await fetch('/api/auth/status');
+		if (!res.ok) return;
 		const data = await res.json();
 		const btn = document.getElementById('user-menu-btn');
 		const sbName = document.getElementById('sidebar-name');
@@ -2073,39 +2450,40 @@ async function updateUserUI() {
 
 		if (data.isLoggedIn && data.account) {
 			const init = data.account.initial || '?';
-			btn.innerHTML = `<span style="font-size:0.72rem;font-weight:700;">${init}</span>`;
+			if (btn) btn.innerHTML = `<span style="font-size:0.72rem;font-weight:700;">${init}</span>`;
 			if (sbName) sbName.textContent = data.account.name;
 			if (sbAvatar) sbAvatar.textContent = init;
-			document.getElementById('user-initial').textContent = init;
+			const userInitEl = document.getElementById('user-initial');
+			if (userInitEl) userInitEl.textContent = init;
 
-			document.getElementById('user-dropdown').innerHTML = `
-				<div style="padding:10px 12px;border-bottom:1px solid var(--border);margin-bottom:6px;">
-					<div style="font-size:0.85rem;font-weight:600;color:var(--fg);">${data.account.name}</div>
-					<div style="font-size:0.72rem;color:var(--muted);">${data.account.email}</div>
+			renderDropdown(`
+				<div style="padding:12px 12px 10px;border-bottom:1px solid var(--border);margin-bottom:6px;display:flex;align-items:center;gap:10px;">
+					<div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;color:#fff;flex-shrink:0;">${init}</div>
+					<div>
+						<div style="font-size:0.85rem;font-weight:600;color:var(--fg);">${data.account.name}</div>
+						<div style="font-size:0.72rem;color:var(--muted);">${data.account.email}</div>
+					</div>
 				</div>
-				<div class="sidebar-item" onclick="handleAuthAction()">
+				<div class="sidebar-item" onclick="handleAuthAction()" style="gap:10px;">
 					<span class="material-symbols-rounded" style="font-size:16px;">account_circle</span>
 					Hesabı Yönet
 				</div>
-				<div class="sidebar-item" style="color:#ff6464;" onclick="handleAuthAction()">
+				<div class="sidebar-item" onclick="openModal('settingsModal')" style="gap:10px;">
+					<span class="material-symbols-rounded" style="font-size:16px;">settings</span>
+					Ayarlar
+				</div>
+				<div class="sidebar-item" onclick="openModal('exportModal')" style="gap:10px;">
+					<span class="material-symbols-rounded" style="font-size:16px;">download</span>
+					Dışa Aktar
+				</div>
+				<div class="sidebar-item" style="color:#ff6464;gap:10px;" onclick="handleAuthAction()">
 					<span class="material-symbols-rounded" style="font-size:16px;">logout</span>
 					Çıkış Yap
-				</div>`;
-		} else {
-			document.getElementById('user-initial').textContent = '?';
-			if (sbName) sbName.textContent = 'Giriş Yapılmadı';
-			document.getElementById('user-dropdown').innerHTML = `
-				<div style="padding:16px 12px;text-align:center;border-bottom:1px solid var(--border);margin-bottom:6px;">
-					<span class="material-symbols-rounded" style="font-size:36px;color:var(--muted);">account_circle</span>
-					<div style="font-size:0.82rem;font-weight:600;margin-top:6px;">Giriş Yapılmadı</div>
-					<div style="font-size:0.72rem;color:var(--muted);">Senkronizasyon için giriş yapın</div>
-				</div>
-				<button onclick="handleAuthAction()" class="btn btn-primary" style="width:100%;justify-content:center;margin:4px 0;">
-					<span class="material-symbols-rounded" style="font-size:16px;">login</span>
-					Giriş Yap
-				</button>`;
+				</div>`);
 		}
-	} catch(e) {}
+	} catch(e) {
+		// fallback already rendered above, nothing to do
+	}
 }
 
 // ─── CODE ACTIONS ─────────────────────────────────────────────────────────
@@ -2233,12 +2611,12 @@ es.onmessage = (e) => {
 					currentAssistantMsgId = 'msg-' + (data.message.id || Date.now() + Math.random().toString(36).substr(2,5));
 					appendMessage('assistant', data.message.content, currentAssistantMsgId);
 				} else {
-					updateMessage(currentAssistantMsgId, data.message.content);
+					updateMessage(currentAssistantMsgId, data.message.content, true);
 				}
 
 			} else if (data.type === 'message_end') {
 				setGeneratingState(false);
-				if (currentAssistantMsgId) updateMessage(currentAssistantMsgId, data.message.content);
+				if (currentAssistantMsgId) updateMessage(currentAssistantMsgId, data.message.content, false);
 				currentAssistantMsgId = null;
 				syncMessageIds();
 			}
@@ -2262,7 +2640,11 @@ es.onmessage = (e) => {
 				document.getElementById('input-model-badge').textContent = name;
 			}
 			if (data.state?.cwd) {
-				document.getElementById('cwd-text').textContent = data.state.cwd.split(/[\\/]/).pop() || data.state.cwd;
+				const cwd = data.state.cwd;
+				const short = cwd.split(/[\\/]/).pop() || cwd;
+				document.getElementById('cwd-text').textContent = short;
+				const activeCwd = document.getElementById('active-cwd-display');
+				if (activeCwd) activeCwd.textContent = cwd;
 			}
 			if (data.state?.tokens) {
 				document.getElementById('token-usage').textContent = `${(data.state.tokens.in||0).toLocaleString()} / ${(data.state.tokens.out||0).toLocaleString()}`;
@@ -2522,12 +2904,162 @@ function runCode(btn) {
 	toast('Kod panoya kopyalandı — terminale yapıştırın', 'info');
 }
 
+// ─── BROWSER BRIDGE ───────────────────────────────────────────────────────
+async function refreshBridgeStatus() {
+	try {
+		const res = await fetch('/api/browser/status');
+		const data = await res.json();
+		// BrowserBridgeStatus: { running, clients, port, error? }
+		const connected = data.running === true && (data.clients || 0) > 0;
+		const pill = document.getElementById('bridge-pill');
+		const label = document.getElementById('bridge-label');
+		const statusText = document.getElementById('bridge-status-text');
+		const statusBadge = document.getElementById('bridge-status-badge');
+		const connInfo = document.getElementById('bridge-connected-info');
+
+		if (pill) pill.className = 'bridge-pill' + (connected ? ' connected' : '');
+		if (label) label.textContent = connected ? 'Köprü Bağlı' : 'Köprü';
+		if (statusText) statusText.textContent = connected
+			? `Bağlı — ${data.clients} tarayıcı istemcisi`
+			: data.running ? 'Sunucu çalışıyor, bağlı istemci yok' : 'Köprü sunucusu kapalı';
+		if (statusBadge) {
+			statusBadge.textContent = connected ? 'BAĞLI' : (data.running ? 'ÇALIŞIYOR' : 'KAPALI');
+			statusBadge.style.color = connected ? '#4ade80' : (data.running ? 'var(--accent)' : 'var(--muted)');
+			statusBadge.style.borderColor = connected ? '#4ade8040' : 'var(--border)';
+		}
+		if (connInfo) connInfo.classList.toggle('hidden', !connected);
+	} catch(e) {
+		const label = document.getElementById('bridge-label');
+		if (label) label.textContent = 'Köprü';
+	}
+}
+
+// ─── SESSION FORK ─────────────────────────────────────────────────────────
+async function forkSession() {
+	const btn = document.querySelector('[onclick="forkSession()"]');
+	if (btn) btn.disabled = true;
+	try {
+		// Get last message ID for fork point
+		const rows = chatInner.querySelectorAll('.msg-row:not([id="global-indicator"])');
+		const lastRow = rows[rows.length - 1];
+		const id = lastRow ? lastRow.id : undefined;
+
+		const res = await fetch('/api/session/fork', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ id })
+		});
+		const data = await res.json();
+		if (data.success) {
+			toast('Oturum dallandırıldı — yeni dal aktif', 'success');
+			loadHistory();
+		} else {
+			toast('Fork başarısız oldu', 'error');
+		}
+	} catch(e) {
+		toast('Fork hatası', 'error');
+	} finally {
+		if (btn) btn.disabled = false;
+	}
+}
+
+// ─── SESSION EXPORT ───────────────────────────────────────────────────────
+async function exportSession(format) {
+	try {
+		const res = await fetch(`/api/session/export?format=${format}`);
+		if (!res.ok) { toast('Dışa aktarma başarısız', 'error'); return; }
+		const blob = await res.blob();
+		const ext = format === 'html' ? 'html' : 'jsonl';
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = `mooncode-session-${Date.now()}.${ext}`;
+		a.click();
+		URL.revokeObjectURL(url);
+		closeModal('exportModal');
+		toast(`Oturum ${ext.toUpperCase()} olarak indirildi`, 'success');
+	} catch(e) {
+		toast('Dışa aktarma hatası', 'error');
+	}
+}
+
+// ─── SESSION IMPORT ───────────────────────────────────────────────────────
+async function importSessionData(content) {
+	try {
+		const res = await fetch('/api/session/import', {
+			method: 'POST',
+			headers: { 'Content-Type': 'text/plain' },
+			body: content
+		});
+		const data = await res.json();
+		if (data.success) {
+			closeModal('exportModal');
+			toast('Oturum başarıyla içe aktarıldı', 'success');
+			loadHistory();
+		} else {
+			toast('İçe aktarma başarısız oldu', 'error');
+		}
+	} catch(e) {
+		toast('İçe aktarma hatası', 'error');
+	}
+}
+
+function handleImportFile(input) {
+	const file = input.files[0];
+	if (!file) return;
+	const reader = new FileReader();
+	reader.onload = (e) => importSessionData(e.target.result);
+	reader.readAsText(file);
+}
+
+function handleImportDrop(event) {
+	event.preventDefault();
+	document.getElementById('drop-zone')?.classList.remove('drag-over');
+	const file = event.dataTransfer.files[0];
+	if (!file || !file.name.endsWith('.jsonl')) { toast('Sadece .jsonl dosyaları desteklenir', 'error'); return; }
+	const reader = new FileReader();
+	reader.onload = (e) => importSessionData(e.target.result);
+	reader.readAsText(file);
+}
+
+// ─── SESSION SHARE ────────────────────────────────────────────────────────
+async function shareSession() {
+	const btn = document.getElementById('share-btn');
+	if (btn) { btn.disabled = true; btn.querySelector('.material-symbols-rounded').textContent = 'hourglass_top'; }
+	try {
+		const res = await fetch('/api/session/share', { method: 'POST' });
+		const data = await res.json();
+		if (data.success && data.url) {
+			document.getElementById('share-url-input').value = data.url;
+			document.getElementById('share-open-link').href = data.url;
+			openModal('shareModal');
+		} else {
+			toast('Paylaşım başarısız: ' + (data.error || 'GitHub token gerekli'), 'error');
+		}
+	} catch(e) {
+		toast('Paylaşım hatası', 'error');
+	} finally {
+		if (btn) { btn.disabled = false; btn.querySelector('.material-symbols-rounded').textContent = 'share'; }
+	}
+}
+
+function copyShareUrl() {
+	const input = document.getElementById('share-url-input');
+	if (!input) return;
+	navigator.clipboard.writeText(input.value);
+	toast('Bağlantı kopyalandı', 'success');
+}
+
+// ─── PERIODIC BRIDGE POLL ─────────────────────────────────────────────────
+setInterval(refreshBridgeStatus, 15000);
+
 // ─── INIT ─────────────────────────────────────────────────────────────────
 checkInitialStatus();
 loadHistory();
 updateUserUI();
 fetchCommands();
 initSettings();
+refreshBridgeStatus();
 setInterval(updateUserUI, 8000);
 
 // Sidebar starts open on wide screens

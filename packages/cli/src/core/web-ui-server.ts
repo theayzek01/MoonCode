@@ -1936,7 +1936,11 @@ const AUTH_PANEL_HTML = `<!doctype html>
           text.textContent = event.instructions || 'Redirecting to provider login...';
           link.href = event.url;
           link.textContent = event.url;
-          setTimeout(() => { window.location.href = event.url; }, 250);
+          if (event.instructions && event.instructions.toLowerCase().includes('code')) {
+            link.target = '_blank';
+          } else {
+            setTimeout(() => { window.location.href = event.url; }, 250);
+          }
         } catch (_) {}
       }, 700);
     }

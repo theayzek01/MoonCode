@@ -1,5 +1,6 @@
 import { MODELS } from "./models.generated.js";
 import type { Api, KnownProvider, Model, ModelThinkingLevel, Usage } from "./types.js";
+import { GITLAB_MODELS } from "./utils/oauth/gitlab.js";
 
 const modelRegistry: Map<string, Map<string, Model<Api>>> = new Map();
 
@@ -89,6 +90,13 @@ for (const id of finalOllamaModels) {
 	} as Model<Api>);
 }
 modelRegistry.set("ollama", cloudOllamaModels);
+
+// Inject GitLab Duo models dynamically
+const gitlabDuoModelsMap = new Map<string, Model<Api>>();
+for (const model of GITLAB_MODELS) {
+	gitlabDuoModelsMap.set(model.id, model as Model<Api>);
+}
+modelRegistry.set("gitlab-duo", gitlabDuoModelsMap);
 
 export function getModel(provider: string, modelId: string): Model<any> | undefined {
 	const providerModels = modelRegistry.get(provider);

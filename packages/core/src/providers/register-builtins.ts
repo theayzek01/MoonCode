@@ -11,6 +11,8 @@ import type {
 	StreamOptions,
 } from "../types.js";
 import { AssistantMessageEventStream } from "../utils/event-stream.js";
+import { streamGitLabDuo } from "./gitlab-duo.js";
+import * as anthropicModule from "./anthropic.js";
 import type { BedrockOptions } from "./amazon-bedrock.js";
 import type { AnthropicOptions } from "./anthropic.js";
 import type { AzureOpenAIResponsesOptions } from "./azure-openai-responses.js";
@@ -412,6 +414,12 @@ export function registerBuiltInApiProviders(): void {
 		api: "google-vertex",
 		stream: streamGoogleVertex,
 		streamSimple: streamSimpleGoogleVertex,
+	});
+
+	registerApiProvider({
+		api: "gitlab-duo-api",
+		stream: streamGitLabDuo,
+		streamSimple: streamGitLabDuo,
 	});
 
 	registerApiProvider({

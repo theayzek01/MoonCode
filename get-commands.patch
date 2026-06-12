@@ -1,0 +1,54 @@
+--- packages/cli/src/modes/web/web-mode.ts
++++ packages/cli/src/modes/web/web-mode.ts
+@@ -10,6 +10,7 @@
+ 	private clients: ServerResponse[] = [];
+ 	private server: ReturnType<typeof createServer> | null = null;
+ 	private port: number = 0;
++	private allCommandsCache: { cmd: string, desc: string }[] | null = null;
+ 
+ 	constructor(runtime: EngineSessionRuntime, options: InteractiveModeOptions) {
+ 		this.runtime = runtime;
+@@ -22,6 +23,43 @@
+ 		});
+ 	}
+ 
++	private getSlashCommands() {
++		if (this.allCommandsCache) return this.allCommandsCache;
++		const fromCore = (this.runtime.session as any).builtinCommands || [];
++		const templates = this.runtime.session.promptTemplates || [];
++		const skills = this.runtime.session.skillsManager?.getSkills() || [];
++		const extensions = this.runtime.session.extensionRunner?.getRegisteredCommands() || [];
++		
++		const cmds = [];
++		// Add builtins (using hardcoded fallback if we can't reflect it)
++		cmds.push(
++			{ cmd: '/help', desc: 'Yardım menüsünü gösterir' },
++			{ cmd: '/clear', desc: 'Sohbet geçmişini temizler' },
++			{ cmd: '/compact', desc: 'Sohbet bağlamını sıkıştırır' },
++			{ cmd: '/snapshot', desc: 'Proje durumunu kaydeder' },
++			{ cmd: '/model', desc: 'Kullanılan yapay zeka modelini değiştirir' },
++			{ cmd: '/diff', desc: 'Değişiklikleri gösterir' },
++			{ cmd: '/ship', desc: 'Değişiklikleri uzak sunucuya gönderir' },
++			{ cmd: '/reset', desc: 'Ajanı başlangıç durumuna sıfırlar' },
++			{ cmd: '/review', desc: 'Yazılan kodu gözden geçirir' },
++			{ cmd: '/test', desc: 'Testleri çalıştırır' },
++			{ cmd: '/exit', desc: 'Çıkış yapar' }
++		);
++		
++		templates.forEach(t => {
++			cmds.push({ cmd: '/' + t.name, desc: t.description });
++		});
++		skills.forEach(s => {
++			cmds.push({ cmd: '/' + s.name, desc: s.description });
++		});
++		extensions.forEach(e => {
++			cmds.push({ cmd: '/' + e.name, desc: e.description });
++		});
++		
++		this.allCommandsCache = cmds;
++		return cmds;
++	}
++
+ 	private broadcastEvent(event: any) {
+ 		try {
+ 			const cache = new Set();

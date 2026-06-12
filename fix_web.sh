@@ -1,0 +1,6 @@
+#!/bin/bash
+sed -i 's/const models = (await this.runtime.session.modelRegistry.getAvailable()).filter((m: any) => m.tools);/try { const models = await this.runtime.session.modelRegistry.getAvailable(); res.end(JSON.stringify(models.filter((m: any) => m.tools))); } catch(e) { res.statusCode = 500; res.end(JSON.stringify({error: "Failed"})); }/g' packages/cli/src/modes/web/web-mode.ts
+
+sed -i '/res.statusCode = 404;/i \
+			if (method === "GET" && url.pathname === "/api/settings") {\n				res.setHeader("Content-Type", "application/json");\n				res.end(JSON.stringify(this.runtime.session.settingsManager.getSettings()));\n				return;\n			}\n\n			if (method === "POST" && url.pathname === "/api/settings") {\n				let body = "";\n				req.on("data", chunk => body += chunk);\n				req.on("end", async () => {\n					try {\n						const updates = JSON.parse(body);\n						for (const [k, v] of Object.entries(updates)) {\n							this.runtime.session.settingsManager.set(k, v);\n						}\n						res.setHeader("Content-Type", "application/json");\n						res.end(JSON.stringify({ success: true }));\n					} catch(e) {\n						res.statusCode = 500;\n						res.end(JSON.stringify({ error: "Invalid settings" }));\n					}\n				});\n				return;\n			}\n' packages/cli/src/modes/web/web-mode.ts
+

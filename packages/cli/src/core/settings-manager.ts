@@ -813,6 +813,24 @@ export class SettingsManager {
 		this.save();
 	}
 
+	setCompactionReserveTokens(tokens: number | undefined): void {
+		if (!this.globalSettings.compaction) {
+			this.globalSettings.compaction = {};
+		}
+		this.globalSettings.compaction.reserveTokens = tokens;
+		this.markModified("compaction", "reserveTokens");
+		this.save();
+	}
+
+	setCompactionKeepRecentTokens(tokens: number | undefined): void {
+		if (!this.globalSettings.compaction) {
+			this.globalSettings.compaction = {};
+		}
+		this.globalSettings.compaction.keepRecentTokens = tokens;
+		this.markModified("compaction", "keepRecentTokens");
+		this.save();
+	}
+
 	getCompactionReserveTokens(): number {
 		const explicit = this.settings.compaction?.reserveTokens;
 		if (typeof explicit === "number") return explicit;

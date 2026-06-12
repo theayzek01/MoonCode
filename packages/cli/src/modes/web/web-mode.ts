@@ -8,6 +8,8 @@ import { getEngineDir } from "../../config.js";
 import type { EngineSessionRuntime } from "../../core/engine-session-runtime.js";
 import { buildSessionInfo, SessionManager } from "../../core/session-manager.js";
 import type { InteractiveModeOptions } from "../interactive/interactive-mode.js";
+import { getBrowserBridgeStatus } from "../../core/browser-bridge-server.js";
+import { BUILTIN_SLASH_COMMANDS } from "../../core/slash-commands.js";
 
 const execAsync = promisify(exec);
 
@@ -148,6 +150,68 @@ export class WebMode {
 		console.log("Starting Web Interface...");
 		try {
 			const serverModule = await import("../../core/web-ui-server.js");
+			const { getProviders } = await import("moon-core");
+			serverModule.setAuthPanelStateProvider(() => {
+				const authStorage = this.runtime.session.modelRegistry.authStorage;
+				const providerMap = new Map();
+				
+				for (const p of getProviders()) {
+					providerMap.set(p, {
+						id: p,
+						name: this.runtime.session.modelRegistry.getProviderDisplayName(p) || p,
+						supportsOAuth: false,
+						supportsApiKey: true,
+						auth: authStorage.getAuthStatus(p)
+					});
+				}
+				
+				for (const p of authStorage.getOAuthProviders()) {
+					if (providerMap.has(p.id)) {
+						providerMap.get(p.id).supportsOAuth = true;
+						providerMap.get(p.id).name = p.name;
+					} else {
+						providerMap.set(p.id, {
+							id: p.id,
+							name: p.name,
+							supportsOAuth: true,
+							supportsApiKey: true,
+							auth: authStorage.getAuthStatus(p.id)
+						});
+					}
+				}
+
+				return {
+					providers: Array.from(providerMap.values()),
+					accounts: authStorage.listManagedAccounts(),
+					models: { available: 0, total: 0 }
+				};
+			});
+			serverModule.webUiAuthActionListeners.add(async (action: any) => {
+				const authStorage = this.runtime.session.modelRegistry.authStorage;
+				if (action.action === "set_active") {
+					authStorage.setActiveManagedAccount(action.accountId);
+				} else if (action.action === "remove_account") {
+					authStorage.removeManagedAccount(action.accountId);
+				} else if (action.action === "save_api_key") {
+					authStorage.set(action.providerId, { type: "api_key", key: action.apiKey });
+				} else if (action.action === "oauth_login") {
+					let currentAuthUrl = "";
+					await authStorage.login(action.providerId, {
+						onAuth: (info: any) => {
+							currentAuthUrl = info.url;
+							serverModule.setAuthPanelOAuthEvent({ providerId: action.providerId, url: currentAuthUrl, instructions: info.instructions || "Please open the login URL in your browser." });
+						},
+						onPrompt: async (prompt: any) => {
+							serverModule.setAuthPanelOAuthEvent({ providerId: action.providerId, status: "pending", instructions: prompt.message, url: currentAuthUrl });
+							return "";
+						},
+						onProgress: (msg: string) => serverModule.setAuthPanelOAuthEvent({ providerId: action.providerId, status: "pending", instructions: msg, url: currentAuthUrl }),
+						onInfo: (lines: string[]) => serverModule.setAuthPanelOAuthEvent({ providerId: action.providerId, status: "pending", instructions: lines.join("\n"), url: currentAuthUrl }),
+						onManualCodeInput: () => new Promise<string>(() => {})
+					});
+					serverModule.setAuthPanelOAuthEvent({ providerId: action.providerId, status: "success", instructions: "Login successful!", url: "" });
+				}
+			});
 			this.webUiServerInstance = serverModule.startWebUiServer({ port: 3131 });
 			console.log(`Web UI Auth Server started at: ${this.webUiServerInstance.url}`);
 		} catch (e) {
@@ -265,23 +329,10 @@ export class WebMode {
 			const skills: any[] = [];
 			const extensions = this.runtime.session.extensionRunner?.getRegisteredCommands() || [];
 
-			const cmds = [
-				{ cmd: "/help", desc: "Yardım menüsünü gösterir" },
-				{ cmd: "/clear", desc: "Sohbet geçmişini temizler" },
-				{ cmd: "/compact", desc: "Sohbet bağlamını sıkıştırır" },
-				{ cmd: "/snapshot", desc: "Proje durumunu kaydeder" },
-				{ cmd: "/model", desc: "Modeli değiştirir" },
-				{ cmd: "/diff", desc: "Değişiklikleri gösterir" },
-				{ cmd: "/ship", desc: "Değişiklikleri uzak sunucuya gönderir" },
-				{ cmd: "/reset", desc: "Ajanı başlangıç durumuna sıfırlar" },
-				{ cmd: "/review", desc: "Kodu gözden geçirir" },
-				{ cmd: "/test", desc: "Testleri çalıştırır" },
-				{ cmd: "/build", desc: "Projeyi derler" },
-				{ cmd: "/lint", desc: "Lint taraması yapar" },
-				{ cmd: "/exit", desc: "Çıkış yapar" },
-				{ cmd: "/models", desc: "Mevcut modelleri listeler" },
-				{ cmd: "/provider", desc: "Sağlayıcıyı değiştirir" },
-			];
+			const cmds = BUILTIN_SLASH_COMMANDS.map((c) => ({
+				cmd: "/" + c.name,
+				desc: c.description,
+			}));
 
 			templates.forEach((t) => cmds.push({ cmd: "/" + t.name, desc: t.description || "Şablon komutu" }));
 
@@ -710,6 +761,8 @@ export class WebMode {
 					theme: sm.getTheme(),
 					compactionProfile: sm.getCompactionProfile(),
 					enableToolBasedCompaction: sm.getCompactionEnabled(),
+					reserveTokens: sm.getCompactionReserveTokens(),
+					keepRecentTokens: sm.getCompactionKeepRecentTokens(),
 					thinkingLevel: sm.getDefaultThinkingLevel(),
 					permissionLevel: sm.getPermissionLevel(),
 				}),
@@ -728,7 +781,10 @@ export class WebMode {
 					for (const [k, v] of Object.entries(updates)) {
 						if (k === "theme") sm.setTheme(v as string);
 						if (k === "enableToolBasedCompaction") sm.setCompactionEnabled(v as boolean);
-						if (k === "permissionLevel") sm.setPermissionLevel(v as any);
+						if (k === "compactionProfile") sm.setCompactionProfile(v as any);
+						if (k === "reserveTokens") sm.setCompactionReserveTokens(v ? Number(v) : undefined);
+						if (k === "keepRecentTokens") sm.setCompactionKeepRecentTokens(v ? Number(v) : undefined);
+						if (k === "permissionLevel" && ["ask", "safe", "full"].includes(v as string)) sm.setPermissionLevel(v as any);
 					}
 					res.setHeader("Content-Type", "application/json");
 					res.end(JSON.stringify({ success: true }));
@@ -737,6 +793,132 @@ export class WebMode {
 					res.end(JSON.stringify({ error: "Invalid settings" }));
 				}
 			});
+			return;
+		}
+
+		if (method === "GET" && url.pathname === "/api/browser/status") {
+			res.setHeader("Content-Type", "application/json");
+			res.end(JSON.stringify(getBrowserBridgeStatus()));
+			return;
+		}
+
+		if (method === "POST" && url.pathname === "/api/session/fork") {
+			let body = "";
+			req.on("data", (chunk) => (body += chunk));
+			req.on("end", async () => {
+				try {
+					const { id } = JSON.parse(body);
+					const result = await this.runtime.fork(id, { position: "at" });
+					res.setHeader("Content-Type", "application/json");
+					res.end(JSON.stringify({ success: !result.cancelled }));
+				} catch (e: any) {
+					res.statusCode = 500;
+					res.end(JSON.stringify({ error: e.message }));
+				}
+			});
+			return;
+		}
+
+		if (method === "GET" && url.pathname === "/api/session/export") {
+			try {
+				const format = url.searchParams.get("format") || "jsonl";
+				const tempDir = join(getEngineDir(), "temp-exports");
+				if (!fs.existsSync(tempDir)) {
+					fs.mkdirSync(tempDir, { recursive: true });
+				}
+				const filename = `session-${Date.now()}.${format}`;
+				const tempPath = join(tempDir, filename);
+
+				if (format === "html") {
+					await this.runtime.session.exportToHtml(tempPath);
+					res.setHeader("Content-Type", "text/html");
+				} else {
+					this.runtime.session.exportToJsonl(tempPath);
+					res.setHeader("Content-Type", "application/jsonl");
+				}
+
+				res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+				const content = fs.readFileSync(tempPath);
+				fs.unlinkSync(tempPath);
+				res.end(content);
+			} catch (e: any) {
+				res.statusCode = 500;
+				res.end(JSON.stringify({ error: e.message }));
+			}
+			return;
+		}
+
+		if (method === "POST" && url.pathname === "/api/session/import") {
+			let body = "";
+			req.on("data", (chunk) => (body += chunk));
+			req.on("end", async () => {
+				try {
+					const tempDir = join(getEngineDir(), "temp-imports");
+					if (!fs.existsSync(tempDir)) {
+						fs.mkdirSync(tempDir, { recursive: true });
+					}
+					const tempPath = join(tempDir, `import-${Date.now()}.jsonl`);
+					fs.writeFileSync(tempPath, body, "utf-8");
+
+					const result = await this.runtime.importFromJsonl(tempPath);
+					fs.unlinkSync(tempPath);
+
+					res.setHeader("Content-Type", "application/json");
+					res.end(JSON.stringify({ success: !result.cancelled }));
+				} catch (e: any) {
+					res.statusCode = 500;
+					res.end(JSON.stringify({ error: e.message }));
+				}
+			});
+			return;
+		}
+
+		if (method === "POST" && url.pathname === "/api/session/share") {
+			try {
+				const tempDir = join(getEngineDir(), "temp-exports");
+				if (!fs.existsSync(tempDir)) {
+					fs.mkdirSync(tempDir, { recursive: true });
+				}
+				const tempPath = join(tempDir, `share-${Date.now()}.html`);
+				await this.runtime.session.exportToHtml(tempPath);
+				const htmlContent = fs.readFileSync(tempPath, "utf-8");
+				fs.unlinkSync(tempPath);
+
+				const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+				const headers: Record<string, string> = {
+					"Content-Type": "application/json",
+					"User-Agent": "MoonCode",
+				};
+				if (token) {
+					headers["Authorization"] = `token ${token}`;
+				}
+				
+				const response = await fetch("https://api.github.com/gists", {
+					method: "POST",
+					headers,
+					body: JSON.stringify({
+						description: "MoonCode Session Export",
+						public: false,
+						files: {
+							"session.html": {
+								content: htmlContent
+							}
+						}
+					})
+				});
+
+				const result = await response.json() as any;
+				if (response.ok && result.html_url) {
+					res.setHeader("Content-Type", "application/json");
+					res.end(JSON.stringify({ success: true, url: result.html_url }));
+				} else {
+					res.statusCode = response.status;
+					res.end(JSON.stringify({ error: result.message || "Failed to create Gist" }));
+				}
+			} catch (e: any) {
+				res.statusCode = 500;
+				res.end(JSON.stringify({ error: e.message }));
+			}
 			return;
 		}
 

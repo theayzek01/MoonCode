@@ -1,0 +1,20 @@
+--- packages/cli/src/modes/web/web-mode.ts
++++ packages/cli/src/modes/web/web-mode.ts
+@@ -397,13 +397,10 @@
+ 			await fetch('/api/interrupt', { method: 'POST' });
+ 		}
+ 
+-		const slashCommands = [
+-			{ cmd: '/help', desc: 'Get started with MoonCode' },
+-			{ cmd: '/compact', desc: 'Compact memory & context' },
+-			{ cmd: '/clear', desc: 'Clear the context' },
+-			{ cmd: '/snapshot', desc: 'Take a workspace snapshot' },
+-			{ cmd: '/model', desc: 'Change current model' }
+-		];
++		let slashCommands = [];
++		fetch('/api/commands').then(r => r.json()).then(cmds => {
++			slashCommands = cmds;
++		}).catch(() => {});
+ 
+ 		const slashCommandsMenu = document.getElementById('slash-commands');
+ 		let commandIndex = -1;
