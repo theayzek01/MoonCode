@@ -18,7 +18,7 @@ import type { CodingAgentMode, CodingAgentsSettings, CodingAgentVerbosity } from
 
 export interface CompactionSettings {
 	enabled?: boolean; // default: true
-	profile?: "aggressive" | "balanced" | "off"; // default: balanced
+	profile?: "nuclear" | "aggressive" | "balanced" | "off"; // default: balanced
 	reserveTokens?: number; // profile default override
 	keepRecentTokens?: number; // profile default override
 }
@@ -786,11 +786,11 @@ export class SettingsManager {
 		this.save();
 	}
 
-	getCompactionProfile(): "aggressive" | "balanced" | "off" {
+	getCompactionProfile(): "nuclear" | "aggressive" | "balanced" | "off" {
 		return this.settings.compaction?.profile ?? "aggressive";
 	}
 
-	setCompactionProfile(profile: "aggressive" | "balanced" | "off"): void {
+	setCompactionProfile(profile: "nuclear" | "aggressive" | "balanced" | "off"): void {
 		if (!this.globalSettings.compaction) {
 			this.globalSettings.compaction = {};
 		}
@@ -834,18 +834,22 @@ export class SettingsManager {
 	getCompactionReserveTokens(): number {
 		const explicit = this.settings.compaction?.reserveTokens;
 		if (typeof explicit === "number") return explicit;
-		return this.getCompactionProfile() === "aggressive" ? 4096 : 8192;
+		const profile = this.getCompactionProfile();
+		if (profile === "nuclear") return 1024;
+		return profile === "aggressive" ? 4096 : 8192;
 	}
 
 	getCompactionKeepRecentTokens(): number {
 		const explicit = this.settings.compaction?.keepRecentTokens;
 		if (typeof explicit === "number") return explicit;
-		return this.getCompactionProfile() === "aggressive" ? 3000 : 8000;
+		const profile = this.getCompactionProfile();
+		if (profile === "nuclear") return 1024;
+		return profile === "aggressive" ? 3000 : 8000;
 	}
 
 	getCompactionSettings(): {
 		enabled: boolean;
-		profile: "aggressive" | "balanced" | "off";
+		profile: "nuclear" | "aggressive" | "balanced" | "off";
 		reserveTokens: number;
 		keepRecentTokens: number;
 	} {

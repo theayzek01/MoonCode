@@ -31,6 +31,10 @@ export class LearningMemory {
 		return LearningMemory.instance;
 	}
 
+	public getExperiences(): ExperienceItem[] {
+		return this.experiences;
+	}
+
 	private loadMemory(): void {
 		try {
 			if (fs.existsSync(this.memoryPath)) {

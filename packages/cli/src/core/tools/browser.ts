@@ -42,7 +42,6 @@ const browserPageSchema = Type.Object({
 		Type.Literal("evaluate"),
 		Type.Literal("scroll"),
 		Type.Literal("console_logs"),
-		Type.Literal("screenshot"),
 		Type.Literal("wait"),
 		Type.Literal("clear_ui"),
 		Type.Literal("block_code"),

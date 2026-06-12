@@ -15,7 +15,7 @@
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 	<style>
-		/* ─── THEME TOKENS ─────────────────────────────────────────────── */
+		/* â”€â”€â”€ THEME TOKENS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		[data-theme="mooncode"] {
 			--bg:          #0e0f10;
 			--bg2:         #141518;
@@ -114,7 +114,7 @@
 			--shadow:      0 4px 20px rgba(0,0,0,0.1);
 		}
 
-		/* ─── BASE ──────────────────────────────────────────────────────── */
+		/* â”€â”€â”€ BASE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		*, *::before, *::after { box-sizing: border-box; }
 		:root { font-size: 15px; }
 		body {
@@ -128,13 +128,13 @@
 			transition: background 0.3s, color 0.3s;
 		}
 
-		/* ─── SCROLLBAR ─────────────────────────────────────────────────── */
+		/* â”€â”€â”€ SCROLLBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		::-webkit-scrollbar { width: 5px; height: 5px; }
 		::-webkit-scrollbar-track { background: transparent; }
 		::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
 		::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 
-		/* ─── MATERIAL ICONS ─────────────────────────────────────────────── */
+		/* â”€â”€â”€ MATERIAL ICONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.material-symbols-rounded {
 			font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
 			font-size: 20px;
@@ -142,7 +142,7 @@
 			user-select: none;
 		}
 
-		/* ─── ANIMATIONS ────────────────────────────────────────────────── */
+		/* â”€â”€â”€ ANIMATIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 		@keyframes fadeIn { from{opacity:0;transform:translate(8px)} to{opacity:1;transform:translate(0)} }
 		@keyframes slideIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
@@ -154,7 +154,7 @@
 		.msg-enter { animation: fadeIn 0.3s ease forwards; }
 		.tool-enter { animation: slideIn 0.25s ease forwards; }
 
-		/* ─── SIDEBAR ───────────────────────────────────────────────────── */
+		/* â”€â”€â”€ SIDEBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		#sidebar {
 			width: 260px;
 			min-width: 260px;
@@ -169,10 +169,10 @@
 		}
 		#sidebar.collapsed { width: 0; min-width: 0; border-right: none; }
 
-		/* ─── MAIN ──────────────────────────────────────────────────────── */
+		/* â”€â”€â”€ MAIN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		#main { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
 
-		/* ─── HEADER ────────────────────────────────────────────────────── */
+		/* â”€â”€â”€ HEADER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		#header {
 			height: 52px;
 			border-bottom: 1px solid var(--border);
@@ -187,7 +187,7 @@
 			flex-shrink: 0;
 		}
 
-		/* ─── CHAT CONTAINER ─────────────────────────────────────────────── */
+		/* â”€â”€â”€ CHAT CONTAINER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		#chat-container {
 			flex: 1;
 			overflow-y: auto;
@@ -196,7 +196,7 @@
 		}
 		.chat-inner { max-width: 780px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
 
-		/* ─── MESSAGES ──────────────────────────────────────────────────── */
+		/* â”€â”€â”€ MESSAGES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.msg-row { display: flex; flex-direction: column; gap: 6px; }
 		.msg-row.user { align-items: flex-end; }
 		.msg-row.assistant { align-items: flex-start; }
@@ -222,7 +222,7 @@
 			word-break: break-word;
 		}
 
-		/* ─── PROSE / MARKDOWN ───────────────────────────────────────────── */
+		/* â”€â”€â”€ PROSE / MARKDOWN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.prose h1,.prose h2,.prose h3,.prose h4,.prose h5,.prose h6 {
 			color: var(--fg);
 			font-weight: 600;
@@ -274,7 +274,7 @@
 			border: 1px solid var(--border);
 		}
 
-		/* ─── CODE BLOCKS ────────────────────────────────────────────────── */
+		/* â”€â”€â”€ CODE BLOCKS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.code-block {
 			margin: 0.8em 0;
 			border-radius: 12px;
@@ -324,7 +324,7 @@
 		}
 		.code-block pre code { background: none !important; padding: 0 !important; border: none !important; font-size: inherit; }
 
-		/* ─── THINKING BLOCK ─────────────────────────────────────────────── */
+		/* â”€â”€â”€ THINKING BLOCK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.thinking-block {
 			position: relative;
 			background: rgba(108,143,255,0.03);
@@ -391,7 +391,7 @@
 		}
 		.thinking-body { scroll-behavior: smooth; }
 
-		/* ─── TOOL CARDS ─────────────────────────────────────────────────── */
+		/* â”€â”€â”€ TOOL CARDS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.tool-card {
 			background: var(--surface);
 			border: 1px solid var(--border);
@@ -440,7 +440,7 @@
 		.tool-section.result pre { color: var(--accent2); }
 		.tool-section.error-section pre { color: #ff8a8a; }
 
-		/* ─── ACTION BAR ─────────────────────────────────────────────────── */
+		/* â”€â”€â”€ ACTION BAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.action-bar {
 			display: flex;
 			align-items: center;
@@ -463,7 +463,7 @@
 		}
 		.action-bar button:hover { color: var(--fg); background: var(--surface2); }
 
-		/* ─── INPUT AREA ─────────────────────────────────────────────────── */
+		/* â”€â”€â”€ INPUT AREA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		#input-area {
 			position: absolute;
 			bottom: 0; left: 0; right: 0;
@@ -551,7 +551,7 @@
 		}
 		#stop-btn:hover { background: rgba(255,80,80,0.25); }
 
-		/* ─── BADGE BUTTON ────────────────────────────────────────────────── */
+		/* â”€â”€â”€ BADGE BUTTON â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.badge-btn {
 			display: flex; align-items: center; gap: 4px;
 			background: var(--surface2);
@@ -566,7 +566,7 @@
 		}
 		.badge-btn:hover { color: var(--fg); border-color: rgba(255,255,255,0.15); }
 
-		/* ─── MODALS ─────────────────────────────────────────────────────── */
+		/* â”€â”€â”€ MODALS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.modal-overlay {
 			display: none;
 			position: fixed; inset: 0;
@@ -604,7 +604,7 @@
 		.modal-body { padding: 16px 18px; max-height: 70vh; overflow-y: auto; }
 		.modal-footer { padding: 12px 18px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
 
-		/* ─── FORM ELEMENTS ──────────────────────────────────────────────── */
+		/* â”€â”€â”€ FORM ELEMENTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
 		.form-label { font-size: 0.78rem; font-weight: 500; color: var(--fg); }
 		.form-select, .form-input {
@@ -630,7 +630,7 @@
 		}
 		.form-checkbox-row input[type="checkbox"] { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
 
-		/* ─── BUTTONS ─────────────────────────────────────────────────────── */
+		/* â”€â”€â”€ BUTTONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.btn { 
 			border: none; cursor: pointer; border-radius: 9px; font-weight: 500;
 			font-size: 0.82rem; padding: 8px 16px; display: inline-flex;
@@ -644,7 +644,7 @@
 		.btn-danger { background: rgba(255,80,80,0.15); color: #ff6464; }
 		.btn-danger:hover { background: rgba(255,80,80,0.25); }
 
-		/* ─── TOASTS ──────────────────────────────────────────────────────── */
+		/* â”€â”€â”€ TOASTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		#toast-container {
 			position: fixed;
 			bottom: 24px; right: 24px;
@@ -670,7 +670,7 @@
 		.toast.info { border-color: rgba(108,143,255,0.3); }
 		.toast.out { animation: toastOut 0.3s ease forwards; }
 
-		/* ─── COMMAND PALETTE ─────────────────────────────────────────────── */
+		/* â”€â”€â”€ COMMAND PALETTE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		#cmd-palette .modal { max-width: 540px; }
 		#cmd-input {
 			width: 100%;
@@ -704,7 +704,7 @@
 			border-radius: 5px; padding: 2px 5px; color: var(--muted);
 		}
 
-		/* ─── THEME PICKER ────────────────────────────────────────────────── */
+		/* â”€â”€â”€ THEME PICKER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 		.theme-card {
 			border-radius: 12px;
@@ -721,7 +721,7 @@
 			background: var(--surface2); text-align: center;
 		}
 
-		/* ─── MODEL LIST ─────────────────────────────────────────────────── */
+		/* â”€â”€â”€ MODEL LIST â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.model-item {
 			display: flex; align-items: center; gap: 12px;
 			padding: 10px 12px;
@@ -740,7 +740,7 @@
 			font-family: 'JetBrains Mono', monospace;
 		}
 
-		/* ─── AUTOCOMPLETE ────────────────────────────────────────────────── */
+		/* â”€â”€â”€ AUTOCOMPLETE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		#autocomplete {
 			position: absolute; bottom: calc(100% + 8px); left: 0;
 			width: 320px;
@@ -765,7 +765,7 @@
 		.ac-cmd { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 600; color: var(--accent); }
 		.ac-desc { font-size: 0.72rem; color: var(--muted); }
 
-		/* ─── EMPT STATE ─────────────────────────────────────────────────── */
+		/* â”€â”€â”€ EMPT STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		#empty-state {
 			display: flex;
 			flex-direction: column;
@@ -874,7 +874,7 @@
 		.session-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(108,143,255,0.08); }
 		.session-btn .material-symbols-rounded { font-size: 14px; }
 
-		/* ─── IMPORT DROP ZONE ───────────────────────────────────────────── */
+		/* â”€â”€â”€ IMPORT DROP ZONE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.drop-zone {
 			border: 2px dashed var(--border); border-radius: 12px;
 			padding: 28px 20px; text-align: center; cursor: pointer;
@@ -884,7 +884,7 @@
 			border-color: var(--accent); background: rgba(108,143,255,0.05); color: var(--accent);
 		}
 
-		/* ─── ADVANCED SETTINGS TABS ─────────────────────────────────────── */
+		/* â”€â”€â”€ ADVANCED SETTINGS TABS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.stab-row { display: flex; gap: 4px; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
 		.stab {
 			padding: 5px 12px; border-radius: 8px 8px 0 0; font-size: 0.73rem;
@@ -895,7 +895,7 @@
 		.stab-panel { display: none; }
 		.stab-panel.active { display: block; }
 
-		/* ─── PINNED & HIGHLIGHT ────────────────────────────────────────── */
+		/* â”€â”€â”€ PINNED & HIGHLIGHT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.pinned-message .user-bubble {
 			border-color: var(--accent);
 			box-shadow: 0 0 12px rgba(108,143,255,0.12);
@@ -955,10 +955,6 @@
 
 	<!-- Sidebar Footer -->
 	<div style="padding:10px 10px;flex-shrink:0;">
-		<div class="sidebar-item" onclick="openSemanticBrain()">
-			<span class="material-symbols-rounded" style="font-size:17px;flex-shrink:0;">neurology</span>
-			<span>Semantic Brain</span>
-		</div>
 		<div class="sidebar-item" onclick="openModal('settingsModal')">
 			<span class="material-symbols-rounded" style="font-size:17px;flex-shrink:0;">settings</span>
 			<span>Settings</span>
@@ -1159,35 +1155,6 @@
 	</div>
 </div>
 
-<!-- Mini Browser Modal -->
-<div id="miniBrowserModal" class="modal-overlay" style="align-items:center; justify-content:flex-end; padding-right: 20px;">
-	<div class="modal" style="width:400px; height:600px; max-width:90%; display:flex; flex-direction:column; box-shadow: -5px 0 30px rgba(0,0,0,0.5);">
-		<div class="modal-header" style="background:var(--surface2); padding: 8px 12px;">
-			<div class="modal-title" style="font-size:0.8rem; color:var(--accent);"><span class="material-symbols-rounded" style="font-size:16px;">language</span> Mini Browser</div>
-			<div style="display:flex; gap:6px; align-items:center;">
-				<input type="text" id="miniBrowserUrl" readonly style="background:var(--bg); border:1px solid var(--border); border-radius:4px; font-size:0.7rem; padding:2px 6px; width:200px; color:var(--muted);">
-				<button class="modal-close" onclick="document.getElementById('miniBrowserModal').classList.remove('active')"><span class="material-symbols-rounded">close</span></button>
-			</div>
-		</div>
-		<div class="modal-body" style="flex:1; padding:0; background:#fff; overflow:hidden;">
-			<iframe id="miniBrowserFrame" src="about:blank" style="width:100%; height:100%; border:none;"></iframe>
-		</div>
-	</div>
-</div>
-
-<!-- Semantic Brain Modal -->
-<div id="semanticBrainModal" class="modal-overlay" onclick="overlayClose(event, 'semanticBrainModal')">
-	<div class="modal" style="max-width:680px;" onclick="event.stopPropagation()">
-		<div class="modal-header">
-			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent2);">neurology</span> Semantic Vector Brain</div>
-			<button class="modal-close" onclick="closeModal('semanticBrainModal')"><span class="material-symbols-rounded">close</span></button>
-		</div>
-		<div class="modal-body" id="semantic-brain-content" style="background:var(--bg2);">
-			<div style="text-align:center;padding:20px;color:var(--muted);font-size:0.82rem;">Loading semantic experiences...</div>
-		</div>
-	</div>
-</div>
-
 <!-- Reasoning Modal -->
 <div id="reasoningModal" class="modal-overlay" onclick="overlayClose(event,'reasoningModal')">
 	<div class="modal" style="max-width:320px;" onclick="event.stopPropagation()">
@@ -1248,7 +1215,6 @@
 				<div class="form-group">
 					<label class="form-label">Compaction Profile</label>
 					<select class="form-select" id="set-profile">
-						<option value="nuclear">Nuclear — Extreme zero-token mode</option>
 						<option value="balanced">Balanced — Speed/Quality balance</option>
 						<option value="aggressive">Aggressive — Maximum context preservation</option>
 						<option value="off">Off — No automatic compaction</option>
@@ -1322,7 +1288,7 @@
 <div id="themeModal" class="modal-overlay" onclick="overlayClose(event,'themeModal')">
 	<div class="modal" style="max-width:480px;" onclick="event.stopPropagation()">
 		<div class="modal-header">
-			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">palette</span> Tema Seç</div>
+			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">palette</span> Tema SeÃ§</div>
 			<button class="modal-close" onclick="closeModal('themeModal')"><span class="material-symbols-rounded">close</span></button>
 		</div>
 		<div class="modal-body">
@@ -1361,7 +1327,7 @@
 							<div style="width:22px;height:8px;border-radius:4px;background:#f6c177;opacity:0.5;"></div>
 						</div>
 					</div>
-					<div class="theme-name">Rosé Pine</div>
+					<div class="theme-name">RosÃ© Pine</div>
 				</div>
 				<div class="theme-card" id="theme-sepia" onclick="setTheme('sepia')">
 					<div class="theme-preview" style="background:linear-gradient(135deg,#1c1a16 40%,#211e18);border-bottom:1px solid #26221a;">
@@ -1370,7 +1336,7 @@
 							<div style="width:22px;height:8px;border-radius:4px;background:#c8855a;opacity:0.5;"></div>
 						</div>
 					</div>
-					<div class="theme-name">Sepya (Göz Dostu)</div>
+					<div class="theme-name">Sepya (GÃ¶z Dostu)</div>
 				</div>
 				<div class="theme-card" id="theme-light" onclick="setTheme('light')">
 					<div class="theme-preview" style="background:linear-gradient(135deg,#f5f5f7 40%,#ffffff);border-bottom:1px solid #e5e5ea;">
@@ -1379,7 +1345,7 @@
 							<div style="width:22px;height:8px;border-radius:4px;background:#0ea5c8;opacity:0.5;"></div>
 						</div>
 					</div>
-					<div class="theme-name" style="background:#f0f0f5;color:#1a1a2e;">Açık</div>
+					<div class="theme-name" style="background:#f0f0f5;color:#1a1a2e;">AÃ§Ä±k</div>
 				</div>
 			</div>
 		</div>
@@ -1390,17 +1356,17 @@
 <div id="shortcutsModal" class="modal-overlay" onclick="overlayClose(event,'shortcutsModal')">
 	<div class="modal" style="max-width:400px;" onclick="event.stopPropagation()">
 		<div class="modal-header">
-			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">keyboard</span> Klavye Kısayolları</div>
+			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">keyboard</span> Klavye KÄ±sayollarÄ±</div>
 			<button class="modal-close" onclick="closeModal('shortcutsModal')"><span class="material-symbols-rounded">close</span></button>
 		</div>
 		<div class="modal-body">
 			<div style="display:flex;flex-direction:column;gap:3px;font-size:0.8rem;">
 				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;background:var(--surface2);">
-					<span style="color:var(--fg);">Gönder</span>
+					<span style="color:var(--fg);">GÃ¶nder</span>
 					<div style="display:flex;gap:4px;"><kbd>Enter</kbd></div>
 				</div>
 				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;">
-					<span style="color:var(--fg);">YYeni Satır</span>
+					<span style="color:var(--fg);">eni SatÄ±r</span>
 					<div style="display:flex;gap:4px;"><kbd>Shift</kbd><kbd>Enter</kbd></div>
 				</div>
 				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;background:var(--surface2);">
@@ -1412,7 +1378,7 @@
 					<div style="display:flex;gap:4px;"><kbd>Ctrl</kbd><kbd>F</kbd></div>
 				</div>
 				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;background:var(--surface2);">
-					<span style="color:var(--fg);">Kenar Çubuğu</span>
+					<span style="color:var(--fg);">Kenar Ã‡ubuÄŸu</span>
 					<div style="display:flex;gap:4px;"><kbd>Ctrl</kbd><kbd>B</kbd></div>
 				</div>
 				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;">
@@ -1438,7 +1404,7 @@
 	</div>
 </div>
 
-<!-- ————————————————————————————————————— BROWSER BRIDGE MODAL ——————————————————————————————————————— -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• BROWSER BRIDGE MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="bridgeModal" class="modal-overlay" onclick="overlayClose(event,'bridgeModal')">
 	<div class="modal" style="max-width:420px;" onclick="event.stopPropagation()">
 		<div class="modal-header">
@@ -1450,21 +1416,21 @@
 				<div style="display:flex;align-items:center;gap:10px;">
 					<span class="material-symbols-rounded" style="font-size:28px;color:var(--accent);">lan</span>
 					<div>
-						<div style="font-size:0.85rem;font-weight:600;">Bridgeü Durumu</div>
+						<div style="font-size:0.85rem;font-weight:600;">BridgeÃ¼ Durumu</div>
 						<div id="bridge-status-text" style="font-size:0.72rem;color:var(--muted);">Kontrol ediliyor...</div>
 					</div>
 				</div>
-				<div id="bridge-status-badge" style="padding:4px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;background:var(--surface);border:1px solid var(--border);">—</div>
+				<div id="bridge-status-badge" style="padding:4px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;background:var(--surface);border:1px solid var(--border);">â€”</div>
 			</div>
 			<div style="font-size:0.78rem;color:var(--muted);line-height:1.7;padding:10px 14px;border-radius:10px;background:rgba(108,143,255,0.04);border:1px solid rgba(108,143,255,0.12);">
 				<div style="font-weight:600;color:var(--fg);margin-bottom:6px;display:flex;align-items:center;gap:6px;">
 					<span class="material-symbols-rounded" style="font-size:16px;color:var(--accent);">info</span> Browser Bridge Nedir?
 				</div>
-				MoonCode'un tarayıcıyı kontrol etmesini sağlar. Etkinleştirildiğinde web sayfaları açabilir, form doldurup gönderebilir, ekran görüntüsü alabilirsiniz.
+				MoonCode'un tarayÄ±cÄ±yÄ± kontrol etmesini saÄŸlar. EtkinleÅŸtirildiÄŸinde web sayfalarÄ± aÃ§abilir, form doldurup gÃ¶nderebilir, ekran gÃ¶rÃ¼ntÃ¼sÃ¼ alabilirsiniz.
 			</div>
 			<div id="bridge-connected-info" class="hidden" style="margin-top:12px;padding:10px 14px;border-radius:10px;background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.2);font-size:0.75rem;color:#4ade80;">
 				<span class="material-symbols-rounded" style="font-size:15px;vertical-align:middle;">check_circle</span>
-				Tarayıcı bağlı ve hazır. MoonCode ajan görevlerinde tarayıcıyı kullanabilir.
+				TarayÄ±cÄ± baÄŸlÄ± ve hazÄ±r. MoonCode ajan gÃ¶revlerinde tarayÄ±cÄ±yÄ± kullanabilir.
 			</div>
 		</div>
 		<div class="modal-footer">
@@ -1474,7 +1440,7 @@
 	</div>
 </div>
 
-<!-- ————————————————————————————————————— EXPORT / IMPORT MODAL ——————————————————————————————————————— -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• EXPORT / IMPORT MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="exportModal" class="modal-overlay" onclick="overlayClose(event,'exportModal')">
 	<div class="modal" style="max-width:460px;" onclick="event.stopPropagation()">
 		<div class="modal-header">
@@ -1514,15 +1480,15 @@
 	</div>
 </div>
 
-<!-- ————————————————————————————————————— SHARE RESULT MODAL ——————————————————————————————————————— -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SHARE RESULT MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="shareModal" class="modal-overlay" onclick="overlayClose(event,'shareModal')">
 	<div class="modal" style="max-width:420px;" onclick="event.stopPropagation()">
 		<div class="modal-header">
-			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">share</span> Oturum Paylaşıldı</div>
+			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">share</span> Oturum PaylaÅŸÄ±ldÄ±</div>
 			<button class="modal-close" onclick="closeModal('shareModal')"><span class="material-symbols-rounded">close</span></button>
 		</div>
 		<div class="modal-body">
-			<div style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;">Oturum GitHub Gist olarak paylaşıldı. Aşağıdaki bağlantıyı kopyalayın:</div>
+			<div style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;">Oturum GitHub Gist olarak paylaÅŸÄ±ldÄ±. AÅŸaÄŸÄ±daki baÄŸlantÄ±yÄ± kopyalayÄ±n:</div>
 			<div style="display:flex;gap:6px;align-items:center;">
 				<input id="share-url-input" class="form-input" type="text" readonly style="flex:1;font-family:'JetBrains Mono',monospace;font-size:0.75rem;" value="">
 				<button onclick="copyShareUrl()" class="btn btn-primary" style="flex-shrink:0;">
@@ -1532,7 +1498,7 @@
 			<div style="margin-top:10px;">
 				<a id="share-open-link" href="#" target="_blank" style="font-size:0.78rem;color:var(--accent);display:flex;align-items:center;gap:4px;text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
 					<span class="material-symbols-rounded" style="font-size:15px;">open_in_new</span>
-					Gist'i aç
+					Gist'i aÃ§
 				</a>
 			</div>
 		</div>
@@ -1570,9 +1536,9 @@
 	</div>
 </div>
 
-<!-- ————————————————————————————————————— SCRIPT ——————————————————————————————————————— -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SCRIPT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <script>
-// ─── MARKED SETUP ────────────────────────────────────────────────────────
+// â”€â”€â”€ MARKED SETUP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const renderer = new marked.Renderer();
 
 renderer.code = function(token) {
@@ -1591,7 +1557,7 @@ renderer.code = function(token) {
 					${lang}
 				</div>
 				<div class="code-actions">
-					<button onclick="runCode(this)" title="Çalıştır" style="display:none;" id="run-${id}">
+					<button onclick="runCode(this)" title="Ã‡alÄ±ÅŸtÄ±r" style="display:none;" id="run-${id}">
 						<span class="material-symbols-rounded" style="font-size:15px;">play_arrow</span>
 					</button>
 					<button onclick="downloadCode(this, '${lang}')" title="Download">
@@ -1613,7 +1579,7 @@ renderer.codespan = function(token) {
 
 marked.setOptions({ renderer, breaks: true, gfm: true });
 
-// ─── STATE ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const chatInner = document.getElementById('chat-inner');
 const chatContainer = document.getElementById('chat-container');
 const promptInput = document.getElementById('prompt-input');
@@ -1631,7 +1597,7 @@ let availableCommands = [];
 let filteredCommands = [];
 let acIndex = -1;
 
-// ─── THEME ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ THEME â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function setTheme(theme) {
 	currentTheme = theme;
 	document.documentElement.setAttribute('data-theme', theme);
@@ -1658,7 +1624,7 @@ setTimeout(() => {
 	if (card) card.classList.add('active');
 }, 100);
 
-// ─── TOAST ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ TOAST â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function toast(msg, type = 'info', duration = 3000) {
 	const container = document.getElementById('toast-container');
 	const el = document.createElement('div');
@@ -1678,7 +1644,7 @@ function toast(msg, type = 'info', duration = 3000) {
 	}, duration);
 }
 
-// ─── MODAL ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function openModal(id) {
 	document.getElementById(id).classList.add('active');
 	if (id === 'modelModal') loadModels();
@@ -1693,7 +1659,7 @@ function overlayClose(e, id) {
 	if (e.target === e.currentTarget) closeModal(id);
 }
 
-// ─── SIDEBAR ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ SIDEBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let sidebarOpen = true;
 function toggleSidebar() {
 	sidebarOpen = !sidebarOpen;
@@ -1702,7 +1668,7 @@ function toggleSidebar() {
 	else sb.classList.add('collapsed');
 }
 
-// ─── SEARCH ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ SEARCH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let searchActive = false;
 function toggleSearch() {
 	searchActive = !searchActive;
@@ -1729,7 +1695,7 @@ function searchChat(query) {
 	count.textContent = matches ? `${matches} result(s)` : 'No results found';
 }
 
-// ─── EXPORT ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ EXPORT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function exportChat() {
 	const rows = chatInner.querySelectorAll('.msg-row');
 	let md = `# MoonCode Chat Export\n\n_${new Date().toLocaleString('en-US')}_\n\n---\n\n`;
@@ -1747,14 +1713,14 @@ function exportChat() {
 	toast('Chat exported', 'success');
 }
 
-// ─── INSERT PROMPT ────────────────────────────────────────────────────────
+// â”€â”€â”€ INSERT PROMPT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function insertPrompt(text) {
 	promptInput.value = text;
 	promptInput.focus();
 	autoResize();
 }
 
-// ─── FILE ATTACH ──────────────────────────────────────────────────────────
+// â”€â”€â”€ FILE ATTACH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function handleFileAttach(input) {
 	const files = Array.from(input.files);
 	files.forEach(f => { if (!attachedFiles.find(x => x.name === f.name)) attachedFiles.push(f); });
@@ -1781,7 +1747,7 @@ function removeFile(i) {
 	renderAttachments();
 }
 
-// ─── TEXTAREA AUTO RESIZE ─────────────────────────────────────────────────
+// â”€â”€â”€ TEXTAREA AUTO RESIZE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function autoResize() {
 	promptInput.style.height = 'auto';
 	promptInput.style.height = Math.min(promptInput.scrollHeight, 200) + 'px';
@@ -1794,7 +1760,7 @@ promptInput.addEventListener('input', () => {
 	handleAutocomplete();
 });
 
-// ─── INPUT AREA PADDING ───────────────────────────────────────────────────
+// â”€â”€â”€ INPUT AREA PADDING â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const inputArea = document.getElementById('input-area');
 function updateChatPadding() {
 	chatContainer.style.paddingBottom = (inputArea.offsetHeight + 8) + 'px';
@@ -1802,7 +1768,7 @@ function updateChatPadding() {
 updateChatPadding();
 new ResizeObserver(updateChatPadding).observe(inputArea);
 
-// ─── AUTOCOMPLETE ─────────────────────────────────────────────────────────
+// â”€â”€â”€ AUTOCOMPLETE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const autocompleteEl = document.getElementById('autocomplete');
 
 function handleAutocomplete() {
@@ -1838,9 +1804,9 @@ function selectCommand(cmd) {
 	promptInput.focus();
 }
 
-// ─── COMMAND PALETTE ──────────────────────────────────────────────────────
+// â”€â”€â”€ COMMAND PALETTE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const paletteCommands = [
-	{ icon: 'add', title: 'Yeni Sohbet', desc: 'Sohbeti temizle', action: () => newChat(), kbd: 'Ctrl+N' },
+	{ icon: 'add', title: 'eni Sohbet', desc: 'Sohbeti temizle', action: () => newChat(), kbd: 'Ctrl+N' },
 	{ icon: 'construction', title: 'Derle', desc: 'Projeyi derle', action: () => { closeModal('cmd-palette'); insertPrompt('/build'); sendMessage(); } },
 	{ icon: 'science', title: 'Run Test', desc: 'Run the test suite', action: () => { closeModal('cmd-palette'); insertPrompt('/test'); sendMessage(); } },
 	{ icon: 'rate_review', title: 'Code Review', desc: 'Review the code', action: () => { closeModal('cmd-palette'); insertPrompt('/review'); sendMessage(); } },
@@ -1906,7 +1872,7 @@ function cmdKeydown(e) {
 	}
 }
 
-// ─── GLOBAL KEBOARD SHORTCUTS ───────────────────────────────────────────
+// â”€â”€â”€ GLOBAL KEBOARD SHORTCUTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 document.addEventListener('keydown', (e) => {
 	if (e.ctrlKey || e.metaKey) {
 		if (e.key === 'k') { e.preventDefault(); openCmdPalette(); }
@@ -1943,7 +1909,7 @@ chatContainer.addEventListener('scroll', () => {
 	}
 });
 
-// ─── APPEND TO CHAT ───────────────────────────────────────────────────────
+// â”€â”€â”€ APPEND TO CHAT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function appendToChat(el) {
 	const indicator = document.getElementById('global-indicator');
 	if (indicator) chatInner.insertBefore(el, indicator);
@@ -1951,7 +1917,7 @@ function appendToChat(el) {
 	chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-// ─── SET GENERATING STATE ─────────────────────────────────────────────────
+// â”€â”€â”€ SET GENERATING STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function setGeneratingState(generating) {
 	isGenerating = generating;
 	sendBtn.classList.toggle('hidden', generating);
@@ -1974,7 +1940,7 @@ function setGeneratingState(generating) {
 	}
 }
 
-// ─── APPEND MESSAGE ───────────────────────────────────────────────────────
+// â”€â”€â”€ APPEND MESSAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function appendMessage(role, content, id = null, pinned = false) {
 	// Remove empty state
 	const emptyState = document.getElementById('empty-state');
@@ -2044,7 +2010,7 @@ function appendMessage(role, content, id = null, pinned = false) {
 	return row.id;
 }
 
-// ─── UPDATE MESSAGE ───────────────────────────────────────────────────────
+// â”€â”€â”€ UPDATE MESSAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const thinkingStartTimes = new Map(); // msgId -> timestamp when thinking started
 
 function updateMessage(id, content, isStreaming = false) {
@@ -2068,13 +2034,13 @@ function updateMessage(id, content, isStreaming = false) {
 		const elapsed = Math.round((Date.now() - thinkingStartTimes.get(id)) / 1000);
 		const charCount = thinking.length;
 
-		// While streaming → open (not collapsed), after done → collapsed
+		// While streaming â†’ open (not collapsed), after done â†’ collapsed
 		const collapsedClass = isStreaming ? '' : 'collapsed';
 		const streamingClass = isStreaming ? 'streaming' : '';
 		const pulseClass = isStreaming ? 'thinking-pulse' : '';
 		const metaText = isStreaming
 			? `${charCount.toLocaleString()} karakter`
-			: `${elapsed}s · ${charCount.toLocaleString()} karakter`;
+			: `${elapsed}s Â· ${charCount.toLocaleString()} karakter`;
 
 		// Preserve collapsed state if user manually toggled
 		const existingBlock = inner.querySelector('.thinking-block');
@@ -2125,7 +2091,7 @@ function updateMessage(id, content, isStreaming = false) {
 		}
 	}
 
-	// ── KaTeX math rendering ──────────────────────────────────────────
+	// â”€â”€ KaTeX math rendering â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 	if (typeof katex !== 'undefined') {
 		// Block math: $$...$$
 		inner.querySelectorAll('p, div, li, td').forEach(el => {
@@ -2145,7 +2111,7 @@ function updateMessage(id, content, isStreaming = false) {
 	chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-// ─── TOOL RENDER ──────────────────────────────────────────────────────────
+// â”€â”€â”€ TOOL RENDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderTool(toolCallId, name, args, status, result) {
 	let el = document.getElementById('tool-' + toolCallId);
 	
@@ -2196,78 +2162,32 @@ function renderTool(toolCallId, name, args, status, result) {
 	else if (el.subTools.some(t => t.status === 'running')) groupStatus = 'running';
 	
 	const statusClass = groupStatus;
-	const statusLabel = groupStatus === 'running' ? 'Çalışıyor' : (groupStatus === 'error' ? 'Hata' : 'Tamamlandı');
-
-	let iconName = 'build';
-	let iconColor = 'var(--muted)';
-	let nameLC = name.toLowerCase();
+	const statusLabel = groupStatus === 'running' ? 'Running' : (groupStatus === 'error' ? 'Error' : 'Completed');
 	
-	if (nameLC.includes('bash') || nameLC.includes('run_command')) { iconName = 'terminal'; iconColor = '#00ffaa'; }
-	else if (nameLC.includes('view') || nameLC.includes('read') || nameLC.includes('list')) { iconName = 'visibility'; iconColor = '#50b8ff'; }
-	else if (nameLC.includes('edit') || nameLC.includes('replace') || nameLC.includes('write')) { iconName = 'edit_document'; iconColor = '#ffcf50'; }
-	else if (nameLC.includes('search') || nameLC.includes('grep')) { iconName = 'search'; iconColor = '#d950ff'; }
-	else if (nameLC.includes('browser') || nameLC.includes('url')) { iconName = 'language'; iconColor = '#ff6b6b'; }
-	else if (nameLC.includes('ask_question') || nameLC.includes('question')) { iconName = 'help_center'; iconColor = '#ffe250'; }
-
-	if (statusClass === 'error') iconColor = '#ff6464';
-
 	let bodyHtml = '';
 	el.subTools.forEach((t, index) => {
 		const fmtArgs = formatToolValue(t.args);
 		const fmtResult = formatToolValue(t.result);
 		const subStatusClass = t.status === 'running' ? 'running' : (t.status === 'error' ? 'error' : 'done');
 		
-		let optionsHtml = '';
-		if (nameLC.includes('ask_question') && subStatusClass === 'running' && t.args && Array.isArray(t.args.options)) {
-			optionsHtml = '<div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;">';
-			t.args.options.forEach(opt => {
-				optionsHtml += `<button class="p-btn secondary" style="font-size:0.8rem; padding:6px 12px; cursor:pointer;" onclick="answerQuestion('${escapeHtml(opt)}')">${escapeHtml(opt)}</button>`;
-			});
-			optionsHtml += '</div>';
-		}
-
 		bodyHtml += `
 			<div style="border-bottom: ${index < count - 1 ? '1px solid var(--border)' : 'none'}; padding: 10px 12px;">
 				<div style="display:flex; align-items:center; gap:8px; font-weight:600; font-size:0.75rem; color:var(--muted); margin-bottom: 6px;">
-					<span class="tool-status-dot" style="width:6px; height:6px; background:${subStatusClass === 'running' ? iconColor : subStatusClass === 'error' ? '#ff6464' : 'var(--accent2)'}"></span>
+					<span class="tool-status-dot" style="width:6px; height:6px; background:${subStatusClass === 'running' ? 'var(--accent)' : subStatusClass === 'error' ? '#ff6464' : 'var(--accent2)'}"></span>
 					<span>${name} #${index + 1}</span>
 				</div>
-				${fmtArgs ? `<div class="tool-section"><div class="tool-section-label" style="font-size:0.6rem;">Girdi</div><pre style="max-height:120px;color:${iconColor}aa;">${escapeHtml(fmtArgs)}</pre></div>` : ''}
-				${optionsHtml}
+				${fmtArgs ? `<div class="tool-section"><div class="tool-section-label" style="font-size:0.6rem;">Girdi</div><pre style="max-height:120px;">${escapeHtml(fmtArgs)}</pre></div>` : ''}
 				${fmtResult ? `<div class="tool-section result"><div class="tool-section-label" style="font-size:0.6rem;">Çıktı</div><pre style="max-height:120px;">${escapeHtml(fmtResult)}</pre></div>` : ''}
 			</div>
 		`;
-		
-		// Update Mini Browser
-		if ((nameLC.includes('browser_tabs') || nameLC.includes('browser_page')) && t.args && t.args.url) {
-			const frame = document.getElementById('miniBrowserFrame');
-			const urlInput = document.getElementById('miniBrowserUrl');
-			const modal = document.getElementById('miniBrowserModal');
-			if (frame.src !== t.args.url) {
-				frame.src = t.args.url;
-				urlInput.value = t.args.url;
-			}
-			if (subStatusClass === 'running') {
-				modal.classList.add('active');
-			}
-		}
-		if ((nameLC.includes('browser_tabs') || nameLC.includes('browser_page')) && subStatusClass !== 'running') {
-			// Auto close mini browser when done? User said: "işi bitince kapansın ya da bizde kapatabilelim"
-			// But maybe delay it a bit so user can see it
-			setTimeout(() => {
-				const modal = document.getElementById('miniBrowserModal');
-				if (modal && modal.classList.contains('active')) {
-					modal.classList.remove('active');
-				}
-			}, 3000);
-		}
 	});
 
 	el.innerHTML = `
-		<div class="tool-card ${statusClass}" style="width: 100%; max-width: 780px; margin: 0 auto; border-left: 2px solid ${iconColor}40;">
+		<div class="tool-card ${statusClass}" style="width: 100%; max-width: 780px; margin: 0 auto;">
 			<div class="tool-header" onclick="this.nextElementSibling.classList.toggle('hidden')">
-				<span class="material-symbols-rounded" style="font-size:15px;color:${iconColor};">${statusClass === 'running' ? 'hourglass_top' : statusClass === 'error' ? 'error' : iconName}</span>
-				<span class="tool-name" style="color:${iconColor};">${title}</span>
+				<span class="tool-status-dot"></span>
+				<span class="material-symbols-rounded" style="font-size:15px;color:var(--muted);">${statusClass === 'running' ? 'hourglass_top' : statusClass === 'error' ? 'error' : 'check_circle'}</span>
+				<span class="tool-name">${title}</span>
 				<span style="margin-left:auto;font-size:0.7rem;color:var(--muted);">${statusLabel}</span>
 				<span class="material-symbols-rounded" style="font-size:14px;color:var(--muted);">expand_more</span>
 			</div>
@@ -2286,7 +2206,7 @@ function formatToolValue(val) {
 	try { return JSON.stringify(val, null, 2); } catch(e) { return String(val); }
 }
 
-// ─── SEND MESSAGE ─────────────────────────────────────────────────────────
+// â”€â”€â”€ SEND MESSAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 sendBtn.addEventListener('click', sendMessage);
 
 async function sendMessage() {
@@ -2318,11 +2238,11 @@ async function sendMessage() {
 		}
 	} catch(e) {
 		setGeneratingState(false);
-		appendMessage('assistant', 'Bağlantı hatası: sunucuya ulaşılamıyor.');
+		appendMessage('assistant', 'BaÄŸlantÄ± hatasÄ±: sunucuya ulaÅŸÄ±lamÄ±yor.');
 	}
 }
 
-// ─── INTERRUPT ────────────────────────────────────────────────────────────
+// â”€â”€â”€ INTERRUPT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function interruptGeneration() {
 	try {
 		await fetch('/api/interrupt', { method: 'POST' });
@@ -2331,7 +2251,7 @@ async function interruptGeneration() {
 	} catch(e) {}
 }
 
-// ─── NEW CHAT ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ NEW CHAT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function newChat() {
 	currentAssistantMsgId = null;
 	chatInner.innerHTML = `
@@ -2342,13 +2262,13 @@ function newChat() {
 			<h2 style="font-size:1.3rem;font-weight:600;margin:0 0 8px;">How can I help you today?</h2>
 			<p style="color:var(--muted);font-size:0.85rem;margin:0 0 28px;max-width:400px;line-height:1.6;">Write code, debug, refactor, or start a project from scratch.</p>
 			<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-				<button onclick="insertPrompt('Kodumu incele ve iyileştirme öner')" class="badge-btn" style="padding:8px 14px;border-radius:10px;">
+				<button onclick="insertPrompt('Kodumu incele ve iyileÅŸtirme Ã¶ner')" class="badge-btn" style="padding:8px 14px;border-radius:10px;">
 					<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent);">code_blocks</span>Code Review</button>
 				<button onclick="insertPrompt('/build')" class="badge-btn" style="padding:8px 14px;border-radius:10px;">
 					<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent2);">construction</span>Build</button>
 				<button onclick="insertPrompt('/test')" class="badge-btn" style="padding:8px 14px;border-radius:10px;">
 					<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent);">science</span>
-					Test çalıştır
+					Test Ã§alÄ±ÅŸtÄ±r
 				</button>
 				<button onclick="insertPrompt('/review')" class="badge-btn" style="padding:8px 14px;border-radius:10px;">
 					<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent2);">rate_review</span>Code Review</button>
@@ -2357,7 +2277,7 @@ function newChat() {
 	closeModal('cmd-palette');
 }
 
-// ─── LOAD MODELS ──────────────────────────────────────────────────────────
+// â”€â”€â”€ LOAD MODELS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const providerColors = {
 	google: '#4285f4', anthropic: '#d4956a', openai: '#10a37f',
 	mistral: '#ff7000', cohere: '#39d353', default: '#6c8fff'
@@ -2365,11 +2285,11 @@ const providerColors = {
 
 async function loadModels() {
 	const list = document.getElementById('model-list');
-	list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:0.82rem;">Yükleniyor...</div>';
+	list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:0.82rem;">Ã¼kleniyor...</div>';
 	try {
 		const res = await fetch('/api/models');
 		const models = await res.json();
-		if (!models.length) { list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">Model bulunamadı</div>'; return; }
+		if (!models.length) { list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">Model bulunamadÄ±</div>'; return; }
 		
 		const grouped = {};
 		models.forEach(m => { if (!grouped[m.provider]) grouped[m.provider] = []; grouped[m.provider].push(m); });
@@ -2389,7 +2309,7 @@ async function loadModels() {
 					</div>`).join('')}
 			</div>`).join('');
 	} catch(e) {
-		list.innerHTML = '<div style="text-align:center;padding:20px;color:#ff6464;font-size:0.82rem;">Modeller yüklenemedi</div>';
+		list.innerHTML = '<div style="text-align:center;padding:20px;color:#ff6464;font-size:0.82rem;">Modeller yÃ¼klenemedi</div>';
 	}
 }
 
@@ -2406,7 +2326,7 @@ async function setModel(provider, id) {
 	toast(`Model: ${name}`, 'success');
 }
 
-// ─── REASONING ────────────────────────────────────────────────────────────
+// â”€â”€â”€ REASONING â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const reasoningLabels = { none: 'Off', low: 'Low', medium: 'Medium', high: 'High' };
 
 async function setReasoning(level) {
@@ -2422,7 +2342,7 @@ async function setReasoning(level) {
 	toast(`Thinking level: ${reasoningLabels[level]}`, 'info');
 }
 
-// ─── SETTINGS TABS ────────────────────────────────────────────────────────
+// â”€â”€â”€ SETTINGS TABS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function switchSettingsTab(name, btn) {
 	document.querySelectorAll('.stab').forEach(t => t.classList.remove('active'));
 	document.querySelectorAll('.stab-panel').forEach(p => p.classList.remove('active'));
@@ -2430,7 +2350,7 @@ function switchSettingsTab(name, btn) {
 	document.getElementById('stab-' + name)?.classList.add('active');
 }
 
-// ─── SETTINGS ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ SETTINGS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function loadSettings() {
 	try {
 		const res = await fetch('/api/settings');
@@ -2453,7 +2373,7 @@ async function loadSettings() {
 		const toolEl = document.getElementById('set-tool-compaction');
 		if (toolEl) toolEl.checked = !!s.enableToolBasedCompaction;
 
-		// Security tab — permission radio
+		// Security tab â€” permission radio
 		const permLevel = s.permissionLevel || 'ask';
 		document.querySelectorAll('.perm-row').forEach(row => {
 			const val = row.dataset.val;
@@ -2504,7 +2424,7 @@ async function saveSettings() {
 	}
 }
 
-// ─── USER MENU ────────────────────────────────────────────────────────────
+// â”€â”€â”€ USER MENU â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let userMenuOpen = false;
 function toggleUserMenu() {
 	const dd = document.getElementById('user-dropdown');
@@ -2601,7 +2521,7 @@ async function updateUserUI() {
 	}
 }
 
-// ─── CODE ACTIONS ─────────────────────────────────────────────────────────
+// â”€â”€â”€ CODE ACTIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function copyCode(btn) {
 	const pre = btn.closest('.code-block').querySelector('pre');
 	if (!pre) return;
@@ -2658,7 +2578,7 @@ async function likeMsg(id, positive) {
 	}
 }
 
-// ─── HISTOR ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ HISTOR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function loadHistory() {
 	try {
 		const res = await fetch('/api/history');
@@ -2680,7 +2600,7 @@ async function loadHistory() {
 	} catch(e) {}
 }
 
-// ─── INITIAL STATUS ───────────────────────────────────────────────────────
+// â”€â”€â”€ INITIAL STATUS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function checkInitialStatus() {
 	try {
 		const res = await fetch('/api/status');
@@ -2698,7 +2618,7 @@ async function checkInitialStatus() {
 	} catch(e) {}
 }
 
-// ─── INIT SETTINGS ────────────────────────────────────────────────────────
+// â”€â”€â”€ INIT SETTINGS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function initSettings() {
 	try {
 		const res = await fetch('/api/settings');
@@ -2709,7 +2629,7 @@ async function initSettings() {
 	} catch(e) {}
 }
 
-// ─── FETCH COMMANDS ───────────────────────────────────────────────────────
+// â”€â”€â”€ FETCH COMMANDS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function fetchCommands() {
 	try {
 		const res = await fetch('/api/commands');
@@ -2717,7 +2637,7 @@ async function fetchCommands() {
 	} catch(e) {}
 }
 
-// ─── SSE SETUP ────────────────────────────────────────────────────────────
+// â”€â”€â”€ SSE SETUP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const es = new EventSource('/events');
 es.onmessage = (e) => {
 	try {
@@ -2792,7 +2712,7 @@ es.onmessage = (e) => {
 	}
 }
 
-// ─── ESCAPE HTML ──────────────────────────────────────────────────────────
+// â”€â”€â”€ ESCAPE HTML â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function escapeHtml(str) {
 	return String(str)
 		.replace(/&/g,'&amp;')
@@ -2802,7 +2722,7 @@ function escapeHtml(str) {
 		.replace(/'/g,'&#39;');
 }
 
-// ─── ESCAPE JS STRING FOR TEMPLATE LITERALS ──────────────────────────────
+// â”€â”€â”€ ESCAPE JS STRING FOR TEMPLATE LITERALS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function escapeJsString(str) {
 	return str
 		.replace(/\\/g, '\\\\')
@@ -2810,7 +2730,7 @@ function escapeJsString(str) {
 		.replace(/\$/g, '\\$');
 }
 
-// ─── SNC MESSAGE IDS WITH BACKEND ────────────────────────────────────────
+// â”€â”€â”€ SNC MESSAGE IDS WITH BACKEND â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function syncMessageIds() {
 	try {
 		const res = await fetch('/api/history');
@@ -2836,7 +2756,7 @@ async function syncMessageIds() {
 	}
 }
 
-// ─── UPDATE PINNED BAR ──────────────────────────────────────────────────
+// â”€â”€â”€ UPDATE PINNED BAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function updatePinnedBar() {
 	const bar = document.getElementById('pinned-bar');
 	const list = document.getElementById('pinned-list');
@@ -2869,7 +2789,7 @@ function updatePinnedBar() {
 	`).join('');
 }
 
-// ─── SCROLL TO MESSAGE ───────────────────────────────────────────────────
+// â”€â”€â”€ SCROLL TO MESSAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function scrollToMessage(id) {
 	const el = document.getElementById(id);
 	if (!el) return;
@@ -2878,7 +2798,7 @@ function scrollToMessage(id) {
 	setTimeout(() => el.classList.remove('pulse-highlight'), 2000);
 }
 
-// ─── TOGGLE PIN STATE ────────────────────────────────────────────────────
+// â”€â”€â”€ TOGGLE PIN STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function togglePin(id) {
 	const row = document.getElementById(id);
 	if (!row) return;
@@ -2912,11 +2832,11 @@ async function togglePin(id) {
 	}
 }
 
-// ─── DELETE MESSAGE ──────────────────────────────────────────────────────
+// â”€â”€â”€ DELETE MESSAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function deleteMsg(id) {
 	const row = document.getElementById(id);
 	if (!row) return;
-	if (!confirm('Bu mesajı silmek istediğinize emin misiniz?')) return;
+	if (!confirm('Bu mesajÄ± silmek istediÄŸinize emin misiniz?')) return;
 
 	try {
 		const res = await fetch('/api/history/delete', {
@@ -2942,7 +2862,7 @@ async function deleteMsg(id) {
 	}
 }
 
-// ─── EDIT MESSAGE ────────────────────────────────────────────────────────
+// â”€â”€â”€ EDIT MESSAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function editMsg(id) {
 	const row = document.getElementById(id);
 	if (!row) return;
@@ -2998,7 +2918,7 @@ async function saveEdit(id) {
 	}
 }
 
-// ─── DIRECTOR SELECTION ──────────────────────────────────────────────────
+// â”€â”€â”€ DIRECTOR SELECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function selectProjectDirectory() {
 	try {
 		const res = await fetch('/api/project/select-directory', { method: 'POST' });
@@ -3029,7 +2949,7 @@ async function selectProjectDirectory() {
 	}
 }
 
-// ─── RUN CODE ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ RUN CODE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function runCode(btn) {
 	const codeBlock = btn.closest('.code-block');
 	if (!codeBlock) return;
@@ -3040,7 +2960,7 @@ function runCode(btn) {
 	toast('Code copied to clipboard - paste into terminal', 'info');
 }
 
-// ─── BROWSER BRIDGE ───────────────────────────────────────────────────────
+// â”€â”€â”€ BROWSER BRIDGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function refreshBridgeStatus() {
 	try {
 		const res = await fetch('/api/browser/status');
@@ -3070,7 +2990,7 @@ async function refreshBridgeStatus() {
 	}
 }
 
-// ─── SESSION FORK ─────────────────────────────────────────────────────────
+// â”€â”€â”€ SESSION FORK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function forkSession() {
 	const btn = document.querySelector('[onclick="forkSession()"]');
 	if (btn) btn.disabled = true;
@@ -3099,7 +3019,7 @@ async function forkSession() {
 	}
 }
 
-// ─── SESSION EXPORT ───────────────────────────────────────────────────────
+// â”€â”€â”€ SESSION EXPORT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function exportSession(format) {
 	try {
 		const res = await fetch(`/api/session/export?format=${format}`);
@@ -3119,7 +3039,7 @@ async function exportSession(format) {
 	}
 }
 
-// ─── SESSION IMPORT ───────────────────────────────────────────────────────
+// â”€â”€â”€ SESSION IMPORT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function importSessionData(content) {
 	try {
 		const res = await fetch('/api/session/import', {
@@ -3158,7 +3078,7 @@ function handleImportDrop(event) {
 	reader.readAsText(file);
 }
 
-// ─── SESSION SHARE ────────────────────────────────────────────────────────
+// â”€â”€â”€ SESSION SHARE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function shareSession() {
 	const btn = document.getElementById('share-btn');
 	if (btn) { btn.disabled = true; btn.querySelector('.material-symbols-rounded').textContent = 'hourglass_top'; }
@@ -3186,10 +3106,10 @@ function copyShareUrl() {
 	toast('Link copied', 'success');
 }
 
-// ─── PERIODIC BRIDGE POLL ─────────────────────────────────────────────────
+// â”€â”€â”€ PERIODIC BRIDGE POLL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 setInterval(refreshBridgeStatus, 15000);
 
-// ─── INIT ─────────────────────────────────────────────────────────────────
+// â”€â”€â”€ INIT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 checkInitialStatus();
 loadHistory();
 updateUserUI();
@@ -3200,57 +3120,6 @@ setInterval(updateUserUI, 8000);
 
 // Sidebar starts open on wide screens
 if (window.innerWidth < 768) toggleSidebar();
-
-// ─── ANSWER QUESTION ───────────────────────────────────────────────────────
-async function answerQuestion(answer) {
-	try {
-		const res = await fetch('/api/session/answer', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ answer })
-		});
-		if (!res.ok) throw new Error('Cevap gönderilemedi');
-		toast('Cevap gönderildi', 'success');
-	} catch (e) {
-		toast(e.message, 'error');
-	}
-}
-
-// ─── SEMANTIC BRAIN ───────────────────────────────────────────────────────
-async function openSemanticBrain() {
-	openModal('semanticBrainModal');
-	const container = document.getElementById('semantic-brain-content');
-	container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:0.82rem;">Loading semantic experiences...</div>';
-	try {
-		const res = await fetch('/api/memory/experiences');
-		const data = await res.json();
-		if (!data.success) throw new Error(data.error);
-		
-		if (!data.experiences || data.experiences.length === 0) {
-			container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:0.9rem;">The semantic brain is currently empty. The assistant will learn from your interactions over time.</div>';
-			return;
-		}
-
-		let html = '<div style="display:flex; flex-direction:column; gap:12px;">';
-		data.experiences.forEach((exp, idx) => {
-			html += \`
-			<div style="background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px;">
-				<div style="font-size:0.75rem; color:var(--muted); margin-bottom:6px; display:flex; justify-content:space-between;">
-					<span>Experience #\${idx + 1}</span>
-					<span style="font-family:'JetBrains Mono',monospace;">\${new Date(exp.timestamp).toLocaleString()}</span>
-				</div>
-				<div style="font-size:0.85rem; color:var(--fg); line-height:1.5;">\${escapeHtml(exp.summary)}</div>
-				\${exp.tags && exp.tags.length > 0 ? \`<div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">
-					\${exp.tags.map(t => \`<span style="background:rgba(108,143,255,0.1); color:var(--accent); padding:2px 8px; border-radius:12px; font-size:0.65rem;">\${escapeHtml(t)}</span>\`).join('')}
-				</div>\` : ''}
-			</div>\`;
-		});
-		html += '</div>';
-		container.innerHTML = html;
-	} catch (e) {
-		container.innerHTML = \`<div style="color:#ff6464; padding:20px; text-align:center;">Failed to load semantic brain: \${escapeHtml(e.message)}</div>\`;
-	}
-}
 </script>
 <!-- WELCOME MODAL -->
 <div id="welcomeModal" class="modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);backdrop-filter:blur(10px);z-index:9999;align-items:center;justify-content:center;opacity:0;transition:opacity 0.4s ease;">

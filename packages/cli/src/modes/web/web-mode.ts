@@ -21,6 +21,7 @@ export class WebMode {
 	private port: number = 0;
 	private pinnedMessageIds: Set<string> = new Set();
 	private logBuffer: string[] = [];
+	private pendingSelectResolver: ((value: string | undefined) => void) | null = null;
 
 	private getWebProjects(): string[] {
 		const filePath = join(getEngineDir(), "web-projects.json");
@@ -59,6 +60,40 @@ export class WebMode {
 		this.runtime.setRebindSession(async (newSession) => {
 			this.bindSession(newSession);
 		});
+		this.runtime.session.extensionRunner.setUIContext({
+			select: async (title: string, options: string[]) => {
+				return new Promise<string | undefined>((resolve) => {
+					this.pendingSelectResolver = resolve;
+				});
+			},
+			confirm: async () => false,
+			input: async () => undefined,
+			notify: () => {},
+			onTerminalInput: () => () => {},
+			setStatus: () => {},
+			setWorkingMessage: () => {},
+			setWorkingVisible: () => {},
+			setWorkingIndicator: () => {},
+			setHiddenThinkingLabel: () => {},
+			setWidget: () => {},
+			setFooter: () => {},
+			setHeader: () => {},
+			setTitle: () => {},
+			custom: async () => undefined as never,
+			pasteToEditor: () => {},
+			setEditorText: () => {},
+			getEditorText: () => "",
+			editor: async () => undefined,
+			addAutocompleteProvider: () => {},
+			setEditorComponent: () => {},
+			getEditorComponent: () => undefined,
+			get theme() { return undefined; },
+			getAllThemes: () => [],
+			getTheme: () => undefined,
+			setTheme: () => ({ success: false, error: "Not supported" }),
+			getToolsExpanded: () => false,
+			setToolsExpanded: () => {},
+		} as any);
 	}
 
 	private bindSession(session: any) {
@@ -862,6 +897,45 @@ export class WebMode {
 			});
 			return;
 		}
+
+		if (method === "POST" && url.pathname === "/api/session/answer") {
+			let body = "";
+			req.on("data", (chunk) => (body += chunk));
+			req.on("end", async () => {
+				try {
+					const { answer } = JSON.parse(body);
+					if (this.pendingSelectResolver) {
+						this.pendingSelectResolver(answer);
+						this.pendingSelectResolver = null;
+					}
+					res.setHeader("Content-Type", "application/json");
+					res.end(JSON.stringify({ success: true }));
+				} catch (e: any) {
+					res.statusCode = 500;
+					res.end(JSON.stringify({ error: e.message }));
+				}
+			});
+			return;
+		}
+
+		if (method === "GET" && url.pathname === "/api/memory/experiences") {
+			try {
+				const memory = (this.runtime.session as any).learningMemory;
+				if (memory && memory.getExperiences) {
+					const experiences = memory.getExperiences();
+					res.setHeader("Content-Type", "application/json");
+					res.end(JSON.stringify({ success: true, experiences }));
+				} else {
+					res.setHeader("Content-Type", "application/json");
+					res.end(JSON.stringify({ success: true, experiences: [] }));
+				}
+			} catch (e: any) {
+				res.statusCode = 500;
+				res.end(JSON.stringify({ error: e.message }));
+			}
+			return;
+		}
+
 
 		if (method === "GET" && url.pathname === "/api/session/export") {
 			try {
