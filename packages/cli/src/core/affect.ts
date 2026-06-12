@@ -373,8 +373,8 @@ export function renderAffectiveStatus(settings: NormalizedAffectiveSettings): st
 		`Status: ${settings.enabled ? "on" : "off"}`,
 		`Mode: ${settings.mode}`,
 		`Posture: ${posture}`,
-		`Etkilesim: ${state.interactionCount}`,
-		`Son sinyal: ${state.lastSignal ?? "none"}`,
+		`Interactions: ${state.interactionCount}`,
+		`Last signal: ${state.lastSignal ?? "none"}`,
 		"",
 		`trust: ${formatAxis(state.trust)}    warmth: ${formatAxis(state.warmth)}`,
 		`curiosity: ${formatAxis(state.curiosity)} caution: ${formatAxis(state.caution)}`,
@@ -391,7 +391,7 @@ export function renderAffectiveStatus(settings: NormalizedAffectiveSettings): st
 		"  /mood mode subtle|active",
 		"  /mood reset",
 		"",
-		"Not: Bu katman davranisi etkileyen kalici ic durumdur; bilinc iddiasi degildir.",
+		"Note: This layer is a persistent internal state that influences behavior; it is not a claim of consciousness.",
 	].join("\n");
 }
 
@@ -401,7 +401,7 @@ export function renderAffectiveExplanation(settings: NormalizedAffectiveSettings
 	return [
 		"Affective Explanation",
 		`Posture: ${deriveAffectivePosture(state)}`,
-		`Son sinyal: ${state.lastSignal ?? "none"}`,
+		`Last signal: ${state.lastSignal ?? "none"}`,
 		`Current needs: ${deriveAffectiveNeeds(state).join("; ")}`,
 		"",
 		"Recent journal:",

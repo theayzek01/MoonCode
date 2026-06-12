@@ -114,9 +114,43 @@ export async function loginGitLab(callbacks: OAuthLoginCallbacks): Promise<OAuth
 	});
 
 	callbacks.onAuth({ url: `${GITLAB_COM_URL}/oauth/authorize?${authParams.toString()}` });
-	const callbackUrl = await callbacks.onPrompt({ message: "Paste the callback URL:" });
-	const code = new URL(callbackUrl).searchParams.get("code");
-	if (!code) throw new Error("No authorization code found in callback URL");
+	const code = await new Promise<string>((resolve, reject) => {
+		const http = require("node:http");
+		const server = http.createServer((req: any, res: any) => {
+			try {
+				const url = new URL(req.url || "", REDIRECT_URI);
+				if (url.pathname === "/callback") {
+					const code = url.searchParams.get("code");
+					if (code) {
+						res.writeHead(200, { "Content-Type": "text/html" });
+						res.end(
+							"<html><body><h1 style='font-family:sans-serif'>Authentication successful!</h1><p style='font-family:sans-serif'>You can close this tab and return to MoonCode.</p><script>setTimeout(() => window.close(), 1000)</script></body></html>"
+						);
+						server.close();
+						resolve(code);
+					} else {
+						res.writeHead(400, { "Content-Type": "text/plain" });
+						res.end("Missing authorization code.");
+						server.close();
+						reject(new Error("Missing authorization code in callback URL."));
+					}
+				} else {
+					res.writeHead(404);
+					res.end();
+				}
+			} catch (err) {
+				// ignore
+			}
+		});
+
+		server.listen(8080, "127.0.0.1", () => {});
+
+		// Timeout after 5 minutes
+		setTimeout(() => {
+			server.close();
+			reject(new Error("Authentication timed out."));
+		}, 5 * 60 * 1000);
+	});
 
 	const tokenResponse = await fetch(`${GITLAB_COM_URL}/oauth/token`, {
 		method: "POST",

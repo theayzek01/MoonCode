@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="tr" data-theme="mooncode">
+<html lang="en" data-theme="mooncode">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>MoonCode – AI Kodlama Asistanı</title>
+	<title>MoonCode – AI Coding Assistant</title>
 	<link rel="icon" type="image/png" href="/assets/Mooncodewhitelogo.png">
-	<meta name="description" content="MoonCode – Güçlü yapay zeka destekli kodlama asistanı">
+	<meta name="description" content="MoonCode – Powerful AI coding assistant">
 	<script src="https://cdn.tailwindcss.com"></script>
 	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
@@ -15,7 +15,7 @@
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 	<style>
-		/* ─── THEME TOKENS ─────────────────────────────────────────────── */
+		/* â”€â”€â”€ THEME TOKENS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		[data-theme="mooncode"] {
 			--bg:          #0e0f10;
 			--bg2:         #141518;
@@ -114,7 +114,7 @@
 			--shadow:      0 4px 20px rgba(0,0,0,0.1);
 		}
 
-		/* ─── BASE ──────────────────────────────────────────────────────── */
+		/* â”€â”€â”€ BASE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		*, *::before, *::after { box-sizing: border-box; }
 		:root { font-size: 15px; }
 		body {
@@ -128,13 +128,13 @@
 			transition: background 0.3s, color 0.3s;
 		}
 
-		/* ─── SCROLLBAR ─────────────────────────────────────────────────── */
+		/* â”€â”€â”€ SCROLLBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		::-webkit-scrollbar { width: 5px; height: 5px; }
 		::-webkit-scrollbar-track { background: transparent; }
 		::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
 		::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 
-		/* ─── MATERIAL ICONS ─────────────────────────────────────────────── */
+		/* â”€â”€â”€ MATERIAL ICONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.material-symbols-rounded {
 			font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
 			font-size: 20px;
@@ -142,9 +142,9 @@
 			user-select: none;
 		}
 
-		/* ─── ANIMATIONS ────────────────────────────────────────────────── */
+		/* â”€â”€â”€ ANIMATIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-		@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+		@keyframes fadeIn { from{opacity:0;transform:translate(8px)} to{opacity:1;transform:translate(0)} }
 		@keyframes slideIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
 		@keyframes scaleIn { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
 		@keyframes toastIn { from{opacity:0;transform:translateX(100%)} to{opacity:1;transform:translateX(0)} }
@@ -154,7 +154,7 @@
 		.msg-enter { animation: fadeIn 0.3s ease forwards; }
 		.tool-enter { animation: slideIn 0.25s ease forwards; }
 
-		/* ─── SIDEBAR ───────────────────────────────────────────────────── */
+		/* â”€â”€â”€ SIDEBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		#sidebar {
 			width: 260px;
 			min-width: 260px;
@@ -169,10 +169,10 @@
 		}
 		#sidebar.collapsed { width: 0; min-width: 0; border-right: none; }
 
-		/* ─── MAIN ──────────────────────────────────────────────────────── */
+		/* â”€â”€â”€ MAIN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		#main { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
 
-		/* ─── HEADER ────────────────────────────────────────────────────── */
+		/* â”€â”€â”€ HEADER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		#header {
 			height: 52px;
 			border-bottom: 1px solid var(--border);
@@ -187,7 +187,7 @@
 			flex-shrink: 0;
 		}
 
-		/* ─── CHAT CONTAINER ─────────────────────────────────────────────── */
+		/* â”€â”€â”€ CHAT CONTAINER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		#chat-container {
 			flex: 1;
 			overflow-y: auto;
@@ -196,7 +196,7 @@
 		}
 		.chat-inner { max-width: 780px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
 
-		/* ─── MESSAGES ──────────────────────────────────────────────────── */
+		/* â”€â”€â”€ MESSAGES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.msg-row { display: flex; flex-direction: column; gap: 6px; }
 		.msg-row.user { align-items: flex-end; }
 		.msg-row.assistant { align-items: flex-start; }
@@ -222,7 +222,7 @@
 			word-break: break-word;
 		}
 
-		/* ─── PROSE / MARKDOWN ───────────────────────────────────────────── */
+		/* â”€â”€â”€ PROSE / MARKDOWN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.prose h1,.prose h2,.prose h3,.prose h4,.prose h5,.prose h6 {
 			color: var(--fg);
 			font-weight: 600;
@@ -274,7 +274,7 @@
 			border: 1px solid var(--border);
 		}
 
-		/* ─── CODE BLOCKS ────────────────────────────────────────────────── */
+		/* â”€â”€â”€ CODE BLOCKS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.code-block {
 			margin: 0.8em 0;
 			border-radius: 12px;
@@ -324,7 +324,7 @@
 		}
 		.code-block pre code { background: none !important; padding: 0 !important; border: none !important; font-size: inherit; }
 
-		/* ─── THINKING BLOCK ─────────────────────────────────────────────── */
+		/* â”€â”€â”€ THINKING BLOCK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.thinking-block {
 			position: relative;
 			background: rgba(108,143,255,0.03);
@@ -386,12 +386,12 @@
 		.thinking-block.streaming { animation: thinkingBorderPulse 2s ease-in-out infinite; }
 		/* smooth token-by-token text appearance */
 		@keyframes fadeInChar {
-			from { opacity: 0; transform: translateY(2px); }
-			to   { opacity: 1; transform: translateY(0); }
+			from { opacity: 0; transform: translate(2px); }
+			to   { opacity: 1; transform: translate(0); }
 		}
 		.thinking-body { scroll-behavior: smooth; }
 
-		/* ─── TOOL CARDS ─────────────────────────────────────────────────── */
+		/* â”€â”€â”€ TOOL CARDS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.tool-card {
 			background: var(--surface);
 			border: 1px solid var(--border);
@@ -440,7 +440,7 @@
 		.tool-section.result pre { color: var(--accent2); }
 		.tool-section.error-section pre { color: #ff8a8a; }
 
-		/* ─── ACTION BAR ─────────────────────────────────────────────────── */
+		/* â”€â”€â”€ ACTION BAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.action-bar {
 			display: flex;
 			align-items: center;
@@ -463,7 +463,7 @@
 		}
 		.action-bar button:hover { color: var(--fg); background: var(--surface2); }
 
-		/* ─── INPUT AREA ─────────────────────────────────────────────────── */
+		/* â”€â”€â”€ INPUT AREA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		#input-area {
 			position: absolute;
 			bottom: 0; left: 0; right: 0;
@@ -551,7 +551,7 @@
 		}
 		#stop-btn:hover { background: rgba(255,80,80,0.25); }
 
-		/* ─── BADGE BUTTON ────────────────────────────────────────────────── */
+		/* â”€â”€â”€ BADGE BUTTON â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.badge-btn {
 			display: flex; align-items: center; gap: 4px;
 			background: var(--surface2);
@@ -566,7 +566,7 @@
 		}
 		.badge-btn:hover { color: var(--fg); border-color: rgba(255,255,255,0.15); }
 
-		/* ─── MODALS ─────────────────────────────────────────────────────── */
+		/* â”€â”€â”€ MODALS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.modal-overlay {
 			display: none;
 			position: fixed; inset: 0;
@@ -604,7 +604,7 @@
 		.modal-body { padding: 16px 18px; max-height: 70vh; overflow-y: auto; }
 		.modal-footer { padding: 12px 18px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
 
-		/* ─── FORM ELEMENTS ──────────────────────────────────────────────── */
+		/* â”€â”€â”€ FORM ELEMENTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
 		.form-label { font-size: 0.78rem; font-weight: 500; color: var(--fg); }
 		.form-select, .form-input {
@@ -630,7 +630,7 @@
 		}
 		.form-checkbox-row input[type="checkbox"] { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
 
-		/* ─── BUTTONS ─────────────────────────────────────────────────────── */
+		/* â”€â”€â”€ BUTTONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.btn { 
 			border: none; cursor: pointer; border-radius: 9px; font-weight: 500;
 			font-size: 0.82rem; padding: 8px 16px; display: inline-flex;
@@ -644,7 +644,7 @@
 		.btn-danger { background: rgba(255,80,80,0.15); color: #ff6464; }
 		.btn-danger:hover { background: rgba(255,80,80,0.25); }
 
-		/* ─── TOASTS ──────────────────────────────────────────────────────── */
+		/* â”€â”€â”€ TOASTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		#toast-container {
 			position: fixed;
 			bottom: 24px; right: 24px;
@@ -670,7 +670,7 @@
 		.toast.info { border-color: rgba(108,143,255,0.3); }
 		.toast.out { animation: toastOut 0.3s ease forwards; }
 
-		/* ─── COMMAND PALETTE ─────────────────────────────────────────────── */
+		/* â”€â”€â”€ COMMAND PALETTE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		#cmd-palette .modal { max-width: 540px; }
 		#cmd-input {
 			width: 100%;
@@ -704,7 +704,7 @@
 			border-radius: 5px; padding: 2px 5px; color: var(--muted);
 		}
 
-		/* ─── THEME PICKER ────────────────────────────────────────────────── */
+		/* â”€â”€â”€ THEME PICKER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 		.theme-card {
 			border-radius: 12px;
@@ -713,7 +713,7 @@
 			cursor: pointer;
 			transition: all 0.2s;
 		}
-		.theme-card:hover { transform: translateY(-2px); }
+		.theme-card:hover { transform: translate(-2px); }
 		.theme-card.active { border-color: var(--accent); }
 		.theme-preview { height: 56px; position: relative; }
 		.theme-name { 
@@ -721,7 +721,7 @@
 			background: var(--surface2); text-align: center;
 		}
 
-		/* ─── MODEL LIST ─────────────────────────────────────────────────── */
+		/* â”€â”€â”€ MODEL LIST â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.model-item {
 			display: flex; align-items: center; gap: 12px;
 			padding: 10px 12px;
@@ -740,7 +740,7 @@
 			font-family: 'JetBrains Mono', monospace;
 		}
 
-		/* ─── AUTOCOMPLETE ────────────────────────────────────────────────── */
+		/* â”€â”€â”€ AUTOCOMPLETE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		#autocomplete {
 			position: absolute; bottom: calc(100% + 8px); left: 0;
 			width: 320px;
@@ -765,7 +765,7 @@
 		.ac-cmd { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 600; color: var(--accent); }
 		.ac-desc { font-size: 0.72rem; color: var(--muted); }
 
-		/* ─── EMPTY STATE ─────────────────────────────────────────────────── */
+		/* â”€â”€â”€ EMPT STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		#empty-state {
 			display: flex;
 			flex-direction: column;
@@ -785,7 +785,7 @@
 			margin-bottom: 20px;
 		}
 
-		/* ─── SIDEBAR ITEMS ───────────────────────────────────────────────── */
+		/* ————————————————————————————————————————————————————————————— SIDEBAR ITEMS ————————————————————————————————————————————————————————————— */
 		.sidebar-item {
 			display: flex; align-items: center; gap: 10px;
 			padding: 8px 12px;
@@ -800,7 +800,7 @@
 		.sidebar-item:hover { background: var(--surface); color: var(--fg); }
 		.sidebar-item.active { background: var(--surface); color: var(--fg); }
 
-		/* ─── STATUS BAR ─────────────────────────────────────────────────── */
+		/* —————————————————————————————————————————————————————————————— STATUS BAR ———————————————————————————————————————————————————————————————— */
 		.status-pill {
 			display: flex; align-items: center; gap: 5px;
 			padding: 3px 9px;
@@ -811,7 +811,7 @@
 			color: var(--muted);
 		}
 
-		/* ─── FILE ATTACHMENT ─────────────────────────────────────────────── */
+		/* ———————————————————————————————————————————————————————————— FILE ATTACHMENT ————————————————————————————————————————————————————————————— */
 		.file-chip {
 			display: inline-flex; align-items: center; gap: 6px;
 			background: var(--surface2);
@@ -823,7 +823,7 @@
 			margin: 0 2px;
 		}
 
-		/* ─── SEARCH BAR ─────────────────────────────────────────────────── */
+		/* —————————————————————————————————————————————————————————————— SEARCH BAR ———————————————————————————————————————————————————————————————— */
 		#search-bar {
 			display: none;
 			padding: 8px 16px;
@@ -845,12 +845,12 @@
 		.search-count { font-size: 0.72rem; color: var(--muted); }
 		.highlight-match { background: rgba(108,143,255,0.25); border-radius: 2px; padding: 0 1px; }
 
-		/* ─── MISC ────────────────────────────────────────────────────────── */
+		/* ————————————————————————————————————————————————————————————————— MISC ————————————————————————————————————————————————————————————————— */
 		.divider { width: 100%; height: 1px; background: var(--border); margin: 8px 0; }
 		.spin { animation: spin 0.8s linear infinite; }
 		.hidden { display: none !important; }
 
-		/* ─── BROWSER BRIDGE PILL ────────────────────────────────────────── */
+		/* —————————————————————————————————————————————————————— BROWSER BRIDGE PILL ———————————————————————————————————————————————————————— */
 		.bridge-pill {
 			display: flex; align-items: center; gap: 5px;
 			padding: 4px 10px; border-radius: 20px;
@@ -862,7 +862,7 @@
 		.bridge-pill.connected { border-color: #4ade8060; color: #4ade80; background: rgba(74,222,128,0.07); }
 		.bridge-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink:0; }
 
-		/* ─── SESSION ACTION BAR ─────────────────────────────────────────── */
+		/* ————————————————————————————————————————————————————————— SESSION ACTION BAR ———————————————————————————————————————————————————————————— */
 		.session-actions { display: flex; align-items: center; gap: 5px; }
 		.session-btn {
 			display: flex; align-items: center; gap: 4px;
@@ -874,7 +874,7 @@
 		.session-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(108,143,255,0.08); }
 		.session-btn .material-symbols-rounded { font-size: 14px; }
 
-		/* ─── IMPORT DROP ZONE ───────────────────────────────────────────── */
+		/* â”€â”€â”€ IMPORT DROP ZONE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.drop-zone {
 			border: 2px dashed var(--border); border-radius: 12px;
 			padding: 28px 20px; text-align: center; cursor: pointer;
@@ -884,7 +884,7 @@
 			border-color: var(--accent); background: rgba(108,143,255,0.05); color: var(--accent);
 		}
 
-		/* ─── ADVANCED SETTINGS TABS ─────────────────────────────────────── */
+		/* â”€â”€â”€ ADVANCED SETTINGS TABS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.stab-row { display: flex; gap: 4px; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
 		.stab {
 			padding: 5px 12px; border-radius: 8px 8px 0 0; font-size: 0.73rem;
@@ -895,7 +895,7 @@
 		.stab-panel { display: none; }
 		.stab-panel.active { display: block; }
 
-		/* ─── PINNED & HIGHLIGHT ────────────────────────────────────────── */
+		/* â”€â”€â”€ PINNED & HIGHLIGHT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 		.pinned-message .user-bubble {
 			border-color: var(--accent);
 			box-shadow: 0 0 12px rgba(108,143,255,0.12);
@@ -917,7 +917,7 @@
 </head>
 <body>
 
-<!-- ═══════════════════ SIDEBAR ═══════════════════════════════════════════ -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SIDEBAR â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="sidebar">
 	<!-- Brand -->
 	<div style="padding:14px 14px 10px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
@@ -932,22 +932,22 @@
 
 	<!-- New Chat & Directory Select -->
 	<div style="padding:0 10px 8px; display:flex; flex-direction:column; gap:8px;">
-		<button onclick="newChat()" style="width:100%; display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 6px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;color:var(--fg);font-size:0.75rem;font-weight:500;font-family:'Inter',sans-serif;transition:all 0.15s;" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--surface2)'" title="Yeni Sohbet">
+		<button onclick="newChat()" style="width:100%; display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 6px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;color:var(--fg);font-size:0.75rem;font-weight:500;font-family:'Inter',sans-serif;transition:all 0.15s;" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--surface2)'" title="New Chat">
 			<span class="material-symbols-rounded" style="color:var(--accent);font-size:16px;">add</span>
-			<span>Yeni Sohbet</span>
+			<span>New Chat</span>
 		</button>
 		
-		<button onclick="selectProjectDirectory()" style="width:100%; display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 6px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;color:var(--fg);font-size:0.75rem;font-weight:500;font-family:'Inter',sans-serif;transition:all 0.15s;" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--surface2)'" title="Dizin Seç">
+		<button onclick="selectProjectDirectory()" style="width:100%; display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 6px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;color:var(--fg);font-size:0.75rem;font-weight:500;font-family:'Inter',sans-serif;transition:all 0.15s;" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--surface2)'" title="Select Directory">
 			<span class="material-symbols-rounded" style="color:var(--accent2);font-size:16px;">folder_open</span>
-			<span>Proje Dizini Seç</span>
+			<span>Select Project Directory</span>
 		</button>
 
 		<div style="padding:10px; background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:10px; margin-top:4px;">
 			<div style="font-size:0.65rem; font-weight:700; text-transform:uppercase; color:var(--muted); margin-bottom:4px; display:flex; align-items:center; gap:4px;">
 				<span class="material-symbols-rounded" style="font-size:12px;">folder</span>
-				<span>Aktif Proje Dizini</span>
+				<span>Active Project Directory</span>
 			</div>
-			<div id="active-cwd-display" style="font-size:0.75rem; word-break:break-all; color:var(--fg); font-family:'JetBrains Mono', monospace; line-height:1.4;">Yükleniyor...</div>
+			<div id="active-cwd-display" style="font-size:0.75rem; word-break:break-all; color:var(--fg); font-family:'JetBrains Mono', monospace; line-height:1.4;">Loading...</div>
 		</div>
 	</div>
 
@@ -957,22 +957,22 @@
 	<div style="padding:10px 10px;flex-shrink:0;">
 		<div class="sidebar-item" onclick="openModal('settingsModal')">
 			<span class="material-symbols-rounded" style="font-size:17px;flex-shrink:0;">settings</span>
-			<span>Ayarlar</span>
+			<span>Settings</span>
 		</div>
 		<div class="sidebar-item" onclick="openModal('themeModal')">
 			<span class="material-symbols-rounded" style="font-size:17px;flex-shrink:0;">palette</span>
-			<span>Tema</span>
+			<span>Theme</span>
 		</div>
 		<div class="sidebar-item" onclick="openModal('shortcutsModal')">
 			<span class="material-symbols-rounded" style="font-size:17px;flex-shrink:0;">keyboard</span>
-			<span>Kısayollar</span>
+			<span>Shortcuts</span>
 		</div>
 		<div style="height:8px;"></div>
 		<!-- User Info -->
 		<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:11px;background:var(--surface2);cursor:pointer;transition:background 0.15s;" onclick="toggleUserMenu()" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--surface2)'">
 			<div id="sidebar-avatar" style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#fff;flex-shrink:0;">U</div>
 			<div style="overflow:hidden;flex:1;">
-				<div id="sidebar-name" style="font-size:0.78rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Giriş Yapılmadı</div>
+				<div id="sidebar-name" style="font-size:0.78rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Not Logged In</div>
 				<div style="font-size:0.65rem;color:var(--accent);">Pro</div>
 			</div>
 			<span class="material-symbols-rounded" style="font-size:16px;color:var(--muted);">more_vert</span>
@@ -980,65 +980,65 @@
 	</div>
 </div>
 
-<!-- ═══════════════════ MAIN ═════════════════════════════════════════════ -->
+<!-- ———————————————————————————————————————————————————————————————— MAIN —————————————————————————————————————————————————————————————————— -->
 <div id="main">
 
 	<!-- Header -->
 	<div id="header">
 		<div style="display:flex;align-items:center;gap:10px;">
-			<button id="sidebar-toggle" onclick="toggleSidebar()" class="tool-btn" title="Kenar çubuğu (Ctrl+B)">
+			<button id="sidebar-toggle" onclick="toggleSidebar()" class="tool-btn" title="Sidebar (Ctrl+B)">
 				<span class="material-symbols-rounded">menu</span>
 			</button>
 			<button onclick="openModal('modelModal')" class="badge-btn" id="model-btn">
 				<span class="material-symbols-rounded" style="font-size:14px;color:var(--accent);">smart_toy</span>
-				<span id="model-display">Yükleniyor...</span>
+				<span id="model-display">Loading...</span>
 				<span class="material-symbols-rounded" style="font-size:13px;">keyboard_arrow_down</span>
 			</button>
 			<button onclick="openModal('reasoningModal')" class="badge-btn">
 				<span class="material-symbols-rounded" style="font-size:14px;color:var(--accent2);">psychology</span>
-				<span id="reasoning-display">Düşünme: Düşük</span>
+				<span id="reasoning-display">Thinking: Low</span>
 				<span class="material-symbols-rounded" style="font-size:13px;">keyboard_arrow_down</span>
 			</button>
 		</div>
 
 		<div style="display:flex;align-items:center;gap:8px;">
-			<div class="status-pill" id="cwd-display" title="Çalışma dizini">
+			<div class="status-pill" id="cwd-display" title="Working Directory">
 				<span class="material-symbols-rounded" style="font-size:13px;">folder</span>
-				<span id="cwd-text" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">—</span>
+				<span id="cwd-text" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">â€”</span>
 			</div>
-			<div class="status-pill" id="token-pill" title="Token kullanımı">
+			<div class="status-pill" id="token-pill" title="Token Usage">
 				<span class="material-symbols-rounded" style="font-size:13px;">data_usage</span>
 				<span id="token-usage">0 / 0</span>
 			</div>
 			<!-- Browser Bridge Status -->
-			<div class="bridge-pill" id="bridge-pill" onclick="openModal('bridgeModal')" title="Tarayıcı Köprüsü">
+			<div class="bridge-pill" id="bridge-pill" onclick="openModal('bridgeModal')" title="Browser Bridge">
 				<span class="bridge-dot"></span>
-				<span id="bridge-label">Köprü</span>
+				<span id="bridge-label">Bridge</span>
 			</div>
 			<!-- Session Actions -->
 			<div class="session-actions">
-				<button class="session-btn" onclick="forkSession()" title="Oturumu Dallandır">
+				<button class="session-btn" onclick="forkSession()" title="Fork Session">
 					<span class="material-symbols-rounded">call_split</span>
 					<span class="hide-sm">Fork</span>
 				</button>
-				<button class="session-btn" onclick="openModal('exportModal')" title="Dışa/İçe Aktar">
+				<button class="session-btn" onclick="openModal('exportModal')" title="Export/Import">
 					<span class="material-symbols-rounded">import_export</span>
-					<span class="hide-sm">Aktar</span>
+					<span class="hide-sm">Import</span>
 				</button>
-				<button class="session-btn" onclick="shareSession()" title="Gist ile Paylaş" id="share-btn">
+				<button class="session-btn" onclick="shareSession()" title="Share with Gist" id="share-btn">
 					<span class="material-symbols-rounded">share</span>
-					<span class="hide-sm">Paylaş</span>
+					<span class="hide-sm">Share</span>
 				</button>
 			</div>
-			<button onclick="toggleSearch()" class="tool-btn" title="Ara (Ctrl+F)">
+			<button onclick="toggleSearch()" class="tool-btn" title="Search (Ctrl+F)">
 				<span class="material-symbols-rounded">search</span>
 			</button>
-			<button onclick="openCmdPalette()" class="tool-btn" title="Komut Paleti (Ctrl+K)">
+			<button onclick="openCmdPalette()" class="tool-btn" title="Command Palette (Ctrl+K)">
 				<span class="material-symbols-rounded">apps</span>
 			</button>
 			<!-- User menu -->
 			<div style="position:relative;">
-				<button id="user-menu-btn" onclick="toggleUserMenu()" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#fff;transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'" title="Kullanıcı menüsu">
+				<button id="user-menu-btn" onclick="toggleUserMenu()" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#fff;transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'" title="User Menu">
 					<span id="user-initial">U</span>
 				</button>
 				<div id="user-dropdown" class="hidden" style="position:absolute;right:0;top:calc(100% + 8px);width:280px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);z-index:200;padding:8px;animation:scaleIn 0.15s ease;"></div>
@@ -1049,7 +1049,7 @@
 	<!-- Search Bar -->
 	<div id="search-bar">
 		<span class="material-symbols-rounded" style="font-size:18px;color:var(--muted);">search</span>
-		<input id="search-input" placeholder="Sohbette ara..." oninput="searchChat(this.value)">
+		<input id="search-input" placeholder="Search chat..." oninput="searchChat(this.value)">
 		<span class="search-count" id="search-count"></span>
 		<button onclick="toggleSearch()" class="tool-btn"><span class="material-symbols-rounded" style="font-size:17px;">close</span></button>
 	</div>
@@ -1057,14 +1057,14 @@
 	<!-- Pinned Messages Bar -->
 	<div id="pinned-bar" class="hidden" style="background:var(--surface);border-bottom:1px solid var(--border);padding:8px 16px;display:flex;align-items:center;gap:10px;font-size:0.8rem;z-index:9;flex-shrink:0;">
 		<span class="material-symbols-rounded" style="color:var(--accent);font-size:16px;font-variation-settings:'FILL' 1;">push_pin</span>
-		<span style="font-weight:600;color:var(--fg);white-space:nowrap;">Sabitlenenler:</span>
+		<span style="font-weight:600;color:var(--fg);white-space:nowrap;">Pinned:</span>
 		<div id="pinned-list" style="display:flex;gap:6px;overflow-x:auto;flex:1;align-items:center;scrollbar-width:none;">
 			<!-- Pinned item chips -->
 		</div>
 	</div>
 
 	<!-- Scroll to bottom button -->
-	<button id="scroll-btn" onclick="chatContainer.scrollTop=chatContainer.scrollHeight" class="hidden" style="position:absolute;bottom:170px;right:20px;z-index:30;width:36px;height:36px;border-radius:50%;background:var(--surface);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);box-shadow:var(--shadow);transition:all 0.2s;" onmouseover="this.style.color='var(--fg)'" onmouseout="this.style.color='var(--muted)'" title="A\u015fa\u011f\u0131 git">
+	<button id="scroll-btn" onclick="chatContainer.scrollTop=chatContainer.scrollHeight" class="hidden" style="position:absolute;bottom:170px;right:20px;z-index:30;width:36px;height:36px;border-radius:50%;background:var(--surface);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);box-shadow:var(--shadow);transition:all 0.2s;" onmouseover="this.style.color='var(--fg)'" onmouseout="this.style.color='var(--muted)'" title="Scroll to bottom">
 		<span class="material-symbols-rounded" style="font-size:18px;">keyboard_double_arrow_down</span>
 	</button>
 
@@ -1077,25 +1077,19 @@
 					<img src="/assets/Mooncodewhitelogo.png" alt="MoonCode" style="width:68px;height:68px;border-radius:18px;object-fit:cover;filter:drop-shadow(0 0 18px rgba(108,143,255,0.35));" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
 					<span class="material-symbols-rounded thinking-pulse" style="font-size:32px;color:var(--accent);display:none;">auto_awesome</span>
 				</div>
-				<h2 style="font-size:1.3rem;font-weight:600;margin:0 0 8px;">Bugün nasıl yardımcı olabilirim?</h2>
-				<p style="color:var(--muted);font-size:0.85rem;margin:0 0 28px;max-width:400px;line-height:1.6;">Kodunuzu yazın, hata ayıklayın, refactor yapın veya sıfırdan proje başlatın.</p>
+				<h2 style="font-size:1.3rem;font-weight:600;margin:0 0 8px;">How can I help you today?</h2>
+				<p style="color:var(--muted);font-size:0.85rem;margin:0 0 28px;max-width:400px;line-height:1.6;">Write code, debug, refactor, or start a project from scratch.</p>
 				<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-					<button onclick="insertPrompt('Kodumu incele ve iyileştirme öner')" class="badge-btn" style="padding:8px 14px;border-radius:10px;">
-						<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent);">code_blocks</span>
-						Kod incele
-					</button>
+					<button onclick="insertPrompt('Review my code and suggest improvements')" class="badge-btn" style="padding:8px 14px;border-radius:10px;">
+						<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent);">code_blocks</span>Code Review</button>
 					<button onclick="insertPrompt('/build')" class="badge-btn" style="padding:8px 14px;border-radius:10px;">
-						<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent2);">construction</span>
-						Derle
-					</button>
+						<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent2);">construction</span>Build</button>
 					<button onclick="insertPrompt('/test')" class="badge-btn" style="padding:8px 14px;border-radius:10px;">
 						<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent);">science</span>
-						Test çalıştır
+						Run test
 					</button>
 					<button onclick="insertPrompt('/review')" class="badge-btn" style="padding:8px 14px;border-radius:10px;">
-						<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent2);">rate_review</span>
-						Kod review
-					</button>
+						<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent2);">rate_review</span>Code Review</button>
 				</div>
 			</div>
 		</div>
@@ -1112,51 +1106,51 @@
 
 			<div class="input-box">
 				<div class="input-toolbar">
-					<button class="tool-btn" onclick="document.getElementById('file-input').click()" title="Dosya ekle">
+					<button class="tool-btn" onclick="document.getElementById('file-input').click()" title="Attach file">
 						<span class="material-symbols-rounded" style="font-size:19px;">attach_file</span>
 					</button>
 					<input id="file-input" type="file" class="hidden" multiple onchange="handleFileAttach(this)">
-					<button class="tool-btn" onclick="openCmdPalette()" title="Komutlar">
+					<button class="tool-btn" onclick="openCmdPalette()" title="Commands">
 						<span class="material-symbols-rounded" style="font-size:19px;">bolt</span>
 					</button>
 				</div>
-				<textarea id="prompt-input" rows="1" placeholder="MoonCode'a mesaj yazın… (Enter = gönder, Shift+Enter = yeni satır)"></textarea>
+				<textarea id="prompt-input" rows="1" placeholder="Message MoonCode... (Enter = send, Shift+Enter = new line)"></textarea>
 				<div class="input-footer">
 					<div class="input-footer-left">
 						<button onclick="openModal('modelModal')" class="badge-btn" style="font-size:0.68rem;">
-							<span id="input-model-badge" style="font-family:'JetBrains Mono',monospace;">—</span>
+							<span id="input-model-badge" style="font-family:'JetBrains Mono',monospace;">â€”</span>
 							<span class="material-symbols-rounded" style="font-size:11px;">keyboard_arrow_down</span>
 						</button>
 					</div>
 					<div class="input-footer-right">
 						<span class="char-count" id="char-count"></span>
-						<button id="stop-btn" onclick="interruptGeneration()" class="hidden" title="Durdur">
+						<button id="stop-btn" onclick="interruptGeneration()" class="hidden" title="Stop">
 							<span class="material-symbols-rounded" style="font-size:16px;">stop</span>
 						</button>
-						<button id="send-btn" onclick="sendMessage()" title="Gönder (Enter)">
+						<button id="send-btn" onclick="sendMessage()" title="Send (Enter)">
 							<span class="material-symbols-rounded" style="font-size:17px;">arrow_upward</span>
 						</button>
 					</div>
 				</div>
 			</div>
 			<div style="text-align:center;font-size:0.65rem;color:var(--muted);margin-top:6px;opacity:0.5;">
-				MoonCode yapay zeka hatalar yapabilir. Kritik bilgileri doğrulayın.
+				MoonCode AI can make mistakes. Verify critical information.
 			</div>
 		</div>
 	</div>
 </div>
 
-<!-- ═══════════════════ MODALS ═══════════════════════════════════════════ -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• MODALS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 
 <!-- Model Modal -->
 <div id="modelModal" class="modal-overlay" onclick="overlayClose(event, 'modelModal')">
 	<div class="modal" style="max-width:460px;" onclick="event.stopPropagation()">
 		<div class="modal-header">
-			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">smart_toy</span> Model Seç</div>
+			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">smart_toy</span> Select Model</div>
 			<button class="modal-close" onclick="closeModal('modelModal')"><span class="material-symbols-rounded">close</span></button>
 		</div>
 		<div class="modal-body" id="model-list">
-			<div style="text-align:center;padding:20px;color:var(--muted);font-size:0.82rem;">Modeller yükleniyor...</div>
+			<div style="text-align:center;padding:20px;color:var(--muted);font-size:0.82rem;">Loading models...</div>
 		</div>
 	</div>
 </div>
@@ -1165,25 +1159,25 @@
 <div id="reasoningModal" class="modal-overlay" onclick="overlayClose(event,'reasoningModal')">
 	<div class="modal" style="max-width:320px;" onclick="event.stopPropagation()">
 		<div class="modal-header">
-			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent2);">psychology</span> Düşünme Seviyesi</div>
+			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent2);">psychology</span> Thinking Level</div>
 			<button class="modal-close" onclick="closeModal('reasoningModal')"><span class="material-symbols-rounded">close</span></button>
 		</div>
 		<div class="modal-body" style="display:flex;flex-direction:column;gap:6px;">
 			<button onclick="setReasoning('none')" class="model-item" id="r-none">
 				<span class="material-symbols-rounded" style="color:var(--muted);">remove_circle</span>
-				<div><div class="cmd-title">Kapalı</div><div class="cmd-desc">Daha hızlı yanıt, düşünme yok</div></div>
+				<div><div class="cmd-title">Off</div><div class="cmd-desc">Faster response, no thinking</div></div>
 			</button>
 			<button onclick="setReasoning('low')" class="model-item" id="r-low">
 				<span class="material-symbols-rounded" style="color:var(--accent);">battery_1_bar</span>
-				<div><div class="cmd-title">Düşük</div><div class="cmd-desc">Hafif düşünme, dengeli hız</div></div>
+				<div><div class="cmd-title">Low</div><div class="cmd-desc">Light thinking, balanced speed</div></div>
 			</button>
 			<button onclick="setReasoning('medium')" class="model-item" id="r-medium">
 				<span class="material-symbols-rounded" style="color:var(--accent);">battery_3_bar</span>
-				<div><div class="cmd-title">Orta</div><div class="cmd-desc">Derin analiz, orta hız</div></div>
+				<div><div class="cmd-title">Medium</div><div class="cmd-desc">Deep analysis, medium speed</div></div>
 			</button>
 			<button onclick="setReasoning('high')" class="model-item" id="r-high">
 				<span class="material-symbols-rounded" style="color:var(--accent2);">battery_full</span>
-				<div><div class="cmd-title">Yüksek</div><div class="cmd-desc">En derin düşünme, yavaş</div></div>
+				<div><div class="cmd-title">High</div><div class="cmd-desc">Deepest thinking, slow</div></div>
 			</button>
 		</div>
 	</div>
@@ -1193,100 +1187,99 @@
 <div id="settingsModal" class="modal-overlay" onclick="overlayClose(event,'settingsModal')">
 	<div class="modal" style="max-width:520px;" onclick="event.stopPropagation()">
 		<div class="modal-header">
-			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">settings</span> Ayarlar</div>
+			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">settings</span>Settings</div>
 			<button class="modal-close" onclick="closeModal('settingsModal')"><span class="material-symbols-rounded">close</span></button>
 		</div>
 		<div class="modal-body" style="padding-top:4px;">
 			<div class="stab-row">
-				<button class="stab active" onclick="switchSettingsTab('general',this)">Genel</button>
-				<button class="stab" onclick="switchSettingsTab('compaction',this)">Bellek</button>
-				<button class="stab" onclick="switchSettingsTab('security',this)">Güvenlik</button>
+				<button class="stab active" onclick="switchSettingsTab('general',this)">General</button>
+				<button class="stab" onclick="switchSettingsTab('compaction',this)">Memory</button>
+				<button class="stab" onclick="switchSettingsTab('security',this)">Security</button>
 			</div>
 			<!-- General Tab -->
 			<div class="stab-panel active" id="stab-general">
 				<div class="form-group">
-					<label class="form-label">Tema</label>
+					<label class="form-label">Theme</label>
 					<select class="form-select" id="set-theme" onchange="setTheme(this.value)">
-						<option value="mooncode">MoonCode (Varsayılan)</option>
+						<option value="mooncode">MoonCode (Default)</option>
 						<option value="nord">Nord</option>
-						<option value="forest">Orman</option>
+						<option value="forest">Forest</option>
 						<option value="rosepine">Rosé Pine</option>
-						<option value="sepia">Sepya (Göz Dostu)</option>
-						<option value="light">Açık</option>
+						<option value="sepia">Sepia (Eye Friendly)</option>
+						<option value="light">Light</option>
 					</select>
 				</div>
 			</div>
 			<!-- Compaction Tab -->
 			<div class="stab-panel" id="stab-compaction">
 				<div class="form-group">
-					<label class="form-label">Sıkıştırma Profili</label>
+					<label class="form-label">Compaction Profile</label>
 					<select class="form-select" id="set-profile">
-						<option value="balanced">Dengeli — Hız/Kalite dengesi</option>
-						<option value="aggressive">Agresif — Maksimum bağlam koruma</option>
-						<option value="off">Kapalı — Otomatik sıkıştırma yok</option>
+						<option value="balanced">Balanced — Speed/Quality balance</option>
+						<option value="aggressive">Aggressive — Maximum context preservation</option>
+						<option value="off">Off — No automatic compaction</option>
 					</select>
 				</div>
 				<div class="form-group">
 					<label class="form-label" style="display:flex;justify-content:space-between;">
-						<span>Rezerve Token</span>
+						<span>Reserved Tokens</span>
 						<span id="reserve-val" style="color:var(--accent);font-weight:700;">1000</span>
 					</label>
-					<div style="font-size:0.72rem;color:var(--muted);margin-bottom:6px;">Yanıt için ayrılan minimum token (sıkıştırma tetiklemez)</div>
+					<div style="font-size:0.72rem;color:var(--muted);margin-bottom:6px;">Minimum tokens reserved for response (does not trigger compaction)</div>
 					<input type="range" id="set-reserve" min="500" max="8000" step="500" value="1000" style="width:100%;accent-color:var(--accent);" oninput="document.getElementById('reserve-val').textContent=this.value">
 				</div>
 				<div class="form-group">
 					<label class="form-label" style="display:flex;justify-content:space-between;">
-						<span>Kısa Geçmiş Koruması</span>
+						<span>Recent History Protection</span>
 						<span id="keep-val" style="color:var(--accent);font-weight:700;">2000</span>
 					</label>
-					<div style="font-size:0.72rem;color:var(--muted);margin-bottom:6px;">Sıkıştırma sonrası korunacak son N token</div>
+					<div style="font-size:0.72rem;color:var(--muted);margin-bottom:6px;">Last N tokens to keep after compaction</div>
 					<input type="range" id="set-keep" min="500" max="16000" step="500" value="2000" style="width:100%;accent-color:var(--accent);" oninput="document.getElementById('keep-val').textContent=this.value">
 				</div>
 				<label class="form-checkbox-row">
 					<input type="checkbox" id="set-tool-compaction">
 					<div>
-						<div style="font-size:0.82rem;font-weight:500;">Araç Tabanlı Sıkıştırma</div>
-						<div style="font-size:0.72rem;color:var(--muted);">Büyük araç çıktılarını otomatik sıkıştır</div>
+						<div style="font-size:0.82rem;font-weight:500;">Tool-Based Compaction</div>
+						<div style="font-size:0.72rem;color:var(--muted);">Automatically compact large tool outputs</div>
 					</div>
 				</label>
 			</div>
 			<!-- Security Tab -->
 			<div class="stab-panel" id="stab-security">
 				<div class="form-group">
-					<label class="form-label">Genel İzin Seviyesi</label>
-					<div style="font-size:0.72rem;color:var(--muted);margin-bottom:8px;">Tüm projeler için varsayılan araç onay davranışı</div>
+					<label class="form-label">Global Permission Level</label>
+					<div style="font-size:0.72rem;color:var(--muted);margin-bottom:8px;">Default tool approval behavior for all projects</div>
 					<div style="display:flex;flex-direction:column;gap:5px;" id="perm-radio-group">
 						<label class="perm-row" data-val="ask">
 							<input type="radio" name="perm-level" value="ask" style="display:none;">
 							<span class="material-symbols-rounded" style="color:var(--accent);font-size:18px;">help</span>
 							<div style="flex:1;">
-								<div style="font-size:0.8rem;font-weight:500;">Her Zaman Sor</div>
-								<div style="font-size:0.7rem;color:var(--muted);">Her araç çalıştırmadan önce onay iste (varsayılan)</div>
+								<div style="font-size:0.8rem;font-weight:500;">Always Ask</div>
+								<div style="font-size:0.7rem;color:var(--muted);">Ask for confirmation before running any tool (default)</div>
 							</div>
 						</label>
 						<label class="perm-row" data-val="safe">
 							<input type="radio" name="perm-level" value="safe" style="display:none;">
 							<span class="material-symbols-rounded" style="color:var(--accent2);font-size:18px;">shield</span>
 							<div style="flex:1;">
-								<div style="font-size:0.8rem;font-weight:500;">Güvenli Mod</div>
-								<div style="font-size:0.7rem;color:var(--muted);">Salt-okunur araçlara otomatik izin, yazma için sor</div>
+								<div style="font-size:0.8rem;font-weight:500;">Safe Mode</div>
+								<div style="font-size:0.7rem;color:var(--muted);">Auto-approve read-only tools, ask for writing</div>
 							</div>
 						</label>
 						<label class="perm-row" data-val="full">
 							<input type="radio" name="perm-level" value="full" style="display:none;">
 							<span class="material-symbols-rounded" style="color:#4ade80;font-size:18px;">check_circle</span>
 							<div style="flex:1;">
-								<div style="font-size:0.8rem;font-weight:500;">Tam İzin</div>
-								<div style="font-size:0.7rem;color:var(--muted);">Tüm araçlara otomatik izin ver (dikkatli kullanın)</div>
+								<div style="font-size:0.8rem;font-weight:500;">Full Permission</div>
+								<div style="font-size:0.7rem;color:var(--muted);">Auto-approve all tools (use with caution)</div>
 							</div>
 						</label>
 					</div>
 				</div>
 			</div>
 		</div>
-		<div class="modal-footer">
-			<button onclick="closeModal('settingsModal')" class="btn btn-ghost">İptal</button>
-			<button onclick="saveSettings()" class="btn btn-primary"><span class="material-symbols-rounded" style="font-size:15px;">save</span>Kaydet</button>
+		<div class="modal-footer">Cancel</button>
+			<button onclick="saveSettings()" class="btn btn-primary"><span class="material-symbols-rounded" style="font-size:15px;">save</span>Save</button>
 		</div>
 	</div>
 </div>
@@ -1295,7 +1288,7 @@
 <div id="themeModal" class="modal-overlay" onclick="overlayClose(event,'themeModal')">
 	<div class="modal" style="max-width:480px;" onclick="event.stopPropagation()">
 		<div class="modal-header">
-			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">palette</span> Tema Seç</div>
+			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">palette</span> Tema SeÃ§</div>
 			<button class="modal-close" onclick="closeModal('themeModal')"><span class="material-symbols-rounded">close</span></button>
 		</div>
 		<div class="modal-body">
@@ -1334,7 +1327,7 @@
 							<div style="width:22px;height:8px;border-radius:4px;background:#f6c177;opacity:0.5;"></div>
 						</div>
 					</div>
-					<div class="theme-name">Rosé Pine</div>
+					<div class="theme-name">RosÃ© Pine</div>
 				</div>
 				<div class="theme-card" id="theme-sepia" onclick="setTheme('sepia')">
 					<div class="theme-preview" style="background:linear-gradient(135deg,#1c1a16 40%,#211e18);border-bottom:1px solid #26221a;">
@@ -1343,7 +1336,7 @@
 							<div style="width:22px;height:8px;border-radius:4px;background:#c8855a;opacity:0.5;"></div>
 						</div>
 					</div>
-					<div class="theme-name">Sepya (Göz Dostu)</div>
+					<div class="theme-name">Sepya (GÃ¶z Dostu)</div>
 				</div>
 				<div class="theme-card" id="theme-light" onclick="setTheme('light')">
 					<div class="theme-preview" style="background:linear-gradient(135deg,#f5f5f7 40%,#ffffff);border-bottom:1px solid #e5e5ea;">
@@ -1352,7 +1345,7 @@
 							<div style="width:22px;height:8px;border-radius:4px;background:#0ea5c8;opacity:0.5;"></div>
 						</div>
 					</div>
-					<div class="theme-name" style="background:#f0f0f5;color:#1a1a2e;">Açık</div>
+					<div class="theme-name" style="background:#f0f0f5;color:#1a1a2e;">AÃ§Ä±k</div>
 				</div>
 			</div>
 		</div>
@@ -1363,17 +1356,17 @@
 <div id="shortcutsModal" class="modal-overlay" onclick="overlayClose(event,'shortcutsModal')">
 	<div class="modal" style="max-width:400px;" onclick="event.stopPropagation()">
 		<div class="modal-header">
-			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">keyboard</span> Klavye Kısayolları</div>
+			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">keyboard</span> Klavye KÄ±sayollarÄ±</div>
 			<button class="modal-close" onclick="closeModal('shortcutsModal')"><span class="material-symbols-rounded">close</span></button>
 		</div>
 		<div class="modal-body">
 			<div style="display:flex;flex-direction:column;gap:3px;font-size:0.8rem;">
 				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;background:var(--surface2);">
-					<span style="color:var(--fg);">Gönder</span>
+					<span style="color:var(--fg);">GÃ¶nder</span>
 					<div style="display:flex;gap:4px;"><kbd>Enter</kbd></div>
 				</div>
 				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;">
-					<span style="color:var(--fg);">Yeni Satır</span>
+					<span style="color:var(--fg);">eni SatÄ±r</span>
 					<div style="display:flex;gap:4px;"><kbd>Shift</kbd><kbd>Enter</kbd></div>
 				</div>
 				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;background:var(--surface2);">
@@ -1385,7 +1378,7 @@
 					<div style="display:flex;gap:4px;"><kbd>Ctrl</kbd><kbd>F</kbd></div>
 				</div>
 				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;background:var(--surface2);">
-					<span style="color:var(--fg);">Kenar Çubuğu</span>
+					<span style="color:var(--fg);">Kenar Ã‡ubuÄŸu</span>
 					<div style="display:flex;gap:4px;"><kbd>Ctrl</kbd><kbd>B</kbd></div>
 				</div>
 				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;">
@@ -1393,7 +1386,7 @@
 					<div style="display:flex;gap:4px;"><kbd>Escape</kbd></div>
 				</div>
 				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;background:var(--surface2);">
-					<span style="color:var(--fg);">Yeni Sohbet</span>
+					<span style="color:var(--fg);">New Chat</span>
 					<div style="display:flex;gap:4px;"><kbd>Ctrl</kbd><kbd>N</kbd></div>
 				</div>
 			</div>
@@ -1405,17 +1398,17 @@
 <div id="cmd-palette" class="modal-overlay" onclick="overlayClose(event,'cmd-palette')">
 	<div class="modal" style="max-width:520px;margin-top:-10vh;" onclick="event.stopPropagation()">
 		<div style="padding:14px 14px 8px;">
-			<input id="cmd-input" placeholder="Komut ara veya mesaj gönder..." oninput="filterCommands(this.value)" onkeydown="cmdKeydown(event)">
+			<input id="cmd-input" placeholder="Search command or send message..." oninput="filterCommands(this.value)" onkeydown="cmdKeydown(event)">
 		</div>
 		<div class="cmd-list" id="cmd-list" style="padding:0 8px 10px;"></div>
 	</div>
 </div>
 
-<!-- ═══════════════════ BROWSER BRIDGE MODAL ═══════════════════════════════ -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• BROWSER BRIDGE MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="bridgeModal" class="modal-overlay" onclick="overlayClose(event,'bridgeModal')">
 	<div class="modal" style="max-width:420px;" onclick="event.stopPropagation()">
 		<div class="modal-header">
-			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">open_in_browser</span> Tarayıcı Köprüsü</div>
+			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">open_in_browser</span> Browser Bridge</div>
 			<button class="modal-close" onclick="closeModal('bridgeModal')"><span class="material-symbols-rounded">close</span></button>
 		</div>
 		<div class="modal-body">
@@ -1423,60 +1416,60 @@
 				<div style="display:flex;align-items:center;gap:10px;">
 					<span class="material-symbols-rounded" style="font-size:28px;color:var(--accent);">lan</span>
 					<div>
-						<div style="font-size:0.85rem;font-weight:600;">Köprü Durumu</div>
+						<div style="font-size:0.85rem;font-weight:600;">BridgeÃ¼ Durumu</div>
 						<div id="bridge-status-text" style="font-size:0.72rem;color:var(--muted);">Kontrol ediliyor...</div>
 					</div>
 				</div>
-				<div id="bridge-status-badge" style="padding:4px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;background:var(--surface);border:1px solid var(--border);">—</div>
+				<div id="bridge-status-badge" style="padding:4px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;background:var(--surface);border:1px solid var(--border);">â€”</div>
 			</div>
 			<div style="font-size:0.78rem;color:var(--muted);line-height:1.7;padding:10px 14px;border-radius:10px;background:rgba(108,143,255,0.04);border:1px solid rgba(108,143,255,0.12);">
 				<div style="font-weight:600;color:var(--fg);margin-bottom:6px;display:flex;align-items:center;gap:6px;">
-					<span class="material-symbols-rounded" style="font-size:16px;color:var(--accent);">info</span> Tarayıcı Köprüsü Nedir?
+					<span class="material-symbols-rounded" style="font-size:16px;color:var(--accent);">info</span> Browser Bridge Nedir?
 				</div>
-				MoonCode'un tarayıcıyı kontrol etmesini sağlar. Etkinleştirildiğinde web sayfaları açabilir, form doldurup gönderebilir, ekran görüntüsü alabilirsiniz.
+				MoonCode'un tarayÄ±cÄ±yÄ± kontrol etmesini saÄŸlar. EtkinleÅŸtirildiÄŸinde web sayfalarÄ± aÃ§abilir, form doldurup gÃ¶nderebilir, ekran gÃ¶rÃ¼ntÃ¼sÃ¼ alabilirsiniz.
 			</div>
 			<div id="bridge-connected-info" class="hidden" style="margin-top:12px;padding:10px 14px;border-radius:10px;background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.2);font-size:0.75rem;color:#4ade80;">
 				<span class="material-symbols-rounded" style="font-size:15px;vertical-align:middle;">check_circle</span>
-				Tarayıcı bağlı ve hazır. MoonCode ajan görevlerinde tarayıcıyı kullanabilir.
+				TarayÄ±cÄ± baÄŸlÄ± ve hazÄ±r. MoonCode ajan gÃ¶revlerinde tarayÄ±cÄ±yÄ± kullanabilir.
 			</div>
 		</div>
 		<div class="modal-footer">
 			<button onclick="closeModal('bridgeModal')" class="btn btn-ghost">Kapat</button>
-			<button onclick="refreshBridgeStatus()" class="btn btn-primary"><span class="material-symbols-rounded" style="font-size:15px;">refresh</span>Yenile</button>
+			<button onclick="refreshBridgeStatus()" class="btn btn-primary"><span class="material-symbols-rounded" style="font-size:15px;">refresh</span>enile</button>
 		</div>
 	</div>
 </div>
 
-<!-- ═══════════════════ EXPORT / IMPORT MODAL ════════════════════════════════ -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• EXPORT / IMPORT MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="exportModal" class="modal-overlay" onclick="overlayClose(event,'exportModal')">
 	<div class="modal" style="max-width:460px;" onclick="event.stopPropagation()">
 		<div class="modal-header">
-			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">import_export</span> Dışa / İçe Aktar</div>
+			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">import_export</span> Export / Import</div>
 			<button class="modal-close" onclick="closeModal('exportModal')"><span class="material-symbols-rounded">close</span></button>
 		</div>
 		<div class="modal-body">
 			<!-- Export section -->
 			<div style="margin-bottom:16px;">
-				<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.08em;margin-bottom:8px;">Dışa Aktar</div>
+				<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.08em;margin-bottom:8px;">Export</div>
 				<div style="display:flex;gap:8px;">
 					<button onclick="exportSession('jsonl')" class="btn btn-ghost" style="flex:1;justify-content:center;gap:6px;">
 						<span class="material-symbols-rounded" style="font-size:16px;">data_object</span>
-						JSONL (Ham)
+						JSONL (Raw)
 					</button>
 					<button onclick="exportSession('html')" class="btn btn-ghost" style="flex:1;justify-content:center;gap:6px;">
 						<span class="material-symbols-rounded" style="font-size:16px;">html</span>
-						HTML (Görünüm)
+						HTML (Formatted)
 					</button>
 				</div>
 			</div>
 			<div class="divider"></div>
 			<!-- Import section -->
 			<div style="margin-top:16px;">
-				<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.08em;margin-bottom:8px;">İçe Aktar (JSONL)</div>
+				<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.08em;margin-bottom:8px;">Import (JSONL)</div>
 				<div class="drop-zone" id="drop-zone" onclick="document.getElementById('import-file-input').click()" ondrop="handleImportDrop(event)" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')">
 					<span class="material-symbols-rounded" style="font-size:32px;display:block;margin-bottom:6px;">upload_file</span>
-					<div style="font-size:0.82rem;font-weight:500;">Dosyayı buraya sürükleyin</div>
-					<div style="font-size:0.72rem;margin-top:4px;">veya tıklayın — .jsonl dosyası</div>
+					<div style="font-size:0.82rem;font-weight:500;">Drag and drop file here</div>
+					<div style="font-size:0.72rem;margin-top:4px;">or click to select — .jsonl file</div>
 				</div>
 				<input type="file" id="import-file-input" class="hidden" accept=".jsonl" onchange="handleImportFile(this)">
 			</div>
@@ -1487,15 +1480,15 @@
 	</div>
 </div>
 
-<!-- ═══════════════════ SHARE RESULT MODAL ══════════════════════════════════ -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SHARE RESULT MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="shareModal" class="modal-overlay" onclick="overlayClose(event,'shareModal')">
 	<div class="modal" style="max-width:420px;" onclick="event.stopPropagation()">
 		<div class="modal-header">
-			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">share</span> Oturum Paylaşıldı</div>
+			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">share</span> Oturum PaylaÅŸÄ±ldÄ±</div>
 			<button class="modal-close" onclick="closeModal('shareModal')"><span class="material-symbols-rounded">close</span></button>
 		</div>
 		<div class="modal-body">
-			<div style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;">Oturum GitHub Gist olarak paylaşıldı. Aşağıdaki bağlantıyı kopyalayın:</div>
+			<div style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;">Oturum GitHub Gist olarak paylaÅŸÄ±ldÄ±. AÅŸaÄŸÄ±daki baÄŸlantÄ±yÄ± kopyalayÄ±n:</div>
 			<div style="display:flex;gap:6px;align-items:center;">
 				<input id="share-url-input" class="form-input" type="text" readonly style="flex:1;font-family:'JetBrains Mono',monospace;font-size:0.75rem;" value="">
 				<button onclick="copyShareUrl()" class="btn btn-primary" style="flex-shrink:0;">
@@ -1505,7 +1498,7 @@
 			<div style="margin-top:10px;">
 				<a id="share-open-link" href="#" target="_blank" style="font-size:0.78rem;color:var(--accent);display:flex;align-items:center;gap:4px;text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
 					<span class="material-symbols-rounded" style="font-size:15px;">open_in_new</span>
-					Gist'i aç
+					Gist'i aÃ§
 				</a>
 			</div>
 		</div>
@@ -1526,26 +1519,26 @@
 	</div>
 	<div class="sidebar-item" onclick="openActiveProjectExplorer()" style="padding:6px 10px;display:flex;align-items:center;gap:8px;cursor:pointer;">
 		<span class="material-symbols-rounded" style="font-size:16px;">folder_open</span>
-		<span>Dosya Gezgininde aç</span>
+		<span>Open in File Explorer</span>
 	</div>
 	<div class="sidebar-item" onclick="renameActiveProject()" style="padding:6px 10px;display:flex;align-items:center;gap:8px;cursor:pointer;">
 		<span class="material-symbols-rounded" style="font-size:16px;">edit</span>
-		<span>Projeyi yeniden adlandır</span>
+		<span>Rename project</span>
 	</div>
 	<div class="sidebar-item" onclick="archiveActiveProject()" style="padding:6px 10px;display:flex;align-items:center;gap:8px;cursor:pointer;">
 		<span class="material-symbols-rounded" style="font-size:16px;">archive</span>
-		<span>Sohbetleri arşivle</span>
+		<span>Archive chats</span>
 	</div>
 	<div class="divider"></div>
 	<div class="sidebar-item" onclick="deleteActiveProject()" style="color:#ff6464;padding:6px 10px;display:flex;align-items:center;gap:8px;cursor:pointer;">
 		<span class="material-symbols-rounded" style="font-size:16px;color:#ff6464;">delete</span>
-		<span>Kaldır</span>
+		<span>Remove</span>
 	</div>
 </div>
 
-<!-- ═══════════════════ SCRIPT ═══════════════════════════════════════════ -->
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• SCRIPT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <script>
-// ─── MARKED SETUP ────────────────────────────────────────────────────────
+// â”€â”€â”€ MARKED SETUP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const renderer = new marked.Renderer();
 
 renderer.code = function(token) {
@@ -1564,13 +1557,13 @@ renderer.code = function(token) {
 					${lang}
 				</div>
 				<div class="code-actions">
-					<button onclick="runCode(this)" title="Çalıştır" style="display:none;" id="run-${id}">
+					<button onclick="runCode(this)" title="Ã‡alÄ±ÅŸtÄ±r" style="display:none;" id="run-${id}">
 						<span class="material-symbols-rounded" style="font-size:15px;">play_arrow</span>
 					</button>
-					<button onclick="downloadCode(this, '${lang}')" title="İndir">
+					<button onclick="downloadCode(this, '${lang}')" title="Download">
 						<span class="material-symbols-rounded" style="font-size:15px;">download</span>
 					</button>
-					<button onclick="copyCode(this)" title="Kopyala">
+					<button onclick="copyCode(this)" title="Copy">
 						<span class="material-symbols-rounded" style="font-size:15px;">content_copy</span>
 					</button>
 				</div>
@@ -1586,7 +1579,7 @@ renderer.codespan = function(token) {
 
 marked.setOptions({ renderer, breaks: true, gfm: true });
 
-// ─── STATE ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const chatInner = document.getElementById('chat-inner');
 const chatContainer = document.getElementById('chat-container');
 const promptInput = document.getElementById('prompt-input');
@@ -1604,7 +1597,7 @@ let availableCommands = [];
 let filteredCommands = [];
 let acIndex = -1;
 
-// ─── THEME ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ THEME â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function setTheme(theme) {
 	currentTheme = theme;
 	document.documentElement.setAttribute('data-theme', theme);
@@ -1621,7 +1614,7 @@ function setTheme(theme) {
 			: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css';
 	}
 	closeModal('themeModal');
-	toast('Tema değiştirildi', 'success');
+	toast('Theme changed', 'success');
 }
 // Apply saved theme on load
 document.documentElement.setAttribute('data-theme', currentTheme);
@@ -1631,7 +1624,7 @@ setTimeout(() => {
 	if (card) card.classList.add('active');
 }, 100);
 
-// ─── TOAST ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ TOAST â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function toast(msg, type = 'info', duration = 3000) {
 	const container = document.getElementById('toast-container');
 	const el = document.createElement('div');
@@ -1651,7 +1644,7 @@ function toast(msg, type = 'info', duration = 3000) {
 	}, duration);
 }
 
-// ─── MODAL ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function openModal(id) {
 	document.getElementById(id).classList.add('active');
 	if (id === 'modelModal') loadModels();
@@ -1666,7 +1659,7 @@ function overlayClose(e, id) {
 	if (e.target === e.currentTarget) closeModal(id);
 }
 
-// ─── SIDEBAR ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ SIDEBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let sidebarOpen = true;
 function toggleSidebar() {
 	sidebarOpen = !sidebarOpen;
@@ -1675,7 +1668,7 @@ function toggleSidebar() {
 	else sb.classList.add('collapsed');
 }
 
-// ─── SEARCH ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ SEARCH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let searchActive = false;
 function toggleSearch() {
 	searchActive = !searchActive;
@@ -1699,35 +1692,35 @@ function searchChat(query) {
 		const text = n.textContent;
 		if (text.toLowerCase().includes(query.toLowerCase())) matches++;
 	});
-	count.textContent = matches ? `${matches} sonuç` : 'Bulunamadı';
+	count.textContent = matches ? `${matches} result(s)` : 'No results found';
 }
 
-// ─── EXPORT ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ EXPORT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function exportChat() {
 	const rows = chatInner.querySelectorAll('.msg-row');
-	let md = `# MoonCode Sohbet Dışa Aktarma\n\n_${new Date().toLocaleString('tr-TR')}_\n\n---\n\n`;
+	let md = `# MoonCode Chat Export\n\n_${new Date().toLocaleString('en-US')}_\n\n---\n\n`;
 	rows.forEach(row => {
 		const isUser = row.classList.contains('user');
 		const bubble = row.querySelector('.user-bubble, .assistant-content');
 		if (!bubble) return;
-		md += `**${isUser ? '👤 Kullanıcı' : '🤖 MoonCode'}**\n\n${bubble.textContent.trim()}\n\n---\n\n`;
+		md += `**${isUser ? '👤 User' : '🤖 MoonCode'}**\n\n${bubble.textContent.trim()}\n\n---\n\n`;
 	});
 	const blob = new Blob([md], { type: 'text/markdown' });
 	const url = URL.createObjectURL(blob);
 	const a = document.createElement('a');
 	a.href = url; a.download = `mooncode-${Date.now()}.md`; a.click();
 	URL.revokeObjectURL(url);
-	toast('Sohbet dışa aktarıldı', 'success');
+	toast('Chat exported', 'success');
 }
 
-// ─── INSERT PROMPT ────────────────────────────────────────────────────────
+// â”€â”€â”€ INSERT PROMPT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function insertPrompt(text) {
 	promptInput.value = text;
 	promptInput.focus();
 	autoResize();
 }
 
-// ─── FILE ATTACH ──────────────────────────────────────────────────────────
+// â”€â”€â”€ FILE ATTACH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function handleFileAttach(input) {
 	const files = Array.from(input.files);
 	files.forEach(f => { if (!attachedFiles.find(x => x.name === f.name)) attachedFiles.push(f); });
@@ -1754,7 +1747,7 @@ function removeFile(i) {
 	renderAttachments();
 }
 
-// ─── TEXTAREA AUTO RESIZE ─────────────────────────────────────────────────
+// â”€â”€â”€ TEXTAREA AUTO RESIZE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function autoResize() {
 	promptInput.style.height = 'auto';
 	promptInput.style.height = Math.min(promptInput.scrollHeight, 200) + 'px';
@@ -1767,7 +1760,7 @@ promptInput.addEventListener('input', () => {
 	handleAutocomplete();
 });
 
-// ─── INPUT AREA PADDING ───────────────────────────────────────────────────
+// â”€â”€â”€ INPUT AREA PADDING â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const inputArea = document.getElementById('input-area');
 function updateChatPadding() {
 	chatContainer.style.paddingBottom = (inputArea.offsetHeight + 8) + 'px';
@@ -1775,7 +1768,7 @@ function updateChatPadding() {
 updateChatPadding();
 new ResizeObserver(updateChatPadding).observe(inputArea);
 
-// ─── AUTOCOMPLETE ─────────────────────────────────────────────────────────
+// â”€â”€â”€ AUTOCOMPLETE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const autocompleteEl = document.getElementById('autocomplete');
 
 function handleAutocomplete() {
@@ -1811,22 +1804,22 @@ function selectCommand(cmd) {
 	promptInput.focus();
 }
 
-// ─── COMMAND PALETTE ──────────────────────────────────────────────────────
+// â”€â”€â”€ COMMAND PALETTE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const paletteCommands = [
-	{ icon: 'add', title: 'Yeni Sohbet', desc: 'Sohbeti temizle', action: () => newChat(), kbd: 'Ctrl+N' },
+	{ icon: 'add', title: 'eni Sohbet', desc: 'Sohbeti temizle', action: () => newChat(), kbd: 'Ctrl+N' },
 	{ icon: 'construction', title: 'Derle', desc: 'Projeyi derle', action: () => { closeModal('cmd-palette'); insertPrompt('/build'); sendMessage(); } },
-	{ icon: 'science', title: 'Test Çalıştır', desc: 'Test paketini çalıştır', action: () => { closeModal('cmd-palette'); insertPrompt('/test'); sendMessage(); } },
-	{ icon: 'rate_review', title: 'Kod Review', desc: 'Kodu gözden geçir', action: () => { closeModal('cmd-palette'); insertPrompt('/review'); sendMessage(); } },
-	{ icon: 'content_cut', title: 'Sıkıştır', desc: 'Bağlamı sıkıştır', action: () => { closeModal('cmd-palette'); insertPrompt('/compact'); sendMessage(); } },
-	{ icon: 'commit', title: 'Diff Göster', desc: 'Git değişiklikleri göster', action: () => { closeModal('cmd-palette'); insertPrompt('/diff'); sendMessage(); } },
-	{ icon: 'rocket_launch', title: 'Ship', desc: 'Değişiklikleri push et', action: () => { closeModal('cmd-palette'); insertPrompt('/ship'); sendMessage(); } },
+	{ icon: 'science', title: 'Run Test', desc: 'Run the test suite', action: () => { closeModal('cmd-palette'); insertPrompt('/test'); sendMessage(); } },
+	{ icon: 'rate_review', title: 'Code Review', desc: 'Review the code', action: () => { closeModal('cmd-palette'); insertPrompt('/review'); sendMessage(); } },
+	{ icon: 'content_cut', title: 'Compact', desc: 'Compact context', action: () => { closeModal('cmd-palette'); insertPrompt('/compact'); sendMessage(); } },
+	{ icon: 'commit', title: 'Show Diff', desc: 'Show Git changes', action: () => { closeModal('cmd-palette'); insertPrompt('/diff'); sendMessage(); } },
+	{ icon: 'rocket_launch', title: 'Ship', desc: 'Push changes', action: () => { closeModal('cmd-palette'); insertPrompt('/ship'); sendMessage(); } },
 	{ icon: 'search', title: 'Sohbette Ara', desc: 'Ctrl+F', action: () => { closeModal('cmd-palette'); toggleSearch(); } },
-	{ icon: 'download', title: 'Dışa Aktar', desc: 'Sohbeti markdown olarak indir', action: () => { closeModal('cmd-palette'); exportChat(); } },
-	{ icon: 'palette', title: 'Tema Seç', desc: '6 farklı tema', action: () => { closeModal('cmd-palette'); openModal('themeModal'); } },
-	{ icon: 'smart_toy', title: 'Model Seç', desc: 'AI modeli değiştir', action: () => { closeModal('cmd-palette'); openModal('modelModal'); } },
-	{ icon: 'settings', title: 'Ayarlar', desc: 'Uygulama ayarları', action: () => { closeModal('cmd-palette'); openModal('settingsModal'); } },
-	{ icon: 'keyboard', title: 'Kısayollar', desc: 'Tüm kısayolları göster', action: () => { closeModal('cmd-palette'); openModal('shortcutsModal'); } },
-	{ icon: 'restart_alt', title: 'Sıfırla', desc: 'Oturumu sıfırla', action: () => { closeModal('cmd-palette'); fetch('/api/reset',{method:'POST'}); newChat(); toast('Oturum sıfırlandı','info'); } },
+	{ icon: 'download', title: 'Export', desc: 'Download chat as markdown', action: () => { closeModal('cmd-palette'); exportChat(); } },
+	{ icon: 'palette', title: 'Select Theme', desc: '6 different themes', action: () => { closeModal('cmd-palette'); openModal('themeModal'); } },
+	{ icon: 'smart_toy', title: 'Select Model', desc: 'Change AI model', action: () => { closeModal('cmd-palette'); openModal('modelModal'); } },
+	{ icon: 'settings', title: 'Settings', desc: 'Application settings', action: () => { closeModal('cmd-palette'); openModal('settingsModal'); } },
+	{ icon: 'keyboard', title: 'Shortcuts', desc: 'Show all shortcuts', action: () => { closeModal('cmd-palette'); openModal('shortcutsModal'); } },
+	{ icon: 'restart_alt', title: 'Reset', desc: 'Reset session', action: () => { closeModal('cmd-palette'); fetch('/api/reset',{method:'POST'}); newChat(); toast('Session reset','info'); } },
 ];
 
 function openCmdPalette() {
@@ -1879,7 +1872,7 @@ function cmdKeydown(e) {
 	}
 }
 
-// ─── GLOBAL KEYBOARD SHORTCUTS ───────────────────────────────────────────
+// â”€â”€â”€ GLOBAL KEBOARD SHORTCUTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 document.addEventListener('keydown', (e) => {
 	if (e.ctrlKey || e.metaKey) {
 		if (e.key === 'k') { e.preventDefault(); openCmdPalette(); }
@@ -1916,7 +1909,7 @@ chatContainer.addEventListener('scroll', () => {
 	}
 });
 
-// ─── APPEND TO CHAT ───────────────────────────────────────────────────────
+// â”€â”€â”€ APPEND TO CHAT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function appendToChat(el) {
 	const indicator = document.getElementById('global-indicator');
 	if (indicator) chatInner.insertBefore(el, indicator);
@@ -1924,7 +1917,7 @@ function appendToChat(el) {
 	chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-// ─── SET GENERATING STATE ─────────────────────────────────────────────────
+// â”€â”€â”€ SET GENERATING STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function setGeneratingState(generating) {
 	isGenerating = generating;
 	sendBtn.classList.toggle('hidden', generating);
@@ -1938,7 +1931,7 @@ function setGeneratingState(generating) {
 		indicator.innerHTML = `
 			<div style="display:flex;align-items:center;gap:8px;color:var(--muted);font-size:0.78rem;padding:4px 0;">
 				<span class="material-symbols-rounded thinking-pulse" style="font-size:16px;color:var(--accent);">psychology</span>
-				<span class="thinking-pulse">Düşünüyor...</span>
+				<span class="thinking-pulse">Thinking...</span>
 			</div>`;
 		chatInner.appendChild(indicator);
 		chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -1947,7 +1940,7 @@ function setGeneratingState(generating) {
 	}
 }
 
-// ─── APPEND MESSAGE ───────────────────────────────────────────────────────
+// â”€â”€â”€ APPEND MESSAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function appendMessage(role, content, id = null, pinned = false) {
 	// Remove empty state
 	const emptyState = document.getElementById('empty-state');
@@ -1970,16 +1963,16 @@ function appendMessage(role, content, id = null, pinned = false) {
 			<div style="display:flex;align-items:center;gap:6px;">
 				<span style="font-size:0.65rem;color:var(--muted);opacity:0.6;">${timeStr}</span>
 				<div class="action-bar" style="margin-top:0;">
-					<button onclick="copyText(this.closest('.msg-row').querySelector('.user-bubble').textContent)" title="Kopyala">
+					<button onclick="copyText(this.closest('.msg-row').querySelector('.user-bubble').textContent)" title="Copy">
 						<span class="material-symbols-rounded" style="font-size:15px;">content_copy</span>
 					</button>
-					<button onclick="editMsg('${row.id}')" title="Düzenle">
+					<button onclick="editMsg(this.closest('.msg-row').id)" title="Edit">
 						<span class="material-symbols-rounded" style="font-size:15px;">edit</span>
 					</button>
-					<button onclick="deleteMsg('${row.id}')" title="Sil">
+					<button onclick="deleteMsg(this.closest('.msg-row').id)" title="Delete">
 						<span class="material-symbols-rounded" style="font-size:15px;">delete</span>
 					</button>
-					<button onclick="togglePin('${row.id}')" title="Sabitle" class="pin-btn">
+					<button onclick="togglePin(this.closest('.msg-row').id)" title="Pin" class="pin-btn">
 						<span class="material-symbols-rounded" style="font-size:15px;${pinStyle}">${pinIcon}</span>
 					</button>
 				</div>
@@ -1990,22 +1983,22 @@ function appendMessage(role, content, id = null, pinned = false) {
 			<div style="display:flex;align-items:center;gap:6px;margin-top:2px;">
 				<span style="font-size:0.65rem;color:var(--muted);opacity:0.6;">${timeStr}</span>
 				<div class="action-bar" style="margin-top:0;">
-					<button onclick="copyText(document.getElementById('inner-${row.id}').innerText)" title="Kopyala">
+					<button onclick="copyText(document.getElementById('inner-' + this.closest('.msg-row').id).innerText)" title="Copy">
 						<span class="material-symbols-rounded" style="font-size:15px;">content_copy</span>
 					</button>
-					<button onclick="shareMsg('${row.id}')" title="Payla\u015f">
+					<button onclick="shareMsg(this.closest('.msg-row').id)" title="Share">
 						<span class="material-symbols-rounded" style="font-size:15px;">share</span>
 					</button>
-					<button onclick="likeMsg('${row.id}', true)" title="Be\u011fen">
+					<button onclick="likeMsg(this.closest('.msg-row').id, true)" title="Like">
 						<span class="material-symbols-rounded" style="font-size:15px;">thumb_up</span>
 					</button>
-					<button onclick="likeMsg('${row.id}', false)" title="Be\u011fenme">
+					<button onclick="likeMsg(this.closest('.msg-row').id, false)" title="Dislike">
 						<span class="material-symbols-rounded" style="font-size:15px;">thumb_down</span>
 					</button>
-					<button onclick="deleteMsg('${row.id}')" title="Sil">
+					<button onclick="deleteMsg(this.closest('.msg-row').id)" title="Delete">
 						<span class="material-symbols-rounded" style="font-size:15px;">delete</span>
 					</button>
-					<button onclick="togglePin('${row.id}')" title="Sabitle" class="pin-btn">
+					<button onclick="togglePin(this.closest('.msg-row').id)" title="Pin" class="pin-btn">
 						<span class="material-symbols-rounded" style="font-size:15px;${pinStyle}">${pinIcon}</span>
 					</button>
 				</div>
@@ -2017,7 +2010,7 @@ function appendMessage(role, content, id = null, pinned = false) {
 	return row.id;
 }
 
-// ─── UPDATE MESSAGE ───────────────────────────────────────────────────────
+// â”€â”€â”€ UPDATE MESSAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const thinkingStartTimes = new Map(); // msgId -> timestamp when thinking started
 
 function updateMessage(id, content, isStreaming = false) {
@@ -2041,13 +2034,13 @@ function updateMessage(id, content, isStreaming = false) {
 		const elapsed = Math.round((Date.now() - thinkingStartTimes.get(id)) / 1000);
 		const charCount = thinking.length;
 
-		// While streaming → open (not collapsed), after done → collapsed
+		// While streaming â†’ open (not collapsed), after done â†’ collapsed
 		const collapsedClass = isStreaming ? '' : 'collapsed';
 		const streamingClass = isStreaming ? 'streaming' : '';
 		const pulseClass = isStreaming ? 'thinking-pulse' : '';
 		const metaText = isStreaming
 			? `${charCount.toLocaleString()} karakter`
-			: `${elapsed}s · ${charCount.toLocaleString()} karakter`;
+			: `${elapsed}s Â· ${charCount.toLocaleString()} karakter`;
 
 		// Preserve collapsed state if user manually toggled
 		const existingBlock = inner.querySelector('.thinking-block');
@@ -2061,7 +2054,7 @@ function updateMessage(id, content, isStreaming = false) {
 				<div class="thinking-summary" onclick="this.parentElement.classList.toggle('collapsed')">
 					<span style="display:flex;align-items:center;gap:7px;">
 						<span class="material-symbols-rounded ${pulseClass}" style="font-size:16px;">psychology</span>
-						<span>${isStreaming ? 'Düşünüyor...' : 'Düşünce Süreci'}</span>
+						<span>${isStreaming ? 'Thinking...' : 'Thinking Process'}</span>
 					</span>
 					<span class="thinking-meta">
 						<span>${metaText}</span>
@@ -2098,7 +2091,7 @@ function updateMessage(id, content, isStreaming = false) {
 		}
 	}
 
-	// ── KaTeX math rendering ──────────────────────────────────────────
+	// â”€â”€ KaTeX math rendering â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 	if (typeof katex !== 'undefined') {
 		// Block math: $$...$$
 		inner.querySelectorAll('p, div, li, td').forEach(el => {
@@ -2118,7 +2111,7 @@ function updateMessage(id, content, isStreaming = false) {
 	chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-// ─── TOOL RENDER ──────────────────────────────────────────────────────────
+// â”€â”€â”€ TOOL RENDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderTool(toolCallId, name, args, status, result) {
 	let el = document.getElementById('tool-' + toolCallId);
 	if (!el) {
@@ -2130,7 +2123,7 @@ function renderTool(toolCallId, name, args, status, result) {
 	el.className = `msg-row assistant tool-enter`;
 
 	const statusClass = status === 'running' ? 'running' : (status === 'error' ? 'error' : 'done');
-	const statusLabel = status === 'running' ? 'Çalışıyor' : (status === 'error' ? 'Hata' : 'Tamamlandı');
+	const statusLabel = status === 'running' ? 'Running' : (status === 'error' ? 'Error' : 'Completed');
 	const fmtArgs = formatToolValue(args);
 	const fmtResult = formatToolValue(result);
 	const hasBody = fmtArgs || fmtResult;
@@ -2147,7 +2140,7 @@ function renderTool(toolCallId, name, args, status, result) {
 			${hasBody ? `
 			<div class="tool-body ${status !== 'running' ? 'hidden' : ''}">
 				${fmtArgs ? `<div class="tool-section"><div class="tool-section-label">Girdi</div><pre>${escapeHtml(fmtArgs)}</pre></div>` : ''}
-				${fmtResult ? `<div class="tool-section result"><div class="tool-section-label">Çıktı</div><pre>${escapeHtml(fmtResult)}</pre></div>` : ''}
+				${fmtResult ? `<div class="tool-section result"><div class="tool-section-label">Ã‡Ä±ktÄ±</div><pre>${escapeHtml(fmtResult)}</pre></div>` : ''}
 			</div>` : ''}
 		</div>`;
 }
@@ -2161,7 +2154,7 @@ function formatToolValue(val) {
 	try { return JSON.stringify(val, null, 2); } catch(e) { return String(val); }
 }
 
-// ─── SEND MESSAGE ─────────────────────────────────────────────────────────
+// â”€â”€â”€ SEND MESSAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 sendBtn.addEventListener('click', sendMessage);
 
 async function sendMessage() {
@@ -2193,11 +2186,11 @@ async function sendMessage() {
 		}
 	} catch(e) {
 		setGeneratingState(false);
-		appendMessage('assistant', 'Bağlantı hatası: sunucuya ulaşılamıyor.');
+		appendMessage('assistant', 'BaÄŸlantÄ± hatasÄ±: sunucuya ulaÅŸÄ±lamÄ±yor.');
 	}
 }
 
-// ─── INTERRUPT ────────────────────────────────────────────────────────────
+// â”€â”€â”€ INTERRUPT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function interruptGeneration() {
 	try {
 		await fetch('/api/interrupt', { method: 'POST' });
@@ -2206,7 +2199,7 @@ async function interruptGeneration() {
 	} catch(e) {}
 }
 
-// ─── NEW CHAT ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ NEW CHAT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function newChat() {
 	currentAssistantMsgId = null;
 	chatInner.innerHTML = `
@@ -2214,31 +2207,25 @@ function newChat() {
 			<div class="empty-orb" style="background:none;border:none;">
 				<img src="/assets/Mooncodewhitelogo.png" alt="MoonCode" style="width:68px;height:68px;border-radius:18px;object-fit:cover;filter:drop-shadow(0 0 20px rgba(108,143,255,0.4));" onerror="this.style.display='none'">
 			</div>
-			<h2 style="font-size:1.3rem;font-weight:600;margin:0 0 8px;">Bugün nasıl yardımcı olabilirim?</h2>
-			<p style="color:var(--muted);font-size:0.85rem;margin:0 0 28px;max-width:400px;line-height:1.6;">Kodunuzu yazın, hata ayıklayın, refactor yapın veya sıfırdan proje başlatın.</p>
+			<h2 style="font-size:1.3rem;font-weight:600;margin:0 0 8px;">How can I help you today?</h2>
+			<p style="color:var(--muted);font-size:0.85rem;margin:0 0 28px;max-width:400px;line-height:1.6;">Write code, debug, refactor, or start a project from scratch.</p>
 			<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-				<button onclick="insertPrompt('Kodumu incele ve iyileştirme öner')" class="badge-btn" style="padding:8px 14px;border-radius:10px;">
-					<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent);">code_blocks</span>
-					Kod incele
-				</button>
+				<button onclick="insertPrompt('Kodumu incele ve iyileÅŸtirme Ã¶ner')" class="badge-btn" style="padding:8px 14px;border-radius:10px;">
+					<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent);">code_blocks</span>Code Review</button>
 				<button onclick="insertPrompt('/build')" class="badge-btn" style="padding:8px 14px;border-radius:10px;">
-					<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent2);">construction</span>
-					Derle
-				</button>
+					<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent2);">construction</span>Build</button>
 				<button onclick="insertPrompt('/test')" class="badge-btn" style="padding:8px 14px;border-radius:10px;">
 					<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent);">science</span>
-					Test çalıştır
+					Test Ã§alÄ±ÅŸtÄ±r
 				</button>
 				<button onclick="insertPrompt('/review')" class="badge-btn" style="padding:8px 14px;border-radius:10px;">
-					<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent2);">rate_review</span>
-					Kod review
-				</button>
+					<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent2);">rate_review</span>Code Review</button>
 			</div>
 		</div>`;
 	closeModal('cmd-palette');
 }
 
-// ─── LOAD MODELS ──────────────────────────────────────────────────────────
+// â”€â”€â”€ LOAD MODELS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const providerColors = {
 	google: '#4285f4', anthropic: '#d4956a', openai: '#10a37f',
 	mistral: '#ff7000', cohere: '#39d353', default: '#6c8fff'
@@ -2246,11 +2233,11 @@ const providerColors = {
 
 async function loadModels() {
 	const list = document.getElementById('model-list');
-	list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:0.82rem;">Yükleniyor...</div>';
+	list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:0.82rem;">Ã¼kleniyor...</div>';
 	try {
 		const res = await fetch('/api/models');
 		const models = await res.json();
-		if (!models.length) { list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">Model bulunamadı</div>'; return; }
+		if (!models.length) { list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">Model bulunamadÄ±</div>'; return; }
 		
 		const grouped = {};
 		models.forEach(m => { if (!grouped[m.provider]) grouped[m.provider] = []; grouped[m.provider].push(m); });
@@ -2270,7 +2257,7 @@ async function loadModels() {
 					</div>`).join('')}
 			</div>`).join('');
 	} catch(e) {
-		list.innerHTML = '<div style="text-align:center;padding:20px;color:#ff6464;font-size:0.82rem;">Modeller yüklenemedi</div>';
+		list.innerHTML = '<div style="text-align:center;padding:20px;color:#ff6464;font-size:0.82rem;">Modeller yÃ¼klenemedi</div>';
 	}
 }
 
@@ -2287,8 +2274,8 @@ async function setModel(provider, id) {
 	toast(`Model: ${name}`, 'success');
 }
 
-// ─── REASONING ────────────────────────────────────────────────────────────
-const reasoningLabels = { none: 'Kapalı', low: 'Düşük', medium: 'Orta', high: 'Yüksek' };
+// â”€â”€â”€ REASONING â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const reasoningLabels = { none: 'Off', low: 'Low', medium: 'Medium', high: 'High' };
 
 async function setReasoning(level) {
 	await fetch('/api/set-thinking', {
@@ -2296,14 +2283,14 @@ async function setReasoning(level) {
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ level })
 	});
-	document.getElementById('reasoning-display').textContent = 'Düşünme: ' + (reasoningLabels[level] || level);
+	document.getElementById('reasoning-display').textContent = 'Thinking: ' + (reasoningLabels[level] || level);
 	['none','low','medium','high'].forEach(l => document.getElementById('r-'+l)?.classList.remove('selected'));
 	document.getElementById('r-'+level)?.classList.add('selected');
 	closeModal('reasoningModal');
-	toast(`Düşünme seviyesi: ${reasoningLabels[level]}`, 'info');
+	toast(`Thinking level: ${reasoningLabels[level]}`, 'info');
 }
 
-// ─── SETTINGS TABS ────────────────────────────────────────────────────────
+// â”€â”€â”€ SETTINGS TABS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function switchSettingsTab(name, btn) {
 	document.querySelectorAll('.stab').forEach(t => t.classList.remove('active'));
 	document.querySelectorAll('.stab-panel').forEach(p => p.classList.remove('active'));
@@ -2311,7 +2298,7 @@ function switchSettingsTab(name, btn) {
 	document.getElementById('stab-' + name)?.classList.add('active');
 }
 
-// ─── SETTINGS ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ SETTINGS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function loadSettings() {
 	try {
 		const res = await fetch('/api/settings');
@@ -2334,7 +2321,7 @@ async function loadSettings() {
 		const toolEl = document.getElementById('set-tool-compaction');
 		if (toolEl) toolEl.checked = !!s.enableToolBasedCompaction;
 
-		// Security tab — permission radio
+		// Security tab â€” permission radio
 		const permLevel = s.permissionLevel || 'ask';
 		document.querySelectorAll('.perm-row').forEach(row => {
 			const val = row.dataset.val;
@@ -2359,7 +2346,7 @@ async function loadSettings() {
 		});
 
 	} catch(e) {
-		toast('Ayarlar yüklenemedi', 'error');
+		toast('Failed to load settings', 'error');
 	}
 }
 
@@ -2385,7 +2372,7 @@ async function saveSettings() {
 	}
 }
 
-// ─── USER MENU ────────────────────────────────────────────────────────────
+// â”€â”€â”€ USER MENU â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let userMenuOpen = false;
 function toggleUserMenu() {
 	const dd = document.getElementById('user-dropdown');
@@ -2414,19 +2401,17 @@ async function updateUserUI() {
 		<div style="padding:16px 12px;text-align:center;border-bottom:1px solid var(--border);margin-bottom:6px;">
 			<span class="material-symbols-rounded" style="font-size:40px;color:var(--accent);opacity:0.6;">person</span>
 			<div style="font-size:0.85rem;font-weight:600;margin-top:8px;">Mooncode</div>
-			<div style="font-size:0.72rem;color:var(--muted);margin-top:2px;">Yerel oturum</div>
+			<div style="font-size:0.72rem;color:var(--muted);margin-top:2px;">Local Session</div>
 		</div>
 		<div class="sidebar-item" onclick="openModal('settingsModal')" style="gap:10px;">
-			<span class="material-symbols-rounded" style="font-size:16px;">settings</span>
-			Ayarlar
-		</div>
+			<span class="material-symbols-rounded" style="font-size:16px;">settings</span>Settings</div>
 		<div class="sidebar-item" onclick="openModal('exportModal')" style="gap:10px;">
 			<span class="material-symbols-rounded" style="font-size:16px;">download</span>
-			Oturumu Dışa Aktar
+			Export Session
 		</div>
 		<div class="sidebar-item" onclick="openModal('bridgeModal')" style="gap:10px;">
 			<span class="material-symbols-rounded" style="font-size:16px;">cable</span>
-			Tarayıcı Köprüsü
+			Browser Bridge
 		</div>
 		<div style="padding:8px 12px;margin-top:4px;border-top:1px solid var(--border);">
 			<div id="user-dropdown-cwd" style="font-size:0.68rem;color:var(--muted);font-family:'JetBrains Mono',monospace;word-break:break-all;"></div>
@@ -2466,19 +2451,17 @@ async function updateUserUI() {
 				</div>
 				<div class="sidebar-item" onclick="handleAuthAction()" style="gap:10px;">
 					<span class="material-symbols-rounded" style="font-size:16px;">account_circle</span>
-					Hesabı Yönet
+					Manage Account
 				</div>
 				<div class="sidebar-item" onclick="openModal('settingsModal')" style="gap:10px;">
-					<span class="material-symbols-rounded" style="font-size:16px;">settings</span>
-					Ayarlar
-				</div>
+					<span class="material-symbols-rounded" style="font-size:16px;">settings</span>Settings</div>
 				<div class="sidebar-item" onclick="openModal('exportModal')" style="gap:10px;">
 					<span class="material-symbols-rounded" style="font-size:16px;">download</span>
-					Dışa Aktar
+					Export
 				</div>
 				<div class="sidebar-item" style="color:#ff6464;gap:10px;" onclick="handleAuthAction()">
 					<span class="material-symbols-rounded" style="font-size:16px;">logout</span>
-					Çıkış Yap
+					Log Out
 				</div>`);
 		}
 	} catch(e) {
@@ -2486,14 +2469,14 @@ async function updateUserUI() {
 	}
 }
 
-// ─── CODE ACTIONS ─────────────────────────────────────────────────────────
+// â”€â”€â”€ CODE ACTIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function copyCode(btn) {
 	const pre = btn.closest('.code-block').querySelector('pre');
 	if (!pre) return;
-	navigator.clipboard.writeText(pre.textContent.trim());
+	if (navigator.clipboard) { navigator.clipboard.writeText(pre.textContent.trim()); } else { const ta = document.createElement('textarea'); ta.value = pre.textContent.trim(); document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); }
 	const icon = btn.querySelector('.material-symbols-rounded');
 	if (icon) { icon.textContent = 'check'; setTimeout(() => icon.textContent = 'content_copy', 2000); }
-	toast('Kopyalandı', 'success', 1500);
+	toast('Copied', 'success', 1500);
 }
 
 function downloadCode(btn, lang) {
@@ -2505,26 +2488,45 @@ function downloadCode(btn, lang) {
 	const url = URL.createObjectURL(blob);
 	const a = document.createElement('a'); a.href = url; a.download = `code.${ext}`; a.click();
 	URL.revokeObjectURL(url);
-	toast('İndirildi', 'success', 1500);
+	toast('Downloaded', 'success', 1500);
 }
 
 function copyText(text) {
-	navigator.clipboard.writeText(text);
-	toast('Kopyalandı', 'success', 1500);
+	if (navigator.clipboard) {
+		navigator.clipboard.writeText(text);
+		toast('Copied', 'success', 1500);
+	} else {
+		const ta = document.createElement('textarea');
+		ta.value = text;
+		document.body.appendChild(ta);
+		ta.select();
+		document.execCommand('copy');
+		document.body.removeChild(ta);
+		toast('Copied', 'success', 1500);
+	}
 }
 
 function shareMsg(id) {
 	const el = document.getElementById('inner-' + id);
 	if (!el) return;
 	if (navigator.share) navigator.share({ text: el.innerText });
-	else { navigator.clipboard.writeText(el.innerText); toast('Panoya kopyalandı', 'info'); }
+	else { navigator.clipboard.writeText(el.innerText); toast('Copied to clipboard', 'info'); }
 }
 
-function likeMsg(id, positive) {
-	toast(positive ? 'Geri bildirim için teşekkürler!' : 'Geri bildirim alındı', 'info');
+async function likeMsg(id, positive) {
+	try {
+		await fetch('/api/history/like', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ id, positive })
+		});
+		toast(positive ? 'Thanks for the feedback! (Learned)' : 'Feedback received', 'info');
+	} catch(e) {
+		toast('Failed to save feedback.', 'error');
+	}
 }
 
-// ─── HISTORY ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ HISTOR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function loadHistory() {
 	try {
 		const res = await fetch('/api/history');
@@ -2546,7 +2548,7 @@ async function loadHistory() {
 	} catch(e) {}
 }
 
-// ─── INITIAL STATUS ───────────────────────────────────────────────────────
+// â”€â”€â”€ INITIAL STATUS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function checkInitialStatus() {
 	try {
 		const res = await fetch('/api/status');
@@ -2564,18 +2566,18 @@ async function checkInitialStatus() {
 	} catch(e) {}
 }
 
-// ─── INIT SETTINGS ────────────────────────────────────────────────────────
+// â”€â”€â”€ INIT SETTINGS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function initSettings() {
 	try {
 		const res = await fetch('/api/settings');
 		const s = await res.json();
 		if (s.thinkingLevel) {
-			document.getElementById('reasoning-display').textContent = 'Düşünme: ' + (reasoningLabels[s.thinkingLevel] || s.thinkingLevel);
+			document.getElementById('reasoning-display').textContent = 'Thinking: ' + (reasoningLabels[s.thinkingLevel] || s.thinkingLevel);
 		}
 	} catch(e) {}
 }
 
-// ─── FETCH COMMANDS ───────────────────────────────────────────────────────
+// â”€â”€â”€ FETCH COMMANDS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function fetchCommands() {
 	try {
 		const res = await fetch('/api/commands');
@@ -2583,7 +2585,7 @@ async function fetchCommands() {
 	} catch(e) {}
 }
 
-// ─── SSE SETUP ────────────────────────────────────────────────────────────
+// â”€â”€â”€ SSE SETUP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const es = new EventSource('/events');
 es.onmessage = (e) => {
 	try {
@@ -2655,7 +2657,7 @@ es.onmessage = (e) => {
 	}
 }
 
-// ─── ESCAPE HTML ──────────────────────────────────────────────────────────
+// â”€â”€â”€ ESCAPE HTML â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function escapeHtml(str) {
 	return String(str)
 		.replace(/&/g,'&amp;')
@@ -2665,7 +2667,7 @@ function escapeHtml(str) {
 		.replace(/'/g,'&#39;');
 }
 
-// ─── ESCAPE JS STRING FOR TEMPLATE LITERALS ──────────────────────────────
+// â”€â”€â”€ ESCAPE JS STRING FOR TEMPLATE LITERALS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function escapeJsString(str) {
 	return str
 		.replace(/\\/g, '\\\\')
@@ -2673,7 +2675,7 @@ function escapeJsString(str) {
 		.replace(/\$/g, '\\$');
 }
 
-// ─── SYNC MESSAGE IDS WITH BACKEND ────────────────────────────────────────
+// â”€â”€â”€ SNC MESSAGE IDS WITH BACKEND â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function syncMessageIds() {
 	try {
 		const res = await fetch('/api/history');
@@ -2699,7 +2701,7 @@ async function syncMessageIds() {
 	}
 }
 
-// ─── UPDATE PINNED BAR ──────────────────────────────────────────────────
+// â”€â”€â”€ UPDATE PINNED BAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function updatePinnedBar() {
 	const bar = document.getElementById('pinned-bar');
 	const list = document.getElementById('pinned-list');
@@ -2732,7 +2734,7 @@ function updatePinnedBar() {
 	`).join('');
 }
 
-// ─── SCROLL TO MESSAGE ───────────────────────────────────────────────────
+// â”€â”€â”€ SCROLL TO MESSAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function scrollToMessage(id) {
 	const el = document.getElementById(id);
 	if (!el) return;
@@ -2741,7 +2743,7 @@ function scrollToMessage(id) {
 	setTimeout(() => el.classList.remove('pulse-highlight'), 2000);
 }
 
-// ─── TOGGLE PIN STATE ────────────────────────────────────────────────────
+// â”€â”€â”€ TOGGLE PIN STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function togglePin(id) {
 	const row = document.getElementById(id);
 	if (!row) return;
@@ -2766,20 +2768,20 @@ async function togglePin(id) {
 				pinBtn.style.color = '';
 				pinBtn.style.fontVariationSettings = '';
 				row.classList.remove('pinned-message');
-				toast('Sabitleme kaldırıldı', 'info');
+				toast('Unpinned', 'info');
 			}
 			updatePinnedBar();
 		}
 	} catch(e) {
-		toast('İşlem başarısız oldu', 'error');
+		toast('Operation failed', 'error');
 	}
 }
 
-// ─── DELETE MESSAGE ──────────────────────────────────────────────────────
+// â”€â”€â”€ DELETE MESSAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function deleteMsg(id) {
 	const row = document.getElementById(id);
 	if (!row) return;
-	if (!confirm('Bu mesajı silmek istediğinize emin misiniz?')) return;
+	if (!confirm('Bu mesajÄ± silmek istediÄŸinize emin misiniz?')) return;
 
 	try {
 		const res = await fetch('/api/history/delete', {
@@ -2793,7 +2795,7 @@ async function deleteMsg(id) {
 				nextRow.remove();
 			}
 			row.remove();
-			toast('Mesaj silindi', 'success');
+			toast('Message deleted', 'success');
 			updatePinnedBar();
 			
 			if (chatInner.children.length === 0 || (chatInner.children.length === 1 && chatInner.children[0].id === 'global-indicator')) {
@@ -2805,7 +2807,7 @@ async function deleteMsg(id) {
 	}
 }
 
-// ─── EDIT MESSAGE ────────────────────────────────────────────────────────
+// â”€â”€â”€ EDIT MESSAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function editMsg(id) {
 	const row = document.getElementById(id);
 	if (!row) return;
@@ -2818,9 +2820,8 @@ function editMsg(id) {
 
 	bubble.innerHTML = `
 		<textarea class="form-input" style="width:100%;background:var(--bg2);color:var(--fg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:0.875rem;resize:vertical;" rows="2"></textarea>
-		<div style="display:flex;justify-content:flex-end;gap:6px;margin-top:6px;">
-			<button class="btn btn-ghost" style="padding:4px 8px;font-size:0.75rem;" onclick="cancelEdit('${id}', \`${escapeJsString(originalText)}\`)">İptal</button>
-			<button class="btn btn-primary" style="padding:4px 8px;font-size:0.75rem;" onclick="saveEdit('${id}')">Kaydet</button>
+		<div style="display:flex;justify-content:flex-end;gap:6px;margin-top:6px;">Cancel</button>
+			<button class="btn btn-primary" style="padding:4px 8px;font-size:0.75rem;" onclick="saveEdit('${id}')">Save</button>
 		</div>
 	`;
 	const textarea = bubble.querySelector('textarea');
@@ -2854,15 +2855,15 @@ async function saveEdit(id) {
 		});
 		if (res.ok) {
 			bubble.innerHTML = escapeHtml(newText).replace(/\n/g, '<br>');
-			toast('Mesaj güncellendi', 'success');
+			toast('Message updated', 'success');
 			updatePinnedBar();
 		}
 	} catch(e) {
-		toast('Güncelleme başarısız oldu', 'error');
+		toast('Update failed', 'error');
 	}
 }
 
-// ─── DIRECTORY SELECTION ──────────────────────────────────────────────────
+// â”€â”€â”€ DIRECTOR SELECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function selectProjectDirectory() {
 	try {
 		const res = await fetch('/api/project/select-directory', { method: 'POST' });
@@ -2870,7 +2871,7 @@ async function selectProjectDirectory() {
 		let selectedPath = data.path;
 		
 		if (!selectedPath) {
-			selectedPath = prompt('Proje klasörünün tam yolunu girin:');
+			selectedPath = prompt('Enter the full path of the project folder:');
 		}
 		
 		if (!selectedPath || !selectedPath.trim()) return;
@@ -2883,17 +2884,17 @@ async function selectProjectDirectory() {
 		
 		if (createRes.ok) {
 			newChat();
-			toast('Proje dizini değiştirildi', 'success');
+			toast('Project directory changed', 'success');
 			checkInitialStatus();
 		} else {
-			toast('Dizin değiştirilemedi', 'error');
+			toast('Could not change directory', 'error');
 		}
 	} catch(e) {
-		toast('Dizin değiştirme hatası', 'error');
+		toast('Directory change error', 'error');
 	}
 }
 
-// ─── RUN CODE ─────────────────────────────────────────────────────────────
+// â”€â”€â”€ RUN CODE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function runCode(btn) {
 	const codeBlock = btn.closest('.code-block');
 	if (!codeBlock) return;
@@ -2901,10 +2902,10 @@ function runCode(btn) {
 	const code = pre ? pre.textContent.trim() : '';
 
 	navigator.clipboard.writeText(code);
-	toast('Kod panoya kopyalandı — terminale yapıştırın', 'info');
+	toast('Code copied to clipboard - paste into terminal', 'info');
 }
 
-// ─── BROWSER BRIDGE ───────────────────────────────────────────────────────
+// â”€â”€â”€ BROWSER BRIDGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function refreshBridgeStatus() {
 	try {
 		const res = await fetch('/api/browser/status');
@@ -2918,23 +2919,23 @@ async function refreshBridgeStatus() {
 		const connInfo = document.getElementById('bridge-connected-info');
 
 		if (pill) pill.className = 'bridge-pill' + (connected ? ' connected' : '');
-		if (label) label.textContent = connected ? 'Köprü Bağlı' : 'Köprü';
+		if (label) label.textContent = connected ? 'Bridge Connected' : 'Bridge';
 		if (statusText) statusText.textContent = connected
-			? `Bağlı — ${data.clients} tarayıcı istemcisi`
-			: data.running ? 'Sunucu çalışıyor, bağlı istemci yok' : 'Köprü sunucusu kapalı';
+			? `Connected — ${data.clients} browser client(s)`
+			: data.running ? 'Server running, no connected client' : 'Bridge server closed';
 		if (statusBadge) {
-			statusBadge.textContent = connected ? 'BAĞLI' : (data.running ? 'ÇALIŞIYOR' : 'KAPALI');
+			statusBadge.textContent = connected ? 'CONNECTED' : (data.running ? 'RUNNING' : 'CLOSED');
 			statusBadge.style.color = connected ? '#4ade80' : (data.running ? 'var(--accent)' : 'var(--muted)');
 			statusBadge.style.borderColor = connected ? '#4ade8040' : 'var(--border)';
 		}
 		if (connInfo) connInfo.classList.toggle('hidden', !connected);
 	} catch(e) {
 		const label = document.getElementById('bridge-label');
-		if (label) label.textContent = 'Köprü';
+		if (label) label.textContent = 'Bridge';
 	}
 }
 
-// ─── SESSION FORK ─────────────────────────────────────────────────────────
+// â”€â”€â”€ SESSION FORK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function forkSession() {
 	const btn = document.querySelector('[onclick="forkSession()"]');
 	if (btn) btn.disabled = true;
@@ -2951,23 +2952,23 @@ async function forkSession() {
 		});
 		const data = await res.json();
 		if (data.success) {
-			toast('Oturum dallandırıldı — yeni dal aktif', 'success');
+			toast('Session forked — new branch active', 'success');
 			loadHistory();
 		} else {
-			toast('Fork başarısız oldu', 'error');
+			toast('Fork failed', 'error');
 		}
 	} catch(e) {
-		toast('Fork hatası', 'error');
+		toast('Fork error', 'error');
 	} finally {
 		if (btn) btn.disabled = false;
 	}
 }
 
-// ─── SESSION EXPORT ───────────────────────────────────────────────────────
+// â”€â”€â”€ SESSION EXPORT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function exportSession(format) {
 	try {
 		const res = await fetch(`/api/session/export?format=${format}`);
-		if (!res.ok) { toast('Dışa aktarma başarısız', 'error'); return; }
+		if (!res.ok) { toast('Export failed', 'error'); return; }
 		const blob = await res.blob();
 		const ext = format === 'html' ? 'html' : 'jsonl';
 		const url = URL.createObjectURL(blob);
@@ -2977,13 +2978,13 @@ async function exportSession(format) {
 		a.click();
 		URL.revokeObjectURL(url);
 		closeModal('exportModal');
-		toast(`Oturum ${ext.toUpperCase()} olarak indirildi`, 'success');
+		toast(`Session exported as ${ext.toUpperCase()}`, 'success');
 	} catch(e) {
-		toast('Dışa aktarma hatası', 'error');
+		toast('Export error', 'error');
 	}
 }
 
-// ─── SESSION IMPORT ───────────────────────────────────────────────────────
+// â”€â”€â”€ SESSION IMPORT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function importSessionData(content) {
 	try {
 		const res = await fetch('/api/session/import', {
@@ -2994,13 +2995,13 @@ async function importSessionData(content) {
 		const data = await res.json();
 		if (data.success) {
 			closeModal('exportModal');
-			toast('Oturum başarıyla içe aktarıldı', 'success');
+			toast('Session successfully imported', 'success');
 			loadHistory();
 		} else {
-			toast('İçe aktarma başarısız oldu', 'error');
+			toast('Import failed', 'error');
 		}
 	} catch(e) {
-		toast('İçe aktarma hatası', 'error');
+toast('Import error', 'error');
 	}
 }
 
@@ -3016,13 +3017,13 @@ function handleImportDrop(event) {
 	event.preventDefault();
 	document.getElementById('drop-zone')?.classList.remove('drag-over');
 	const file = event.dataTransfer.files[0];
-	if (!file || !file.name.endsWith('.jsonl')) { toast('Sadece .jsonl dosyaları desteklenir', 'error'); return; }
+	if (!file || !file.name.endsWith('.jsonl')) { toast('Only .jsonl files are supported', 'error'); return; }
 	const reader = new FileReader();
 	reader.onload = (e) => importSessionData(e.target.result);
 	reader.readAsText(file);
 }
 
-// ─── SESSION SHARE ────────────────────────────────────────────────────────
+// â”€â”€â”€ SESSION SHARE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function shareSession() {
 	const btn = document.getElementById('share-btn');
 	if (btn) { btn.disabled = true; btn.querySelector('.material-symbols-rounded').textContent = 'hourglass_top'; }
@@ -3034,10 +3035,10 @@ async function shareSession() {
 			document.getElementById('share-open-link').href = data.url;
 			openModal('shareModal');
 		} else {
-			toast('Paylaşım başarısız: ' + (data.error || 'GitHub token gerekli'), 'error');
+			toast('Share failed: ' + (data.error || 'GitHub token required'), 'error');
 		}
 	} catch(e) {
-		toast('Paylaşım hatası', 'error');
+		toast('Share error', 'error');
 	} finally {
 		if (btn) { btn.disabled = false; btn.querySelector('.material-symbols-rounded').textContent = 'share'; }
 	}
@@ -3047,13 +3048,13 @@ function copyShareUrl() {
 	const input = document.getElementById('share-url-input');
 	if (!input) return;
 	navigator.clipboard.writeText(input.value);
-	toast('Bağlantı kopyalandı', 'success');
+	toast('Link copied', 'success');
 }
 
-// ─── PERIODIC BRIDGE POLL ─────────────────────────────────────────────────
+// â”€â”€â”€ PERIODIC BRIDGE POLL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 setInterval(refreshBridgeStatus, 15000);
 
-// ─── INIT ─────────────────────────────────────────────────────────────────
+// â”€â”€â”€ INIT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 checkInitialStatus();
 loadHistory();
 updateUserUI();
@@ -3065,5 +3066,59 @@ setInterval(updateUserUI, 8000);
 // Sidebar starts open on wide screens
 if (window.innerWidth < 768) toggleSidebar();
 </script>
-</body>
+<!-- WELCOME MODAL -->
+<div id="welcomeModal" class="modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);backdrop-filter:blur(10px);z-index:9999;align-items:center;justify-content:center;opacity:0;transition:opacity 0.4s ease;">
+	<div style="background:linear-gradient(145deg, var(--surface), var(--surface2));border:1px solid var(--border);border-radius:24px;padding:40px;width:90%;max-width:500px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,0.5);transform:translate(20px);transition:transform 0.4s ease;" id="welcomeModalContent">
+		<div style="width:80px;height:80px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 0 30px var(--accent);">
+			<span class="material-symbols-rounded" style="font-size:40px;color:white;">auto_awesome</span>
+		</div>
+		<h1 style="font-family:'Inter', sans-serif;font-size:1.8rem;margin-bottom:10px;color:var(--fg);">Welcome to MoonCode</h1>
+		<p style="color:var(--muted);font-size:1rem;margin-bottom:30px;line-height:1.5;">Meet your advanced AI coding assistant.<br>Here is what you need to know:</p>
+		
+		<div style="text-align:left;margin-bottom:30px;display:flex;flex-direction:column;gap:15px;">
+			<div style="display:flex;align-items:center;gap:15px;background:var(--bg2);padding:15px;border-radius:12px;border:1px solid var(--border);">
+				<span class="material-symbols-rounded" style="color:#6C8FFF;">history_edu</span>
+				<div><strong style="display:block;color:var(--fg);font-size:0.95rem;">Memory & Learning</strong><span style="font-size:0.85rem;color:var(--muted);">Likes teach it your coding style so it adapts to you.</span></div>
+			</div>
+			<div style="display:flex;align-items:center;gap:15px;background:var(--bg2);padding:15px;border-radius:12px;border:1px solid var(--border);">
+				<span class="material-symbols-rounded" style="color:#4CAF50;">api</span>
+				<div><strong style="display:block;color:var(--fg);font-size:0.95rem;">Powerful Providers</strong><span style="font-size:0.85rem;color:var(--muted);">Ollama, GitLab Duo, Anthropic, and more... Built-in!</span></div>
+			</div>
+			<div style="display:flex;align-items:center;gap:15px;background:var(--bg2);padding:15px;border-radius:12px;border:1px solid var(--border);">
+				<span class="material-symbols-rounded" style="color:#FF9800;">keyboard_command_key</span>
+				<div><strong style="display:block;color:var(--fg);font-size:0.95rem;">Commands</strong><span style="font-size:0.85rem;color:var(--muted);">Instantly manage projects with /build, /lint, /test.</span></div>
+			</div>
+		</div>
+		
+		<button onclick="closeWelcomeModal()" class="btn btn-primary" style="width:100%;padding:14px;border-radius:12px;font-size:1.1rem;font-weight:600;letter-spacing:0.5px;">Get Started</button>
+	</div>
+</div>
+<script>
+	function showWelcomeModal() {
+		const modal = document.getElementById('welcomeModal');
+		const content = document.getElementById('welcomeModalContent');
+		modal.style.display = 'flex';
+		void modal.offsetWidth;
+		modal.style.opacity = '1';
+		content.style.transform = 'translate(0)';
+	}
+	function closeWelcomeModal() {
+		const modal = document.getElementById('welcomeModal');
+		const content = document.getElementById('welcomeModalContent');
+		modal.style.opacity = '0';
+		content.style.transform = 'translate(20px)';
+		setTimeout(() => { modal.style.display = 'none'; }, 400);
+	}
+	window.addEventListener('DOMContentLoaded', () => {
+		if (!localStorage.getItem('mooncode_welcomed')) {
+			localStorage.setItem('mooncode_welcomed', 'true');
+			setTimeout(showWelcomeModal, 500);
+		}
+	});
+</script></body>
 </html>
+
+
+
+
+

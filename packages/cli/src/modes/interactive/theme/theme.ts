@@ -538,18 +538,18 @@ function parseThemeJson(label: string, json: unknown): ThemeJson {
 			otherErrors.push(`  - ${path}: ${error.message}`);
 		}
 
-		let errorMessage = `Geçersiz tema "${label}":\n`;
+		let errorMessage = `Invalid theme "${label}":\n`;
 		if (missingColors.size > 0) {
-			errorMessage += "\nEksik gerekli renk tokenları:\n";
+			errorMessage += "\nMissing required color tokens:\n";
 			errorMessage += Array.from(missingColors)
 				.sort()
 				.map((color) => `  - ${color}`)
 				.join("\n");
-			errorMessage += '\n\nLütfen bu renkleri temanızın "colors" nesnesine ekleyin.';
-			errorMessage += "\nReferans değerler için yerleşik temalara (dark.json, light.json) bakın.";
+			errorMessage += '\n\nPlease add these colors to your theme\'s "colors" object.';
+			errorMessage += "\nSee built-in themes (dark.json, light.json) for reference values.";
 		}
 		if (otherErrors.length > 0) {
-			errorMessage += `\n\nDiğer hatalar:\n${otherErrors.join("\n")}`;
+			errorMessage += `\n\nOther errors:\n${otherErrors.join("\n")}`;
 		}
 
 		throw new Error(errorMessage);
@@ -1110,7 +1110,7 @@ export function getMarkdownTheme(): MarkdownTheme {
 		codeBlock: (text: string) => theme.fg("mdCodeBlock", text),
 		codeBlockBorder: (text: string) => {
 			if (text.startsWith("```bash") || text.startsWith("```sh")) {
-				return theme.fg("mdCodeBlockBorder", text) + theme.fg("dim", "  [Çalıştır: ctrl+e]");
+				return theme.fg("mdCodeBlockBorder", text) + theme.fg("dim", "  [Run: ctrl+e]");
 			}
 			return theme.fg("mdCodeBlockBorder", text);
 		},

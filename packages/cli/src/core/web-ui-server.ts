@@ -343,7 +343,7 @@ if (installButton) {
     try {
       await navigator.clipboard.writeText(code.trim());
       const old = installButton.textContent;
-      installButton.textContent = 'Copyndı';
+      installButton.textContent = 'Copied';
       setTimeout(() => { installButton.textContent = old; }, 1300);
     } catch {
       installButton.textContent = 'Seçip kopyala';
@@ -1371,7 +1371,7 @@ function renderSessions() {
   });
 
   if (filtered.length === 0) {
-    listEl.innerHTML = '<p class="muted pad" style="font-size:13px; text-align:center; padding:32px 16px;">Oturum bulunamadı.</p>';
+    listEl.innerHTML = '<p class="muted pad" style="font-size:13px; text-align:center; padding:32px 16px;">No sessions found.</p>';
     return;
   }
 
@@ -1426,7 +1426,7 @@ async function loadSession(id, isPoll = false) {
             thinkingHtml += \`
               <div class="thinking-card">
                 <div class="thinking-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
-                  <span>💡 Düşünce Zinciri (Genişletmek için tıklayın)</span>
+                  <span>💡 Thought Chain (Click to expand)</span>
                   <span>▼</span>
                 </div>
                 <div class="thinking-content" style="display: none;">\\\${escapeHtml(part.thinking)}</div>
@@ -1438,7 +1438,7 @@ async function loadSession(id, isPoll = false) {
         if (msgHtml.trim() || thinkingHtml.trim()) {
           const wrapperClass = isUser ? "user" : "assistant";
           const avatar = isUser ? "👤" : "🌝";
-          const authorLabel = isUser ? "Kullanıcı" : "MoonCode";
+          const authorLabel = isUser ? "User" : "MoonCode";
 
           html += \`
             <div class="msg-wrapper \${wrapperClass}">
@@ -1458,7 +1458,7 @@ async function loadSession(id, isPoll = false) {
           <div class="tool-card">
             <div class="tool-header">
               <span>🛠️ Tool Çağrısı: <b>\\\${escapeHtml(entry.toolName)}</b></span>
-              <span>Aktif</span>
+              <span>Active</span>
             </div>
             <div class="tool-body">
               <pre><code>\\\${escapeHtml(JSON.stringify(entry.input || {}, null, 2))}</code></pre>
@@ -1469,7 +1469,7 @@ async function loadSession(id, isPoll = false) {
         html += \`
           <div class="tool-result-card">
             <div class="tool-result-header">
-              <span>✅ Tool Sonucu</span>
+              <span>✅ Tool Result</span>
             </div>
             <div class="tool-result-body">
               <pre><code>\\\${escapeHtml(textOf(entry.output || entry.result || entry))}</code></pre>
@@ -1484,8 +1484,8 @@ async function loadSession(id, isPoll = false) {
       <div class="messages-content">
         <div class="welcome-screen">
           <span class="moon-mascot">🌝</span>
-          <h1>Oturum Boş</h1>
-          <p>Henüz bu oturumda kaydedilmiş bir mesaj yok. CLI üzerinden konuşma başlattığınızda burada anlık olarak akacaktır.</p>
+          <h1>Session Empty</h1>
+          <p>There are no messages in this session yet. When you start a conversation via CLI, it will flow here in real-time.</p>
         </div>
       </div>
     \`;
@@ -1539,7 +1539,7 @@ $("#btn-unlock-tui").addEventListener("click", async () => {
     await fetch("/api/unlock", { method: "POST" });
     $("#unlock-modal").style.display = "flex";
   } catch (err) {
-    alert("TUI kilidi açma hatası: " + err.message);
+    alert("TUI unlock error: " + err.message);
   }
 });
 
@@ -1561,10 +1561,10 @@ $("#message-form").addEventListener("submit", async (e) => {
     });
     const data = await res.json();
     if (!data.ok) {
-      alert("Gönderim hatası: " + data.error);
+      alert("Send error: " + data.error);
     }
   } catch (err) {
-    alert("Gönderim bağlantı hatası: " + err.message);
+    alert("Send connection error: " + err.message);
   } finally {
     input.disabled = false;
     $("#btn-send").disabled = false;

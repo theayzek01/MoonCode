@@ -3,15 +3,15 @@ import chalk from "chalk";
 
 function getDisplayName(): string {
 	const envName = process.env.MOONCODE_USER_NAME || process.env.USERNAME || process.env.USER || os.userInfo().username;
-	return envName?.trim() || "arkadaş";
+	return envName?.trim() || "friend";
 }
 
 function getGreeting(): string {
 	const hour = new Date().getHours();
-	if (hour >= 5 && hour < 11) return "Günaydın";
-	if (hour >= 11 && hour < 17) return "Tünaydın";
-	if (hour >= 17 && hour < 22) return "İyi akşamlar";
-	return "İyi geceler";
+	if (hour >= 5 && hour < 11) return "Good morning";
+	if (hour >= 11 && hour < 17) return "Good afternoon";
+	if (hour >= 17 && hour < 22) return "Good evening";
+	return "Good night";
 }
 
 export function buildWelcomeMessage(): { text: string } {
@@ -25,7 +25,7 @@ export function buildWelcomeMessage(): { text: string } {
 		blue("                          MOONCODE"),
 		"",
 		bright(`${getGreeting()}, ${getDisplayName()}.`),
-		dim("MoonCode hazır. Düşünüyorum, kontrol ediyorum, kısa info önerileri sunuyorum."),
+		dim("MoonCode is ready. Thinking, checking, offering short info suggestions."),
 		"",
 		bright("Fast coding agent. Clean tools. Quiet output."),
 		bright("Terminal coding agent with MCP, Browser Bridge, and DreamKernel."),

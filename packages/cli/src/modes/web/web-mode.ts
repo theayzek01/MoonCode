@@ -271,7 +271,7 @@ export class WebMode {
 		res.setHeader("Access-Control-Allow-Origin", "*");
 
 		if (method === "GET" && url.pathname === "/") {
-			res.setHeader("Content-Type", "text/html");
+			res.setHeader("Content-Type", "text/html; charset=utf-8");
 			res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
 			res.setHeader("Pragma", "no-cache");
 			res.setHeader("Expires", "0");
