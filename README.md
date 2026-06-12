@@ -1,238 +1,147 @@
 <div align="center">
 
-<img src="https://i.hizliresim.com/q2e03b9.png" width="140" height="140" alt="MoonCode Logo" />
+<img src="https://i.hizliresim.com/q2e03b9.png" width="160" height="160" alt="MoonCode Logo" style="filter: drop-shadow(0px 0px 20px rgba(108,143,255,0.6));" />
 
-<h1>MoonCode v26.3</h1>
-
-<p>
-  <strong>Hem Terminal hem de Tarayıcı üzerinden erişilebilen otonom, hızlı ve zeki kodlama asistanı.</strong>
-</p>
-
-<p>
-  <em>“Ey yükselen yeni kuşak! Gelecek sizindir.”</em><br/>
-  <strong>~ Mustafa Kemal Atatürk</strong>
-</p>
+<h1 style="font-size: 3em; margin-bottom: 0;">MoonCode</h1>
+<strong>Yeni Nesil Otonom Yapay Zeka Kodlama Asistanı (v26.3)</strong>
 
 <br/>
 
-<p>
-  <a href="https://theayzek01.github.io/MoonCode/">
-    <img src="https://img.shields.io/badge/DOCS-LIVE%20SITE-ffffff?style=for-the-badge&labelColor=111111&color=ffffff" alt="Live Docs" />
-  </a>
-  <a href="https://github.com/theayzek01/MoonCode">
-    <img src="https://img.shields.io/badge/GITHUB-MOONCODE-ffffff?style=for-the-badge&logo=github&logoColor=white&labelColor=111111&color=ffffff" alt="GitHub Repo" />
-  </a>
-  <img src="https://img.shields.io/badge/NODE.JS-20%2B-ffffff?style=for-the-badge&logo=node.js&logoColor=white&labelColor=111111&color=ffffff" alt="Node.js 20+" />
-  <img src="https://img.shields.io/badge/LICENSE-MIT-ffffff?style=for-the-badge&labelColor=111111&color=ffffff" alt="MIT License" />
+*“Ey yükselen yeni kuşak! Gelecek sizindir.”*
+**~ Mustafa Kemal Atatürk**
+
+<br/>
+
+<p align="center">
+  <a href="https://theayzek01.github.io/MoonCode/"><img src="https://img.shields.io/badge/📖_Live_Docs-111111?style=for-the-badge&logoColor=white&color=0055ff" alt="Docs"></a>
+  <a href="https://github.com/theayzek01/MoonCode"><img src="https://img.shields.io/badge/💻_GitHub-111111?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></a>
+  <img src="https://img.shields.io/badge/Node.js-20+-111111?style=for-the-badge&logo=node.js&logoColor=white&color=43853d" alt="Node">
+  <img src="https://img.shields.io/badge/License-MIT-111111?style=for-the-badge&color=blueviolet" alt="License">
 </p>
+
+---
+
+![MoonCode Web UI Showcase](https://i.hizliresim.com/q2e03b9.png) <!-- GÖRSEL İÇİN YER TUTUCU, ANCAK LOGO DEĞERLENDİRİLDİ -->
+
+<br/>
 
 </div>
 
----
+## 🌌 MoonCode Nedir?
 
-<div align="center">
+MoonCode, yazılımcılar için özel olarak tasarlanmış, **tam otonom** ve **sınırları aşan** bir kodlama asistanıdır. Kodu sadece yazmakla kalmaz; terminal komutlarını çalıştırır, projenizi derler, hataları bulur, tarayıcınızı açıp test eder ve sizin yerinize commit atar. 
 
-<strong>MoonCode V26.3 Dev Güncellemesi!</strong><br/>
-Artık sadece terminal odaklı bir araç değil! <strong>Yepyeni, modern Web Arayüzü</strong>, <em>Gelişmiş Proje Yönetimi</em>, <em>Dahili Terminal Entegrasyonu</em>, <em>Multi-Model Desteği</em> ve kişiselleştirilebilir temalarla sınırları aşan bir AI iş arkadaşı.
+Devasa projelerde kaybolmaz, kendi hafıza yönetimi ile **Time-Travel Debugging** yapar ve birden fazla yapay zeka modelini (Gemini, Claude, DeepSeek, OpenAI) tek bir platformda ustalıkla yönetir.
 
-<br/>
-<br/>
-
-<a href="https://theayzek01.github.io/MoonCode/">
-  <strong>Canlı Dokümantasyonu Aç</strong>
-</a>
-
-</div>
+> **Sıradan bir chatbot değil; takımınızdaki en yetenekli Senior Developer.**
 
 ---
 
-## MoonCode Nedir?
+## ✨ Neden MoonCode?
 
-MoonCode, geliştiriciler için çalışan **otonom bir kodlama asistanıdır**. İster terminalinden istersen de yepyeni web arayüzünden çalışarak kod yazabilir, hataları düzeltebilir ve terminal komutlarını senin için çalıştırabilir.
+### 🌐 Yepyeni Büyüleyici Web Arayüzü (Web UI)
+Artık terminalin siyah ekranına hapsolmak yok! `mooncode web` yazın ve tamamen yerel çalışan modern web arayüzüne geçin. 
+- Gerçek zamanlı kod önizlemeleri ve Diff (fark) gösterimi
+- Dinamik temalar (Mooncode, Ocean, Dark, Light)
+- Command Palette (`Cmd/Ctrl+K`) ve özel klavye kısayolları
+- Sürükle & Bırak ile anında resim/dosya yükleme
 
-Yeni web arayüzü sayesinde tüm projelerini tek bir ekrandan yönetebilir, ChatGPT veya Claude arayüzüne benzeyen ancak **tamamen senin bilgisayarına entegre** bir deneyim yaşayabilirsin.
+### 🧠 Multi-Model Zekası & Düşünme Kapasitesi (Thinking)
+Favori modelinize bağlı kalmayın. İstediğiniz an ayarlar panelinden modelinizi değiştirin:
+- **Google Gemini 2.5 Pro / 3.1 Pro**
+- **Anthropic Claude 3.7 Sonnet (Thinking)**
+- **OpenAI GPT-4o / o1 / o3-mini**
+- **DeepSeek V3 / R1**
+ve yüzlercesi! *İsterseniz sadece OpenRouter API key'inizi girin ve sonsuz olasılığa kapı açın.*
 
-> Daha otonom.
-> Daha geniş hafıza.
-> Modern ve kullanışlı bir Web Arayüzü.
+### 🚀 Browser Bridge (Tarayıcı Otonomisi)
+MoonCode sadece kodunuzu okumakla kalmaz. Projenizi ayağa kaldırır (ör: `npm run dev`), tarayıcınızı kontrol eder, sayfada gezinir, hataları tespit eder ve hatta sizin için dökümantasyon okuyup kodunuza entegre eder!
+
+### 📦 Gelişmiş Proje & Hafıza (Context) Yönetimi
+Kod tabanınız devasa mı? Sorun değil!
+- **Session Compaction:** Tek tıkla *(Compact tuşu)* MoonCode sohbet geçmişini yüksek sıkıştırma animasyonlarıyla harika bir şekilde özetler ve token limitine asla takılmazsınız.
+- Birden fazla projeyi (Workspace) tek arayüzde yönetme
+- "Chat History" ile geçmiş sohbetleri dallandırma (Fork) ve zaman yolculuğu.
 
 ---
 
-## Kurulum
+## ⚡ Hızlı Başlangıç
 
-### Hızlı Kurulum
+### 1. Kolay Kurulum (Windows için)
 
-Release paketinden kurulum yapmak için:
-
+Sadece saniyeler içinde çalıştırmak için:
 ```bat
 setup.bat install
 ```
 
-### Geliştirici (Kaynak Koddan) Kurulumu
+### 2. Geliştirici Kurulumu (Manuel)
+
+Eğer kaynak koddan inşa etmek isterseniz (Tüm işletim sistemleri):
 
 ```bash
+# Repoyu klonlayın
 git clone https://github.com/theayzek01/MoonCode.git
 cd MoonCode
+
+# Bağımlılıkları yükleyin
 npm install
+
+# Projeyi derleyin
 npm run build
+
+# Modern Web arayüzünü başlatın!
 mooncode web
 ```
 
-*(Not: Tarayıcı arayüzü için `mooncode web` veya terminal arayüzü için `mooncode` komutunu kullanabilirsiniz.)*
+*(Sadece terminalde kalmak isterseniz `mooncode` komutunu çalıştırmanız yeterlidir.)*
 
 ---
 
-## 🔥 Yeni Özellikler (v26.3)
+## 🛠️ Temel Komutlar (Komut Paleti)
 
-<table>
-  <tr>
-    <td align="center" width="72">
-      <img src="https://api.iconify.design/mdi:web.svg?color=white" width="30" height="30" alt="Web UI" />
-    </td>
-    <td>
-      <strong>Modern Web Arayüzü (Web UI)</strong><br/>
-      Terminalin kısıtlamalarından kurtulun! MoonCode artık <code>mooncode web</code> komutuyla yerel bir web sunucusu başlatır ve tüm projelerinizi modern, şık bir arayüzden yönetmenizi sağlar.
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="72">
-      <img src="https://api.iconify.design/mdi:folder-multiple.svg?color=white" width="30" height="30" alt="Projects" />
-    </td>
-    <td>
-      <strong>Gelişmiş Proje Sistemi</strong><br/>
-      Web arayüzünde dilediğiniz klasörü proje olarak ekleyebilir, her proje için ayrı oturumlar (chat geçmişleri) açabilir ve projeler arasında kolayca geçiş yapabilirsiniz.
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="72">
-      <img src="https://api.iconify.design/mdi:brain.svg?color=white" width="30" height="30" alt="Multi-Model" />
-    </td>
-    <td>
-      <strong>Çoklu Yapay Zeka (Multi-Model) Desteği</strong><br/>
-      Kullanıcı ayarlarına gidin ve anında modelinizi değiştirin: <em>Claude 3.7 Sonnet</em>, <em>Gemini 2.5 Pro</em>, <em>DeepSeek V3/R1</em>, <em>GPT-4o</em> ve dahası! Ajanın yetki seviyesini belirleyerek (Admin/Normal/Read-Only) güvenliğinizi sağlayın.
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="72">
-      <img src="https://api.iconify.design/mdi:history.svg?color=white" width="30" height="30" alt="Time Travel" />
-    </td>
-    <td>
-      <strong>Time-Travel Debugging & Hafıza</strong><br/>
-      Eski mesajları silebilir, düzenleyebilir, sabitleyebilirsiniz. MoonCode kod profilinizi zamanla öğrenir ve sizin stilinizde kodlar yazar.
-    </td>
-  </tr>
-</table>
+Arayüzde sohbet kısmına aşağıdaki komutları yazarak (veya `Ctrl+K` basarak) asistanı yönlendirin:
 
-## Temel Özellikler
-
-<table>
-  <tr>
-    <td align="center" width="72">
-      <img src="https://api.iconify.design/mdi:palette.svg?color=white" width="30" height="30" alt="Themes" />
-    </td>
-    <td>
-      <strong>Dinamik Temalar</strong><br/>
-      Karanlık mod yetmedi mi? Ayarlardan <em>Mooncode</em>, <em>Ocean</em>, <em>Dark</em> veya <em>Light</em> temalarından birini seçin, tüm editör renkleri (Highlight.js dahil) anında değişsin.
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="72">
-      <img src="https://api.iconify.design/mdi:bridge.svg?color=white" width="30" height="30" alt="Browser Bridge" />
-    </td>
-    <td>
-      <strong>Browser Bridge & Otonomi</strong><br/>
-      Otonom ajan interneti senin gibi gezer. Chrome eklentisiyle birlikte çalışıp doküman okuyabilir, hata mesajlarını Google'da araştırabilir.
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="72">
-      <img src="https://api.iconify.design/mdi:connection.svg?color=white" width="30" height="30" alt="MCP" />
-    </td>
-    <td>
-      <strong>MCP Desteği</strong><br/>
-      Model Context Protocol (MCP) sayesinde her türlü veritabanına, harici araçlara ve API'lara sorunsuz eklenebilir.
-    </td>
-  </tr>
-</table>
+| Komut | Ne Yapar? |
+| :--- | :--- |
+| `/build` | Projenizdeki derleme (build) komutlarını bularak çalıştırır ve hataları çözer. |
+| `/test` | Test süitini çalıştırır (Jest, Vitest, PyTest vb.) ve kırılan testleri onarır. |
+| `/review` | Son yapılan değişiklikleri (Git diff) okur ve detaylı bir "Code Review" sunar. |
+| `/ship` | Yaptığınız harika işleri toparlar, harika bir commit mesajı yazar ve Push'lar! |
+| `/compact` | Aşırı iyi bir animasyon eşliğinde sohbeti sıkıştırır ve beynini rahatlatır. |
 
 ---
 
-## Temel Komutlar
+## 🎨 Temalar ve Özelleştirme
 
-MoonCode size hem Terminal (TUI) hem de Web (GUI) deneyimi sunar:
-
-<table>
-  <tr>
-    <th align="left">Komut</th>
-    <th align="left">Açıklama</th>
-  </tr>
-  <tr>
-    <td><code>mooncode web</code></td>
-    <td>Yeni ve modern web arayüzünü başlatır (Önerilen). <code>http://localhost:3131</code> üzerinden erişilir.</td>
-  </tr>
-  <tr>
-    <td><code>mooncode</code></td>
-    <td>Klasik TUI arayüzü üzerinden terminalin içinde başlatır.</td>
-  </tr>
-</table>
+MoonCode, karanlık moddan sıkılanlar için birbirinden güzel 4 yerleşik tema sunar. Sağ üst köşedeki ayarlar ikonundan anında değiştirebilirsiniz:
+- **Mooncode (Varsayılan):** Fütüristik uzay mavisi ve mor tonları.
+- **Ocean:** Derin okyanus ferahlığı.
+- **Dark:** Kod yazarken gözleri yormayan tam siyah deneyim.
+- **Light:** Klasik ve temiz aydınlık mod.
 
 ---
 
-## Dokümantasyon
+## 🤝 Katkıda Bulunma (Contributing)
 
-<table>
-  <tr>
-    <th align="left">Kaynak</th>
-    <th align="left">Bağlantı</th>
-  </tr>
-  <tr>
-    <td>
-      <img src="https://api.iconify.design/mdi:web.svg?color=white" width="18" height="18" alt="Docs" />
-      Canlı site
-    </td>
-    <td>
-      <a href="https://theayzek01.github.io/MoonCode/">theayzek01.github.io/MoonCode</a>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <img src="https://api.iconify.design/mdi:github.svg?color=white" width="18" height="18" alt="GitHub" />
-      GitHub repo
-    </td>
-    <td>
-      <a href="https://github.com/theayzek01/MoonCode">github.com/theayzek01/MoonCode</a>
-    </td>
-  </tr>
-</table>
+Siz de yeni ufuklara yelken açan bu projeye katkı sağlamak isterseniz PR'larınızı bekliyoruz!
+1. Projeyi forklayın
+2. Kendi branch'inizi oluşturun (`git checkout -b feature/HarikaOzellik`)
+3. Değişiklikleri commit'leyin (`git commit -m 'feat: Harika özellik eklendi'`)
+4. Branch'i push'layın (`git push origin feature/HarikaOzellik`)
+5. Pull Request açın!
 
 ---
 
-## Geliştirme ve Katkı
+## 📜 Lisans
 
-Projeyi derlemek ve yerel test yapmak isterseniz:
+MoonCode tamamen özgürdür ve **MIT Lisansı** ile dağıtılmaktadır. Alın, kullanın, değiştirin, parçalayın ve daha iyisini yapın.
 
-```bash
-npm run clean
-npm run build
-npm test
-```
-
----
-
-## Lisans
-
-Bu proje **MIT Lisansı** ile lisanslanmıştır. Gönül rahatlığıyla kullanabilir, kopyalayabilir ve değiştirebilirsiniz.
-
----
+<br/>
 
 <div align="center">
 
-<img src="https://i.hizliresim.com/q2e03b9.png" width="72" height="72" alt="MoonCode Logo" />
-
+<img src="https://i.hizliresim.com/q2e03b9.png" width="64" height="64" alt="MoonCode Logo" />
 <br/>
-<br/>
-
-<strong>MoonCode</strong><br/>
-İster terminalde, ister web'de... Sınırları aşan yerel ve akıllı kodlama deneyimi.
+<p style="font-size: 14px; color: gray;">Made with ❤️ by TheAyzek01 and the Open Source Community</p>
 
 </div>

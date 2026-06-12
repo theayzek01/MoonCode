@@ -465,7 +465,7 @@ export class WebMode {
 			req.on("data", (chunk) => (body += chunk));
 			req.on("end", async () => {
 				try {
-					const { prompt } = JSON.parse(body);
+					const { prompt, images } = JSON.parse(body);
 					res.setHeader("Content-Type", "application/json");
 					res.end(JSON.stringify({ success: true }));
 
@@ -494,7 +494,7 @@ export class WebMode {
 					}
 
 					if (!handled) {
-						this.runtime.session.prompt(prompt).catch((err: any) => {
+						this.runtime.session.prompt(prompt, { images }).catch((err: any) => {
 							console.error("Prompt error:", err);
 							this.broadcastEvent({
 								type: "message_start",

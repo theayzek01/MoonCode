@@ -2365,7 +2365,6 @@ function renderTool(toolCallId, name, args, status, result) {
 
 	let iconName = 'build';
 	let iconColor = 'var(--muted)';
-	let nameLC = name.toLowerCase();
 	
 	if (nameLC.includes('bash') || nameLC.includes('run_command')) { iconName = 'terminal'; iconColor = '#00ffaa'; }
 	else if (nameLC.includes('view') || nameLC.includes('read') || nameLC.includes('list')) { iconName = 'visibility'; iconColor = '#50b8ff'; }
@@ -2455,6 +2454,23 @@ sendBtn.addEventListener('click', sendMessage);
 async function sendMessage() {
 	const text = promptInput.value.trim();
 	if (!text || isGenerating) return;
+
+	// Process images if any
+	const images = [];
+	for (const file of attachedFiles) {
+		if (file.type.startsWith('image/')) {
+			const data = await new Promise((resolve) => {
+				const reader = new FileReader();
+				reader.onload = (e) => resolve(e.target.result.split(',')[1]);
+				reader.readAsDataURL(file);
+			});
+			images.push({ type: 'image', mimeType: file.type, data });
+		}
+	}
+
+	attachedFiles = [];
+	renderAttachments();
+
 	promptInput.value = '';
 	autoResize();
 	document.getElementById('char-count').textContent = '';
@@ -2472,7 +2488,7 @@ async function sendMessage() {
 		const res = await fetch('/api/prompt', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ prompt: text })
+			body: JSON.stringify({ prompt: text, images: images.length > 0 ? images : undefined })
 		});
 		syncMessageIds();
 		if (!res.ok) {
@@ -2518,6 +2534,36 @@ function newChat() {
 			</div>
 		</div>`;
 	closeModal('cmd-palette');
+}
+
+// ─── COMPACT SESSION ──────────────────────────────────────────────────────
+async function compactSession() {
+	if (isGenerating) return;
+	
+	// Start animation
+	chatInner.classList.add('compacting');
+	setGeneratingState(true);
+	
+	try {
+		await fetch('/api/prompt', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ prompt: '/compact' })
+		});
+		
+		// The compact process runs in the background. We wait a little bit then reload history
+		setTimeout(() => {
+			loadHistory();
+			checkInitialStatus();
+			chatInner.classList.remove('compacting');
+			setGeneratingState(false);
+			toast('Session compacted successfully', 'success');
+		}, 1500); // 1.5s delay to let animation play and backend start/finish
+	} catch (e) {
+		chatInner.classList.remove('compacting');
+		setGeneratingState(false);
+		toast('Failed to compact session', 'error');
+	}
 }
 
 // ─── LOAD MODELS ──────────────────────────────────────────────────────────
@@ -2934,6 +2980,11 @@ es.onmessage = (e) => {
 			setGeneratingState(false);
 			// Refresh sidebar so new session appears
 			setTimeout(() => loadConversations(), 400);
+			// Also reload history and status in case this was a session switch
+			setTimeout(() => {
+				loadHistory();
+				checkInitialStatus();
+			}, 500);
 
 		} else if (data.type === 'state_update') {
 			if (data.state?.model) {
