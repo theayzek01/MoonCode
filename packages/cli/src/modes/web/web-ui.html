@@ -1,0 +1,2182 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="mooncode">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>MoonCode – AI Kodlama Asistanı</title>
+	<meta name="description" content="MoonCode – Güçlü yapay zeka destekli kodlama asistanı">
+	<script src="https://cdn.tailwindcss.com"></script>
+	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" id="hljs-theme">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+	<style>
+		/* ─── THEME TOKENS ─────────────────────────────────────────────── */
+		[data-theme="mooncode"] {
+			--bg:          #0e0f10;
+			--bg2:         #141518;
+			--sidebar:     #111213;
+			--surface:     #1a1b1e;
+			--surface2:    #222327;
+			--border:      rgba(255,255,255,0.07);
+			--fg:          #e2e4e9;
+			--muted:       #8b909a;
+			--accent:      #6c8fff;
+			--accent2:     #5dd5c8;
+			--user-bubble: #1e2333;
+			--user-border: rgba(108,143,255,0.2);
+			--code-bg:     #0a0b0d;
+			--hljs:        atom-one-dark;
+			--shadow:      0 8px 32px rgba(0,0,0,0.5);
+		}
+		[data-theme="nord"] {
+			--bg:          #1a1d27;
+			--bg2:         #1e2230;
+			--sidebar:     #171a24;
+			--surface:     #222739;
+			--surface2:    #2a3048;
+			--border:      rgba(255,255,255,0.08);
+			--fg:          #cdd6f4;
+			--muted:       #6c7086;
+			--accent:      #89b4fa;
+			--accent2:     #94e2d5;
+			--user-bubble: #1e2333;
+			--user-border: rgba(137,180,250,0.2);
+			--code-bg:     #11131d;
+			--shadow:      0 8px 32px rgba(0,0,0,0.5);
+		}
+		[data-theme="forest"] {
+			--bg:          #0d1117;
+			--bg2:         #111820;
+			--sidebar:     #0a0f14;
+			--surface:     #161e28;
+			--surface2:    #1d2835;
+			--border:      rgba(255,255,255,0.06);
+			--fg:          #d2e0c8;
+			--muted:       #637a5c;
+			--accent:      #7ec8a0;
+			--accent2:     #5ba88a;
+			--user-bubble: #162212;
+			--user-border: rgba(126,200,160,0.2);
+			--code-bg:     #080d10;
+			--shadow:      0 8px 32px rgba(0,0,0,0.5);
+		}
+		[data-theme="rosepine"] {
+			--bg:          #191724;
+			--bg2:         #1f1d2e;
+			--sidebar:     #161320;
+			--surface:     #26233a;
+			--surface2:    #312e4a;
+			--border:      rgba(255,255,255,0.06);
+			--fg:          #e0def4;
+			--muted:       #6e6a86;
+			--accent:      #c4a7e7;
+			--accent2:     #f6c177;
+			--user-bubble: #271d3a;
+			--user-border: rgba(196,167,231,0.2);
+			--code-bg:     #110f1c;
+			--shadow:      0 8px 32px rgba(0,0,0,0.5);
+		}
+		[data-theme="sepia"] {
+			--bg:          #1c1a16;
+			--bg2:         #211e18;
+			--sidebar:     #18160f;
+			--surface:     #26221a;
+			--surface2:    #2f2a20;
+			--border:      rgba(255,230,150,0.07);
+			--fg:          #e8d9b5;
+			--muted:       #8a7c5e;
+			--accent:      #d4a853;
+			--accent2:     #c8855a;
+			--user-bubble: #231e12;
+			--user-border: rgba(212,168,83,0.2);
+			--code-bg:     #110f0a;
+			--shadow:      0 8px 32px rgba(0,0,0,0.5);
+		}
+		[data-theme="light"] {
+			--bg:          #f5f5f7;
+			--bg2:         #ffffff;
+			--sidebar:     #f0f0f5;
+			--surface:     #ffffff;
+			--surface2:    #f0f0f5;
+			--border:      rgba(0,0,0,0.08);
+			--fg:          #1a1a2e;
+			--muted:       #6b6b80;
+			--accent:      #4f6ef7;
+			--accent2:     #0ea5c8;
+			--user-bubble: #e8eeff;
+			--user-border: rgba(79,110,247,0.2);
+			--code-bg:     #1e1e2e;
+			--shadow:      0 4px 20px rgba(0,0,0,0.1);
+		}
+
+		/* ─── BASE ──────────────────────────────────────────────────────── */
+		*, *::before, *::after { box-sizing: border-box; }
+		:root { font-size: 15px; }
+		body {
+			font-family: 'Inter', system-ui, sans-serif;
+			background: var(--bg);
+			color: var(--fg);
+			margin: 0; padding: 0;
+			height: 100vh;
+			display: flex;
+			overflow: hidden;
+			transition: background 0.3s, color 0.3s;
+		}
+
+		/* ─── SCROLLBAR ─────────────────────────────────────────────────── */
+		::-webkit-scrollbar { width: 5px; height: 5px; }
+		::-webkit-scrollbar-track { background: transparent; }
+		::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+		::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+		/* ─── MATERIAL ICONS ─────────────────────────────────────────────── */
+		.material-symbols-rounded {
+			font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+			font-size: 20px;
+			line-height: 1;
+			user-select: none;
+		}
+
+		/* ─── ANIMATIONS ────────────────────────────────────────────────── */
+		@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+		@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+		@keyframes slideIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
+		@keyframes scaleIn { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
+		@keyframes toastIn { from{opacity:0;transform:translateX(100%)} to{opacity:1;transform:translateX(0)} }
+		@keyframes toastOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(100%)} }
+		@keyframes spin { to{transform:rotate(360deg)} }
+		.thinking-pulse { animation: pulse 2s ease-in-out infinite; }
+		.msg-enter { animation: fadeIn 0.3s ease forwards; }
+		.tool-enter { animation: slideIn 0.25s ease forwards; }
+
+		/* ─── SIDEBAR ───────────────────────────────────────────────────── */
+		#sidebar {
+			width: 260px;
+			min-width: 260px;
+			background: var(--sidebar);
+			border-right: 1px solid var(--border);
+			display: flex;
+			flex-direction: column;
+			transition: width 0.25s cubic-bezier(0.4,0,0.2,1), min-width 0.25s cubic-bezier(0.4,0,0.2,1);
+			overflow: hidden;
+			z-index: 20;
+			position: relative;
+		}
+		#sidebar.collapsed { width: 0; min-width: 0; border-right: none; }
+
+		/* ─── MAIN ──────────────────────────────────────────────────────── */
+		#main { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+
+		/* ─── HEADER ────────────────────────────────────────────────────── */
+		#header {
+			height: 52px;
+			border-bottom: 1px solid var(--border);
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 0 16px;
+			shrink: 0;
+			background: var(--bg);
+			backdrop-filter: blur(12px);
+			z-index: 10;
+			flex-shrink: 0;
+		}
+
+		/* ─── CHAT CONTAINER ─────────────────────────────────────────────── */
+		#chat-container {
+			flex: 1;
+			overflow-y: auto;
+			padding: 24px 16px;
+			scroll-behavior: smooth;
+		}
+		.chat-inner { max-width: 780px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+
+		/* ─── MESSAGES ──────────────────────────────────────────────────── */
+		.msg-row { display: flex; flex-direction: column; gap: 6px; }
+		.msg-row.user { align-items: flex-end; }
+		.msg-row.assistant { align-items: flex-start; }
+
+		.user-bubble {
+			background: var(--user-bubble);
+			border: 1px solid var(--user-border);
+			color: var(--fg);
+			padding: 10px 16px;
+			border-radius: 18px 18px 4px 18px;
+			max-width: 75%;
+			font-size: 0.875rem;
+			line-height: 1.6;
+			white-space: pre-wrap;
+			word-break: break-word;
+		}
+
+		.assistant-content {
+			color: var(--fg);
+			font-size: 0.875rem;
+			line-height: 1.75;
+			max-width: 100%;
+			word-break: break-word;
+		}
+
+		/* ─── PROSE / MARKDOWN ───────────────────────────────────────────── */
+		.prose h1,.prose h2,.prose h3,.prose h4,.prose h5,.prose h6 {
+			color: var(--fg);
+			font-weight: 600;
+			line-height: 1.35;
+			margin: 1.2em 0 0.5em;
+		}
+		.prose h1{font-size:1.4rem}.prose h2{font-size:1.2rem}.prose h3{font-size:1.05rem}
+		.prose h4,.prose h5,.prose h6{font-size:0.95rem}
+		.prose p { margin: 0.6em 0; }
+		.prose a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+		.prose a:hover { opacity: 0.8; }
+		.prose strong { font-weight: 600; color: var(--fg); }
+		.prose em { font-style: italic; color: var(--muted); }
+		.prose ul { list-style: disc; padding-left: 1.4rem; margin: 0.5em 0; }
+		.prose ol { list-style: decimal; padding-left: 1.4rem; margin: 0.5em 0; }
+		.prose li { margin: 0.25em 0; }
+		.prose blockquote {
+			border-left: 3px solid var(--accent);
+			padding: 0.5rem 1rem;
+			margin: 0.8em 0;
+			background: rgba(108,143,255,0.06);
+			border-radius: 0 8px 8px 0;
+			color: var(--muted);
+			font-style: italic;
+		}
+		.prose hr { border: none; border-top: 1px solid var(--border); margin: 1.2em 0; }
+		.prose table { width: 100%; border-collapse: collapse; margin: 1em 0; font-size: 0.85rem; }
+		.prose th {
+			text-align: left;
+			font-weight: 600;
+			padding: 8px 12px;
+			border-bottom: 2px solid var(--border);
+			color: var(--fg);
+			background: var(--surface);
+		}
+		.prose td {
+			padding: 7px 12px;
+			border-bottom: 1px solid var(--border);
+			color: var(--muted);
+		}
+		.prose tr:hover td { color: var(--fg); background: rgba(255,255,255,0.02); }
+		.prose code:not([class]) {
+			font-family: 'JetBrains Mono', monospace;
+			font-size: 0.82em;
+			background: var(--surface2);
+			color: var(--accent2);
+			padding: 2px 6px;
+			border-radius: 5px;
+			border: 1px solid var(--border);
+		}
+
+		/* ─── CODE BLOCKS ────────────────────────────────────────────────── */
+		.code-block {
+			margin: 0.8em 0;
+			border-radius: 12px;
+			overflow: hidden;
+			border: 1px solid var(--border);
+			background: var(--code-bg);
+		}
+		.code-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 8px 14px;
+			background: var(--surface);
+			border-bottom: 1px solid var(--border);
+			font-size: 0.75rem;
+			color: var(--muted);
+			font-family: 'JetBrains Mono', monospace;
+		}
+		.code-header .lang-badge {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			color: var(--accent2);
+			font-weight: 500;
+		}
+		.code-actions { display: flex; align-items: center; gap: 4px; }
+		.code-actions button {
+			background: none;
+			border: none;
+			cursor: pointer;
+			color: var(--muted);
+			padding: 4px;
+			border-radius: 6px;
+			display: flex;
+			align-items: center;
+			transition: color 0.15s, background 0.15s;
+		}
+		.code-actions button:hover { color: var(--fg); background: rgba(255,255,255,0.08); }
+		.code-block pre {
+			margin: 0;
+			padding: 14px 16px;
+			overflow-x: auto;
+			font-family: 'JetBrains Mono', monospace;
+			font-size: 0.82rem;
+			line-height: 1.65;
+			background: transparent !important;
+		}
+		.code-block pre code { background: none !important; padding: 0 !important; border: none !important; font-size: inherit; }
+
+		/* ─── THINKING BLOCK ─────────────────────────────────────────────── */
+		.thinking-block {
+			background: rgba(108,143,255,0.04);
+			border: 1px solid rgba(108,143,255,0.12);
+			border-radius: 12px;
+			overflow: hidden;
+			margin-bottom: 12px;
+			font-size: 0.8rem;
+		}
+		.thinking-summary {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 8px 12px;
+			cursor: pointer;
+			user-select: none;
+			color: var(--accent);
+			font-weight: 500;
+			transition: background 0.15s;
+		}
+		.thinking-summary:hover { background: rgba(108,143,255,0.05); }
+		.thinking-body {
+			padding: 10px 14px;
+			border-top: 1px solid rgba(108,143,255,0.1);
+			color: var(--muted);
+			font-family: 'JetBrains Mono', monospace;
+			font-size: 0.78rem;
+			line-height: 1.7;
+			white-space: pre-wrap;
+			max-height: 300px;
+			overflow-y: auto;
+			background: rgba(0,0,0,0.15);
+		}
+		.thinking-block.collapsed .thinking-body { display: none; }
+		.thinking-chevron { transition: transform 0.2s; }
+		.thinking-block:not(.collapsed) .thinking-chevron { transform: rotate(180deg); }
+
+		/* ─── TOOL CARDS ─────────────────────────────────────────────────── */
+		.tool-card {
+			background: var(--surface);
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			overflow: hidden;
+			font-size: 0.8rem;
+		}
+		.tool-card.running { border-color: rgba(108,143,255,0.3); }
+		.tool-card.done { border-color: rgba(93,213,200,0.2); }
+		.tool-card.error { border-color: rgba(255,100,100,0.25); }
+		.tool-header {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding: 8px 12px;
+			cursor: pointer;
+			user-select: none;
+		}
+		.tool-name { font-family: 'JetBrains Mono', monospace; font-weight: 500; color: var(--fg); }
+		.tool-status-dot {
+			width: 7px;
+			height: 7px;
+			border-radius: 50%;
+			flex-shrink: 0;
+		}
+		.running .tool-status-dot { background: var(--accent); animation: pulse 1.5s infinite; }
+		.done .tool-status-dot { background: var(--accent2); }
+		.error .tool-status-dot { background: #ff6464; }
+		.tool-body {
+			border-top: 1px solid var(--border);
+			overflow: hidden;
+		}
+		.tool-section { padding: 8px 12px; }
+		.tool-section-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+		.tool-section pre {
+			margin: 0;
+			font-family: 'JetBrains Mono', monospace;
+			font-size: 0.75rem;
+			white-space: pre-wrap;
+			word-break: break-word;
+			max-height: 200px;
+			overflow-y: auto;
+			color: var(--fg);
+			line-height: 1.6;
+		}
+		.tool-section.result pre { color: var(--accent2); }
+		.tool-section.error-section pre { color: #ff8a8a; }
+
+		/* ─── ACTION BAR ─────────────────────────────────────────────────── */
+		.action-bar {
+			display: flex;
+			align-items: center;
+			gap: 2px;
+			margin-top: 4px;
+			opacity: 0;
+			transition: opacity 0.2s;
+		}
+		.msg-row:hover .action-bar { opacity: 1; }
+		.action-bar button {
+			background: none;
+			border: none;
+			cursor: pointer;
+			color: var(--muted);
+			padding: 5px;
+			border-radius: 7px;
+			display: flex;
+			align-items: center;
+			transition: color 0.15s, background 0.15s;
+		}
+		.action-bar button:hover { color: var(--fg); background: var(--surface2); }
+
+		/* ─── INPUT AREA ─────────────────────────────────────────────────── */
+		#input-area {
+			position: absolute;
+			bottom: 0; left: 0; right: 0;
+			padding: 16px;
+			background: linear-gradient(to top, var(--bg) 65%, transparent);
+			pointer-events: none;
+		}
+		.input-wrap {
+			max-width: 780px;
+			margin: 0 auto;
+			pointer-events: all;
+		}
+		.input-box {
+			background: var(--surface);
+			border: 1px solid var(--border);
+			border-radius: 16px;
+			transition: border-color 0.2s, box-shadow 0.2s;
+			position: relative;
+		}
+		.input-box:focus-within {
+			border-color: rgba(108,143,255,0.35);
+			box-shadow: 0 0 0 3px rgba(108,143,255,0.07);
+		}
+		.input-toolbar {
+			display: flex;
+			align-items: center;
+			gap: 4px;
+			padding: 8px 12px 0;
+		}
+		.tool-btn {
+			background: none;
+			border: none;
+			cursor: pointer;
+			color: var(--muted);
+			padding: 5px;
+			border-radius: 8px;
+			display: flex;
+			align-items: center;
+			transition: color 0.15s, background 0.15s;
+		}
+		.tool-btn:hover { color: var(--fg); background: var(--surface2); }
+		#prompt-input {
+			width: 100%;
+			background: transparent;
+			border: none;
+			outline: none;
+			color: var(--fg);
+			font-family: 'Inter', sans-serif;
+			font-size: 0.875rem;
+			resize: none;
+			padding: 10px 14px;
+			max-height: 200px;
+			line-height: 1.6;
+		}
+		#prompt-input::placeholder { color: var(--muted); }
+		.input-footer {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 6px 10px 8px;
+		}
+		.input-footer-left { display: flex; align-items: center; gap: 6px; }
+		.input-footer-right { display: flex; align-items: center; gap: 6px; }
+		.char-count { font-size: 0.7rem; color: var(--muted); }
+
+		#send-btn, #stop-btn {
+			width: 34px; height: 34px;
+			border-radius: 10px;
+			border: none;
+			cursor: pointer;
+			display: flex; align-items: center; justify-content: center;
+			transition: all 0.2s;
+			flex-shrink: 0;
+		}
+		#send-btn {
+			background: var(--accent);
+			color: #fff;
+		}
+		#send-btn:hover { opacity: 0.85; transform: scale(1.05); }
+		#send-btn:active { transform: scale(0.97); }
+		#stop-btn {
+			background: rgba(255,80,80,0.15);
+			color: #ff6464;
+			border: 1px solid rgba(255,80,80,0.25);
+		}
+		#stop-btn:hover { background: rgba(255,80,80,0.25); }
+
+		/* ─── BADGE BUTTON ────────────────────────────────────────────────── */
+		.badge-btn {
+			display: flex; align-items: center; gap: 4px;
+			background: var(--surface2);
+			border: 1px solid var(--border);
+			border-radius: 7px;
+			padding: 3px 8px;
+			font-size: 0.72rem;
+			color: var(--muted);
+			cursor: pointer;
+			transition: all 0.15s;
+			font-family: 'Inter', sans-serif;
+		}
+		.badge-btn:hover { color: var(--fg); border-color: rgba(255,255,255,0.15); }
+
+		/* ─── MODALS ─────────────────────────────────────────────────────── */
+		.modal-overlay {
+			display: none;
+			position: fixed; inset: 0;
+			background: rgba(0,0,0,0.6);
+			backdrop-filter: blur(6px);
+			z-index: 100;
+			align-items: center;
+			justify-content: center;
+			padding: 16px;
+		}
+		.modal-overlay.active { display: flex; }
+		.modal {
+			background: var(--surface);
+			border: 1px solid var(--border);
+			border-radius: 16px;
+			width: 100%;
+			box-shadow: var(--shadow);
+			animation: scaleIn 0.2s ease;
+			overflow: hidden;
+		}
+		.modal-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 14px 18px;
+			border-bottom: 1px solid var(--border);
+		}
+		.modal-title { font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
+		.modal-close {
+			background: none; border: none; cursor: pointer;
+			color: var(--muted); padding: 4px; border-radius: 6px;
+			display: flex; align-items: center; transition: color 0.15s;
+		}
+		.modal-close:hover { color: var(--fg); }
+		.modal-body { padding: 16px 18px; max-height: 70vh; overflow-y: auto; }
+		.modal-footer { padding: 12px 18px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+
+		/* ─── FORM ELEMENTS ──────────────────────────────────────────────── */
+		.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+		.form-label { font-size: 0.78rem; font-weight: 500; color: var(--fg); }
+		.form-select, .form-input {
+			background: var(--bg2);
+			border: 1px solid var(--border);
+			border-radius: 9px;
+			padding: 8px 12px;
+			color: var(--fg);
+			font-size: 0.82rem;
+			outline: none;
+			transition: border-color 0.2s;
+			font-family: 'Inter', sans-serif;
+			width: 100%;
+		}
+		.form-select:focus, .form-input:focus { border-color: var(--accent); }
+		.form-select option { background: var(--surface); }
+		.form-checkbox-row {
+			display: flex; align-items: center; gap: 10px;
+			padding: 10px 12px;
+			background: var(--bg2);
+			border-radius: 9px;
+			cursor: pointer;
+		}
+		.form-checkbox-row input[type="checkbox"] { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
+
+		/* ─── BUTTONS ─────────────────────────────────────────────────────── */
+		.btn { 
+			border: none; cursor: pointer; border-radius: 9px; font-weight: 500;
+			font-size: 0.82rem; padding: 8px 16px; display: inline-flex;
+			align-items: center; gap: 6px; transition: all 0.15s;
+			font-family: 'Inter', sans-serif;
+		}
+		.btn-primary { background: var(--accent); color: #fff; }
+		.btn-primary:hover { opacity: 0.87; }
+		.btn-ghost { background: var(--surface2); color: var(--fg); }
+		.btn-ghost:hover { background: var(--border); }
+		.btn-danger { background: rgba(255,80,80,0.15); color: #ff6464; }
+		.btn-danger:hover { background: rgba(255,80,80,0.25); }
+
+		/* ─── TOASTS ──────────────────────────────────────────────────────── */
+		#toast-container {
+			position: fixed;
+			bottom: 24px; right: 24px;
+			display: flex; flex-direction: column; gap: 10px;
+			z-index: 1000;
+			pointer-events: none;
+		}
+		.toast {
+			display: flex; align-items: center; gap: 10px;
+			background: var(--surface);
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			padding: 10px 16px;
+			font-size: 0.82rem;
+			color: var(--fg);
+			box-shadow: var(--shadow);
+			pointer-events: all;
+			animation: toastIn 0.3s ease;
+			max-width: 340px;
+		}
+		.toast.success { border-color: rgba(93,213,200,0.3); }
+		.toast.error { border-color: rgba(255,100,100,0.3); }
+		.toast.info { border-color: rgba(108,143,255,0.3); }
+		.toast.out { animation: toastOut 0.3s ease forwards; }
+
+		/* ─── COMMAND PALETTE ─────────────────────────────────────────────── */
+		#cmd-palette .modal { max-width: 540px; }
+		#cmd-input {
+			width: 100%;
+			background: var(--bg2);
+			border: 1px solid var(--border);
+			border-radius: 10px;
+			padding: 10px 14px;
+			color: var(--fg);
+			font-size: 0.875rem;
+			outline: none;
+			margin-bottom: 12px;
+			font-family: 'Inter', sans-serif;
+		}
+		#cmd-input:focus { border-color: var(--accent); }
+		.cmd-list { display: flex; flex-direction: column; gap: 2px; max-height: 360px; overflow-y: auto; }
+		.cmd-item {
+			display: flex; align-items: center; gap: 12px;
+			padding: 9px 12px;
+			border-radius: 9px;
+			cursor: pointer;
+			transition: background 0.1s;
+		}
+		.cmd-item:hover, .cmd-item.active { background: var(--surface2); }
+		.cmd-item .cmd-icon { color: var(--accent); flex-shrink: 0; }
+		.cmd-item .cmd-title { font-size: 0.82rem; font-weight: 500; color: var(--fg); }
+		.cmd-item .cmd-desc { font-size: 0.72rem; color: var(--muted); }
+		.cmd-item .cmd-kbd { margin-left: auto; flex-shrink: 0; }
+		kbd {
+			font-size: 0.65rem; font-family: 'JetBrains Mono', monospace;
+			background: var(--surface2); border: 1px solid var(--border);
+			border-radius: 5px; padding: 2px 5px; color: var(--muted);
+		}
+
+		/* ─── THEME PICKER ────────────────────────────────────────────────── */
+		.theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+		.theme-card {
+			border-radius: 12px;
+			overflow: hidden;
+			border: 2px solid transparent;
+			cursor: pointer;
+			transition: all 0.2s;
+		}
+		.theme-card:hover { transform: translateY(-2px); }
+		.theme-card.active { border-color: var(--accent); }
+		.theme-preview { height: 56px; position: relative; }
+		.theme-name { 
+			padding: 6px 8px; font-size: 0.72rem; font-weight: 500;
+			background: var(--surface2); text-align: center;
+		}
+
+		/* ─── MODEL LIST ─────────────────────────────────────────────────── */
+		.model-item {
+			display: flex; align-items: center; gap: 12px;
+			padding: 10px 12px;
+			border-radius: 10px;
+			cursor: pointer;
+			border: 1px solid transparent;
+			transition: all 0.15s;
+			margin-bottom: 4px;
+		}
+		.model-item:hover { background: var(--surface2); border-color: var(--border); }
+		.model-item.selected { background: rgba(108,143,255,0.08); border-color: rgba(108,143,255,0.25); }
+		.model-icon {
+			width: 36px; height: 36px; border-radius: 10px;
+			display: flex; align-items: center; justify-content: center;
+			flex-shrink: 0; font-size: 0.7rem; font-weight: 700;
+			font-family: 'JetBrains Mono', monospace;
+		}
+
+		/* ─── AUTOCOMPLETE ────────────────────────────────────────────────── */
+		#autocomplete {
+			position: absolute; bottom: calc(100% + 8px); left: 0;
+			width: 320px;
+			background: var(--surface);
+			border: 1px solid var(--border);
+			border-radius: 14px;
+			box-shadow: var(--shadow);
+			z-index: 50;
+			padding: 6px;
+			animation: scaleIn 0.15s ease;
+			max-height: 240px;
+			overflow-y: auto;
+		}
+		.ac-item {
+			display: flex; align-items: center; gap: 10px;
+			padding: 8px 10px;
+			border-radius: 9px;
+			cursor: pointer;
+			transition: background 0.1s;
+		}
+		.ac-item:hover, .ac-item.active { background: var(--surface2); }
+		.ac-cmd { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 600; color: var(--accent); }
+		.ac-desc { font-size: 0.72rem; color: var(--muted); }
+
+		/* ─── EMPTY STATE ─────────────────────────────────────────────────── */
+		#empty-state {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			height: 100%;
+			text-align: center;
+			gap: 0;
+			padding-bottom: 60px;
+		}
+		.empty-orb {
+			width: 72px; height: 72px;
+			background: radial-gradient(circle at 40% 35%, rgba(108,143,255,0.35), rgba(93,213,200,0.15) 60%, transparent);
+			border-radius: 50%;
+			display: flex; align-items: center; justify-content: center;
+			border: 1px solid rgba(108,143,255,0.2);
+			margin-bottom: 20px;
+		}
+
+		/* ─── SIDEBAR ITEMS ───────────────────────────────────────────────── */
+		.sidebar-item {
+			display: flex; align-items: center; gap: 10px;
+			padding: 8px 12px;
+			border-radius: 10px;
+			cursor: pointer;
+			font-size: 0.8rem;
+			color: var(--muted);
+			transition: all 0.15s;
+			white-space: nowrap;
+			overflow: hidden;
+		}
+		.sidebar-item:hover { background: var(--surface); color: var(--fg); }
+		.sidebar-item.active { background: var(--surface); color: var(--fg); }
+
+		/* ─── STATUS BAR ─────────────────────────────────────────────────── */
+		.status-pill {
+			display: flex; align-items: center; gap: 5px;
+			padding: 3px 9px;
+			border-radius: 99px;
+			font-size: 0.7rem;
+			background: var(--surface2);
+			border: 1px solid var(--border);
+			color: var(--muted);
+		}
+
+		/* ─── FILE ATTACHMENT ─────────────────────────────────────────────── */
+		.file-chip {
+			display: inline-flex; align-items: center; gap: 6px;
+			background: var(--surface2);
+			border: 1px solid var(--border);
+			border-radius: 8px;
+			padding: 4px 8px;
+			font-size: 0.72rem;
+			color: var(--muted);
+			margin: 0 2px;
+		}
+
+		/* ─── SEARCH BAR ─────────────────────────────────────────────────── */
+		#search-bar {
+			display: none;
+			padding: 8px 16px;
+			border-bottom: 1px solid var(--border);
+			background: var(--bg2);
+			align-items: center;
+			gap: 10px;
+		}
+		#search-bar.active { display: flex; }
+		#search-input {
+			flex: 1;
+			background: none;
+			border: none;
+			outline: none;
+			color: var(--fg);
+			font-size: 0.82rem;
+			font-family: 'Inter', sans-serif;
+		}
+		.search-count { font-size: 0.72rem; color: var(--muted); }
+		.highlight-match { background: rgba(108,143,255,0.25); border-radius: 2px; padding: 0 1px; }
+
+		/* ─── MISC ────────────────────────────────────────────────────────── */
+		.divider { width: 100%; height: 1px; background: var(--border); margin: 8px 0; }
+		.spin { animation: spin 0.8s linear infinite; }
+		.hidden { display: none !important; }
+	</style>
+</head>
+<body>
+
+<!-- ═══════════════════ SIDEBAR ═══════════════════════════════════════════ -->
+<div id="sidebar">
+	<!-- Brand -->
+	<div style="padding:16px 14px 12px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
+		<div style="display:flex;align-items:center;gap:8px;">
+			<div style="width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+				<span class="material-symbols-rounded" style="font-size:17px;color:#fff;">auto_awesome</span>
+			</div>
+			<span style="font-weight:700;font-size:0.95rem;white-space:nowrap;">MoonCode</span>
+		</div>
+		<button onclick="toggleSidebar()" class="tool-btn">
+			<span class="material-symbols-rounded" style="font-size:18px;">close</span>
+		</button>
+	</div>
+
+	<!-- New Chat -->
+	<div style="padding:0 10px 8px;">
+		<button onclick="newChat()" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;color:var(--fg);font-size:0.8rem;font-weight:500;font-family:'Inter',sans-serif;transition:all 0.15s;" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--surface2)'">
+			<span class="material-symbols-rounded" style="color:var(--accent);font-size:18px;">add</span>
+			<span>Yeni Sohbet</span>
+		</button>
+	</div>
+
+	<div class="divider"></div>
+
+	<!-- Quick actions -->
+	<div style="padding:4px 10px;">
+		<div class="sidebar-item" onclick="openCmdPalette()">
+			<span class="material-symbols-rounded" style="font-size:17px;flex-shrink:0;">apps</span>
+			<span>Komut Paleti</span>
+			<kbd style="margin-left:auto;font-size:0.6rem;">Ctrl+K</kbd>
+		</div>
+		<div class="sidebar-item" onclick="toggleSearch()">
+			<span class="material-symbols-rounded" style="font-size:17px;flex-shrink:0;">search</span>
+			<span>Sohbette Ara</span>
+			<kbd style="margin-left:auto;font-size:0.6rem;">Ctrl+F</kbd>
+		</div>
+		<div class="sidebar-item" onclick="exportChat()">
+			<span class="material-symbols-rounded" style="font-size:17px;flex-shrink:0;">download</span>
+			<span>Sohbeti Dışa Aktar</span>
+		</div>
+	</div>
+
+	<div class="divider"></div>
+
+	<!-- Recent chats -->
+	<div style="flex:1;overflow-y:auto;padding:4px 10px;">
+		<div style="font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding:4px 12px;margin-bottom:4px;">Son Sohbetler</div>
+		<div id="recent-list">
+			<div class="sidebar-item active" style="font-size:0.78rem;">
+				<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent);flex-shrink:0;">chat</span>
+				<span style="overflow:hidden;text-overflow:ellipsis;">Mevcut oturum</span>
+			</div>
+		</div>
+	</div>
+
+	<div class="divider"></div>
+
+	<!-- Sidebar Footer -->
+	<div style="padding:10px 10px;flex-shrink:0;">
+		<div class="sidebar-item" onclick="openModal('settingsModal')">
+			<span class="material-symbols-rounded" style="font-size:17px;flex-shrink:0;">settings</span>
+			<span>Ayarlar</span>
+		</div>
+		<div class="sidebar-item" onclick="openModal('themeModal')">
+			<span class="material-symbols-rounded" style="font-size:17px;flex-shrink:0;">palette</span>
+			<span>Tema</span>
+		</div>
+		<div class="sidebar-item" onclick="openModal('shortcutsModal')">
+			<span class="material-symbols-rounded" style="font-size:17px;flex-shrink:0;">keyboard</span>
+			<span>Kısayollar</span>
+		</div>
+		<div style="height:8px;"></div>
+		<!-- User Info -->
+		<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:11px;background:var(--surface2);cursor:pointer;transition:background 0.15s;" onclick="toggleUserMenu()" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--surface2)'">
+			<div id="sidebar-avatar" style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#fff;flex-shrink:0;">U</div>
+			<div style="overflow:hidden;flex:1;">
+				<div id="sidebar-name" style="font-size:0.78rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Giriş Yapılmadı</div>
+				<div style="font-size:0.65rem;color:var(--accent);">Pro</div>
+			</div>
+			<span class="material-symbols-rounded" style="font-size:16px;color:var(--muted);">more_vert</span>
+		</div>
+	</div>
+</div>
+
+<!-- ═══════════════════ MAIN ═════════════════════════════════════════════ -->
+<div id="main">
+
+	<!-- Header -->
+	<div id="header">
+		<div style="display:flex;align-items:center;gap:10px;">
+			<button id="sidebar-toggle" onclick="toggleSidebar()" class="tool-btn" title="Kenar çubuğu (Ctrl+B)">
+				<span class="material-symbols-rounded">menu</span>
+			</button>
+			<button onclick="openModal('modelModal')" class="badge-btn" id="model-btn">
+				<span class="material-symbols-rounded" style="font-size:14px;color:var(--accent);">smart_toy</span>
+				<span id="model-display">Yükleniyor...</span>
+				<span class="material-symbols-rounded" style="font-size:13px;">keyboard_arrow_down</span>
+			</button>
+			<button onclick="openModal('reasoningModal')" class="badge-btn">
+				<span class="material-symbols-rounded" style="font-size:14px;color:var(--accent2);">psychology</span>
+				<span id="reasoning-display">Düşünme: Düşük</span>
+				<span class="material-symbols-rounded" style="font-size:13px;">keyboard_arrow_down</span>
+			</button>
+		</div>
+
+		<div style="display:flex;align-items:center;gap:8px;">
+			<div class="status-pill" id="cwd-display" title="Çalışma dizini">
+				<span class="material-symbols-rounded" style="font-size:13px;">folder</span>
+				<span id="cwd-text" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">—</span>
+			</div>
+			<div class="status-pill" id="token-pill" title="Token kullanımı">
+				<span class="material-symbols-rounded" style="font-size:13px;">data_usage</span>
+				<span id="token-usage">0 / 0</span>
+			</div>
+			<button onclick="toggleSearch()" class="tool-btn" title="Ara (Ctrl+F)">
+				<span class="material-symbols-rounded">search</span>
+			</button>
+			<button onclick="openCmdPalette()" class="tool-btn" title="Komut Paleti (Ctrl+K)">
+				<span class="material-symbols-rounded">apps</span>
+			</button>
+			<!-- User menu -->
+			<div style="position:relative;">
+				<button id="user-menu-btn" onclick="toggleUserMenu()" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#fff;transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'" title="Kullanıcı menüsü">
+					<span id="user-initial">U</span>
+				</button>
+				<div id="user-dropdown" class="hidden" style="position:absolute;right:0;top:calc(100%+8px);width:280px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);z-index:200;padding:8px;animation:scaleIn 0.15s ease;"></div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Search Bar -->
+	<div id="search-bar">
+		<span class="material-symbols-rounded" style="font-size:18px;color:var(--muted);">search</span>
+		<input id="search-input" placeholder="Sohbette ara..." oninput="searchChat(this.value)">
+		<span class="search-count" id="search-count"></span>
+		<button onclick="toggleSearch()" class="tool-btn"><span class="material-symbols-rounded" style="font-size:17px;">close</span></button>
+	</div>
+
+	<!-- Chat -->
+	<div id="chat-container">
+		<div class="chat-inner" id="chat-inner">
+			<!-- Empty state -->
+			<div id="empty-state">
+				<div class="empty-orb">
+					<span class="material-symbols-rounded thinking-pulse" style="font-size:28px;color:var(--accent);">auto_awesome</span>
+				</div>
+				<h2 style="font-size:1.3rem;font-weight:600;margin:0 0 8px;">Bugün nasıl yardımcı olabilirim?</h2>
+				<p style="color:var(--muted);font-size:0.85rem;margin:0 0 28px;max-width:400px;line-height:1.6;">Kodunuzu yazın, hata ayıklayın, refactor yapın veya sıfırdan proje başlatın.</p>
+				<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+					<button onclick="insertPrompt('Kodumu incele ve iyileştirme öner')" class="badge-btn" style="padding:8px 14px;border-radius:10px;">
+						<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent);">code_blocks</span>
+						Kod incele
+					</button>
+					<button onclick="insertPrompt('/build')" class="badge-btn" style="padding:8px 14px;border-radius:10px;">
+						<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent2);">construction</span>
+						Derle
+					</button>
+					<button onclick="insertPrompt('/test')" class="badge-btn" style="padding:8px 14px;border-radius:10px;">
+						<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent);">science</span>
+						Test çalıştır
+					</button>
+					<button onclick="insertPrompt('/review')" class="badge-btn" style="padding:8px 14px;border-radius:10px;">
+						<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent2);">rate_review</span>
+						Kod review
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Input Area -->
+	<div id="input-area">
+		<div class="input-wrap" style="position:relative;">
+			<!-- Autocomplete -->
+			<div id="autocomplete" class="hidden"></div>
+
+			<!-- Attachment preview -->
+			<div id="attachment-preview" class="hidden" style="padding:6px 14px;display:flex;gap:6px;flex-wrap:wrap;"></div>
+
+			<div class="input-box">
+				<div class="input-toolbar">
+					<button class="tool-btn" onclick="document.getElementById('file-input').click()" title="Dosya ekle">
+						<span class="material-symbols-rounded" style="font-size:19px;">attach_file</span>
+					</button>
+					<input id="file-input" type="file" class="hidden" multiple onchange="handleFileAttach(this)">
+					<button class="tool-btn" onclick="openCmdPalette()" title="Komutlar">
+						<span class="material-symbols-rounded" style="font-size:19px;">bolt</span>
+					</button>
+				</div>
+				<textarea id="prompt-input" rows="1" placeholder="MoonCode'a mesaj yazın… (Enter = gönder, Shift+Enter = yeni satır)"></textarea>
+				<div class="input-footer">
+					<div class="input-footer-left">
+						<button onclick="openModal('modelModal')" class="badge-btn" style="font-size:0.68rem;">
+							<span id="input-model-badge" style="font-family:'JetBrains Mono',monospace;">—</span>
+							<span class="material-symbols-rounded" style="font-size:11px;">keyboard_arrow_down</span>
+						</button>
+					</div>
+					<div class="input-footer-right">
+						<span class="char-count" id="char-count"></span>
+						<button id="stop-btn" onclick="interruptGeneration()" class="hidden" title="Durdur">
+							<span class="material-symbols-rounded" style="font-size:16px;">stop</span>
+						</button>
+						<button id="send-btn" onclick="sendMessage()" title="Gönder (Enter)">
+							<span class="material-symbols-rounded" style="font-size:17px;">arrow_upward</span>
+						</button>
+					</div>
+				</div>
+			</div>
+			<div style="text-align:center;font-size:0.65rem;color:var(--muted);margin-top:6px;opacity:0.5;">
+				MoonCode yapay zeka hatalar yapabilir. Kritik bilgileri doğrulayın.
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- ═══════════════════ MODALS ═══════════════════════════════════════════ -->
+
+<!-- Model Modal -->
+<div id="modelModal" class="modal-overlay" onclick="overlayClose(event, 'modelModal')">
+	<div class="modal" style="max-width:460px;" onclick="event.stopPropagation()">
+		<div class="modal-header">
+			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">smart_toy</span> Model Seç</div>
+			<button class="modal-close" onclick="closeModal('modelModal')"><span class="material-symbols-rounded">close</span></button>
+		</div>
+		<div class="modal-body" id="model-list">
+			<div style="text-align:center;padding:20px;color:var(--muted);font-size:0.82rem;">Modeller yükleniyor...</div>
+		</div>
+	</div>
+</div>
+
+<!-- Reasoning Modal -->
+<div id="reasoningModal" class="modal-overlay" onclick="overlayClose(event,'reasoningModal')">
+	<div class="modal" style="max-width:320px;" onclick="event.stopPropagation()">
+		<div class="modal-header">
+			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent2);">psychology</span> Düşünme Seviyesi</div>
+			<button class="modal-close" onclick="closeModal('reasoningModal')"><span class="material-symbols-rounded">close</span></button>
+		</div>
+		<div class="modal-body" style="display:flex;flex-direction:column;gap:6px;">
+			<button onclick="setReasoning('none')" class="model-item" id="r-none">
+				<span class="material-symbols-rounded" style="color:var(--muted);">remove_circle</span>
+				<div><div class="cmd-title">Kapalı</div><div class="cmd-desc">Daha hızlı yanıt, düşünme yok</div></div>
+			</button>
+			<button onclick="setReasoning('low')" class="model-item" id="r-low">
+				<span class="material-symbols-rounded" style="color:var(--accent);">battery_1_bar</span>
+				<div><div class="cmd-title">Düşük</div><div class="cmd-desc">Hafif düşünme, dengeli hız</div></div>
+			</button>
+			<button onclick="setReasoning('medium')" class="model-item" id="r-medium">
+				<span class="material-symbols-rounded" style="color:var(--accent);">battery_3_bar</span>
+				<div><div class="cmd-title">Orta</div><div class="cmd-desc">Derin analiz, orta hız</div></div>
+			</button>
+			<button onclick="setReasoning('high')" class="model-item" id="r-high">
+				<span class="material-symbols-rounded" style="color:var(--accent2);">battery_full</span>
+				<div><div class="cmd-title">Yüksek</div><div class="cmd-desc">En derin düşünme, yavaş</div></div>
+			</button>
+		</div>
+	</div>
+</div>
+
+<!-- Settings Modal -->
+<div id="settingsModal" class="modal-overlay" onclick="overlayClose(event,'settingsModal')">
+	<div class="modal" style="max-width:440px;" onclick="event.stopPropagation()">
+		<div class="modal-header">
+			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">settings</span> Ayarlar</div>
+			<button class="modal-close" onclick="closeModal('settingsModal')"><span class="material-symbols-rounded">close</span></button>
+		</div>
+		<div class="modal-body" id="settings-body">
+			<div style="text-align:center;padding:20px;color:var(--muted);font-size:0.82rem;">Yükleniyor...</div>
+		</div>
+		<div class="modal-footer">
+			<button onclick="closeModal('settingsModal')" class="btn btn-ghost">İptal</button>
+			<button onclick="saveSettings()" class="btn btn-primary"><span class="material-symbols-rounded" style="font-size:15px;">save</span>Kaydet</button>
+		</div>
+	</div>
+</div>
+
+<!-- Theme Modal -->
+<div id="themeModal" class="modal-overlay" onclick="overlayClose(event,'themeModal')">
+	<div class="modal" style="max-width:480px;" onclick="event.stopPropagation()">
+		<div class="modal-header">
+			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">palette</span> Tema Seç</div>
+			<button class="modal-close" onclick="closeModal('themeModal')"><span class="material-symbols-rounded">close</span></button>
+		</div>
+		<div class="modal-body">
+			<div class="theme-grid">
+				<div class="theme-card" id="theme-mooncode" onclick="setTheme('mooncode')">
+					<div class="theme-preview" style="background:linear-gradient(135deg,#0e0f10 40%,#141518);border-bottom:1px solid #1a1b1e;">
+						<div style="position:absolute;bottom:8px;left:10px;display:flex;gap:4px;">
+							<div style="width:36px;height:8px;border-radius:4px;background:#6c8fff;opacity:0.7;"></div>
+							<div style="width:22px;height:8px;border-radius:4px;background:#5dd5c8;opacity:0.5;"></div>
+						</div>
+					</div>
+					<div class="theme-name">MoonCode</div>
+				</div>
+				<div class="theme-card" id="theme-nord" onclick="setTheme('nord')">
+					<div class="theme-preview" style="background:linear-gradient(135deg,#1a1d27 40%,#1e2230);border-bottom:1px solid #222739;">
+						<div style="position:absolute;bottom:8px;left:10px;display:flex;gap:4px;">
+							<div style="width:36px;height:8px;border-radius:4px;background:#89b4fa;opacity:0.7;"></div>
+							<div style="width:22px;height:8px;border-radius:4px;background:#94e2d5;opacity:0.5;"></div>
+						</div>
+					</div>
+					<div class="theme-name">Nord</div>
+				</div>
+				<div class="theme-card" id="theme-forest" onclick="setTheme('forest')">
+					<div class="theme-preview" style="background:linear-gradient(135deg,#0d1117 40%,#111820);border-bottom:1px solid #161e28;">
+						<div style="position:absolute;bottom:8px;left:10px;display:flex;gap:4px;">
+							<div style="width:36px;height:8px;border-radius:4px;background:#7ec8a0;opacity:0.7;"></div>
+							<div style="width:22px;height:8px;border-radius:4px;background:#5ba88a;opacity:0.5;"></div>
+						</div>
+					</div>
+					<div class="theme-name">Orman</div>
+				</div>
+				<div class="theme-card" id="theme-rosepine" onclick="setTheme('rosepine')">
+					<div class="theme-preview" style="background:linear-gradient(135deg,#191724 40%,#1f1d2e);border-bottom:1px solid #26233a;">
+						<div style="position:absolute;bottom:8px;left:10px;display:flex;gap:4px;">
+							<div style="width:36px;height:8px;border-radius:4px;background:#c4a7e7;opacity:0.7;"></div>
+							<div style="width:22px;height:8px;border-radius:4px;background:#f6c177;opacity:0.5;"></div>
+						</div>
+					</div>
+					<div class="theme-name">Rosé Pine</div>
+				</div>
+				<div class="theme-card" id="theme-sepia" onclick="setTheme('sepia')">
+					<div class="theme-preview" style="background:linear-gradient(135deg,#1c1a16 40%,#211e18);border-bottom:1px solid #26221a;">
+						<div style="position:absolute;bottom:8px;left:10px;display:flex;gap:4px;">
+							<div style="width:36px;height:8px;border-radius:4px;background:#d4a853;opacity:0.7;"></div>
+							<div style="width:22px;height:8px;border-radius:4px;background:#c8855a;opacity:0.5;"></div>
+						</div>
+					</div>
+					<div class="theme-name">Sepya (Göz Dostu)</div>
+				</div>
+				<div class="theme-card" id="theme-light" onclick="setTheme('light')">
+					<div class="theme-preview" style="background:linear-gradient(135deg,#f5f5f7 40%,#ffffff);border-bottom:1px solid #e5e5ea;">
+						<div style="position:absolute;bottom:8px;left:10px;display:flex;gap:4px;">
+							<div style="width:36px;height:8px;border-radius:4px;background:#4f6ef7;opacity:0.7;"></div>
+							<div style="width:22px;height:8px;border-radius:4px;background:#0ea5c8;opacity:0.5;"></div>
+						</div>
+					</div>
+					<div class="theme-name" style="background:#f0f0f5;color:#1a1a2e;">Açık</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Shortcuts Modal -->
+<div id="shortcutsModal" class="modal-overlay" onclick="overlayClose(event,'shortcutsModal')">
+	<div class="modal" style="max-width:400px;" onclick="event.stopPropagation()">
+		<div class="modal-header">
+			<div class="modal-title"><span class="material-symbols-rounded" style="color:var(--accent);">keyboard</span> Klavye Kısayolları</div>
+			<button class="modal-close" onclick="closeModal('shortcutsModal')"><span class="material-symbols-rounded">close</span></button>
+		</div>
+		<div class="modal-body">
+			<div style="display:flex;flex-direction:column;gap:3px;font-size:0.8rem;">
+				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;background:var(--surface2);">
+					<span style="color:var(--fg);">Gönder</span>
+					<div style="display:flex;gap:4px;"><kbd>Enter</kbd></div>
+				</div>
+				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;">
+					<span style="color:var(--fg);">Yeni Satır</span>
+					<div style="display:flex;gap:4px;"><kbd>Shift</kbd><kbd>Enter</kbd></div>
+				</div>
+				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;background:var(--surface2);">
+					<span style="color:var(--fg);">Komut Paleti</span>
+					<div style="display:flex;gap:4px;"><kbd>Ctrl</kbd><kbd>K</kbd></div>
+				</div>
+				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;">
+					<span style="color:var(--fg);">Ara</span>
+					<div style="display:flex;gap:4px;"><kbd>Ctrl</kbd><kbd>F</kbd></div>
+				</div>
+				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;background:var(--surface2);">
+					<span style="color:var(--fg);">Kenar Çubuğu</span>
+					<div style="display:flex;gap:4px;"><kbd>Ctrl</kbd><kbd>B</kbd></div>
+				</div>
+				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;">
+					<span style="color:var(--fg);">Durdur</span>
+					<div style="display:flex;gap:4px;"><kbd>Escape</kbd></div>
+				</div>
+				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;background:var(--surface2);">
+					<span style="color:var(--fg);">Yeni Sohbet</span>
+					<div style="display:flex;gap:4px;"><kbd>Ctrl</kbd><kbd>N</kbd></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Command Palette -->
+<div id="cmd-palette" class="modal-overlay" onclick="overlayClose(event,'cmd-palette')">
+	<div class="modal" style="max-width:520px;margin-top:-10vh;" onclick="event.stopPropagation()">
+		<div style="padding:14px 14px 8px;">
+			<input id="cmd-input" placeholder="Komut ara veya mesaj gönder..." oninput="filterCommands(this.value)" onkeydown="cmdKeydown(event)">
+		</div>
+		<div class="cmd-list" id="cmd-list" style="padding:0 8px 10px;"></div>
+	</div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<!-- ═══════════════════ SCRIPT ═══════════════════════════════════════════ -->
+<script>
+// ─── MARKED SETUP ────────────────────────────────────────────────────────
+const renderer = new marked.Renderer();
+
+renderer.code = function(token) {
+	const code = typeof token === 'object' ? (token.text || '') : (token || '');
+	const lang = typeof token === 'object' ? (token.lang || 'text') : 'text';
+	const escaped = code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+	const highlighted = (hljs && hljs.getLanguage(lang))
+		? hljs.highlight(code, { language: lang, ignoreIllegals: true }).value
+		: escaped;
+	const id = 'code-' + Math.random().toString(36).substr(2, 8);
+	return `
+		<div class="code-block">
+			<div class="code-header">
+				<div class="lang-badge">
+					<span class="material-symbols-rounded" style="font-size:14px;">code</span>
+					${lang}
+				</div>
+				<div class="code-actions">
+					<button onclick="runCode(this)" title="Çalıştır" style="display:none;" id="run-${id}">
+						<span class="material-symbols-rounded" style="font-size:15px;">play_arrow</span>
+					</button>
+					<button onclick="downloadCode(this, '${lang}')" title="İndir">
+						<span class="material-symbols-rounded" style="font-size:15px;">download</span>
+					</button>
+					<button onclick="copyCode(this)" title="Kopyala">
+						<span class="material-symbols-rounded" style="font-size:15px;">content_copy</span>
+					</button>
+				</div>
+			</div>
+			<pre id="${id}"><code class="language-${lang}">${highlighted}</code></pre>
+		</div>`;
+};
+
+renderer.codespan = function(token) {
+	const code = typeof token === 'object' ? (token.text || '') : (token || '');
+	return `<code>${code}</code>`;
+};
+
+marked.setOptions({ renderer, breaks: true, gfm: true });
+
+// ─── STATE ────────────────────────────────────────────────────────────────
+const chatInner = document.getElementById('chat-inner');
+const chatContainer = document.getElementById('chat-container');
+const promptInput = document.getElementById('prompt-input');
+const sendBtn = document.getElementById('send-btn');
+const stopBtn = document.getElementById('stop-btn');
+let authUrl = 'http://127.0.0.1:3131';
+let currentAssistantMsgId = null;
+let isGenerating = false;
+let attachedFiles = [];
+let currentTheme = localStorage.getItem('mc-theme') || 'mooncode';
+let allCommands = [];
+let filteredCmds = [];
+let cmdIndex = -1;
+let availableCommands = [];
+let filteredCommands = [];
+let acIndex = -1;
+
+// ─── THEME ────────────────────────────────────────────────────────────────
+function setTheme(theme) {
+	currentTheme = theme;
+	document.documentElement.setAttribute('data-theme', theme);
+	localStorage.setItem('mc-theme', theme);
+	document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+	const card = document.getElementById('theme-' + theme);
+	if (card) card.classList.add('active');
+
+	// Update hljs theme for light
+	const hljsLink = document.getElementById('hljs-theme');
+	if (hljsLink) {
+		hljsLink.href = theme === 'light'
+			? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css'
+			: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css';
+	}
+	closeModal('themeModal');
+	toast('Tema değiştirildi', 'success');
+}
+// Apply saved theme on load
+document.documentElement.setAttribute('data-theme', currentTheme);
+setTimeout(() => {
+	document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+	const card = document.getElementById('theme-' + currentTheme);
+	if (card) card.classList.add('active');
+}, 100);
+
+// ─── TOAST ────────────────────────────────────────────────────────────────
+function toast(msg, type = 'info', duration = 3000) {
+	const container = document.getElementById('toast-container');
+	const el = document.createElement('div');
+	el.className = `toast ${type}`;
+	const icons = { success: 'check_circle', error: 'error', info: 'info', warning: 'warning' };
+	const colors = { success: 'var(--accent2)', error: '#ff6464', info: 'var(--accent)', warning: '#f6c177' };
+	el.innerHTML = `
+		<span class="material-symbols-rounded" style="font-size:18px;color:${colors[type] || colors.info};flex-shrink:0;">${icons[type] || 'info'}</span>
+		<span style="flex:1;">${msg}</span>
+		<button onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:0;display:flex;">
+			<span class="material-symbols-rounded" style="font-size:16px;">close</span>
+		</button>`;
+	container.appendChild(el);
+	setTimeout(() => {
+		el.classList.add('out');
+		setTimeout(() => el.remove(), 300);
+	}, duration);
+}
+
+// ─── MODAL ────────────────────────────────────────────────────────────────
+function openModal(id) {
+	document.getElementById(id).classList.add('active');
+	if (id === 'modelModal') loadModels();
+	if (id === 'settingsModal') loadSettings();
+}
+function closeModal(id) {
+	if (id) document.getElementById(id)?.classList.remove('active');
+	else document.querySelectorAll('.modal-overlay').forEach(el => el.classList.remove('active'));
+}
+function overlayClose(e, id) {
+	if (e.target === e.currentTarget) closeModal(id);
+}
+
+// ─── SIDEBAR ──────────────────────────────────────────────────────────────
+let sidebarOpen = true;
+function toggleSidebar() {
+	sidebarOpen = !sidebarOpen;
+	const sb = document.getElementById('sidebar');
+	if (sidebarOpen) sb.classList.remove('collapsed');
+	else sb.classList.add('collapsed');
+}
+
+// ─── SEARCH ───────────────────────────────────────────────────────────────
+let searchActive = false;
+function toggleSearch() {
+	searchActive = !searchActive;
+	const bar = document.getElementById('search-bar');
+	if (searchActive) {
+		bar.classList.add('active');
+		document.getElementById('search-input').focus();
+	} else {
+		bar.classList.remove('active');
+		document.getElementById('search-input').value = '';
+		searchChat('');
+	}
+}
+
+function searchChat(query) {
+	const count = document.getElementById('search-count');
+	if (!query.trim()) { count.textContent = ''; return; }
+	const nodes = chatInner.querySelectorAll('.assistant-content,.user-bubble');
+	let matches = 0;
+	nodes.forEach(n => {
+		const text = n.textContent;
+		if (text.toLowerCase().includes(query.toLowerCase())) matches++;
+	});
+	count.textContent = matches ? `${matches} sonuç` : 'Bulunamadı';
+}
+
+// ─── EXPORT ───────────────────────────────────────────────────────────────
+function exportChat() {
+	const rows = chatInner.querySelectorAll('.msg-row');
+	let md = `# MoonCode Sohbet Dışa Aktarma\n\n_${new Date().toLocaleString('tr-TR')}_\n\n---\n\n`;
+	rows.forEach(row => {
+		const isUser = row.classList.contains('user');
+		const bubble = row.querySelector('.user-bubble, .assistant-content');
+		if (!bubble) return;
+		md += `**${isUser ? '👤 Kullanıcı' : '🤖 MoonCode'}**\n\n${bubble.textContent.trim()}\n\n---\n\n`;
+	});
+	const blob = new Blob([md], { type: 'text/markdown' });
+	const url = URL.createObjectURL(blob);
+	const a = document.createElement('a');
+	a.href = url; a.download = `mooncode-${Date.now()}.md`; a.click();
+	URL.revokeObjectURL(url);
+	toast('Sohbet dışa aktarıldı', 'success');
+}
+
+// ─── INSERT PROMPT ────────────────────────────────────────────────────────
+function insertPrompt(text) {
+	promptInput.value = text;
+	promptInput.focus();
+	autoResize();
+}
+
+// ─── FILE ATTACH ──────────────────────────────────────────────────────────
+function handleFileAttach(input) {
+	const files = Array.from(input.files);
+	files.forEach(f => { if (!attachedFiles.find(x => x.name === f.name)) attachedFiles.push(f); });
+	renderAttachments();
+	input.value = '';
+}
+
+function renderAttachments() {
+	const preview = document.getElementById('attachment-preview');
+	if (!attachedFiles.length) { preview.classList.add('hidden'); return; }
+	preview.classList.remove('hidden');
+	preview.innerHTML = attachedFiles.map((f, i) => `
+		<span class="file-chip">
+			<span class="material-symbols-rounded" style="font-size:14px;color:var(--accent);">description</span>
+			${f.name}
+			<button onclick="removeFile(${i})" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:0;display:flex;">
+				<span class="material-symbols-rounded" style="font-size:13px;">close</span>
+			</button>
+		</span>`).join('');
+}
+
+function removeFile(i) {
+	attachedFiles.splice(i, 1);
+	renderAttachments();
+}
+
+// ─── TEXTAREA AUTO RESIZE ─────────────────────────────────────────────────
+function autoResize() {
+	promptInput.style.height = 'auto';
+	promptInput.style.height = Math.min(promptInput.scrollHeight, 200) + 'px';
+}
+promptInput.addEventListener('input', () => {
+	autoResize();
+	const len = promptInput.value.length;
+	const cc = document.getElementById('char-count');
+	cc.textContent = len > 50 ? len.toLocaleString() : '';
+	handleAutocomplete();
+});
+
+// ─── INPUT AREA PADDING ───────────────────────────────────────────────────
+const inputArea = document.getElementById('input-area');
+function updateChatPadding() {
+	chatContainer.style.paddingBottom = (inputArea.offsetHeight + 8) + 'px';
+}
+updateChatPadding();
+new ResizeObserver(updateChatPadding).observe(inputArea);
+
+// ─── AUTOCOMPLETE ─────────────────────────────────────────────────────────
+const autocompleteEl = document.getElementById('autocomplete');
+
+function handleAutocomplete() {
+	const val = promptInput.value;
+	if (!val.startsWith('/')) { hideAutocomplete(); return; }
+	const q = val.slice(1).toLowerCase();
+	filteredCommands = availableCommands.filter(c => c.cmd.slice(1).toLowerCase().startsWith(q));
+	if (!filteredCommands.length) { hideAutocomplete(); return; }
+	acIndex = -1;
+	renderAutocomplete();
+	autocompleteEl.classList.remove('hidden');
+}
+
+function renderAutocomplete() {
+	autocompleteEl.innerHTML = filteredCommands.map((c, i) => `
+		<div class="ac-item ${i === acIndex ? 'active' : ''}" onclick="selectCommand('${c.cmd}')">
+			<span class="material-symbols-rounded" style="font-size:16px;color:var(--accent);flex-shrink:0;">bolt</span>
+			<div style="overflow:hidden;">
+				<div class="ac-cmd">${c.cmd}</div>
+				<div class="ac-desc" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.desc}</div>
+			</div>
+		</div>`).join('');
+}
+
+function hideAutocomplete() {
+	autocompleteEl.classList.add('hidden');
+	acIndex = -1;
+}
+
+function selectCommand(cmd) {
+	promptInput.value = cmd + ' ';
+	hideAutocomplete();
+	promptInput.focus();
+}
+
+// ─── COMMAND PALETTE ──────────────────────────────────────────────────────
+const paletteCommands = [
+	{ icon: 'add', title: 'Yeni Sohbet', desc: 'Sohbeti temizle', action: () => newChat(), kbd: 'Ctrl+N' },
+	{ icon: 'construction', title: 'Derle', desc: 'Projeyi derle', action: () => { closeModal('cmd-palette'); insertPrompt('/build'); sendMessage(); } },
+	{ icon: 'science', title: 'Test Çalıştır', desc: 'Test paketini çalıştır', action: () => { closeModal('cmd-palette'); insertPrompt('/test'); sendMessage(); } },
+	{ icon: 'rate_review', title: 'Kod Review', desc: 'Kodu gözden geçir', action: () => { closeModal('cmd-palette'); insertPrompt('/review'); sendMessage(); } },
+	{ icon: 'content_cut', title: 'Sıkıştır', desc: 'Bağlamı sıkıştır', action: () => { closeModal('cmd-palette'); insertPrompt('/compact'); sendMessage(); } },
+	{ icon: 'commit', title: 'Diff Göster', desc: 'Git değişiklikleri göster', action: () => { closeModal('cmd-palette'); insertPrompt('/diff'); sendMessage(); } },
+	{ icon: 'rocket_launch', title: 'Ship', desc: 'Değişiklikleri push et', action: () => { closeModal('cmd-palette'); insertPrompt('/ship'); sendMessage(); } },
+	{ icon: 'search', title: 'Sohbette Ara', desc: 'Ctrl+F', action: () => { closeModal('cmd-palette'); toggleSearch(); } },
+	{ icon: 'download', title: 'Dışa Aktar', desc: 'Sohbeti markdown olarak indir', action: () => { closeModal('cmd-palette'); exportChat(); } },
+	{ icon: 'palette', title: 'Tema Seç', desc: '6 farklı tema', action: () => { closeModal('cmd-palette'); openModal('themeModal'); } },
+	{ icon: 'smart_toy', title: 'Model Seç', desc: 'AI modeli değiştir', action: () => { closeModal('cmd-palette'); openModal('modelModal'); } },
+	{ icon: 'settings', title: 'Ayarlar', desc: 'Uygulama ayarları', action: () => { closeModal('cmd-palette'); openModal('settingsModal'); } },
+	{ icon: 'keyboard', title: 'Kısayollar', desc: 'Tüm kısayolları göster', action: () => { closeModal('cmd-palette'); openModal('shortcutsModal'); } },
+	{ icon: 'restart_alt', title: 'Sıfırla', desc: 'Oturumu sıfırla', action: () => { closeModal('cmd-palette'); fetch('/api/reset',{method:'POST'}); newChat(); toast('Oturum sıfırlandı','info'); } },
+];
+
+function openCmdPalette() {
+	openModal('cmd-palette');
+	document.getElementById('cmd-input').value = '';
+	filterCommands('');
+	setTimeout(() => document.getElementById('cmd-input').focus(), 50);
+}
+
+function filterCommands(q) {
+	filteredCmds = q
+		? paletteCommands.filter(c => c.title.toLowerCase().includes(q.toLowerCase()) || c.desc.toLowerCase().includes(q.toLowerCase()))
+		: paletteCommands;
+	cmdIndex = -1;
+	renderCmdList();
+}
+
+function renderCmdList() {
+	document.getElementById('cmd-list').innerHTML = filteredCmds.map((c, i) => `
+		<div class="cmd-item ${i === cmdIndex ? 'active' : ''}" onclick="filteredCmds[${i}].action()">
+			<span class="material-symbols-rounded cmd-icon" style="font-size:18px;">${c.icon}</span>
+			<div style="flex:1;overflow:hidden;">
+				<div class="cmd-title">${c.title}</div>
+				<div class="cmd-desc" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.desc}</div>
+			</div>
+			${c.kbd ? `<div class="cmd-kbd"><kbd>${c.kbd}</kbd></div>` : ''}
+		</div>`).join('');
+}
+
+function cmdKeydown(e) {
+	if (e.key === 'ArrowDown') {
+		e.preventDefault();
+		cmdIndex = Math.min(cmdIndex + 1, filteredCmds.length - 1);
+		renderCmdList();
+	} else if (e.key === 'ArrowUp') {
+		e.preventDefault();
+		cmdIndex = Math.max(cmdIndex - 1, -1);
+		renderCmdList();
+	} else if (e.key === 'Enter') {
+		e.preventDefault();
+		if (cmdIndex >= 0 && filteredCmds[cmdIndex]) filteredCmds[cmdIndex].action();
+		else if (document.getElementById('cmd-input').value.trim()) {
+			const txt = document.getElementById('cmd-input').value.trim();
+			closeModal('cmd-palette');
+			insertPrompt(txt);
+			sendMessage();
+		}
+	} else if (e.key === 'Escape') {
+		closeModal('cmd-palette');
+	}
+}
+
+// ─── GLOBAL KEYBOARD SHORTCUTS ───────────────────────────────────────────
+document.addEventListener('keydown', (e) => {
+	if (e.ctrlKey || e.metaKey) {
+		if (e.key === 'k') { e.preventDefault(); openCmdPalette(); }
+		else if (e.key === 'b') { e.preventDefault(); toggleSidebar(); }
+		else if (e.key === 'f') { e.preventDefault(); toggleSearch(); }
+		else if (e.key === 'n') { e.preventDefault(); newChat(); }
+	}
+	if (e.key === 'Escape') {
+		if (document.querySelector('.modal-overlay.active')) {
+			document.querySelectorAll('.modal-overlay.active').forEach(el => el.classList.remove('active'));
+		} else if (isGenerating) {
+			interruptGeneration();
+		}
+		if (searchActive) toggleSearch();
+	}
+});
+
+promptInput.addEventListener('keydown', (e) => {
+	// Autocomplete navigation
+	if (!autocompleteEl.classList.contains('hidden') && filteredCommands.length > 0) {
+		if (e.key === 'ArrowDown') { e.preventDefault(); acIndex = (acIndex+1)%filteredCommands.length; renderAutocomplete(); return; }
+		if (e.key === 'ArrowUp') { e.preventDefault(); acIndex = (acIndex-1+filteredCommands.length)%filteredCommands.length; renderAutocomplete(); return; }
+		if (e.key === 'Enter' && acIndex >= 0) { e.preventDefault(); selectCommand(filteredCommands[acIndex].cmd); return; }
+		if (e.key === 'Escape') { e.preventDefault(); hideAutocomplete(); return; }
+	}
+	if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+
+// ─── APPEND TO CHAT ───────────────────────────────────────────────────────
+function appendToChat(el) {
+	const indicator = document.getElementById('global-indicator');
+	if (indicator) chatInner.insertBefore(el, indicator);
+	else chatInner.appendChild(el);
+	chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+// ─── SET GENERATING STATE ─────────────────────────────────────────────────
+function setGeneratingState(generating) {
+	isGenerating = generating;
+	sendBtn.classList.toggle('hidden', generating);
+	stopBtn.classList.toggle('hidden', !generating);
+
+	let indicator = document.getElementById('global-indicator');
+	if (generating && !indicator) {
+		indicator = document.createElement('div');
+		indicator.id = 'global-indicator';
+		indicator.className = 'msg-row assistant';
+		indicator.innerHTML = `
+			<div style="display:flex;align-items:center;gap:8px;color:var(--muted);font-size:0.78rem;padding:4px 0;">
+				<span class="material-symbols-rounded thinking-pulse" style="font-size:16px;color:var(--accent);">psychology</span>
+				<span class="thinking-pulse">Düşünüyor...</span>
+			</div>`;
+		chatInner.appendChild(indicator);
+		chatContainer.scrollTop = chatContainer.scrollHeight;
+	} else if (!generating && indicator) {
+		indicator.remove();
+	}
+}
+
+// ─── APPEND MESSAGE ───────────────────────────────────────────────────────
+function appendMessage(role, content, id = null) {
+	// Remove empty state
+	const emptyState = document.getElementById('empty-state');
+	if (emptyState) emptyState.remove();
+
+	const row = document.createElement('div');
+	row.className = `msg-row ${role} msg-enter`;
+	row.id = id || ('msg-' + Date.now() + Math.random().toString(36).substr(2,5));
+
+	if (role === 'user') {
+		row.innerHTML = `
+			<div class="user-bubble">${escapeHtml(typeof content === 'string' ? content : '')}</div>
+			<div class="action-bar">
+				<button onclick="copyText(this.closest('.msg-row').querySelector('.user-bubble').textContent)" title="Kopyala">
+					<span class="material-symbols-rounded" style="font-size:16px;">content_copy</span>
+				</button>
+			</div>`;
+	} else {
+		row.innerHTML = `
+			<div class="assistant-content prose" id="inner-${row.id}"></div>
+			<div class="action-bar">
+				<button onclick="copyText(document.getElementById('inner-${row.id}').innerText)" title="Kopyala">
+					<span class="material-symbols-rounded" style="font-size:16px;">content_copy</span>
+				</button>
+				<button onclick="shareMsg('${row.id}')" title="Paylaş">
+					<span class="material-symbols-rounded" style="font-size:16px;">share</span>
+				</button>
+				<button onclick="likeMsg('${row.id}', true)" title="Beğen">
+					<span class="material-symbols-rounded" style="font-size:16px;">thumb_up</span>
+				</button>
+				<button onclick="likeMsg('${row.id}', false)" title="Beğenme">
+					<span class="material-symbols-rounded" style="font-size:16px;">thumb_down</span>
+				</button>
+			</div>`;
+		if (content) updateMessage(row.id, content);
+	}
+
+	appendToChat(row);
+	return row.id;
+}
+
+// ─── UPDATE MESSAGE ───────────────────────────────────────────────────────
+function updateMessage(id, content) {
+	const inner = document.getElementById('inner-' + id);
+	if (!inner) return;
+
+	let text = '', thinking = '';
+	if (typeof content === 'string') {
+		text = content;
+	} else if (Array.isArray(content)) {
+		content.forEach(c => {
+			if (c.type === 'text') text += c.text || '';
+			else if (c.type === 'thinking') thinking += c.thinking || '';
+		});
+	}
+
+	let html = '';
+	if (thinking.trim()) {
+		html += `
+			<div class="thinking-block collapsed">
+				<div class="thinking-summary" onclick="this.parentElement.classList.toggle('collapsed')">
+					<span style="display:flex;align-items:center;gap:6px;">
+						<span class="material-symbols-rounded thinking-pulse" style="font-size:15px;">psychology</span>
+						Düşünce Süreci
+					</span>
+					<span class="material-symbols-rounded thinking-chevron" style="font-size:16px;">expand_more</span>
+				</div>
+				<div class="thinking-body">${escapeHtml(thinking)}</div>
+			</div>`;
+	}
+	html += marked.parse(text || '');
+	inner.innerHTML = html;
+	chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+// ─── TOOL RENDER ──────────────────────────────────────────────────────────
+function renderTool(toolCallId, name, args, status, result) {
+	let el = document.getElementById('tool-' + toolCallId);
+	if (!el) {
+		el = document.createElement('div');
+		el.id = 'tool-' + toolCallId;
+		el.className = 'tool-enter';
+		appendToChat(el);
+	}
+	el.className = `msg-row assistant tool-enter`;
+
+	const statusClass = status === 'running' ? 'running' : (status === 'error' ? 'error' : 'done');
+	const statusLabel = status === 'running' ? 'Çalışıyor' : (status === 'error' ? 'Hata' : 'Tamamlandı');
+	const fmtArgs = formatToolValue(args);
+	const fmtResult = formatToolValue(result);
+	const hasBody = fmtArgs || fmtResult;
+
+	el.innerHTML = `
+		<div class="tool-card ${statusClass}">
+			<div class="tool-header" onclick="this.nextElementSibling.classList.toggle('hidden')" style="${hasBody ? '' : 'cursor:default;'}">
+				<span class="tool-status-dot"></span>
+				<span class="material-symbols-rounded" style="font-size:15px;color:var(--muted);">${statusClass === 'running' ? 'hourglass_top' : statusClass === 'error' ? 'error' : 'check_circle'}</span>
+				<span class="tool-name">${name || 'tool'}</span>
+				<span style="margin-left:auto;font-size:0.7rem;color:var(--muted);">${statusLabel}</span>
+				${hasBody ? '<span class="material-symbols-rounded" style="font-size:14px;color:var(--muted);">expand_more</span>' : ''}
+			</div>
+			${hasBody ? `
+			<div class="tool-body ${status !== 'running' ? 'hidden' : ''}">
+				${fmtArgs ? `<div class="tool-section"><div class="tool-section-label">Girdi</div><pre>${escapeHtml(fmtArgs)}</pre></div>` : ''}
+				${fmtResult ? `<div class="tool-section result"><div class="tool-section-label">Çıktı</div><pre>${escapeHtml(fmtResult)}</pre></div>` : ''}
+			</div>` : ''}
+		</div>`;
+}
+
+function formatToolValue(val) {
+	if (!val) return '';
+	if (typeof val === 'string') return val.trim();
+	if (Array.isArray(val)) return val.map(formatToolValue).filter(Boolean).join('\n');
+	if (val.type === 'text') return val.text || '';
+	if (val.content) return formatToolValue(val.content);
+	try { return JSON.stringify(val, null, 2); } catch(e) { return String(val); }
+}
+
+// ─── SEND MESSAGE ─────────────────────────────────────────────────────────
+sendBtn.addEventListener('click', sendMessage);
+
+async function sendMessage() {
+	const text = promptInput.value.trim();
+	if (!text || isGenerating) return;
+	promptInput.value = '';
+	autoResize();
+	document.getElementById('char-count').textContent = '';
+	hideAutocomplete();
+
+	if (text === '/login' || text === '/logout') {
+		window.open(authUrl + '/login', '_blank');
+		return;
+	}
+
+	appendMessage('user', text);
+	setGeneratingState(true);
+
+	try {
+		const res = await fetch('/api/prompt', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ prompt: text })
+		});
+		if (!res.ok) {
+			setGeneratingState(false);
+			appendMessage('assistant', 'Hata: ' + await res.text());
+		}
+	} catch(e) {
+		setGeneratingState(false);
+		appendMessage('assistant', 'Bağlantı hatası: sunucuya ulaşılamıyor.');
+	}
+}
+
+// ─── INTERRUPT ────────────────────────────────────────────────────────────
+async function interruptGeneration() {
+	try {
+		await fetch('/api/interrupt', { method: 'POST' });
+		setGeneratingState(false);
+		toast('Durduruldu', 'info');
+	} catch(e) {}
+}
+
+// ─── NEW CHAT ─────────────────────────────────────────────────────────────
+function newChat() {
+	currentAssistantMsgId = null;
+	chatInner.innerHTML = `
+		<div id="empty-state">
+			<div class="empty-orb">
+				<span class="material-symbols-rounded thinking-pulse" style="font-size:28px;color:var(--accent);">auto_awesome</span>
+			</div>
+			<h2 style="font-size:1.3rem;font-weight:600;margin:0 0 8px;">Bugün nasıl yardımcı olabilirim?</h2>
+			<p style="color:var(--muted);font-size:0.85rem;margin:0 0 28px;max-width:400px;line-height:1.6;">Kodunuzu yazın, hata ayıklayın, refactor yapın veya sıfırdan proje başlatın.</p>
+			<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+				<button onclick="insertPrompt('Kodumu incele ve iyileştirme öner')" class="badge-btn" style="padding:8px 14px;border-radius:10px;">
+					<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent);">code_blocks</span>
+					Kod incele
+				</button>
+				<button onclick="insertPrompt('/build')" class="badge-btn" style="padding:8px 14px;border-radius:10px;">
+					<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent2);">construction</span>
+					Derle
+				</button>
+				<button onclick="insertPrompt('/test')" class="badge-btn" style="padding:8px 14px;border-radius:10px;">
+					<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent);">science</span>
+					Test çalıştır
+				</button>
+				<button onclick="insertPrompt('/review')" class="badge-btn" style="padding:8px 14px;border-radius:10px;">
+					<span class="material-symbols-rounded" style="font-size:15px;color:var(--accent2);">rate_review</span>
+					Kod review
+				</button>
+			</div>
+		</div>`;
+	closeModal('cmd-palette');
+}
+
+// ─── LOAD MODELS ──────────────────────────────────────────────────────────
+const providerColors = {
+	google: '#4285f4', anthropic: '#d4956a', openai: '#10a37f',
+	mistral: '#ff7000', cohere: '#39d353', default: '#6c8fff'
+};
+
+async function loadModels() {
+	const list = document.getElementById('model-list');
+	list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:0.82rem;">Yükleniyor...</div>';
+	try {
+		const res = await fetch('/api/models');
+		const models = await res.json();
+		if (!models.length) { list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">Model bulunamadı</div>'; return; }
+		
+		const grouped = {};
+		models.forEach(m => { if (!grouped[m.provider]) grouped[m.provider] = []; grouped[m.provider].push(m); });
+		
+		list.innerHTML = Object.entries(grouped).map(([provider, mods]) => `
+			<div style="margin-bottom:12px;">
+				<div style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding:4px 6px;margin-bottom:4px;">${provider}</div>
+				${mods.map(m => `
+					<div class="model-item" onclick="setModel('${m.provider}','${m.id}')">
+						<div class="model-icon" style="background:${providerColors[provider] || providerColors.default}22;color:${providerColors[provider] || providerColors.default};">
+							${m.name.slice(0,2).toUpperCase()}
+						</div>
+						<div style="overflow:hidden;">
+							<div style="font-size:0.82rem;font-weight:500;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${m.name}</div>
+							<div style="font-size:0.7rem;color:var(--muted);font-family:'JetBrains Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${m.id}</div>
+						</div>
+					</div>`).join('')}
+			</div>`).join('');
+	} catch(e) {
+		list.innerHTML = '<div style="text-align:center;padding:20px;color:#ff6464;font-size:0.82rem;">Modeller yüklenemedi</div>';
+	}
+}
+
+async function setModel(provider, id) {
+	await fetch('/api/set-model', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ provider, model: id })
+	});
+	const name = id.split('/').pop() || id;
+	document.getElementById('model-display').textContent = name;
+	document.getElementById('input-model-badge').textContent = name;
+	closeModal('modelModal');
+	toast(`Model: ${name}`, 'success');
+}
+
+// ─── REASONING ────────────────────────────────────────────────────────────
+const reasoningLabels = { none: 'Kapalı', low: 'Düşük', medium: 'Orta', high: 'Yüksek' };
+
+async function setReasoning(level) {
+	await fetch('/api/set-thinking', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ level })
+	});
+	document.getElementById('reasoning-display').textContent = 'Düşünme: ' + (reasoningLabels[level] || level);
+	['none','low','medium','high'].forEach(l => document.getElementById('r-'+l)?.classList.remove('selected'));
+	document.getElementById('r-'+level)?.classList.add('selected');
+	closeModal('reasoningModal');
+	toast(`Düşünme seviyesi: ${reasoningLabels[level]}`, 'info');
+}
+
+// ─── SETTINGS ─────────────────────────────────────────────────────────────
+async function loadSettings() {
+	const body = document.getElementById('settings-body');
+	try {
+		const res = await fetch('/api/settings');
+		const s = await res.json();
+		body.innerHTML = `
+			<div class="form-group">
+				<label class="form-label">Tema</label>
+				<select class="form-select" id="set-theme" onchange="setTheme(this.value)">
+					<option value="mooncode" ${s.theme==='mooncode'||!s.theme?'selected':''}>MoonCode (Varsayılan)</option>
+					<option value="nord" ${s.theme==='nord'?'selected':''}>Nord</option>
+					<option value="forest" ${s.theme==='forest'?'selected':''}>Orman</option>
+					<option value="rosepine" ${s.theme==='rosepine'?'selected':''}>Rosé Pine</option>
+					<option value="sepia" ${s.theme==='sepia'?'selected':''}>Sepya (Göz Dostu)</option>
+					<option value="light" ${s.theme==='light'?'selected':''}>Açık</option>
+				</select>
+			</div>
+			<div class="form-group">
+				<label class="form-label">Sıkıştırma Profili</label>
+				<select class="form-select" id="set-profile">
+					<option value="balanced" ${s.compactionProfile==='balanced'?'selected':''}>Dengeli</option>
+					<option value="aggressive" ${s.compactionProfile==='aggressive'?'selected':''}>Agresif</option>
+					<option value="off" ${s.compactionProfile==='off'?'selected':''}>Kapalı</option>
+				</select>
+			</div>
+			<label class="form-checkbox-row">
+				<input type="checkbox" id="set-tool-compaction" ${s.enableToolBasedCompaction?'checked':''}>
+				<div>
+					<div style="font-size:0.82rem;font-weight:500;">Araç Tabanlı Sıkıştırma</div>
+					<div style="font-size:0.72rem;color:var(--muted);">Büyük araç çıktılarını otomatik sıkıştır</div>
+				</div>
+			</label>`;
+	} catch(e) {
+		body.innerHTML = '<div style="color:#ff6464;font-size:0.82rem;padding:8px;">Ayarlar yüklenemedi</div>';
+	}
+}
+
+async function saveSettings() {
+	const theme = document.getElementById('set-theme')?.value;
+	const profile = document.getElementById('set-profile')?.value;
+	const toolCompaction = document.getElementById('set-tool-compaction')?.checked;
+	try {
+		await fetch('/api/settings', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ theme, profile, enableToolBasedCompaction: toolCompaction })
+		});
+		if (theme) setTheme(theme);
+		closeModal('settingsModal');
+		toast('Ayarlar kaydedildi', 'success');
+	} catch(e) {
+		toast('Ayarlar kaydedilemedi', 'error');
+	}
+}
+
+// ─── USER MENU ────────────────────────────────────────────────────────────
+let userMenuOpen = false;
+function toggleUserMenu() {
+	const dd = document.getElementById('user-dropdown');
+	userMenuOpen = !userMenuOpen;
+	dd.classList.toggle('hidden', !userMenuOpen);
+}
+document.addEventListener('click', (e) => {
+	const dd = document.getElementById('user-dropdown');
+	const btn = document.getElementById('user-menu-btn');
+	const sbBtn = document.getElementById('sidebar-avatar')?.closest('.sidebar-item') || document.querySelector('[onclick="toggleUserMenu()"]');
+	if (dd && !dd.contains(e.target) && !btn?.contains(e.target)) {
+		dd.classList.add('hidden');
+		userMenuOpen = false;
+	}
+});
+
+function handleAuthAction() { window.open(authUrl + '/login', '_blank'); }
+
+async function updateUserUI() {
+	try {
+		const res = await fetch('/api/auth/status');
+		const data = await res.json();
+		const btn = document.getElementById('user-menu-btn');
+		const sbName = document.getElementById('sidebar-name');
+		const sbAvatar = document.getElementById('sidebar-avatar');
+
+		if (data.isLoggedIn && data.account) {
+			const init = data.account.initial || '?';
+			btn.innerHTML = `<span style="font-size:0.72rem;font-weight:700;">${init}</span>`;
+			if (sbName) sbName.textContent = data.account.name;
+			if (sbAvatar) sbAvatar.textContent = init;
+			document.getElementById('user-initial').textContent = init;
+
+			document.getElementById('user-dropdown').innerHTML = `
+				<div style="padding:10px 12px;border-bottom:1px solid var(--border);margin-bottom:6px;">
+					<div style="font-size:0.85rem;font-weight:600;color:var(--fg);">${data.account.name}</div>
+					<div style="font-size:0.72rem;color:var(--muted);">${data.account.email}</div>
+				</div>
+				<div class="sidebar-item" onclick="handleAuthAction()">
+					<span class="material-symbols-rounded" style="font-size:16px;">account_circle</span>
+					Hesabı Yönet
+				</div>
+				<div class="sidebar-item" style="color:#ff6464;" onclick="handleAuthAction()">
+					<span class="material-symbols-rounded" style="font-size:16px;">logout</span>
+					Çıkış Yap
+				</div>`;
+		} else {
+			document.getElementById('user-initial').textContent = '?';
+			if (sbName) sbName.textContent = 'Giriş Yapılmadı';
+			document.getElementById('user-dropdown').innerHTML = `
+				<div style="padding:16px 12px;text-align:center;border-bottom:1px solid var(--border);margin-bottom:6px;">
+					<span class="material-symbols-rounded" style="font-size:36px;color:var(--muted);">account_circle</span>
+					<div style="font-size:0.82rem;font-weight:600;margin-top:6px;">Giriş Yapılmadı</div>
+					<div style="font-size:0.72rem;color:var(--muted);">Senkronizasyon için giriş yapın</div>
+				</div>
+				<button onclick="handleAuthAction()" class="btn btn-primary" style="width:100%;justify-content:center;margin:4px 0;">
+					<span class="material-symbols-rounded" style="font-size:16px;">login</span>
+					Giriş Yap
+				</button>`;
+		}
+	} catch(e) {}
+}
+
+// ─── CODE ACTIONS ─────────────────────────────────────────────────────────
+function copyCode(btn) {
+	const pre = btn.closest('.code-block').querySelector('pre');
+	if (!pre) return;
+	navigator.clipboard.writeText(pre.textContent.trim());
+	const icon = btn.querySelector('.material-symbols-rounded');
+	if (icon) { icon.textContent = 'check'; setTimeout(() => icon.textContent = 'content_copy', 2000); }
+	toast('Kopyalandı', 'success', 1500);
+}
+
+function downloadCode(btn, lang) {
+	const pre = btn.closest('.code-block').querySelector('pre');
+	if (!pre) return;
+	const exts = { javascript:'js', typescript:'ts', python:'py', css:'css', html:'html', json:'json', bash:'sh', go:'go', rust:'rs', java:'java', cpp:'cpp', c:'c' };
+	const ext = exts[lang] || 'txt';
+	const blob = new Blob([pre.textContent.trim()], { type: 'text/plain' });
+	const url = URL.createObjectURL(blob);
+	const a = document.createElement('a'); a.href = url; a.download = `code.${ext}`; a.click();
+	URL.revokeObjectURL(url);
+	toast('İndirildi', 'success', 1500);
+}
+
+function copyText(text) {
+	navigator.clipboard.writeText(text);
+	toast('Kopyalandı', 'success', 1500);
+}
+
+function shareMsg(id) {
+	const el = document.getElementById('inner-' + id);
+	if (!el) return;
+	if (navigator.share) navigator.share({ text: el.innerText });
+	else { navigator.clipboard.writeText(el.innerText); toast('Panoya kopyalandı', 'info'); }
+}
+
+function likeMsg(id, positive) {
+	toast(positive ? 'Geri bildirim için teşekkürler!' : 'Geri bildirim alındı', 'info');
+}
+
+// ─── HISTORY ─────────────────────────────────────────────────────────────
+async function loadHistory() {
+	try {
+		const res = await fetch('/api/history');
+		const history = await res.json();
+		if (!history?.length) return;
+		chatInner.innerHTML = '';
+		history.forEach(msg => {
+			if (msg.role === 'user' || msg.role === 'assistant') {
+				const content = msg.text || (Array.isArray(msg.content) ? msg.content : null);
+				if (content || msg.role === 'assistant') {
+					appendMessage(msg.role, content || '', msg.id);
+				}
+			}
+			if (msg.tools?.length) {
+				msg.tools.forEach(t => renderTool(t.id, t.name, t.input, t.status === 'success' ? 'done' : 'running', t.output));
+			}
+		});
+	} catch(e) {}
+}
+
+// ─── INITIAL STATUS ───────────────────────────────────────────────────────
+async function checkInitialStatus() {
+	try {
+		const res = await fetch('/api/status');
+		const data = await res.json();
+		if (data.isGenerating) setGeneratingState(true);
+		if (data.authUrl) authUrl = data.authUrl;
+		if (data.model) {
+			const name = data.model.split('/').pop() || data.model;
+			document.getElementById('model-display').textContent = name;
+			document.getElementById('input-model-badge').textContent = name;
+		}
+		if (data.cwd) {
+			document.getElementById('cwd-text').textContent = data.cwd.split(/[\\/]/).pop() || data.cwd;
+		}
+	} catch(e) {}
+}
+
+// ─── INIT SETTINGS ────────────────────────────────────────────────────────
+async function initSettings() {
+	try {
+		const res = await fetch('/api/settings');
+		const s = await res.json();
+		if (s.thinkingLevel) {
+			document.getElementById('reasoning-display').textContent = 'Düşünme: ' + (reasoningLabels[s.thinkingLevel] || s.thinkingLevel);
+		}
+	} catch(e) {}
+}
+
+// ─── FETCH COMMANDS ───────────────────────────────────────────────────────
+async function fetchCommands() {
+	try {
+		const res = await fetch('/api/commands');
+		availableCommands = await res.json();
+	} catch(e) {}
+}
+
+// ─── SSE SETUP ────────────────────────────────────────────────────────────
+const es = new EventSource('/events');
+es.onmessage = (e) => {
+	try {
+		const data = JSON.parse(e.data);
+
+		if (data.type === 'engine_start') {
+			setGeneratingState(true);
+			currentAssistantMsgId = null;
+
+		} else if (data.type === 'engine_end') {
+			setGeneratingState(false);
+			currentAssistantMsgId = null;
+
+		} else if (data.type === 'message_start' || data.type === 'message_update' || data.type === 'message_end') {
+			if (!data.message || data.message.role !== 'assistant') return;
+
+			if (data.type === 'message_start') {
+				setGeneratingState(true);
+				currentAssistantMsgId = 'msg-' + (data.message.id || Date.now() + Math.random().toString(36).substr(2,5));
+				appendMessage('assistant', data.message.content, currentAssistantMsgId);
+
+			} else if (data.type === 'message_update') {
+				if (!currentAssistantMsgId) {
+					currentAssistantMsgId = 'msg-' + (data.message.id || Date.now() + Math.random().toString(36).substr(2,5));
+					appendMessage('assistant', data.message.content, currentAssistantMsgId);
+				} else {
+					updateMessage(currentAssistantMsgId, data.message.content);
+				}
+
+			} else if (data.type === 'message_end') {
+				setGeneratingState(false);
+				if (currentAssistantMsgId) updateMessage(currentAssistantMsgId, data.message.content);
+				currentAssistantMsgId = null;
+			}
+
+		} else if (data.type === 'tool_execution_start' || data.type === 'tool_execution_step') {
+			setGeneratingState(true);
+			renderTool(data.toolCallId, data.toolName, data.args, 'running', null);
+
+		} else if (data.type === 'tool_execution_end') {
+			renderTool(data.toolCallId, data.toolName, data.args, 'done', data.result);
+
+		} else if (data.type === 'clear_chat') {
+			currentAssistantMsgId = null;
+			newChat();
+			setGeneratingState(false);
+
+		} else if (data.type === 'state_update') {
+			if (data.state?.model) {
+				const name = data.state.model.split('/').pop() || data.state.model;
+				document.getElementById('model-display').textContent = name;
+				document.getElementById('input-model-badge').textContent = name;
+			}
+			if (data.state?.cwd) {
+				document.getElementById('cwd-text').textContent = data.state.cwd.split(/[\\/]/).pop() || data.state.cwd;
+			}
+			if (data.state?.tokens) {
+				document.getElementById('token-usage').textContent = `${(data.state.tokens.in||0).toLocaleString()} / ${(data.state.tokens.out||0).toLocaleString()}`;
+			}
+		}
+	} catch(err) {
+		console.error('SSE parse error', err);
+	}
+};
+es.onerror = () => {};
+
+// ─── ESCAPE HTML ──────────────────────────────────────────────────────────
+function escapeHtml(str) {
+	return String(str)
+		.replace(/&/g,'&amp;')
+		.replace(/</g,'&lt;')
+		.replace(/>/g,'&gt;')
+		.replace(/"/g,'&quot;')
+		.replace(/'/g,'&#39;');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────
+checkInitialStatus();
+loadHistory();
+updateUserUI();
+fetchCommands();
+initSettings();
+setInterval(updateUserUI, 8000);
+
+// Sidebar starts open on wide screens
+if (window.innerWidth < 768) toggleSidebar();
+</script>
+</body>
+</html>

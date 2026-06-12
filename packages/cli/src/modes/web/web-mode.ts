@@ -1,0 +1,390 @@
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import fs from 'fs';
+import path from 'path';
+import { createServer, IncomingMessage, ServerResponse } from "node:http";
+import { exec } from "node:child_process";
+import type { EngineSessionRuntime } from "../../core/engine-session-runtime.js";
+import { type InteractiveModeOptions } from "../interactive/interactive-mode.js";
+
+export class WebMode {
+	private runtime: EngineSessionRuntime;
+	private options: InteractiveModeOptions;
+	private clients: ServerResponse[] = [];
+	private server: ReturnType<typeof createServer> | null = null;
+	private port: number = 0;
+
+	constructor(runtime: EngineSessionRuntime, options: InteractiveModeOptions) {
+		this.runtime = runtime;
+		this.options = options;
+	}
+
+	async init() {
+		this.runtime.session.subscribe((event) => {
+			this.broadcastEvent(event);
+			this.broadcastEvent(this.getStateUpdateEvent());
+		});
+	}
+
+	private getStateUpdateEvent() {
+		try {
+			const stats = this.runtime.session.getSessionStats();
+			return {
+				type: "state_update",
+				state: {
+					model: this.runtime.session.model?.id || "Unknown Model",
+					cwd: this.runtime.cwd,
+					tokens: {
+						in: stats.tokens.input,
+						out: stats.tokens.output
+					}
+				}
+			};
+		} catch(e) {
+			return {
+				type: "state_update",
+				state: {
+					model: this.runtime.session.model?.id || "Unknown Model",
+					cwd: this.runtime.cwd,
+					tokens: { in: 0, out: 0 }
+				}
+			};
+		}
+	}
+
+	private broadcastEvent(event: any) {
+		try {
+			const removeCircular = (obj: any, seen = new WeakSet()): any => {
+				if (typeof obj !== 'object' || obj === null) return obj;
+				if (seen.has(obj)) return '[Circular]';
+				seen.add(obj);
+				if (Array.isArray(obj)) {
+					const newArr = obj.map(item => removeCircular(item, seen));
+					seen.delete(obj);
+					return newArr;
+				}
+				const newObj: any = {};
+				for (const [key, value] of Object.entries(obj)) {
+					newObj[key] = removeCircular(value, seen);
+				}
+				seen.delete(obj);
+				return newObj;
+			};
+			
+			const safeEvent = removeCircular(event);
+			const dataStr = JSON.stringify(safeEvent);
+			const data = `data: ${dataStr}\n\n`;
+			for (const client of this.clients) {
+				try {
+					client.write(data);
+				} catch(e) {}
+			}
+		} catch (e) {
+			console.error("Broadcast stringify error:", e);
+		}
+	}
+
+	private webUiServerInstance: any = null;
+
+	async run() {
+		console.log("Starting Web Interface...");
+		try {
+			const serverModule = await import("../../core/web-ui-server.js");
+			this.webUiServerInstance = serverModule.startWebUiServer({ port: 3131 });
+			console.log(`Web UI Auth Server started at: ${this.webUiServerInstance.url}`);
+		} catch (e) {
+			console.error("Failed to start Web UI Auth Server:", e);
+		}
+
+		this.server = createServer((req, res) => this.handleRequest(req, res));
+
+		return new Promise<void>((resolve, reject) => {
+			this.server!.listen(0, "127.0.0.1", () => {
+				const address = this.server!.address() as any;
+				this.port = address.port;
+				const url = `http://127.0.0.1:${this.port}`;
+				console.log(`\nMoonCode Web UI running at: ${url}`);
+
+				const startCmd = process.platform === "win32" ? "start" : process.platform === "darwin" ? "open" : "xdg-open";
+				exec(`${startCmd} ${url}`);
+			});
+		});
+	}
+
+	private async handleRequest(req: IncomingMessage, res: ServerResponse) {
+		const method = req.method;
+		const url = new URL(req.url || "/", `http://127.0.0.1:${this.port}`);
+
+		res.setHeader("Access-Control-Allow-Origin", "*");
+
+		if (method === "GET" && url.pathname === "/") {
+			res.setHeader("Content-Type", "text/html");
+			res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+			res.setHeader("Pragma", "no-cache");
+			res.setHeader("Expires", "0");
+			res.end(this.getHtmlTemplate());
+			return;
+		}
+
+		if (method === "GET" && (url.pathname === "/api/stream" || url.pathname === "/events")) {
+			res.setHeader("Content-Type", "text/event-stream");
+			res.setHeader("Cache-Control", "no-cache");
+			res.setHeader("Connection", "keep-alive");
+			this.clients.push(res);
+			try {
+				const stats = this.runtime.session.getSessionStats();
+				const initialState = {
+					type: "state_update",
+					state: {
+						model: this.runtime.session.model?.id || "Unknown Model",
+						cwd: this.runtime.cwd,
+						tokens: {
+							in: stats.tokens.input,
+							out: stats.tokens.output
+						}
+					}
+				};
+				res.write("data: " + JSON.stringify(initialState) + "\n\n");
+			} catch(e) {}
+
+			req.on("close", () => {
+				this.clients = this.clients.filter(client => client !== res);
+			});
+			return;
+		}
+
+		if (method === "GET" && url.pathname === "/api/commands") {
+			res.setHeader("Content-Type", "application/json");
+			
+			const templates = this.runtime.session.promptTemplates || [];
+			const skills: any[] = [];
+			const extensions = this.runtime.session.extensionRunner?.getRegisteredCommands() || [];
+			
+			const cmds = [
+				{ cmd: '/help', desc: 'Yardım menüsünü gösterir' },
+				{ cmd: '/clear', desc: 'Sohbet geçmişini temizler' },
+				{ cmd: '/compact', desc: 'Sohbet bağlamını sıkıştırır' },
+				{ cmd: '/snapshot', desc: 'Proje durumunu kaydeder' },
+				{ cmd: '/model', desc: 'Modeli değiştirir' },
+				{ cmd: '/diff', desc: 'Değişiklikleri gösterir' },
+				{ cmd: '/ship', desc: 'Değişiklikleri uzak sunucuya gönderir' },
+				{ cmd: '/reset', desc: 'Ajanı başlangıç durumuna sıfırlar' },
+				{ cmd: '/review', desc: 'Kodu gözden geçirir' },
+				{ cmd: '/test', desc: 'Testleri çalıştırır' },
+				{ cmd: '/build', desc: 'Projeyi derler' },
+				{ cmd: '/lint', desc: 'Lint taraması yapar' },
+				{ cmd: '/exit', desc: 'Çıkış yapar' },
+				{ cmd: '/models', desc: 'Mevcut modelleri listeler' },
+				{ cmd: '/provider', desc: 'Sağlayıcıyı değiştirir' }
+			];
+			
+			templates.forEach(t => cmds.push({ cmd: '/' + t.name, desc: t.description || 'Şablon komutu' }));
+			
+			extensions.forEach(e => cmds.push({ cmd: '/' + e.name, desc: e.description || 'Eklenti komutu' }));
+			
+			// Deduplicate by cmd
+			const uniqueCmds = Array.from(new Map(cmds.map(item => [item.cmd, item])).values());
+			
+			res.end(JSON.stringify(uniqueCmds));
+			return;
+		}
+
+		if (method === "GET" && url.pathname === "/api/status") {
+			res.setHeader("Content-Type", "application/json");
+			const stats = this.runtime.session.getSessionStats();
+			res.end(JSON.stringify({
+				cwd: this.runtime.cwd,
+				model: this.runtime.session.model?.id || "Unknown Model",
+				usage: stats.tokens,
+				isGenerating: this.runtime.session.isStreaming,
+				authUrl: this.webUiServerInstance ? this.webUiServerInstance.url : "http://127.0.0.1:3131"
+			}));
+			return;
+		}
+
+		if (method === "GET" && url.pathname === "/api/history") {
+			res.setHeader("Content-Type", "application/json");
+			const messages = this.runtime.session.engine.state.messages || [];
+
+			const mapped = messages.map((m: any, index: number) => ({
+				id: m.id || `msg-${index}`,
+				role: m.role,
+				text: typeof m.content === "string" ? m.content : (m.content && m.content.map ? m.content.map((c: any) => c.text).join("") : ""),
+				tools: (m.toolInvocations || []).map((t: any) => ({
+					id: t.toolCallId,
+					name: t.toolName,
+					status: t.state === "result" ? "success" : (t.state === "error" ? "error" : "running"),
+					input: typeof t.args === "string" ? t.args : JSON.stringify(t.args || {}),
+					output: typeof t.result === "string" ? t.result : JSON.stringify(t.result || "")
+				})),
+				status: 'complete'
+			}));
+			res.end(JSON.stringify(mapped));
+			return;
+		}
+
+				if (method === "POST" && url.pathname === "/api/prompt") {
+			let body = "";
+			req.on("data", chunk => body += chunk);
+			req.on("end", async () => {
+				try {
+					const { prompt } = JSON.parse(body);
+					res.setHeader("Content-Type", "application/json");
+					res.end(JSON.stringify({ success: true }));
+
+					// COMMAND INTERCEPTION FOR WEB MODE
+					let handled = false;
+					const cmd = prompt.trim().toLowerCase();
+					if (cmd === "/clear") {
+						this.runtime.session.engine.reset();
+						this.broadcastEvent({ type: "clear_chat" });
+						handled = true;
+					} else if (cmd === "/compact") {
+						this.runtime.session.compact();
+						handled = true;
+					} else if (cmd === "/test") {
+						this.runtime.session.prompt("Run the test suite and fix the errors.");
+						handled = true;
+					} else if (cmd === "/build") {
+						this.runtime.session.prompt("Build the project.");
+						handled = true;
+					} else if (cmd === "/lint") {
+						this.runtime.session.prompt("Run linter and fix the issues.");
+						handled = true;
+					} else if (cmd === "/ship") {
+						this.runtime.session.prompt("Ship the current changes (branch, commit, push, PR).");
+						handled = true;
+					}
+					
+					if (!handled) {
+						this.runtime.session.prompt(prompt).catch(console.error);
+					}
+				} catch (e: any) {
+					res.statusCode = 500;
+					res.end(JSON.stringify({ error: e.message }));
+				}
+			});
+			return;
+		}
+
+		if (method === "POST" && url.pathname === "/api/reset") {
+			this.runtime.session.engine.reset();
+			this.broadcastEvent({ type: "clear_chat" });
+			res.setHeader("Content-Type", "application/json");
+			res.end(JSON.stringify({ success: true }));
+			return;
+		}
+
+		if (method === "POST" && url.pathname === "/api/interrupt") {
+            this.runtime.session.abort();
+            res.setHeader("Content-Type", "application/json");
+            res.end(JSON.stringify({ success: true }));
+            return;
+        }
+
+        if (method === "GET" && url.pathname === "/api/models") {
+            res.setHeader("Content-Type", "application/json");
+            try { const models = await this.runtime.session.modelRegistry.getAvailable(); res.end(JSON.stringify(models)); } catch(e) { res.statusCode = 500; res.end(JSON.stringify({error: "Failed"})); }
+            
+            return;
+        }
+
+        if (method === "POST" && url.pathname === "/api/set-model") {
+		let body = "";
+		req.on("data", chunk => body += chunk);
+		req.on("end", async () => {
+			try {
+				const { provider, model: modelId } = JSON.parse(body);
+				const modelObj = this.runtime.session.modelRegistry.find(provider, modelId);
+				if (!modelObj) {
+					res.statusCode = 404;
+					res.end(JSON.stringify({ error: "Model not found" }));
+					return;
+				}
+				await this.runtime.session.setModel(modelObj);
+				res.setHeader("Content-Type", "application/json");
+				res.end(JSON.stringify({ success: true }));
+			} catch (e: any) {
+				res.statusCode = 500;
+				res.end(JSON.stringify({ error: e.message }));
+			}
+		});
+		return;
+	}
+
+        if (method === "POST" && url.pathname === "/api/set-thinking") {
+            let body = "";
+            req.on("data", chunk => body += chunk);
+            req.on("end", async () => {
+                const { level } = JSON.parse(body);
+                this.runtime.session.settingsManager.setDefaultThinkingLevel(level as any);
+                res.setHeader("Content-Type", "application/json");
+                res.end(JSON.stringify({ success: true }));
+            });
+            return;
+        }
+
+		if (method === "GET" && url.pathname === "/api/auth/status") {
+			res.setHeader("Content-Type", "application/json");
+			const authStorage = this.runtime.session.modelRegistry.authStorage;
+			const accounts = authStorage.listManagedAccounts();
+			const activeAccount = accounts.find(a => a.active);
+			res.end(JSON.stringify({
+				isLoggedIn: !!activeAccount,
+				account: activeAccount ? {
+					name: activeAccount.label || activeAccount.provider,
+					email: activeAccount.quotaLabel || `${activeAccount.provider} account`,
+					initial: (activeAccount.label || activeAccount.provider).charAt(0).toUpperCase()
+				} : null
+			}));
+			return;
+		}
+
+
+			if (method === "GET" && url.pathname === "/api/settings") {
+				res.setHeader("Content-Type", "application/json");
+				
+			const sm = this.runtime.session.settingsManager;
+			res.end(JSON.stringify({
+				theme: sm.getTheme(),
+				compactionProfile: sm.getCompactionProfile(),
+				enableToolBasedCompaction: sm.getCompactionEnabled(),
+				thinkingLevel: sm.getDefaultThinkingLevel()
+			}));
+
+				return;
+			}
+
+			if (method === "POST" && url.pathname === "/api/settings") {
+				let body = "";
+				req.on("data", chunk => body += chunk);
+				req.on("end", async () => {
+					try {
+						const updates = JSON.parse(body);
+						for (const [k, v] of Object.entries(updates)) {
+							
+								const sm = this.runtime.session.settingsManager;
+								if(k === 'theme') sm.setTheme(v as string);
+								
+								if(k === 'enableToolBasedCompaction') sm.setCompactionEnabled(v as boolean);
+
+						}
+						res.setHeader("Content-Type", "application/json");
+						res.end(JSON.stringify({ success: true }));
+					} catch(e) {
+						res.statusCode = 500;
+						res.end(JSON.stringify({ error: "Invalid settings" }));
+					}
+				});
+				return;
+			}
+
+		res.statusCode = 404;
+		res.end("Not Found");
+	}
+
+	private getHtmlTemplate() {
+    const _filename = fileURLToPath(import.meta.url);
+        const _dirname = dirname(_filename);
+        return fs.readFileSync(path.join(_dirname, 'web-ui.html'), 'utf8');
+}}
