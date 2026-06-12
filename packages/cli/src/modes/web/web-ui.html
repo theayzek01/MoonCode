@@ -3233,22 +3233,22 @@ async function openSemanticBrain() {
 
 		let html = '<div style="display:flex; flex-direction:column; gap:12px;">';
 		data.experiences.forEach((exp, idx) => {
-			html += \`
+			html += `
 			<div style="background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px;">
 				<div style="font-size:0.75rem; color:var(--muted); margin-bottom:6px; display:flex; justify-content:space-between;">
-					<span>Experience #\${idx + 1}</span>
-					<span style="font-family:'JetBrains Mono',monospace;">\${new Date(exp.timestamp).toLocaleString()}</span>
+					<span>Experience #${idx + 1}</span>
+					<span style="font-family:'JetBrains Mono',monospace;">${new Date(exp.timestamp).toLocaleString()}</span>
 				</div>
-				<div style="font-size:0.85rem; color:var(--fg); line-height:1.5;">\${escapeHtml(exp.summary)}</div>
-				\${exp.tags && exp.tags.length > 0 ? \`<div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">
-					\${exp.tags.map(t => \`<span style="background:rgba(108,143,255,0.1); color:var(--accent); padding:2px 8px; border-radius:12px; font-size:0.65rem;">\${escapeHtml(t)}</span>\`).join('')}
-				</div>\` : ''}
-			</div>\`;
+				<div style="font-size:0.85rem; color:var(--fg); line-height:1.5;">${escapeHtml(exp.summary)}</div>
+				${exp.tags && exp.tags.length > 0 ? `<div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">
+					${exp.tags.map(t => `<span style="background:rgba(108,143,255,0.1); color:var(--accent); padding:2px 8px; border-radius:12px; font-size:0.65rem;">${escapeHtml(t)}</span>`).join('')}
+				</div>` : ''}
+			</div>`;
 		});
 		html += '</div>';
 		container.innerHTML = html;
 	} catch (e) {
-		container.innerHTML = \`<div style="color:#ff6464; padding:20px; text-align:center;">Failed to load semantic brain: \${escapeHtml(e.message)}</div>\`;
+		container.innerHTML = `<div style="color:#ff6464; padding:20px; text-align:center;">Failed to load semantic brain: ${escapeHtml(e.message)}</div>`;
 	}
 }
 </script>
