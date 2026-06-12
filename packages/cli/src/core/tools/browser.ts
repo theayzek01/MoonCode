@@ -314,21 +314,6 @@ export function createBrowserPageToolDefinition(
 		async execute(_id, params, signal) {
 			if (signal?.aborted) throw new Error("Operation aborted");
 
-			// Screenshot: model vision desteklemiyorsa engelle
-			if (params.action === "screenshot") {
-				const visionOk = getModelVisionSupport ? getModelVisionSupport() : true;
-				if (!visionOk) {
-					return {
-						content: [
-							{
-								type: "text" as const,
-								text: "⚠️ Aktif model görsel girdisini desteklemiyor. Screenshot bu modelde kullanılamaz. Görsel destekleyen bir model seç (Claude, GPT-4o, Gemini Pro/Flash).",
-							},
-						],
-						details: { action: params.action, connected: true, hasScreenshot: false },
-					};
-				}
-			}
 
 			validatePage(params);
 			const cmdParams = normalizePageParams(params);
