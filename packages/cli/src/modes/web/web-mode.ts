@@ -1,4 +1,4 @@
-import { exec } from "node:child_process";
+import { exec, spawn } from "node:child_process";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import fs from "fs";
 import path, { dirname, join } from "path";
@@ -593,10 +593,22 @@ export class WebMode {
 				try {
 					const { command } = JSON.parse(body);
 					process.stdout.write(`\n$ ${command}\n`);
-					exec(command, { cwd: this.runtime.cwd }, (error, stdout, stderr) => {
-						if (stdout) process.stdout.write(stdout);
-						if (stderr) process.stderr.write(stderr);
-						if (error) process.stderr.write(`Error: ${error.message}\n`);
+					const shell = process.platform === "win32" ? "powershell.exe" : "bash";
+					const child = spawn(command, { shell: true, cwd: this.runtime.cwd });
+					child.stdout.on("data", (data) => {
+						const text = data.toString();
+						process.stdout.write(text);
+						this.broadcastEvent({ type: "terminal_log", data: text });
+					});
+					child.stderr.on("data", (data) => {
+						const text = data.toString();
+						process.stderr.write(text);
+						this.broadcastEvent({ type: "terminal_log", data: text });
+					});
+					child.on("error", (error) => {
+						const text = `Error: ${error.message}\n`;
+						process.stderr.write(text);
+						this.broadcastEvent({ type: "terminal_log", data: text });
 					});
 					res.setHeader("Content-Type", "application/json");
 					res.end(JSON.stringify({ success: true }));
