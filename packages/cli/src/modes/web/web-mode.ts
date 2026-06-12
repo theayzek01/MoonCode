@@ -456,7 +456,18 @@ export class WebMode {
 					}
 
 					if (!handled) {
-						this.runtime.session.prompt(prompt).catch(console.error);
+						this.runtime.session.prompt(prompt).catch((err: any) => {
+							console.error("Prompt error:", err);
+							this.broadcastEvent({
+								type: "message_start",
+								message: {
+									id: "error-" + Date.now(),
+									role: "assistant",
+									content: `❌ Hata oluştu: ${err.message || err}`
+								}
+							});
+							this.broadcastEvent({ type: "engine_end" });
+						});
 					}
 				} catch (e: any) {
 					res.statusCode = 500;

@@ -2114,34 +2114,86 @@ function updateMessage(id, content, isStreaming = false) {
 // â”€â”€â”€ TOOL RENDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderTool(toolCallId, name, args, status, result) {
 	let el = document.getElementById('tool-' + toolCallId);
+	
 	if (!el) {
-		el = document.createElement('div');
-		el.id = 'tool-' + toolCallId;
-		el.className = 'tool-enter';
-		appendToChat(el);
+		const children = Array.from(chatInner.children);
+		let lastToolEl = null;
+		for (let i = children.length - 1; i >= 0; i--) {
+			if (children[i].id === 'global-indicator') continue;
+			if (children[i].querySelector('.tool-card')) {
+				lastToolEl = children[i];
+				break;
+			}
+		}
+		
+		if (lastToolEl) {
+			const lastToolName = lastToolEl.getAttribute('data-tool-name');
+			if (lastToolName === name) {
+				el = lastToolEl;
+				if (!el.subTools) el.subTools = [];
+				if (!el.subTools.find(t => t.id === toolCallId)) {
+					el.subTools.push({ id: toolCallId, name, args, status, result });
+				}
+			}
+		}
+		
+		if (!el) {
+			el = document.createElement('div');
+			el.id = 'tool-' + toolCallId;
+			el.className = 'msg-row assistant tool-enter';
+			el.setAttribute('data-tool-name', name);
+			el.subTools = [{ id: toolCallId, name, args, status, result }];
+			appendToChat(el);
+		}
 	}
-	el.className = `msg-row assistant tool-enter`;
-
-	const statusClass = status === 'running' ? 'running' : (status === 'error' ? 'error' : 'done');
-	const statusLabel = status === 'running' ? 'Running' : (status === 'error' ? 'Error' : 'Completed');
-	const fmtArgs = formatToolValue(args);
-	const fmtResult = formatToolValue(result);
-	const hasBody = fmtArgs || fmtResult;
+	
+	const subTool = el.subTools.find(t => t.id === toolCallId);
+	if (subTool) {
+		subTool.args = args;
+		subTool.status = status;
+		subTool.result = result;
+	}
+	
+	const count = el.subTools.length;
+	const title = count > 1 ? `${name} (${count} komut)` : name;
+	
+	let groupStatus = 'done';
+	if (el.subTools.some(t => t.status === 'error')) groupStatus = 'error';
+	else if (el.subTools.some(t => t.status === 'running')) groupStatus = 'running';
+	
+	const statusClass = groupStatus;
+	const statusLabel = groupStatus === 'running' ? 'Running' : (groupStatus === 'error' ? 'Error' : 'Completed');
+	
+	let bodyHtml = '';
+	el.subTools.forEach((t, index) => {
+		const fmtArgs = formatToolValue(t.args);
+		const fmtResult = formatToolValue(t.result);
+		const subStatusClass = t.status === 'running' ? 'running' : (t.status === 'error' ? 'error' : 'done');
+		
+		bodyHtml += `
+			<div style="border-bottom: ${index < count - 1 ? '1px solid var(--border)' : 'none'}; padding: 10px 12px;">
+				<div style="display:flex; align-items:center; gap:8px; font-weight:600; font-size:0.75rem; color:var(--muted); margin-bottom: 6px;">
+					<span class="tool-status-dot" style="width:6px; height:6px; background:${subStatusClass === 'running' ? 'var(--accent)' : subStatusClass === 'error' ? '#ff6464' : 'var(--accent2)'}"></span>
+					<span>${name} #${index + 1}</span>
+				</div>
+				${fmtArgs ? `<div class="tool-section"><div class="tool-section-label" style="font-size:0.6rem;">Girdi</div><pre style="max-height:120px;">${escapeHtml(fmtArgs)}</pre></div>` : ''}
+				${fmtResult ? `<div class="tool-section result"><div class="tool-section-label" style="font-size:0.6rem;">Çıktı</div><pre style="max-height:120px;">${escapeHtml(fmtResult)}</pre></div>` : ''}
+			</div>
+		`;
+	});
 
 	el.innerHTML = `
-		<div class="tool-card ${statusClass}">
-			<div class="tool-header" onclick="this.nextElementSibling.classList.toggle('hidden')" style="${hasBody ? '' : 'cursor:default;'}">
+		<div class="tool-card ${statusClass}" style="width: 100%; max-width: 780px; margin: 0 auto;">
+			<div class="tool-header" onclick="this.nextElementSibling.classList.toggle('hidden')">
 				<span class="tool-status-dot"></span>
 				<span class="material-symbols-rounded" style="font-size:15px;color:var(--muted);">${statusClass === 'running' ? 'hourglass_top' : statusClass === 'error' ? 'error' : 'check_circle'}</span>
-				<span class="tool-name">${name || 'tool'}</span>
+				<span class="tool-name">${title}</span>
 				<span style="margin-left:auto;font-size:0.7rem;color:var(--muted);">${statusLabel}</span>
-				${hasBody ? '<span class="material-symbols-rounded" style="font-size:14px;color:var(--muted);">expand_more</span>' : ''}
+				<span class="material-symbols-rounded" style="font-size:14px;color:var(--muted);">expand_more</span>
 			</div>
-			${hasBody ? `
-			<div class="tool-body ${status !== 'running' ? 'hidden' : ''}">
-				${fmtArgs ? `<div class="tool-section"><div class="tool-section-label">Girdi</div><pre>${escapeHtml(fmtArgs)}</pre></div>` : ''}
-				${fmtResult ? `<div class="tool-section result"><div class="tool-section-label">Ã‡Ä±ktÄ±</div><pre>${escapeHtml(fmtResult)}</pre></div>` : ''}
-			</div>` : ''}
+			<div class="tool-body ${groupStatus !== 'running' ? 'hidden' : ''}">
+				${bodyHtml}
+			</div>
 		</div>`;
 }
 
@@ -2599,6 +2651,9 @@ es.onmessage = (e) => {
 			setGeneratingState(false);
 			currentAssistantMsgId = null;
 			syncMessageIds();
+			if (data.error) {
+				appendMessage('assistant', `❌ Hata: ${data.error.message || data.error}`);
+			}
 
 		} else if (data.type === 'message_start' || data.type === 'message_update' || data.type === 'message_end') {
 			if (!data.message || data.message.role !== 'assistant') return;
