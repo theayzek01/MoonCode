@@ -17,6 +17,26 @@ export class WebMode {
 	private pinnedMessageIds: Set<string> = new Set();
 	private logBuffer: string[] = [];
 
+	private getWebProjects(): string[] {
+		const filePath = join(getEngineDir(), "web-projects.json");
+		if (fs.existsSync(filePath)) {
+			try { return JSON.parse(fs.readFileSync(filePath, "utf-8")); } catch(e) { return []; }
+		}
+		return [];
+	}
+
+	private addWebProject(cwd: string) {
+		const projects = new Set(this.getWebProjects());
+		projects.add(cwd);
+		fs.writeFileSync(join(getEngineDir(), "web-projects.json"), JSON.stringify(Array.from(projects)));
+	}
+
+	private removeWebProject(cwd: string) {
+		const projects = new Set(this.getWebProjects());
+		projects.delete(cwd);
+		fs.writeFileSync(join(getEngineDir(), "web-projects.json"), JSON.stringify(Array.from(projects)));
+	}
+
 	constructor(runtime: EngineSessionRuntime, options: InteractiveModeOptions) {
 		this.runtime = runtime;
 		this.options = options;
@@ -441,57 +461,44 @@ export class WebMode {
 			try {
 				const sessionsDir = join(getEngineDir(), "sessions");
 				const projects: Record<string, any> = {};
-				if (fs.existsSync(sessionsDir)) {
-					const dirs = fs.readdirSync(sessionsDir);
-					for (const dir of dirs) {
-						const fullDir = join(sessionsDir, dir);
-						if (fs.statSync(fullDir).isDirectory()) {
-							const files = fs.readdirSync(fullDir).filter((f) => f.endsWith(".jsonl"));
-							const projectSessions = [];
-							let projectCwd = "";
-							for (const file of files) {
-								const filePath = join(fullDir, file);
-								const info = await buildSessionInfo(filePath);
-								if (info) {
-									projectSessions.push({
-										id: info.id,
-										path: info.path,
-										name: info.name || info.firstMessage || "Başlıksız Sohbet",
-										created: info.created,
-										modified: info.modified,
-										messageCount: info.messageCount,
-									});
-									if (!projectCwd) {
-										projectCwd = info.cwd;
-									}
-								}
+				
+				// Ensure current cwd is always considered an explicitly added project
+				this.addWebProject(this.runtime.cwd);
+				const webProjects = this.getWebProjects();
+
+				for (const projectCwd of webProjects) {
+					const projectName = path.basename(projectCwd) || projectCwd;
+					projects[projectCwd] = {
+						cwd: projectCwd,
+						name: projectName,
+						sessions: []
+					};
+
+					// Find sessions for this cwd
+					const safePath = `--${projectCwd.replace(/^[/\\]/, "").replace(/[/\\:]/g, "-")}--`;
+					const fullDir = join(sessionsDir, safePath);
+
+					if (fs.existsSync(fullDir) && fs.statSync(fullDir).isDirectory()) {
+						const files = fs.readdirSync(fullDir).filter((f) => f.endsWith(".jsonl"));
+						for (const file of files) {
+							const filePath = join(fullDir, file);
+							const info = await buildSessionInfo(filePath);
+							if (info) {
+								projects[projectCwd].sessions.push({
+									id: info.id,
+									path: info.path,
+									name: info.name || info.firstMessage || "Başlıksız Sohbet",
+									created: info.created,
+									modified: info.modified,
+									messageCount: info.messageCount,
+								});
 							}
-							if (!projectCwd) {
-								const decoded = dir.replace(/^--/, "").replace(/--$/, "").replace(/-/g, path.sep);
-								if (process.platform === "win32" && decoded.match(/^[a-zA-Z]/)) {
-									projectCwd = decoded.charAt(0) + ":" + decoded.slice(1);
-								} else {
-									projectCwd = decoded;
-								}
-							}
-							if (projectCwd.includes("AppData\\Local\\Temp") || projectCwd.includes("/tmp/") || projectCwd.includes("\\Temp\\") || projectCwd.includes("AppData/Local/Temp")) {
-								continue;
-							}
-							let projectName = path.basename(projectCwd) || projectCwd;
-							// If basename is randomly generated for tests, clean it or fallback
-							if (projectName.match(/^[a-z0-9]{9,15}$/) && projectCwd.includes("Mooncli")) {
-								continue;
-							}
-							projects[projectCwd] = {
-								cwd: projectCwd,
-								name: projectName,
-								sessions: projectSessions.sort(
-									(a: any, b: any) => new Date(b.modified).getTime() - new Date(a.modified).getTime(),
-								),
-							};
 						}
 					}
+					// Sort sessions by modified desc
+					projects[projectCwd].sessions.sort((a: any, b: any) => new Date(b.modified).getTime() - new Date(a.modified).getTime());
 				}
+
 				res.end(JSON.stringify(Object.values(projects)));
 			} catch (e: any) {
 				res.statusCode = 500;
@@ -528,6 +535,7 @@ export class WebMode {
 			req.on("end", async () => {
 				try {
 					const { cwd } = JSON.parse(body);
+					this.addWebProject(cwd);
 					const sessionDir = this.runtime.session.sessionManager.getSessionDir();
 					const sm = SessionManager.create(cwd, sessionDir);
 					sm.newSession();
@@ -567,11 +575,7 @@ export class WebMode {
 			req.on("end", async () => {
 				try {
 					const { cwd } = JSON.parse(body);
-					const safePath = `--${cwd.replace(/^[/\\]/, "").replace(/[/\\:]/g, "-")}--`;
-					const projectDir = join(getEngineDir(), "sessions", safePath);
-					if (fs.existsSync(projectDir)) {
-						fs.rmSync(projectDir, { recursive: true, force: true });
-					}
+					this.removeWebProject(cwd);
 					res.setHeader("Content-Type", "application/json");
 					res.end(JSON.stringify({ success: true }));
 				} catch (e: any) {

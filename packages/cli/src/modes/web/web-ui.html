@@ -2781,7 +2781,7 @@ function archiveActiveProject() {
 
 async function deleteActiveProject() {
 	if (!activeProjectMenu) return;
-	if (!confirm('Bu projenin tüm sohbetleri silinecek. Emin misiniz?')) return;
+	if (!confirm('Proje listeden kaldırılacak. Emin misiniz?')) return;
 	try {
 		const res = await fetch('/api/project/delete', {
 			method: 'POST',
