@@ -209,7 +209,7 @@
 			border: 1px solid var(--user-border);
 			color: var(--fg);
 			padding: 10px 16px;
-			border-radius: 18px 18px 4px 18px;
+			border-radius: 12px; border-bottom-right-radius: 4px;
 			max-width: 75%;
 			font-size: 0.875rem;
 			line-height: 1.6;
@@ -292,7 +292,7 @@
 			padding: 8px 14px;
 			background: var(--surface);
 			border-bottom: 1px solid var(--border);
-			font-size: 0.75rem;
+			font-size:0.85rem;
 			color: var(--muted);
 			font-family: 'JetBrains Mono', monospace;
 		}
@@ -351,7 +351,7 @@
 			user-select: none;
 			color: var(--accent);
 			font-weight: 600;
-			font-size: 0.75rem;
+			font-size:0.85rem;
 			gap: 8px;
 			transition: background 0.15s;
 		}
@@ -359,7 +359,7 @@
 		.thinking-meta {
 			display: flex; align-items: center; gap: 8px;
 			margin-left: auto; color: var(--muted); font-weight: 400;
-			font-size: 0.68rem; font-family: 'JetBrains Mono', monospace;
+			font-size:0.8rem; font-family: 'JetBrains Mono', monospace;
 		}
 		.thinking-body {
 			padding: 10px 14px 12px;
@@ -386,7 +386,7 @@
 			0%, 100% { border-color: rgba(108,143,255,0.15); }
 			50% { border-color: rgba(108,143,255,0.45); }
 		}
-		.thinking-block.streaming { animation: thinkingBorderPulse 2s ease-in-out infinite; }
+		.thinking-block.streaming {  }
 		/* smooth token-by-token text appearance */
 		@keyframes fadeInChar {
 			from { opacity: 0; transform: translate(2px); }
@@ -428,11 +428,11 @@
 			overflow: hidden;
 		}
 		.tool-section { padding: 8px 12px; }
-		.tool-section-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+		.tool-section-label { font-size:0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
 		.tool-section pre {
 			margin: 0;
 			font-family: 'JetBrains Mono', monospace;
-			font-size: 0.75rem;
+			font-size:0.85rem;
 			white-space: pre-wrap;
 			word-break: break-word;
 			max-height: 200px;
@@ -530,7 +530,7 @@
 		}
 		.input-footer-left { display: flex; align-items: center; gap: 6px; }
 		.input-footer-right { display: flex; align-items: center; gap: 6px; }
-		.char-count { font-size: 0.7rem; color: var(--muted); }
+		.char-count { font-size:0.8rem; color: var(--muted); }
 
 		#send-btn, #stop-btn {
 			width: 34px; height: 34px;
@@ -609,7 +609,7 @@
 
 		/* ─── FORM ELEMENTS ──────────────────────────────────────────────── */
 		.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-		.form-label { font-size: 0.78rem; font-weight: 500; color: var(--fg); }
+		.form-label { font-size:0.85rem; font-weight: 500; color: var(--fg); }
 		.form-select, .form-input {
 			background: var(--bg2);
 			border: 1px solid var(--border);
@@ -702,7 +702,7 @@
 		.cmd-item .cmd-desc { font-size: 0.72rem; color: var(--muted); }
 		.cmd-item .cmd-kbd { margin-left: auto; flex-shrink: 0; }
 		kbd {
-			font-size: 0.65rem; font-family: 'JetBrains Mono', monospace;
+			font-size:0.85rem; font-family: 'JetBrains Mono', monospace;
 			background: var(--surface2); border: 1px solid var(--border);
 			border-radius: 5px; padding: 2px 5px; color: var(--muted);
 		}
@@ -739,7 +739,7 @@
 		.model-icon {
 			width: 36px; height: 36px; border-radius: 10px;
 			display: flex; align-items: center; justify-content: center;
-			flex-shrink: 0; font-size: 0.7rem; font-weight: 700;
+			flex-shrink: 0; font-size:0.8rem; font-weight: 700;
 			font-family: 'JetBrains Mono', monospace;
 		}
 
@@ -808,7 +808,7 @@
 			display: flex; align-items: center; gap: 5px;
 			padding: 3px 9px;
 			border-radius: 99px;
-			font-size: 0.7rem;
+			font-size:0.8rem;
 			background: var(--surface2);
 			border: 1px solid var(--border);
 			color: var(--muted);
@@ -858,7 +858,7 @@
 			display: flex; align-items: center; gap: 5px;
 			padding: 4px 10px; border-radius: 20px;
 			border: 1px solid var(--border); background: var(--surface2);
-			font-size: 0.68rem; font-weight: 600; cursor: pointer;
+			font-size:0.8rem; font-weight: 600; cursor: pointer;
 			transition: all 0.2s; color: var(--muted);
 		}
 		.bridge-pill:hover { border-color: var(--accent); color: var(--fg); }
@@ -871,7 +871,7 @@
 			display: flex; align-items: center; gap: 4px;
 			padding: 4px 9px; border-radius: 8px;
 			border: 1px solid var(--border); background: var(--surface2);
-			font-size: 0.68rem; font-weight: 600; cursor: pointer;
+			font-size:0.8rem; font-weight: 600; cursor: pointer;
 			color: var(--muted); transition: all 0.15s; font-family: 'Inter', sans-serif;
 		}
 		.session-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(108,143,255,0.08); }
@@ -894,7 +894,7 @@
 			width: 100%;
 			padding: 8px 12px;
 			border-radius: 8px;
-			font-size: 0.78rem;
+			font-size:0.85rem;
 			background: none;
 			border: none;
 			cursor: pointer;
@@ -954,22 +954,22 @@
 
 	<!-- New Chat & Directory Select -->
 	<div style="padding:0 10px 8px; display:flex; flex-direction:column; gap:8px;">
-		<button onclick="newConversationChat()" style="width:100%; display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 6px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;color:var(--fg);font-size:0.75rem;font-weight:500;font-family:'Inter',sans-serif;transition:all 0.15s;" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--surface2)'" title="New Chat">
+		<button onclick="newConversationChat()" style="width:100%; display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 6px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;color:var(--fg);font-size:0.85rem;font-weight:500;font-family:'Inter',sans-serif;transition:all 0.15s;" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--surface2)'" title="New Chat">
 			<span class="material-symbols-rounded" style="color:var(--accent);font-size:16px;">add</span>
 			<span>New Chat</span>
 		</button>
 		
-		<button onclick="selectProjectDirectory()" style="width:100%; display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 6px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;color:var(--fg);font-size:0.75rem;font-weight:500;font-family:'Inter',sans-serif;transition:all 0.15s;" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--surface2)'" title="Select Directory">
+		<button onclick="selectProjectDirectory()" style="width:100%; display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 6px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;color:var(--fg);font-size:0.85rem;font-weight:500;font-family:'Inter',sans-serif;transition:all 0.15s;" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--surface2)'" title="Select Directory">
 			<span class="material-symbols-rounded" style="color:var(--accent2);font-size:16px;">folder_open</span>
 			<span>Select Project Directory</span>
 		</button>
 
 		<div style="padding:10px; background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:10px; margin-top:4px;">
-			<div style="font-size:0.65rem; font-weight:700; text-transform:uppercase; color:var(--muted); margin-bottom:4px; display:flex; align-items:center; gap:4px;">
+			<div style="font-size:0.85rem; font-weight:700; text-transform:uppercase; color:var(--muted); margin-bottom:4px; display:flex; align-items:center; gap:4px;">
 				<span class="material-symbols-rounded" style="font-size:12px;">folder</span>
 				<span>Active Project Directory</span>
 			</div>
-			<div id="active-cwd-display" style="font-size:0.75rem; word-break:break-all; color:var(--fg); font-family:'JetBrains Mono', monospace; line-height:1.4;">Loading...</div>
+			<div id="active-cwd-display" style="font-size:0.85rem; word-break:break-all; color:var(--fg); font-family:'JetBrains Mono', monospace; line-height:1.4;">Loading...</div>
 		</div>
 	</div>
 
@@ -977,7 +977,7 @@
 
 	<!-- Conversation List -->
 	<div id="sidebar-conversations" style="flex:1; overflow-y:auto; padding:0 10px; display:flex; flex-direction:column; gap:4px; padding-bottom:10px;">
-		<div style="padding:10px 6px 4px; font-size:0.65rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px;">Sohbetler</div>
+		<div style="padding:10px 6px 4px; font-size:0.85rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px;">Sohbetler</div>
 		<div id="conversation-list" style="display:flex; flex-direction:column; gap:2px;">
 			<!-- Injected by JS -->
 		</div>
@@ -1008,8 +1008,8 @@
 		<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:11px;background:var(--surface2);cursor:pointer;transition:background 0.15s;" onclick="toggleUserMenu()" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--surface2)'">
 			<div id="sidebar-avatar" style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#fff;flex-shrink:0;">U</div>
 			<div style="overflow:hidden;flex:1;">
-				<div id="sidebar-name" style="font-size:0.78rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Not Logged In</div>
-				<div style="font-size:0.65rem;color:var(--accent);">Pro</div>
+				<div id="sidebar-name" style="font-size:0.85rem;font-weight:600;">Not Logged In</div>
+				<div style="font-size:0.85rem;color:var(--accent);">Pro</div>
 			</div>
 			<span class="material-symbols-rounded" style="font-size:16px;color:var(--muted);">more_vert</span>
 		</div>
@@ -1160,7 +1160,7 @@
 				<textarea id="prompt-input" rows="1" placeholder="Message MoonCode... (Enter = send, Shift+Enter = new line)"></textarea>
 				<div class="input-footer">
 					<div class="input-footer-left">
-						<button onclick="openModal('modelModal')" class="badge-btn" style="font-size:0.68rem;">
+						<button onclick="openModal('modelModal')" class="badge-btn" style="font-size:0.8rem;">
 							<span id="input-model-badge" style="font-family:'JetBrains Mono',monospace;">â€”</span>
 							<span class="material-symbols-rounded" style="font-size:11px;">keyboard_arrow_down</span>
 						</button>
@@ -1176,7 +1176,7 @@
 					</div>
 				</div>
 			</div>
-			<div style="text-align:center;font-size:0.65rem;color:var(--muted);margin-top:6px;opacity:0.5;">
+			<div style="text-align:center;font-size:0.85rem;color:var(--muted);margin-top:6px;opacity:0.5;">
 				MoonCode AI can make mistakes. Verify critical information.
 			</div>
 		</div>
@@ -1284,9 +1284,9 @@
 							<span class="material-symbols-rounded" style="color:var(--accent);font-size:18px;">extension</span>
 							Browser Bridge Extension
 						</label>
-						<div style="font-size:0.7rem;color:var(--muted);margin-bottom:8px;">Load this unpacked extension in Chrome/Edge (<code>chrome://extensions</code>) to enable MoonCode browser control.</div>
+						<div style="font-size:0.8rem;color:var(--muted);margin-bottom:8px;">Load this unpacked extension in Chrome/Edge (<code>chrome://extensions</code>) to enable MoonCode browser control.</div>
 						<div style="display:flex; gap:8px;">
-							<input type="text" id="browser-extension-path" readonly style="flex:1; background:var(--bg); border:1px solid var(--border); border-radius:6px; font-size:0.75rem; padding:8px 12px; color:var(--accent); cursor:pointer; text-align:center; transition: all 0.2s;" onclick="copyBrowserExtensionPath()" value="Click here to reveal & copy path">
+							<input type="text" id="browser-extension-path" readonly style="flex:1; background:var(--bg); border:1px solid var(--border); border-radius:6px; font-size:0.85rem; padding:8px 12px; color:var(--accent); cursor:pointer; text-align:center; transition: all 0.2s;" onclick="copyBrowserExtensionPath()" value="Click here to reveal & copy path">
 							<button class="btn btn-primary" onclick="copyBrowserExtensionPath()">
 								<span class="material-symbols-rounded" style="font-size:16px;">content_copy</span> Copy
 							</button>
@@ -1308,7 +1308,7 @@
 								<div class="radio-indicator" style="width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;"></div>
 							</div>
 							<div style="font-weight: 600; font-size: 0.82rem; color: var(--fg);">Nuclear</div>
-							<div style="font-size: 0.7rem; color: var(--muted); line-height: 1.35;">Extreme zero-token mode. Aggressive context cleanup.</div>
+							<div style="font-size:0.8rem; color: var(--muted); line-height: 1.35;">Extreme zero-token mode. Aggressive context cleanup.</div>
 						</div>
 						<!-- Aggressive Card -->
 						<div class="profile-card" data-val="aggressive" onclick="selectProfileCard('aggressive')" style="border: 1px solid var(--border); border-radius: 12px; padding: 12px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 6px; background: var(--bg2);">
@@ -1317,7 +1317,7 @@
 								<div class="radio-indicator" style="width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;"></div>
 							</div>
 							<div style="font-weight: 600; font-size: 0.82rem; color: var(--fg);">Aggressive</div>
-							<div style="font-size: 0.7rem; color: var(--muted); line-height: 1.35;">Maximum context preservation. Keeps history detailed.</div>
+							<div style="font-size:0.8rem; color: var(--muted); line-height: 1.35;">Maximum context preservation. Keeps history detailed.</div>
 						</div>
 						<!-- Balanced Card -->
 						<div class="profile-card" data-val="balanced" onclick="selectProfileCard('balanced')" style="border: 1px solid var(--border); border-radius: 12px; padding: 12px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 6px; background: var(--bg2);">
@@ -1326,7 +1326,7 @@
 								<div class="radio-indicator" style="width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;"></div>
 							</div>
 							<div style="font-weight: 600; font-size: 0.82rem; color: var(--fg);">Balanced</div>
-							<div style="font-size: 0.7rem; color: var(--muted); line-height: 1.35;">Balanced profile. Speed and quality optimize.</div>
+							<div style="font-size:0.8rem; color: var(--muted); line-height: 1.35;">Balanced profile. Speed and quality optimize.</div>
 						</div>
 						<!-- Off Card -->
 						<div class="profile-card" data-val="off" onclick="selectProfileCard('off')" style="border: 1px solid var(--border); border-radius: 12px; padding: 12px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 6px; background: var(--bg2);">
@@ -1335,7 +1335,7 @@
 								<div class="radio-indicator" style="width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;"></div>
 							</div>
 							<div style="font-weight: 600; font-size: 0.82rem; color: var(--fg);">Off</div>
-							<div style="font-size: 0.7rem; color: var(--muted); line-height: 1.35;">No automatic compaction. Keeps everything.</div>
+							<div style="font-size:0.8rem; color: var(--muted); line-height: 1.35;">No automatic compaction. Keeps everything.</div>
 						</div>
 					</div>
 					<input type="hidden" id="set-profile" value="balanced">
@@ -1345,7 +1345,7 @@
 							<span>Reserved Tokens</span>
 							<span id="reserve-val" style="color:var(--accent);font-weight:700;">1000</span>
 						</label>
-						<div style="font-size:0.7rem;color:var(--muted);margin-bottom:6px;">Minimum tokens reserved for response (does not trigger compaction)</div>
+						<div style="font-size:0.8rem;color:var(--muted);margin-bottom:6px;">Minimum tokens reserved for response (does not trigger compaction)</div>
 						<input type="range" id="set-reserve" min="500" max="8000" step="500" value="1000" style="width:100%;accent-color:var(--accent);" oninput="document.getElementById('reserve-val').textContent=this.value">
 					</div>
 					<div class="form-group">
@@ -1353,14 +1353,14 @@
 							<span>Recent History Protection</span>
 							<span id="keep-val" style="color:var(--accent);font-weight:700;">2000</span>
 						</label>
-						<div style="font-size:0.7rem;color:var(--muted);margin-bottom:6px;">Last N tokens to keep after compaction</div>
+						<div style="font-size:0.8rem;color:var(--muted);margin-bottom:6px;">Last N tokens to keep after compaction</div>
 						<input type="range" id="set-keep" min="500" max="16000" step="500" value="2000" style="width:100%;accent-color:var(--accent);" oninput="document.getElementById('keep-val').textContent=this.value">
 					</div>
 					<label class="form-checkbox-row">
 						<input type="checkbox" id="set-tool-compaction">
 						<div>
 							<div style="font-size:0.8rem;font-weight:500;">Tool-Based Compaction</div>
-							<div style="font-size:0.7rem;color:var(--muted);">Automatically compact large tool outputs</div>
+							<div style="font-size:0.8rem;color:var(--muted);">Automatically compact large tool outputs</div>
 						</div>
 					</label>
 				</div>
@@ -1370,14 +1370,14 @@
 					<div style="font-size: 0.9rem; font-weight: 600; margin-bottom: 12px; color: var(--fg);">Security Settings</div>
 					<div class="form-group">
 						<label class="form-label">Global Permission Level</label>
-						<div style="font-size:0.7rem;color:var(--muted);margin-bottom:8px;">Default tool approval behavior for all projects</div>
+						<div style="font-size:0.8rem;color:var(--muted);margin-bottom:8px;">Default tool approval behavior for all projects</div>
 						<div style="display:flex;flex-direction:column;gap:5px;" id="perm-radio-group">
 							<label class="perm-row" data-val="ask">
 								<input type="radio" name="perm-level" value="ask" style="display:none;">
 								<span class="material-symbols-rounded" style="color:var(--accent);font-size:18px;">help</span>
 								<div style="flex:1;">
 									<div style="font-size:0.8rem;font-weight:500;">Always Ask</div>
-									<div style="font-size:0.7rem;color:var(--muted);">Ask for confirmation before running any tool (default)</div>
+									<div style="font-size:0.8rem;color:var(--muted);">Ask for confirmation before running any tool (default)</div>
 								</div>
 							</label>
 							<label class="perm-row" data-val="safe">
@@ -1385,7 +1385,7 @@
 								<span class="material-symbols-rounded" style="color:var(--accent2);font-size:18px;">shield</span>
 								<div style="flex:1;">
 									<div style="font-size:0.8rem;font-weight:500;">Safe Mode</div>
-									<div style="font-size:0.7rem;color:var(--muted);">Auto-approve read-only tools, ask for writing</div>
+									<div style="font-size:0.8rem;color:var(--muted);">Auto-approve read-only tools, ask for writing</div>
 								</div>
 							</label>
 							<label class="perm-row" data-val="full">
@@ -1393,7 +1393,7 @@
 								<span class="material-symbols-rounded" style="color:#4ade80;font-size:18px;">check_circle</span>
 								<div style="flex:1;">
 									<div style="font-size:0.8rem;font-weight:500;">Full Permission</div>
-									<div style="font-size:0.7rem;color:var(--muted);">Auto-approve all tools (use with caution)</div>
+									<div style="font-size:0.8rem;color:var(--muted);">Auto-approve all tools (use with caution)</div>
 								</div>
 							</label>
 						</div>
@@ -1546,13 +1546,13 @@
 				</div>
 				<div id="bridge-status-badge" style="padding:4px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;background:var(--surface);border:1px solid var(--border);">—</div>
 			</div>
-			<div style="font-size:0.78rem;color:var(--muted);line-height:1.7;padding:10px 14px;border-radius:10px;background:rgba(108,143,255,0.04);border:1px solid rgba(108,143,255,0.12);">
+			<div style="font-size:0.85rem;color:var(--muted);line-height:1.7;padding:10px 14px;border-radius:10px;background:rgba(108,143,255,0.04);border:1px solid rgba(108,143,255,0.12);">
 				<div style="font-weight:600;color:var(--fg);margin-bottom:6px;display:flex;align-items:center;gap:6px;">
 					<span class="material-symbols-rounded" style="font-size:16px;color:var(--accent);">info</span> Browser Bridge Nedir?
 				</div>
 				MoonCode'un tarayıcıyı kontrol etmesini sağlar. Etkinleştirildiğinde web sayfaları açabilir, form doldurup gönderebilir, ekran görüntüsü alabilirsiniz.
 			</div>
-			<div id="bridge-connected-info" class="hidden" style="margin-top:12px;padding:10px 14px;border-radius:10px;background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.2);font-size:0.75rem;color:#4ade80;">
+			<div id="bridge-connected-info" class="hidden" style="margin-top:12px;padding:10px 14px;border-radius:10px;background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.2);font-size:0.85rem;color:#4ade80;">
 				<span class="material-symbols-rounded" style="font-size:15px;vertical-align:middle;">check_circle</span>
 				Tarayıcı bağlı ve hazır. MoonCode ajan görevlerinde tarayıcıyı kullanabilir.
 			</div>
@@ -1614,13 +1614,13 @@
 		<div class="modal-body">
 			<div style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;">Oturum GitHub Gist olarak paylaşıldı. Aşağıdaki bağlantıyı kopyalayın:</div>
 			<div style="display:flex;gap:6px;align-items:center;">
-				<input id="share-url-input" class="form-input" type="text" readonly style="flex:1;font-family:'JetBrains Mono',monospace;font-size:0.75rem;" value="">
+				<input id="share-url-input" class="form-input" type="text" readonly style="flex:1;font-family:'JetBrains Mono',monospace;font-size:0.85rem;" value="">
 				<button onclick="copyShareUrl()" class="btn btn-primary" style="flex-shrink:0;">
 					<span class="material-symbols-rounded" style="font-size:15px;">content_copy</span>
 				</button>
 			</div>
 			<div style="margin-top:10px;">
-				<a id="share-open-link" href="#" target="_blank" style="font-size:0.78rem;color:var(--accent);display:flex;align-items:center;gap:4px;text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+				<a id="share-open-link" href="#" target="_blank" style="font-size:0.85rem;color:var(--accent);display:flex;align-items:center;gap:4px;text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
 					<span class="material-symbols-rounded" style="font-size:15px;">open_in_new</span>
 					Gist'i aç
 				</a>
@@ -2041,7 +2041,7 @@ function renderAutocomplete() {
 			<span class="material-symbols-rounded" style="font-size:16px;color:var(--accent);flex-shrink:0;">bolt</span>
 			<div style="overflow:hidden;">
 				<div class="ac-cmd">${c.cmd}</div>
-				<div class="ac-desc" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.desc}</div>
+				<div class="ac-desc" style="">${c.desc}</div>
 			</div>
 		</div>`).join('');
 }
@@ -2096,7 +2096,7 @@ function renderCmdList() {
 			<span class="material-symbols-rounded cmd-icon" style="font-size:18px;">${c.icon}</span>
 			<div style="flex:1;overflow:hidden;">
 				<div class="cmd-title">${c.title}</div>
-				<div class="cmd-desc" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.desc}</div>
+				<div class="cmd-desc" style="">${c.desc}</div>
 			</div>
 			${c.kbd ? `<div class="cmd-kbd"><kbd>${c.kbd}</kbd></div>` : ''}
 		</div>`).join('');
@@ -2191,7 +2191,7 @@ function setGeneratingState(generating) {
 		indicator.id = 'global-indicator';
 		indicator.className = 'msg-row assistant';
 		indicator.innerHTML = `
-			<div style="display:flex;align-items:center;gap:8px;color:var(--muted);font-size:0.78rem;padding:4px 0;">
+			<div style="display:flex;align-items:center;gap:8px;color:var(--muted);font-size:0.85rem;padding:4px 0;">
 				<span class="material-symbols-rounded thinking-pulse" style="font-size:16px;color:var(--accent);">psychology</span>
 				<span class="thinking-pulse">Thinking...</span>
 			</div>`;
@@ -2223,7 +2223,7 @@ function appendMessage(role, content, id = null, pinned = false) {
 		row.innerHTML = `
 			<div class="user-bubble">${safeHtml}</div>
 			<div style="display:flex;align-items:center;gap:6px;">
-				<span style="font-size:0.65rem;color:var(--muted);opacity:0.6;">${timeStr}</span>
+				<span style="font-size:0.85rem;color:var(--muted);opacity:0.6;">${timeStr}</span>
 				<div class="action-bar" style="margin-top:0;">
 					<button onclick="copyText(this.closest('.msg-row').querySelector('.user-bubble').textContent)" title="Copy">
 						<span class="material-symbols-rounded" style="font-size:15px;">content_copy</span>
@@ -2243,7 +2243,7 @@ function appendMessage(role, content, id = null, pinned = false) {
 		row.innerHTML = `
 			<div class="assistant-content prose" id="inner-${row.id}"></div>
 			<div style="display:flex;align-items:center;gap:6px;margin-top:2px;">
-				<span style="font-size:0.65rem;color:var(--muted);opacity:0.6;">${timeStr}</span>
+				<span style="font-size:0.85rem;color:var(--muted);opacity:0.6;">${timeStr}</span>
 				<div class="action-bar" style="margin-top:0;">
 					<button onclick="copyText(document.getElementById('inner-' + this.closest('.msg-row').id).innerText)" title="Copy">
 						<span class="material-symbols-rounded" style="font-size:15px;">content_copy</span>
@@ -2491,12 +2491,12 @@ function renderTool(toolCallId, name, args, status, result) {
 
 		let previewBtnHtml = '';
 		if ((nameLC.includes('browser_tabs') || nameLC.includes('browser_page')) && t.args && t.args.url) {
-			previewBtnHtml = `<button class="p-btn secondary" style="font-size:0.65rem; padding:2px 6px; margin-left:auto;" onclick="window.open('${escapeHtml(t.args.url)}', 'MoonCodePreview', 'width=1000,height=800')"><span class="material-symbols-rounded" style="font-size:12px; margin-right:4px;">open_in_new</span>Ön İzleme Yap</button>`;
+			previewBtnHtml = `<button class="p-btn secondary" style="font-size:0.85rem; padding:2px 6px; margin-left:auto;" onclick="window.open('${escapeHtml(t.args.url)}', 'MoonCodePreview', 'width=1000,height=800')"><span class="material-symbols-rounded" style="font-size:12px; margin-right:4px;">open_in_new</span>Ön İzleme Yap</button>`;
 		}
 
 		bodyHtml += `
 			<div style="border-bottom: ${index < count - 1 ? '1px solid var(--border)' : 'none'}; padding: 10px 12px;">
-				<div style="display:flex; align-items:center; gap:8px; font-weight:600; font-size:0.75rem; color:var(--muted); margin-bottom: 6px;">
+				<div style="display:flex; align-items:center; gap:8px; font-weight:600; font-size:0.85rem; color:var(--muted); margin-bottom: 6px;">
 					<span class="tool-status-dot" style="width:6px; height:6px; background:${subStatusClass === 'running' ? iconColor : subStatusClass === 'error' ? '#ff6464' : 'var(--accent2)'}"></span>
 					<span>${name} #${index + 1}</span>
 					${previewBtnHtml}
@@ -2513,7 +2513,7 @@ function renderTool(toolCallId, name, args, status, result) {
 			<div class="tool-header" onclick="this.nextElementSibling.classList.toggle('hidden')">
 				<span class="material-symbols-rounded" style="font-size:15px;color:${iconColor};">${statusClass === 'running' ? 'hourglass_top' : statusClass === 'error' ? 'error' : iconName}</span>
 				<span class="tool-name" style="color:${iconColor};">${title}</span>
-				<span style="margin-left:auto;font-size:0.7rem;color:var(--muted);">${statusLabel}</span>
+				<span style="margin-left:auto;font-size:0.8rem;color:var(--muted);">${statusLabel}</span>
 				<span class="material-symbols-rounded" style="font-size:14px;color:var(--muted);">expand_more</span>
 			</div>
 			<div class="tool-body ${groupStatus !== 'running' ? 'hidden' : ''}">
@@ -2699,15 +2699,15 @@ async function loadModels() {
 		
 		list.innerHTML = Object.entries(grouped).map(([provider, mods]) => `
 			<div style="margin-bottom:12px;">
-				<div style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding:4px 6px;margin-bottom:4px;">${provider}</div>
+				<div style="font-size:0.8rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding:4px 6px;margin-bottom:4px;">${provider}</div>
 				${mods.map(m => `
 					<div class="model-item" onclick="setModel('${m.provider}','${m.id}')">
 						<div class="model-icon" style="background:${providerColors[provider] || providerColors.default}22;color:${providerColors[provider] || providerColors.default};">
 							${m.name.slice(0,2).toUpperCase()}
 						</div>
 						<div style="overflow:hidden;">
-							<div style="font-size:0.82rem;font-weight:500;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${m.name}</div>
-							<div style="font-size:0.7rem;color:var(--muted);font-family:'JetBrains Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${m.id}</div>
+							<div style="font-size:0.82rem;font-weight:500;color:var(--fg);">${m.name}</div>
+							<div style="font-size:0.8rem;color:var(--muted);font-family:'JetBrains Mono',monospace;">${m.id}</div>
 						</div>
 					</div>`).join('')}
 			</div>`).join('');
@@ -2888,7 +2888,7 @@ async function updateUserUI() {
 			Browser Bridge
 		</div>
 		<div style="padding:8px 12px;margin-top:4px;border-top:1px solid var(--border);">
-			<div id="user-dropdown-cwd" style="font-size:0.68rem;color:var(--muted);font-family:'JetBrains Mono',monospace;word-break:break-all;"></div>
+			<div id="user-dropdown-cwd" style="font-size:0.8rem;color:var(--muted);font-family:'JetBrains Mono',monospace;word-break:break-all;"></div>
 		</div>`;
 
 	// Always render fallback immediately so dropdown is never empty
@@ -3000,7 +3000,7 @@ async function likeMsg(id, positive) {
 	}
 }
 
-// ─── HISTOR ─────────────────────────────────────────────────────────────
+// ─── HISTORY ──────────────────────────────────────────────────────────────
 async function loadHistory() {
 	try {
 		const res = await fetch('/api/history');
@@ -3217,7 +3217,7 @@ function updatePinnedBar() {
 
 	bar.classList.remove('hidden');
 	list.innerHTML = pinnedRows.map(p => `
-		<div onclick="scrollToMessage('${p.id}')" style="display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:0.75rem;color:var(--fg);cursor:pointer;white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+		<div onclick="scrollToMessage('${p.id}')" style="display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:0.85rem;color:var(--fg);cursor:pointer;white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
 			<span style="overflow:hidden;text-overflow:ellipsis;">${escapeHtml(p.text)}</span>
 			<span onclick="event.stopPropagation(); togglePin('${p.id}')" class="material-symbols-rounded" style="font-size:12px;color:var(--muted);cursor:pointer;" onmouseover="this.style.color='#ff6464'" onmouseout="this.style.color='var(--muted)'">close</span>
 		</div>
@@ -3311,7 +3311,7 @@ function editMsg(id) {
 	bubble.innerHTML = `
 		<textarea class="form-input" style="width:100%;background:var(--bg2);color:var(--fg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:0.875rem;resize:vertical;" rows="2"></textarea>
 		<div style="display:flex;justify-content:flex-end;gap:6px;margin-top:6px;">Cancel</button>
-			<button class="btn btn-primary" style="padding:4px 8px;font-size:0.75rem;" onclick="saveEdit('${id}')">Save</button>
+			<button class="btn btn-primary" style="padding:4px 8px;font-size:0.85rem;" onclick="saveEdit('${id}')">Save</button>
 		</div>
 	`;
 	const textarea = bubble.querySelector('textarea');
@@ -3615,13 +3615,13 @@ async function openSemanticBrain() {
 		data.experiences.forEach((exp, idx) => {
 			html += `
 			<div style="background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px;">
-				<div style="font-size:0.75rem; color:var(--muted); margin-bottom:6px; display:flex; justify-content:space-between;">
+				<div style="font-size:0.85rem; color:var(--muted); margin-bottom:6px; display:flex; justify-content:space-between;">
 					<span>Experience #${idx + 1}</span>
 					<span style="font-family:'JetBrains Mono',monospace;">${new Date(exp.timestamp).toLocaleString()}</span>
 				</div>
 				<div style="font-size:0.85rem; color:var(--fg); line-height:1.5;">${escapeHtml(exp.summary)}</div>
 				${exp.tags && exp.tags.length > 0 ? `<div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">
-					${exp.tags.map(t => `<span style="background:rgba(108,143,255,0.1); color:var(--accent); padding:2px 8px; border-radius:12px; font-size:0.65rem;">${escapeHtml(t)}</span>`).join('')}
+					${exp.tags.map(t => `<span style="background:rgba(108,143,255,0.1); color:var(--accent); padding:2px 8px; border-radius:12px; font-size:0.85rem;">${escapeHtml(t)}</span>`).join('')}
 				</div>` : ''}
 			</div>`;
 		});
