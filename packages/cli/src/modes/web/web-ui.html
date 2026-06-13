@@ -1278,6 +1278,20 @@
 							<option value="light">Light</option>
 						</select>
 					</div>
+
+					<div class="form-group" style="margin-top: 16px; background: rgba(108,143,255,0.04); border: 1px solid rgba(108,143,255,0.12); padding: 12px; border-radius: 8px;">
+						<label class="form-label" style="display:flex; align-items:center; gap:6px;">
+							<span class="material-symbols-rounded" style="color:var(--accent);font-size:18px;">extension</span>
+							Browser Bridge Extension
+						</label>
+						<div style="font-size:0.7rem;color:var(--muted);margin-bottom:8px;">Load this unpacked extension in Chrome/Edge (<code>chrome://extensions</code>) to enable MoonCode browser control.</div>
+						<div style="display:flex; gap:8px;">
+							<input type="text" id="browser-extension-path" readonly style="flex:1; background:var(--bg); border:1px solid var(--border); border-radius:6px; font-size:0.75rem; padding:8px 12px; color:var(--accent); cursor:pointer; text-align:center; transition: all 0.2s;" onclick="copyBrowserExtensionPath()" value="Click here to reveal & copy path">
+							<button class="btn btn-primary" onclick="copyBrowserExtensionPath()">
+								<span class="material-symbols-rounded" style="font-size:16px;">content_copy</span> Copy
+							</button>
+						</div>
+					</div>
 				</div>
 
 				<!-- Compaction Panel -->
@@ -2632,6 +2646,37 @@ async function compactSession() {
 		chatInner.classList.remove('compacting');
 		setGeneratingState(false);
 		toast('Failed to compact session', 'error');
+	}
+}
+
+// ─── BROWSER BRIDGE EXTENSION ──────────────────────────────────────────
+function copyBrowserExtensionPath() {
+	const cwdEl = document.getElementById('active-cwd-display');
+	const cwd = cwdEl ? cwdEl.textContent.trim() : '';
+	if (!cwd) {
+		toast('CWD not found, cannot determine extension path.', 'error');
+		return;
+	}
+	
+	// Always point to packages/cli/browser-extension/chrome
+	const extPath = cwd + '\\packages\\cli\\browser-extension\\chrome';
+	
+	const input = document.getElementById('browser-extension-path');
+	if (input) input.value = extPath;
+	
+	if (navigator.clipboard) {
+		navigator.clipboard.writeText(extPath).then(() => {
+			toast('Path copied! Paste in chrome://extensions (Load unpacked)', 'success', 3000);
+		}).catch(() => fallbackCopy(extPath));
+	} else {
+		fallbackCopy(extPath);
+	}
+	
+	function fallbackCopy(text) {
+		if (!input) return;
+		input.select();
+		document.execCommand('copy');
+		toast('Path copied! Paste in chrome://extensions (Load unpacked)', 'success', 3000);
 	}
 }
 
