@@ -3011,7 +3011,7 @@ async function loadHistory() {
 		chatInner.innerHTML = '';
 		history.forEach(msg => {
 			if (msg.role === 'user' || msg.role === 'assistant') {
-				const content = msg.text || (Array.isArray(msg.content) ? msg.content : null);
+				const content = msg.content ? msg.content : (msg.text || null);
 				if (content || msg.role === 'assistant') {
 					appendMessage(msg.role, content || '', msg.id, msg.pinned);
 				}

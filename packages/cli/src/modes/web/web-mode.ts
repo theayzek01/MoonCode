@@ -438,11 +438,12 @@ export class WebMode {
 				return {
 					id: m.id,
 					role: m.role,
+					content: m.content, // Pass raw content array or string directly to frontend
 					text:
 						typeof m.content === "string"
 							? m.content
 							: m.content && m.content.map
-								? m.content.map((c: any) => c.text).join("")
+								? m.content.map((c: any) => c.text || "").join("")
 								: "",
 					tools: (m.toolInvocations || []).map((t: any) => ({
 						id: t.toolCallId,
