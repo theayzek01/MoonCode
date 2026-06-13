@@ -451,7 +451,14 @@ let BUILTIN_THEMES: Record<string, ThemeJson> | undefined;
 function getBuiltinThemes(): Record<string, ThemeJson> {
 	if (!BUILTIN_THEMES) {
 		const themesDir = getThemesDir();
-		const builtinThemeFiles = ["rot-soft.json", "sea-dark.json", "moss-soft.json", "ash-soft.json", "moon-apex.json", "better-chroma-dark.json"];
+		const builtinThemeFiles = [
+			"rot-soft.json",
+			"sea-dark.json",
+			"moss-soft.json",
+			"ash-soft.json",
+			"moon-apex.json",
+			"better-chroma-dark.json",
+		];
 		BUILTIN_THEMES = {};
 		for (const file of builtinThemeFiles) {
 			const themePath = path.join(themesDir, file);

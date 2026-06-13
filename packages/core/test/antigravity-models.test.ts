@@ -9,14 +9,16 @@ describe("Antigravity model metadata", () => {
 		expect(Object.keys(antigravityModels).sort()).toEqual([
 			"antigravity-claude-opus-4-6-thinking",
 			"antigravity-claude-sonnet-4-6",
-			"antigravity-gemini-3-flash",
+			"antigravity-gemini-3.5-flash-high",
+			"antigravity-gemini-3.5-flash-low",
+			"antigravity-gemini-3.5-flash-medium",
 			"antigravity-gemini-3.1-pro-high",
 			"antigravity-gemini-3.1-pro-low",
 			"antigravity-gpt-oss-120b",
-		]);
+		].sort());
 		expect(antigravityModels["antigravity-claude-opus-4-6-thinking"].maxTokens).toBe(64000);
-		expect(antigravityModels["antigravity-gemini-3-flash"].contextWindow).toBe(1048576);
-		expect(antigravityModels["antigravity-gemini-3-flash"].maxTokens).toBeGreaterThanOrEqual(65535);
+		expect(antigravityModels["antigravity-gemini-3.5-flash-medium"].contextWindow).toBe(1048576);
+		expect(antigravityModels["antigravity-gemini-3.5-flash-medium"].maxTokens).toBeGreaterThanOrEqual(65535);
 	});
 
 	test("maps prefixed public ids to model", () => {
@@ -35,4 +37,3 @@ describe("Antigravity model metadata", () => {
 		expect(needsClaudeThinkingBetaHeader(antigravityModels["antigravity-claude-sonnet-4-6"])).toBe(false);
 	});
 });
-

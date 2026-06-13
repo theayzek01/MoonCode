@@ -39,24 +39,17 @@ export function renderToolFrame(
 	const prefix = STATE_PREFIX[state];
 	const prefixColor = STATE_COLOR[state];
 
-	const header =
-		theme.fg(prefixColor, "┌") +
-		theme.bold(theme.fg("toolTitle", `  ${prefix} ${toolName}`));
+	const header = theme.fg(prefixColor, "┌") + theme.bold(theme.fg("toolTitle", `  ${prefix} ${toolName}`));
 
 	const body = contentLines
 		.filter((l) => l.trim().length > 0)
 		.slice(0, 20) // show up to 20 lines inside
 		.map((line) => {
-			return (
-				theme.fg(prefixColor, "│ ") +
-				theme.fg("dim", line)
-			);
+			return theme.fg(prefixColor, "│ ") + theme.fg("dim", line);
 		});
 
 	if (body.length === 0) {
-		const emptyLine =
-			theme.fg(prefixColor, "│ ") +
-			theme.fg("dim", "...");
+		const emptyLine = theme.fg(prefixColor, "│ ") + theme.fg("dim", "...");
 		return [header, emptyLine, theme.fg(prefixColor, "└")];
 	}
 

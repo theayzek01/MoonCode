@@ -5,6 +5,7 @@ import {
 	type AssistantMessage,
 	auditManager,
 	type Context,
+	getModel,
 	type Model,
 	type SimpleStreamOptions,
 	type StreamFunction,
@@ -75,11 +76,25 @@ export class SwarmManager extends EventEmitter {
 
 		const provider = this.defaultModel.provider;
 
-		if (provider === "google-antigravity") {
-			if (highIntelligenceRoles.includes(role)) {
-				return { provider: "google-antigravity", name: "gemini-3.5-flash-high" } as Model<Api>;
-			}
-			return { provider: "google-antigravity", name: "gemini-3.5-flash-low" } as Model<Api>;
+		if (provider === "antigravity" || provider === "google-antigravity") {
+			const targetId = highIntelligenceRoles.includes(role)
+				? "antigravity-gemini-3.5-flash-high"
+				: "antigravity-gemini-3.5-flash-low";
+			const found = getModel("antigravity", targetId);
+			if (found) return found;
+			
+			return {
+				id: targetId,
+				name: highIntelligenceRoles.includes(role) ? "Gemini 3.5 Flash (High)" : "Gemini 3.5 Flash (Low)",
+				api: "google-antigravity",
+				provider: "antigravity",
+				baseUrl: "http://localhost:11435/v1",
+				reasoning: true,
+				input: ["text", "image"],
+				cost: { input: 0.5, output: 3, cacheRead: 0.5, cacheWrite: 0 },
+				contextWindow: 1048576,
+				maxTokens: 65536,
+			} as Model<Api>;
 		}
 
 		if (provider === "google-vertex" || provider === "vercel-ai-gateway" || provider === "openrouter") {
@@ -87,12 +102,36 @@ export class SwarmManager extends EventEmitter {
 		}
 
 		if (highIntelligenceRoles.includes(role)) {
-			// NASA Grade: Use high-reasoning models (Claude 3.5 Sonnet / GPT-4o)
-			return { provider: "anthropic", name: "claude-3-5-sonnet-latest" } as Model<Api>;
+			const found = getModel("anthropic", "claude-3-5-sonnet-latest");
+			if (found) return found;
+			return {
+				id: "claude-3-5-sonnet-latest",
+				name: "claude-3-5-sonnet-latest",
+				api: "anthropic",
+				provider: "anthropic",
+				baseUrl: "https://api.anthropic.com",
+				reasoning: true,
+				input: ["text", "image"],
+				cost: { input: 3, output: 15, cacheRead: 0.3, cacheWrite: 3.75 },
+				contextWindow: 200000,
+				maxTokens: 8192,
+			} as Model<Api>;
 		}
 
-		// Google/Microsoft Grade: Use fast, high-throughput models (Gemini Flash / GPT-4o-mini)
-		return { provider: "google", name: "gemini-1.5-flash-latest" } as Model<Api>;
+		const found = getModel("google", "gemini-1.5-flash-latest");
+		if (found) return found;
+		return {
+			id: "gemini-1.5-flash-latest",
+			name: "gemini-1.5-flash-latest",
+			api: "google",
+			provider: "google",
+			baseUrl: "https://generativelanguage.googleapis.com",
+			reasoning: false,
+			input: ["text", "image"],
+			cost: { input: 0.075, output: 0.3, cacheRead: 0.01875, cacheWrite: 0.075 },
+			contextWindow: 1048576,
+			maxTokens: 8192,
+		} as Model<Api>;
 	}
 
 	/**

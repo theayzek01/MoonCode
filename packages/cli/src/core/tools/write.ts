@@ -284,9 +284,7 @@ export function createWriteToolDefinition(
 									});
 									const linesCount = content.split("\n").length;
 									resolve({
-										content: [
-											{ type: "text", text: `Successfully wrote ${linesCount} lines to ${path}` },
-										],
+										content: [{ type: "text", text: `Successfully wrote ${linesCount} lines to ${path}` }],
 										details: diff ? { diff } : undefined,
 									});
 								} catch (error: any) {

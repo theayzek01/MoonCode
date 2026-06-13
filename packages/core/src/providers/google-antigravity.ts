@@ -21,7 +21,7 @@ import type {
 	ThinkingLevel,
 	ToolCall,
 } from "../types.js";
-import { AssistantMessageEventStream } from "../utils/event-stream.js";
+import type { AssistantMessageEventStream } from "../utils/event-stream.js";
 import { sanitizeSurrogates } from "../utils/sanitize-unicode.js";
 import {
 	convertMessages,
@@ -91,7 +91,7 @@ const _ANTIGRAVITY_SYSTEM_INSTRUCTION =
 	"**Proactiveness**";
 
 // Counter for generating unique tool call IDs
-let toolCallCounter = 0;
+const toolCallCounter = 0;
 
 // Retry configuration
 const MAX_RETRIES = 3;
@@ -252,5 +252,3 @@ export function buildRequest(
 		messages: [],
 	};
 }
-
-
