@@ -2495,6 +2495,23 @@ function updateMessage(id, content, isStreaming = false) {
 function renderTool(toolCallId, name, args, status, result) {
 	const nameLC = name.toLowerCase();
 	
+	// ask_theme: intercept EARLY before any DOM creation
+	if (nameLC.includes('ask_theme')) {
+		const aqc = document.getElementById('ask-question-container');
+		if (status === 'running' && aqc) {
+			waitingForAnswer = true;
+			renderThemeWizardStep(args?.prompt || "");
+			aqc.classList.remove('hidden');
+			// Scroll into view so user sees it
+			setTimeout(() => aqc.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+		} else if (status === 'done' || status === 'error') {
+			if (!waitingForAnswer) {
+				if (aqc) aqc.classList.add('hidden');
+			}
+		}
+		return; // Never render ask_theme as a tool card
+	}
+
 	// ask_question: intercept EARLY before any DOM creation
 	if (nameLC.includes('ask_question')) {
 		const aqc = document.getElementById('ask-question-container');
@@ -3724,6 +3741,319 @@ async function answerQuestion(answer) {
 		if (aqc) aqc.querySelectorAll('button').forEach(btn => { btn.disabled = false; btn.style.opacity = ''; });
 		toast(e.message, 'error');
 	}
+}
+
+// ─── THEME WIZARD ─────────────────────────────────────────────────────────
+let themeWizardState = {
+	step: 1,
+	prompt: "",
+	colorPalette: null,
+	style: null,
+	font: null,
+	iconStyle: null
+};
+
+const curPalettes = [
+	{ id: "sunset", colors: ["#FF5E62", "#FF9966", "#FFD97D", "#1E1B18", "#F7F5F0"] },
+	{ id: "cyberpunk", colors: ["#00F2FE", "#4FACFE", "#F355DA", "#0B0C10", "#FFFFFF"] },
+	{ id: "forest", colors: ["#2E7D32", "#4CAF50", "#81C784", "#111E15", "#F1F8E9"] },
+	{ id: "slate", colors: ["#1E293B", "#475569", "#94A3B8", "#0F172A", "#F8FAFC"] },
+	{ id: "gold", colors: ["#D4AF37", "#AA7C11", "#F3E5AB", "#1F1A12", "#FFFDF6"] },
+	{ id: "pastel", colors: ["#FFB7B2", "#FFDAC1", "#E2F0CB", "#FFFFFF", "#3D3D3D"] }
+];
+
+const curStyles = [
+	{ name: "Minimalizm", desc: "Sade ve minimal" },
+	{ name: "Cyberpunk", desc: "Teknolojik ve parlak neon" },
+	{ name: "Neomorfizm", desc: "Yumuşak gölgeli modern arayüz" },
+	{ name: "Retro/Piksel", desc: "Chunky nostaljik retro esintisi" },
+	{ name: "Corporate", desc: "Profesyonel ve kurumsal düzen" },
+	{ name: "Pastel", desc: "Yumuşak pastel geçişler ve dost canlısı" }
+];
+
+const curFonts = [
+	{ id: "sans-serif", name: "Sans-Serif (Inter)", style: "font-family: 'Inter', sans-serif;" },
+	{ id: "serif", name: "Serif (Playfair)", style: "font-family: 'Playfair Display', serif;" },
+	{ id: "monospace", name: "Monospace (Fira)", style: "font-family: 'Fira Code', monospace;" },
+	{ id: "display", name: "Display (Outfit)", style: "font-family: 'Outfit', sans-serif;" },
+	{ id: "handwritten", name: "Handwritten (Caveat)", style: "font-family: 'Caveat', cursive;" }
+];
+
+const curIcons = [
+	{ id: "outline", name: "Outline (Çizgisel)", desc: "İnce modern çizgiler" },
+	{ id: "solid", name: "Solid (Dolu)", desc: "Belirgin kalın dolgular" },
+	{ id: "colored", name: "Colored (Renkli)", desc: "Palet renkleriyle uyumlu renkli ikonlar" },
+	{ id: "hand-drawn", name: "Hand-drawn (El Çizimi)", desc: "Kroki benzeri eğlenceli ikonlar" }
+];
+
+function drawMiniatureStyle(styleName, colors) {
+	if (!colors) colors = ["#6C8FFF", "#5DD5C8", "#94A3B8", "#1E1E24", "#FFFFFF"];
+	
+	const mainColor = colors[0];
+	const secondaryColor = colors[1];
+	const mutedColor = colors[2];
+	const bg = colors[3];
+	const fg = colors[4];
+	
+	let innerStyles = '';
+	if (styleName === "Minimalizm") {
+		innerStyles = `
+			<div style="background: ${fg}; border: 1px solid #e2e8f0; border-radius: 4px; width: 100%; height: 100%; padding: 6px; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px;">
+				<div style="width: 25px; height: 4px; background: ${mainColor}; border-radius: 2px;"></div>
+				<div style="width: 100%; height: 2px; background: #f1f5f9; margin-top: 2px;"></div>
+				<div style="display: flex; gap: 4px; align-items: center; margin-top: 4px;">
+					<div style="width: 8px; height: 8px; border-radius: 50%; background: ${secondaryColor};"></div>
+					<div style="width: 35px; height: 3px; background: ${mutedColor}; opacity: 0.5;"></div>
+				</div>
+				<div style="width: 100%; height: 2px; background: #f1f5f9;"></div>
+				<div style="width: 100%; height: 2px; background: #f1f5f9;"></div>
+				<div style="margin-top: auto; width: 100%; height: 8px; border-radius: 3px; background: ${mainColor}; display: flex; align-items: center; justify-content: center;"></div>
+			</div>
+		`;
+	} else if (styleName === "Cyberpunk") {
+		innerStyles = `
+			<div style="background: ${bg}; border: 1px solid ${mainColor}; box-shadow: 0 0 5px ${mainColor}; border-radius: 2px; width: 100%; height: 100%; padding: 6px; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px; overflow: hidden; position: relative;">
+				<div style="font-size: 5px; color: ${mainColor}; font-weight: 900; letter-spacing: 0.5px; line-height: 1;">SYS</div>
+				<div style="width: 40px; height: 4px; background: ${secondaryColor}; box-shadow: 0 0 3px ${secondaryColor}; margin-top: 2px;"></div>
+				<div style="width: 100%; height: 1px; background: ${mainColor}40;"></div>
+				<div style="width: 30px; height: 3px; background: ${mutedColor};"></div>
+				<div style="margin-top: auto; width: 100%; height: 8px; background: transparent; border: 1px solid ${secondaryColor}; box-shadow: 0 0 2px ${secondaryColor};"></div>
+			</div>
+		`;
+	} else if (styleName === "Neomorfizm") {
+		innerStyles = `
+			<div style="background: #e0e0e0; border-radius: 8px; width: 100%; height: 100%; padding: 6px; box-sizing: border-box; display: flex; flex-direction: column; gap: 6px; justify-content: space-between;">
+				<div style="width: 100%; height: 10px; border-radius: 4px; background: #e0e0e0; box-shadow: 2px 2px 4px #bebebe, -2px -2px 4px #ffffff;"></div>
+				<div style="width: 30px; height: 6px; border-radius: 3px; background: #e0e0e0; box-shadow: inset 1px 1px 2px #bebebe, inset -1px -1px 2px #ffffff;"></div>
+				<div style="display: flex; gap: 6px; justify-content: center; margin-top: 4px;">
+					<div style="width: 14px; height: 14px; border-radius: 50%; background: #e0e0e0; box-shadow: 2px 2px 4px #bebebe, -2px -2px 4px #ffffff;"></div>
+					<div style="width: 14px; height: 14px; border-radius: 50%; background: #e0e0e0; box-shadow: inset 1.5px 1.5px 3px #bebebe, inset -1.5px -1.5px 3px #ffffff;"></div>
+				</div>
+				<div style="width: 100%; height: 10px; border-radius: 5px; background: ${mainColor}; box-shadow: 2px 2px 4px ${mainColor}60;"></div>
+			</div>
+		`;
+	} else if (styleName === "Retro/Piksel") {
+		innerStyles = `
+			<div style="background: ${fg}; border: 2px solid ${bg}; width: 100%; height: 100%; padding: 4px; box-sizing: border-box; display: flex; flex-direction: column; gap: 3px; font-family: monospace;">
+				<div style="width: 100%; height: 8px; background: ${mainColor}; border: 1px solid ${bg};"></div>
+				<div style="width: 80%; height: 3px; background: ${bg}; margin-top: 2px;"></div>
+				<div style="width: 90%; height: 3px; background: ${mutedColor};"></div>
+				<div style="display: flex; gap: 4px; margin-top: 2px;">
+					<div style="width: 6px; height: 6px; background: ${secondaryColor}; border: 1px solid ${bg};"></div>
+					<div style="width: 6px; height: 6px; background: ${mainColor}; border: 1px solid ${bg};"></div>
+				</div>
+				<div style="margin-top: auto; width: 100%; height: 8px; background: ${secondaryColor}; border: 1px solid ${bg};"></div>
+			</div>
+		`;
+	} else if (styleName === "Corporate") {
+		innerStyles = `
+			<div style="background: ${fg}; border: 1px solid #cbd5e1; border-radius: 2px; width: 100%; height: 100%; padding: 6px; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px;">
+				<div style="display: flex; justify-content: space-between; align-items: center;">
+					<div style="width: 12px; height: 4px; background: ${mainColor};"></div>
+					<div style="display: flex; gap: 2px;">
+						<div style="width: 6px; height: 2px; background: ${mutedColor};"></div>
+						<div style="width: 6px; height: 2px; background: ${mutedColor};"></div>
+					</div>
+				</div>
+				<div style="width: 100%; height: 1px; background: #e2e8f0;"></div>
+				<div style="width: 100%; height: 24px; background: #f8fafc; border: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 2px; padding: 2px;">
+					<div style="width: 40px; height: 3px; background: ${mainColor};"></div>
+					<div style="width: 100%; height: 2px; background: ${mutedColor}; opacity: 0.4;"></div>
+					<div style="width: 80%; height: 2px; background: ${mutedColor}; opacity: 0.4;"></div>
+				</div>
+				<div style="margin-top: auto; display: flex; gap: 4px;">
+					<div style="flex: 1; height: 8px; background: ${mainColor}; border-radius: 1px;"></div>
+					<div style="flex: 1; height: 8px; background: ${secondaryColor}; border-radius: 1px;"></div>
+				</div>
+			</div>
+		`;
+	} else { // Pastel
+		innerStyles = `
+			<div style="background: ${fg}; border: 1px solid #fbcfe8; border-radius: 10px; width: 100%; height: 100%; padding: 6px; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px;">
+				<div style="width: 30px; height: 5px; border-radius: 3px; background: ${mainColor};"></div>
+				<div style="width: 100%; height: 4px; border-radius: 2px; background: ${secondaryColor}60;"></div>
+				<div style="display: flex; gap: 4px; margin-top: 4px;">
+					<div style="width: 10px; height: 10px; border-radius: 4px; background: ${secondaryColor};"></div>
+					<div style="width: 25px; height: 3px; border-radius: 1.5px; background: ${mutedColor}; opacity: 0.6; margin-top: 3px;"></div>
+				</div>
+				<div style="margin-top: auto; width: 100%; height: 10px; border-radius: 5px; background: ${mainColor};"></div>
+			</div>
+		`;
+	}
+
+	return innerStyles;
+}
+
+function renderThemeWizardStep(promptText) {
+	if (promptText && !themeWizardState.prompt) {
+		themeWizardState.prompt = promptText;
+	}
+	
+	const aqc = document.getElementById('ask-question-container');
+	if (!aqc) return;
+
+	let contentHtml = '';
+	
+	// Progress Bar / Indicator
+	const progressHtml = `
+		<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border);">
+			<span style="font-size: 0.8rem; font-weight: 700; color: var(--accent); display: flex; align-items: center; gap: 6px; user-select: none;">
+				<span class="material-symbols-rounded" style="font-size: 18px;">design_services</span>
+				Tasarım Yapılandırma Sihirbazı
+			</span>
+			<div style="display: flex; gap: 4px;">
+				${[1, 2, 3, 4].map(s => `
+					<div style="width: 18px; height: 4px; border-radius: 2px; background: ${themeWizardState.step >= s ? 'var(--accent)' : 'var(--border)'}; transition: background 0.3s;"></div>
+				`).join('')}
+			</div>
+		</div>
+	`;
+
+	if (themeWizardState.step === 1) {
+		// Step 1: Color Palette
+		contentHtml = `
+			${progressHtml}
+			<div style="font-size:0.9rem; font-weight:600; color:var(--fg); margin-bottom:12px; user-select: none;">Renk Paletini Seçin</div>
+			<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px;">
+				${curPalettes.map((p, idx) => `
+					<div onclick="selectThemePalette('${p.id}')" style="background: var(--surface2); border: 1.5px solid var(--border); border-radius: 12px; padding: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+						<div style="display: flex; gap: 4px; justify-content: center; align-items: center; height: 30px;">
+							${p.colors.map(col => `<div style="width: 16px; height: 16px; border-radius: 50%; background: ${col}; border: 1px solid rgba(0,0,0,0.1);"></div>`).join('')}
+						</div>
+					</div>
+				`).join('')}
+			</div>
+		`;
+	} else if (themeWizardState.step === 2) {
+		// Step 2: Style Selector (6 cards 3:4 aspect ratio)
+		const palette = curPalettes.find(p => p.id === themeWizardState.colorPalette) || curPalettes[0];
+		contentHtml = `
+			${progressHtml}
+			<div style="font-size:0.9rem; font-weight:600; color:var(--fg); margin-bottom:12px; user-select: none;">Tasarım Stilini Seçin</div>
+			<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 16px;">
+				${curStyles.map(s => `
+					<div onclick="selectThemeStyle('${s.name}')" style="width: 95px; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; padding: 6px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 6px;" onmouseover="this.style.borderColor='var(--accent)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='var(--border)'; this.style.transform='none';">
+						<div style="width: 100%; height: 106px; border-radius: 6px; overflow: hidden; background: var(--bg2); border: 1px solid rgba(255,255,255,0.05); padding: 4px; box-sizing: border-box;">
+							${drawMiniatureStyle(s.name, palette.colors)}
+						</div>
+						<div style="text-align: center; font-size: 0.72rem; font-weight: 600; color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 2px 0; user-select: none;">${s.name}</div>
+					</div>
+				`).join('')}
+			</div>
+		`;
+	} else if (themeWizardState.step === 3) {
+		// Step 3: Typography
+		contentHtml = `
+			${progressHtml}
+			<div style="font-size:0.9rem; font-weight:600; color:var(--fg); margin-bottom:12px; user-select: none;">Yazı Tipi (Font) Seçin</div>
+			<div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+				${curFonts.map(f => `
+					<button onclick="selectThemeFont('${f.id}')" style="padding: 12px 16px; text-align: left; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 10px; color: var(--fg); cursor: pointer; transition: all 0.2s; font-size: 0.85rem; font-weight: 500; display: flex; justify-content: space-between; align-items: center;" onmouseover="this.style.borderColor='var(--accent)'; this.style.color='var(--accent)';" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--fg)';">
+						<span style="${f.style}">${f.name}</span>
+						<span style="${f.style} font-size: 0.75rem; opacity: 0.7;">Aa Bb Cc 123</span>
+					</button>
+				`).join('')}
+			</div>
+		`;
+	} else if (themeWizardState.step === 4) {
+		// Step 4: Icon Style
+		contentHtml = `
+			${progressHtml}
+			<div style="font-size:0.9rem; font-weight:600; color:var(--fg); margin-bottom:12px; user-select: none;">İkon Stilini Seçin</div>
+			<div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+				${curIcons.map(ic => `
+					<button onclick="selectThemeIcons('${ic.id}')" style="padding: 12px 16px; text-align: left; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 10px; color: var(--fg); cursor: pointer; transition: all 0.2s; font-size: 0.85rem; font-weight: 500; display: flex; flex-direction: column; gap: 2px;" onmouseover="this.style.borderColor='var(--accent)'; this.style.color='var(--accent)';" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--fg)';">
+						<div style="font-weight: 600; text-align: left;">${ic.name}</div>
+						<div style="font-size: 0.75rem; color: var(--muted); text-align: left;">${ic.desc}</div>
+					</button>
+				`).join('')}
+			</div>
+		`;
+	}
+
+	// Action Buttons: Atla (Skip) & Sormayı Bırak (Kafana Göre Yap)
+	contentHtml += `
+		<div style="display: flex; gap: 8px; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 12px;">
+			<button onclick="skipThemeWizardStep()" style="flex: 1; padding: 10px; font-size: 0.82rem; font-weight: 600; cursor: pointer; background: transparent; border: 1.5px solid var(--border); border-radius: 8px; color: var(--muted); transition: all 0.2s; font-family: inherit;" onmouseover="this.style.color='var(--fg)'; this.style.borderColor='var(--fg)';" onmouseout="this.style.color='var(--muted)'; this.style.borderColor='var(--border)';">Atla</button>
+			<button onclick="stopAskingThemeWizard()" style="flex: 1.5; padding: 10px; font-size: 0.82rem; font-weight: 600; cursor: pointer; background: var(--surface2); border: 1.5px solid var(--accent2); border-radius: 8px; color: var(--accent2); transition: all 0.2s; font-family: inherit;" onmouseover="this.style.background='rgba(93,213,200,0.08)';" onmouseout="this.style.background='var(--surface2)';">Sormayı Bırak (Kafana Göre Yap)</button>
+		</div>
+	`;
+
+	aqc.innerHTML = contentHtml;
+}
+
+function selectThemePalette(val) {
+	themeWizardState.colorPalette = val;
+	themeWizardState.step = 2;
+	renderThemeWizardStep();
+}
+
+function selectThemeStyle(val) {
+	themeWizardState.style = val;
+	themeWizardState.step = 3;
+	renderThemeWizardStep();
+}
+
+function selectThemeFont(val) {
+	themeWizardState.font = val;
+	themeWizardState.step = 4;
+	renderThemeWizardStep();
+}
+
+function selectThemeIcons(val) {
+	themeWizardState.iconStyle = val;
+	finishThemeWizard();
+}
+
+function skipThemeWizardStep() {
+	if (themeWizardState.step === 1) {
+		themeWizardState.colorPalette = "default";
+		themeWizardState.step = 2;
+		renderThemeWizardStep();
+	} else if (themeWizardState.step === 2) {
+		themeWizardState.style = "default";
+		themeWizardState.step = 3;
+		renderThemeWizardStep();
+	} else if (themeWizardState.step === 3) {
+		themeWizardState.font = "default";
+		themeWizardState.step = 4;
+		renderThemeWizardStep();
+	} else if (themeWizardState.step === 4) {
+		themeWizardState.iconStyle = "default";
+		finishThemeWizard();
+	}
+}
+
+function stopAskingThemeWizard() {
+	// Auto complete remaining choices
+	if (!themeWizardState.colorPalette || themeWizardState.colorPalette === "default") themeWizardState.colorPalette = "slate";
+	if (!themeWizardState.style || themeWizardState.style === "default") themeWizardState.style = "Minimalizm";
+	if (!themeWizardState.font || themeWizardState.font === "default") themeWizardState.font = "sans-serif";
+	if (!themeWizardState.iconStyle || themeWizardState.iconStyle === "default") themeWizardState.iconStyle = "outline";
+	
+	finishThemeWizard(true);
+}
+
+function finishThemeWizard(isAuto = false) {
+	const answerObj = {
+		colorPalette: themeWizardState.colorPalette,
+		style: themeWizardState.style,
+		font: themeWizardState.font,
+		iconStyle: themeWizardState.iconStyle,
+		auto: isAuto
+	};
+	
+	// Reset wizard state
+	themeWizardState = {
+		step: 1,
+		prompt: "",
+		colorPalette: null,
+		style: null,
+		font: null,
+		iconStyle: null
+	};
+	
+	answerQuestion(JSON.stringify(answerObj));
 }
 
 // ─── SEMANTIC BRAIN ───────────────────────────────────────────────────────

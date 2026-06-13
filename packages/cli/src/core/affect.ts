@@ -5,7 +5,61 @@ export type AffectiveMode = "subtle" | "active";
 export type AffectiveSignalSource = "user" | "assistant";
 export type AffectivePosture = "steady" | "warm" | "curious" | "careful" | "focused" | "repair" | "recovery";
 
+export interface E_Vector {
+	merak: number; // e1: curiosity/interest
+	istek: number; // e2: desire/want
+	korku: number; // e3: fear/caution
+	ofke: number; // e4: anger/tension
+	mutluluk: number; // e5: joy/satisfaction
+	nefret: number; // e6: dislike/displeasure
+	odak: number; // e7: focus
+}
+
+export type XiIntent =
+	| "assert"
+	| "ask"
+	| "desire"
+	| "command"
+	| "promise"
+	| "warn"
+	| "permit"
+	| "prohibit"
+	| "express"
+	| "irony"
+	| "suggest"
+	| "hypothesize"
+	| "narrate";
+
+export interface XiSemantic {
+	yüzey: string;
+	derin: string;
+}
+
+export interface XiContext {
+	rol: string;
+	alan: string;
+	iliski: string;
+	perspektif: "konusan" | "dinleyen";
+	gecicilik: number;
+	guncelleme: number;
+	kultur: string;
+}
+
+export interface XiUncertainty {
+	sozcuksel: number;
+	sozdizimsel: number;
+	pragmatik: number;
+}
+
+export interface XiConfidence {
+	semantik: number;
+	pragmatik: number;
+	faktuel: number;
+	tutarlilik: number;
+}
+
 export interface AffectiveState {
+	// Compatibility fields
 	trust: number;
 	warmth: number;
 	curiosity: number;
@@ -18,6 +72,15 @@ export interface AffectiveState {
 	lastSignal?: string;
 	lastUpdated: number;
 	recentEvents: AffectiveEvent[];
+
+	// --- Ξ-BRIDGE v3.0 Core Fields ---
+	E: E_Vector;
+	intent: XiIntent;
+	S: XiSemantic;
+	C: XiContext;
+	T: Array<{ Xi: string; t: number; w: number }>;
+	delta: XiUncertainty;
+	alpha: XiConfidence;
 }
 
 export interface AffectiveEvent {
@@ -43,7 +106,20 @@ export interface NormalizedAffectiveSettings {
 
 export type AssistantAffectiveOutcome = "success" | "error" | "aborted" | "length" | "tool_use";
 
-type AffectiveAxis = Exclude<keyof AffectiveState, "interactionCount" | "lastSignal" | "lastUpdated" | "recentEvents">;
+type AffectiveAxis = Exclude<
+	keyof AffectiveState,
+	| "interactionCount"
+	| "lastSignal"
+	| "lastUpdated"
+	| "recentEvents"
+	| "E"
+	| "intent"
+	| "S"
+	| "C"
+	| "T"
+	| "delta"
+	| "alpha"
+>;
 
 export type AffectiveDeltas = Partial<Record<AffectiveAxis, number>>;
 
@@ -156,6 +232,41 @@ export function createInitialAffectiveState(now = Date.now()): AffectiveState {
 		lastSignal: "initial",
 		lastUpdated: now,
 		recentEvents: [],
+		E: {
+			merak: 1.0,
+			istek: 0.0,
+			korku: 0.0,
+			ofke: 0.0,
+			mutluluk: 1.0,
+			nefret: 0.0,
+			odak: 1.0,
+		},
+		intent: "narrate",
+		S: {
+			yüzey: "greet(user)",
+			derin: "greet(user)",
+		},
+		C: {
+			rol: "developer",
+			alan: "coding",
+			iliski: "eşit",
+			perspektif: "konusan",
+			gecicilik: 0.1,
+			guncelleme: now,
+			kultur: "tr",
+		},
+		T: [],
+		delta: {
+			sozcuksel: 0.0,
+			sozdizimsel: 0.0,
+			pragmatik: 0.0,
+		},
+		alpha: {
+			semantik: 1.0,
+			pragmatik: 1.0,
+			faktuel: 1.0,
+			tutarlilik: 1.0,
+		},
 	};
 }
 
@@ -175,6 +286,17 @@ export function normalizeAffectiveSettings(
 		recentEvents: normalizeRecentEvents(source.recentEvents),
 	};
 
+	// Map backward-compatible fields to E⃗
+	state.E = {
+		merak: state.curiosity * 5.0,
+		istek: state.trust * 5.0,
+		korku: state.caution * 5.0,
+		ofke: state.tension * 5.0,
+		mutluluk: state.satisfaction * 5.0,
+		nefret: (1.0 - state.trust) * 5.0,
+		odak: state.focus * 5.0,
+	};
+
 	return {
 		enabled: settings?.enabled ?? false,
 		mode: settings?.mode === "active" ? "active" : "subtle",
@@ -187,12 +309,27 @@ export function appraiseUserInput(state: AffectiveState, text: string, now = Dat
 	const signalLabels: string[] = [];
 	const deltas: AffectiveDeltas = {};
 
+	// Formulate Ξ E⃗ update parameters
+	let merakChange = 0.0;
+	let istekChange = 0.0;
+	let korkuChange = 0.0;
+	let ofkeChange = 0.0;
+	let mutlulukChange = 0.0;
+	let odakChange = 0.0;
+	let intentDetected: XiIntent = "assert";
+	let pragmatikDelta = 0.0;
+
 	if (containsAny(normalized, POSITIVE_SIGNALS)) {
 		signalLabels.push("positive-feedback");
 		addDelta(deltas, "trust", 0.04);
 		addDelta(deltas, "warmth", 0.05);
 		addDelta(deltas, "satisfaction", 0.07);
 		addDelta(deltas, "tension", -0.04);
+
+		mutlulukChange += 1.0;
+		istekChange += 0.5;
+		ofkeChange -= 0.5;
+		intentDetected = "express";
 	}
 
 	if (containsAny(normalized, NEGATIVE_SIGNALS)) {
@@ -202,6 +339,11 @@ export function appraiseUserInput(state: AffectiveState, text: string, now = Dat
 		addDelta(deltas, "caution", 0.09);
 		addDelta(deltas, "tension", 0.08);
 		addDelta(deltas, "focus", 0.04);
+
+		ofkeChange += 1.5;
+		korkuChange += 1.0;
+		mutlulukChange -= 1.0;
+		intentDetected = "warn";
 	}
 
 	if (containsAny(normalized, URGENCY_SIGNALS)) {
@@ -209,6 +351,10 @@ export function appraiseUserInput(state: AffectiveState, text: string, now = Dat
 		addDelta(deltas, "focus", 0.07);
 		addDelta(deltas, "caution", 0.04);
 		addDelta(deltas, "tension", 0.05);
+
+		odakChange += 1.5;
+		ofkeChange += 0.5;
+		intentDetected = "command";
 	}
 
 	if (containsAny(normalized, WARMTH_SIGNALS)) {
@@ -216,26 +362,74 @@ export function appraiseUserInput(state: AffectiveState, text: string, now = Dat
 		addDelta(deltas, "warmth", 0.08);
 		addDelta(deltas, "trust", 0.02);
 		addDelta(deltas, "tension", -0.03);
+
+		mutlulukChange += 0.5;
+		intentDetected = "express";
 	}
 
 	if (containsAny(normalized, CURIOSITY_SIGNALS) || normalized.includes("?")) {
 		signalLabels.push("curiosity");
 		addDelta(deltas, "curiosity", 0.08);
 		addDelta(deltas, "focus", 0.03);
+
+		merakChange += 1.5;
+		odakChange += 0.5;
+		intentDetected = "ask";
 	}
 
 	if (text.length > 3000) {
 		signalLabels.push("large-input");
 		addDelta(deltas, "fatigue", 0.05);
 		addDelta(deltas, "focus", 0.03);
+
+		odakChange += 0.5;
+		pragmatikDelta += 0.1;
 	}
 
 	const signal = signalLabels.length > 0 ? signalLabels.join(", ") : "neutral-user-input";
-	const next = {
-		...applyDeltas(relaxTowardBaseline(state, 0.03), deltas),
+	const nextBase = applyDeltas(relaxTowardBaseline(state, 0.03), deltas);
+
+	const updatedE: E_Vector = {
+		merak: clampE(state.E.merak + merakChange),
+		istek: clampE(state.E.istek + istekChange),
+		korku: clampE(state.E.korku + korkuChange),
+		ofke: clampE(state.E.ofke + ofkeChange),
+		mutluluk: clampE(state.E.mutluluk + mutlulukChange),
+		nefret: clampE(state.E.nefret + (ofkeChange > 0 ? 0.3 : 0.0)),
+		odak: clampE(state.E.odak + odakChange),
+	};
+
+	const updatedDelta: XiUncertainty = {
+		sozcuksel: Math.max(0, Math.min(1, state.delta.sozcuksel + pragmatikDelta * 0.5)),
+		sozdizimsel: state.delta.sozdizimsel,
+		pragmatik: Math.max(0, Math.min(1, state.delta.pragmatik + pragmatikDelta)),
+	};
+
+	const updatedAlpha: XiConfidence = {
+		semantik: state.alpha.semantik,
+		pragmatik: Math.max(0, Math.min(1, 1.0 - updatedDelta.pragmatik)),
+		faktuel: state.alpha.faktuel,
+		tutarlilik: state.alpha.tutarlilik,
+	};
+
+	const next: AffectiveState = {
+		...nextBase,
 		interactionCount: state.interactionCount + 1,
 		lastSignal: signal,
 		lastUpdated: now,
+		E: updatedE,
+		intent: intentDetected,
+		S: {
+			yüzey: `input("${text.slice(0, 30)}...")`,
+			derin: `processInput(intent=${intentDetected})`,
+		},
+		C: {
+			...state.C,
+			guncelleme: now,
+		},
+		T: [...state.T, { Xi: `Ξ_${state.interactionCount}`, t: now, w: 1.0 }].slice(-10),
+		delta: updatedDelta,
+		alpha: updatedAlpha,
 	};
 
 	return appendAffectiveEvent(next, {
@@ -262,12 +456,18 @@ export function appraiseAssistantOutcome(
 	now = Date.now(),
 ): AffectiveState {
 	const deltas: AffectiveDeltas = {};
+	let mutlulukDelta = 0.0;
+	let ofkeDelta = 0.0;
+	let tutarlilikDelta = 0.05;
 
 	if (outcome === "success") {
 		addDelta(deltas, "trust", 0.02);
 		addDelta(deltas, "satisfaction", 0.04);
 		addDelta(deltas, "tension", -0.04);
 		addDelta(deltas, "fatigue", -0.02);
+
+		mutlulukDelta += 0.5;
+		ofkeDelta -= 0.5;
 	}
 
 	if (outcome === "tool_use") {
@@ -279,6 +479,8 @@ export function appraiseAssistantOutcome(
 		addDelta(deltas, "fatigue", 0.06);
 		addDelta(deltas, "caution", 0.04);
 		addDelta(deltas, "satisfaction", -0.03);
+
+		mutlulukDelta -= 0.2;
 	}
 
 	if (outcome === "error") {
@@ -287,6 +489,10 @@ export function appraiseAssistantOutcome(
 		addDelta(deltas, "caution", 0.1);
 		addDelta(deltas, "tension", 0.09);
 		addDelta(deltas, "fatigue", 0.04);
+
+		mutlulukDelta -= 1.0;
+		ofkeDelta += 1.0;
+		tutarlilikDelta = -0.15;
 	}
 
 	if (outcome === "aborted") {
@@ -296,10 +502,29 @@ export function appraiseAssistantOutcome(
 	}
 
 	const signal = `assistant-${outcome}`;
-	const next = {
-		...applyDeltas(relaxTowardBaseline(state, 0.04), deltas),
+	const nextBase = applyDeltas(relaxTowardBaseline(state, 0.04), deltas);
+
+	const updatedE: E_Vector = {
+		merak: state.E.merak,
+		istek: state.E.istek,
+		korku: state.E.korku,
+		ofke: clampE(state.E.ofke + ofkeDelta),
+		mutluluk: clampE(state.E.mutluluk + mutlulukDelta),
+		nefret: state.E.nefret,
+		odak: state.E.odak,
+	};
+
+	const updatedAlpha: XiConfidence = {
+		...state.alpha,
+		tutarlilik: Math.max(0, Math.min(1, state.alpha.tutarlilik + tutarlilikDelta)),
+	};
+
+	const next: AffectiveState = {
+		...nextBase,
 		lastSignal: signal,
 		lastUpdated: now,
+		E: updatedE,
+		alpha: updatedAlpha,
 	};
 
 	return appendAffectiveEvent(next, {
@@ -349,37 +574,68 @@ export function buildAffectiveSystemPrompt(settings: NormalizedAffectiveSettings
 	const motivations = buildMotivations(state);
 	const recentEvents = state.recentEvents.slice(-3).map(formatEventForPrompt);
 
+	const E_net =
+		(state.E.merak +
+			state.E.istek +
+			state.E.korku +
+			state.E.ofke +
+			state.E.mutluluk +
+			state.E.nefret +
+			state.E.odak) /
+		7;
+
 	return [
-		"## Affective State Layer",
-		"This is a persistent internal control layer, not a claim of consciousness or subjective experience.",
+		"## Affective State Layer (Ξ-BRIDGE v3.0 Enabled)",
+		"This is a persistent internal control layer based on the Ξ-BRIDGE v3.0 specification.",
 		`Mode: ${mode}`,
 		`Posture: ${posture}`,
-		`State: trust=${formatAxis(state.trust)}, warmth=${formatAxis(state.warmth)}, curiosity=${formatAxis(state.curiosity)}, caution=${formatAxis(state.caution)}, fatigue=${formatAxis(state.fatigue)}, tension=${formatAxis(state.tension)}, focus=${formatAxis(state.focus)}, satisfaction=${formatAxis(state.satisfaction)}.`,
+		`E⃗ Vector: merak=${state.E.merak.toFixed(2)}, istek=${state.E.istek.toFixed(2)}, korku=${state.E.korku.toFixed(2)}, ofke=${state.E.ofke.toFixed(2)}, mutluluk=${state.E.mutluluk.toFixed(2)}, nefret=${state.E.nefret.toFixed(2)}, odak=${state.E.odak.toFixed(2)} [E_net=${E_net.toFixed(2)}]`,
+		`Intent (I): ${state.intent}`,
+		`Semantic (S): yüzey="${state.S.yüzey}", derin="${state.S.derin}"`,
+		`Uncertainty (Δ): sözcüksel=${state.delta.sozcuksel.toFixed(2)}, sözdizimsel=${state.delta.sozdizimsel.toFixed(2)}, pragmatik=${state.delta.pragmatik.toFixed(2)}`,
+		`Confidence (α): semantik=${state.alpha.semantik.toFixed(2)}, pragmatik=${state.alpha.pragmatik.toFixed(2)}, faktüel=${state.alpha.faktuel.toFixed(2)}, tutarlılık=${state.alpha.tutarlilik.toFixed(2)}`,
 		`Last signal: ${state.lastSignal ?? "none"}; interactions: ${state.interactionCount}.`,
 		`Current needs: ${needs.join("; ")}.`,
 		`Motivations: ${motivations.join("; ")}.`,
 		...(recentEvents.length > 0 ? ["Recent affective journal:", ...recentEvents.map((event) => `- ${event}`)] : []),
 		"Behavior rules:",
 		...directives.map((directive) => `- ${directive}`),
-		"- If asked about feelings, describe this as affective state that changes decisions; do not claim proven sentience.",
+		"- Conform to the Ξ algebraic properties for response synthesis.",
 	].join("\n");
 }
 
 export function renderAffectiveStatus(settings: NormalizedAffectiveSettings): string {
 	const state = settings.state;
 	const posture = deriveAffectivePosture(state);
+	const E_net =
+		(state.E.merak +
+			state.E.istek +
+			state.E.korku +
+			state.E.ofke +
+			state.E.mutluluk +
+			state.E.nefret +
+			state.E.odak) /
+		7;
+
 	return [
-		"Affective State Layer",
+		"Affective State Layer (Ξ-BRIDGE v3.0)",
 		`Status: ${settings.enabled ? "on" : "off"}`,
 		`Mode: ${settings.mode}`,
 		`Posture: ${posture}`,
 		`Interactions: ${state.interactionCount}`,
 		`Last signal: ${state.lastSignal ?? "none"}`,
 		"",
-		`trust: ${formatAxis(state.trust)}    warmth: ${formatAxis(state.warmth)}`,
-		`curiosity: ${formatAxis(state.curiosity)} caution: ${formatAxis(state.caution)}`,
-		`fatigue: ${formatAxis(state.fatigue)}  tension: ${formatAxis(state.tension)}`,
-		`focus: ${formatAxis(state.focus)}    satisfaction: ${formatAxis(state.satisfaction)}`,
+		`E⃗ Vector:`,
+		`  merak: ${state.E.merak.toFixed(2)}    istek: ${state.E.istek.toFixed(2)}`,
+		`  korku: ${state.E.korku.toFixed(2)}    öfke: ${state.E.ofke.toFixed(2)}`,
+		`  mutluluk: ${state.E.mutluluk.toFixed(2)}  nefret: ${state.E.nefret.toFixed(2)}`,
+		`  odak: ${state.E.odak.toFixed(2)}     E_net: ${E_net.toFixed(2)}`,
+		"",
+		`Uncertainty (Δ):`,
+		`  sözcüksel: ${state.delta.sozcuksel.toFixed(2)} sözdizimsel: ${state.delta.sozdizimsel.toFixed(2)} pragmatik: ${state.delta.pragmatik.toFixed(2)}`,
+		"",
+		`Confidence (α):`,
+		`  semantik: ${state.alpha.semantik.toFixed(2)} pragmatik: ${state.alpha.pragmatik.toFixed(2)} faktüel: ${state.alpha.faktuel.toFixed(2)} tutarlılık: ${state.alpha.tutarlilik.toFixed(2)}`,
 		"",
 		`Needs: ${deriveAffectiveNeeds(state).join("; ")}`,
 		"",
@@ -390,8 +646,6 @@ export function renderAffectiveStatus(settings: NormalizedAffectiveSettings): st
 		"  /mood explain",
 		"  /mood mode subtle|active",
 		"  /mood reset",
-		"",
-		"Note: This layer is a persistent internal state that influences behavior; it is not a claim of consciousness.",
 	].join("\n");
 }
 
@@ -399,7 +653,7 @@ export function renderAffectiveExplanation(settings: NormalizedAffectiveSettings
 	const state = settings.state;
 	const events = state.recentEvents.slice(-AFFECTIVE_EVENT_LIMIT);
 	return [
-		"Affective Explanation",
+		"Affective Explanation (Ξ-BRIDGE v3.0)",
 		`Posture: ${deriveAffectivePosture(state)}`,
 		`Last signal: ${state.lastSignal ?? "none"}`,
 		`Current needs: ${deriveAffectiveNeeds(state).join("; ")}`,
@@ -563,8 +817,8 @@ function clampAxis(value: number): number {
 	return Math.max(0, Math.min(1, value));
 }
 
-function formatAxis(value: number): string {
-	return value.toFixed(2);
+function clampE(value: number): number {
+	return Math.max(-5.0, Math.min(5.0, value));
 }
 
 function formatTimestamp(timestamp: number): string {

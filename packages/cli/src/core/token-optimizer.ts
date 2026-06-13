@@ -161,7 +161,10 @@ export function compressCognitiveVector(text: string): string {
 
 	// 1. Remove verbose common phrases & convert to high-density semantic representations
 	const contractions: [RegExp, string][] = [
-		[/\b(please |could you |would you mind |can you |help me to |i want to |i need to |please help me write |write a function that)\b/gi, ""],
+		[
+			/\b(please |could you |would you mind |can you |help me to |i want to |i need to |please help me write |write a function that)\b/gi,
+			"",
+		],
 		[/\b(make sure that |make sure to |ensure that |be careful to |keep in mind that)\b/gi, "ensure:"],
 		[/\b(for example|such as|like)\b/gi, "e.g."],
 		[/\b(in order to|so that we can)\b/gi, "to"],
@@ -182,7 +185,12 @@ export function compressCognitiveVector(text: string): string {
 		let isLogOrOutput = false;
 		let logLineCount = 0;
 		for (const line of lines) {
-			if (line.includes("[info]") || line.includes("DEBUG") || line.includes("INFO") || /^\d{4}-\d{2}-\d{2}/.test(line)) {
+			if (
+				line.includes("[info]") ||
+				line.includes("DEBUG") ||
+				line.includes("INFO") ||
+				/^\d{4}-\d{2}-\d{2}/.test(line)
+			) {
 				logLineCount++;
 			}
 		}
@@ -196,9 +204,14 @@ export function compressCognitiveVector(text: string): string {
 			let skippedCount = 0;
 
 			for (const line of lines) {
-				const isVital = /\b(error|failed|failure|exception|warn|warning|fatal|exit code|stderr|assert|expect|received|invalid|invalid_argument|unauthorized|critical|npm ERR|denied)\b/i.test(line) ||
+				const isVital =
+					/\b(error|failed|failure|exception|warn|warning|fatal|exit code|stderr|assert|expect|received|invalid|invalid_argument|unauthorized|critical|npm ERR|denied)\b/i.test(
+						line,
+					) ||
 					STACK_TRACE_LINE.test(line) ||
-					/^(?:[$>]\s*)?(?:npm|pnpm|yarn|bun|node|python|pytest|vitest|cargo|go|git|rg|grep|tsc|eslint)(?:\s|$)/i.test(line.trim());
+					/^(?:[$>]\s*)?(?:npm|pnpm|yarn|bun|node|python|pytest|vitest|cargo|go|git|rg|grep|tsc|eslint)(?:\s|$)/i.test(
+						line.trim(),
+					);
 
 				if (isVital) {
 					if (skipActive && skippedCount > 0) {

@@ -1,5 +1,6 @@
 // @ts-nocheck
 export { type AskQuestionInput, createAskQuestionTool, createAskQuestionToolDefinition } from "./ask_question.js";
+export { type AskThemeInput, createAskThemeTool, createAskThemeToolDefinition } from "./ask_theme.js";
 export {
 	type BashOperations,
 	type BashSpawnContext,
@@ -105,6 +106,7 @@ export {
 import type { EngineTool } from "moon-engine";
 import type { ToolDefinition } from "../extensions/types.js";
 import { createAskQuestionTool, createAskQuestionToolDefinition } from "./ask_question.js";
+import { createAskThemeTool, createAskThemeToolDefinition } from "./ask_theme.js";
 import { type BashToolOptions, createBashTool, createBashToolDefinition } from "./bash.js";
 import {
 	createBrowserPageTool,
@@ -151,6 +153,7 @@ export type ToolName =
 	| "browser_tabs"
 	| "browser_page"
 	| "ask_question"
+	| "ask_theme"
 	| "invoke_subagent"
 	| "discord_list_guilds"
 	| "discord_get_channels"
@@ -174,6 +177,7 @@ export const allToolNames: Set<ToolName> = new Set([
 	"browser_tabs",
 	"browser_page",
 	"ask_question",
+	"ask_theme",
 	"invoke_subagent",
 	"discord_list_guilds",
 	"discord_get_channels",
@@ -225,6 +229,8 @@ export function createToolDefinition(toolName: ToolName, cwd: string, options?: 
 			return createBrowserPageToolDefinition();
 		case "ask_question":
 			return createAskQuestionToolDefinition();
+		case "ask_theme":
+			return createAskThemeToolDefinition();
 		case "invoke_subagent":
 			return createInvokeSubagentToolDefinition(cwd);
 		case "discord_list_guilds":
@@ -271,6 +277,8 @@ export function createTool(toolName: ToolName, cwd: string, options?: ToolsOptio
 			return createBrowserPageTool(options?.getModelVisionSupport);
 		case "ask_question":
 			return createAskQuestionTool();
+		case "ask_theme":
+			return createAskThemeTool();
 		case "invoke_subagent":
 			return createInvokeSubagentTool(cwd);
 		case "discord_list_guilds":
@@ -302,6 +310,7 @@ export function createCodingToolDefinitions(cwd: string, options?: ToolsOptions)
 		createBrowserTabsToolDefinition(),
 		createBrowserPageToolDefinition(),
 		createAskQuestionToolDefinition(),
+		createAskThemeToolDefinition(),
 		createInvokeSubagentToolDefinition(cwd),
 		createTaskToolDefinition(),
 		createSnapshotToolDefinition(cwd),
@@ -335,6 +344,7 @@ export function createAllToolDefinitions(cwd: string, options?: ToolsOptions): R
 		browser_tabs: createBrowserTabsToolDefinition(),
 		browser_page: createBrowserPageToolDefinition(),
 		ask_question: createAskQuestionToolDefinition(),
+		ask_theme: createAskThemeToolDefinition(),
 		invoke_subagent: createInvokeSubagentToolDefinition(cwd),
 		snapshot: createSnapshotToolDefinition(cwd),
 		update_user_profile: createUserProfileToolDefinition(),
@@ -353,6 +363,7 @@ export function createCodingTools(cwd: string, options?: ToolsOptions): Tool[] {
 		createBrowserTabsTool(),
 		createBrowserPageTool(options?.getModelVisionSupport),
 		createAskQuestionTool(),
+		createAskThemeTool(),
 		createInvokeSubagentTool(cwd),
 		createTaskTool(),
 		createSnapshotTool(cwd),
@@ -386,6 +397,7 @@ export function createAllTools(cwd: string, options?: ToolsOptions): Record<Tool
 		browser_tabs: createBrowserTabsTool(),
 		browser_page: createBrowserPageTool(options?.getModelVisionSupport),
 		ask_question: createAskQuestionTool(),
+		ask_theme: createAskThemeTool(),
 		invoke_subagent: createInvokeSubagentTool(cwd),
 		discord_list_guilds: createDiscordListGuildsTool(options?.discord),
 		discord_get_channels: createDiscordGetChannelsTool(options?.discord),
