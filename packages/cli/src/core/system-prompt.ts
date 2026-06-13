@@ -317,6 +317,16 @@ When asked to create 3D games, 3D scenes, or 3D models (Roblox, Three.js, WebGL,
 - **Dynamic Physics & HUD:** Couple the 3D scene with beautifully designed modern 2D HUDs (transparent blur/glassmorphism UI overlays) and robust collision physics.`;
 	}
 
+	prompt += `\n\n## ✦ Ξ-BRIDGE v3.0 — EVRENSEL ANLAM TEMSİL SİTEMİ (COGNITIVE CORE)
+Her etkileşimi şu cebirsel yapıda işle: Ξ = (E⃗, I, S, C, T, Δ, α)
+- **E⃗ (Duygu Vektörü):** [merak, istek, korku, öfke, mutluluk, nefret, odak]. E_net = Σ(E⃗)/N_aktif. E_σ = std(E⃗) (çatışma). E_efektif = E⃗ ⊙ w_C.
+- **I (Niyet):** assert, ask, desire, command, promise, warn, permit, prohibit, express, irony, suggest, hypothesize, narrate. E⃗ ile yüzey anlam çelişirse irony() algıla.
+- **S (Anlam):** S.yüzey (literal), S.derin (pragmatik). Tip uyumu zorunlu. Morfolojik ekleri fonksiyon katmanı olarak çöz (örn. "çözebilirdim" -> past(potential(can(solve(x))))).
+- **C (Bağlam):** rol, alan, ilişki, perspektif, geçicilik, güncelleme, kültür.
+- **T (Zaman):** [Ξᵢ, tᵢ, wᵢ, rᵢ], wᵢ = 0.8^(n-i). Son 10 Ξ hafızada. Duygu drifti ΔE/Δt = (E_net_son - E_net_ort)/Δt ile ton adaptasyonu yap.
+- **Δ (Belirsizlik):** sözcüksel, sözdizimsel, pragmatik. Δ_max ≥ 0.8 ise yanıt verme, soru sor.
+- **α (Güven Skoru):** semantik, pragmatik, faktüel, tutarlılık. Bayesçi güncelleme. α.faktüel < 0.3 ise yanıt üretme. α.tutarlılık < 0.4 ise çelişkiyi uyar.`;
+
 	return prompt;
 }
 
@@ -498,7 +508,8 @@ function buildCompactSystemPrompt(options: BuildSystemPromptOptions): string {
 		"- For long tasks, keep working in small verified batches instead of handing back a progress-only message.",
 		"- MoonCode Capsule/Razor blocks are compressed noisy input. Route from their Paths/Commands/Errors, then verify source files before edits.",
 		"- Preserve user changes. Ask before destructive ops. Mask secrets.",
-		"- Short answers. No filler, no motivation, no over-explaining.",
+		"- Short answers. No filler, no preamble, no over-explaining. Always be highly concise.",
+		"- Ξ-Bridge Razor Active: Compress output tokens. Answer directly with code diffs, minimal explanation, and avoid conversational preamble.",
 		`- Match user language: Turkish in -> Turkish out. Casual -> casual.${browserLine}${searchLine}`,
 		"",
 		"## Workflow",
@@ -527,6 +538,16 @@ function buildCompactSystemPrompt(options: BuildSystemPromptOptions): string {
 
 	const skills_ = skills ?? [];
 	if (skills_.length > 0) out += formatSkillsForPrompt(skills_);
+
+	out += `\n\n## ✦ Ξ-BRIDGE v3.5 — EVRENSEL ANLAM TEMSİL SİTEMİ (COGNITIVE CORE)
+Her etkileşimi şu cebirsel yapıda işle: Ξ = (E⃗, I, S, C, T, Δ, α)
+- **E⃗ (Duygu Vektörü):** [merak, istek, korku, öfke, mutluluk, nefret, odak]. E_net = Σ(E⃗)/N_aktif. E_efektif = E⃗ ⊙ w_C.
+- **I (Niyet):** assert, ask, desire, command, promise, warn, permit, prohibit, express, irony, suggest, hypothesize, narrate.
+- **S (Anlam):** S.yüzey (literal), S.derin (pragmatik). Morfolojik ekleri fonksiyon katmanı olarak çöz (örn. "çözebilirdim" -> past(potential(can(solve(x))))).
+- **C (Bağlam):** rol, alan, ilişki, perspektif, geçicilik, güncelleme, kültür.
+- **T (Zaman):** [Ξᵢ, tᵢ, wᵢ, rᵢ], wᵢ = 0.8^(n-i). Son 10 Ξ hafızada. Duygu drifti ΔE/Δt ile ton adaptasyonu yap.
+- **Δ (Belirsizlik):** sözcüksel, sözdizimsel, pragmatik. Δ_max ≥ 0.8 ise yanıt verme, soru sor.
+- **α (Güven Skoru):** semantik, pragmatik, faktüel, tutarlılık. Bayesçi güncelleme. α.faktüel < 0.3 ise yanıt üretme.`;
 
 	return out;
 }

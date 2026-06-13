@@ -929,6 +929,7 @@
 		<div style="display:flex;align-items:center;gap:9px;">
 			<img src="/assets/Mooncodewhitelogo.png" alt="logo" style="width:28px;height:28px;border-radius:7px;object-fit:cover;flex-shrink:0;" onerror="this.style.display='none'">
 			<span style="font-weight:700;font-size:0.95rem;white-space:nowrap;letter-spacing:-0.01em;">MoonCode</span>
+			<span style="font-size:0.65rem;background:rgba(108,143,255,0.15);color:var(--accent);padding:1px 5px;border-radius:4px;font-weight:600;font-family:'JetBrains Mono',monospace;margin-left:4px;">v3.5-Ξ</span>
 		</div>
 		<button onclick="toggleSidebar()" class="tool-btn">
 			<span class="material-symbols-rounded" style="font-size:18px;">close</span>
@@ -960,7 +961,17 @@
 
 	<!-- Conversation List -->
 	<div id="sidebar-conversations" style="flex:1; overflow-y:auto; padding:0 10px; display:flex; flex-direction:column; gap:4px; padding-bottom:10px;">
-		<div style="padding:10px 6px 4px; font-size:0.85rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px;">Sohbetler</div>
+		<div style="padding:10px 6px 4px; font-size:0.85rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; display:flex; justify-content:space-between; align-items:center;">
+			<span>Sohbetler</span>
+			<button id="bulk-select-btn" onclick="toggleBulkSelectMode()" class="badge-btn" style="padding:2px 6px; font-size:0.7rem; border-radius:4px; margin:0;">Seç</button>
+		</div>
+		<div id="bulk-delete-bar" class="hidden" style="padding:6px; display:flex; justify-content:space-between; align-items:center; background:rgba(255,80,80,0.08); border:1px solid rgba(255,80,80,0.2); border-radius:8px; margin-bottom:4px; flex-shrink:0;">
+			<span id="bulk-selected-count" style="font-size:0.72rem; color:var(--fg); font-weight:600;">0 seçildi</span>
+			<div style="display:flex; gap:4px;">
+				<button onclick="deleteSelectedConversations()" class="btn btn-danger" style="padding:3px 8px; font-size:0.72rem; border-radius:6px; font-weight:600; line-height:1;">Sil</button>
+				<button onclick="toggleBulkSelectMode()" class="btn btn-ghost" style="padding:3px 8px; font-size:0.72rem; border-radius:6px; font-weight:600; line-height:1;">İptal</button>
+			</div>
+		</div>
 		<div id="conversation-list" style="display:flex; flex-direction:column; gap:2px;">
 			<!-- Injected by JS -->
 		</div>
@@ -1788,6 +1799,65 @@ async function loadConversations() {
 	}
 }
 
+let bulkSelectMode = false;
+let selectedConversationIds = new Set();
+
+function toggleBulkSelectMode() {
+	bulkSelectMode = !bulkSelectMode;
+	selectedConversationIds.clear();
+	
+	const bar = document.getElementById('bulk-delete-bar');
+	const btn = document.getElementById('bulk-select-btn');
+	if (bulkSelectMode) {
+		bar.classList.remove('hidden');
+		btn.textContent = 'İptal';
+	} else {
+		bar.classList.add('hidden');
+		btn.textContent = 'Seç';
+	}
+	updateBulkDeleteBar();
+	loadConversations();
+}
+
+function updateBulkDeleteBar() {
+	const countEl = document.getElementById('bulk-selected-count');
+	if (countEl) {
+		countEl.textContent = `${selectedConversationIds.size} seçildi`;
+	}
+}
+
+async function deleteSelectedConversations() {
+	if (selectedConversationIds.size === 0) {
+		toast('Lütfen silinecek sohbetleri seçin', 'warning');
+		return;
+	}
+	
+	if (!confirm(`${selectedConversationIds.size} adet sohbeti kalıcı olarak silmek istiyor musunuz?`)) {
+		return;
+	}
+	
+	const ids = Array.from(selectedConversationIds);
+	let successCount = 0;
+	
+	for (const id of ids) {
+		try {
+			const res = await fetch('/api/conversations/delete', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ id })
+			});
+			if (res.ok) {
+				successCount++;
+			}
+		} catch (e) {
+			console.error(`Failed to delete conversation ${id}`, e);
+		}
+	}
+	
+	toast(`${successCount} sohbet başarıyla silindi`, 'success');
+	toggleBulkSelectMode();
+}
+
 function renderConversations(sessions, activeId) {
 	const list = document.getElementById('conversation-list');
 	if (!list) return;
@@ -1807,6 +1877,24 @@ function renderConversations(sessions, activeId) {
 		item.style.padding = '8px 10px';
 		item.style.gap = '8px';
 		
+		if (bulkSelectMode) {
+			const checkbox = document.createElement('input');
+			checkbox.type = 'checkbox';
+			checkbox.style.marginRight = '6px';
+			checkbox.style.cursor = 'pointer';
+			checkbox.checked = selectedConversationIds.has(s.id);
+			checkbox.onclick = (e) => {
+				e.stopPropagation();
+				if (checkbox.checked) {
+					selectedConversationIds.add(s.id);
+				} else {
+					selectedConversationIds.delete(s.id);
+				}
+				updateBulkDeleteBar();
+			};
+			item.appendChild(checkbox);
+		}
+		
 		const title = s.name || s.firstMessage || 'Yeni Sohbet';
 		const titleEl = document.createElement('div');
 		titleEl.style.flex = '1';
@@ -1815,31 +1903,45 @@ function renderConversations(sessions, activeId) {
 		titleEl.style.textOverflow = 'ellipsis';
 		titleEl.style.fontSize = '0.78rem';
 		titleEl.textContent = title;
-		
-		const actionsEl = document.createElement('div');
-		actionsEl.style.display = 'none';
-		actionsEl.style.gap = '4px';
-		actionsEl.className = 'conv-actions';
-		
-		const editBtn = document.createElement('button');
-		editBtn.className = 'tool-btn';
-		editBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size:14px;">edit</span>';
-		editBtn.onclick = (e) => { e.stopPropagation(); renameConversation(s.id, title); };
-		
-		const delBtn = document.createElement('button');
-		delBtn.className = 'tool-btn';
-		delBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size:14px;color:#ff6464;">delete</span>';
-		delBtn.onclick = (e) => { e.stopPropagation(); deleteConversation(s.id); };
-		
-		actionsEl.appendChild(editBtn);
-		actionsEl.appendChild(delBtn);
-		
 		item.appendChild(titleEl);
-		item.appendChild(actionsEl);
 		
-		item.onmouseover = () => { actionsEl.style.display = 'flex'; };
-		item.onmouseout = () => { actionsEl.style.display = 'none'; };
-		item.onclick = () => switchConversation(s.id);
+		if (!bulkSelectMode) {
+			const actionsEl = document.createElement('div');
+			actionsEl.style.display = 'none';
+			actionsEl.style.gap = '4px';
+			actionsEl.className = 'conv-actions';
+			
+			const editBtn = document.createElement('button');
+			editBtn.className = 'tool-btn';
+			editBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size:14px;">edit</span>';
+			editBtn.onclick = (e) => { e.stopPropagation(); renameConversation(s.id, title); };
+			
+			const delBtn = document.createElement('button');
+			delBtn.className = 'tool-btn';
+			delBtn.innerHTML = '<span class="material-symbols-rounded" style="font-size:14px;color:#ff6464;">delete</span>';
+			delBtn.onclick = (e) => { e.stopPropagation(); deleteConversation(s.id); };
+			
+			actionsEl.appendChild(editBtn);
+			actionsEl.appendChild(delBtn);
+			
+			item.appendChild(actionsEl);
+			
+			item.onmouseover = () => { actionsEl.style.display = 'flex'; };
+			item.onmouseout = () => { actionsEl.style.display = 'none'; };
+			item.onclick = () => switchConversation(s.id);
+		} else {
+			item.style.cursor = 'pointer';
+			item.onclick = (e) => {
+				const checkbox = item.querySelector('input[type="checkbox"]');
+				checkbox.checked = !checkbox.checked;
+				if (checkbox.checked) {
+					selectedConversationIds.add(s.id);
+				} else {
+					selectedConversationIds.delete(s.id);
+				}
+				updateBulkDeleteBar();
+			};
+		}
 		
 		list.appendChild(item);
 	});
@@ -1850,7 +1952,6 @@ async function newConversationChat() {
 		const res = await fetch('/api/conversations/new', { method: 'POST' });
 		if (res.ok) {
 			const data = await res.json();
-			// Wait a tick for file to be written, then refresh list
 			setTimeout(() => loadConversations(), 300);
 		}
 	} catch(e) {
@@ -2271,6 +2372,40 @@ function updateMessage(id, content, isStreaming = false) {
 			else if (c.type === 'thinking') thinking += c.thinking || '';
 		});
 	}
+
+	// Parse <think> or <thinking> tags from text (useful for models that stream thinking inside raw text)
+	let parsedText = '';
+	let currentPos = 0;
+	while (currentPos < text.length) {
+		const openIndex = text.toLowerCase().indexOf('<think>', currentPos);
+		const altOpenIndex = text.toLowerCase().indexOf('<thinking>', currentPos);
+		const actualOpenIndex = openIndex !== -1 && altOpenIndex !== -1 
+			? Math.min(openIndex, altOpenIndex) 
+			: (openIndex !== -1 ? openIndex : altOpenIndex);
+			
+		if (actualOpenIndex === -1) {
+			parsedText += text.substring(currentPos);
+			break;
+		}
+		
+		parsedText += text.substring(currentPos, actualOpenIndex);
+		const tagLength = text.substring(actualOpenIndex).toLowerCase().startsWith('<thinking>') ? 10 : 7;
+		const closeIndex = text.toLowerCase().indexOf('</think>', actualOpenIndex + tagLength);
+		const altCloseIndex = text.toLowerCase().indexOf('</thinking>', actualOpenIndex + tagLength);
+		const actualCloseIndex = closeIndex !== -1 && altCloseIndex !== -1 
+			? Math.min(closeIndex, altCloseIndex) 
+			: (closeIndex !== -1 ? closeIndex : altCloseIndex);
+			
+		if (actualCloseIndex === -1) {
+			thinking += text.substring(actualOpenIndex + tagLength);
+			break;
+		}
+		
+		thinking += text.substring(actualOpenIndex + tagLength, actualCloseIndex) + '\n';
+		const closeTagLength = text.substring(actualCloseIndex).toLowerCase().startsWith('</thinking>') ? 11 : 8;
+		currentPos = actualCloseIndex + closeTagLength;
+	}
+	text = parsedText;
 
 	let html = '';
 	if (thinking.trim()) {
