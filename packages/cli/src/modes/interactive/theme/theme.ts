@@ -451,7 +451,7 @@ let BUILTIN_THEMES: Record<string, ThemeJson> | undefined;
 function getBuiltinThemes(): Record<string, ThemeJson> {
 	if (!BUILTIN_THEMES) {
 		const themesDir = getThemesDir();
-		const builtinThemeFiles = ["rot-soft.json", "sea-dark.json", "moss-soft.json", "ash-soft.json", "moon-apex.json"];
+		const builtinThemeFiles = ["rot-soft.json", "sea-dark.json", "moss-soft.json", "ash-soft.json", "moon-apex.json", "better-chroma-dark.json"];
 		BUILTIN_THEMES = {};
 		for (const file of builtinThemeFiles) {
 			const themePath = path.join(themesDir, file);
@@ -655,7 +655,7 @@ function _detectTerminalBackground(): "dark" | "light" {
 }
 
 function getDefaultTheme(): string {
-	return "Moon Apex";
+	return "better chroma dark";
 }
 
 function normalizeThemeName(name: string | undefined): string {

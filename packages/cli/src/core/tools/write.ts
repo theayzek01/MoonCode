@@ -282,9 +282,10 @@ export function createWriteToolDefinition(
 										target: absolutePath,
 										meta: { cwd, mode: policy.mode, bytes: content.length },
 									});
+									const linesCount = content.split("\n").length;
 									resolve({
 										content: [
-											{ type: "text", text: `Successfully wrote ${content.length} bytes to ${path}` },
+											{ type: "text", text: `Successfully wrote ${linesCount} lines to ${path}` },
 										],
 										details: diff ? { diff } : undefined,
 									});
