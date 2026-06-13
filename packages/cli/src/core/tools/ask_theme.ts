@@ -6,7 +6,12 @@ import type { ToolDefinition } from "../extensions/types.js";
 import { wrapToolDefinition } from "./tool-definition-wrapper.js";
 
 const askThemeSchema = Type.Object({
-	prompt: Type.Optional(Type.String({ description: "Optional context or description of the project (e.g. 'E-commerce website', 'Mobile fitness tracker')." })),
+	prompt: Type.Optional(
+		Type.String({
+			description:
+				"Optional context or description of the project (e.g. 'E-commerce website', 'Mobile fitness tracker').",
+		}),
+	),
 });
 
 export type AskThemeInput = Static<typeof askThemeSchema>;

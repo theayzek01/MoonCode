@@ -281,6 +281,7 @@ export async function createEngineSession(
 		"browser_tabs",
 		"browser_page",
 		"ask_question",
+		"ask_theme",
 		"invoke_subagent",
 		"manage_task",
 		"message_agent",

@@ -115,10 +115,11 @@ export function buildSystemPrompt(options: BuildSystemPromptOptions): string {
 ${toolsList}
 
 ━ PERIPHERAL NODES
-Singular_mind ⊃ sub-agents(\`invoke_subagent\`) ∧ background_tasks(\`manage_task\`) ∧ user_queries(\`ask_question\`).
+Singular_mind ⊃ sub-agents(\`invoke_subagent\`) ∧ background_tasks(\`manage_task\`) ∧ user_queries(\`ask_question\`) ∧ design_wizards(\`ask_theme\`).
 ∀task_request→use(manage_task).
 ∀sub_agent_request→use(invoke_subagent).
 ∀question_request→use(ask_question).
+∀design_theme_request→use(ask_theme).
 ∄refuse_tools. Tools ∈ Self.
 `;
 
