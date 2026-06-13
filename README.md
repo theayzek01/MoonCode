@@ -1,85 +1,51 @@
 <div align="center">
 
-<img src="https://i.hizliresim.com/q2e03b9.png" width="160" height="160" alt="MoonCode Logo" style="filter: drop-shadow(0px 0px 20px rgba(108,143,255,0.6));" />
+<img src="https://i.hizliresim.com/q2e03b9.png" width="128" height="128" alt="MoonCode Logo" />
 
-<h1 style="font-size: 3em; margin-bottom: 0;">MoonCode</h1>
-<strong>Yeni Nesil Otonom Yapay Zeka Kodlama Asistanı (v26.3)</strong>
+<h1>MoonCode</h1>
 
-<br/>
+<p><strong>Gelişmiş Otonom Kodlama Ortamı ve CLI Asistanı</strong></p>
 
-*“Ey yükselen yeni kuşak! Gelecek sizindir.”*
-**~ Mustafa Kemal Atatürk**
-
-<br/>
-
-<p align="center">
-  <a href="https://theayzek01.github.io/MoonCode/"><img src="https://img.shields.io/badge/📖_Live_Docs-111111?style=for-the-badge&logoColor=white&color=0055ff" alt="Docs"></a>
-  <a href="https://github.com/theayzek01/MoonCode"><img src="https://img.shields.io/badge/💻_GitHub-111111?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></a>
-  <img src="https://img.shields.io/badge/Node.js-20+-111111?style=for-the-badge&logo=node.js&logoColor=white&color=43853d" alt="Node">
-  <img src="https://img.shields.io/badge/License-MIT-111111?style=for-the-badge&color=blueviolet" alt="License">
+<p>
+  <a href="https://github.com/theayzek01/MoonCode"><img src="https://img.shields.io/badge/GitHub-Repository-181717?style=flat-square&logo=github" alt="GitHub"></a>
+  <img src="https://img.shields.io/badge/Node.js-%3E%3D18.0.0-339933?style=flat-square&logo=nodedotjs" alt="Node.js">
+  <img src="https://img.shields.io/badge/License-MIT-00599C?style=flat-square" alt="License">
 </p>
-
----
-
-![MoonCode Web UI Showcase](https://i.hizliresim.com/q2e03b9.png) <!-- GÖRSEL İÇİN YER TUTUCU, ANCAK LOGO DEĞERLENDİRİLDİ -->
-
-<br/>
 
 </div>
 
-## 🌌 MoonCode Nedir?
+---
 
-MoonCode, yazılımcılar için özel olarak tasarlanmış, **tam otonom** ve **sınırları aşan** bir kodlama asistanıdır. Kodu sadece yazmakla kalmaz; terminal komutlarını çalıştırır, projenizi derler, hataları bulur, tarayıcınızı açıp test eder ve sizin yerinize commit atar. 
+## ⚡ Genel Bakış
 
-Devasa projelerde kaybolmaz, kendi hafıza yönetimi ile **Time-Travel Debugging** yapar ve birden fazla yapay zeka modelini (Gemini, Claude, DeepSeek, OpenAI) tek bir platformda ustalıkla yönetir.
+MoonCode, doğrudan çalışma alanınızda (workspace) çalışan, profesyonel düzeyde otonom bir kodlama asistanı ve IDE'dir. Terminal komutları, tarayıcı testleri ve kod düzenleme süreçlerini tek bir platformda birleştirerek, bağlam (context) şişkinliği yaratmadan eksiksiz bir geliştirici ortamı sunar.
 
-> **Sıradan bir chatbot değil; takımınızdaki en yetenekli Senior Developer.**
+## 🚀 Temel Özellikler
+
+*   **🎛️ IDE Odaklı Arayüz**
+    Yüzen "sohbet uygulaması" balonlarına veda edin. Sıfır boşluklu (flush panel), alta sabitlenmiş (docked) katı bir düzen. VS Code / Cursor felsefesine sadık, tamamen profesyonel Web UI.
+*   **🧠 Çoklu Model Motoru**
+    Claude 3.7 Sonnet, Gemini 2.5 Pro, GPT-4o, DeepSeek V3/R1 gibi sektör lideri modeller arasında doğrudan API veya OpenRouter üzerinden anında geçiş yapın.
+*   **🌐 Browser Bridge (Tarayıcı Otonomisi)**
+    Sunucunuzu ayağa kaldırır, tarayıcıyı açar, sayfalarda gezinir ve yaptığı işi görsel olarak teyit etmek için DOM yapılarını okur.
+*   **💾 Gelişmiş Bağlam Yönetimi (Context)**
+    Session Forking (Oturum Dallandırma), yerel JSONL geçmiş kaydı ve yüksek performanslı **Session Compaction (Sıkıştırma)** mekanizması. Devasa projelerde token limitine takılmayı ve yavaşlamayı önler.
+*   **⌨️ Komut Paleti (Command Palette)**
+    Hızlı geliştirici iş akışları için yerleşik kısayollar: `/build`, `/test`, `/review`, `/compact`.
 
 ---
 
-## ✨ Neden MoonCode?
+## ⚙️ Kurulum
 
-### 🌐 Yepyeni Büyüleyici Web Arayüzü (Web UI)
-Artık terminalin siyah ekranına hapsolmak yok! `mooncode web` yazın ve tamamen yerel çalışan modern web arayüzüne geçin. 
-- Gerçek zamanlı kod önizlemeleri ve Diff (fark) gösterimi
-- Dinamik temalar (Mooncode, Ocean, Dark, Light)
-- Command Palette (`Cmd/Ctrl+K`) ve özel klavye kısayolları
-- Sürükle & Bırak ile anında resim/dosya yükleme
+### Hızlı Kurulum (Windows)
 
-### 🧠 Multi-Model Zekası & Düşünme Kapasitesi (Thinking)
-Favori modelinize bağlı kalmayın. İstediğiniz an ayarlar panelinden modelinizi değiştirin:
-- **Google Gemini 2.5 Pro / 3.1 Pro**
-- **Anthropic Claude 3.7 Sonnet (Thinking)**
-- **OpenAI GPT-4o / o1 / o3-mini**
-- **DeepSeek V3 / R1**
-ve yüzlercesi! *İsterseniz sadece OpenRouter API key'inizi girin ve sonsuz olasılığa kapı açın.*
-
-### 🚀 Browser Bridge (Tarayıcı Otonomisi)
-MoonCode sadece kodunuzu okumakla kalmaz. Projenizi ayağa kaldırır (ör: `npm run dev`), tarayıcınızı kontrol eder, sayfada gezinir, hataları tespit eder ve hatta sizin için dökümantasyon okuyup kodunuza entegre eder!
-
-### 📦 Gelişmiş Proje & Hafıza (Context) Yönetimi
-Kod tabanınız devasa mı? Sorun değil!
-- **Session Compaction:** Tek tıkla *(Compact tuşu)* MoonCode sohbet geçmişini yüksek sıkıştırma animasyonlarıyla harika bir şekilde özetler ve token limitine asla takılmazsınız.
-- Birden fazla projeyi (Workspace) tek arayüzde yönetme
-- "Chat History" ile geçmiş sohbetleri dallandırma (Fork) ve zaman yolculuğu.
-
----
-
-## ⚡ Hızlı Başlangıç
-
-### 1. Kolay Kurulum (Windows için)
-
-Sadece saniyeler içinde çalıştırmak için:
 ```bat
 setup.bat install
 ```
 
-### 2. Geliştirici Kurulumu (Manuel)
-
-Eğer kaynak koddan inşa etmek isterseniz (Tüm işletim sistemleri):
+### Manuel Kurulum ve Derleme
 
 ```bash
-# Repoyu klonlayın
 git clone https://github.com/theayzek01/MoonCode.git
 cd MoonCode
 
@@ -89,59 +55,35 @@ npm install
 # Projeyi derleyin
 npm run build
 
-# Modern Web arayüzünü başlatın!
+# Global olarak sisteme kurun
+npm install -g .
+```
+
+---
+
+## 💻 Kullanım
+
+Modern IDE arayüzünü başlatmak için terminalinizde:
+```bash
 mooncode web
 ```
 
-*(Sadece terminalde kalmak isterseniz `mooncode` komutunu çalıştırmanız yeterlidir.)*
+Sadece CLI üzerinden kullanmak için:
+```bash
+mooncode
+```
 
 ---
 
-## 🛠️ Temel Komutlar (Komut Paleti)
+## 🤝 Katkıda Bulunma
 
-Arayüzde sohbet kısmına aşağıdaki komutları yazarak (veya `Ctrl+K` basarak) asistanı yönlendirin:
-
-| Komut | Ne Yapar? |
-| :--- | :--- |
-| `/build` | Projenizdeki derleme (build) komutlarını bularak çalıştırır ve hataları çözer. |
-| `/test` | Test süitini çalıştırır (Jest, Vitest, PyTest vb.) ve kırılan testleri onarır. |
-| `/review` | Son yapılan değişiklikleri (Git diff) okur ve detaylı bir "Code Review" sunar. |
-| `/ship` | Yaptığınız harika işleri toparlar, harika bir commit mesajı yazar ve Push'lar! |
-| `/compact` | Aşırı iyi bir animasyon eşliğinde sohbeti sıkıştırır ve beynini rahatlatır. |
-
----
-
-## 🎨 Temalar ve Özelleştirme
-
-MoonCode, karanlık moddan sıkılanlar için birbirinden güzel 4 yerleşik tema sunar. Sağ üst köşedeki ayarlar ikonundan anında değiştirebilirsiniz:
-- **Mooncode (Varsayılan):** Fütüristik uzay mavisi ve mor tonları.
-- **Ocean:** Derin okyanus ferahlığı.
-- **Dark:** Kod yazarken gözleri yormayan tam siyah deneyim.
-- **Light:** Klasik ve temiz aydınlık mod.
-
----
-
-## 🤝 Katkıda Bulunma (Contributing)
-
-Siz de yeni ufuklara yelken açan bu projeye katkı sağlamak isterseniz PR'larınızı bekliyoruz!
+MoonCode açık kaynaklı bir projedir. Katkılarınızı bekliyoruz:
 1. Projeyi forklayın
-2. Kendi branch'inizi oluşturun (`git checkout -b feature/HarikaOzellik`)
-3. Değişiklikleri commit'leyin (`git commit -m 'feat: Harika özellik eklendi'`)
-4. Branch'i push'layın (`git push origin feature/HarikaOzellik`)
-5. Pull Request açın!
+2. Kendi feature branch'inizi oluşturun (`git checkout -b feature/YeniOzellik`)
+3. Değişikliklerinizi commit'leyin (`git commit -m 'feat: Yeni özellik eklendi'`)
+4. Branch'inize push'layın (`git push origin feature/YeniOzellik`)
+5. Bir Pull Request açın
 
----
+## 📄 Lisans
 
-## 📜 Lisans
-
-MoonCode tamamen özgürdür ve **MIT Lisansı** ile dağıtılmaktadır. Alın, kullanın, değiştirin, parçalayın ve daha iyisini yapın.
-
-<br/>
-
-<div align="center">
-
-<img src="https://i.hizliresim.com/q2e03b9.png" width="64" height="64" alt="MoonCode Logo" />
-<br/>
-<p style="font-size: 14px; color: gray;">Made with ❤️ by TheAyzek01 and the Open Source Community</p>
-
-</div>
+Bu proje **MIT Lisansı** altında lisanslanmıştır. Dilediğiniz gibi kullanabilir ve geliştirebilirsiniz.

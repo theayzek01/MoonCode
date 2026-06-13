@@ -161,7 +161,7 @@
 		#sidebar {
 			width: 260px;
 			min-width: 260px;
-			background: var(--sidebar);
+			background: var(--bg);
 			border-right: 1px solid var(--border);
 			display: flex;
 			flex-direction: column;
@@ -194,25 +194,27 @@
 		#chat-container {
 			flex: 1;
 			overflow-y: auto;
-			padding: 24px 16px;
+			padding: 16px;
 			scroll-behavior: smooth;
+			background: var(--bg);
 		}
-		.chat-inner { max-width: 780px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+		.chat-inner { max-width: 100%; margin: 0; padding: 0 16px; display: flex; flex-direction: column; gap: 12px; }
 
 		/* ─── MESSAGES ──────────────────────────────────────────────────── */
-		.msg-row { display: flex; flex-direction: column; gap: 6px; }
-		.msg-row.user { align-items: flex-end; }
+		.msg-row { display: flex; flex-direction: column; gap: 4px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+		.msg-row.user { align-items: flex-start; }
 		.msg-row.assistant { align-items: flex-start; }
 
 		.user-bubble {
-			background: var(--user-bubble);
-			border: 1px solid var(--user-border);
+			background: transparent;
+			border: none;
+			border-left: 2px solid var(--accent);
 			color: var(--fg);
-			padding: 10px 16px;
-			border-radius: 12px; border-bottom-right-radius: 4px;
-			max-width: 75%;
+			padding: 4px 12px;
+			border-radius: 0;
+			max-width: 100%;
 			font-size: 0.875rem;
-			line-height: 1.6;
+			line-height: 1.5;
 			white-space: pre-wrap;
 			word-break: break-word;
 		}
@@ -220,7 +222,7 @@
 		.assistant-content {
 			color: var(--fg);
 			font-size: 0.875rem;
-			line-height: 1.75;
+			line-height: 1.5;
 			max-width: 100%;
 			word-break: break-word;
 		}
@@ -280,7 +282,7 @@
 		/* ─── CODE BLOCKS ────────────────────────────────────────────────── */
 		.code-block {
 			margin: 0.8em 0;
-			border-radius: 12px;
+			border-radius: 4px;
 			overflow: hidden;
 			border: 1px solid var(--border);
 			background: var(--code-bg);
@@ -332,7 +334,7 @@
 			position: relative;
 			background: rgba(108,143,255,0.03);
 			border: 1px solid rgba(108,143,255,0.15);
-			border-radius: 12px;
+			border-radius: 4px;
 			overflow: hidden;
 			margin-bottom: 12px;
 			font-size: 0.8rem;
@@ -398,7 +400,7 @@
 		.tool-card {
 			background: var(--surface);
 			border: 1px solid var(--border);
-			border-radius: 12px;
+			border-radius: 4px;
 			overflow: hidden;
 			font-size: 0.8rem;
 		}
@@ -467,29 +469,10 @@
 		.action-bar button:hover { color: var(--fg); background: var(--surface2); }
 
 		/* ─── INPUT AREA ─────────────────────────────────────────────────── */
-		#input-area {
-			position: absolute;
-			bottom: 0; left: 0; right: 0;
-			padding: 16px;
-			background: linear-gradient(to top, var(--bg) 65%, transparent);
-			pointer-events: none;
-		}
-		.input-wrap {
-			max-width: 780px;
-			margin: 0 auto;
-			pointer-events: all;
-		}
-		.input-box {
-			background: var(--surface);
-			border: 1px solid var(--border);
-			border-radius: 16px;
-			transition: border-color 0.2s, box-shadow 0.2s;
-			position: relative;
-		}
-		.input-box:focus-within {
-			border-color: rgba(108,143,255,0.35);
-			box-shadow: 0 0 0 3px rgba(108,143,255,0.07);
-		}
+		#input-area { position: absolute; bottom: 0; left: 0; right: 0; padding: 0; background: var(--bg); border-top: 1px solid var(--border); pointer-events: all; z-index: 10; }
+		.input-wrap { max-width: 100%; margin: 0; pointer-events: all; }
+		.input-box { background: transparent; border: none; border-radius: 0; transition: none; position: relative; }
+		.input-box:focus-within { border-color: transparent; box-shadow: none; }
 		.input-toolbar {
 			display: flex;
 			align-items: center;
@@ -502,7 +485,7 @@
 			cursor: pointer;
 			color: var(--muted);
 			padding: 5px;
-			border-radius: 8px;
+			border-radius: 2px;
 			display: flex;
 			align-items: center;
 			transition: color 0.15s, background 0.15s;
@@ -584,7 +567,7 @@
 		.modal {
 			background: var(--surface);
 			border: 1px solid var(--border);
-			border-radius: 16px;
+			border-radius: 4px;
 			width: 100%;
 			box-shadow: var(--shadow);
 			animation: scaleIn 0.2s ease;
@@ -659,7 +642,7 @@
 			display: flex; align-items: center; gap: 10px;
 			background: var(--surface);
 			border: 1px solid var(--border);
-			border-radius: 12px;
+			border-radius: 4px;
 			padding: 10px 16px;
 			font-size: 0.82rem;
 			color: var(--fg);
@@ -710,7 +693,7 @@
 		/* ─── THEME PICKER ────────────────────────────────────────────────── */
 		.theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 		.theme-card {
-			border-radius: 12px;
+			border-radius: 4px;
 			overflow: hidden;
 			border: 2px solid transparent;
 			cursor: pointer;
@@ -819,7 +802,7 @@
 			display: inline-flex; align-items: center; gap: 6px;
 			background: var(--surface2);
 			border: 1px solid var(--border);
-			border-radius: 8px;
+			border-radius: 2px;
 			padding: 4px 8px;
 			font-size: 0.72rem;
 			color: var(--muted);
@@ -869,7 +852,7 @@
 		.session-actions { display: flex; align-items: center; gap: 5px; }
 		.session-btn {
 			display: flex; align-items: center; gap: 4px;
-			padding: 4px 9px; border-radius: 8px;
+			padding: 4px 9px; border-radius: 2px;
 			border: 1px solid var(--border); background: var(--surface2);
 			font-size:0.8rem; font-weight: 600; cursor: pointer;
 			color: var(--muted); transition: all 0.15s; font-family: 'Inter', sans-serif;
@@ -879,7 +862,7 @@
 
 		/* ─── IMPORT DROP ZONE ───────────────────────────────────────────── */
 		.drop-zone {
-			border: 2px dashed var(--border); border-radius: 12px;
+			border: 2px dashed var(--border); border-radius: 4px;
 			padding: 28px 20px; text-align: center; cursor: pointer;
 			transition: all 0.2s; color: var(--muted);
 		}
@@ -893,7 +876,7 @@
 			text-align: left;
 			width: 100%;
 			padding: 8px 12px;
-			border-radius: 8px;
+			border-radius: 2px;
 			font-size:0.85rem;
 			background: none;
 			border: none;
@@ -1139,7 +1122,7 @@
 	<div id="input-area">
 		<div class="input-wrap" style="position:relative;">
 			<!-- Ask Question Container -->
-			<div id="ask-question-container" class="hidden" style="padding:14px 16px; background:linear-gradient(135deg, rgba(108,143,255,0.06), rgba(93,213,200,0.04)); border:1.5px solid rgba(108,143,255,0.25); border-radius:12px; margin:8px 0; display:flex; flex-direction:column; gap:10px; box-shadow: 0 0 20px rgba(108,143,255,0.08); backdrop-filter:blur(4px);"></div>
+			<div id="ask-question-container" class="hidden" style="padding:14px 16px; background:linear-gradient(135deg, rgba(108,143,255,0.06), rgba(93,213,200,0.04)); border:1.5px solid rgba(108,143,255,0.25); border-radius: 4px; margin:8px 0; display:flex; flex-direction:column; gap:10px; box-shadow: 0 0 20px rgba(108,143,255,0.08); backdrop-filter:blur(4px);"></div>
 
 			<!-- Autocomplete -->
 			<div id="autocomplete" class="hidden"></div>
@@ -1279,7 +1262,7 @@
 						</select>
 					</div>
 
-					<div class="form-group" style="margin-top: 16px; background: rgba(108,143,255,0.04); border: 1px solid rgba(108,143,255,0.12); padding: 12px; border-radius: 8px;">
+					<div class="form-group" style="margin-top: 16px; background: rgba(108,143,255,0.04); border: 1px solid rgba(108,143,255,0.12); padding: 12px; border-radius: 2px;">
 						<label class="form-label" style="display:flex; align-items:center; gap:6px;">
 							<span class="material-symbols-rounded" style="color:var(--accent);font-size:18px;">extension</span>
 							Browser Bridge Extension
@@ -1302,7 +1285,7 @@
 					<!-- 2x2 Grid of 4 Large Square Cards for Compaction Profile -->
 					<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px;">
 						<!-- Nuclear Card -->
-						<div class="profile-card" data-val="nuclear" onclick="selectProfileCard('nuclear')" style="border: 1px solid var(--border); border-radius: 12px; padding: 12px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 6px; background: var(--bg2);">
+						<div class="profile-card" data-val="nuclear" onclick="selectProfileCard('nuclear')" style="border: 1px solid var(--border); border-radius: 4px; padding: 12px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 6px; background: var(--bg2);">
 							<div style="display: flex; align-items: center; justify-content: space-between;">
 								<span class="material-symbols-rounded" style="color: #ff4a4a; font-size: 24px;">local_fire_department</span>
 								<div class="radio-indicator" style="width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;"></div>
@@ -1311,7 +1294,7 @@
 							<div style="font-size:0.8rem; color: var(--muted); line-height: 1.35;">Extreme zero-token mode. Aggressive context cleanup.</div>
 						</div>
 						<!-- Aggressive Card -->
-						<div class="profile-card" data-val="aggressive" onclick="selectProfileCard('aggressive')" style="border: 1px solid var(--border); border-radius: 12px; padding: 12px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 6px; background: var(--bg2);">
+						<div class="profile-card" data-val="aggressive" onclick="selectProfileCard('aggressive')" style="border: 1px solid var(--border); border-radius: 4px; padding: 12px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 6px; background: var(--bg2);">
 							<div style="display: flex; align-items: center; justify-content: space-between;">
 								<span class="material-symbols-rounded" style="color: #ff9800; font-size: 24px;">offline_bolt</span>
 								<div class="radio-indicator" style="width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;"></div>
@@ -1320,7 +1303,7 @@
 							<div style="font-size:0.8rem; color: var(--muted); line-height: 1.35;">Maximum context preservation. Keeps history detailed.</div>
 						</div>
 						<!-- Balanced Card -->
-						<div class="profile-card" data-val="balanced" onclick="selectProfileCard('balanced')" style="border: 1px solid var(--border); border-radius: 12px; padding: 12px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 6px; background: var(--bg2);">
+						<div class="profile-card" data-val="balanced" onclick="selectProfileCard('balanced')" style="border: 1px solid var(--border); border-radius: 4px; padding: 12px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 6px; background: var(--bg2);">
 							<div style="display: flex; align-items: center; justify-content: space-between;">
 								<span class="material-symbols-rounded" style="color: #6c8fff; font-size: 24px;">balance</span>
 								<div class="radio-indicator" style="width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;"></div>
@@ -1329,7 +1312,7 @@
 							<div style="font-size:0.8rem; color: var(--muted); line-height: 1.35;">Balanced profile. Speed and quality optimize.</div>
 						</div>
 						<!-- Off Card -->
-						<div class="profile-card" data-val="off" onclick="selectProfileCard('off')" style="border: 1px solid var(--border); border-radius: 12px; padding: 12px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 6px; background: var(--bg2);">
+						<div class="profile-card" data-val="off" onclick="selectProfileCard('off')" style="border: 1px solid var(--border); border-radius: 4px; padding: 12px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; gap: 6px; background: var(--bg2);">
 							<div style="display: flex; align-items: center; justify-content: space-between;">
 								<span class="material-symbols-rounded" style="color: var(--muted); font-size: 24px;">power_settings_new</span>
 								<div class="radio-indicator" style="width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;"></div>
@@ -1485,31 +1468,31 @@
 		</div>
 		<div class="modal-body">
 			<div style="display:flex;flex-direction:column;gap:3px;font-size:0.8rem;">
-				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;background:var(--surface2);">
+				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius: 2px;background:var(--surface2);">
 					<span style="color:var(--fg);">Gönder</span>
 					<div style="display:flex;gap:4px;"><kbd>Enter</kbd></div>
 				</div>
-				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;">
+				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius: 2px;">
 					<span style="color:var(--fg);">YYeni Satır</span>
 					<div style="display:flex;gap:4px;"><kbd>Shift</kbd><kbd>Enter</kbd></div>
 				</div>
-				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;background:var(--surface2);">
+				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius: 2px;background:var(--surface2);">
 					<span style="color:var(--fg);">Komut Paleti</span>
 					<div style="display:flex;gap:4px;"><kbd>Ctrl</kbd><kbd>K</kbd></div>
 				</div>
-				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;">
+				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius: 2px;">
 					<span style="color:var(--fg);">Ara</span>
 					<div style="display:flex;gap:4px;"><kbd>Ctrl</kbd><kbd>F</kbd></div>
 				</div>
-				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;background:var(--surface2);">
+				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius: 2px;background:var(--surface2);">
 					<span style="color:var(--fg);">Kenar Çubuğu</span>
 					<div style="display:flex;gap:4px;"><kbd>Ctrl</kbd><kbd>B</kbd></div>
 				</div>
-				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;">
+				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius: 2px;">
 					<span style="color:var(--fg);">Durdur</span>
 					<div style="display:flex;gap:4px;"><kbd>Escape</kbd></div>
 				</div>
-				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;background:var(--surface2);">
+				<div style="display:flex;justify-content:space-between;padding:8px 12px;border-radius: 2px;background:var(--surface2);">
 					<span style="color:var(--fg);">New Chat</span>
 					<div style="display:flex;gap:4px;"><kbd>Ctrl</kbd><kbd>N</kbd></div>
 				</div>
@@ -1536,7 +1519,7 @@
 			<button class="modal-close" onclick="closeModal('bridgeModal')"><span class="material-symbols-rounded">close</span></button>
 		</div>
 		<div class="modal-body">
-			<div style="display:flex;align-items:center;justify-content:space-between;padding:14px;border-radius:12px;background:var(--surface2);border:1px solid var(--border);margin-bottom:14px;">
+			<div style="display:flex;align-items:center;justify-content:space-between;padding:14px;border-radius: 4px;background:var(--surface2);border:1px solid var(--border);margin-bottom:14px;">
 				<div style="display:flex;align-items:center;gap:10px;">
 					<span class="material-symbols-rounded" style="font-size:28px;color:var(--accent);">lan</span>
 					<div>
@@ -1636,7 +1619,7 @@
 <div id="toast-container"></div>
 
 <!-- Project Context Menu -->
-<div id="project-menu" class="hidden" style="position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);z-index:1000;padding:6px;width:210px;font-size:0.8rem;animation:scaleIn 0.15s ease;">
+<div id="project-menu" class="hidden" style="position:fixed;background:var(--surface);border:1px solid var(--border);border-radius: 4px;box-shadow:var(--shadow);z-index:1000;padding:6px;width:210px;font-size:0.8rem;animation:scaleIn 0.15s ease;">
 	<div class="sidebar-item" onclick="pinActiveProject()" style="padding:6px 10px;display:flex;align-items:center;gap:8px;cursor:pointer;">
 		<span class="material-symbols-rounded" style="font-size:16px;">push_pin</span>
 		<span>Projeyi sabitle</span>
@@ -2016,7 +1999,7 @@ promptInput.addEventListener('input', () => {
 // ─── INPUT AREA PADDING ───────────────────────────────────────────────────
 const inputArea = document.getElementById('input-area');
 function updateChatPadding() {
-	chatContainer.style.paddingBottom = (inputArea.offsetHeight + 8) + 'px';
+	chatContainer.style.paddingBottom = (inputArea.offsetHeight + 16) + 'px';
 }
 updateChatPadding();
 new ResizeObserver(updateChatPadding).observe(inputArea);
@@ -3097,11 +3080,23 @@ es.onmessage = (e) => {
 
 			} else if (data.type === 'message_end') {
 				setGeneratingState(false);
-				if (currentAssistantMsgId) updateMessage(currentAssistantMsgId, data.message.content, false);
+				let finalContent = data.message.content || [];
+				if (data.message.stopReason === 'error' && data.message.errorMessage) {
+					if (typeof finalContent === 'string') {
+						finalContent += `\n\n❌ Hata: ${data.message.errorMessage}`;
+					} else if (Array.isArray(finalContent)) {
+						finalContent.push({ type: 'text', text: `\n\n❌ Hata: ${data.message.errorMessage}` });
+					}
+				}
+				if (currentAssistantMsgId) updateMessage(currentAssistantMsgId, finalContent, false);
 				currentAssistantMsgId = null;
 				syncMessageIds();
 			}
 
+		} else if (data.type === 'auto_retry_start') {
+			setGeneratingState(true);
+			appendMessage('assistant', `⚠️ Otomatik Yeniden Deneme (${data.attempt}/${data.maxAttempts}). Neden: ${data.errorMessage || 'Bilinmiyor'}`);
+			
 		} else if (data.type === 'tool_execution_start' || data.type === 'tool_execution_step') {
 			setGeneratingState(true);
 			renderTool(data.toolCallId, data.toolName, data.args, 'running', null);
@@ -3309,7 +3304,7 @@ function editMsg(id) {
 	const originalText = bubble.innerText;
 
 	bubble.innerHTML = `
-		<textarea class="form-input" style="width:100%;background:var(--bg2);color:var(--fg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:0.875rem;resize:vertical;" rows="2"></textarea>
+		<textarea class="form-input" style="width:100%;background:var(--bg2);color:var(--fg);border:1px solid var(--border);border-radius: 2px;padding:6px 10px;font-size:0.875rem;resize:vertical;" rows="2"></textarea>
 		<div style="display:flex;justify-content:flex-end;gap:6px;margin-top:6px;">Cancel</button>
 			<button class="btn btn-primary" style="padding:4px 8px;font-size:0.85rem;" onclick="saveEdit('${id}')">Save</button>
 		</div>
@@ -3621,7 +3616,7 @@ async function openSemanticBrain() {
 				</div>
 				<div style="font-size:0.85rem; color:var(--fg); line-height:1.5;">${escapeHtml(exp.summary)}</div>
 				${exp.tags && exp.tags.length > 0 ? `<div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">
-					${exp.tags.map(t => `<span style="background:rgba(108,143,255,0.1); color:var(--accent); padding:2px 8px; border-radius:12px; font-size:0.85rem;">${escapeHtml(t)}</span>`).join('')}
+					${exp.tags.map(t => `<span style="background:rgba(108,143,255,0.1); color:var(--accent); padding:2px 8px; border-radius: 4px; font-size:0.85rem;">${escapeHtml(t)}</span>`).join('')}
 				</div>` : ''}
 			</div>`;
 		});
@@ -3642,21 +3637,21 @@ async function openSemanticBrain() {
 		<p style="color:var(--muted);font-size:1rem;margin-bottom:30px;line-height:1.5;">Meet your advanced AI coding assistant.<br>Here is what you need to know:</p>
 		
 		<div style="text-align:left;margin-bottom:30px;display:flex;flex-direction:column;gap:15px;">
-			<div style="display:flex;align-items:center;gap:15px;background:var(--bg2);padding:15px;border-radius:12px;border:1px solid var(--border);">
+			<div style="display:flex;align-items:center;gap:15px;background:var(--bg2);padding:15px;border-radius: 4px;border:1px solid var(--border);">
 				<span class="material-symbols-rounded" style="color:#6C8FFF;">history_edu</span>
 				<div><strong style="display:block;color:var(--fg);font-size:0.95rem;">Memory & Learning</strong><span style="font-size:0.85rem;color:var(--muted);">Likes teach it your coding style so it adapts to you.</span></div>
 			</div>
-			<div style="display:flex;align-items:center;gap:15px;background:var(--bg2);padding:15px;border-radius:12px;border:1px solid var(--border);">
+			<div style="display:flex;align-items:center;gap:15px;background:var(--bg2);padding:15px;border-radius: 4px;border:1px solid var(--border);">
 				<span class="material-symbols-rounded" style="color:#4CAF50;">api</span>
 				<div><strong style="display:block;color:var(--fg);font-size:0.95rem;">Powerful Providers</strong><span style="font-size:0.85rem;color:var(--muted);">Ollama, GitLab Duo, Anthropic, and more... Built-in!</span></div>
 			</div>
-			<div style="display:flex;align-items:center;gap:15px;background:var(--bg2);padding:15px;border-radius:12px;border:1px solid var(--border);">
+			<div style="display:flex;align-items:center;gap:15px;background:var(--bg2);padding:15px;border-radius: 4px;border:1px solid var(--border);">
 				<span class="material-symbols-rounded" style="color:#FF9800;">keyboard_command_key</span>
 				<div><strong style="display:block;color:var(--fg);font-size:0.95rem;">Commands</strong><span style="font-size:0.85rem;color:var(--muted);">Instantly manage projects with /build, /lint, /test.</span></div>
 			</div>
 		</div>
 		
-		<button onclick="closeWelcomeModal()" class="btn btn-primary" style="width:100%;padding:14px;border-radius:12px;font-size:1.1rem;font-weight:600;letter-spacing:0.5px;">Get Started</button>
+		<button onclick="closeWelcomeModal()" class="btn btn-primary" style="width:100%;padding:14px;border-radius: 4px;font-size:1.1rem;font-weight:600;letter-spacing:0.5px;">Get Started</button>
 	</div>
 </div>
 <script>
